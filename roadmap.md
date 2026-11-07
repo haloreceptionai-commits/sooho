@@ -7,3 +7,4 @@
 - [x] Reconnect Azure OpenAI in the new workspace (custom connector re-created, verified end to end)
 
 - [x] Pipeline upgrade to Storm Oil guide (fact-check, hooks, beat sheet + checker, colour arc, ~3s dissolves, white/yellow captions, pre-reveal pause, ducking, -14 LUFS, quality score)
+- [x] Story Engine v2 from Briefs #2 + #3 (research stage, hook rules, V1-V10 validators, blind judges, 85 gate, shot mix + continuity gate, captions/audio tweaks, analytics fields)
