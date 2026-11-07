@@ -124,6 +124,8 @@ function StoryGenerator() {
                 ))}
               </div>
             </section>
+            <ScriptIntelligence compact text={plan.flatMap((b) => b.scenes.map((sc) => `[${b.name.toUpperCase()}] ${sc.narration.startsWith("[") ? "" : sc.narration}`)).join("\n")}
+              onOptimize={() => { const body = optimizeScript(plan.flatMap((b) => b.scenes.map((sc) => sc.narration)).filter((n) => !n.startsWith("[")).join(" "), topic); actions.saveScript({ title: `${topic} — Viral Brain`, body }); toast.success("Optimized script saved to Scripts"); navigate({ to: "/scripts" }); }} />
           </div>
 
           {/* Preview */}
