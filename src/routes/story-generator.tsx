@@ -25,7 +25,7 @@ function StoryGenerator() {
   const [duration, setDuration] = useState(60);
   const [pacing, setPacing] = useState(60);
   const [templateId, setTemplateId] = useState(TEMPLATES[0].id);
-  const template = TEMPLATES.find((t) => t.id === templateId)!;
+  const template = TEMPLATES.find((t) => t.id === templateId) ?? TEMPLATES[0]!;
 
   const plan = useMemo(
     () => buildStory({ topic, format, duration, pacing, template }),
@@ -149,7 +149,7 @@ function StoryGenerator() {
                     <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-md text-xs font-bold text-background ${BEAT_TINT[i]}`}>{i + 1}</span>
                     <div>
                       <h3 className="font-bold">{b.name}</h3>
-                      <p className="text-xs text-muted-foreground">{BEATS[i].purpose}</p>
+                      <p className="text-xs text-muted-foreground">{b.purpose}</p>
                     </div>
                   </div>
                   <span className="shrink-0 font-mono text-xs text-muted-foreground">{fmt(b.start)}–{fmt(b.end)} · {b.scenes.length} scenes</span>

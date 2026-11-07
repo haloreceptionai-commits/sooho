@@ -136,7 +136,7 @@ export function buildStory(opts: {
   let sceneIdx = 1;
   return BEATS.map((b, i) => {
     const start = cursor;
-    const end = i === BEATS.length - 1 ? duration : Math.round((cursor + (weights[i] / total) * duration) * 10) / 10;
+    const end = i === BEATS.length - 1 ? duration : Math.round((cursor + ((weights[i] ?? 0) / total) * duration) * 10) / 10;
     cursor = end;
     const count = Math.max(1, Math.round((end - start) / len));
     const step = (end - start) / count;
@@ -145,8 +145,8 @@ export function buildStory(opts: {
       start: Math.round((start + s * step) * 10) / 10,
       end: Math.round((start + (s + 1) * step) * 10) / 10,
       narration: s === 0 ? lines[b.key].replaceAll("{topic}", topic) : `[Expand: ${b.purpose.toLowerCase()}]`,
-      visual: `${VISUALS[b.key][s % VISUALS[b.key].length]} · ${template.style}`,
-      sfx: SFX[b.key][s % SFX[b.key].length],
+      visual: `${VISUALS[b.key][s % VISUALS[b.key].length] ?? ""} · ${template.style}`,
+      sfx: SFX[b.key][s % SFX[b.key].length] ?? "",
     }));
     return { ...b, start, end, scenes };
   });
