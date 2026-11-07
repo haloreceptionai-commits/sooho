@@ -1,139 +1,206 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Film, Smartphone, FileText, Mic, ImageIcon, Clapperboard, Layers, Plus, Sparkles, ArrowUpRight, Youtube } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useRef, useState } from "react";
+import { Film, Smartphone, Sparkles, Play, Square, Shuffle, Loader2, ArrowUpRight, Mic } from "lucide-react";
 import { toast } from "sonner";
-import { actions, timeAgo, useStore } from "@/lib/store";
-import { fmt } from "@/lib/story-engine";
-import { Page, Panel, StatusPill, btnPrimary, btnDark, input } from "@/components/page";
+import { useStore, STYLES } from "@/lib/store";
+import { startVideo } from "@/lib/pipeline";
+import { generateVoice } from "@/lib/pipeline.functions";
+import { ARCHETYPES, scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
+import { VOICES } from "@/lib/voices";
+import { Page, Panel, btnPrimary, btnOutline, input, label } from "@/components/page";
+import { VideoJob } from "@/components/video-job";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Chronicle Studio" },
-      { name: "description", content: "Create long-form history and fact videos plus Shorts with an AI pipeline." },
-      { property: "og:title", content: "Chronicle Studio Dashboard" },
-      { property: "og:description", content: "AI pipeline for history-telling YouTube videos and Shorts." },
+      { title: "Create video — Chronicle Studio" },
+      { name: "description", content: "Generate viral history long-form videos and Shorts in one click." },
+      { property: "og:title", content: "Chronicle Studio — AI history video generator" },
+      { property: "og:description", content: "Topic in, finished narrated history video out. Long-form or Shorts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Dashboard,
+  component: Create,
 });
 
-const steps = [
-  { icon: FileText, name: "Script", desc: "Azure OpenAI writer", to: "/scripts" as const },
-  { icon: Mic, name: "Narration", desc: "Azure text-to-speech", to: "/voiceovers" as const },
-  { icon: ImageIcon, name: "Scenes", desc: "Image generation", to: "/images" as const },
-  { icon: Clapperboard, name: "Motion", desc: "Ken Burns, parallax, maps", to: "/story-generator" as const },
-  { icon: Layers, name: "Stitch", desc: "Python + FFmpeg render", to: "/render-queue" as const },
-];
+function Ring({ v }: { v: number }) {
+  const tone = v >= 70 ? "text-success" : v >= 45 ? "text-warning" : "text-muted-foreground";
+  return <span className={`font-mono text-xs font-bold ${tone}`}>{v}</span>;
+}
 
-function Dashboard() {
-  const s = useStore((x) => x);
-  const navigate = useNavigate();
-  const [format, setFormat] = useState<"long" | "short">("long");
-  const [idea, setIdea] = useState("");
-  const done = s.projects.filter((p) => p.status === "done");
-  const minutes = Math.round(done.reduce((a, p) => a + p.duration, 0) / 60);
-  const stats = [
-    { label: "Projects", value: s.projects.length, sub: `${s.projects.filter((p) => p.status === "draft").length} drafts` },
-    { label: "Videos ready", value: done.length, sub: `${minutes} min produced` },
-    { label: "Shorts", value: s.projects.filter((p) => p.format === "short").length, sub: "9:16 vertical" },
-    { label: "In render queue", value: s.jobs.filter((j) => j.status !== "done").length, sub: "active + waiting" },
-  ];
+function Create() {
+  const settings = useStore((s) => s.settings);
+  const videos = useStore((s) => s.videos);
+  const [format, setFormat] = useState<"long" | "short">("short");
+  const [topic, setTopic] = useState("");
+  const [arch, setArch] = useState<ArchetypeId>("paradox");
+  const [shortSec, setShortSec] = useState(60);
+  const [longMin, setLongMin] = useState(8);
+  const [voice, setVoice] = useState(settings.defaultVoice);
+  const [style, setStyle] = useState(settings.defaultStyle);
+  const [seed, setSeed] = useState(0);
+  const [previewing, setPreviewing] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const cache = useRef<Record<string, string>>({});
 
-  const quick = () => {
-    if (!idea.trim()) { toast.error("Type a video idea first"); return; }
-    actions.addProject({ title: idea, topic: idea, format, template: "paradox", duration: format === "long" ? 900 : 60 });
-    toast.success("Project created");
-    setIdea("");
-    navigate({ to: format === "long" ? "/long-form" : "/shorts" });
+  const a = ARCHETYPES.find((x) => x.id === arch)!;
+  const ideas = useMemo(() => {
+    const t = a.topics;
+    const r = seed % t.length;
+    return [...t.slice(r), ...t.slice(0, r)].slice(0, 4).map((x) => ({ t: x, s: scoreTopic(x) }));
+  }, [a, seed]);
+  const score = scoreTopic(topic);
+  const active = videos.filter((v) => v.status !== "done").slice(0, 5);
+  const recent = videos.filter((v) => v.status === "done").slice(0, 4);
+  const busy = videos.some((v) => v.status === "running");
+
+  const preview = async (id: string, text: string) => {
+    audioRef.current?.pause();
+    if (previewing === id) { setPreviewing(null); return; }
+    setPreviewing(id);
+    try {
+      if (!cache.current[id]) {
+        const r = await generateVoice({ data: { text, voice: id, deployment: settings.ttsDeployment, style: "" } });
+        const type = r.engine === "azure" ? "audio/mpeg" : "audio/wav";
+        cache.current[id] = URL.createObjectURL(new Blob([Uint8Array.from(atob(r.audio), (c) => c.charCodeAt(0))], { type }));
+      }
+      const el = new Audio(cache.current[id]);
+      audioRef.current = el;
+      el.onended = () => setPreviewing(null);
+      await el.play();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Preview failed");
+      setPreviewing(null);
+    }
+  };
+
+  const generate = () => {
+    if (!topic.trim()) { toast.error("Pick or type a topic first"); return; }
+    startVideo({ topic: topic.trim(), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice });
+    toast.success("Video generation started — you can keep working.");
+    setTopic("");
   };
 
   return (
-    <Page eyebrow="Studio overview" title="Good evening, James"
-      actions={<Link to="/story-generator" className={btnPrimary}><Plus className="h-4 w-4" /> New video</Link>}>
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((x) => (
-          <Panel key={x.label} className="p-5">
-            <p className="text-xs font-medium text-muted-foreground">{x.label}</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight">{x.value}</p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">{x.sub}</p>
-          </Panel>
-        ))}
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-3">
-        <Panel className="p-6 lg:col-span-2">
-          <div className="flex items-center justify-between">
-            <h2 className="font-bold">Quick create</h2>
-            <div className="flex rounded-md border p-0.5 text-xs font-semibold">
-              {(["long", "short"] as const).map((f) => (
-                <button key={f} onClick={() => setFormat(f)} className={`rounded px-3 py-1.5 ${format === f ? "bg-foreground text-background" : "text-muted-foreground"}`}>
-                  {f === "long" ? "Long-form 16:9" : "Short 9:16"}
+    <Page eyebrow="Studio" title="Create a video" desc="Pick a format and topic. Script, narration, scene images, sound and editing happen automatically.">
+      <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
+        <div className="space-y-6">
+          {/* 1. Format */}
+          <Panel className="p-5">
+            <p className={label}>1 · Format</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {([
+                ["short", Smartphone, "Short / Reel", "9:16 vertical · 30–90 sec · viral hook formula"],
+                ["long", Film, "Long-form", "16:9 YouTube · 3–15 min documentary"],
+              ] as const).map(([f, Icon, name, sub]) => (
+                <button key={f} onClick={() => setFormat(f)}
+                  className={`flex items-center gap-4 rounded-lg border-2 p-4 text-left transition-colors ${format === f ? "border-primary bg-primary/5" : "border-border hover:bg-muted"}`}>
+                  <div className={`grid h-12 place-items-center rounded-md ${format === f ? "bg-primary text-primary-foreground" : "bg-muted"} ${f === "short" ? "w-8" : "w-16"}`}><Icon className="h-5 w-5" /></div>
+                  <div><p className="font-bold">{name}</p><p className="text-xs text-muted-foreground">{sub}</p></div>
                 </button>
               ))}
             </div>
-          </div>
-          <textarea rows={3} value={idea} onChange={(e) => setIdea(e.target.value)}
-            placeholder={format === "long" ? "e.g. The untold story of the Byzantine Empire's final days…" : "e.g. 3 weird facts about ancient Egypt…"}
-            className={`${input} mt-4 resize-none`} />
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button onClick={quick} className={btnDark}><Plus className="h-4 w-4" /> Create project</button>
-            <Link to="/story-generator" className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"><Sparkles className="h-4 w-4" /> Plan with 5-Beat Generator →</Link>
-          </div>
-        </Panel>
+            <div className="mt-4">
+              <div className="flex justify-between text-sm"><span className="font-semibold">Length</span>
+                <span className="font-mono">{format === "short" ? `${shortSec}s` : `${longMin} min`}</span></div>
+              {format === "short"
+                ? <input type="range" min={30} max={90} step={5} value={shortSec} onChange={(e) => setShortSec(+e.target.value)} className="mt-2 w-full accent-primary" />
+                : <input type="range" min={3} max={15} step={1} value={longMin} onChange={(e) => setLongMin(+e.target.value)} className="mt-2 w-full accent-primary" />}
+            </div>
+          </Panel>
 
-        <Panel className="p-6">
-          <h2 className="font-bold">Production pipeline</h2>
-          <p className="text-xs text-muted-foreground">No direct text-to-video — scenes are built and stitched.</p>
-          <ol className="mt-4 space-y-1">
-            {steps.map((st, i) => (
-              <li key={st.name}>
-                <Link to={st.to} className="flex items-center gap-3 rounded-md p-1.5 hover:bg-muted">
-                  <span className="font-mono text-xs text-muted-foreground">0{i + 1}</span>
-                  <div className="grid h-8 w-8 place-items-center rounded-md border bg-background"><st.icon className="h-4 w-4" /></div>
-                  <div><p className="text-sm font-semibold">{st.name}</p><p className="text-xs text-muted-foreground">{st.desc}</p></div>
-                </Link>
-              </li>
-            ))}
-          </ol>
-        </Panel>
-      </section>
-
-      <Panel>
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="font-bold">Recent projects</h2>
-          <Link to="/long-form" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">View all <ArrowUpRight className="h-3.5 w-3.5" /></Link>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs text-muted-foreground">
-              <tr className="border-b">
-                {["Title", "Format", "Length", "Progress", "Status", "Updated"].map((h) => <th key={h} className="px-6 py-3 font-medium">{h}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {[...s.projects].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 6).map((p) => (
-                <tr key={p.id} className="border-b last:border-0 hover:bg-muted/60">
-                  <td className="px-6 py-3.5 font-medium">
-                    <Link to={p.format === "long" ? "/long-form" : "/shorts"} className="inline-flex items-center gap-2 hover:underline">
-                      {p.format === "short" ? <Smartphone className="h-4 w-4 text-muted-foreground" /> : <Youtube className="h-4 w-4 text-muted-foreground" />}
-                      {p.title}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-3.5 text-muted-foreground">{p.format === "long" ? "Long-form" : "Short"}</td>
-                  <td className="px-6 py-3.5 font-mono text-xs">{fmt(p.duration)}</td>
-                  <td className="px-6 py-3.5"><div className="flex gap-1">{steps.map((_, i) => <span key={i} className={`h-1.5 w-5 rounded-full ${i < p.step ? "bg-primary" : "bg-muted"}`} />)}</div></td>
-                  <td className="px-6 py-3.5"><StatusPill status={p.status} /></td>
-                  <td className="px-6 py-3.5 text-muted-foreground">{timeAgo(p.updatedAt)}</td>
-                </tr>
+          {/* 2. Topic */}
+          <Panel className="p-5">
+            <div className="flex items-center justify-between">
+              <p className={label}>2 · Topic</p>
+              <button className={`${btnOutline} px-2.5 py-1 text-xs`} onClick={() => setSeed((x) => x + 2)}><Shuffle className="h-3 w-3" /> More ideas</button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {ARCHETYPES.map((x) => (
+                <button key={x.id} onClick={() => setArch(x.id)} className={`rounded-full border px-3 py-1 text-xs font-semibold ${arch === x.id ? "border-foreground bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>{x.name}</button>
               ))}
-            </tbody>
-          </table>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">{a.formula} — e.g. “{a.example}”</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {ideas.map(({ t, s }) => (
+                <button key={t} onClick={() => setTopic(t)} className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm ${topic === t ? "border-primary bg-primary/5" : "hover:bg-muted"}`}>
+                  <span className="font-medium">{t}</span><Ring v={s.overall} />
+                </button>
+              ))}
+            </div>
+            <input className={`${input} mt-3`} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="…or type your own: Why Lighthouses Were Painted In Stripes" />
+            {topic && (
+              <div className="mt-2 flex flex-wrap gap-4 font-mono text-[11px] text-muted-foreground">
+                <span>Viral score <b className="text-foreground">{score.overall}</b></span>
+                <span>Curiosity {score.curiosity}</span><span>Visual drama {score.visual}</span><span>Retention {score.retention}</span>
+              </div>
+            )}
+          </Panel>
+
+          {/* 3. Voice & style */}
+          <Panel className="p-5">
+            <p className={label}>3 · Narrator voice</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {VOICES.map((vo) => (
+                <div key={vo.id} onClick={() => setVoice(vo.id)} role="button"
+                  className={`cursor-pointer rounded-lg border-2 p-3 ${voice === vo.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted"}`}>
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold">{vo.name}</p>
+                    <button onClick={(e) => { e.stopPropagation(); void preview(vo.id, vo.sample); }} className="grid h-7 w-7 place-items-center rounded-full bg-foreground text-background" aria-label={`Preview ${vo.name}`}>
+                      {previewing === vo.id ? <Square className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+                    </button>
+                  </div>
+                  <p className="text-xs font-semibold text-primary">{vo.persona}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{vo.desc}</p>
+                </div>
+              ))}
+            </div>
+            <p className={`${label} mt-5`}>Visual style</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {STYLES.map((st) => (
+                <button key={st} onClick={() => setStyle(st)} className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${style === st ? "border-primary bg-primary/5 text-primary" : "text-muted-foreground hover:text-foreground"}`}>{st}</button>
+              ))}
+            </div>
+          </Panel>
+
+          <button onClick={generate} className={`${btnPrimary} w-full py-4 text-base`}>
+            <Sparkles className="h-5 w-5" /> Generate {format === "short" ? "Short" : "long-form video"}
+          </button>
         </div>
-      </Panel>
-      <span className="hidden"><Film /></span>
+
+        {/* Right column: live jobs */}
+        <div className="space-y-4">
+          <Panel className="p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="flex items-center gap-2 font-bold">{busy && <Loader2 className="h-4 w-4 animate-spin text-primary" />} In production</h2>
+              <span className="font-mono text-xs text-muted-foreground">{active.length} job{active.length === 1 ? "" : "s"}</span>
+            </div>
+            <div className="mt-4 space-y-3">
+              {active.length === 0 && <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">No videos generating. Your next one will show live progress here.</p>}
+              {active.map((v) => <VideoJob key={v.id} v={v} />)}
+            </div>
+            {busy && <p className="mt-3 text-[11px] text-muted-foreground">Keep this tab open until rendering finishes.</p>}
+          </Panel>
+
+          <Panel className="p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-bold">Latest videos</h2>
+              <Link to="/videos" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">All videos <ArrowUpRight className="h-3 w-3" /></Link>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {recent.length === 0 && <p className="col-span-2 text-sm text-muted-foreground">Nothing yet.</p>}
+              {recent.map((v) => (
+                <Link key={v.id} to="/videos" className="group overflow-hidden rounded-md border">
+                  <div className="aspect-video bg-muted">{v.thumb && <img src={v.thumb} alt="" className="h-full w-full object-cover" />}</div>
+                  <p className="truncate px-2 py-1.5 text-xs font-semibold group-hover:underline">{v.title}</p>
+                </Link>
+              ))}
+            </div>
+          </Panel>
+          <p className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground"><Mic className="h-3 w-3" /> Script by {settings.scriptDeployment} · images by {settings.imageDeployment} on Azure OpenAI.</p>
+        </div>
+      </div>
     </Page>
   );
 }

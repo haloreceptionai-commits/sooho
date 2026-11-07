@@ -1,0 +1,54 @@
+import { FileText, Mic, ImageIcon, Clapperboard, Check, RotateCcw, Trash2, AlertTriangle } from "lucide-react";
+import { actions, type Video } from "@/lib/store";
+import { runVideo } from "@/lib/pipeline";
+import { deleteVideoFile } from "@/lib/video-db";
+import { btnOutline } from "@/components/page";
+
+const STAGES = [
+  { key: "script", label: "Script", icon: FileText },
+  { key: "voice", label: "Voice", icon: Mic },
+  { key: "images", label: "Scenes", icon: ImageIcon },
+  { key: "render", label: "Render", icon: Clapperboard },
+] as const;
+const ORDER = ["script", "voice", "images", "render", "saving", "done"];
+
+export function VideoJob({ v }: { v: Video }) {
+  const cur = ORDER.indexOf(v.stage);
+  const failed = v.status === "failed";
+  return (
+    <div className="rounded-lg border bg-background p-4">
+      <div className="flex items-start gap-3">
+        <div className={`h-14 shrink-0 overflow-hidden rounded-md border bg-muted ${v.input.format === "short" ? "w-9" : "w-24"}`}>
+          {v.thumb && <img src={v.thumb} alt="" className="h-full w-full object-cover" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-bold">{v.title}</p>
+          <p className="text-xs text-muted-foreground">{v.input.format === "long" ? "Long-form 16:9" : "Short 9:16"} · {v.detail}</p>
+        </div>
+        <span className="font-mono text-sm font-bold">{v.progress}%</span>
+      </div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+        <div className={`h-full rounded-full transition-all duration-500 ${failed ? "bg-destructive" : "bg-primary"}`} style={{ width: `${v.progress}%` }} />
+      </div>
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        {STAGES.map((s, i) => {
+          const done = cur > i || v.status === "done";
+          const active = cur === i && !failed;
+          return (
+            <div key={s.key} className={`flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[11px] font-semibold ${done ? "border-success/30 bg-success/10 text-success" : active ? "border-primary/40 bg-primary/5 text-primary" : "text-muted-foreground"}`}>
+              {done ? <Check className="h-3 w-3" /> : <s.icon className={`h-3 w-3 ${active ? "animate-pulse" : ""}`} />} {s.label}
+            </div>
+          );
+        })}
+      </div>
+      {failed && (
+        <div className="mt-3 flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-xs text-destructive">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <p className="flex-1 break-words">{v.error}</p>
+          <button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> Retry</button>
+          <button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { actions.removeVideo(v.id); void deleteVideoFile(v.id); }}><Trash2 className="h-3 w-3" /></button>
+        </div>
+      )}
+    </div>
+  );
+}
