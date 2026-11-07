@@ -4,7 +4,7 @@ import { actions, getState, type VideoInput } from "@/lib/store";
 import { factCheck, generateHooks, generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
 import { qaScore, validateScript } from "@/lib/quality";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
-import { pollClip, startClip } from "@/lib/clips.functions";
+import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 
@@ -187,7 +187,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (run.length) runs.push(run);
       const est = runs.map((r) => r.reduce((a, i) => a + (plan.scenes[i]!.narration.split(/\s+/).filter(Boolean).length * 60) / 153, 0));
       clips = [];
-      let made = 0, failed = 0;
+      let made = 0, failed = 0, lastClipErr = "";
       up({ stage: "images", progress: 70, detail: `Animating ${runs.length} AI video clips with Gemini Omni…` });
       await pool(runs, 2, async (r, ri) => {
         const start = rawImg[r[0]!];
@@ -201,11 +201,23 @@ export async function runVideo(id: string, input: VideoInput) {
             await sleep(8000);
             const st = await withRetry(() => pollClip({ data: { id: jobId } }), 4);
             if (st.status === "failed") throw new Error(st.error ?? "AI clip failed");
-            if (st.video) {
+            if (st.status === "completed") {
+              const parts: ArrayBuffer[] = [];
+              let off = 0, total = 1;
+              while (off < total) {
+                const c = await withRetry(() => clipChunk({ data: { id: jobId, offset: off } }), 4);
+                const buf = b64ToBuf(c.data);
+                if (!buf.byteLength) break;
+                parts.push(buf); off += buf.byteLength; total = c.total || off;
+              }
               const v = document.createElement("video");
               v.muted = true; v.playsInline = true; v.preload = "auto";
-              v.src = URL.createObjectURL(new Blob([b64ToBuf(st.video)], { type: "video/mp4" }));
-              await new Promise<void>((ok, bad) => { v.onloadeddata = () => ok(); v.onerror = () => bad(new Error("Clip could not load")); });
+              v.src = URL.createObjectURL(new Blob(parts, { type: "video/mp4" }));
+              await new Promise<void>((ok, bad) => {
+                const to = setTimeout(() => bad(new Error("Clip took too long to load")), 30000);
+                v.onloadeddata = () => { clearTimeout(to); ok(); };
+                v.onerror = () => { clearTimeout(to); bad(new Error("Clip could not load")); };
+              });
               clips!.push({ scenes: r, video: v });
               made++;
               up({ progress: 70 + Math.round((made / runs.length) * 2), detail: `AI video clips · ${made}/${runs.length}` });
@@ -216,10 +228,11 @@ export async function runVideo(id: string, input: VideoInput) {
         } catch (e) {
           const m = e instanceof Error ? e.message : String(e);
           if (/\[(402|403)\]/.test(m)) throw e; // credits / access problems stop the whole video
-          failed++; // this run falls back to animated stills
+          failed++; lastClipErr = m; // this run falls back to animated stills
+          console.warn("Gemini Omni clip fell back to stills:", m);
         }
       });
-      if (!made) throw new Error("Gemini Omni could not animate any clip for this video. Try again or switch to Own model.");
+      if (!made) throw new Error("Gemini Omni could not animate any clip for this video (${lastClipErr || "unknown error"}). Try again or switch to Own model.");
     }
     up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
     const out = await renderVideo(full, voice, {
