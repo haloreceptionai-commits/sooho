@@ -109,7 +109,7 @@ export const generatePlan = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<Plan> => {
     const short = data.format === "short";
-    const wpm = short ? 250 : 190; // measured speed of the fast storyteller narration
+    const wpm = 153; // approved Atlas narrator pace
     const words = Math.round((data.durationSec / 60) * wpm);
     const scenes = short ? Math.max(10, Math.round(data.durationSec / 2.5)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
     const perScene = Math.round(words / scenes);
@@ -181,8 +181,6 @@ Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) 
 export interface VoiceInput { text: string; voice: string; deployment: string; style: string }
 
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
-// Gemini voices tested at ~270–300 wpm with the storyteller direction below.
-const GEMINI_VOICE: Record<string, string> = { onyx: "Charon", ash: "Iapetus", echo: "Orus", ballad: "Fenrir", verse: "Puck", cedar: "Alnilam" };
 
 export const generateVoice = createServerFn({ method: "POST" })
   .inputValidator((d: VoiceInput) => {
@@ -191,23 +189,8 @@ export const generateVoice = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }): Promise<{ audio: string; engine: "azure" | "lovable" }> => {
-    const fast = data.style !== "long";
-    const direction = fast
-      ? "Read this as a fast-talking, curious, conversational storyteller telling a friend a crazy true story — quick energetic pace, about 250 words per minute, no dramatic pauses, playful intrigue, punch the twist words"
-      : "Read this as a gripping, curious documentary storyteller — brisk energetic pace, about 190 words per minute, short pauses only before big reveals, playful intrigue";
-    // 1) Azure speech deployment (if the user has one)
-    if (data.deployment) {
-      const res = await azure(`${safeName(data.deployment)}/audio/speech`, {
-        model: data.deployment, input: data.text, voice: data.voice, instructions: direction, speed: fast ? 1.25 : 1.1, response_format: "mp3",
-      });
-      if (res.ok) return { audio: toBase64(await res.arrayBuffer()), engine: "azure" };
-      const t = await res.text();
-      const unsupported = res.status === 404 || (res.status === 400 && /OperationNotSupported|DeploymentNotFound/i.test(t));
-      if (!unsupported) {
-        console.error(`Azure voice failed [${res.status}]: ${t.slice(0, 300)}`);
-        throw new Error(`[${res.status}] Azure voice failed`);
-      }
-    }
+    // Atlas narrator: exact voice + direction of the approved audition (renderer applies the 0.85 pace).
+    const direction = "A grounded male baritone with bright, excited energy. You are thrilled to tell one friend a fascinating secret fact. Speak a little faster than a calm documentary, lively and upbeat, with a knowing grin in the voice, punchy emphasis on the twist lines, rising anticipation, then delighted amazement at the reveal. Keep every word crisp and clear, short natural pauses only. Not shouting, not whispering, not rushed";
     // 2) Fallback: Lovable AI speech (Gemini TTS)
     const k = keys();
     const res = await fetch(`${LOVABLE_AI}/audio/speech`, {
@@ -216,7 +199,7 @@ export const generateVoice = createServerFn({ method: "POST" })
       body: JSON.stringify({
         model: "google/gemini-3.1-flash-tts-preview",
         contents: [{ role: "user", parts: [{ text: `${direction}: ${data.text}` }] }],
-        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_VOICE[data.voice] ?? "Charon" } } } },
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } },
         stream_format: "audio",
       }),
     });
