@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GOLD_ANCHORS, GOLD_STORY, hookIssues, hookTextIssues, rankHookTypes, storyScore, validateStory, type StoryScene } from "@/lib/story-v2";
+import { GOLD_ANCHORS, GOLD_STORY, hookIssues, hookTextIssues, rankHookTypes, splitSentences, storyScore, validateStory, type StoryScene } from "@/lib/story-v2";
 
 const fail = (ids: string[], s = GOLD_STORY()) => validateStory(s).failed.map((c) => c.id).filter((id) => ids.includes(id));
 
@@ -79,7 +79,6 @@ describe("analytics re-ranking", () => {
   it("ranks by retention", () => expect(rankHookTypes([{ hookType: "a", hold3: 40, completion: 20 }, { hookType: "b", hold3: 80, completion: 60 }])[0]).toBe("b"));
 });
 
-import { splitSentences } from "@/lib/story-v2";
 describe("sentence splitter", () => {
   it("keeps initials together", () => expect(splitSentences("Major John F. Ohmer wants it. Next one? Yes.")).toEqual(["Major John F. Ohmer wants it.", "Next one?", "Yes."]));
 });
