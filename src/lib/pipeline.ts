@@ -14,12 +14,6 @@ const b64ToBuf = (b64: string) => {
   return out.buffer;
 };
 
-const bufToB64 = (buf: ArrayBuffer) => {
-  const b = new Uint8Array(buf); let s = "";
-  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000));
-  return btoa(s);
-};
-
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Retry only rate limits / transient server errors, with backoff. */
