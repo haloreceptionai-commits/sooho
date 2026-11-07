@@ -1,13 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Film, Smartphone, Sparkles, Shuffle, Loader2, ArrowUpRight, Mic } from "lucide-react";
+import { useState } from "react";
+import { Film, Smartphone, Sparkles, Loader2, ArrowUpRight, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, STYLES, type VideoEngine } from "@/lib/store";
 import { startVideo } from "@/lib/pipeline";
-import { ARCHETYPES, scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
-import { madeBefore, scoreTopic5 } from "@/lib/quality";
-import { Page, Panel, btnPrimary, btnOutline, input, label } from "@/components/page";
+import { scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
+import { scoreTopic5 } from "@/lib/quality";
+import { Page, Panel, btnPrimary, input, label } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
+import { Button } from "@/components/ui/button";
+import { TopicLibrary } from "@/components/topic-library";
+import { FACT_TOPICS } from "@/lib/topic-catalog";
+import { topicUnavailable, type TopicUse } from "@/lib/topics";
+import { topicHistoryQuery } from "@/lib/topics-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getTopicHistory } from "@/lib/topics.functions";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -20,6 +28,7 @@ export const Route = createFileRoute("/_authenticated/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(topicHistoryQuery),
   component: Create,
 });
 
@@ -38,24 +47,34 @@ function Create() {
   const [longMin, setLongMin] = useState(8);
     const [style, setStyle] = useState(settings.defaultStyle);
   const [engine, setEngine] = useState<VideoEngine>("own");
-  const [seed, setSeed] = useState(0);
-
-  const a = ARCHETYPES.find((x) => x.id === arch)!;
-  const ideas = useMemo(() => {
-    const t = a.topics;
-    const r = seed % t.length;
-    return [...t.slice(r), ...t.slice(0, r)].slice(0, 4).map((x) => ({ t: x, s: scoreTopic(x) }));
-  }, [a, seed]);
+  const { data: history } = useSuspenseQuery(topicHistoryQuery);
+  const checkHistory = useServerFn(getTopicHistory);
+  const [checking, setChecking] = useState(false);
+  const [topicId, setTopicId] = useState<string | undefined>();
+  const used: TopicUse[] = [...history, ...videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }))];
+  const unavailable = topicUnavailable(topic, topicId, used);
   const score = scoreTopic(topic);
   const active = videos.filter((v) => v.status !== "done").slice(0, 5);
   const recent = videos.filter((v) => v.status === "done").slice(0, 4);
   const busy = videos.some((v) => v.status === "running");
 
-  const generate = () => {
+  const generate = async () => {
     if (!topic.trim()) { toast.error("Pick or type a topic first"); return; }
-    startVideo({ topic: topic.trim(), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx", engine });
-    toast.success("Video generation started — you can keep working.");
-    setTopic("");
+    if (checking) return;
+    setChecking(true);
+    try {
+      const fresh = await checkHistory();
+      if (topicUnavailable(topic, topicId, [...fresh, ...used])) {
+        toast.error("This topic already has a video or is being made. Pick a new topic.");
+        return;
+      }
+      const chosen = FACT_TOPICS.find((t) => t.id === topicId);
+      startVideo({ topic: topic.trim(), topicId, ...(chosen ? { topicSource: { url: chosen.source, fact: chosen.fact } } : {}), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx", engine });
+      toast.success("Video generation started — you can keep working.");
+      setTopic(""); setTopicId(undefined);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not check your saved topics. Try again.");
+    } finally { setChecking(false); }
   };
 
   return (
@@ -88,30 +107,14 @@ function Create() {
 
           {/* 2. Topic */}
           <Panel className="p-5">
-            <div className="flex items-center justify-between">
-              <p className={label}>2 · Topic</p>
-              <button className={`${btnOutline} px-2.5 py-1 text-xs`} onClick={() => setSeed((x) => x + 2)}><Shuffle className="h-3 w-3" /> More ideas</button>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {ARCHETYPES.map((x) => (
-                <button key={x.id} onClick={() => setArch(x.id)} className={`rounded-full border px-3 py-1 text-xs font-semibold ${arch === x.id ? "border-foreground bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>{x.name}</button>
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">{a.formula} — e.g. “{a.example}”</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {ideas.map(({ t, s }) => (
-                <button key={t} onClick={() => setTopic(t)} className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm ${topic === t ? "border-primary bg-primary/5" : "hover:bg-muted"}`}>
-                  <span className="font-medium">{t}{madeBefore(t, videos.map((v) => v.input.topic)) && <span className="ml-1.5 rounded bg-muted px-1 text-[10px] font-semibold text-muted-foreground">made before</span>}</span>
-                  <span className="flex shrink-0 items-center gap-2"><span className={`font-mono text-[11px] ${scoreTopic5(t).pass ? "text-success" : "text-muted-foreground"}`} title="Topic tests: one-picture oddity, surprising reason, home analogy, proof shot, two sources">{scoreTopic5(t).total}/25</span><Ring v={s.overall} /></span>
-                </button>
-              ))}
-            </div>
-            <input className={`${input} mt-3`} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="…or type your own: Why Lighthouses Were Painted In Stripes" />
+            <TopicLibrary library={FACT_TOPICS} used={used} selected={topic} onSelect={(idea) => { setTopic(idea.title); setTopicId(idea.id); setArch(idea.archetype); }} />
+            <label htmlFor="custom-topic" className={`${label} mt-5 block`}>Selected topic / custom topic</label>
+            <input id="custom-topic" className={`${input} mt-2`} value={topic} onChange={(e) => { setTopic(e.target.value); setTopicId(undefined); }} placeholder="…or type your own topic" />
             {topic && (
               <div className="mt-2 flex flex-wrap gap-4 font-mono text-[11px] text-muted-foreground">
                 <span>Viral score <b className="text-foreground">{score.overall}</b></span>
                 <span>Topic tests <b className="text-foreground">{scoreTopic5(topic).total}/25</b>{scoreTopic5(topic).pass ? " ✓" : " (needs 18)"}</span>
-                {madeBefore(topic, videos.map((v) => v.input.topic)) && <span className="text-warning">Already made</span>}
+                {unavailable && <span className="text-warning">Already made or in production — choose a new topic</span>}
                 <span>Curiosity {score.curiosity}</span><span>Visual drama {score.visual}</span><span>Retention {score.retention}</span>
               </div>
             )}
@@ -136,9 +139,9 @@ function Create() {
             {engine === "omni" && <p className="mt-2 text-xs text-muted-foreground">Characters really move. Uses far more AI credits and adds several minutes per video.</p>}
           </Panel>
 
-          <button onClick={generate} className={`${btnPrimary} w-full py-4 text-base`}>
-            <Sparkles className="h-5 w-5" /> Generate {format === "short" ? "Short" : "long-form video"}
-          </button>
+          <Button onClick={generate} disabled={checking || unavailable} className={`${btnPrimary} h-auto w-full py-4 text-base`}>
+            {checking ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />} Generate {format === "short" ? "Short" : "long-form video"}
+          </Button>
         </div>
 
         {/* Right column: live jobs */}
