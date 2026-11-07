@@ -181,8 +181,6 @@ Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) 
 export interface VoiceInput { text: string; voice: string; deployment: string; style: string }
 
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
-// Gemini voices tested at ~270–300 wpm with the storyteller direction below.
-const GEMINI_VOICE: Record<string, string> = { onyx: "Charon", ash: "Iapetus", echo: "Orus", ballad: "Fenrir", verse: "Puck", cedar: "Alnilam" };
 
 export const generateVoice = createServerFn({ method: "POST" })
   .inputValidator((d: VoiceInput) => {

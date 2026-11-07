@@ -1,15 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
-import { Film, Smartphone, Sparkles, Play, Square, Shuffle, Loader2, ArrowUpRight, Mic } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Film, Smartphone, Sparkles, Shuffle, Loader2, ArrowUpRight, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, STYLES } from "@/lib/store";
 import { startVideo } from "@/lib/pipeline";
-import { generateVoice } from "@/lib/pipeline.functions";
 import { ARCHETYPES, scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
-import { VOICES } from "@/lib/voices";
 import { Page, Panel, btnPrimary, btnOutline, input, label } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
-import { VoiceAuditions } from "@/components/voice-auditions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,12 +35,8 @@ function Create() {
   const [arch, setArch] = useState<ArchetypeId>("paradox");
   const [shortSec, setShortSec] = useState(60);
   const [longMin, setLongMin] = useState(8);
-  const [voice, setVoice] = useState(settings.defaultVoice);
-  const [style, setStyle] = useState(settings.defaultStyle);
+    const [style, setStyle] = useState(settings.defaultStyle);
   const [seed, setSeed] = useState(0);
-  const [previewing, setPreviewing] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const cache = useRef<Record<string, string>>({});
 
   const a = ARCHETYPES.find((x) => x.id === arch)!;
   const ideas = useMemo(() => {
@@ -56,36 +49,15 @@ function Create() {
   const recent = videos.filter((v) => v.status === "done").slice(0, 4);
   const busy = videos.some((v) => v.status === "running");
 
-  const preview = async (id: string, text: string) => {
-    audioRef.current?.pause();
-    if (previewing === id) { setPreviewing(null); return; }
-    setPreviewing(id);
-    try {
-      if (!cache.current[id]) {
-        const r = await generateVoice({ data: { text, voice: id, deployment: settings.ttsDeployment, style: "" } });
-        const type = r.engine === "azure" ? "audio/mpeg" : "audio/wav";
-        cache.current[id] = URL.createObjectURL(new Blob([Uint8Array.from(atob(r.audio), (c) => c.charCodeAt(0))], { type }));
-      }
-      const el = new Audio(cache.current[id]);
-      audioRef.current = el;
-      el.onended = () => setPreviewing(null);
-      await el.play();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Preview failed");
-      setPreviewing(null);
-    }
-  };
-
   const generate = () => {
     if (!topic.trim()) { toast.error("Pick or type a topic first"); return; }
-    startVideo({ topic: topic.trim(), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice });
+    startVideo({ topic: topic.trim(), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx" });
     toast.success("Video generation started — you can keep working.");
     setTopic("");
   };
 
   return (
     <Page eyebrow="Studio" title="Create a video" desc="Pick a format and topic. Script, narration, scene images, sound and editing happen automatically.">
-      <VoiceAuditions />
       <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
         <div className="space-y-6">
           {/* 1. Format */}
@@ -142,23 +114,7 @@ function Create() {
 
           {/* 3. Voice & style */}
           <Panel className="p-5">
-            <p className={label}>3 · Narrator voice</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {VOICES.map((vo) => (
-                <div key={vo.id} onClick={() => setVoice(vo.id)} role="button"
-                  className={`cursor-pointer rounded-lg border-2 p-3 ${voice === vo.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted"}`}>
-                  <div className="flex items-center justify-between">
-                    <p className="font-bold">{vo.name}</p>
-                    <button onClick={(e) => { e.stopPropagation(); void preview(vo.id, vo.sample); }} className="grid h-7 w-7 place-items-center rounded-full bg-foreground text-background" aria-label={`Preview ${vo.name}`}>
-                      {previewing === vo.id ? <Square className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                    </button>
-                  </div>
-                  <p className="text-xs font-semibold text-primary">{vo.persona}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{vo.desc}</p>
-                </div>
-              ))}
-            </div>
-            <p className={`${label} mt-5`}>Visual style</p>
+            <p className={label}>3 · Visual style</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {STYLES.map((st) => (
                 <button key={st} onClick={() => setStyle(st)} className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${style === st ? "border-primary bg-primary/5 text-primary" : "text-muted-foreground hover:text-foreground"}`}>{st}</button>
@@ -200,7 +156,7 @@ function Create() {
               ))}
             </div>
           </Panel>
-          <p className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground"><Mic className="h-3 w-3" /> Script by {settings.scriptDeployment} · images by {settings.imageDeployment} on Azure OpenAI.</p>
+          <p className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground"><Mic className="h-3 w-3" /> Atlas narrator · script by {settings.scriptDeployment} · images by {settings.imageDeployment} on Azure OpenAI.</p>
         </div>
       </div>
     </Page>
