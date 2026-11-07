@@ -9,86 +9,90 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as VideosRouteImport } from './routes/videos'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/_authenticated/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/_authenticated/settings',
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VideosRoute = VideosRouteImport.update({
-  id: '/videos',
+const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
+  id: '/_authenticated/videos',
   path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRoute
-  '/videos': typeof VideosRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/videos': typeof AuthenticatedVideosRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRoute
-  '/videos': typeof VideosRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/videos': typeof AuthenticatedVideosRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/settings': typeof SettingsRoute
-  '/videos': typeof VideosRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/videos': typeof AuthenticatedVideosRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/settings' | '/videos'
+  fullPaths: '/settings' | '/videos' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/settings' | '/videos'
-  id: '__root__' | '/' | '/settings' | '/videos'
+  to: '/settings' | '/videos' | '/'
+  id:
+    | '__root__'
+    | '/_authenticated/settings'
+    | '/_authenticated/videos'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  SettingsRoute: typeof SettingsRoute
-  VideosRoute: typeof VideosRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/videos': {
-      id: '/videos'
+    '/_authenticated/videos': {
+      id: '/_authenticated/videos'
       path: '/videos'
       fullPath: '/videos'
-      preLoaderRoute: typeof VideosRouteImport
+      preLoaderRoute: typeof AuthenticatedVideosRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  SettingsRoute: SettingsRoute,
-  VideosRoute: VideosRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedVideosRoute: AuthenticatedVideosRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
