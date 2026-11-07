@@ -120,6 +120,12 @@ export async function runVideo(id: string, input: VideoInput) {
       cur.push(i); wc += w;
     });
     if (cur.length) groups.push(cur);
+    // very short takes make the voice engine misread them, so fold them into a neighbour
+    const wcount = (g: number[]) => g.reduce((a, i) => a + plan.scenes[i]!.narration.split(/\s+/).filter(Boolean).length, 0);
+    for (let gi = groups.length - 1; gi > 0; gi--) {
+      if (wcount(groups[gi]!) < 22 && plan.scenes[groups[gi]![0]!]!.beat !== "reveal") { groups[gi - 1]!.push(...groups[gi]!); groups.splice(gi, 1); }
+    }
+    if (groups.length > 1 && wcount(groups[0]!) < 22) { groups[1]!.unshift(...groups[0]!); groups.shift(); }
     const voice: VoiceChunk[] = groups.map((g) => ({ scenes: g, audio: new ArrayBuffer(0) }));
 
     const totalAssets = groups.length + n + 1;
