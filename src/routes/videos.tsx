@@ -36,6 +36,28 @@ async function download(v: Video) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
+async function importVideo(file: File) {
+  const url = URL.createObjectURL(file);
+  try {
+    const el = document.createElement("video");
+    el.muted = true; el.preload = "auto"; el.src = url;
+    await new Promise<void>((res, rej) => { el.onloadeddata = () => res(); el.onerror = () => rej(new Error("Can't read this video")); });
+    el.currentTime = Math.min(1, el.duration / 2);
+    await new Promise<void>((res) => { el.onseeked = () => res(); });
+    const w = el.videoWidth, h = el.videoHeight, s = 360 / Math.max(w, h);
+    const c = document.createElement("canvas"); c.width = Math.round(w * s); c.height = Math.round(h * s);
+    c.getContext("2d")!.drawImage(el, 0, 0, c.width, c.height);
+    const short = h > w;
+    const title = file.name.replace(/\.[^.]+$/, "").replace(/\.publer\.com$/, "");
+    const id = actions.addVideo({ topic: title, format: short ? "short" : "long", durationSec: Math.round(el.duration), archetype: "", style: "", voice: "atlas" });
+    await saveVideoFile(id, file);
+    actions.updateVideo(id, { status: "done", stage: "done", progress: 100, detail: "", duration: el.duration, mime: file.type, size: file.size, thumb: c.toDataURL("image/jpeg", 0.7), sceneCount: 0 });
+    toast.success("Video added to your library");
+  } catch (e) {
+    toast.error(e instanceof Error ? e.message : "Import failed");
+  } finally { URL.revokeObjectURL(url); }
+}
+
 function Videos() {
   const videos = useStore((s) => s.videos);
   const [filter, setFilter] = useState<"all" | "long" | "short">("all");
@@ -57,7 +79,12 @@ function Videos() {
 
   return (
     <Page eyebrow="Library" title="My videos" desc="Every finished video, ready to watch and download."
-      actions={<Link to="/" className={btnPrimary}><Plus className="h-4 w-4" /> New video</Link>}>
+      actions={<div className="flex gap-2">
+        <label className={`${btnOutline} cursor-pointer`}><Upload className="h-4 w-4" /> Import video
+          <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void importVideo(f); }} />
+        </label>
+        <Link to="/" className={btnPrimary}><Plus className="h-4 w-4" /> New video</Link>
+      </div>}>
       {inProgress.length > 0 && (
         <div className="grid gap-3 md:grid-cols-2">{inProgress.map((v) => <VideoJob key={v.id} v={v} />)}</div>
       )}
