@@ -4,7 +4,11 @@
 export interface ScriptScene { beat: string; narration: string }
 export interface ScriptCheck { ok: boolean; issues: string[]; words: number; revealPos: number; longSentences: number; sentences: number }
 
+import { hardWords } from "@/lib/sound-words";
+
 const GREETING = /\b(hello|hey guys|hi everyone|welcome( back)?|did you know|in this video|today we)\b/i;
+
+const MYTH = /\b(most people think|people think|everyone thinks|you(?:'d| would)? think|you might think|people believed|everyone believed|it'?s not|that'?s (?:not|wrong)|wasn'?t|isn'?t (?:true|what)|the truth is|actually)\b/i;
 
 export const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
 
@@ -36,6 +40,15 @@ export function validateScript(scenes: ScriptScene[], loopLine: string, duration
   if (!scenes.some((s) => s.beat === "proof")) issues.push("No proof / demo moment");
   if (!scenes.some((s) => s.beat === "payoff")) issues.push("No payoff");
   if (!loopLine.trim()) issues.push("No closing loop line");
+  // plain English a 5-year-old follows
+  const hard = [...new Set(hardWords(all))];
+  if (hard.length > 3) issues.push(`Too many hard words: ${hard.slice(0, 8).join(", ")} — use simple everyday words`);
+  // hook must open on a question or a strange action that begs "why?"
+  const pre = ri < 0 ? all : scenes.slice(0, ri).map((s) => s.narration).join(" ");
+  const questions = (pre.match(/\?/g) ?? []).length;
+  const needQ = Math.max(2, Math.floor((durationSec * (ri < 0 ? 1 : 0.65)) / 12));
+  if (questions < needQ) issues.push(`Only ${questions} curiosity questions before the reveal (need ${needQ}: a new question every ~10s to re-hook)`);
+  if (!MYTH.test(all)) issues.push('No false belief broken (e.g. "Most people think... But that\'s wrong.")');
   return { ok: issues.length === 0, issues, words, revealPos, longSentences: long, sentences: ss.length };
 }
 
