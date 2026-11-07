@@ -78,3 +78,8 @@ describe("analytics re-ranking", () => {
   it("is empty without data", () => expect(rankHookTypes([{ hookType: "mid_action" }])).toEqual([]));
   it("ranks by retention", () => expect(rankHookTypes([{ hookType: "a", hold3: 40, completion: 20 }, { hookType: "b", hold3: 80, completion: 60 }])[0]).toBe("b"));
 });
+
+import { splitSentences } from "@/lib/story-v2";
+describe("sentence splitter", () => {
+  it("keeps initials together", () => expect(splitSentences("Major John F. Ohmer wants it. Next one? Yes.")).toEqual(["Major John F. Ohmer wants it.", "Next one?", "Yes."]));
+});
