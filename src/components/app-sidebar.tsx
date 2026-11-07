@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Sparkles, Clapperboard, Settings, ChevronsLeft, ChevronsRight, Menu, X, Cpu, PlaySquare } from "lucide-react";
+import { Sparkles, Clapperboard, Settings, ChevronsLeft, ChevronsRight, Menu, X, Cpu, PlaySquare, LogOut } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 type To = "/" | "/videos" | "/settings";
@@ -8,6 +9,8 @@ type To = "/" | "/videos" | "/settings";
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
+  const signOut = async () => { await supabase.auth.signOut(); void navigate({ to: "/auth", replace: true }); };
   const videos = useStore((s) => s.videos);
   const channel = useStore((s) => s.settings.channelName);
   const running = videos.filter((v) => v.status === "running").length;
@@ -68,6 +71,7 @@ export function AppSidebar() {
               <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent text-xs font-bold text-accent-foreground">J</div>
               {!c && <div className="min-w-0 flex-1 leading-tight"><p className="truncate text-sm font-semibold">James</p><p className="truncate text-[11px] text-muted-foreground">{channel}</p></div>}
             </div>
+            <button onClick={() => void signOut()} title="Sign out" aria-label="Sign out" className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"><LogOut className="h-4 w-4" /></button>
             {!isMobile && (
               <button onClick={() => setCollapsed(!collapsed)} title={collapsed ? "Expand" : "Collapse"} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
                 {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
