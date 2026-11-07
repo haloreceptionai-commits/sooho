@@ -273,7 +273,7 @@ export const generateVoice = createServerFn({ method: "POST" })
         stream_format: "audio",
       }),
     });
-    if (!res.ok) await fail(res, "Voice");
+    if (!res.ok) { console.error(`Voice text was: ${data.text.slice(0, 600)}`); await fail(res, "Voice"); }
     return { audio: toBase64(await res.arrayBuffer()), engine: "lovable" };
   });
 
