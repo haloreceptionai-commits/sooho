@@ -269,6 +269,11 @@ function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
   return shots;
 }
 
+/** Playback speed that stretches a clip of `clipSec` across `spanSec` (never below half speed, never sped up). */
+export function clipRate(clipSec: number, spanSec: number) {
+  return Math.max(0.5, Math.min(1, clipSec / Math.max(0.1, spanSec)));
+}
+
 function drawImage(ctx: CanvasRenderingContext2D, img: ImageBitmap | HTMLVideoElement, w: number, h: number, zoom: number, panX: number, panY: number, ox = 0, oy = 0) {
   const iw = img instanceof HTMLVideoElement ? img.videoWidth : img.width;
   const ih = img instanceof HTMLVideoElement ? img.videoHeight : img.height;
@@ -514,10 +519,15 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
       if (!clip.started) {
         clip.started = true;
         clip.video.currentTime = 0;
-        clip.video.playbackRate = Math.max(0.5, Math.min(1, (clip.video.duration || span) / span));
+        // Short clips are slowed (down to half speed) to cover their whole scene run.
+        clip.video.playbackRate = clipRate(clip.video.duration || span, span);
         void clip.video.play().catch(() => undefined);
       }
-      drawImage(ctx, clip.video, o.width, o.height, 1.02, 0, 0, ox * 0.5, oy * 0.5);
+      // Keep it moving if the browser paused it early; once it ends, its last frame
+      // holds while a slow push-in continues so the run never looks frozen.
+      if (clip.video.paused && !clip.video.ended) void clip.video.play().catch(() => undefined);
+      const cp = Math.min(1, Math.max(0, (el - cs) / span));
+      drawImage(ctx, clip.video, o.width, o.height, 1.02 + 0.1 * ease(cp), 0, 0, ox * 0.5, oy * 0.5);
     } else {
       drawImage(ctx, sc.image, o.width, o.height, zoom, sh.x0 + (sh.x1 - sh.x0) * pe, sh.y0 + (sh.y1 - sh.y0) * pe, ox, oy);
     }

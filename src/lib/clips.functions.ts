@@ -50,16 +50,35 @@ export const pollClip = createServerFn({ method: "POST" })
     if (!/^[A-Za-z0-9_-]{1,200}$/.test(d.id)) throw new Error("Invalid clip id");
     return d;
   })
-  .handler(async ({ data }): Promise<{ status: string; error?: string; video?: string }> => {
+  .handler(async ({ data }): Promise<{ status: string; error?: string }> => {
     const res = await fetch(`${GATEWAY}/videos/${encodeURIComponent(data.id)}`, { headers: { Authorization: `Bearer ${key()}` } });
     if (!res.ok) await err(res, "AI video status");
     const j = (await res.json()) as { status: string; error?: { code: string; message: string } };
     if (j.status === "failed") return { status: "failed", error: j.error?.message ?? "AI video failed" };
-    if (j.status !== "completed") return { status: j.status };
-    const dl = await fetch(`${GATEWAY}/videos/${encodeURIComponent(data.id)}/content`, { headers: { Authorization: `Bearer ${key()}` } });
+    return { status: j.status };
+  });
+
+// Finished clips are 4–8 MB; one response that large is dropped by the preview proxy,
+// so the browser downloads them in small byte ranges instead.
+export const CLIP_CHUNK = 1_500_000;
+export const clipChunk = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; offset: number }) => {
+    if (!/^[A-Za-z0-9_-]{1,200}$/.test(d.id)) throw new Error("Invalid clip id");
+    if (!Number.isInteger(d.offset) || d.offset < 0) throw new Error("Invalid offset");
+    return d;
+  })
+  .handler(async ({ data }): Promise<{ data: string; total: number }> => {
+    const url = `${GATEWAY}/videos/${encodeURIComponent(data.id)}/content`;
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${key()}` }, redirect: "manual" });
+    const loc = r.headers.get("location");
+    const dl = loc
+      ? await fetch(loc, { headers: { Range: `bytes=${data.offset}-${data.offset + CLIP_CHUNK - 1}` } })
+      : r;
     if (!dl.ok) await err(dl, "AI video download");
-    const bytes = new Uint8Array(await dl.arrayBuffer());
+    let bytes = new Uint8Array(await dl.arrayBuffer());
+    let total = Number(dl.headers.get("content-range")?.split("/")[1] ?? 0);
+    if (dl.status !== 206) { total = bytes.length; bytes = bytes.subarray(data.offset, data.offset + CLIP_CHUNK); }
     let bin = "";
     for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-    return { status: "completed", video: btoa(bin) };
+    return { data: btoa(bin), total };
   });
