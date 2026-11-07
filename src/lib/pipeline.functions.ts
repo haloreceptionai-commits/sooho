@@ -64,13 +64,14 @@ export interface PlanScene {
   beat: string; narration: string; image_prompt: string; characters: string[];
   camera: Camera; sfx: string; mood: "tension" | "reveal";
 }
-export interface Plan { title: string; description: string; palette: string; characters: PlanCharacter[]; scenes: PlanScene[] }
+export interface Plan { script: string; title: string; description: string; palette: string; characters: PlanCharacter[]; scenes: PlanScene[] }
 
 const planSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["title", "description", "palette", "characters", "scenes"],
+  required: ["script", "title", "description", "palette", "characters", "scenes"],
   properties: {
+    script: { type: "string" },
     title: { type: "string" },
     description: { type: "string" },
     palette: { type: "string" },
@@ -121,10 +122,12 @@ Rules:
 - Beats in order: hook → stakes (rival foil doubts/mocks) → defeat (the conventional way looks like it's winning) → countdown (environment escalates: storm, heat, pressure, time) → climax (the threat arrives) → reveal ("You see, ..." name the real historical practice + one everyday analogy starting with "Ever ...?") → payoff (protagonist survives, rival suffers the catastrophe; last line lands hard).
 - FLOW: write it like one breathless story told out loud — mostly long run-on sentences chained with "and", "so", "but then", "while". NO choppy fragments ("Horns blare. Ladders rise."), no lists, at most 3 named characters, and the story must be crystal clear to a 12-year-old on first listen.
 - Historically accurate. No subscribe/like calls. No filler; every sentence pushes forward.
+- Plain, simple spoken words. Every line must make literal sense; no poetic metaphors ("glassy knuckles", "clock ticks in his ears"), no "us/we" from the narrator, refer to characters by role ("the cook", "his captain", "the pirates") more than by name.
+- Write the WHOLE narration first in "script" (polish it until it reads perfectly out loud), THEN split that exact text, word for word, into the scenes' "narration" fields.
 Visuals — the video cuts every 1.5–2.5 seconds, so every scene is ONE frozen action moment:
 - characters: 2–4 recurring characters with a fixed, very specific look (age, build, face, hair/beard, clothing colors, one signature prop). Reuse the exact names in scenes.
 - palette: one sentence of color direction (e.g. deep navy storm sea vs glowing amber oil). Even night/storm scenes must be BRIGHTLY lit and vivid — readable, saturated, never murky.
-- image_prompt: what the camera sees in that instant — subject + action + expression, setting, camera angle (close-up, low angle, over-the-shoulder, wide aerial...), lighting. Vary angles shot to shot. Include the key prop in a contrasting color. Never put text, letters or signs in the image.
+- image_prompt: what the camera sees in that instant — subject + action + expression, setting, camera angle (close-up, low angle, over-the-shoulder, wide aerial...), lighting. Vary angles shot to shot. Characters are always DOING the action (pouring, grabbing, pointing, gripping the wheel) — never standing in a lineup or posing. At least 40% of shots show no faces at all: the threat (a ship, a towering wave, storm clouds), a key object in extreme close-up, or a wide aerial establishing shot. Include a simple explainer visual for the reveal (e.g. a bowl of soup with an oil droplet). Include the key prop in a contrasting color. Never put text, letters or signs in the image.
 - Safety filter: never describe gore, blood, corpses, injuries, people dying, children, nudity or real living people. Show danger indirectly (towering waves, cracking stone, smoke, terrified faces, the rival ship swamped by foam).
 - camera: the motion that best sells the moment (punch_in for shocks/reveals, tilt_up for something huge, pan for chases).
 - sfx: the one sound that belongs at that moment. mood: "tension" until the reveal, then "reveal".`;

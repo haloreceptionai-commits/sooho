@@ -20,6 +20,7 @@ export interface RenderOptions {
   height: number;
   captions: boolean;
   sfx: boolean;
+  targetSec?: number; // narration is sped up (pitch kept) to land near this length
   onProgress: (pct: number) => void;
 }
 
@@ -165,6 +166,38 @@ export function tightenPauses(ctx: BaseAudioContext, b: AudioBuffer, maxPause = 
   return out;
 }
 
+/** WSOLA time-stretch: speeds speech up by `rate` while keeping the voice's pitch. */
+export function timeStretch(ctx: BaseAudioContext, b: AudioBuffer, rate: number): AudioBuffer {
+  if (rate <= 1.01) return b;
+  const sr = b.sampleRate;
+  const N = Math.round(sr * 0.03), Hs = Math.round(N / 2), tol = Math.round(sr * 0.008);
+  const win = new Float32Array(N);
+  for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (N - 1));
+  const src = b.getChannelData(0);
+  const outLen = Math.floor(src.length / rate);
+  const out = ctx.createBuffer(1, outLen + N, sr);
+  const o = out.getChannelData(0);
+  let prevEnd = 0; // where the natural continuation of the last copied frame starts in src
+  for (let k = 0; k * Hs + N < outLen; k++) {
+    const nominal = Math.round(k * Hs * rate);
+    let best = nominal;
+    if (k > 0) {
+      let bestC = -Infinity;
+      const lo = Math.max(0, nominal - tol), hi = Math.min(src.length - N, nominal + tol);
+      for (let p = lo; p <= hi; p += 2) {
+        let c = 0;
+        for (let j = 0; j < Hs; j += 4) c += src[p + j]! * src[prevEnd + j]!;
+        if (c > bestC) { bestC = c; best = p; }
+      }
+    }
+    if (best + N >= src.length) break;
+    const at = k * Hs;
+    for (let j = 0; j < N; j++) o[at + j]! += src[best + j]! * win[j]!;
+    prevEnd = Math.min(src.length - N - 1, best + Hs);
+  }
+  return out;
+}
+
 export interface Word { text: string; t0: number; t1: number }
 export interface SceneTiming { start: number; end: number; words: Word[] }
 
@@ -305,7 +338,10 @@ function scheduleMusic(ctx: AudioContext, out: AudioNode, at: number, step: numb
 export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number }> {
   const actx = new AudioContext();
   await actx.resume();
-  const buffers = (await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))))).map((b) => tightenPauses(actx, b));
+  let buffers = (await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))))).map((b) => tightenPauses(actx, b));
+  const raw = buffers.reduce((a, b) => a + b.duration, 0);
+  const rate = o.targetSec ? Math.max(1, Math.min(1.35, raw / Math.max(5, o.targetSec - 1))) : 1;
+  if (rate > 1.01) buffers = buffers.map((b) => timeStretch(actx, b, rate));
   const LEAD = 0.15, JOIN = 0.06;
   let t = LEAD;
   const chunks = buffers.map((b, i) => {

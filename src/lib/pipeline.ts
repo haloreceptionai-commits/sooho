@@ -124,7 +124,7 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
     const out = await renderVideo(full, voice, {
       width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080,
-      captions: s.burnCaptions, sfx: s.soundEffects,
+      captions: s.burnCaptions, sfx: s.soundEffects, targetSec: input.durationSec,
       onProgress: (p) => up({ progress: 72 + Math.round(p * 0.26) }),
     });
     up({ stage: "saving", progress: 99, detail: "Saving…" });
