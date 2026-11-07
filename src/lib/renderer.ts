@@ -1,12 +1,19 @@
-// Browser video assembler: animates still images (Ken Burns), lays narration + SFX,
-// burns captions, and records to MP4 (or WebM fallback) with MediaRecorder.
+// Browser video editor: turns stills into a fast-cut "animated" Short — 1.5–2.5s shots with
+// camera moves, punch-ins, shake and whip transitions; flowing narration, synthesized music
+// bed + foley, and kinetic one-word captions. Records with MediaRecorder.
+
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in";
 
 export interface RenderScene {
   image: ImageBitmap;
-  audio: ArrayBuffer;
   text: string;
   sfx: string;
+  camera: Camera;
+  mood: "tension" | "reveal";
 }
+
+/** One narration recording covering several consecutive scenes. */
+export interface VoiceChunk { audio: ArrayBuffer; scenes: number[] }
 
 export interface RenderOptions {
   width: number;
@@ -70,6 +77,14 @@ function playSfx(ctx: AudioContext, out: AudioNode, kind: string, at: number) {
     });
     return;
   }
+  if (kind === "clang") {
+    [523, 1187, 1873, 2711].forEach((fr) => {
+      const o = ctx.createOscillator(); o.type = "square"; o.frequency.value = fr; o.connect(g);
+      o.start(at); o.stop(at + 1.2);
+    });
+    env(0.12, 0.003, 1.0);
+    return;
+  }
   if (kind === "coin") {
     const o = ctx.createOscillator(); o.type = "triangle"; o.frequency.value = 2200;
     o.connect(g); env(0.25, 0.005, 0.6); o.start(at); o.stop(at + 0.7);
@@ -86,129 +101,272 @@ function playSfx(ctx: AudioContext, out: AudioNode, kind: string, at: number) {
     creak: ["bandpass", 350, 0.3, 0.2, 0.7],
     fire: ["bandpass", 1200, 0.15, 0.3, 1.5],
     crowd: ["bandpass", 600, 0.12, 0.5, 1.6],
+    wind: ["bandpass", 700, 0.16, 0.6, 1.8],
+    pour: ["lowpass", 500, 0.3, 0.05, 1.2],
   };
   const [type, freq, peak, a, d] = presets[kind] ?? presets["whoosh"]!;
   f.type = type; f.frequency.value = freq;
+  if (kind === "wind") { f.Q.value = 3; f.frequency.setValueAtTime(400, at); f.frequency.linearRampToValueAtTime(1200, at + 1.2); f.frequency.linearRampToValueAtTime(500, at + 2.3); }
+  if (kind === "pour") { const lfo = ctx.createOscillator(); const lg = ctx.createGain(); lfo.frequency.value = 9; lg.gain.value = 250; lfo.connect(lg); lg.connect(f.frequency); lfo.start(at); lfo.stop(at + 1.4); }
   if (kind === "whoosh") { f.frequency.setValueAtTime(300, at); f.frequency.exponentialRampToValueAtTime(3000, at + 0.5); }
   env(peak, a, d);
   n.start(at); n.stop(at + a + d + 0.1);
 }
 
-function drawCover(ctx: CanvasRenderingContext2D, img: ImageBitmap, w: number, h: number, zoom: number, panX: number, panY: number, alpha: number) {
+
+// ---------------- timing ----------------
+
+const wordWeight = (w: string) => w.replace(/[^\p{L}\p{N}]/gu, "").length + 1.5 + (/[.!?]["']?$/.test(w) ? 4 : /[,;:—-]["']?$/.test(w) ? 2 : 0);
+
+/** Find where speech actually starts/ends so chunks butt together with no dead air. */
+function speechBounds(b: AudioBuffer) {
+  const d = b.getChannelData(0);
+  const th = 0.012;
+  let s = 0, e = d.length - 1;
+  while (s < d.length && Math.abs(d[s]!) < th) s++;
+  while (e > s && Math.abs(d[e]!) < th) e--;
+  const pad = b.sampleRate * 0.04;
+  return { from: Math.max(0, s - pad) / b.sampleRate, to: Math.min(d.length, e + pad) / b.sampleRate };
+}
+
+export interface Word { text: string; t0: number; t1: number }
+export interface SceneTiming { start: number; end: number; words: Word[] }
+
+/** Splits each chunk's spoken time across its scenes and words by weighted length. */
+export function timeline(chunks: { scenes: number[]; dur: number; start: number }[], texts: string[]): SceneTiming[] {
+  const out: SceneTiming[] = texts.map(() => ({ start: 0, end: 0, words: [] }));
+  for (const c of chunks) {
+    const words = c.scenes.map((i) => texts[i]!.split(/\s+/).filter(Boolean));
+    const total = words.flat().reduce((a, w) => a + wordWeight(w), 0) || 1;
+    let t = c.start;
+    c.scenes.forEach((si, k) => {
+      const sc = out[si]!;
+      sc.start = t;
+      for (const w of words[k]!) {
+        const d = (wordWeight(w) / total) * c.dur;
+        sc.words.push({ text: w, t0: t, t1: t + d });
+        t += d;
+      }
+      sc.end = t;
+    });
+  }
+  return out;
+}
+
+// ---------------- drawing ----------------
+
+const ease = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+const easeOut = (x: number) => 1 - (1 - x) ** 3;
+
+interface Shot { scene: number; start: number; end: number; z0: number; z1: number; x0: number; x1: number; y0: number; y1: number; punch: boolean }
+
+function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
+  const shots: Shot[] = [];
+  scenes.forEach((sc, i) => {
+    const t = tl[i]!;
+    const dur = Math.max(0.6, t.end - t.start);
+    const n = Math.max(1, Math.round(dur / 2.1));
+    for (let k = 0; k < n; k++) {
+      const s = t.start + (dur * k) / n, e = t.start + (dur * (k + 1)) / n;
+      const v = (i * 7 + k * 3) % 5;
+      // first shot uses the planned move on a wide framing, later shots re-frame tighter
+      const cam: Camera = k === 0 ? sc.camera : (["push_in", "pan_right", "tilt_up", "pan_left", "pull_out"] as Camera[])[v]!;
+      const base = k === 0 ? 1.05 : 1.3 + (v % 3) * 0.15;
+      const fx = k === 0 ? 0 : [-0.5, 0.45, 0, -0.3, 0.35][v]!;
+      const fy = k === 0 ? 0 : [-0.35, -0.2, -0.5, 0.2, -0.1][v]!;
+      const m = 0.09;
+      const sh: Shot = { scene: i, start: s, end: e, z0: base, z1: base, x0: fx, x1: fx, y0: fy, y1: fy, punch: false };
+      if (cam === "push_in") sh.z1 = base + 0.16;
+      if (cam === "pull_out") { sh.z0 = base + 0.18; }
+      if (cam === "pan_left") { sh.x0 = fx + 0.5; sh.x1 = fx - 0.5; sh.z0 = sh.z1 = base + m; }
+      if (cam === "pan_right") { sh.x0 = fx - 0.5; sh.x1 = fx + 0.5; sh.z0 = sh.z1 = base + m; }
+      if (cam === "tilt_up") { sh.y0 = fy + 0.6; sh.y1 = fy - 0.6; sh.z0 = sh.z1 = base + m; }
+      if (cam === "tilt_down") { sh.y0 = fy - 0.6; sh.y1 = fy + 0.6; sh.z0 = sh.z1 = base + m; }
+      if (cam === "punch_in") { sh.punch = true; sh.z1 = base + 0.35; }
+      shots.push(sh);
+    }
+  });
+  return shots;
+}
+
+function drawImage(ctx: CanvasRenderingContext2D, img: ImageBitmap, w: number, h: number, zoom: number, panX: number, panY: number, ox = 0, oy = 0) {
   const scale = Math.max(w / img.width, h / img.height) * zoom;
   const dw = img.width * scale, dh = img.height * scale;
-  const x = (w - dw) / 2 + panX * (dw - w) / 2;
-  const y = (h - dh) / 2 + panY * (dh - h) / 2;
-  ctx.globalAlpha = alpha;
+  const x = (w - dw) / 2 + Math.max(-1, Math.min(1, panX)) * (dw - w) / 2 + ox;
+  const y = (h - dh) / 2 + Math.max(-1, Math.min(1, panY)) * (dh - h) / 2 + oy;
   ctx.drawImage(img, x, y, dw, dh);
-  ctx.globalAlpha = 1;
 }
 
-function chunks(text: string, size: number) {
-  const words = text.split(/\s+/).filter(Boolean);
-  const out: string[] = [];
-  for (let i = 0; i < words.length; i += size) out.push(words.slice(i, i + size).join(" "));
-  return out.length ? out : [""];
+function drawCaption(ctx: CanvasRenderingContext2D, text: string, w: number, h: number, vertical: boolean, pop: number) {
+  const size = Math.round(w * (vertical ? 0.092 : 0.05));
+  ctx.save();
+  const y = vertical ? h * 0.6 : h * 0.8;
+  const sc = 1 + 0.28 * (1 - easeOut(Math.min(1, pop)));
+  ctx.translate(w / 2, y); ctx.scale(sc, sc);
+  ctx.font = `900 ${size}px Manrope, "Arial Black", system-ui, sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+  ctx.lineWidth = size * 0.24;
+  ctx.strokeStyle = "#000000";
+  ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = size * 0.25; ctx.shadowOffsetY = size * 0.06;
+  ctx.strokeText(text, 0, 0);
+  ctx.shadowColor = "transparent";
+  ctx.fillStyle = "#FFD60A";
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
 }
 
-function drawCaption(ctx: CanvasRenderingContext2D, text: string, w: number, h: number, vertical: boolean) {
-  const size = Math.round(w * (vertical ? 0.075 : 0.042));
-  ctx.font = `800 ${size}px Manrope, system-ui, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.lineJoin = "round";
-  ctx.lineWidth = size * 0.18;
-  ctx.strokeStyle = "rgba(0,0,0,0.9)";
-  ctx.fillStyle = "#ffffff";
-  const y = vertical ? h * 0.7 : h * 0.86;
-  // wrap to max width
-  const maxW = w * 0.86;
-  const words = text.toUpperCase().split(" ");
-  const lines: string[] = [];
-  let line = "";
-  for (const wd of words) {
-    const t = line ? `${line} ${wd}` : wd;
-    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = wd; } else line = t;
+/** Caption groups: one word at a time, pairing tiny words with their neighbour. */
+function captionWords(words: Word[]): Word[] {
+  const out: Word[] = [];
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i]!;
+    const clean = (x: string) => x.replace(/^["'“‘(]+|["'”’)]+$/g, "");
+    const next = words[i + 1];
+    if (next && clean(w.text).length <= 3 && clean(next.text).length <= 7) {
+      out.push({ text: `${clean(w.text)} ${clean(next.text)}`, t0: w.t0, t1: next.t1 }); i++;
+    } else out.push({ text: clean(w.text), t0: w.t0, t1: w.t1 });
   }
-  if (line) lines.push(line);
-  lines.forEach((l, i) => {
-    const ly = y + (i - (lines.length - 1) / 2) * size * 1.15;
-    ctx.strokeText(l, w / 2, ly);
-    ctx.fillText(l, w / 2, ly);
-  });
+  return out;
 }
 
-export async function renderVideo(scenes: RenderScene[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number }> {
+// ---------------- music ----------------
+
+const NOTE = (m: number) => 440 * 2 ** ((m - 69) / 12);
+const TENSION = [[45, 48, 52], [41, 45, 48], [43, 47, 50], [40, 44, 47]]; // Am F G E
+const REVEAL = [[48, 52, 55], [43, 47, 50], [45, 48, 52], [41, 45, 48]]; // C G Am F
+
+function scheduleMusic(ctx: AudioContext, out: AudioNode, at: number, step: number, mood: "tension" | "reveal") {
+  const bar = Math.floor(step / 8) % 4;
+  const chord = (mood === "tension" ? TENSION : REVEAL)[bar]!;
+  const dur = 60 / 128 / 2;
+  // staccato strings / plucks
+  const o = ctx.createOscillator(); const g = ctx.createGain(); const f = ctx.createBiquadFilter();
+  o.type = mood === "tension" ? "sawtooth" : "triangle";
+  o.frequency.value = NOTE(chord[step % 3]! + (mood === "tension" ? 12 : 24));
+  f.type = "lowpass"; f.frequency.value = mood === "tension" ? 1400 : 3000;
+  o.connect(f); f.connect(g); g.connect(out);
+  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(mood === "tension" ? 0.22 : 0.16, at + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + dur * 0.9);
+  o.start(at); o.stop(at + dur);
+  // bass + kick on beats
+  if (step % 2 === 0) {
+    const b = ctx.createOscillator(); const bg = ctx.createGain();
+    b.type = "sine"; b.frequency.value = NOTE(chord[0]! - 12); b.connect(bg); bg.connect(out);
+    bg.gain.setValueAtTime(0.0001, at); bg.gain.exponentialRampToValueAtTime(0.35, at + 0.01); bg.gain.exponentialRampToValueAtTime(0.0001, at + dur * 1.8);
+    b.start(at); b.stop(at + dur * 2);
+  }
+  if (step % 4 === 0) {
+    const k = ctx.createOscillator(); const kg = ctx.createGain();
+    k.frequency.setValueAtTime(120, at); k.frequency.exponentialRampToValueAtTime(40, at + 0.15);
+    k.connect(kg); kg.connect(out);
+    kg.gain.setValueAtTime(0.5, at); kg.gain.exponentialRampToValueAtTime(0.0001, at + 0.2);
+    k.start(at); k.stop(at + 0.25);
+  }
+}
+
+// ---------------- render ----------------
+
+export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number }> {
   const actx = new AudioContext();
   await actx.resume();
-  const buffers = await Promise.all(scenes.map((s) => actx.decodeAudioData(s.audio.slice(0))));
-  const GAP = 0.35;
-  const starts: number[] = [];
-  let t = 0.3;
-  const RATE = 1.06; // slightly faster delivery
-  buffers.forEach((b) => { starts.push(t); t += b.duration / RATE + GAP; });
-  const total = t + 0.6;
+  const buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
+  const LEAD = 0.15, JOIN = 0.06;
+  let t = LEAD;
+  const chunks = buffers.map((b, i) => {
+    const bd = speechBounds(b);
+    const c = { scenes: voice[i]!.scenes, dur: bd.to - bd.from, start: t, from: bd.from, buf: b };
+    t += c.dur + JOIN;
+    return c;
+  });
+  const total = t + 0.5;
+  const tl = timeline(chunks, scenes.map((s) => s.text));
+  // stretch first/last scene to cover lead-in and tail
+  tl[0]!.start = 0; tl[tl.length - 1]!.end = total;
+  for (let i = 1; i < tl.length; i++) tl[i]!.start = tl[i - 1]!.end;
+  const shots = buildShots(scenes, tl);
+  const caps = tl.map((x) => captionWords(x.words)).flat();
+  const revealAt = tl[scenes.findIndex((s) => s.mood === "reveal")]?.start ?? Infinity;
 
   const canvas = document.createElement("canvas");
   canvas.width = o.width; canvas.height = o.height;
   const ctx = canvas.getContext("2d")!;
   const dest = actx.createMediaStreamDestination();
   const voiceBus = actx.createGain(); voiceBus.gain.value = 1; voiceBus.connect(dest);
-  const sfxBus = actx.createGain(); sfxBus.gain.value = 0.55; sfxBus.connect(dest);
-  // low drone bed for tension
-  const drone = actx.createOscillator(); const droneG = actx.createGain();
-  drone.type = "sawtooth"; drone.frequency.value = 55;
-  const lp = actx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 160;
-  drone.connect(lp); lp.connect(droneG); droneG.connect(dest); droneG.gain.value = o.sfx ? 0.035 : 0;
+  const sfxBus = actx.createGain(); sfxBus.gain.value = 0.45; sfxBus.connect(dest);
+  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.11 : 0; musicBus.connect(dest);
 
   const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
   const mime = pickMime();
-  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 8_000_000 : 5_000_000 });
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 9_000_000 : 6_000_000 });
   const parts: Blob[] = [];
   rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
   const stopped = new Promise<void>((r) => (rec.onstop = () => r()));
-
   const vertical = o.height > o.width;
-  const captionChunks = scenes.map((s) => chunks(s.text, vertical ? 3 : 6));
 
   rec.start(1000);
   const t0 = actx.currentTime + 0.15;
-  buffers.forEach((b, i) => {
-    const src = actx.createBufferSource(); src.buffer = b; src.playbackRate.value = RATE; src.connect(voiceBus); src.start(t0 + starts[i]!);
-    if (o.sfx) {
-      if (i > 0) playSfx(actx, sfxBus, "whoosh", t0 + starts[i]! - 0.3);
-      const k = scenes[i]!.sfx;
-      if (k && k !== "none" && k !== "whoosh") playSfx(actx, sfxBus, k, t0 + starts[i]! + Math.min(0.8, (b.duration / RATE) * 0.3));
-    }
+  chunks.forEach((c) => {
+    const src = actx.createBufferSource(); src.buffer = c.buf; src.connect(voiceBus);
+    src.start(t0 + c.start, c.from, c.dur);
   });
-  drone.start(t0); drone.stop(t0 + total);
+  if (o.sfx) {
+    scenes.forEach((sc, i) => {
+      const at = t0 + tl[i]!.start;
+      if (i > 0 && i % 2 === 0) playSfx(actx, sfxBus, "whoosh", at - 0.12);
+      if (sc.sfx && sc.sfx !== "none") playSfx(actx, sfxBus, sc.sfx, at + 0.05);
+    });
+    playSfx(actx, sfxBus, "boom", t0 + total - 1.2);
+  }
+  const stepLen = 60 / 128 / 2;
+  let nextStep = 0;
 
   await new Promise<void>((resolve) => {
+    let si = 0, ci = 0;
     const frame = () => {
       const el = actx.currentTime - t0;
       if (el >= total) { resolve(); return; }
-      let i = starts.findIndex((s, k) => el < (starts[k + 1] ?? Infinity) - GAP / 2);
-      if (i < 0) i = scenes.length - 1;
-      const sceneStart = (starts[i] ?? 0) - (i === 0 ? 0.3 : GAP / 2);
-      const sceneLen = (buffers[i]?.duration ?? 1) / RATE + GAP;
-      const p = Math.max(0, Math.min(1, (el - sceneStart) / sceneLen));
+      // music look-ahead scheduler
+      while (o.sfx && nextStep * stepLen < Math.min(el + 0.5, total - 1)) {
+        const at = nextStep * stepLen;
+        scheduleMusic(actx, musicBus, t0 + at, nextStep, at >= revealAt ? "reveal" : "tension");
+        nextStep++;
+      }
+      while (si < shots.length - 1 && el >= shots[si]!.end) si++;
+      const sh = shots[Math.min(si, shots.length - 1)]!;
+      const sc = scenes[sh.scene]!;
+      const local = Math.max(0, el - sh.start);
+      const p = Math.min(1, local / Math.max(0.1, sh.end - sh.start));
+      const pe = sh.punch ? (local < 0.28 ? easeOut(local / 0.28) * 0.8 : 0.8 + 0.2 * p) : ease(p);
+      // cut energy: overshoot zoom right after each cut
+      const cutKick = Math.max(0, 1 - local / 0.22);
+      let zoom = sh.z0 + (sh.z1 - sh.z0) * pe + cutKick * 0.06;
+      // handheld sway + impact shake
+      let ox = Math.sin(el * 1.7) * o.width * 0.004, oy = Math.cos(el * 1.3) * o.height * 0.003;
+      const sceneLocal = el - tl[sh.scene]!.start;
+      if (["boom", "thunder", "clang", "snap", "splash"].includes(sc.sfx) && sceneLocal < 0.5) {
+        const a = (1 - sceneLocal / 0.5) * o.width * 0.018;
+        ox += (Math.random() - 0.5) * a; oy += (Math.random() - 0.5) * a; zoom += 0.02;
+      }
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, o.width, o.height);
-      const dir = i % 2 ? -1 : 1;
-      // previous scene crossfade
-      const fade = Math.min(1, (el - sceneStart) / 0.45);
-      if (i > 0 && fade < 1) drawCover(ctx, scenes[i - 1]!.image, o.width, o.height, 1.15, -dir * 0.5, 0, 1);
-      drawCover(ctx, scenes[i]!.image, o.width, o.height, 1.04 + p * 0.12, dir * (p - 0.5) * 0.8, (i % 3 === 0 ? -1 : 1) * (p - 0.5) * 0.4, fade);
-      // vignette
-      const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.3, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.75);
-      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.55)");
+      const px = sh.x0 + (sh.x1 - sh.x0) * pe, py = sh.y0 + (sh.y1 - sh.y0) * pe;
+      if (cutKick > 0) {
+        // whip motion blur on the cut
+        ctx.globalAlpha = 0.35;
+        drawImage(ctx, sc.image, o.width, o.height, zoom, px, py, ox - o.width * 0.03 * cutKick, oy);
+        drawImage(ctx, sc.image, o.width, o.height, zoom, px, py, ox + o.width * 0.03 * cutKick, oy);
+        ctx.globalAlpha = 1 - cutKick * 0.35;
+      }
+      drawImage(ctx, sc.image, o.width, o.height, zoom, px, py, ox, oy);
+      ctx.globalAlpha = 1;
+      if (sh.punch && local < 0.08) { ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillRect(0, 0, o.width, o.height); }
+      // light vignette
+      const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
+      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.35)");
       ctx.fillStyle = g; ctx.fillRect(0, 0, o.width, o.height);
       if (o.captions) {
-        const local = el - (starts[i] ?? 0);
-        const dur = (buffers[i]?.duration ?? 1) / RATE;
-        if (local >= 0 && local <= dur) {
-          const cc = captionChunks[i]!;
-          drawCaption(ctx, cc[Math.min(cc.length - 1, Math.floor((local / dur) * cc.length))]!, o.width, o.height, vertical);
-        }
+        while (ci < caps.length - 1 && el >= caps[ci]!.t1) ci++;
+        const c = caps[ci];
+        if (c && el >= c.t0 - 0.02 && el <= c.t1 + 0.05) drawCaption(ctx, c.text, o.width, o.height, vertical, (el - c.t0) / 0.1);
       }
       o.onProgress(Math.min(100, (el / total) * 100));
       setTimeout(frame, 1000 / 30);
