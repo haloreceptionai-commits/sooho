@@ -219,5 +219,6 @@ export async function renderVideo(scenes: RenderScene[], o: RenderOptions): Prom
   await stopped;
   stream.getTracks().forEach((tr) => tr.stop());
   await actx.close();
-  return { blob: new Blob(parts, { type: mime.split(";")[0] }), mime: mime.split(";")[0]!, duration: total };
+  const base = mime.split(";")[0] ?? "video/webm";
+  return { blob: new Blob(parts, { type: base }), mime: base, duration: total };
 }
