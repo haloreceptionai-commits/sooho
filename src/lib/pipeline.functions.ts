@@ -188,7 +188,7 @@ const planSchema = {
           image_prompt: { type: "string" },
           characters: { type: "array", items: { type: "string" } },
           camera: { type: "string", enum: ["push_in", "pull_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "punch_in"] },
-          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour", "wave", "crash"] },
+          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour", "wave", "crash", "spray"] },
           mood: { type: "string", enum: ["tension", "reveal"] },
         },
       },
