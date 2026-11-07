@@ -337,11 +337,12 @@ SKELETON (scale to ${D}s):
 - payoff (last ~${Math.max(6, at(0.12))}s): a consequence, twist, number or image the viewer did not expect (never an absence like "nobody came" unless framed as success: "It worked so well that..."). The final 8s REPEAT the opening question's words and answer it plainly ("So how do you hide a factory from the sky? You turn its roof into a fake street."). loopLine = that closing line.
 
 HERO & CAST:
-- The hero (a person, named if documented, else a clear role like "the head painter") states their want in a sentence by 10s ("Lockheed wants the factory gone from enemy maps."). The hero appears (in "characters") in at least 60% of scenes.
+- The hero (a person, named if documented, else a clear role like "the head painter") states their want by 10s in a sentence of the exact form "[hero name] wants/needs/must ..." ("Lockheed wants the factory hidden from enemy bombers."). Use the hero's name in that sentence and in "hero.name". The hero appears (in "characters") in at least 60% of scenes.
 - Every character is introduced with a name or role in the same sentence. Every "he/she/they" must refer to someone named in the previous sentence; otherwise repeat the name. Never introduce side characters, extra places or side examples.
 
 LANGUAGE:
-- Words a 5-year-old knows. Short, complete subject-verb-object sentences, present tense for action, one idea per sentence. Every sentence adds one new fact or a reversal; delete scene-only description.
+- NEVER speak beat labels ("Try one:", "Proof:", "Step two:"). Every sentence is a full spoken sentence with a verb — never a list or a bare place name ("Burbank, California." is wrong; "This is Burbank, California." is right).
+- Words a 5-year-old knows. Apart from the anchor words, avoid words of 3+ syllables (say "street" not "neighborhood", "work" not "production", "can't be seen" not "invisible"). Short, complete subject-verb-object sentences, present tense for action, one idea per sentence. Every sentence adds one new fact or a reversal; delete scene-only description.
 - Re-hook every 6-8s after 15s with a new danger, number, reversal or question.
 - Use sound words on key moments (knock, splash, crash, boom, creak, rustle, siren, plane, thunder) so the editor can add sound.
 - Family-friendly words only (never blood, kill, die, dead, corpse, stab, slaughter, drown). Stay inside the fact sheet; word disputed claims carefully ("no attack is documented").

@@ -133,7 +133,7 @@ export async function runVideo(id: string, input: VideoInput) {
     let ev = await evaluate(plan);
     for (let attempt = 1; attempt <= 2 && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/2)…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: ev.gate.blockers.map((b) => `- ${b}`).join("\n") } })).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: `${ev.gate.blockers.map((b) => `- ${b}`).join("\n")}\nPrevious script (keep its good lines, rewrite only what breaks the checks above):\n${plan.scenes.map((x) => `[${x.beat}] ${x.narration}`).join(" ")}` } })).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       if (ev2.gate.score >= ev.gate.score) { plan = repaired; ev = ev2; }

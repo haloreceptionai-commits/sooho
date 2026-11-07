@@ -98,6 +98,9 @@ const ABSENCE_OK = /\b(so well|worked|because|thanks to|that'?s why|which is why
 const WANT = /\b(wants?|needs?|must|has to|have to|tries|trying|try to|goal|plans? to|hopes?|desperate)\b/i;
 const PRONOUN_START = /^["']?(he|she|they|him|her|his|them)\b/i;
 
+const LABEL = /^["']?(try|step|attempt|proof|reveal|hook|payoff|myth|analogy|context|question|escalation|fact)\s*(one|two|three|\d)?\s*:/i;
+// rough "has a verb" test: common verbs, -s/-ed/-ing forms, or modal/aux
+const VERBISH = /\b(is|are|was|were|be|has|have|had|do|does|did|can|could|will|would|must|let|lets|make|makes|made|get|gets|got|go|goes|went|see|sees|look|looks|need|needs|want|wants|know|knows|turn|turns|hide|hides|hid|build|builds|built|put|puts|say|says|said|come|comes|came|take|takes|took|keep|keeps|kept|try|tries|think|thinks|fly|flies|flew|run|runs|ran)\b|\w(s|ed|ing)\b/i;
 const role = (r: Role) => [r.name, r.role].filter(Boolean);
 
 export function validateStory(s: StoryInput): StoryReport {
@@ -192,10 +195,13 @@ export function validateStory(s: StoryInput): StoryReport {
   add("SHOTS", mixOk, mixOk ? "Shot mix balanced" : `Shot mix: wide ${Math.round(wide * 100)}% (≥40), action ${Math.round(shotMix.action * 100)}% (~30), macro ${Math.round(shotMix.macro * 100)}% (~20), faces ${Math.round(shotMix.face * 100)}% (≤30)${s.scenes[0]?.shot === "face" ? "; first frame is a face" : ""}`);
   // Language: 3-12 word sentences, plain words, length
   const longS = sents.filter((x) => wc(x) > 12).length;
-  const hard = [...new Set(hardWords(all))];
+  const anchorWords = new Set(Object.values(s.anchors).flatMap(contentWords).concat(contentWords(`${s.hero.name} ${s.cast.map((c) => c.name).join(" ")}`)));
+  const hard = [...new Set(hardWords(all))].filter((w) => !anchorWords.has(w.toLowerCase().replace(/[^a-z]/g, "")));
+  const labels = sents.filter((x) => LABEL.test(x));
+  const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || !VERBISH.test(x)) && !/\?["']?$/.test(x));
   const budget = s.durationSec * 2.6;
-  const langOk = longS <= 1 && hard.length <= 3 && words <= budget * 1.15 && words >= budget * 0.8;
-  add("LANG", langOk, langOk ? "Plain short sentences" : [longS > 1 ? `${longS} sentences over 12 words` : "", hard.length > 3 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
+  const langOk = longS <= 1 && hard.length <= 3 && !labels.length && frags.length <= 2 && words <= budget * 1.15 && words >= budget * 0.8;
+  add("LANG", langOk, langOk ? "Plain short sentences" : [longS > 1 ? `${longS} sentences over 12 words` : "", hard.length > 3 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
 
   const ri = s.scenes.findIndex((x) => x.beat === "reveal");
   return { checks, failed: checks.filter((c) => !c.pass), words, revealSec: ri >= 0 ? starts[ri]! : 0, shotMix };
