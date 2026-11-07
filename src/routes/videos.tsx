@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Play, Download, Trash2, Film, Smartphone, Clapperboard, Plus, Copy } from "lucide-react";
+import { Play, Download, Trash2, Film, Smartphone, Clapperboard, Plus, Copy, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { actions, timeAgo, useStore, type Video } from "@/lib/store";
-import { getVideoFile, deleteVideoFile } from "@/lib/video-db";
+import { getVideoFile, deleteVideoFile, saveVideoFile } from "@/lib/video-db";
 import { fmt } from "@/lib/story-engine";
 import { Page, Panel, Empty, btnPrimary, btnOutline, btnDark } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
