@@ -113,7 +113,7 @@ function Videos() {
               </button>
               <div className="flex flex-1 flex-col p-4">
                 <p className="font-bold leading-snug">{v.title}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{timeAgo(v.createdAt)} · {v.sceneCount} scenes · {((v.size ?? 0) / 1e6).toFixed(1)} MB</p>
+                <p className="mt-1 text-xs text-muted-foreground">{timeAgo(v.createdAt)} · {v.sceneCount ? `${v.sceneCount} scenes · ` : ""}{((v.size ?? 0) / 1e6).toFixed(1)} MB</p>
                 {v.qa && (
                   <details className="mt-2 text-xs">
                     <summary className={`w-fit cursor-pointer rounded px-1.5 py-0.5 font-mono font-bold ${v.qa.score >= 80 ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
