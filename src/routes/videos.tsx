@@ -116,15 +116,18 @@ function Videos() {
                 <p className="mt-1 text-xs text-muted-foreground">{timeAgo(v.createdAt)} · {v.sceneCount ? `${v.sceneCount} scenes · ` : ""}{((v.size ?? 0) / 1e6).toFixed(1)} MB</p>
                 {v.qa && (
                   <details className="mt-2 text-xs">
-                    <summary className={`w-fit cursor-pointer rounded px-1.5 py-0.5 font-mono font-bold ${v.qa.score >= 80 ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
-                      Quality {v.qa.score}/100{v.qa.score < 80 ? " · below 80" : ""}
+                    <summary className={`w-fit cursor-pointer rounded px-1.5 py-0.5 font-mono font-bold ${v.qa.score >= 85 && v.ready !== false ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
+                      Quality {v.qa.score}/100{v.ready === false || v.qa.score < 85 ? " · Not ready to publish" : " · Ready"}
                     </summary>
                     <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-[11px] text-muted-foreground">
                       {Object.entries(v.qa.parts).map(([k, n]) => <li key={k} className="flex justify-between"><span className="capitalize">{k}</span><span>{n}</span></li>)}
                     </ul>
-                    {v.hooks && <p className="mt-2 text-muted-foreground"><b className="text-foreground">Hook:</b> {v.hooks.best}<br /><b className="text-foreground">Runner-up:</b> {v.hooks.runnerUp}</p>}
+                    {v.story && <p className="mt-2 text-muted-foreground"><b className="text-foreground">Premise:</b> {v.story.premise}<br /><b className="text-foreground">Question:</b> {v.story.question}<br /><b className="text-foreground">Hero:</b> {v.story.hero}</p>}
+                    {v.hooks && <p className="mt-2 text-muted-foreground"><b className="text-foreground">Hook:</b> {v.hooks.best}<br /><b className="text-foreground">Runner-up (A/B):</b> {v.hooks.runnerUp}</p>}
+                    {v.judges && <p className="mt-1 text-muted-foreground"><b className="text-foreground">Viewer tests:</b> first 3s {v.judges.passA}/4 · first 15s {v.judges.passB}/4 · question answered {v.judges.passC ? "yes" : "no"}<br /><b className="text-foreground">Weakest part:</b> {v.judges.weakest}</p>}
                     {v.facts && <p className="mt-1 text-muted-foreground"><b className="text-foreground">Reality:</b> {v.facts.reality}</p>}
-                    {!!v.checks?.length && <p className="mt-1 text-warning">Script checks: {v.checks.join(" · ")}</p>}
+                    {!!v.checks?.length && <p className="mt-1 text-warning">To fix: {v.checks.join(" · ")}</p>}
+                    <PerfForm v={v} />
                   </details>
                 )}
                 <div className="mt-auto flex gap-2 pt-4">
@@ -154,5 +157,24 @@ function Videos() {
         </DialogContent>
       </Dialog>
     </Page>
+  );
+}
+
+const PERF = [["hold3", "3s hold %"], ["ret30", "30s retention %"], ["completion", "Completion %"], ["replays", "Replays %"]] as const;
+
+/** Enter real YouTube numbers; hook types are re-ranked from them for future videos. */
+function PerfForm({ v }: { v: Video }) {
+  return (
+    <div className="mt-2 rounded border p-2">
+      <p className="font-semibold text-foreground">Your YouTube stats</p>
+      <div className="mt-1 grid grid-cols-2 gap-1.5">
+        {PERF.map(([k, l]) => (
+          <label key={k} className="flex flex-col text-[11px] text-muted-foreground">{l}
+            <input type="number" min={0} max={1000} defaultValue={v.perf?.[k] ?? ""} className="mt-0.5 rounded border bg-background px-1.5 py-1 text-foreground"
+              onBlur={(e) => { const n = e.target.value === "" ? undefined : Number(e.target.value); actions.updateVideo(v.id, { perf: { ...v.perf, [k]: n } }); }} />
+          </label>
+        ))}
+      </div>
+    </div>
   );
 }
