@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Save, RotateCcw, ShieldCheck } from "lucide-react";
+import { Save, RotateCcw, KeyRound, Brain, Mic, ImageIcon, Clapperboard } from "lucide-react";
+
+const MODELS = [
+  { key: "scriptDeployment", name: "Script & Viral Brain", role: "Writes scripts, brainstorms topics, optimizes hooks", icon: Brain },
+  { key: "ttsDeployment", name: "Voice & Narration", role: "Onyx narration with suspense pauses", icon: Mic },
+  { key: "imageDeployment", name: "Image Generation", role: "Scene stills in your visual style", icon: ImageIcon },
+  { key: "videoDeployment", name: "Video Assembly & Automation", role: "Builds the stitching / render steps", icon: Clapperboard },
+] as const;
 import { toast } from "sonner";
 import { actions, useStore, VOICES, STYLES, type Settings } from "@/lib/store";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
@@ -44,15 +51,26 @@ function SettingsPage() {
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Azure OpenAI</h2>
           <Field name="Endpoint" hint="e.g. https://your-resource.openai.azure.com"><input className={input} value={f.azureEndpoint} onChange={(e) => set("azureEndpoint", e.target.value)} placeholder="https://…openai.azure.com" /></Field>
-          <div className="grid grid-cols-3 gap-3">
-            <Field name="Script model"><input className={input} value={f.scriptDeployment} onChange={(e) => set("scriptDeployment", e.target.value)} /></Field>
-            <Field name="Voice model"><input className={input} value={f.ttsDeployment} onChange={(e) => set("ttsDeployment", e.target.value)} /></Field>
-            <Field name="Image model"><input className={input} value={f.imageDeployment} onChange={(e) => set("imageDeployment", e.target.value)} /></Field>
+          <Field name="API key" hint="Stored server-side only — never saved in your browser or the app code.">
+            <div className="flex items-center gap-2">
+              <input className={input} type="password" disabled value="" placeholder="Saved securely when the backend is connected" />
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-semibold text-warning"><KeyRound className="h-3 w-3" /> Not set</span>
+            </div>
+          </Field>
+          <div>
+            <p className={label}>Model deployments</p>
+            <ul className="mt-2 divide-y rounded-md border">
+              {MODELS.map((m) => (
+                <li key={m.key} className="grid items-center gap-3 px-3 py-3 sm:grid-cols-[1fr_200px]">
+                  <div className="flex items-start gap-3">
+                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md border"><m.icon className="h-4 w-4" /></div>
+                    <div><p className="text-sm font-semibold">{m.name}</p><p className="text-xs text-muted-foreground">{m.role}</p></div>
+                  </div>
+                  <input className={`${input} font-mono`} value={f[m.key]} onChange={(e) => set(m.key, e.target.value)} aria-label={`${m.name} deployment`} />
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="flex gap-2 rounded-md bg-muted p-3 text-xs text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 shrink-0 text-success" />
-            Your API key is never entered here. It will be stored securely on the server when we connect the APIs.
-          </p>
         </Panel>
 
         <Panel className="space-y-4 p-5 lg:col-span-2">
