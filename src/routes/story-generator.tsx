@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { actions } from "@/lib/store";
 import { Page, btnOutline, btnPrimary } from "@/components/page";
+import { ScriptIntelligence } from "@/components/script-intelligence";
+import { optimizeScript } from "@/lib/viral-brain";
 import { useMemo, useState } from "react";
 import { FileText, Plus, Eye, Volume2, Copy, Zap, Film, Smartphone } from "lucide-react";
 import { BEATS, TEMPLATES, buildStory, fmt, sceneLength, type Format } from "@/lib/story-engine";

@@ -2,11 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   LayoutDashboard, Film, Smartphone, FileText, Mic, ImageIcon, Layers, Settings, Sparkles,
-  Clapperboard, ChevronsLeft, ChevronsRight, Menu, X, Cpu, Plus,
+  Clapperboard, Brain, ChevronsLeft, ChevronsRight, Menu, X, Cpu, Plus,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 
-type To = "/" | "/long-form" | "/shorts" | "/story-generator" | "/scripts" | "/voiceovers" | "/images" | "/render-queue" | "/settings";
+type To = "/" | "/viral-brain" | "/long-form" | "/shorts" | "/story-generator" | "/scripts" | "/voiceovers" | "/images" | "/render-queue" | "/settings";
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -28,6 +28,7 @@ export function AppSidebar() {
     {
       label: "Create",
       items: [
+        { to: "/viral-brain", icon: Brain, label: "Viral Brain" },
         { to: "/story-generator", icon: Sparkles, label: "Story Generator" },
         { to: "/long-form", icon: Film, label: "Long-form", badge: counts.long },
         { to: "/shorts", icon: Smartphone, label: "Shorts & Reels", badge: counts.short },
