@@ -9,6 +9,7 @@ import { ARCHETYPES, scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
 import { VOICES } from "@/lib/voices";
 import { Page, Panel, btnPrimary, btnOutline, input, label } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
+import { VoiceAuditions } from "@/components/voice-auditions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -84,6 +85,7 @@ function Create() {
 
   return (
     <Page eyebrow="Studio" title="Create a video" desc="Pick a format and topic. Script, narration, scene images, sound and editing happen automatically.">
+      <VoiceAuditions />
       <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
         <div className="space-y-6">
           {/* 1. Format */}
