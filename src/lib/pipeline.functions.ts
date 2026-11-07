@@ -103,7 +103,7 @@ Write narration that follows this exact viral formula:
 5. CATASTROPHIC VISUAL CLIMAX — the rival method fails violently and visually.
 6. PAYOFF — one short final line that loops back to the hook.
 Rules: short punchy sentences, concrete nouns and impact verbs, present-tense tension, historically accurate facts, no "in this video", no calls to subscribe.
-Each scene = one still image the editor will animate with slow zoom/pan. image_prompt: a detailed visual description of that single frame (subject, setting, era, lighting, camera angle), in the visual style "${data.style}", no text or letters in the image.
+Each scene = one still image the editor will animate with slow zoom/pan. image_prompt: a detailed visual description of that single frame (subject, setting, era, lighting, camera angle), in the visual style "${data.style}", no text or letters in the image. IMPORTANT: image prompts must pass a strict safety filter — never describe gore, blood, corpses, injuries, weapons in use, people dying, children, nudity or real living people. Show danger indirectly: storm skies, cracking stone, buckled steel, empty ruins, silhouettes, smoke, worried faces, objects in close-up.
 sfx: the single best sound effect for that scene, or "none".`;
     const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube documentary, 16:9"}.
 Topic: ${data.topic}
@@ -144,7 +144,7 @@ export const generateVoice = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }): Promise<{ audio: string; engine: "azure" | "lovable" }> => {
-    const instructions = `${data.style} Deliberate cadence, suspenseful micro-pauses before reveals, punch single-syllable impact words, documentary storyteller, never rushed.`;
+    const instructions = `${data.style}. Curious, intrigued, leaning-in storyteller who is about to reveal a secret. Fast energetic pace, quick micro-pauses only before reveals, punch single-syllable impact words, rising curiosity in the voice.`;
     // 1) Azure speech deployment (if the user has one)
     if (data.deployment) {
       const res = await azure(`${safeName(data.deployment)}/audio/speech`, {
@@ -165,7 +165,7 @@ export const generateVoice = createServerFn({ method: "POST" })
       headers: { Authorization: `Bearer ${k.lovable}`, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
       body: JSON.stringify({
         model: "google/gemini-3.1-flash-tts-preview",
-        contents: [{ role: "user", parts: [{ text: `Narrate like a gripping viral history documentary, deep confident voice, ${data.style || "brisk pace"}: ${data.text}` }] }],
+        contents: [{ role: "user", parts: [{ text: `Narrate quickly with a curious, intrigued, leaning-in tone, like revealing a fascinating secret — deep confident voice, ${data.style || "fast pace"}: ${data.text}` }] }],
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_VOICE[data.voice] ?? "Charon" } } } },
         stream_format: "audio",
       }),
@@ -183,18 +183,58 @@ export const generateImage = createServerFn({ method: "POST" })
     if (!d.prompt?.trim() || d.prompt.length > 3000) throw new Error("Image prompt must be 1–3000 characters");
     return d;
   })
-  .handler(async ({ data }): Promise<{ image: string }> => {
-    const res = await azure(`${safeName(data.deployment)}/images/generations`, {
-      prompt: `${data.prompt}. Cinematic, highly detailed, dramatic lighting. Absolutely no text, letters, captions or watermarks.`,
-      size: data.aspect === "portrait" ? "1024x1536" : "1536x1024",
-      quality: data.quality,
-      output_format: "jpeg",
-      output_compression: 80,
-      n: 1,
-    });
-    if (!res.ok) await fail(res, "Image generator");
-    const json = (await res.json()) as { data?: { b64_json?: string }[] };
-    const b64 = json.data?.[0]?.b64_json;
-    if (!b64) throw new Error("Image generator returned no image");
-    return { image: b64 };
+  .handler(async ({ data }): Promise<{ image: string | null; note: string }> => {
+    // Azure's image safety filter rejects violent/graphic wording. Try the prompt, then a
+    // softened version, then a safe establishing shot — never fail the whole video.
+    const attempts = [
+      { p: data.prompt, note: "original" },
+      { p: softenPrompt(data.prompt), note: "softened" },
+      { p: `A calm, atmospheric historical establishing shot related to: ${softenPrompt(data.prompt).slice(0, 200)}. Wide landscape or architecture, no people in distress`, note: "safe" },
+    ];
+    for (const a of attempts) {
+      const res = await azure(`${safeName(data.deployment)}/images/generations`, {
+        prompt: `${a.p}. Museum-quality historical artwork, cinematic, dramatic lighting, family-friendly, no gore. Absolutely no text, letters, captions or watermarks.`,
+        size: data.aspect === "portrait" ? "1024x1536" : "1536x1024",
+        quality: data.quality,
+        output_format: "jpeg",
+        output_compression: 80,
+        n: 1,
+      });
+      if (res.ok) {
+        const json = (await res.json()) as { data?: { b64_json?: string }[] };
+        const b64 = json.data?.[0]?.b64_json;
+        if (b64) return { image: b64, note: a.note };
+        continue;
+      }
+      const text = await res.text();
+      if (res.status === 400 && /moderation_blocked|content_policy|safety system|ResponsibleAI/i.test(text)) {
+        console.warn(`Image prompt blocked by safety filter (${a.note}), retrying safer`);
+        continue;
+      }
+      console.error(`Image generator failed [${res.status}]: ${text.slice(0, 300)}`);
+      throw new Error(`[${res.status}] Image generator failed`);
+    }
+    return { image: null, note: "blocked" };
   });
+
+const HARSH: [RegExp, string][] = [
+  [/\b(blood(y|ied)?|gore|gory|bleed(ing)?|wound(ed|s)?|injur(y|ies|ed))\b/gi, ""],
+  [/\b(corpses?|dead bod(y|ies)|bodies|skulls?|skeletons?|carcass(es)?)\b/gi, "ruins"],
+  [/\b(kill(s|ed|ing)?|murder(s|ed)?|slaughter(ed)?|massacre(d)?|execut(e|ed|ion)|behead(ed|ing)?|stab(bed|bing)?|tortur(e|ed|ing))\b/gi, "defeat"],
+  [/\b(dy(ing)?|die(s|d)?|death|dead)\b/gi, "fallen"],
+  [/\b(explod(e|es|ed|ing)|explosions?|blasts?|bombs?)\b/gi, "dramatic smoke"],
+  [/\b(burn(s|ed|ing|t)?|flames?|ablaze|on fire|fire)\b/gi, "glowing orange light"],
+  [/\b(screams?|screaming|agony|terrified|panic(ked)?|horror)\b/gi, "tense"],
+  [/\b(weapons?|guns?|rifles?|swords?|spears?|cannons?)\b/gi, "equipment"],
+  [/\b(soldiers?|warriors?|army|troops)\b/gi, "figures"],
+  [/\b(prisoners?|inmates?|captives?)\b/gi, "a man"],
+  [/\b(violent(ly)?|violence|brutal(ly)?|savage(ly)?|catastroph(e|ic))\b/gi, "dramatic"],
+  [/\b(naked|nude|shirtless)\b/gi, "clothed"],
+  [/\b(child(ren)?|kids?|boys?|girls?)\b/gi, "people"],
+];
+
+function softenPrompt(p: string) {
+  let out = p;
+  for (const [re, rep] of HARSH) out = out.replace(re, rep);
+  return out.replace(/\s{2,}/g, " ").trim();
+}
