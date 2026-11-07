@@ -1,7 +1,8 @@
 // Client orchestrator: script → voice + images → render → save. Runs in the background
 // while the user moves around the app.
 import { actions, getState, type VideoInput } from "@/lib/store";
-import { generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
+import { factCheck, generateHooks, generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
+import { qaScore, validateScript } from "@/lib/quality";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
@@ -49,6 +50,18 @@ function thumbnail(img: ImageBitmap) {
   return c.toDataURL("image/jpeg", 0.7);
 }
 
+const ANGLE: Record<string, string> = {
+  wide: "Wide establishing shot:", close: "Close-up:", aerial: "High aerial drone shot:", top_down: "Straight top-down shot:",
+  macro: "Extreme macro close-up:", pov: "First-person POV shot:", low_angle: "Dramatic low-angle shot:", over_shoulder: "Over-the-shoulder shot:",
+};
+const COLOR: Record<string, string> = {
+  bright: "Sunny bright daylight, clear blue sky, cheerful saturated colors.",
+  dark_cold: "Dark stormy navy-blue palette, cold moonlit highlights, still clearly lit and readable.",
+  warm_interior: "Warm orange interior lantern light, cozy amber tones.",
+  golden_macro: "Glowing golden amber light, shallow depth of field.",
+  high_contrast: "High-contrast dramatic lighting, crisp white foam against deep blue.",
+};
+
 const running = new Set<string>();
 
 export async function runVideo(id: string, input: VideoInput) {
@@ -59,24 +72,60 @@ export async function runVideo(id: string, input: VideoInput) {
   try {
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
-    const plan = await withRetry(() => generatePlan({ data: {
+    // 1) fact check
+    up({ detail: "Fact-checking the story…" });
+    const facts = await withRetry(() => factCheck({ data: { topic: input.topic, deployment: s.scriptDeployment } }));
+    const factText = [
+      ...facts.claims.map((c) => `- ${c.claim} [${c.confidence}; ${c.sources.join("; ")}]`),
+      `Myth: ${facts.myth}`, `Reality: ${facts.reality}`, facts.hedge ? `Hedge line to include: ${facts.hedge}` : "",
+    ].join("\n");
+    const confidence = facts.claims.length ? facts.claims.filter((c) => c.confidence !== "low").length / facts.claims.length : 0;
+    up({ progress: 5, facts: { myth: facts.myth, reality: facts.reality, claims: facts.claims.length, confidence }, detail: "Writing 10 hooks…" });
+    // 2) hooks
+    const hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment } }));
+    const hb = hooks.best;
+    const hookScore = hb.curiosity + hb.clarity + hb.visualness + hb.speakability;
+    up({ progress: 7, hooks: { best: hb.line, runnerUp: hooks.runnerUp.line }, detail: "Viral Brain is writing the beat sheet and script…" });
+    // 3) beat sheet + script, checked, rewritten once if it fails
+    const base = {
       topic: input.topic, format: input.format, durationSec: input.durationSec,
       archetype: archetype ? `${archetype.name} — ${archetype.formula}` : "Best fit", style: input.style, deployment: s.scriptDeployment,
-    } }));
+      facts: factText, hook: hb.line,
+    };
+    let plan = await withRetry(() => generatePlan({ data: base }));
+    let check = validateScript(plan.scenes, plan.loopLine, input.durationSec);
+    if (!check.ok) {
+      up({ detail: `Script checker: fixing ${check.issues.length} issue${check.issues.length === 1 ? "" : "s"}…` });
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: check.issues.join("; ") } })).catch(() => null);
+      if (repaired) {
+        const c2 = validateScript(repaired.scenes, repaired.loopLine, input.durationSec);
+        if (c2.issues.length <= check.issues.length) { plan = repaired; check = c2; }
+      }
+    }
+    up({ checks: check.issues });
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 10, detail: `Script ready · ${n} scenes` });
 
     const portrait = input.format === "short";
-    const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood }));
+    const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
     // narration is recorded in chunks of a few scenes so the delivery flows like one take
     const groups: number[][] = [];
     let cur: number[] = []; let wc = 0;
     plan.scenes.forEach((sc, i) => {
       const w = sc.narration.split(/\s+/).filter(Boolean).length;
-      if (cur.length && wc + w > (portrait ? 60 : 90)) { groups.push(cur); cur = []; wc = 0; }
+      // new take when the pace class changes (action / reveal / normal) so each take gets its own rate
+      const cls = (b: string) => (["countdown", "climax", "defeat"].includes(b) ? 1 : ["reveal", "proof"].includes(b) ? 2 : 0);
+      const brk = cur.length && cls(plan.scenes[cur[0]!]!.beat) !== cls(sc.beat);
+      if (cur.length && (brk || wc + w > (portrait ? 60 : 90))) { groups.push(cur); cur = []; wc = 0; }
       cur.push(i); wc += w;
     });
     if (cur.length) groups.push(cur);
+    // very short takes make the voice engine misread them, so fold them into a neighbour
+    const wcount = (g: number[]) => g.reduce((a, i) => a + plan.scenes[i]!.narration.split(/\s+/).filter(Boolean).length, 0);
+    for (let gi = groups.length - 1; gi > 0; gi--) {
+      if (wcount(groups[gi]!) < 22 && plan.scenes[groups[gi]![0]!]!.beat !== "reveal") { groups[gi - 1]!.push(...groups[gi]!); groups.splice(gi, 1); }
+    }
+    if (groups.length > 1 && wcount(groups[0]!) < 22) { groups[1]!.unshift(...groups[0]!); groups.shift(); }
     const voice: VoiceChunk[] = groups.map((g) => ({ scenes: g, audio: new ArrayBuffer(0) }));
 
     const totalAssets = groups.length + n + 1;
@@ -109,8 +158,9 @@ export async function runVideo(id: string, input: VideoInput) {
         tick("Designing characters");
         await pool(plan.scenes, 2, async (sc, i) => {
           const cast = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
-          let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), sc.image_prompt).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
-          if (!r) r = await img({ cast }, sc.image_prompt); // retry without the reference
+          const shot = `${ANGLE[sc.angle] ?? ""} ${sc.image_prompt} ${COLOR[sc.color] ?? ""}`.trim();
+          let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
+          if (!r) r = await img({ cast }, shot); // retry without the reference
           if (r.image) rawImg[i] = r.image;
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
@@ -174,14 +224,20 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
     const out = await renderVideo(full, voice, {
       width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080,
-      captions: s.burnCaptions, sfx: s.soundEffects, targetSec: input.durationSec, ...(clips ? { clips } : {}),
+      captions: s.burnCaptions, sfx: s.soundEffects, targetSec: input.durationSec, hookText: plan.hookText, ...(clips ? { clips } : {}),
       onProgress: (p) => up({ progress: 72 + Math.round(p * 0.26) }),
     });
     up({ stage: "saving", progress: 99, detail: "Saving…" });
     await saveVideoFile(id, out.blob);
-    up({ status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
+    const width = portrait ? 1080 : 1920, height = portrait ? 1920 : 1080;
+    const qa = qaScore({
+      hookScore, revealPos: check.revealPos, factConfidence: confidence, wordsPerSec: out.stats.wordsPerSec, avgShotSec: out.stats.avgShotSec,
+      captions: s.burnCaptions, lufs: out.stats.lufs, lra: out.stats.lra, loopLine: !!plan.loopLine.trim(), width, height,
+    });
+    up({ qa, status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
+    let msg = e instanceof Error ? e.message : String(e);
+    if (/PROHIBITED_CONTENT/.test(msg)) msg = "The narrator voice refused part of this script (it reads as too violent). Try a gentler topic wording and generate again.";
     up({ status: "failed", error: msg, detail: "Failed" });
   } finally {
     running.delete(id);

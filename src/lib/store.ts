@@ -32,6 +32,10 @@ export interface Video {
   size?: number | undefined;
   thumb?: string | undefined; // small jpeg data URL
   sceneCount?: number | undefined;
+  qa?: { score: number; parts: Record<string, number> } | undefined;
+  hooks?: { best: string; runnerUp: string } | undefined;
+  facts?: { myth: string; reality: string; claims: number; confidence: number } | undefined;
+  checks?: string[] | undefined; // script checker issues left after the rewrite
   createdAt: number;
 }
 

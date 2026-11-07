@@ -15,3 +15,9 @@ describe("narration timeline", () => {
     expect(b!.t1 - b!.t0).toBeGreaterThan(a!.t1 - a!.t0);
   });
 });
+
+import { paceRate } from "@/lib/renderer";
+describe("Atlas pace fitting", () => {
+  it("speeds a slow 40s take of 76 words to ~30s (153 wpm)", () => expect(paceRate(40, (76 * 60) / 153)).toBeCloseTo(1.34, 1));
+  it("never stretches beyond natural limits", () => expect(paceRate(100, 30)).toBe(1.45));
+});
