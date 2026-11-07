@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useStore, STYLES, type VideoEngine } from "@/lib/store";
 import { startVideo } from "@/lib/pipeline";
 import { ARCHETYPES, scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
+import { madeBefore, scoreTopic5 } from "@/lib/quality";
 import { Page, Panel, btnPrimary, btnOutline, input, label } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
 
@@ -100,7 +101,8 @@ function Create() {
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {ideas.map(({ t, s }) => (
                 <button key={t} onClick={() => setTopic(t)} className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm ${topic === t ? "border-primary bg-primary/5" : "hover:bg-muted"}`}>
-                  <span className="font-medium">{t}</span><Ring v={s.overall} />
+                  <span className="font-medium">{t}{madeBefore(t, videos.map((v) => v.input.topic)) && <span className="ml-1.5 rounded bg-muted px-1 text-[10px] font-semibold text-muted-foreground">made before</span>}</span>
+                  <span className="flex shrink-0 items-center gap-2"><span className={`font-mono text-[11px] ${scoreTopic5(t).pass ? "text-success" : "text-muted-foreground"}`} title="5 topic tests">{scoreTopic5(t).total}/25</span><Ring v={s.overall} /></span>
                 </button>
               ))}
             </div>
@@ -108,6 +110,8 @@ function Create() {
             {topic && (
               <div className="mt-2 flex flex-wrap gap-4 font-mono text-[11px] text-muted-foreground">
                 <span>Viral score <b className="text-foreground">{score.overall}</b></span>
+                <span>Topic tests <b className="text-foreground">{scoreTopic5(topic).total}/25</b>{scoreTopic5(topic).pass ? " ✓" : " (needs 18)"}</span>
+                {madeBefore(topic, videos.map((v) => v.input.topic)) && <span className="text-warning">Already made</span>}
                 <span>Curiosity {score.curiosity}</span><span>Visual drama {score.visual}</span><span>Retention {score.retention}</span>
               </div>
             )}

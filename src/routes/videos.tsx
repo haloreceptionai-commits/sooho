@@ -87,6 +87,19 @@ function Videos() {
               <div className="flex flex-1 flex-col p-4">
                 <p className="font-bold leading-snug">{v.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{timeAgo(v.createdAt)} · {v.sceneCount} scenes · {((v.size ?? 0) / 1e6).toFixed(1)} MB</p>
+                {v.qa && (
+                  <details className="mt-2 text-xs">
+                    <summary className={`w-fit cursor-pointer rounded px-1.5 py-0.5 font-mono font-bold ${v.qa.score >= 80 ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
+                      Quality {v.qa.score}/100{v.qa.score < 80 ? " · below 80" : ""}
+                    </summary>
+                    <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-[11px] text-muted-foreground">
+                      {Object.entries(v.qa.parts).map(([k, n]) => <li key={k} className="flex justify-between"><span className="capitalize">{k}</span><span>{n}</span></li>)}
+                    </ul>
+                    {v.hooks && <p className="mt-2 text-muted-foreground"><b className="text-foreground">Hook:</b> {v.hooks.best}<br /><b className="text-foreground">Runner-up:</b> {v.hooks.runnerUp}</p>}
+                    {v.facts && <p className="mt-1 text-muted-foreground"><b className="text-foreground">Reality:</b> {v.facts.reality}</p>}
+                    {!!v.checks?.length && <p className="mt-1 text-warning">Script checks: {v.checks.join(" · ")}</p>}
+                  </details>
+                )}
                 <div className="mt-auto flex gap-2 pt-4">
                   <button className={`${btnDark} flex-1 px-3 text-xs`} onClick={() => setPlaying(v)}><Play className="h-3.5 w-3.5" /> Play now</button>
                   <button className={`${btnPrimary} flex-1 px-3 text-xs`} onClick={() => void download(v)}><Download className="h-3.5 w-3.5" /> Download</button>
