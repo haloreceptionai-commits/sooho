@@ -21,3 +21,10 @@ describe("Atlas pace fitting", () => {
   it("speeds a slow 40s take of 76 words to ~30s (153 wpm)", () => expect(paceRate(40, (76 * 60) / 153)).toBeCloseTo(1.34, 1));
   it("never stretches beyond natural limits", () => expect(paceRate(100, 30)).toBe(1.45));
 });
+
+import { clipRate } from "@/lib/renderer";
+describe("AI clip stretching", () => {
+  it("slows a 5s clip to cover an 8s scene run", () => expect(clipRate(5, 8)).toBeCloseTo(0.625));
+  it("never goes below half speed", () => expect(clipRate(2, 10)).toBe(0.5));
+  it("never speeds a long clip up", () => expect(clipRate(10, 6)).toBe(1));
+});
