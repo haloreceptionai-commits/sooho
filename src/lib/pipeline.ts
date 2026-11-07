@@ -1,0 +1,110 @@
+// Client orchestrator: script → voice + images → render → save. Runs in the background
+// while the user moves around the app.
+import { actions, getState, type VideoInput } from "@/lib/store";
+import { generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
+import { renderVideo, type RenderScene } from "@/lib/renderer";
+import { saveVideoFile } from "@/lib/video-db";
+import { ARCHETYPES } from "@/lib/viral-brain";
+
+const b64ToBuf = (b64: string) => {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out.buffer;
+};
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Retry only rate limits / transient server errors, with backoff. */
+async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      last = e;
+      const m = e instanceof Error ? e.message : String(e);
+      if (!/\[(429|5\d\d)\]/.test(m) || i === tries - 1) throw e;
+      await sleep(2000 * 2 ** i + Math.random() * 1000);
+    }
+  }
+  throw last;
+}
+
+async function pool<T>(items: T[], limit: number, fn: (item: T, i: number) => Promise<void>) {
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const i = next++;
+      await fn(items[i]!, i);
+    }
+  }));
+}
+
+function thumbnail(img: ImageBitmap) {
+  const c = document.createElement("canvas");
+  const w = 360; c.width = w; c.height = Math.round((img.height / img.width) * w);
+  c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.7);
+}
+
+const running = new Set<string>();
+
+export async function runVideo(id: string, input: VideoInput) {
+  if (running.has(id)) return;
+  running.add(id);
+  const s = getState().settings;
+  const up = (p: Parameters<typeof actions.updateVideo>[1]) => actions.updateVideo(id, p);
+  try {
+    up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
+    const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
+    const plan = await withRetry(() => generatePlan({ data: {
+      topic: input.topic, format: input.format, durationSec: input.durationSec,
+      archetype: archetype ? `${archetype.name} — ${archetype.formula}` : "Best fit", style: input.style, deployment: s.scriptDeployment,
+    } }));
+    const n = plan.scenes.length;
+    up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 10, detail: `Script ready · ${n} scenes` });
+
+    const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx }));
+    let done = 0;
+    const tick = (what: string) => {
+      done++;
+      up({ progress: 10 + Math.round((done / (n * 2)) * 60), detail: `${what} · ${done}/${n * 2} assets`, stage: done < n ? "voice" : "images" });
+    };
+    const portrait = input.format === "short";
+    await Promise.all([
+      pool(plan.scenes, 3, async (sc, i) => {
+        const r = await withRetry(() => generateVoice({ data: { text: sc.narration, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "fast punchy pace" : "brisk measured pace" } }));
+        scenes[i]!.audio = b64ToBuf(r.audio);
+        tick("Recording narration");
+      }),
+      pool(plan.scenes, 2, async (sc, i) => {
+        const r = await withRetry(() => generateImage({ data: { prompt: sc.image_prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality } }));
+        scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
+        tick("Painting scenes");
+      }),
+    ]);
+
+    const full = scenes as RenderScene[];
+    up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
+    const out = await renderVideo(full, {
+      width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080,
+      captions: s.burnCaptions, sfx: s.soundEffects,
+      onProgress: (p) => up({ progress: 72 + Math.round(p * 0.26) }),
+    });
+    up({ stage: "saving", progress: 99, detail: "Saving…" });
+    await saveVideoFile(id, out.blob);
+    up({ status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    up({ status: "failed", error: msg, detail: "Failed" });
+  } finally {
+    running.delete(id);
+  }
+}
+
+export function startVideo(input: VideoInput) {
+  const id = actions.addVideo(input);
+  void runVideo(id, input);
+  return id;
+}

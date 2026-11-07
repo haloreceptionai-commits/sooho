@@ -4,12 +4,13 @@ import { Save, RotateCcw, KeyRound, Brain, Mic, ImageIcon, Clapperboard } from "
 
 const MODELS = [
   { key: "scriptDeployment", name: "Script & Viral Brain", role: "Writes scripts, brainstorms topics, optimizes hooks", icon: Brain },
-  { key: "ttsDeployment", name: "Voice & Narration", role: "Onyx narration with suspense pauses", icon: Mic },
+  { key: "ttsDeployment", name: "Voice & Narration", role: "Narrator voices. Without an Azure speech deployment, Lovable AI voices are used automatically", icon: Mic },
   { key: "imageDeployment", name: "Image Generation", role: "Scene stills in your visual style", icon: ImageIcon },
-  { key: "videoDeployment", name: "Video Assembly & Automation", role: "Builds the stitching / render steps", icon: Clapperboard },
+  { key: "videoDeployment", name: "Video Assembly & Automation", role: "Reserved for automation; videos are assembled in the browser", icon: Clapperboard },
 ] as const;
 import { toast } from "sonner";
-import { actions, useStore, VOICES, STYLES, type Settings } from "@/lib/store";
+import { actions, useStore, STYLES, DEFAULT_SETTINGS, type Settings } from "@/lib/store";
+import { VOICES } from "@/lib/voices";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
 
 export const Route = createFileRoute("/settings")({
@@ -38,13 +39,13 @@ function SettingsPage() {
 
   return (
     <Page eyebrow="System" title="Settings"
-      actions={<><button className={btnOutline} onClick={() => { if (confirm("Reset all projects, scripts and settings to the sample data?")) { actions.resetAll(); toast("Workspace reset"); } }}><RotateCcw className="h-4 w-4" /> Reset sample data</button>
+      actions={<><button className={btnOutline} onClick={() => { setF(DEFAULT_SETTINGS); toast("Defaults restored — click Save to keep them"); }}><RotateCcw className="h-4 w-4" /> Restore defaults</button>
         <button className={btnDark} onClick={() => { actions.saveSettings(f); toast.success("Settings saved"); }}><Save className="h-4 w-4" /> Save changes</button></>}>
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Channel</h2>
           <Field name="Channel name"><input className={input} value={f.channelName} onChange={(e) => set("channelName", e.target.value)} /></Field>
-          <Field name="Default voice"><select className={input} value={f.defaultVoice} onChange={(e) => set("defaultVoice", e.target.value)}>{VOICES.map((v) => <option key={v}>{v}</option>)}</select></Field>
+          <Field name="Default voice"><select className={input} value={f.defaultVoice} onChange={(e) => set("defaultVoice", e.target.value)}>{VOICES.map((v) => <option key={v.id} value={v.id}>{v.name} — {v.persona}</option>)}</select></Field>
           <Field name="Default visual style"><select className={input} value={f.defaultStyle} onChange={(e) => set("defaultStyle", e.target.value)}>{STYLES.map((v) => <option key={v}>{v}</option>)}</select></Field>
         </Panel>
 
@@ -74,16 +75,23 @@ function SettingsPage() {
         </Panel>
 
         <Panel className="space-y-4 p-5 lg:col-span-2">
-          <h2 className="font-bold">Render output</h2>
+          <h2 className="font-bold">Video output</h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field name="Long-form resolution"><select className={input} value={f.longResolution} onChange={(e) => set("longResolution", e.target.value)}><option>1920x1080</option><option>2560x1440</option><option>3840x2160</option></select></Field>
-            <Field name="Shorts resolution"><select className={input} value={f.shortResolution} onChange={(e) => set("shortResolution", e.target.value)}><option>1080x1920</option><option>720x1280</option></select></Field>
+            <Field name="Image quality" hint="Medium looks better; low is faster and cheaper.">
+              <select className={input} value={f.imageQuality} onChange={(e) => set("imageQuality", e.target.value as Settings["imageQuality"])}><option value="medium">Medium</option><option value="low">Low</option></select>
+            </Field>
             <Field name="Captions">
               <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
-                <input type="checkbox" className="accent-primary" checked={f.burnCaptions} onChange={(e) => set("burnCaptions", e.target.checked)} /> Burn-in animated captions
+                <input type="checkbox" className="accent-primary" checked={f.burnCaptions} onChange={(e) => set("burnCaptions", e.target.checked)} /> Burn-in bold captions
+              </label>
+            </Field>
+            <Field name="Sound design">
+              <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                <input type="checkbox" className="accent-primary" checked={f.soundEffects} onChange={(e) => set("soundEffects", e.target.checked)} /> Sound effects + tension bed
               </label>
             </Field>
           </div>
+          <p className="text-xs text-muted-foreground">Shorts render at 1080×1920, long-form at 1920×1080.</p>
         </Panel>
       </div>
     </Page>

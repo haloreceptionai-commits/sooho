@@ -28,5 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
-- App data lives in a client store (src/lib/store.ts, localStorage-persisted) with all mutations in `actions`; why: pages work before APIs/backend exist, and actions are the single swap point for real API calls later.
-- Script intelligence (scoring, analysis, optimizer, SFX extraction) lives in src/lib/viral-brain.ts and is rendered via the shared ScriptIntelligence component; why: one engine serves Viral Brain, Scripts and Story Generator, and `optimizeScript` is the swap point for an AI rewrite.
+- Video metadata + settings live in a client store (src/lib/store.ts, localStorage); finished video files live in IndexedDB (src/lib/video-db.ts); why: no backend database yet and video blobs exceed localStorage.
+- Pipeline: server fns in src/lib/pipeline.functions.ts call Azure via the connector gateway (script, images; voice falls back to Lovable AI when no Azure speech deployment); src/lib/pipeline.ts orchestrates in the browser and src/lib/renderer.ts assembles video with canvas + MediaRecorder; why: Workers cannot run Python/FFmpeg.
+- App has exactly 3 pages: / (create), /videos (library), /settings; why: user wants a minimal UI with the rest running in the background.
+- Topic archetypes and viral scoring live in src/lib/viral-brain.ts; why: shared by the create page and pipeline prompts.

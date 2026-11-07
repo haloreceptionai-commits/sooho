@@ -1,23 +1,36 @@
 import { useSyncExternalStore } from "react";
 
 export type Format = "long" | "short";
-export type ProjectStatus = "draft" | "queued" | "rendering" | "done";
+export type VideoStatus = "running" | "done" | "failed";
+export type Stage = "script" | "voice" | "images" | "render" | "saving" | "done";
 
-export interface Project {
-  id: string;
-  title: string;
+export interface VideoInput {
   topic: string;
   format: Format;
-  duration: number; // seconds
-  template: string;
-  status: ProjectStatus;
-  step: number; // 0-5 pipeline steps complete
-  updatedAt: number;
+  durationSec: number;
+  archetype: string;
+  style: string;
+  voice: string;
 }
-export interface Script { id: string; title: string; projectId?: string | undefined; body: string; updatedAt: number }
-export interface Voiceover { id: string; title: string; scriptId?: string | undefined; voice: string; speed: number; text: string; status: "pending" | "ready"; createdAt: number }
-export interface ImageAsset { id: string; prompt: string; style: string; aspect: "16:9" | "9:16" | "1:1"; hue: number; createdAt: number }
-export interface RenderJob { id: string; projectId: string; title: string; format: Format; progress: number; status: "queued" | "rendering" | "done" | "failed"; createdAt: number }
+
+export interface Video {
+  id: string;
+  title: string;
+  description: string;
+  input: VideoInput;
+  status: VideoStatus;
+  stage: Stage;
+  progress: number; // 0-100
+  detail: string;
+  error?: string | undefined;
+  duration?: number | undefined; // seconds, after render
+  mime?: string | undefined;
+  size?: number | undefined;
+  thumb?: string | undefined; // small jpeg data URL
+  sceneCount?: number | undefined;
+  createdAt: number;
+}
+
 export interface Settings {
   channelName: string;
   azureEndpoint: string;
@@ -27,66 +40,35 @@ export interface Settings {
   videoDeployment: string;
   defaultVoice: string;
   defaultStyle: string;
-  longResolution: string;
-  shortResolution: string;
   burnCaptions: boolean;
+  soundEffects: boolean;
+  imageQuality: "low" | "medium";
 }
 
 export interface State {
-  projects: Project[];
-  scripts: Script[];
-  voiceovers: Voiceover[];
-  images: ImageAsset[];
-  jobs: RenderJob[];
+  videos: Video[];
   settings: Settings;
 }
 
-const now = Date.now();
-const h = 3600_000;
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
-const seed: State = {
-  projects: [
-    { id: "p1", title: "The Fall of Constantinople, 1453", topic: "Fall of Constantinople", format: "long", duration: 1104, template: "paradox", status: "rendering", step: 4, updatedAt: now - 0.1 * h },
-    { id: "p2", title: "Why Romans Never Used Soap", topic: "Roman hygiene", format: "short", duration: 52, template: "lie", status: "done", step: 5, updatedAt: now - 1 * h },
-    { id: "p3", title: "The Lost Library of Alexandria", topic: "Library of Alexandria", format: "long", duration: 1330, template: "secret", status: "queued", step: 2, updatedAt: now - 2 * h },
-    { id: "p4", title: "Napoleon Was Not Short", topic: "Napoleon's height", format: "short", duration: 45, template: "lie", status: "done", step: 5, updatedAt: now - 26 * h },
-    { id: "p5", title: "Rise of the Mongol Empire", topic: "Mongol Empire", format: "long", duration: 900, template: "countdown", status: "draft", step: 1, updatedAt: now - 50 * h },
-  ],
-  scripts: [
-    { id: "s1", title: "The Fall of Constantinople — v2", projectId: "p1", body: "The Fall of Constantinople should have been impossible. And yet — it happened.\n\nFor a thousand years its walls had never been breached…", updatedAt: now - 3 * h },
-    { id: "s2", title: "Romans & soap (Short)", projectId: "p2", body: "Everything you learned about Roman hygiene is wrong.\n\nThey didn't use soap. They used oil, a metal scraper, and a public bath…", updatedAt: now - 20 * h },
-  ],
-  voiceovers: [
-    { id: "v1", title: "Constantinople narration", scriptId: "s1", voice: "Narrator · Deep male", speed: 0.95, text: "The Fall of Constantinople should have been impossible.", status: "ready", createdAt: now - 2 * h },
-  ],
-  images: [
-    { id: "i1", prompt: "Theodosian walls at dawn, siege cannons", style: "Oil painting", aspect: "16:9", hue: 30, createdAt: now - 4 * h },
-    { id: "i2", prompt: "Ottoman fleet dragged over land", style: "Oil painting", aspect: "16:9", hue: 210, createdAt: now - 4 * h },
-    { id: "i3", prompt: "Roman bathhouse, steam, strigil", style: "Fresco", aspect: "9:16", hue: 45, createdAt: now - 21 * h },
-    { id: "i4", prompt: "Library scrolls burning", style: "Chiaroscuro", aspect: "16:9", hue: 15, createdAt: now - 30 * h },
-  ],
-  jobs: [
-    { id: "j1", projectId: "p1", title: "The Fall of Constantinople, 1453", format: "long", progress: 62, status: "rendering", createdAt: now - 0.2 * h },
-    { id: "j2", projectId: "p3", title: "The Lost Library of Alexandria", format: "long", progress: 0, status: "queued", createdAt: now - 0.1 * h },
-    { id: "j3", projectId: "p2", title: "Why Romans Never Used Soap", format: "short", progress: 100, status: "done", createdAt: now - 1 * h },
-  ],
-  settings: {
-    channelName: "Chronicle History",
-    azureEndpoint: "https://robiulalamsuleman-5258-resource.services.ai.azure.com/",
-    scriptDeployment: "gpt-5",
-    ttsDeployment: "gpt-realtime",
-    imageDeployment: "gpt-image-1-mini",
-    videoDeployment: "gpt-5.1-codex",
-    defaultVoice: "Narrator · Deep male",
-    defaultStyle: "Oil painting",
-    longResolution: "1920x1080",
-    shortResolution: "1080x1920",
-    burnCaptions: true,
-  },
+export const DEFAULT_SETTINGS: Settings = {
+  channelName: "Chronicle History",
+  azureEndpoint: "https://robiulalamsuleman-5258-resource.services.ai.azure.com/",
+  scriptDeployment: "gpt-5",
+  ttsDeployment: "gpt-realtime",
+  imageDeployment: "gpt-image-1-mini",
+  videoDeployment: "gpt-5.1-codex",
+  defaultVoice: "onyx",
+  defaultStyle: "Oil painting",
+  burnCaptions: true,
+  soundEffects: true,
+  imageQuality: "medium",
 };
 
-const KEY = "chronicle-studio-v1";
+const seed: State = { videos: [], settings: DEFAULT_SETTINGS };
+
+const KEY = "chronicle-studio-v2";
 let state: State = seed;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
@@ -96,13 +78,13 @@ export function hydrateStore() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<State>;
-      const st = { ...seed.settings, ...parsed.settings };
-      // migrate old placeholder deployments to the configured Azure models
-      if (!st.azureEndpoint) st.azureEndpoint = seed.settings.azureEndpoint;
-      if (st.scriptDeployment === "gpt-4o") st.scriptDeployment = seed.settings.scriptDeployment;
-      if (st.ttsDeployment === "tts-hd") st.ttsDeployment = seed.settings.ttsDeployment;
-      if (st.imageDeployment === "dall-e-3") st.imageDeployment = seed.settings.imageDeployment;
-      state = { ...seed, ...parsed, settings: st };
+      state = {
+        settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+        // jobs that were running when the page closed can't resume
+        videos: (parsed.videos ?? []).map((v) =>
+          v.status === "running" ? { ...v, status: "failed", error: "Interrupted — the page was closed while generating.", detail: "Interrupted" } : v,
+        ),
+      };
     }
     emit();
   } catch {
@@ -110,13 +92,17 @@ export function hydrateStore() {
   }
 }
 
-export function setState(fn: (s: State) => State) {
-  state = fn(state);
+function persist() {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
   } catch {
-    /* ignore */
+    /* quota — ignore */
   }
+}
+
+export function setState(fn: (s: State) => State) {
+  state = fn(state);
+  persist();
   emit();
 }
 
@@ -133,93 +119,25 @@ export function useStore<T>(sel: (s: State) => T): T {
 
 export const getState = () => state;
 
-// ---------- actions ----------
 export const actions = {
-  addProject(p: Omit<Project, "id" | "updatedAt" | "status" | "step">) {
+  addVideo(input: VideoInput) {
     const id = uid();
-    setState((s) => ({ ...s, projects: [{ ...p, id, status: "draft", step: 0, updatedAt: Date.now() }, ...s.projects] }));
+    const v: Video = { id, title: input.topic, description: "", input, status: "running", stage: "script", progress: 1, detail: "Writing script…", createdAt: Date.now() };
+    setState((s) => ({ ...s, videos: [v, ...s.videos] }));
     return id;
   },
-  updateProject(id: string, patch: Partial<Project>) {
-    setState((s) => ({ ...s, projects: s.projects.map((p) => (p.id === id ? { ...p, ...patch, updatedAt: Date.now() } : p)) }));
+  updateVideo(id: string, patch: Partial<Video>) {
+    setState((s) => ({ ...s, videos: s.videos.map((v) => (v.id === id ? { ...v, ...patch } : v)) }));
   },
-  deleteProject(id: string) {
-    setState((s) => ({ ...s, projects: s.projects.filter((p) => p.id !== id), jobs: s.jobs.filter((j) => j.projectId !== id) }));
-  },
-  queueRender(projectId: string) {
-    const p = state.projects.find((x) => x.id === projectId);
-    if (!p) return;
-    setState((s) => ({
-      ...s,
-      projects: s.projects.map((x) => (x.id === projectId ? { ...x, status: "queued", updatedAt: Date.now() } : x)),
-      jobs: [{ id: uid(), projectId, title: p.title, format: p.format, progress: 0, status: "queued", createdAt: Date.now() }, ...s.jobs.filter((j) => !(j.projectId === projectId && j.status !== "done"))],
-    }));
-  },
-  cancelJob(id: string) {
-    setState((s) => {
-      const job = s.jobs.find((j) => j.id === id);
-      return {
-        ...s,
-        jobs: s.jobs.filter((j) => j.id !== id),
-        projects: s.projects.map((p) => (job && p.id === job.projectId && p.status !== "done" ? { ...p, status: "draft" } : p)),
-      };
-    });
-  },
-  clearFinished() {
-    setState((s) => ({ ...s, jobs: s.jobs.filter((j) => j.status !== "done" && j.status !== "failed") }));
-  },
-  /** Simulated render worker: advances the first active job. Replaced by Python worker later. */
-  tickRender() {
-    const active = state.jobs.find((j) => j.status === "rendering") ?? state.jobs.find((j) => j.status === "queued");
-    if (!active) return;
-    const progress = Math.min(100, active.progress + 4);
-    const done = progress >= 100;
-    setState((s) => ({
-      ...s,
-      jobs: s.jobs.map((j) => (j.id === active.id ? { ...j, progress, status: done ? "done" : "rendering" } : j)),
-      projects: s.projects.map((p) =>
-        p.id === active.projectId ? { ...p, status: done ? "done" : "rendering", step: done ? 5 : Math.max(p.step, 4), updatedAt: Date.now() } : p,
-      ),
-    }));
-  },
-  saveScript(sc: Omit<Script, "id" | "updatedAt"> & { id?: string | undefined }) {
-    const id = sc.id ?? uid();
-    setState((s) => {
-      const exists = s.scripts.some((x) => x.id === id);
-      const next = { ...sc, id, updatedAt: Date.now() } as Script;
-      return { ...s, scripts: exists ? s.scripts.map((x) => (x.id === id ? next : x)) : [next, ...s.scripts] };
-    });
-    if (sc.projectId) {
-      const p = state.projects.find((x) => x.id === sc.projectId);
-      if (p && p.step < 1) actions.updateProject(p.id, { step: 1 });
-    }
-    return id;
-  },
-  deleteScript(id: string) {
-    setState((s) => ({ ...s, scripts: s.scripts.filter((x) => x.id !== id) }));
-  },
-  addVoiceover(v: Omit<Voiceover, "id" | "createdAt" | "status">) {
-    setState((s) => ({ ...s, voiceovers: [{ ...v, id: uid(), status: "pending", createdAt: Date.now() }, ...s.voiceovers] }));
-  },
-  deleteVoiceover(id: string) {
-    setState((s) => ({ ...s, voiceovers: s.voiceovers.filter((x) => x.id !== id) }));
-  },
-  addImages(imgs: Omit<ImageAsset, "id" | "createdAt">[]) {
-    setState((s) => ({ ...s, images: [...imgs.map((i) => ({ ...i, id: uid(), createdAt: Date.now() })), ...s.images] }));
-  },
-  deleteImage(id: string) {
-    setState((s) => ({ ...s, images: s.images.filter((x) => x.id !== id) }));
+  removeVideo(id: string) {
+    setState((s) => ({ ...s, videos: s.videos.filter((v) => v.id !== id) }));
   },
   saveSettings(patch: Partial<Settings>) {
     setState((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
   },
-  resetAll() {
-    setState(() => seed);
-  },
 };
 
-export const VOICES = ["Narrator · Deep male", "Narrator · Warm female", "Documentary · Calm", "Storyteller · Dramatic", "Shorts · Energetic"];
-export const STYLES = ["Oil painting", "Fresco", "Chiaroscuro", "Parchment ink", "Blueprint sepia", "Cinematic photoreal"];
+export const STYLES = ["Oil painting", "Cinematic photoreal", "Chiaroscuro", "Fresco", "Parchment ink", "Blueprint sepia"];
 
 export function timeAgo(t: number) {
   const m = Math.round((Date.now() - t) / 60000);
