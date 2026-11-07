@@ -1,6 +1,7 @@
 // Gemini Omni image-to-video clips via the Lovable AI Gateway (used only when the
 // user picks the "Gemini Omni" engine). One job per scene group; client polls.
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const MODEL = "google/gemini-omni-1.1-flash";
@@ -21,7 +22,7 @@ async function err(res: Response, what: string): Promise<never> {
 
 export interface ClipInput { prompt: string; image: string; aspect: "portrait" | "landscape"; seconds: number }
 
-export const startClip = createServerFn({ method: "POST" })
+export const startClip = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: ClipInput) => {
     if (!d.prompt?.trim() || d.prompt.length > 3500) throw new Error("Clip prompt must be 1–3500 characters");
     if (!d.image || d.image.length > 20_000_000) throw new Error("Clip start image missing or too large");
@@ -45,7 +46,7 @@ export const startClip = createServerFn({ method: "POST" })
     return { id: j.id };
   });
 
-export const pollClip = createServerFn({ method: "POST" })
+export const pollClip = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => {
     if (!/^[A-Za-z0-9_-]{1,200}$/.test(d.id)) throw new Error("Invalid clip id");
     return d;
@@ -61,7 +62,7 @@ export const pollClip = createServerFn({ method: "POST" })
 // Finished clips are 4–8 MB; one response that large is dropped by the preview proxy,
 // so the browser downloads them in small byte ranges instead.
 export const CLIP_CHUNK = 1_500_000;
-export const clipChunk = createServerFn({ method: "POST" })
+export const clipChunk = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; offset: number }) => {
     if (!/^[A-Za-z0-9_-]{1,200}$/.test(d.id)) throw new Error("Invalid clip id");
     if (!Number.isInteger(d.offset) || d.offset < 0) throw new Error("Invalid offset");

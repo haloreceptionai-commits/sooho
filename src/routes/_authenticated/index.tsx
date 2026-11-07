@@ -9,7 +9,7 @@ import { madeBefore, scoreTopic5 } from "@/lib/quality";
 import { Page, Panel, btnPrimary, btnOutline, input, label } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Create video — Chronicle Studio" },

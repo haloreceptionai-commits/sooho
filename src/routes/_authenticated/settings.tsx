@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { actions, useStore, STYLES, DEFAULT_SETTINGS, type Settings } from "@/lib/store";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Chronicle Studio" },
