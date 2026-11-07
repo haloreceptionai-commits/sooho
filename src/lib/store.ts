@@ -11,7 +11,11 @@ export interface VideoInput {
   archetype: string;
   style: string;
   voice: string;
+  engine?: VideoEngine;
 }
+
+/** "own" = stills + camera motion (no AI video); "omni" = Gemini Omni AI-animated clips. */
+export type VideoEngine = "own" | "omni";
 
 export interface Video {
   id: string;

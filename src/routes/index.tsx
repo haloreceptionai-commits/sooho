@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Film, Smartphone, Sparkles, Shuffle, Loader2, ArrowUpRight, Mic } from "lucide-react";
 import { toast } from "sonner";
-import { useStore, STYLES } from "@/lib/store";
+import { useStore, STYLES, type VideoEngine } from "@/lib/store";
 import { startVideo } from "@/lib/pipeline";
 import { ARCHETYPES, scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
 import { Page, Panel, btnPrimary, btnOutline, input, label } from "@/components/page";
@@ -36,6 +36,7 @@ function Create() {
   const [shortSec, setShortSec] = useState(60);
   const [longMin, setLongMin] = useState(8);
     const [style, setStyle] = useState(settings.defaultStyle);
+  const [engine, setEngine] = useState<VideoEngine>("own");
   const [seed, setSeed] = useState(0);
 
   const a = ARCHETYPES.find((x) => x.id === arch)!;
@@ -51,7 +52,7 @@ function Create() {
 
   const generate = () => {
     if (!topic.trim()) { toast.error("Pick or type a topic first"); return; }
-    startVideo({ topic: topic.trim(), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx" });
+    startVideo({ topic: topic.trim(), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx", engine });
     toast.success("Video generation started — you can keep working.");
     setTopic("");
   };
@@ -120,6 +121,15 @@ function Create() {
                 <button key={st} onClick={() => setStyle(st)} className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${style === st ? "border-primary bg-primary/5 text-primary" : "text-muted-foreground hover:text-foreground"}`}>{st}</button>
               ))}
             </div>
+          </Panel>
+
+          <Panel className="p-5">
+            <label htmlFor="engine" className={label}>4 · Video model</label>
+            <select id="engine" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
+              <option value="own">Own model — AI images with camera motion</option>
+              <option value="omni">Gemini Omni — AI-animated video clips</option>
+            </select>
+            {engine === "omni" && <p className="mt-2 text-xs text-muted-foreground">Characters really move. Uses far more AI credits and adds several minutes per video.</p>}
           </Panel>
 
           <button onClick={generate} className={`${btnPrimary} w-full py-4 text-base`}>
