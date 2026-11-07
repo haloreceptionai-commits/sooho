@@ -28,3 +28,4 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+- App data lives in a client store (src/lib/store.ts, localStorage-persisted) with all mutations in `actions`; why: pages work before APIs/backend exist, and actions are the single swap point for real API calls later.

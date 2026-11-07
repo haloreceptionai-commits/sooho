@@ -1,6 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { actions } from "@/lib/store";
+import { Page, btnOutline, btnPrimary } from "@/components/page";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Clapperboard, Eye, Volume2, Copy, Zap, Film, Smartphone } from "lucide-react";
+import { FileText, Plus, Eye, Volume2, Copy, Zap, Film, Smartphone } from "lucide-react";
 import { BEATS, TEMPLATES, buildStory, fmt, sceneLength, type Format } from "@/lib/story-engine";
 
 export const Route = createFileRoute("/story-generator")({
@@ -39,6 +42,21 @@ function StoryGenerator() {
     setDuration(f === "short" ? 60 : 900);
   };
 
+  const navigate = useNavigate();
+  const scriptText = () => plan
+      .map((b) => `## ${b.name} (${fmt(b.start)}–${fmt(b.end)})\n` +
+        b.scenes.map((s) => `[${fmt(s.start)}] ${s.narration}\n  VISUAL: ${s.visual}\n  SFX: ${s.sfx}`).join("\n"))
+      .join("\n\n");
+  const saveScript = () => {
+    actions.saveScript({ title: `${topic} — ${template.name}`, body: scriptText() });
+    toast.success("Saved to Scripts");
+  };
+  const createProject = () => {
+    const id = actions.addProject({ title: topic || "Untitled", topic, format, duration, template: template.id });
+    actions.saveScript({ title: `${topic} — ${template.name}`, body: scriptText(), projectId: id });
+    toast.success("Project + script created");
+    navigate({ to: format === "long" ? "/long-form" : "/shorts" });
+  };
   const copyScript = () => {
     const text = plan
       .map((b) => `## ${b.name} (${fmt(b.start)}–${fmt(b.end)})\n` +
@@ -48,22 +66,14 @@ function StoryGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="flex h-16 items-center justify-between border-b px-6">
-        <div className="flex items-center gap-3">
-          <Link to="/" className="grid h-9 w-9 place-items-center rounded-md border text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground"><Clapperboard className="h-4 w-4" /></div>
-          <span className="font-bold tracking-tight">5-Beat Story Generator</span>
-        </div>
-        <button onClick={copyScript} className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-sm font-semibold text-background">
-          <Copy className="h-4 w-4" /> Copy script
-        </button>
-      </header>
-
-      <main className="bg-grid min-h-[calc(100vh-4rem)] p-6 lg:p-8">
-        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[380px_1fr]">
+    <Page eyebrow="Create" title="5-Beat Story Generator"
+      desc="Paradox Hook → Stakes & Foil → False Defeat → Hidden Turn → Catastrophic Payoff."
+      actions={<>
+        <button onClick={copyScript} className={btnOutline}><Copy className="h-4 w-4" /> Copy</button>
+        <button onClick={saveScript} className={btnOutline}><FileText className="h-4 w-4" /> Save as script</button>
+        <button onClick={createProject} className={btnPrimary}><Plus className="h-4 w-4" /> Create project</button>
+      </>}>
+        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
           {/* Controls */}
           <div className="space-y-6">
             <section className="rounded-lg border bg-background p-5">
@@ -173,7 +183,6 @@ function StoryGenerator() {
             ))}
           </div>
         </div>
-      </main>
-    </div>
+    </Page>
   );
 }
