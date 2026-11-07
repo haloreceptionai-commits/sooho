@@ -107,7 +107,7 @@ export async function runVideo(id: string, input: VideoInput) {
         tick("Designing characters");
         await pool(plan.scenes, 3, async (sc, i) => {
           const cast = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
-          let r = await img({ cast, reference: cast && sheet ? sheet : undefined }, sc.image_prompt).catch(() => null);
+          let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), sc.image_prompt).catch(() => null);
           if (!r) r = await img({ cast }, sc.image_prompt); // retry without the reference
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
