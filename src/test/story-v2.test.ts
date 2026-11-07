@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { splitLongScenes } from "@/lib/pipeline";
 import { GOLD_ANCHORS, GOLD_STORY, hookIssues, hookTextIssues, rankHookTypes, splitSentences, storyScore, validateStory, type StoryScene } from "@/lib/story-v2";
 
 const fail = (ids: string[], s = GOLD_STORY()) => validateStory(s).failed.map((c) => c.id).filter((id) => ids.includes(id));
@@ -83,7 +84,6 @@ describe("sentence splitter", () => {
   it("keeps initials together", () => expect(splitSentences("Major John F. Ohmer wants it. Next one? Yes.")).toEqual(["Major John F. Ohmer wants it.", "Next one?", "Yes."]));
 });
 
-import { splitLongScenes } from "@/lib/pipeline";
 describe("long scenes get a second picture", () => {
   it("splits a 3-sentence 25-word scene", () => {
     const sc = { beat: "payoff", narration: "It worked so well that pilots got lost over their own factory. So how do you hide a factory from the sky? You turn its roof into a fake street.", image_prompt: "x", characters: [], camera: "push_in" as const, sfx: "none", mood: "reveal" as const, color: "bright", angle: "wide", shot: "wide" as const, money: true, loop_opened: "", loop_closed: "main", purpose: "" };
