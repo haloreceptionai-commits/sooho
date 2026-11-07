@@ -117,8 +117,10 @@ export function validateStory(s: StoryInput): StoryReport {
   const qSents = sents.map((x, i) => ({ x, i, t: wc(sents.slice(0, i).join(" ")) / WPS })).filter((q) => /\?["']?$/.test(q.x));
   const mainQ = qSents.find((q) => q.t <= 8);
   const early = qSents.filter((q) => q.t <= 15);
-  const v2 = !!mainQ && early.length === 1 && wc(mainQ.x) <= 12;
-  add("V2", v2, v2 ? "V2 one main question by 8s" : !mainQ ? "V2 main question: no plain question is spoken in the first 8s" : early.length > 1 ? `V2 main question: ${early.length} questions before 15s (only one allowed)` : "V2 main question is longer than 12 words");
+  // the spoken question must be the real one (shares words with the research question or names the subject)
+  const realQ = !!mainQ && (mentions(mainQ.x, s.anchors.subject) || contentWords(mainQ.x).filter((w) => contentWords(s.question).includes(w)).length >= Math.max(1, contentWords(s.question).length * 0.5));
+  const v2 = !!mainQ && realQ && early.length === 1 && wc(mainQ.x) <= 12;
+  add("V2", v2, v2 ? "V2 one main question by 8s" : !mainQ ? "V2 main question: no plain question is spoken in the first 8s" : !realQ ? `V2 main question "${mainQ.x.slice(0, 50)}" isn't about the real mystery (${s.anchors.subject})` : early.length > 1 ? `V2 main question: ${early.length} questions before 15s (only one allowed)` : "V2 main question is longer than 12 words");
   // V3 referents
   const bad: string[] = [];
   const names = [...s.cast.flatMap(role), s.hero.name, s.hero.role].filter(Boolean).map((n) => n.toLowerCase());
