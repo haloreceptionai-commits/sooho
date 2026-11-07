@@ -32,11 +32,6 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Create,
 });
 
-function Ring({ v }: { v: number }) {
-  const tone = v >= 70 ? "text-success" : v >= 45 ? "text-warning" : "text-muted-foreground";
-  return <span className={`font-mono text-xs font-bold ${tone}`}>{v}</span>;
-}
-
 function Create() {
   const settings = useStore((s) => s.settings);
   const videos = useStore((s) => s.videos);
@@ -80,7 +75,7 @@ function Create() {
   return (
     <Page eyebrow="Studio" title="Create a video" desc="Pick a format and topic. Script, narration, scene images, sound and editing happen automatically.">
       <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* 1. Format */}
           <Panel className="p-5">
             <p className={label}>1 · Format</p>
@@ -145,7 +140,7 @@ function Create() {
         </div>
 
         {/* Right column: live jobs */}
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <Panel className="p-5">
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 font-bold">{busy && <Loader2 className="h-4 w-4 animate-spin text-primary" />} In production</h2>
