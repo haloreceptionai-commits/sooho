@@ -232,7 +232,7 @@ export async function runVideo(id: string, input: VideoInput) {
           console.warn("Gemini Omni clip fell back to stills:", m);
         }
       });
-      if (!made) throw new Error("Gemini Omni could not animate any clip for this video (${lastClipErr || "unknown error"}). Try again or switch to Own model.");
+      if (!made) throw new Error(`Gemini Omni could not animate any clip for this video (${lastClipErr || "unknown error"}). Try again or switch to Own model.`);
     }
     up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
     const out = await renderVideo(full, voice, {
