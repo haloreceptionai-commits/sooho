@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   LayoutDashboard, Film, Smartphone, FileText, Mic, ImageIcon, Layers, Settings,
@@ -20,10 +20,11 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
-const nav = [
+const nav: { icon: typeof Film; label: string; active?: boolean; to?: "/story-generator" }[] = [
   { icon: LayoutDashboard, label: "Dashboard", active: true },
   { icon: Film, label: "Long-form" },
   { icon: Smartphone, label: "Shorts & Reels" },
+  { icon: Sparkles, label: "5-Beat Story Generator", to: "/story-generator" },
   { icon: FileText, label: "Scripts" },
   { icon: Mic, label: "Voiceovers" },
   { icon: ImageIcon, label: "Image library" },
@@ -75,7 +76,11 @@ function Dashboard() {
           <span className="font-bold tracking-tight">Chronicle Studio</span>
         </div>
         <nav className="flex-1 space-y-0.5 p-3">
-          {nav.map((n) => (
+          {nav.map((n) => n.to ? (
+            <Link key={n.label} to={n.to} className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              <n.icon className="h-4 w-4" /> {n.label}
+            </Link>
+          ) : (
             <button
               key={n.label}
               className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
@@ -159,6 +164,7 @@ function Dashboard() {
                 <button className="mt-4 inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-sm font-semibold text-background">
                   <Sparkles className="h-4 w-4" /> Generate script
                 </button>
+                <Link to="/story-generator" className="ml-3 text-sm font-semibold text-primary hover:underline">Open 5-Beat Generator →</Link>
               </div>
 
               <div className="rounded-lg border bg-background p-6">
