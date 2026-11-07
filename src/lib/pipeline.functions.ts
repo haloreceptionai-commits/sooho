@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { styleAnchor } from "@/lib/styles";
 
 // Server-side calls to Azure OpenAI (through the Lovable connector gateway) and,
 // for narration when no Azure speech deployment exists, Lovable AI speech.
@@ -57,32 +58,48 @@ export interface PlanInput {
   style: string;
   deployment: string;
 }
-export interface PlanScene { beat: string; narration: string; image_prompt: string; sfx: string }
-export interface Plan { title: string; description: string; scenes: PlanScene[] }
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in";
+export interface PlanCharacter { name: string; look: string }
+export interface PlanScene {
+  beat: string; narration: string; image_prompt: string; characters: string[];
+  camera: Camera; sfx: string; mood: "tension" | "reveal";
+}
+export interface Plan { title: string; description: string; palette: string; characters: PlanCharacter[]; scenes: PlanScene[] }
 
 const planSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["title", "description", "scenes"],
+  required: ["title", "description", "palette", "characters", "scenes"],
   properties: {
     title: { type: "string" },
     description: { type: "string" },
+    palette: { type: "string" },
+    characters: {
+      type: "array",
+      items: { type: "object", additionalProperties: false, required: ["name", "look"], properties: { name: { type: "string" }, look: { type: "string" } } },
+    },
     scenes: {
       type: "array",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["beat", "narration", "image_prompt", "sfx"],
+        required: ["beat", "narration", "image_prompt", "characters", "camera", "sfx", "mood"],
         properties: {
-          beat: { type: "string", enum: ["hook", "stakes", "defeat", "countdown", "climax", "payoff"] },
+          beat: { type: "string", enum: ["hook", "stakes", "defeat", "countdown", "climax", "reveal", "payoff"] },
           narration: { type: "string" },
           image_prompt: { type: "string" },
-          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd"] },
+          characters: { type: "array", items: { type: "string" } },
+          camera: { type: "string", enum: ["push_in", "pull_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "punch_in"] },
+          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour"] },
+          mood: { type: "string", enum: ["tension", "reveal"] },
         },
       },
     },
   },
 };
+
+// Tone reference (style only — never reuse its content).
+const TONE_EXAMPLE = `"Pour cooking oil into the sea with a pirate ship so close behind them he could hear the pirates laughing. His captain grabs him by the collar and goes, 'We're about to get boarded, and you're making soup?' But he doesn't even look up. He just points at the black clouds. 'Steer into the storm.' ... You see, sailors really carried oil just for this. They called it storm oil. Ever blown on a bowl of soup? The broth ripples, but the oily spots stay perfectly smooth... And fifty yards behind, it curls over and drops straight onto the pirates' deck."`;
 
 export const generatePlan = createServerFn({ method: "POST" })
   .inputValidator((d: PlanInput) => {
@@ -91,25 +108,30 @@ export const generatePlan = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<Plan> => {
     const short = data.format === "short";
-    const wpm = short ? 165 : 145; // matches measured narrator speed so videos land near the target length
+    const wpm = short ? 250 : 190; // measured speed of the fast storyteller narration
     const words = Math.round((data.durationSec / 60) * wpm);
-    const scenes = short ? Math.max(8, Math.round(data.durationSec / 5)) : Math.max(12, Math.round(data.durationSec / 18));
-    const system = `You are the head writer of a history & facts YouTube channel whose Shorts average 7.8M views (style of RicksClips3000).
-Write narration that follows this exact viral formula:
-1. HOOK at 0:00 — in media res, UNDER 12 words, zero greetings or fluff, immediate sensory action.
-2. STAKES & RIVAL FOIL — who opposes the protagonist / the conventional method.
-3. FALSE DEFEAT & PUBLIC DOUBT — the conventional way looks like it won; people mock the odd choice.
-4. HIDDEN COUNTDOWN / ENVIRONMENTAL SHIFT — heat, pressure, a storm, time running out.
-5. CATASTROPHIC VISUAL CLIMAX — the rival method fails violently and visually.
-6. PAYOFF — one short final line that loops back to the hook.
-Rules: short punchy sentences, concrete nouns and impact verbs, present-tense tension, historically accurate facts, no "in this video", no calls to subscribe.
-Each scene = one still image the editor will animate with slow zoom/pan. image_prompt: a detailed visual description of that single frame (subject, setting, era, lighting, camera angle), in the visual style "${data.style}", no text or letters in the image. IMPORTANT: image prompts must pass a strict safety filter — never describe gore, blood, corpses, injuries, weapons in use, people dying, children, nudity or real living people. Show danger indirectly: storm skies, cracking stone, buckled steel, empty ruins, silhouettes, smoke, worried faces, objects in close-up.
-sfx: the single best sound effect for that scene, or "none".`;
-    const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube documentary, 16:9"}.
+    const scenes = short ? Math.max(10, Math.round(data.durationSec / 3)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
+    const perScene = Math.round(words / scenes);
+    const system = `You are the head writer of a viral history & science Shorts channel (style of RicksClips3000 / Zack D. Films, 7.8M+ average views).
+You write a STORY, not a lecture: an ordinary protagonist does something that looks insane, a rival mocks or doubts it, danger escalates, then the hidden science/history is revealed and the rival gets the catastrophe.
+Voice of the narration — copy this TONE, never its content: ${TONE_EXAMPLE}
+Rules:
+- 0:00 hook: start mid-action with the strange act itself, under 12 words before the first comma or period. No greetings, no "did you know", no "in this video".
+- Third person, present tense, conversational ("goes,", "and all he gets back is,"). Short quoted dialogue lines between characters.
+- Beats in order: hook → stakes (rival foil doubts/mocks) → defeat (the conventional way looks like it's winning) → countdown (environment escalates: storm, heat, pressure, time) → climax (the threat arrives) → reveal ("You see, ..." name the real historical practice + one everyday analogy starting with "Ever ...?") → payoff (protagonist survives, rival suffers the catastrophe; last line lands hard).
+- Historically accurate. No subscribe/like calls. No pauses or filler; every sentence pushes forward.
+Visuals — the video cuts every 1.5–2.5 seconds, so every scene is ONE frozen action moment:
+- characters: 2–4 recurring characters with a fixed, very specific look (age, build, face, hair/beard, clothing colors, one signature prop). Reuse the exact names in scenes.
+- palette: one sentence of color direction (e.g. dark navy storm sea vs glowing amber oil).
+- image_prompt: what the camera sees in that instant — subject + action + expression, setting, camera angle (close-up, low angle, over-the-shoulder, wide aerial...), lighting. Vary angles shot to shot. Include the key prop in a contrasting color. Never put text, letters or signs in the image.
+- Safety filter: never describe gore, blood, corpses, injuries, people dying, children, nudity or real living people. Show danger indirectly (towering waves, cracking stone, smoke, terrified faces, the rival ship swamped by foam).
+- camera: the motion that best sells the moment (punch_in for shocks/reveals, tilt_up for something huge, pan for chases).
+- sfx: the one sound that belongs at that moment. mood: "tension" until the reveal, then "reveal".`;
+    const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube story documentary, 16:9 (same storytelling style, more detail and more twists)"}.
 Topic: ${data.topic}
 Viral archetype: ${data.archetype}
-Target length: ${data.durationSec} seconds ≈ ${words} words of narration total — stay within ±10% of this word count.
-Split into about ${scenes} scenes, spread across the beats in order. Return a click-worthy title (under 60 chars) and a 2-sentence YouTube description.`;
+Target: ${data.durationSec} seconds ≈ ${words} words of narration total (±8%). Exactly about ${scenes} scenes of ~${perScene} words each — a scene's narration may end mid-sentence; it continues in the next scene.
+Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) and a 2-sentence YouTube description.`;
 
     const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
@@ -135,7 +157,8 @@ Split into about ${scenes} scenes, spread across the beats in order. Return a cl
 export interface VoiceInput { text: string; voice: string; deployment: string; style: string }
 
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
-const GEMINI_VOICE: Record<string, string> = { onyx: "Charon", ash: "Algenib", echo: "Orus", ballad: "Rasalgethi", verse: "Fenrir", cedar: "Alnilam" };
+// Gemini voices tested at ~270–300 wpm with the storyteller direction below.
+const GEMINI_VOICE: Record<string, string> = { onyx: "Charon", ash: "Iapetus", echo: "Orus", ballad: "Fenrir", verse: "Puck", cedar: "Alnilam" };
 
 export const generateVoice = createServerFn({ method: "POST" })
   .inputValidator((d: VoiceInput) => {
@@ -144,11 +167,14 @@ export const generateVoice = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }): Promise<{ audio: string; engine: "azure" | "lovable" }> => {
-    const instructions = `${data.style}. Curious, intrigued, leaning-in storyteller who is about to reveal a secret. Fast energetic pace, quick micro-pauses only before reveals, punch single-syllable impact words, rising curiosity in the voice.`;
+    const fast = data.style !== "long";
+    const direction = fast
+      ? "Read this as a fast-talking, curious, conversational storyteller telling a friend a crazy true story — quick energetic pace, about 250 words per minute, no dramatic pauses, playful intrigue, punch the twist words"
+      : "Read this as a gripping, curious documentary storyteller — brisk energetic pace, about 190 words per minute, short pauses only before big reveals, playful intrigue";
     // 1) Azure speech deployment (if the user has one)
     if (data.deployment) {
       const res = await azure(`${safeName(data.deployment)}/audio/speech`, {
-        model: data.deployment, input: data.text, voice: data.voice, instructions, response_format: "mp3",
+        model: data.deployment, input: data.text, voice: data.voice, instructions: direction, speed: fast ? 1.25 : 1.1, response_format: "mp3",
       });
       if (res.ok) return { audio: toBase64(await res.arrayBuffer()), engine: "azure" };
       const t = await res.text();
@@ -158,14 +184,14 @@ export const generateVoice = createServerFn({ method: "POST" })
         throw new Error(`[${res.status}] Azure voice failed`);
       }
     }
-    // 2) Fallback: Lovable AI speech (Gemini TTS) with the closest male narrator voice
+    // 2) Fallback: Lovable AI speech (Gemini TTS)
     const k = keys();
     const res = await fetch(`${LOVABLE_AI}/audio/speech`, {
       method: "POST",
       headers: { Authorization: `Bearer ${k.lovable}`, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
       body: JSON.stringify({
         model: "google/gemini-3.1-flash-tts-preview",
-        contents: [{ role: "user", parts: [{ text: `Narrate quickly with a curious, intrigued, leaning-in tone, like revealing a fascinating secret — deep confident voice, ${data.style || "fast pace"}: ${data.text}` }] }],
+        contents: [{ role: "user", parts: [{ text: `${direction}: ${data.text}` }] }],
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_VOICE[data.voice] ?? "Charon" } } } },
         stream_format: "audio",
       }),
@@ -176,30 +202,67 @@ export const generateVoice = createServerFn({ method: "POST" })
 
 // ---------------- Images ----------------
 
-export interface ImageInput { prompt: string; aspect: "portrait" | "landscape"; deployment: string; quality: "low" | "medium" }
+export interface ImageInput {
+  prompt: string;
+  aspect: "portrait" | "landscape";
+  deployment: string;
+  quality: "low" | "medium";
+  style: string;
+  palette?: string;
+  cast?: string; // "Name: look; Name: look" for characters in this shot
+  reference?: string; // base64 jpeg character sheet for consistency
+  sheet?: boolean; // generating the character sheet itself
+}
+
+function b64ToBytes(b64: string) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function imageCall(data: ImageInput, prompt: string) {
+  const size = data.sheet ? "1536x1024" : data.aspect === "portrait" ? "1024x1536" : "1536x1024";
+  if (data.reference) {
+    const k = keys();
+    const fd = new FormData();
+    fd.append("image[]", new Blob([b64ToBytes(data.reference)], { type: "image/jpeg" }), "cast.jpg");
+    fd.append("prompt", prompt);
+    fd.append("size", size);
+    fd.append("quality", data.quality);
+    fd.append("output_format", "jpeg");
+    fd.append("output_compression", "82");
+    fd.append("n", "1");
+    return fetch(`${AZURE_GATEWAY}/openai/deployments/${safeName(data.deployment)}/images/edits?api-version=${API_VERSION}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${k.lovable}`, "X-Connection-Api-Key": k.azure },
+      body: fd,
+    });
+  }
+  return azure(`${safeName(data.deployment)}/images/generations`, {
+    prompt, size, quality: data.quality, output_format: "jpeg", output_compression: 82, n: 1,
+  });
+}
 
 export const generateImage = createServerFn({ method: "POST" })
   .inputValidator((d: ImageInput) => {
     if (!d.prompt?.trim() || d.prompt.length > 3000) throw new Error("Image prompt must be 1–3000 characters");
+    if (d.reference && d.reference.length > 6_000_000) throw new Error("Reference image too large");
     return d;
   })
   .handler(async ({ data }): Promise<{ image: string | null; note: string }> => {
-    // Azure's image safety filter rejects violent/graphic wording. Try the prompt, then a
-    // softened version, then a safe establishing shot — never fail the whole video.
+    const anchor = styleAnchor(data.style);
+    const build = (p: string) => data.sheet
+      ? `Character reference sheet. ${anchor}. Full-body front view of each character standing side by side on a plain light grey studio background, evenly spaced, neutral pose, consistent scale: ${p}. No text, no labels.`
+      : `${anchor}. ${data.palette ? `Color direction: ${data.palette}. ` : ""}${data.reference ? "Keep the characters EXACTLY as they look in the reference sheet (same faces, hair, clothes, colors, proportions) but place them in this new shot; do not show the grey sheet background. " : ""}Shot: ${p}${data.cast ? ` Characters: ${data.cast}.` : ""} Full-bleed ${data.aspect === "portrait" ? "vertical 9:16" : "16:9"} frame, subject large and centered, dramatic depth. Family-friendly, no gore. Absolutely no text, letters, captions or watermarks.`;
+    // Azure's safety filter rejects violent wording: try original → softened → calm establishing shot.
     const attempts = [
       { p: data.prompt, note: "original" },
       { p: softenPrompt(data.prompt), note: "softened" },
-      { p: `A calm, atmospheric historical establishing shot related to: ${softenPrompt(data.prompt).slice(0, 200)}. Wide landscape or architecture, no people in distress`, note: "safe" },
+      { p: `A calm, atmospheric establishing shot related to: ${softenPrompt(data.prompt).slice(0, 200)}. No people in distress`, note: "safe" },
     ];
     for (const a of attempts) {
-      const res = await azure(`${safeName(data.deployment)}/images/generations`, {
-        prompt: `${a.p}. Museum-quality historical artwork, cinematic, dramatic lighting, family-friendly, no gore. Absolutely no text, letters, captions or watermarks.`,
-        size: data.aspect === "portrait" ? "1024x1536" : "1536x1024",
-        quality: data.quality,
-        output_format: "jpeg",
-        output_compression: 80,
-        n: 1,
-      });
+      const res = await imageCall(data, build(a.p).slice(0, 3900));
       if (res.ok) {
         const json = (await res.json()) as { data?: { b64_json?: string }[] };
         const b64 = json.data?.[0]?.b64_json;
