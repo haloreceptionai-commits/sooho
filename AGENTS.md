@@ -33,3 +33,4 @@ use the editor.
 - App has exactly 3 pages: / (create), /videos (library), /settings; why: user wants a minimal UI with the rest running in the background.
 - Topic archetypes and viral scoring live in src/lib/viral-brain.ts; why: shared by the create page and pipeline prompts.
 - Video narration is fixed to the chosen Atlas narrator (Gemini Charon, direction in generateVoice, renderer ATLAS_RATE pace, no pause trimming or length-fitting); why: the user approved that exact audition sound and removed voice pickers from the UI.
+- Optional "Gemini Omni" engine (src/lib/clips.functions.ts): server fns start/poll google/gemini-omni-1.1-flash image-to-video jobs per ~8s scene run, the browser keeps clips in memory and the renderer draws them muted under narration; failed clips fall back to animated stills; why: user wanted real motion as an opt-in beside the own stills engine.
