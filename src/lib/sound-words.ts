@@ -17,6 +17,11 @@ const SOUND_WORDS: [RegExp, string][] = [
   [/^(coin|coins|gold|money|treasure)$/, "coin"],
   [/^(heart|heartbeat|heartbeats)$/, "heartbeat"],
   [/^(crowd|crowds|cheer|cheers|laugh|laughs|laughing|shout|shouts|screams?)$/, "crowd"],
+  [/^(knock|knocks|knocked|knocking|tap|taps)$/, "knock"],
+  [/^(rustle|rustles|rustling|flap|flaps|flutter|flutters|nets?)$/, "rustle"],
+  [/^(plane|planes|bomber|bombers|engine|engines|jet|jets|propeller|propellers)$/, "plane"],
+  [/^(siren|sirens|alarm|alarms|wail|wails)$/, "siren"],
+  [/^(hit|hits|slap|slaps|thud|thuds|punch|punches|impact|smack|smacks)$/, "impact"],
   [/^(whoosh|zoom|zooms|swoosh|flies|rushes)$/, "whoosh"],
 ];
 
