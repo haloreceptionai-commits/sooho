@@ -363,9 +363,13 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   canvas.width = o.width; canvas.height = o.height;
   const ctx = canvas.getContext("2d")!;
   const dest = actx.createMediaStreamDestination();
-  const voiceBus = actx.createGain(); voiceBus.gain.value = 1; voiceBus.connect(dest);
-  const sfxBus = actx.createGain(); sfxBus.gain.value = 0.45; sfxBus.connect(dest);
-  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.11 : 0; musicBus.connect(dest);
+  // master limiter so voice + music + impacts never clip
+  const master = actx.createDynamicsCompressor();
+  master.threshold.value = -10; master.knee.value = 6; master.ratio.value = 12; master.attack.value = 0.003; master.release.value = 0.15;
+  master.connect(dest);
+  const voiceBus = actx.createGain(); voiceBus.gain.value = 0.9; voiceBus.connect(master);
+  const sfxBus = actx.createGain(); sfxBus.gain.value = 0.45; sfxBus.connect(master);
+  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.11 : 0; musicBus.connect(master);
 
   const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
   const mime = pickMime();
