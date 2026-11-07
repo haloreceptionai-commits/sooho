@@ -145,7 +145,8 @@ export async function renderVideo(scenes: RenderScene[], o: RenderOptions): Prom
   const GAP = 0.35;
   const starts: number[] = [];
   let t = 0.3;
-  buffers.forEach((b) => { starts.push(t); t += b.duration + GAP; });
+  const RATE = 1.06; // slightly faster delivery
+  buffers.forEach((b) => { starts.push(t); t += b.duration / RATE + GAP; });
   const total = t + 0.6;
 
   const canvas = document.createElement("canvas");
@@ -173,11 +174,11 @@ export async function renderVideo(scenes: RenderScene[], o: RenderOptions): Prom
   rec.start(1000);
   const t0 = actx.currentTime + 0.15;
   buffers.forEach((b, i) => {
-    const src = actx.createBufferSource(); src.buffer = b; src.connect(voiceBus); src.start(t0 + starts[i]!);
+    const src = actx.createBufferSource(); src.buffer = b; src.playbackRate.value = RATE; src.connect(voiceBus); src.start(t0 + starts[i]!);
     if (o.sfx) {
       if (i > 0) playSfx(actx, sfxBus, "whoosh", t0 + starts[i]! - 0.3);
       const k = scenes[i]!.sfx;
-      if (k && k !== "none" && k !== "whoosh") playSfx(actx, sfxBus, k, t0 + starts[i]! + Math.min(0.8, b.duration * 0.3));
+      if (k && k !== "none" && k !== "whoosh") playSfx(actx, sfxBus, k, t0 + starts[i]! + Math.min(0.8, (b.duration / RATE) * 0.3));
     }
   });
   drone.start(t0); drone.stop(t0 + total);
@@ -189,7 +190,7 @@ export async function renderVideo(scenes: RenderScene[], o: RenderOptions): Prom
       let i = starts.findIndex((s, k) => el < (starts[k + 1] ?? Infinity) - GAP / 2);
       if (i < 0) i = scenes.length - 1;
       const sceneStart = (starts[i] ?? 0) - (i === 0 ? 0.3 : GAP / 2);
-      const sceneLen = (buffers[i]?.duration ?? 1) + GAP;
+      const sceneLen = (buffers[i]?.duration ?? 1) / RATE + GAP;
       const p = Math.max(0, Math.min(1, (el - sceneStart) / sceneLen));
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, o.width, o.height);
       const dir = i % 2 ? -1 : 1;
@@ -203,7 +204,7 @@ export async function renderVideo(scenes: RenderScene[], o: RenderOptions): Prom
       ctx.fillStyle = g; ctx.fillRect(0, 0, o.width, o.height);
       if (o.captions) {
         const local = el - (starts[i] ?? 0);
-        const dur = buffers[i]?.duration ?? 1;
+        const dur = (buffers[i]?.duration ?? 1) / RATE;
         if (local >= 0 && local <= dur) {
           const cc = captionChunks[i]!;
           drawCaption(ctx, cc[Math.min(cc.length - 1, Math.floor((local / dur) * cc.length))]!, o.width, o.height, vertical);

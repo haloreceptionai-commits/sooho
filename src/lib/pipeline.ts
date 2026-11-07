@@ -74,17 +74,22 @@ export async function runVideo(id: string, input: VideoInput) {
     const portrait = input.format === "short";
     await Promise.all([
       pool(plan.scenes, 3, async (sc, i) => {
-        const r = await withRetry(() => generateVoice({ data: { text: sc.narration, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "fast punchy pace" : "brisk measured pace" } }));
+        const r = await withRetry(() => generateVoice({ data: { text: sc.narration, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "fast punchy pace" : "brisk lively pace" } }));
         scenes[i]!.audio = b64ToBuf(r.audio);
         tick("Recording narration");
       }),
       pool(plan.scenes, 2, async (sc, i) => {
         const r = await withRetry(() => generateImage({ data: { prompt: sc.image_prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality } }));
-        scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
+        if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
         tick("Painting scenes");
       }),
     ]);
 
+    // scenes whose image was blocked by the safety filter reuse the nearest image
+    const firstImg = scenes.find((x) => x.image)?.image;
+    if (!firstImg) throw new Error("Azure's safety filter blocked every scene image for this topic. Try rephrasing the topic.");
+    let lastImg = firstImg;
+    for (const sc of scenes) { if (sc.image) lastImg = sc.image; else sc.image = lastImg; }
     const full = scenes as RenderScene[];
     up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
     const out = await renderVideo(full, {
