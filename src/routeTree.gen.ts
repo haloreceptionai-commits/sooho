@@ -10,39 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ImagesRouteImport } from './routes/images'
-import { Route as LongFormRouteImport } from './routes/long-form'
-import { Route as RenderQueueRouteImport } from './routes/render-queue'
-import { Route as ScriptsRouteImport } from './routes/scripts'
 import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ShortsRouteImport } from './routes/shorts'
-import { Route as StoryGeneratorRouteImport } from './routes/story-generator'
-import { Route as ViralBrainRouteImport } from './routes/viral-brain'
-import { Route as VoiceoversRouteImport } from './routes/voiceovers'
+import { Route as VideosRouteImport } from './routes/videos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImagesRoute = ImagesRouteImport.update({
-  id: '/images',
-  path: '/images',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LongFormRoute = LongFormRouteImport.update({
-  id: '/long-form',
-  path: '/long-form',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RenderQueueRoute = RenderQueueRouteImport.update({
-  id: '/render-queue',
-  path: '/render-queue',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScriptsRoute = ScriptsRouteImport.update({
-  id: '/scripts',
-  path: '/scripts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -50,114 +23,40 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShortsRoute = ShortsRouteImport.update({
-  id: '/shorts',
-  path: '/shorts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StoryGeneratorRoute = StoryGeneratorRouteImport.update({
-  id: '/story-generator',
-  path: '/story-generator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ViralBrainRoute = ViralBrainRouteImport.update({
-  id: '/viral-brain',
-  path: '/viral-brain',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VoiceoversRoute = VoiceoversRouteImport.update({
-  id: '/voiceovers',
-  path: '/voiceovers',
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/images': typeof ImagesRoute
-  '/long-form': typeof LongFormRoute
-  '/render-queue': typeof RenderQueueRoute
-  '/scripts': typeof ScriptsRoute
   '/settings': typeof SettingsRoute
-  '/shorts': typeof ShortsRoute
-  '/story-generator': typeof StoryGeneratorRoute
-  '/viral-brain': typeof ViralBrainRoute
-  '/voiceovers': typeof VoiceoversRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/images': typeof ImagesRoute
-  '/long-form': typeof LongFormRoute
-  '/render-queue': typeof RenderQueueRoute
-  '/scripts': typeof ScriptsRoute
   '/settings': typeof SettingsRoute
-  '/shorts': typeof ShortsRoute
-  '/story-generator': typeof StoryGeneratorRoute
-  '/viral-brain': typeof ViralBrainRoute
-  '/voiceovers': typeof VoiceoversRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/images': typeof ImagesRoute
-  '/long-form': typeof LongFormRoute
-  '/render-queue': typeof RenderQueueRoute
-  '/scripts': typeof ScriptsRoute
   '/settings': typeof SettingsRoute
-  '/shorts': typeof ShortsRoute
-  '/story-generator': typeof StoryGeneratorRoute
-  '/viral-brain': typeof ViralBrainRoute
-  '/voiceovers': typeof VoiceoversRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/images'
-    | '/long-form'
-    | '/render-queue'
-    | '/scripts'
-    | '/settings'
-    | '/shorts'
-    | '/story-generator'
-    | '/viral-brain'
-    | '/voiceovers'
+  fullPaths: '/' | '/settings' | '/videos'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/images'
-    | '/long-form'
-    | '/render-queue'
-    | '/scripts'
-    | '/settings'
-    | '/shorts'
-    | '/story-generator'
-    | '/viral-brain'
-    | '/voiceovers'
-  id:
-    | '__root__'
-    | '/'
-    | '/images'
-    | '/long-form'
-    | '/render-queue'
-    | '/scripts'
-    | '/settings'
-    | '/shorts'
-    | '/story-generator'
-    | '/viral-brain'
-    | '/voiceovers'
+  to: '/' | '/settings' | '/videos'
+  id: '__root__' | '/' | '/settings' | '/videos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ImagesRoute: typeof ImagesRoute
-  LongFormRoute: typeof LongFormRoute
-  RenderQueueRoute: typeof RenderQueueRoute
-  ScriptsRoute: typeof ScriptsRoute
   SettingsRoute: typeof SettingsRoute
-  ShortsRoute: typeof ShortsRoute
-  StoryGeneratorRoute: typeof StoryGeneratorRoute
-  ViralBrainRoute: typeof ViralBrainRoute
-  VoiceoversRoute: typeof VoiceoversRoute
+  VideosRoute: typeof VideosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -169,34 +68,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/images': {
-      id: '/images'
-      path: '/images'
-      fullPath: '/images'
-      preLoaderRoute: typeof ImagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/long-form': {
-      id: '/long-form'
-      path: '/long-form'
-      fullPath: '/long-form'
-      preLoaderRoute: typeof LongFormRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/render-queue': {
-      id: '/render-queue'
-      path: '/render-queue'
-      fullPath: '/render-queue'
-      preLoaderRoute: typeof RenderQueueRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/scripts': {
-      id: '/scripts'
-      path: '/scripts'
-      fullPath: '/scripts'
-      preLoaderRoute: typeof ScriptsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -204,32 +75,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/shorts': {
-      id: '/shorts'
-      path: '/shorts'
-      fullPath: '/shorts'
-      preLoaderRoute: typeof ShortsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/story-generator': {
-      id: '/story-generator'
-      path: '/story-generator'
-      fullPath: '/story-generator'
-      preLoaderRoute: typeof StoryGeneratorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/viral-brain': {
-      id: '/viral-brain'
-      path: '/viral-brain'
-      fullPath: '/viral-brain'
-      preLoaderRoute: typeof ViralBrainRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/voiceovers': {
-      id: '/voiceovers'
-      path: '/voiceovers'
-      fullPath: '/voiceovers'
-      preLoaderRoute: typeof VoiceoversRouteImport
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -237,15 +87,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ImagesRoute: ImagesRoute,
-  LongFormRoute: LongFormRoute,
-  RenderQueueRoute: RenderQueueRoute,
-  ScriptsRoute: ScriptsRoute,
   SettingsRoute: SettingsRoute,
-  ShortsRoute: ShortsRoute,
-  StoryGeneratorRoute: StoryGeneratorRoute,
-  ViralBrainRoute: ViralBrainRoute,
-  VoiceoversRoute: VoiceoversRoute,
+  VideosRoute: VideosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
