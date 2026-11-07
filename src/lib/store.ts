@@ -43,6 +43,7 @@ export interface Settings {
   burnCaptions: boolean;
   soundEffects: boolean;
   imageQuality: "low" | "medium";
+  styleV?: number;
 }
 
 export interface State {
@@ -60,7 +61,8 @@ export const DEFAULT_SETTINGS: Settings = {
   imageDeployment: "gpt-image-1-mini",
   videoDeployment: "gpt-5.1-codex",
   defaultVoice: "onyx",
-  defaultStyle: "Oil painting",
+  defaultStyle: "3D animated cartoon",
+  styleV: 2,
   burnCaptions: true,
   soundEffects: true,
   imageQuality: "medium",
@@ -79,7 +81,7 @@ export function hydrateStore() {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<State>;
       state = {
-        settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+        settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } return st; })(),
         // jobs that were running when the page closed can't resume
         videos: (parsed.videos ?? []).map((v) =>
           v.status === "running" ? { ...v, status: "failed", error: "Interrupted — the page was closed while generating.", detail: "Interrupted" } : v,
@@ -137,7 +139,7 @@ export const actions = {
   },
 };
 
-export const STYLES = ["Oil painting", "Cinematic photoreal", "Chiaroscuro", "Fresco", "Parchment ink", "Blueprint sepia"];
+export { STYLES } from "@/lib/styles";
 
 export function timeAgo(t: number) {
   const m = Math.round((Date.now() - t) / 60000);

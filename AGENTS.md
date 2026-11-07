@@ -29,6 +29,6 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 - Video metadata + settings live in a client store (src/lib/store.ts, localStorage); finished video files live in IndexedDB (src/lib/video-db.ts); why: no backend database yet and video blobs exceed localStorage.
-- Pipeline: server fns in src/lib/pipeline.functions.ts call Azure via the connector gateway (script, images; voice falls back to Lovable AI when no Azure speech deployment); src/lib/pipeline.ts orchestrates in the browser and src/lib/renderer.ts assembles video with canvas + MediaRecorder; why: Workers cannot run Python/FFmpeg.
+- Pipeline: server fns in src/lib/pipeline.functions.ts call Azure via the connector gateway (script, images; voice falls back to Lovable AI when no Azure speech deployment); src/lib/pipeline.ts orchestrates in the browser and src/lib/renderer.ts assembles video with canvas + MediaRecorder (fast-cut shots, WSOLA speed-up to target length, synthesized music/foley); a character sheet image is generated first and passed to Azure image edits for cast consistency; why: Workers cannot run Python/FFmpeg and no text-to-video is allowed.
 - App has exactly 3 pages: / (create), /videos (library), /settings; why: user wants a minimal UI with the rest running in the background.
 - Topic archetypes and viral scoring live in src/lib/viral-brain.ts; why: shared by the create page and pipeline prompts.
