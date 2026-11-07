@@ -228,5 +228,5 @@ export async function syncFromCloud() {
 
 export function clearVideos() {
   state = { ...state, videos: [] };
-  emit();
+  persist(); emit();
 }
