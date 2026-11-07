@@ -98,7 +98,6 @@ export async function runVideo(id: string, input: VideoInput) {
       - hookIssues(h.line, rs.anchors, factText).length * 8 - hookTextIssues(h.text, h.line).length * 4 + (prefer[0] === h.type ? 3 : 0);
     const ranked = [...hooks.all].sort((x, y) => rate(y) - rate(x));
     const hb = ranked[0]!, runner = ranked[1] ?? hb;
-    const hookScore = hb.curiosity + hb.clarity + hb.visualness + hb.speakability;
     up({ progress: 8, hooks: { best: hb.line, runnerUp: runner.line }, detail: "Writing the beat sheet and script…" });
     // 4) beat sheet + script -> blocking validators + blind judges -> up to 2 repair rewrites (before any images or voice)
     const base = {
@@ -107,12 +106,10 @@ export async function runVideo(id: string, input: VideoInput) {
       facts: factText, research: researchText, hook: hb.line,
     };
     const evaluate = async (p: Plan) => {
-      const cast = p.characters.slice(0, 3).map((c) => ({ name: c.name, role: c.role }));
       const story = {
         scenes: p.scenes.map((x) => ({ beat: x.beat, narration: x.narration, characters: x.characters, shot: x.shot, money: x.money, loop_opened: x.loop_opened, loop_closed: x.loop_closed })),
         anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec,
       };
-      void cast;
       const report = validateStory(story);
       const ht = hookTextIssues(p.hookText, p.scenes[0]?.narration ?? "");
       if (ht.length) report.checks.push({ id: "HOOKTEXT", pass: false, msg: ht.join("; ") }), report.failed.push(report.checks[report.checks.length - 1]!);
@@ -141,7 +138,6 @@ export async function runVideo(id: string, input: VideoInput) {
       const ev2 = await evaluate(repaired);
       if (ev2.gate.score >= ev.gate.score) { plan = repaired; ev = ev2; }
     }
-    const check = { revealPos: 0 };
     up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${ev.gate.score}/100 · ${n} scenes` });
@@ -175,6 +171,7 @@ export async function runVideo(id: string, input: VideoInput) {
       up({ progress: 10 + Math.round((done / totalAssets) * 60), detail: `${what} · ${done}/${totalAssets} assets`, stage: "images" });
     };
     const rawImg: (string | undefined)[] = [];
+    const contScores: number[] = [];
     const looks = new Map(plan.characters.map((c) => [c.name.toLowerCase(), c]));
     const img = (extra: Partial<Parameters<typeof generateImage>[0]["data"]>, prompt: string) =>
       withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }), 9, 30000);
@@ -201,6 +198,18 @@ export async function runVideo(id: string, input: VideoInput) {
           const shot = `${ANGLE[sc.angle] ?? ""} ${sc.image_prompt} ${COLOR[sc.color] ?? ""}`.trim();
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
+          // continuity gate: compare the cast to the character sheet; redraw once if it drifted
+          if (r.image && sheet && cast) {
+            const c = await withRetry(() => checkContinuity({ data: { sheet, shot: r!.image!, cast, deployment: s.scriptDeployment } })).catch(() => null);
+            if (c) contScores.push(c.score);
+            if (c && c.score < 6) {
+              const again = await img({ cast, reference: sheet }, `${shot} The characters must match the reference sheet exactly (${c.issue.slice(0, 160)}).`).catch(() => null);
+              if (again?.image) {
+                const c2 = await withRetry(() => checkContinuity({ data: { sheet, shot: again.image!, cast, deployment: s.scriptDeployment } })).catch(() => null);
+                if (!c2 || c2.score >= c.score) { r = again; if (c2) contScores[contScores.length - 1] = c2.score; }
+              }
+            }
+          }
           if (r.image) rawImg[i] = r.image;
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
@@ -283,9 +292,11 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ stage: "saving", progress: 99, detail: "Saving…" });
     await saveVideoFile(id, out.blob);
     const width = portrait ? 1080 : 1920, height = portrait ? 1920 : 1080;
-    const qa = qaScore({
-      hookScore, revealPos: check.revealPos, factConfidence: confidence, wordsPerSec: out.stats.wordsPerSec, avgShotSec: out.stats.avgShotSec,
-      captions: s.burnCaptions, lufs: out.stats.lufs, lra: out.stats.lra, loopLine: !!plan.loopLine.trim(), width, height,
+    const fin = finalScore(ev.gate, { wordsPerSec: out.stats.wordsPerSec, avgShotSec: out.stats.avgShotSec, lufs: out.stats.lufs, lra: out.stats.lra, width, height, captions: s.burnCaptions });
+    const qa = { score: fin.score, parts: fin.parts };
+    const continuity = contScores.length ? contScores.filter((x) => x >= 6).length / contScores.length : 1;
+    up({
+      ready: fin.ready, analytics: { hookType: hb.type, revealSec: ev.report.revealSec, castSize: plan.characters.length, shotMix: ev.report.shotMix, continuity },
     });
     up({ qa, status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
   } catch (e) {
