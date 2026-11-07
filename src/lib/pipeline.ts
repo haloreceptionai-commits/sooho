@@ -1,8 +1,8 @@
 // Client orchestrator: script → voice + images → render → save. Runs in the background
 // while the user moves around the app.
 import { actions, getState, type VideoInput } from "@/lib/store";
-import { factCheck, generateHooks, generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
-import { qaScore, validateScript } from "@/lib/quality";
+import { checkContinuity, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
@@ -76,35 +76,75 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ detail: "Fact-checking the story…" });
     const facts = await withRetry(() => factCheck({ data: { topic: input.topic, deployment: s.scriptDeployment } }));
     const factText = [
-      ...facts.claims.map((c) => `- ${c.claim} [${c.confidence}; ${c.sources.join("; ")}]`),
+      ...facts.claims.map((c) => `- ${c.claim} (${c.date}) [${c.confidence}; ${c.sources.join("; ")}]`),
       `Myth: ${facts.myth}`, `Reality: ${facts.reality}`, facts.hedge ? `Hedge line to include: ${facts.hedge}` : "",
     ].join("\n");
     const confidence = facts.claims.length ? facts.claims.filter((c) => c.confidence !== "low").length / facts.claims.length : 0;
-    up({ progress: 5, facts: { myth: facts.myth, reality: facts.reality, claims: facts.claims.length, confidence }, detail: "Writing 10 hooks…" });
-    // 2) hooks
-    const hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment } }));
-    const hb = hooks.best;
+    up({ progress: 4, facts: { myth: facts.myth, reality: facts.reality, claims: facts.claims.length, confidence }, detail: "Finding the hero, question and payoff…" });
+    // 2) research: anchors, premise, impossible question, payoff, money shot
+    const rs = await withRetry(() => researchStory({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment } }));
+    if (!rs.oneImage.ok) throw new Error("Pick a more visual topic: the odd thing in this story can't be shown in one picture.");
+    const researchText = [
+      `Anchors: subject "${rs.anchors.subject}", year "${rs.anchors.year}", place "${rs.anchors.place}", org "${rs.anchors.org}", stakes "${rs.anchors.stakes}"`,
+      `Premise: ${rs.premise}`, `Main question: ${rs.question}`,
+      `Hero: ${rs.hero.name} (${rs.hero.role}) wants: ${rs.hero.want}`, `Skeptic: ${rs.skeptic.name} (${rs.skeptic.role})`, `Threat: ${rs.threat}`,
+      `Tries: ${rs.tries.join(" -> ")}`, `Analogy: ${rs.analogy}`, `Proof shot: ${rs.proof}`, `Payoff: ${rs.payoff}`, `Money shot: ${rs.moneyShot}`,
+    ].join("\n");
+    up({ progress: 6, story: { premise: rs.premise, question: rs.question, hero: `${rs.hero.name} — ${rs.hero.want}`, anchors: Object.values(rs.anchors).join(" · ") }, detail: "Writing 10 hooks…" });
+    // 3) hooks: score, drop banned / unanchored ones, prefer types that performed best
+    const prefer = rankHookTypes(getState().videos.filter((v) => v.perf && v.analytics).map((v) => ({ hookType: v.analytics!.hookType, ...v.perf })));
+    const hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment } }));
+    const rate = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability
+      - hookIssues(h.line, rs.anchors, factText).length * 8 - hookTextIssues(h.text, h.line).length * 4 + (prefer[0] === h.type ? 3 : 0);
+    const ranked = [...hooks.all].sort((x, y) => rate(y) - rate(x));
+    const hb = ranked[0]!, runner = ranked[1] ?? hb;
     const hookScore = hb.curiosity + hb.clarity + hb.visualness + hb.speakability;
-    up({ progress: 7, hooks: { best: hb.line, runnerUp: hooks.runnerUp.line }, detail: "Viral Brain is writing the beat sheet and script…" });
-    // 3) beat sheet + script, checked, rewritten once if it fails
+    up({ progress: 8, hooks: { best: hb.line, runnerUp: runner.line }, detail: "Writing the beat sheet and script…" });
+    // 4) beat sheet + script -> blocking validators + blind judges -> up to 2 repair rewrites (before any images or voice)
     const base = {
       topic: input.topic, format: input.format, durationSec: input.durationSec,
       archetype: archetype ? `${archetype.name} — ${archetype.formula}` : "Best fit", style: input.style, deployment: s.scriptDeployment,
-      facts: factText, hook: hb.line,
+      facts: factText, research: researchText, hook: hb.line,
+    };
+    const evaluate = async (p: Plan) => {
+      const cast = p.characters.slice(0, 3).map((c) => ({ name: c.name, role: c.role }));
+      const story = {
+        scenes: p.scenes.map((x) => ({ beat: x.beat, narration: x.narration, characters: x.characters, shot: x.shot, money: x.money, loop_opened: x.loop_opened, loop_closed: x.loop_closed })),
+        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec,
+      };
+      void cast;
+      const report = validateStory(story);
+      const ht = hookTextIssues(p.hookText, p.scenes[0]?.narration ?? "");
+      if (ht.length) report.checks.push({ id: "HOOKTEXT", pass: false, msg: ht.join("; ") }), report.failed.push(report.checks[report.checks.length - 1]!);
+      const hi = hookIssues(splitSentences(p.script || p.scenes.map((x) => x.narration).join(" "))[0] ?? "", rs.anchors, factText);
+      report.checks.push({ id: "HOOK", pass: !hi.length, msg: hi.length ? `Hook: ${hi.join("; ")}` : "Hook rules met" });
+      if (hi.length) report.failed.push(report.checks[report.checks.length - 1]!);
+      const full = p.scenes.map((x) => x.narration).join(" ");
+      const firstShots = (sec: number) => { const st = sceneStarts(story.scenes); return p.scenes.filter((_, i) => st[i]! < sec).map((x) => `[picture: ${x.image_prompt.slice(0, 200)}]`).join(" "); };
+      const judge = await withRetry(() => judgeScript({ data: {
+        first3: `${p.hookText ? `On-screen text: "${p.hookText}". ` : ""}Narration: "${spokenBy(story.scenes, 3.2)}" ${firstShots(3.2)}`,
+        first15: `Narration: "${spokenBy(story.scenes, 15)}" ${firstShots(15)}`,
+        full, truth: `${researchText}\nHook: ${hb.line}`,
+        shots: p.scenes.map((x, i) => `${i}: ${x.narration} => ${x.image_prompt.slice(0, 220)}`).join("\n"),
+        deployment: s.scriptDeployment,
+      } })).catch((e: unknown) => { console.warn("Judges unavailable:", e); return null; });
+      if (judge?.filler.length && judge.filler.length > 2) report.failed.push({ id: "V8j", pass: false, msg: `V8 new info (judge): "${judge.filler.slice(0, 2).join('", "')}" add nothing new` });
+      const gate = storyScore(report, judge, p.scenes.length);
+      return { report, judge, gate };
     };
     let plan = await withRetry(() => generatePlan({ data: base }));
-    let check = validateScript(plan.scenes, plan.loopLine, input.durationSec);
-    if (!check.ok) {
-      up({ detail: `Script checker: fixing ${check.issues.length} issue${check.issues.length === 1 ? "" : "s"}…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: check.issues.join("; ") } })).catch(() => null);
-      if (repaired) {
-        const c2 = validateScript(repaired.scenes, repaired.loopLine, input.durationSec);
-        if (c2.issues.length <= check.issues.length) { plan = repaired; check = c2; }
-      }
+    let ev = await evaluate(plan);
+    for (let attempt = 1; attempt <= 2 && !ev.gate.ready; attempt++) {
+      up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/2)…` });
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: ev.gate.blockers.map((b) => `- ${b}`).join("\n") } })).catch(() => null);
+      if (!repaired) break;
+      const ev2 = await evaluate(repaired);
+      if (ev2.gate.score >= ev.gate.score) { plan = repaired; ev = ev2; }
     }
-    up({ checks: check.issues });
+    const check = { revealPos: 0 };
+    up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     const n = plan.scenes.length;
-    up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 10, detail: `Script ready · ${n} scenes` });
+    up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${ev.gate.score}/100 · ${n} scenes` });
 
     const portrait = input.format === "short";
     const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
@@ -114,7 +154,7 @@ export async function runVideo(id: string, input: VideoInput) {
     plan.scenes.forEach((sc, i) => {
       const w = sc.narration.split(/\s+/).filter(Boolean).length;
       // new take when the pace class changes (action / reveal / normal) so each take gets its own rate
-      const cls = (b: string) => (["countdown", "climax", "defeat"].includes(b) ? 1 : ["reveal", "proof"].includes(b) ? 2 : 0);
+      const cls = (b: string) => (["try", "fail", "escalation"].includes(b) ? 1 : ["reveal", "analogy", "proof"].includes(b) ? 2 : 0);
       const brk = cur.length && cls(plan.scenes[cur[0]!]!.beat) !== cls(sc.beat);
       if (cur.length && (brk || wc + w > (portrait ? 60 : 90))) { groups.push(cur); cur = []; wc = 0; }
       cur.push(i); wc += w;
