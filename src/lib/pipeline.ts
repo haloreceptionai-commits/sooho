@@ -3,6 +3,7 @@
 import { actions, getState, type VideoInput } from "@/lib/store";
 import { generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
+import { pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 
@@ -11,6 +12,12 @@ const b64ToBuf = (b64: string) => {
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out.buffer;
+};
+
+const bufToB64 = (buf: ArrayBuffer) => {
+  const b = new Uint8Array(buf); let s = "";
+  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000));
+  return btoa(s);
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -84,6 +91,7 @@ export async function runVideo(id: string, input: VideoInput) {
       done++;
       up({ progress: 10 + Math.round((done / totalAssets) * 60), detail: `${what} · ${done}/${totalAssets} assets`, stage: "images" });
     };
+    const rawImg: (string | undefined)[] = [];
     const looks = new Map(plan.characters.map((c) => [c.name.toLowerCase(), c]));
     const img = (extra: Partial<Parameters<typeof generateImage>[0]["data"]>, prompt: string) =>
       withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }), 9, 30000);
@@ -109,6 +117,7 @@ export async function runVideo(id: string, input: VideoInput) {
           const cast = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), sc.image_prompt).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, sc.image_prompt); // retry without the reference
+          if (r.image) rawImg[i] = r.image;
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
         });
@@ -121,10 +130,57 @@ export async function runVideo(id: string, input: VideoInput) {
     let lastImg = firstImg;
     for (const sc of scenes) { if (sc.image) lastImg = sc.image; else sc.image = lastImg; }
     const full = scenes as RenderScene[];
+
+    // Gemini Omni engine: animate runs of scenes (~8s each) starting from their scene image.
+    let clips: { scenes: number[]; video: HTMLVideoElement }[] | undefined;
+    if (input.engine === "omni") {
+      const runs: number[][] = []; let run: number[] = []; let sec = 0;
+      plan.scenes.forEach((sc, i) => {
+        const d = (sc.narration.split(/\s+/).filter(Boolean).length * 60) / 153;
+        if (run.length && (sec + d > 8 || !rawImg[run[0]!])) { runs.push(run); run = []; sec = 0; }
+        run.push(i); sec += d;
+      });
+      if (run.length) runs.push(run);
+      const est = runs.map((r) => r.reduce((a, i) => a + (plan.scenes[i]!.narration.split(/\s+/).filter(Boolean).length * 60) / 153, 0));
+      clips = [];
+      let made = 0, failed = 0;
+      up({ stage: "images", progress: 70, detail: `Animating ${runs.length} AI video clips with Gemini Omni…` });
+      await pool(runs, 2, async (r, ri) => {
+        const start = rawImg[r[0]!];
+        if (!start) { failed++; return; }
+        const action = r.map((i) => plan.scenes[i]!.image_prompt).join(" Then: ");
+        const prompt = `Animate this exact frame as a ${input.style} scene in a single continuous shot with lively character acting, expressive faces and constant dynamic camera motion. Keep the characters exactly as they look. Action: ${action}. Consider micro-detail, expression and timing. No dialogue, no speech, no music, no on-screen text. Ambient sound only.`;
+        try {
+          const { id: jobId } = await withRetry(() => startClip({ data: { prompt: prompt.slice(0, 3400), image: start, aspect: portrait ? "portrait" : "landscape", seconds: Math.ceil(est[ri]!) } }), 6, 30000);
+          const t = Date.now();
+          while (Date.now() - t < 12 * 60_000) {
+            await sleep(8000);
+            const st = await withRetry(() => pollClip({ data: { id: jobId } }), 4);
+            if (st.status === "failed") throw new Error(st.error ?? "AI clip failed");
+            if (st.video) {
+              const v = document.createElement("video");
+              v.muted = true; v.playsInline = true; v.preload = "auto";
+              v.src = URL.createObjectURL(new Blob([b64ToBuf(st.video)], { type: "video/mp4" }));
+              await new Promise<void>((ok, bad) => { v.onloadeddata = () => ok(); v.onerror = () => bad(new Error("Clip could not load")); });
+              clips!.push({ scenes: r, video: v });
+              made++;
+              up({ progress: 70 + Math.round((made / runs.length) * 2), detail: `AI video clips · ${made}/${runs.length}` });
+              return;
+            }
+          }
+          throw new Error("AI clip timed out");
+        } catch (e) {
+          const m = e instanceof Error ? e.message : String(e);
+          if (/\[(402|403)\]/.test(m)) throw e; // credits / access problems stop the whole video
+          failed++; // this run falls back to animated stills
+        }
+      });
+      if (!made) throw new Error("Gemini Omni could not animate any clip for this video. Try again or switch to Own model.");
+    }
     up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
     const out = await renderVideo(full, voice, {
       width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080,
-      captions: s.burnCaptions, sfx: s.soundEffects, targetSec: input.durationSec,
+      captions: s.burnCaptions, sfx: s.soundEffects, targetSec: input.durationSec, ...(clips ? { clips } : {}),
       onProgress: (p) => up({ progress: 72 + Math.round(p * 0.26) }),
     });
     up({ stage: "saving", progress: 99, detail: "Saving…" });

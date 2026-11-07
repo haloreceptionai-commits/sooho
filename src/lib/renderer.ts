@@ -20,7 +20,9 @@ export interface RenderOptions {
   height: number;
   captions: boolean;
   sfx: boolean;
-  targetSec?: number; // narration is sped up (pitch kept) to land near this length
+  targetSec?: number;
+  /** AI-animated clips (Gemini Omni engine); each covers a run of consecutive scenes. */
+  clips?: { scenes: number[]; video: HTMLVideoElement }[];
   onProgress: (pct: number) => void;
 }
 
@@ -260,9 +262,12 @@ function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
   return shots;
 }
 
-function drawImage(ctx: CanvasRenderingContext2D, img: ImageBitmap, w: number, h: number, zoom: number, panX: number, panY: number, ox = 0, oy = 0) {
-  const scale = Math.max(w / img.width, h / img.height) * zoom;
-  const dw = img.width * scale, dh = img.height * scale;
+function drawImage(ctx: CanvasRenderingContext2D, img: ImageBitmap | HTMLVideoElement, w: number, h: number, zoom: number, panX: number, panY: number, ox = 0, oy = 0) {
+  const iw = img instanceof HTMLVideoElement ? img.videoWidth : img.width;
+  const ih = img instanceof HTMLVideoElement ? img.videoHeight : img.height;
+  if (!iw || !ih) return;
+  const scale = Math.max(w / iw, h / ih) * zoom;
+  const dw = iw * scale, dh = ih * scale;
   const x = (w - dw) / 2 + Math.max(-1, Math.min(1, panX)) * (dw - w) / 2 + ox;
   const y = (h - dh) / 2 + Math.max(-1, Math.min(1, panY)) * (dh - h) / 2 + oy;
   ctx.drawImage(img, x, y, dw, dh);
@@ -358,6 +363,8 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   for (let i = 1; i < tl.length; i++) tl[i]!.start = tl[i - 1]!.end;
   const shots = buildShots(scenes, tl);
   const caps = tl.map((x) => captionWords(x.words)).flat();
+  const clipOf = new Map<number, { scenes: number[]; video: HTMLVideoElement; started?: boolean }>();
+  for (const c of o.clips ?? []) { const e = { ...c }; c.scenes.forEach((i) => clipOf.set(i, e)); }
   const revealAt = tl[scenes.findIndex((s) => s.mood === "reveal")]?.start ?? Infinity;
 
   const canvas = document.createElement("canvas");
@@ -425,6 +432,19 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
         ox += (Math.random() - 0.5) * a; oy += (Math.random() - 0.5) * a; zoom += 0.02;
       }
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, o.width, o.height);
+      const clip = clipOf.get(sh.scene);
+      if (clip) {
+        const first = clip.scenes[0]!, last = clip.scenes[clip.scenes.length - 1]!;
+        const cs = tl[first]!.start, span = Math.max(0.5, tl[last]!.end - cs);
+        if (!clip.started) {
+          clip.started = true;
+          clip.video.currentTime = 0;
+          clip.video.playbackRate = Math.max(0.5, Math.min(1, (clip.video.duration || span) / span));
+          void clip.video.play().catch(() => undefined);
+        }
+        const k = Math.max(0, 1 - (el - cs) / 0.22);
+        drawImage(ctx, clip.video, o.width, o.height, 1.02 + k * 0.05, 0, 0, ox * 0.5, oy * 0.5);
+      } else {
       const px = sh.x0 + (sh.x1 - sh.x0) * pe, py = sh.y0 + (sh.y1 - sh.y0) * pe;
       if (cutKick > 0) {
         // whip motion blur on the cut
@@ -436,6 +456,7 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
       drawImage(ctx, sc.image, o.width, o.height, zoom, px, py, ox, oy);
       ctx.globalAlpha = 1;
       if (sh.punch && local < 0.08) { ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillRect(0, 0, o.width, o.height); }
+      }
       // light vignette
       const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
       g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.35)");
@@ -455,6 +476,7 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   await stopped;
   stream.getTracks().forEach((tr) => tr.stop());
   await actx.close();
+  o.clips?.forEach((c) => c.video.pause());
   const base = mime.split(";")[0] ?? "video/webm";
   return { blob: new Blob(parts, { type: base }), mime: base, duration: total };
 }
