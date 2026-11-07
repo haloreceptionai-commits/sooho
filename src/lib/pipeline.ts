@@ -54,6 +54,13 @@ const ANGLE: Record<string, string> = {
   wide: "Wide establishing shot:", close: "Close-up:", aerial: "High aerial drone shot:", top_down: "Straight top-down shot:",
   macro: "Extreme macro close-up:", pov: "First-person POV shot:", low_angle: "Dramatic low-angle shot:", over_shoulder: "Over-the-shoulder shot:",
 };
+const SHOT: Record<string, string> = {
+  wide: "WIDE ENVIRONMENT SHOT: the place fills the frame; people, if any, are tiny.",
+  aerial: "AERIAL VIEW from high in the sky looking down at the whole place; no faces.",
+  action: "ACTION SHOT: hands and bodies doing the physical task, motion and props in focus.",
+  macro: "MACRO PROCESS INSERT: extreme close-up of the object or material being worked on; no faces.",
+  face: "Expressive close-up of the character reacting.",
+};
 const COLOR: Record<string, string> = {
   bright: "Sunny bright daylight, clear blue sky, cheerful saturated colors.",
   dark_cold: "Dark stormy navy-blue palette, cold moonlit highlights, still clearly lit and readable.",
@@ -194,8 +201,16 @@ export async function runVideo(id: string, input: VideoInput) {
         }
         tick("Designing characters");
         await pool(plan.scenes, 2, async (sc, i) => {
-          const cast = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
-          const shot = `${ANGLE[sc.angle] ?? ""} ${sc.image_prompt} ${COLOR[sc.color] ?? ""}`.trim();
+          // Characters only lead action/face shots; wide, aerial and macro shots show the world, the process or the money shot,
+          // and skip the sheet reference (it pulls every frame back to a posed line-up).
+          const people = sc.shot === "action" || sc.shot === "face";
+          const castAll = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
+          const cast = people ? castAll : "";
+          const shot = [
+            SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && rs.moneyShot ? `MONEY SHOT: ${rs.moneyShot}.` : "", sc.image_prompt,
+            people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
+            COLOR[sc.color] ?? "",
+          ].filter(Boolean).join(" ");
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
           // continuity gate: compare the cast to the character sheet; redraw once if it drifted
