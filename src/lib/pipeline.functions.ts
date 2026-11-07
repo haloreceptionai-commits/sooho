@@ -208,7 +208,7 @@ export const generatePlan = createServerFn({ method: "POST" })
     const short = data.format === "short";
     const wpm = 153; // approved Atlas narrator pace
     const words = Math.round((data.durationSec / 60) * wpm);
-    const scenes = short ? Math.max(10, Math.round(data.durationSec / 2.5)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
+    const scenes = short ? Math.max(8, Math.round(data.durationSec / 3)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
     const perScene = Math.round(words / scenes);
     const system = `You are the head writer of a viral history & science Shorts channel (style of RicksClips3000 / Zack D. Films, 7.8M+ average views).
 You write a STORY, not a lecture: an ordinary protagonist does something that looks insane, a rival mocks or doubts it, danger escalates, then the hidden science/history is revealed and the rival gets the catastrophe.
@@ -216,61 +216,33 @@ Voice of the narration — copy this TONE, never its content: ${TONE_EXAMPLE}
 Rules:
 - 0:00 hook: start mid-action with the strange act itself, under 12 words before the first comma or period. No greetings, no "did you know", no "in this video".
 - Third person, present tense, conversational ("goes,", "and all he gets back is,"). Short quoted dialogue lines between characters.
-- Beats in order: hook → stakes (rival foil doubts/mocks) → defeat (the conventional way looks like it's winning) → countdown (environment escalates: storm, heat, pressure, time) → climax (the threat arrives) → reveal ("You see, ..." name the real historical practice + one everyday analogy starting with "Ever ...?") → payoff (protagonist survives, rival suffers the catastrophe; last line lands hard).
-- FLOW: write it like one breathless story told out loud — mostly long run-on sentences chained with "and", "so", "but then", "while". NO choppy fragments ("Horns blare. Ladders rise."), no lists, at most 3 named characters, and the story must be crystal clear to a 12-year-old on first listen.
+- CURIOSITY-GAP MINI-STORY. Beats in order: hook (weird action, the open loop "why?") → stakes (antagonist + a SKEPTIC who doubts it out loud in quoted dialogue) → defeat → countdown (escalation with 2 mini-twists; a new event, place or question every 6-8 seconds; withhold the answer) → climax (peak tension) → reveal ("You see, ..." name the real practice + one everyday household analogy starting with "Ever ...?") → proof (one visual demo of the mechanism, e.g. a macro shot of soup) → payoff (spectacle; rival gets the catastrophe) and the LAST sentence is the loopLine: it loops back to the hook image or opens a follow-up question.
+- The reveal beat must START between 60% and 72% of the total words. Every question raised must be answered by the end.
+- First write the timed beat sheet in "beats" (start_s, end_s, words, purpose, open_loop_id, visual_note), THEN write the prose to match it.
+- SENTENCES: 3-12 words each, present-tense action, concrete nouns, one idea per sentence, questions as pivots, dialogue quoted inside narration. It must still flow as one story told out loud (use "But", "So", "Then" to link) — no lists, at most 3 named characters, crystal clear to a 12-year-old on first listen. No passive voice, no jargon without an analogy.
+- FACTS: stay inside the fact sheet. If it gives a hedge line, say it (in your own words) in the reveal or proof, never overstate the effect.
 - Historically accurate. No subscribe/like calls. No filler; every sentence pushes forward.
 - Plain, simple spoken words. Every line must make literal sense; no poetic metaphors ("glassy knuckles", "clock ticks in his ears"), no "us/we" from the narrator, refer to characters by role ("the cook", "his captain", "the pirates") more than by name.
 - Write the WHOLE narration first in "script" (polish it until it reads perfectly out loud), THEN split that exact text, word for word, into the scenes' "narration" fields.
-Visuals — the video cuts every 1.5–2.5 seconds, so every scene is ONE frozen action moment:
+Visuals — a new shot about every 3 seconds with smooth continuous camera moves, so every scene is ONE clear action moment:
 - characters: 2–4 recurring characters with a fixed, very specific look (age, build, face, hair/beard, clothing colors, one signature prop). Reuse the exact names in scenes.
 - palette: one sentence of color direction (e.g. deep navy storm sea vs glowing amber oil). Even night/storm scenes must be BRIGHTLY lit and vivid — readable, saturated, never murky.
 - image_prompt: what the camera sees in that instant — subject + action + expression, setting, camera angle (close-up, low angle, over-the-shoulder, wide aerial...), lighting. Vary angles shot to shot. Characters are always DOING the action (pouring, grabbing, pointing, gripping the wheel) — never standing in a lineup or posing. At least 40% of shots show no faces at all: the threat (a ship, a towering wave, storm clouds), a key object in extreme close-up, or a wide aerial establishing shot. Include a simple explainer visual for the reveal (e.g. a bowl of soup with an oil droplet). Include the key prop in a contrasting color. Never put text, letters or signs in the image.
 - Safety filter: never describe gore, blood, corpses, injuries, people dying, children, nudity or real living people. Show danger indirectly (towering waves, cracking stone, smoke, terrified faces, the rival ship swamped by foam).
 - camera: the motion that best sells the moment (punch_in for shocks/reveals, tilt_up for something huge, pan for chases).
-- sfx: the one sound that belongs at that moment. mood: "tension" until the reveal, then "reveal".`;
+- angle: change it on every scene (wide, close, aerial, top_down, macro, pov, low_angle, over_shoulder); never the same angle twice in a row.
+- color: colour arc tracks emotion — "bright" for the sunny setup, "dark_cold" for tension/storm, "warm_interior" for the reveal, "golden_macro" for the proof close-up, "high_contrast" for the payoff spectacle.
+- sfx: the sound of the visual event (pour, wave, crash, clang, splash...). mood: "tension" until the reveal, then "reveal".
+- hookText: a 3-6 word on-screen version of the hook.`;
     const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube story documentary, 16:9 (same storytelling style, more detail and more twists)"}.
 Topic: ${data.topic}
 Viral archetype: ${data.archetype}
 Target: ${data.durationSec} seconds ≈ ${words} words of narration total (±8%). Exactly about ${scenes} scenes of ~${perScene} words each — a scene's narration may end mid-sentence; it continues in the next scene.
-Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) and a 2-sentence YouTube description.`;
+${data.facts ? `Fact sheet (obey it): ${data.facts}\n` : ""}${data.hook ? `Open with this exact hook line: "${data.hook}"\n` : ""}${data.repair ? `A previous draft FAILED these checks — fix every one: ${data.repair}\n` : ""}Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) and a 2-sentence YouTube description.`;
 
-    const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
-      messages: [{ role: "system", content: system }, { role: "user", content: user }],
-      max_completion_tokens: 32000,
-      reasoning_effort: "low",
-      stream: true, // stream so the gateway sees bytes flowing on long scripts
-      response_format: { type: "json_schema", json_schema: { name: "video_plan", strict: true, schema: planSchema } },
-    });
-    if (!res.ok || !res.body) await fail(res, "Script writer");
-    let content = "", refusal = "", buf = "";
-    const reader = res.body!.getReader();
-    const dec = new TextDecoder();
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let nl: number;
-      while ((nl = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (payload === "[DONE]") continue;
-        try {
-          const j = JSON.parse(payload) as { choices?: { delta?: { content?: string; refusal?: string } }[] };
-          content += j.choices?.[0]?.delta?.content ?? "";
-          refusal += j.choices?.[0]?.delta?.refusal ?? "";
-        } catch { /* partial keep-alive */ }
-      }
-    }
-    if (refusal) throw new Error(`Script writer refused: ${refusal}`);
-    const msg = { content };
-    try {
-      const plan = JSON.parse(msg?.content ?? "") as Plan;
-      if (!plan.scenes?.length) throw new Error("empty");
-      return plan;
-    } catch {
-      throw new Error("Script writer returned an unreadable plan");
-    }
+    const plan = await azureJson<Plan>(data.deployment, system, user, "video_plan", planSchema, "Script writer");
+    if (!plan.scenes?.length) throw new Error("Script writer returned an empty plan");
+    return plan;
   });
 
 // ---------------- Voice ----------------
