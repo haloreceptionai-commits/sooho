@@ -111,6 +111,7 @@ function playSfx(ctx: AudioContext, out: AudioNode, kind: string, at: number) {
     pour: ["lowpass", 500, 0.3, 0.05, 1.2],
     wave: ["lowpass", 900, 0.4, 0.4, 1.6],
     crash: ["lowpass", 2600, 0.6, 0.01, 1.1],
+    spray: ["highpass", 3500, 0.35, 0.03, 0.8],
   };
   const [type, freq, peak, a, d] = presets[kind] ?? presets["whoosh"]!;
   f.type = type; f.frequency.value = freq;
@@ -446,6 +447,7 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   const meter = actx.createAnalyser(); meter.fftSize = 2048; makeup.connect(meter);
   const voiceBus = actx.createGain(); voiceBus.gain.value = 0.9 * voiceGain; voiceBus.connect(master);
   const sfxBus = actx.createGain(); sfxBus.gain.value = 0.45; sfxBus.connect(master);
+  const wordSfx = actx.createGain(); wordSfx.gain.value = 0.32; wordSfx.connect(master);
   const musicLp = actx.createBiquadFilter(); musicLp.type = "lowpass"; musicLp.frequency.value = 18000; musicLp.connect(master);
   const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.13 : 0; musicBus.connect(musicLp);
 
@@ -481,6 +483,8 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
       if (sc.sfx && sc.sfx !== "none") playSfx(actx, sfxBus, sc.sfx === "crash" ? "splash" : sc.sfx, at + 0.05);
       if (sc.sfx === "crash") playSfx(actx, sfxBus, "boom", at + 0.05);
     });
+    // sound on the spoken word: "spray" -> spray hiss, "crash" -> crash, ...
+    for (const cue of wordSoundCues(tl.flatMap((x) => x.words))) playSfx(actx, wordSfx, cue.kind === "crash" ? "splash" : cue.kind, t0 + cue.at);
     if (payoffIdx >= 0) playSfx(actx, sfxBus, "boom", t0 + tl[payoffIdx]!.start + 0.05);
     playSfx(actx, sfxBus, "boom", t0 + total - 1.2);
   }
