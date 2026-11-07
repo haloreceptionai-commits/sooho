@@ -46,14 +46,14 @@ function RenderQueue() {
         <>
           {active.length > 0 && (
             <Panel className="divide-y">
-              {active.map((j, idx) => {
+              {active.map((j) => {
                 const stage = Math.min(4, Math.floor(j.progress / 20));
                 return (
                   <div key={j.id} className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       {j.format === "long" ? <Film className="h-4 w-4 text-muted-foreground" /> : <Smartphone className="h-4 w-4 text-muted-foreground" />}
                       <p className="flex-1 font-semibold">{j.title}</p>
-                      {j.status === "queued" && <span className="font-mono text-xs text-muted-foreground">#{idx + 1} in line</span>}
+                      {j.status === "queued" && <span className="font-mono text-xs text-muted-foreground">#{active.filter((x) => x.status === "queued").indexOf(j) + 1} in line</span>}
                       <StatusPill status={j.status} />
                       <button className={`${btnOutline} px-2.5 py-1.5`} title="Cancel" onClick={() => { actions.cancelJob(j.id); toast("Job cancelled"); }}><X className="h-3.5 w-3.5" /></button>
                     </div>
