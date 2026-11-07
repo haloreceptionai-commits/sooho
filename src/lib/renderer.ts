@@ -1,4 +1,5 @@
 import { emphasisIndex } from "@/lib/quality";
+import { wordSoundCues } from "@/lib/sound-words";
 // Browser video editor: turns stills into a fast-cut "animated" Short — 1.5–2.5s shots with
 // camera moves, punch-ins, shake and whip transitions; flowing narration, synthesized music
 // bed + foley, and kinetic one-word captions. Records with MediaRecorder.
