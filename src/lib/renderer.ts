@@ -1,3 +1,4 @@
+import { emphasisIndex } from "@/lib/quality";
 // Browser video editor: turns stills into a fast-cut "animated" Short — 1.5–2.5s shots with
 // camera moves, punch-ins, shake and whip transitions; flowing narration, synthesized music
 // bed + foley, and kinetic one-word captions. Records with MediaRecorder.
@@ -10,6 +11,7 @@ export interface RenderScene {
   sfx: string;
   camera: Camera;
   mood: "tension" | "reveal";
+  beat?: string;
 }
 
 /** One narration recording covering several consecutive scenes. */
@@ -21,6 +23,7 @@ export interface RenderOptions {
   captions: boolean;
   sfx: boolean;
   targetSec?: number;
+  hookText?: string; // 3-6 word on-screen hook for the first 3 seconds
   /** AI-animated clips (Gemini Omni engine); each covers a run of consecutive scenes. */
   clips?: { scenes: number[]; video: HTMLVideoElement }[];
   onProgress: (pct: number) => void;
@@ -106,6 +109,8 @@ function playSfx(ctx: AudioContext, out: AudioNode, kind: string, at: number) {
     crowd: ["bandpass", 600, 0.12, 0.5, 1.6],
     wind: ["bandpass", 700, 0.16, 0.6, 1.8],
     pour: ["lowpass", 500, 0.3, 0.05, 1.2],
+    wave: ["lowpass", 900, 0.4, 0.4, 1.6],
+    crash: ["lowpass", 2600, 0.6, 0.01, 1.1],
   };
   const [type, freq, peak, a, d] = presets[kind] ?? presets["whoosh"]!;
   f.type = type; f.frequency.value = freq;
@@ -238,7 +243,7 @@ function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
   scenes.forEach((sc, i) => {
     const t = tl[i]!;
     const dur = Math.max(0.6, t.end - t.start);
-    const n = Math.max(1, Math.round(dur / 1.7));
+    const n = Math.max(1, Math.round(dur / 3));
     for (let k = 0; k < n; k++) {
       const s = t.start + (dur * k) / n, e = t.start + (dur * (k + 1)) / n;
       const v = (i * 7 + k * 3) % 5;
@@ -274,20 +279,53 @@ function drawImage(ctx: CanvasRenderingContext2D, img: ImageBitmap | HTMLVideoEl
 }
 
 function drawCaption(ctx: CanvasRenderingContext2D, text: string, w: number, h: number, vertical: boolean, pop: number) {
-  const size = Math.round(w * (vertical ? 0.092 : 0.05));
+  const size = Math.round(w * (vertical ? 0.088 : 0.05));
+  const words = text.split(" ");
+  const em = emphasisIndex(words);
   ctx.save();
-  const y = vertical ? h * 0.6 : h * 0.8;
-  const sc = 1 + 0.28 * (1 - easeOut(Math.min(1, pop)));
+  const y = vertical ? h * 0.68 : h * 0.8;
+  const sc = 1 + 0.25 * (1 - easeOut(Math.min(1, pop)));
   ctx.translate(w / 2, y); ctx.scale(sc, sc);
+  ctx.textBaseline = "middle"; ctx.lineJoin = "round"; ctx.textAlign = "left";
+  const font = (k: number) => `900 ${Math.round(size * k)}px Manrope, "Arial Black", system-ui, sans-serif`;
+  const gap = size * 0.28;
+  const widths = words.map((wd, i) => { ctx.font = font(i === em ? 1.25 : 1); return ctx.measureText(wd).width; });
+  let x = -(widths.reduce((a, b) => a + b, 0) + gap * (words.length - 1)) / 2;
+  words.forEach((wd, i) => {
+    const k = i === em ? 1.25 : 1;
+    ctx.font = font(k);
+    ctx.lineWidth = size * k * 0.24; ctx.strokeStyle = "#000000";
+    ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = size * 0.25; ctx.shadowOffsetY = size * 0.06;
+    ctx.strokeText(wd, x, 0);
+    ctx.shadowColor = "transparent";
+    ctx.fillStyle = i === em ? "#FFD60A" : "#FFFFFF";
+    ctx.fillText(wd, x, 0);
+    x += widths[i]! + gap;
+  });
+  ctx.restore();
+}
+
+function drawHook(ctx: CanvasRenderingContext2D, text: string, w: number, h: number, vertical: boolean, el: number) {
+  const a = Math.min(1, el / 0.2) * Math.min(1, Math.max(0, (3 - el) / 0.3));
+  if (a <= 0) return;
+  const size = Math.round(w * (vertical ? 0.075 : 0.045));
+  ctx.save();
+  ctx.globalAlpha = a;
   ctx.font = `900 ${size}px Manrope, "Arial Black", system-ui, sans-serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
-  ctx.lineWidth = size * 0.24;
-  ctx.strokeStyle = "#000000";
-  ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = size * 0.25; ctx.shadowOffsetY = size * 0.06;
-  ctx.strokeText(text, 0, 0);
-  ctx.shadowColor = "transparent";
-  ctx.fillStyle = "#FFD60A";
-  ctx.fillText(text, 0, 0);
+  // wrap into max 2 lines
+  const words = text.toUpperCase().split(/\s+/);
+  const lines: string[] = [""];
+  for (const wd of words) {
+    const tryL = `${lines[lines.length - 1]} ${wd}`.trim();
+    if (ctx.measureText(tryL).width > w * 0.82 && lines[lines.length - 1]) lines.push(wd); else lines[lines.length - 1] = tryL;
+  }
+  const y0 = h * (vertical ? 0.2 : 0.15);
+  lines.forEach((ln, i) => {
+    const y = y0 + i * size * 1.15;
+    ctx.lineWidth = size * 0.22; ctx.strokeStyle = "#000000"; ctx.strokeText(ln, w / 2, y);
+    ctx.fillStyle = "#FFFFFF"; ctx.fillText(ln, w / 2, y);
+  });
   ctx.restore();
 }
 
@@ -342,23 +380,40 @@ function scheduleMusic(ctx: AudioContext, out: AudioNode, at: number, step: numb
 
 // ---------------- render ----------------
 
-export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number }> {
+export interface RenderStats { lufs: number; lra: number; avgShotSec: number; wordsPerSec: number }
+
+/** Atlas pace per beat: a touch faster in action, slower at the reveal. */
+export function beatRate(beat: string | undefined) {
+  if (beat === "countdown" || beat === "climax" || beat === "defeat") return 0.9;
+  if (beat === "reveal" || beat === "proof") return 0.82;
+  return ATLAS_RATE;
+}
+
+export const PRE_REVEAL_PAUSE = 0.4;
+
+export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number; stats: RenderStats }> {
   const actx = new AudioContext();
   await actx.resume();
-  // Atlas narrator: keep natural pauses and apply the same 0.85 pace used for the approved audition.
   let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
-  buffers = buffers.map((b) => timeStretch(actx, b, ATLAS_RATE));
+  buffers = buffers.map((b, i) => timeStretch(actx, b, beatRate(scenes[voice[i]!.scenes[0]!]?.beat)));
   const LEAD = 0.15, JOIN = 0.06;
   let t = LEAD;
+  let voiceRms = 0, voiceN = 0;
   const chunks = buffers.map((b, i) => {
     const bd = speechBounds(b);
+    const first = scenes[voice[i]!.scenes[0]!];
+    if (i > 0 && first?.beat === "reveal") t += PRE_REVEAL_PAUSE; // silent beat before the answer
     const c = { scenes: voice[i]!.scenes, dur: bd.to - bd.from, start: t, from: bd.from, buf: b };
+    const d = b.getChannelData(0);
+    for (let k = Math.floor(bd.from * b.sampleRate); k < bd.to * b.sampleRate; k += 4) { voiceRms += d[k]! * d[k]!; voiceN++; }
     t += c.dur + JOIN;
     return c;
   });
+  // loudness: bring speech to about -17 dBFS RMS so the full mix lands near -14 LUFS
+  const rmsDb = 10 * Math.log10(voiceRms / Math.max(1, voiceN) + 1e-12);
+  const voiceGain = Math.min(4, Math.max(0.3, 10 ** ((-17 - rmsDb) / 20)));
   const total = t + 0.5;
   const tl = timeline(chunks, scenes.map((s) => s.text));
-  // stretch first/last scene to cover lead-in and tail
   tl[0]!.start = 0; tl[tl.length - 1]!.end = total;
   for (let i = 1; i < tl.length; i++) tl[i]!.start = tl[i - 1]!.end;
   const shots = buildShots(scenes, tl);
@@ -366,18 +421,21 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   const clipOf = new Map<number, { scenes: number[]; video: HTMLVideoElement; started?: boolean }>();
   for (const c of o.clips ?? []) { const e = { ...c }; c.scenes.forEach((i) => clipOf.set(i, e)); }
   const revealAt = tl[scenes.findIndex((s) => s.mood === "reveal")]?.start ?? Infinity;
+  const payoffIdx = scenes.findIndex((s) => s.beat === "payoff");
 
   const canvas = document.createElement("canvas");
   canvas.width = o.width; canvas.height = o.height;
   const ctx = canvas.getContext("2d")!;
   const dest = actx.createMediaStreamDestination();
-  // master limiter so voice + music + impacts never clip
   const master = actx.createDynamicsCompressor();
   master.threshold.value = -10; master.knee.value = 6; master.ratio.value = 12; master.attack.value = 0.003; master.release.value = 0.15;
-  master.connect(dest);
-  const voiceBus = actx.createGain(); voiceBus.gain.value = 0.9; voiceBus.connect(master);
+  const makeup = actx.createGain(); makeup.gain.value = 1;
+  master.connect(makeup); makeup.connect(dest);
+  const meter = actx.createAnalyser(); meter.fftSize = 2048; makeup.connect(meter);
+  const voiceBus = actx.createGain(); voiceBus.gain.value = 0.9 * voiceGain; voiceBus.connect(master);
   const sfxBus = actx.createGain(); sfxBus.gain.value = 0.45; sfxBus.connect(master);
-  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.11 : 0; musicBus.connect(master);
+  const musicLp = actx.createBiquadFilter(); musicLp.type = "lowpass"; musicLp.frequency.value = 18000; musicLp.connect(master);
+  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.13 : 0; musicBus.connect(musicLp);
 
   const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
   const mime = pickMime();
@@ -392,24 +450,70 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   chunks.forEach((c) => {
     const src = actx.createBufferSource(); src.buffer = c.buf; src.connect(voiceBus);
     src.start(t0 + c.start, c.from, c.dur);
+    // duck music under the voice
+    if (o.sfx) {
+      musicBus.gain.setTargetAtTime(0.06, t0 + c.start - 0.05, 0.08);
+      musicBus.gain.setTargetAtTime(0.13, t0 + c.start + c.dur, 0.15);
+    }
   });
   if (o.sfx) {
+    if (Number.isFinite(revealAt)) {
+      // muffled dip into the reveal, then open up
+      musicLp.frequency.setValueAtTime(18000, t0 + Math.max(0, revealAt - 1.6));
+      musicLp.frequency.exponentialRampToValueAtTime(350, t0 + revealAt - 0.1);
+      musicLp.frequency.exponentialRampToValueAtTime(18000, t0 + revealAt + 0.6);
+    }
     scenes.forEach((sc, i) => {
       const at = t0 + tl[i]!.start;
-      if (i > 0 && i % 2 === 0) playSfx(actx, sfxBus, "whoosh", at - 0.12);
-      if (sc.sfx && sc.sfx !== "none") playSfx(actx, sfxBus, sc.sfx, at + 0.05);
+      if (i > 0 && shots.some((s) => s.scene === i && s.punch)) playSfx(actx, sfxBus, "whoosh", at - 0.12);
+      if (sc.sfx && sc.sfx !== "none") playSfx(actx, sfxBus, sc.sfx === "crash" ? "splash" : sc.sfx, at + 0.05);
+      if (sc.sfx === "crash") playSfx(actx, sfxBus, "boom", at + 0.05);
     });
+    if (payoffIdx >= 0) playSfx(actx, sfxBus, "boom", t0 + tl[payoffIdx]!.start + 0.05);
     playSfx(actx, sfxBus, "boom", t0 + total - 1.2);
   }
   const stepLen = 60 / 128 / 2;
   let nextStep = 0;
+  const loud: number[] = [];
+  const mbuf = new Float32Array(meter.fftSize);
 
+  const drawShot = (sh: Shot, el: number, alpha: number) => {
+    const sc = scenes[sh.scene]!;
+    const local = Math.max(0, el - sh.start);
+    const p = Math.min(1, local / Math.max(0.1, sh.end - sh.start));
+    const pe = sh.punch ? (local < 0.28 ? easeOut(local / 0.28) * 0.8 : 0.8 + 0.2 * p) : ease(p);
+    let zoom = sh.z0 + (sh.z1 - sh.z0) * pe + (sh.punch ? Math.max(0, 1 - local / 0.22) * 0.06 : 0);
+    let ox = Math.sin(el * 1.1) * o.width * 0.003, oy = Math.cos(el * 0.9) * o.height * 0.002;
+    const sceneLocal = el - tl[sh.scene]!.start;
+    if (["boom", "thunder", "clang", "snap", "splash", "crash", "wave"].includes(sc.sfx) && sceneLocal < 0.5) {
+      const a = (1 - sceneLocal / 0.5) * o.width * 0.014;
+      ox += (Math.random() - 0.5) * a; oy += (Math.random() - 0.5) * a; zoom += 0.02;
+    }
+    ctx.globalAlpha = alpha;
+    const clip = clipOf.get(sh.scene);
+    if (clip) {
+      const first = clip.scenes[0]!, last = clip.scenes[clip.scenes.length - 1]!;
+      const cs = tl[first]!.start, span = Math.max(0.5, tl[last]!.end - cs);
+      if (!clip.started) {
+        clip.started = true;
+        clip.video.currentTime = 0;
+        clip.video.playbackRate = Math.max(0.5, Math.min(1, (clip.video.duration || span) / span));
+        void clip.video.play().catch(() => undefined);
+      }
+      drawImage(ctx, clip.video, o.width, o.height, 1.02, 0, 0, ox * 0.5, oy * 0.5);
+    } else {
+      drawImage(ctx, sc.image, o.width, o.height, zoom, sh.x0 + (sh.x1 - sh.x0) * pe, sh.y0 + (sh.y1 - sh.y0) * pe, ox, oy);
+    }
+    ctx.globalAlpha = 1;
+    if (sh.punch && local < 0.08) { ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.fillRect(0, 0, o.width, o.height); }
+  };
+
+  const DISSOLVE = 0.35;
   await new Promise<void>((resolve) => {
-    let si = 0, ci = 0;
+    let si = 0, ci = 0, lastMeter = 0, acc = 0, accN = 0;
     const frame = () => {
       const el = actx.currentTime - t0;
       if (el >= total) { resolve(); return; }
-      // music look-ahead scheduler
       while (o.sfx && nextStep * stepLen < Math.min(el + 0.5, total - 1)) {
         const at = nextStep * stepLen;
         scheduleMusic(actx, musicBus, t0 + at, nextStep, at >= revealAt ? "reveal" : "tension");
@@ -417,55 +521,26 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
       }
       while (si < shots.length - 1 && el >= shots[si]!.end) si++;
       const sh = shots[Math.min(si, shots.length - 1)]!;
-      const sc = scenes[sh.scene]!;
-      const local = Math.max(0, el - sh.start);
-      const p = Math.min(1, local / Math.max(0.1, sh.end - sh.start));
-      const pe = sh.punch ? (local < 0.28 ? easeOut(local / 0.28) * 0.8 : 0.8 + 0.2 * p) : ease(p);
-      // cut energy: overshoot zoom right after each cut
-      const cutKick = Math.max(0, 1 - local / 0.22);
-      let zoom = sh.z0 + (sh.z1 - sh.z0) * pe + cutKick * 0.06;
-      // handheld sway + impact shake
-      let ox = Math.sin(el * 1.7) * o.width * 0.004, oy = Math.cos(el * 1.3) * o.height * 0.003;
-      const sceneLocal = el - tl[sh.scene]!.start;
-      if (["boom", "thunder", "clang", "snap", "splash"].includes(sc.sfx) && sceneLocal < 0.5) {
-        const a = (1 - sceneLocal / 0.5) * o.width * 0.018;
-        ox += (Math.random() - 0.5) * a; oy += (Math.random() - 0.5) * a; zoom += 0.02;
-      }
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, o.width, o.height);
-      const clip = clipOf.get(sh.scene);
-      if (clip) {
-        const first = clip.scenes[0]!, last = clip.scenes[clip.scenes.length - 1]!;
-        const cs = tl[first]!.start, span = Math.max(0.5, tl[last]!.end - cs);
-        if (!clip.started) {
-          clip.started = true;
-          clip.video.currentTime = 0;
-          clip.video.playbackRate = Math.max(0.5, Math.min(1, (clip.video.duration || span) / span));
-          void clip.video.play().catch(() => undefined);
-        }
-        const k = Math.max(0, 1 - (el - cs) / 0.22);
-        drawImage(ctx, clip.video, o.width, o.height, 1.02 + k * 0.05, 0, 0, ox * 0.5, oy * 0.5);
-      } else {
-      const px = sh.x0 + (sh.x1 - sh.x0) * pe, py = sh.y0 + (sh.y1 - sh.y0) * pe;
-      if (cutKick > 0) {
-        // whip motion blur on the cut
-        ctx.globalAlpha = 0.35;
-        drawImage(ctx, sc.image, o.width, o.height, zoom, px, py, ox - o.width * 0.03 * cutKick, oy);
-        drawImage(ctx, sc.image, o.width, o.height, zoom, px, py, ox + o.width * 0.03 * cutKick, oy);
-        ctx.globalAlpha = 1 - cutKick * 0.35;
-      }
-      drawImage(ctx, sc.image, o.width, o.height, zoom, px, py, ox, oy);
-      ctx.globalAlpha = 1;
-      if (sh.punch && local < 0.08) { ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillRect(0, 0, o.width, o.height); }
-      }
-      // light vignette
+      const local = el - sh.start;
+      const prev = si > 0 ? shots[si - 1] : undefined;
+      if (prev && !sh.punch && local < DISSOLVE) {
+        drawShot(prev, el, 1);
+        drawShot(sh, el, easeOut(local / DISSOLVE));
+      } else drawShot(sh, el, 1);
       const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
-      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.35)");
+      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.3)");
       ctx.fillStyle = g; ctx.fillRect(0, 0, o.width, o.height);
+      if (o.hookText && el < 3) drawHook(ctx, o.hookText, o.width, o.height, vertical, el);
       if (o.captions) {
         while (ci < caps.length - 1 && el >= caps[ci]!.t1) ci++;
         const c = caps[ci];
         if (c && el >= c.t0 - 0.02 && el <= c.t1 + 0.05) drawCaption(ctx, c.text, o.width, o.height, vertical, (el - c.t0) / 0.1);
       }
+      // loudness meter (approximate, 400ms blocks)
+      meter.getFloatTimeDomainData(mbuf);
+      for (let k = 0; k < mbuf.length; k += 2) { acc += mbuf[k]! * mbuf[k]!; accN++; }
+      if (el - lastMeter >= 0.4) { loud.push(10 * Math.log10(acc / Math.max(1, accN) + 1e-12) - 0.691 + 3); acc = 0; accN = 0; lastMeter = el; }
       o.onProgress(Math.min(100, (el / total) * 100));
       setTimeout(frame, 1000 / 30);
     };
@@ -477,6 +552,14 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   stream.getTracks().forEach((tr) => tr.stop());
   await actx.close();
   o.clips?.forEach((c) => c.video.pause());
+  const gated = loud.filter((x) => x > -50).sort((a, b) => a - b);
+  const lufs = gated.length ? 10 * Math.log10(gated.reduce((a, x) => a + 10 ** (x / 10), 0) / gated.length) : -60;
+  // LRA from 3s short-term windows (~7 blocks)
+  const st: number[] = [];
+  for (let i = 0; i + 7 <= loud.length; i++) st.push(10 * Math.log10(loud.slice(i, i + 7).reduce((a, x) => a + 10 ** (x / 10), 0) / 7));
+  const sts = st.filter((x) => x > lufs - 20).sort((a, b) => a - b);
+  const lra = sts.length > 4 ? sts[Math.floor(sts.length * 0.95) - 1]! - sts[Math.floor(sts.length * 0.1)]! : 0;
+  const words = scenes.reduce((a, s) => a + s.text.split(/\s+/).filter(Boolean).length, 0);
   const base = mime.split(";")[0] ?? "video/webm";
-  return { blob: new Blob(parts, { type: base }), mime: base, duration: total };
+  return { blob: new Blob(parts, { type: base }), mime: base, duration: total, stats: { lufs, lra, avgShotSec: total / shots.length, wordsPerSec: words / total } };
 }
