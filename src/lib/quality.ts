@@ -64,7 +64,7 @@ const HISTORY = ["sailor", "roman", "napoleon", "king", "army", "empire", "ancie
 const hits = (t: string, list: string[]) => list.filter((w) => t.includes(w)).length;
 const cap5 = (n: number) => Math.max(0, Math.min(5, Math.round(n)));
 
-/** The brief's 5 topic tests, 0-5 each; a topic passes at 18/25. */
+/** Brief #2 topic tests (0-5 each, pass 18/25): odd = visible oddity in one image, hidden = surprising reason, analogy = household analogy, demo = one proof shot, verifiable = two sources. */
 export function scoreTopic5(title: string): Topic5 {
   const t = title.toLowerCase();
   const odd = cap5(1 + hits(t, ODD) * 2);

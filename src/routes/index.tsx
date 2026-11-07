@@ -102,7 +102,7 @@ function Create() {
               {ideas.map(({ t, s }) => (
                 <button key={t} onClick={() => setTopic(t)} className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm ${topic === t ? "border-primary bg-primary/5" : "hover:bg-muted"}`}>
                   <span className="font-medium">{t}{madeBefore(t, videos.map((v) => v.input.topic)) && <span className="ml-1.5 rounded bg-muted px-1 text-[10px] font-semibold text-muted-foreground">made before</span>}</span>
-                  <span className="flex shrink-0 items-center gap-2"><span className={`font-mono text-[11px] ${scoreTopic5(t).pass ? "text-success" : "text-muted-foreground"}`} title="5 topic tests">{scoreTopic5(t).total}/25</span><Ring v={s.overall} /></span>
+                  <span className="flex shrink-0 items-center gap-2"><span className={`font-mono text-[11px] ${scoreTopic5(t).pass ? "text-success" : "text-muted-foreground"}`} title="Topic tests: one-picture oddity, surprising reason, home analogy, proof shot, two sources">{scoreTopic5(t).total}/25</span><Ring v={s.overall} /></span>
                 </button>
               ))}
             </div>
