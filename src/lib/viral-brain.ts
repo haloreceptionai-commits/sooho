@@ -196,6 +196,10 @@ export function optimizeScript(raw: string, topic?: string): string {
     "It was hiding in plain sight, in front of thousands of people.",
     "And the people who laughed the loudest were the ones who paid the price.",
     "It would take one brutal season to prove who was right.",
+    "The numbers looked perfect on paper, and that was exactly the problem.",
+    "Nobody wrote it down, because nobody believed it could matter.",
+    "One small detail was about to decide everything.",
+    "And when it finally happened, it happened in seconds.",
   ];
   let i = 0;
   while (countWords(out) < PACING_MIN && i < fillers.length) {
