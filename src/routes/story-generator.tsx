@@ -24,7 +24,7 @@ function StoryGenerator() {
   const [format, setFormat] = useState<Format>("short");
   const [duration, setDuration] = useState(60);
   const [pacing, setPacing] = useState(60);
-  const [templateId, setTemplateId] = useState(TEMPLATES[0].id);
+  const [templateId, setTemplateId] = useState("paradox");
   const template = TEMPLATES.find((t) => t.id === templateId) ?? TEMPLATES[0]!;
 
   const plan = useMemo(
