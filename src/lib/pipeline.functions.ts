@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { styleAnchor } from "@/lib/styles";
+import { FEW_SHOT } from "@/lib/story-v2";
 
 // Server-side calls to Azure OpenAI (through the Lovable connector gateway) and,
 // for narration when no Azure speech deployment exists, Lovable AI speech.
@@ -222,17 +223,23 @@ const hookSchema = {
 };
 
 export const generateHooks = createServerFn({ method: "POST" })
-  .inputValidator((d: { topic: string; facts: string; deployment: string }) => {
+  .inputValidator((d: { topic: string; facts: string; research: string; prefer?: string; deployment: string }) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
-    return { ...d, facts: (d.facts ?? "").slice(0, 4000) };
+    return { ...d, facts: (d.facts ?? "").slice(0, 4000), research: (d.research ?? "").slice(0, 3000), prefer: (d.prefer ?? "").slice(0, 200) };
   })
   .handler(async ({ data }) => {
     const r = await azureJson<{ hooks: Hook[] }>(data.deployment,
-      `You write 0:00 hooks for viral history Shorts (RicksClips / Zack D. Films style). Write exactly 10 hooks, 2 of each type: paradox_image, shocking_number, mid_action, direct_question, contrarian. Each "line" is the first spoken sentence: max 12 words, THIRD person ("A sailor...", "He..."; never "I" or "we"), present tense, family-friendly words only (no blood, bleeding, killing, dying, corpses, weapons hurting people), starts mid-action, no greeting, never "Did you know", no "in this video". "visual" = the matching first-frame image (an odd, concrete action). "text" = a 3-6 word on-screen version (no punctuation except ?). Score each 1-10 honestly on curiosity, clarity, visualness, speakability. Stay factually true to the fact sheet, but NEVER reveal or hint at the answer/explanation — the hook only shows the weird action and opens the "why?" loop (e.g. "A sailor pours cooking oil into the sea as pirates close in.").`,
-      `Topic: ${data.topic}\nFact sheet: ${data.facts}`, "hooks", hookSchema, "Hook writer");
-    const total = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability - (h.line.split(/\s+/).length > 12 ? 10 : 0) - (/did you know|hello|hey guys|welcome/i.test(h.line) ? 20 : 0);
-    const ranked = [...r.hooks].sort((a, b) => total(b) - total(a));
-    return { best: ranked[0]!, runnerUp: ranked[1] ?? ranked[0]!, all: ranked };
+      `You write the first 3 seconds of viral story Shorts. Write exactly 10 hooks, 2 of each type: paradox_image, shocking_number, mid_action, direct_question, contrarian.
+HARD RULES for "line" (the first spoken sentence):
+- 8-12 words. No greeting, no joke setup, no riddle, never "Did you know", never "Imagine", never "A [job] knocks...", nothing that needs context from later.
+- Must contain: a concrete subject (say the subject anchor word), an odd action or number, and a place OR time anchor (say the year/era or place).
+- States the oddity in concrete words a 5-year-old understands, so a stranger instantly knows what is odd. It may tease but must not give the hidden reason.
+- Every number must come from the fact sheet. Family-friendly words only. direct_question hooks must still contain the subject + anchor.
+"visual" = the first frame: a WIDE shot that shows the odd thing (never a face close-up).
+"text" = on-screen hook text, max 6 words, states the oddity as a FACT (no question mark), and must NOT repeat the spoken line's words (e.g. spoken "In 1942, America hid a bomber factory under a fake neighbourhood." -> text "FAKE STREET. REAL BOMBERS.").
+Score each 1-10 honestly on curiosity, clarity, visualness, speakability.${data.prefer ? `\nOur audience data says these hook types perform best (in order): ${data.prefer}.` : ""}`,
+      `Topic: ${data.topic}\nResearch (anchors, premise, question):\n${data.research}\nFact sheet:\n${data.facts}`, "hooks", hookSchema, "Hook writer");
+    return { all: r.hooks };
   });
 
 // ---------------- Script / plan ----------------
@@ -245,60 +252,63 @@ export interface PlanInput {
   style: string;
   deployment: string;
   facts?: string; // fact-check summary (claims, myth vs reality, hedge)
+  research?: string; // anchors, premise, question, hero, payoff, money shot
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
 }
-export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in";
-export interface PlanCharacter { name: string; look: string }
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit";
+export interface PlanCharacter { name: string; role: string; look: string }
 export interface PlanScene {
   beat: string; narration: string; image_prompt: string; characters: string[];
   camera: Camera; sfx: string; mood: "tension" | "reveal"; color: string; angle: string;
+  shot: "wide" | "aerial" | "action" | "macro" | "face"; money: boolean; loop_opened: string; loop_closed: string; purpose: string;
 }
-export interface PlanBeat { beat: string; start_s: number; end_s: number; words: number; purpose: string; open_loop_id: string; visual_note: string }
-export interface Plan { beats: PlanBeat[]; script: string; title: string; description: string; palette: string; hookText: string; loopLine: string; characters: PlanCharacter[]; scenes: PlanScene[] }
+export interface PlanBeat { beat: string; start_s: number; end_s: number; words: number; purpose: string; loop_opened: string; loop_closed: string; visual: string; camera_move: string }
+export interface Plan {
+  premise: string; question: string; hero: { name: string; role: string; want: string };
+  beats: PlanBeat[]; script: string; title: string; description: string; palette: string; hookText: string; loopLine: string; characters: PlanCharacter[]; scenes: PlanScene[];
+}
 
+const BEATS = ["hook", "context", "question", "try", "fail", "escalation", "myth", "reveal", "analogy", "proof", "payoff"];
 const planSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["beats", "script", "title", "description", "palette", "hookText", "loopLine", "characters", "scenes"],
+  required: ["premise", "question", "hero", "beats", "script", "title", "description", "palette", "hookText", "loopLine", "characters", "scenes"],
   properties: {
-    beats: { type: "array", items: { type: "object", additionalProperties: false, required: ["beat", "start_s", "end_s", "words", "purpose", "open_loop_id", "visual_note"], properties: {
-      beat: { type: "string" }, start_s: { type: "number" }, end_s: { type: "number" }, words: { type: "integer" }, purpose: { type: "string" }, open_loop_id: { type: "string" }, visual_note: { type: "string" },
+    premise: S, question: S,
+    hero: { type: "object", additionalProperties: false, required: ["name", "role", "want"], properties: { name: S, role: S, want: S } },
+    beats: { type: "array", items: { type: "object", additionalProperties: false, required: ["beat", "start_s", "end_s", "words", "purpose", "loop_opened", "loop_closed", "visual", "camera_move"], properties: {
+      beat: { type: "string", enum: BEATS }, start_s: { type: "number" }, end_s: { type: "number" }, words: { type: "integer" }, purpose: S, loop_opened: S, loop_closed: S, visual: S, camera_move: S,
     } } },
-    hookText: { type: "string" },
-    loopLine: { type: "string" },
-    script: { type: "string" },
-    title: { type: "string" },
-    description: { type: "string" },
-    palette: { type: "string" },
+    hookText: S, loopLine: S, script: S, title: S, description: S, palette: S,
     characters: {
       type: "array",
-      items: { type: "object", additionalProperties: false, required: ["name", "look"], properties: { name: { type: "string" }, look: { type: "string" } } },
+      items: { type: "object", additionalProperties: false, required: ["name", "role", "look"], properties: { name: S, role: S, look: S } },
     },
     scenes: {
       type: "array",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["beat", "narration", "image_prompt", "characters", "camera", "sfx", "mood", "color", "angle"],
+        required: ["beat", "narration", "image_prompt", "characters", "camera", "sfx", "mood", "color", "angle", "shot", "money", "loop_opened", "loop_closed", "purpose"],
         properties: {
-          beat: { type: "string", enum: ["hook", "stakes", "defeat", "countdown", "climax", "reveal", "proof", "payoff"] },
+          beat: { type: "string", enum: BEATS },
           color: { type: "string", enum: ["bright", "dark_cold", "warm_interior", "golden_macro", "high_contrast"] },
           angle: { type: "string", enum: ["wide", "close", "aerial", "top_down", "macro", "pov", "low_angle", "over_shoulder"] },
-          narration: { type: "string" },
-          image_prompt: { type: "string" },
-          characters: { type: "array", items: { type: "string" } },
-          camera: { type: "string", enum: ["push_in", "pull_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "punch_in"] },
-          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour", "wave", "crash", "spray"] },
+          shot: { type: "string", enum: ["wide", "aerial", "action", "macro", "face"] },
+          money: { type: "boolean" },
+          loop_opened: S, loop_closed: S, purpose: S,
+          narration: S,
+          image_prompt: S,
+          characters: { type: "array", items: S },
+          camera: { type: "string", enum: ["push_in", "pull_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "punch_in", "orbit"] },
+          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour", "wave", "crash", "spray", "knock", "rustle", "plane", "siren", "impact"] },
           mood: { type: "string", enum: ["tension", "reveal"] },
         },
       },
     },
   },
 };
-
-// Tone reference (style only — never reuse its content).
-const TONE_EXAMPLE = `"Pour cooking oil into the sea with a pirate ship so close behind them he could hear the pirates laughing. His captain grabs him by the collar and goes, 'We're about to get boarded, and you're making soup?' But he doesn't even look up. He just points at the black clouds. 'Steer into the storm.' ... You see, sailors really carried oil just for this. They called it storm oil. Ever blown on a bowl of soup? The broth ripples, but the oily spots stay perfectly smooth... And fifty yards behind, it curls over and drops straight onto the pirates' deck."`;
 
 export const generatePlan = createServerFn({ method: "POST" })
   .inputValidator((d: PlanInput) => {
@@ -307,45 +317,59 @@ export const generatePlan = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<Plan> => {
     const short = data.format === "short";
-    const wpm = 153; // approved Atlas narrator pace
-    const words = Math.round((data.durationSec / 60) * wpm);
-    const scenes = short ? Math.max(8, Math.round(data.durationSec / 3)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
+    const D = data.durationSec;
+    const words = Math.round(D * 2.6); // ~2.6 spoken words per second (Atlas pace)
+    const scenes = short ? Math.max(8, Math.round(D / 3)) : Math.min(90, Math.max(14, Math.round(D / 6)));
     const perScene = Math.round(words / scenes);
-    const system = `You are the head writer of a viral history & science Shorts channel (style of RicksClips3000 / Zack D. Films, 7.8M+ average views).
-You write a STORY, not a lecture: an ordinary protagonist does something that looks insane, a rival mocks or doubts it, danger escalates, then the hidden science/history is revealed and the rival gets the catastrophe.
-Voice of the narration — copy this TONE, never its content: ${TONE_EXAMPLE}
-Rules:
-- 0:00 hook: start mid-action with the strange act itself, under 12 words before the first comma or period. No greetings, no "did you know", no "in this video".
-- Third person, present tense, conversational ("goes,", "and all he gets back is,"). Short quoted dialogue lines between characters.
-- CURIOSITY-GAP MINI-STORY. Beats in order: hook (weird action, the open loop "why?") → stakes (antagonist + a SKEPTIC who doubts it out loud in quoted dialogue) → defeat → countdown (escalation with 2 mini-twists; a new event, place or question every 6-8 seconds; withhold the answer) → climax (peak tension) → reveal ("You see, ..." name the real practice + one everyday household analogy starting with "Ever ...?") → proof (one visual demo of the mechanism, e.g. a macro shot of soup) → payoff (spectacle; rival gets the catastrophe) and the LAST sentence is the loopLine: it loops back to the hook image or opens a follow-up question.
-- The reveal beat must START between 60% and 72% of the total words. Every question raised must be answered by the end.
-- WORDS A 5-YEAR-OLD KNOWS: use only short, common, everyday words a young kid hears at home ("big", "boat", "oil", "water", "scared", "trick"). Never words like "phenomenon", "viscosity", "surface tension", "maritime", "navigate", "catastrophic", "approximately", "mechanism", "unprecedented". If a science idea needs a name, say it once and explain it in kid words right away ("a thin skin on top of the water").
-- HOOK (first sentence): a strange action or a shocking picture that makes the viewer ask "WHY?". Never give the answer.
-- RE-HOOKS: every 8-10 seconds before the reveal, end a sentence with a NEW question the viewer now needs answered ("So why would he waste good oil?", "But how can oil stop a wave?"). Each one opens a new loop; at least ${Math.max(2, Math.floor((data.durationSec * 0.65) / 12))} questions before the reveal.
-- FALSE BELIEF BROKEN: once, state what most people believe, then smash it ("Most people think oil makes things slippery and worse. But that's wrong."). Put it right before or inside the reveal.
-- SOUND WORDS: use vivid action words the editor can add sound to (splash, spray, crash, boom, creak, pour, thunder) on the key moments.
-- First write the timed beat sheet in "beats" (start_s, end_s, words, purpose, open_loop_id, visual_note), THEN write the prose to match it.
-- SENTENCES: 6-12 words each (never fragments under 5 words like "Reed curses." or "Spray blinds the crew."), present-tense action, concrete nouns, one idea per sentence, questions as pivots, dialogue quoted inside narration. It must still flow as one story told out loud (use "But", "So", "Then" to link) — no lists, at most 3 named characters, crystal clear to a 5-year-old on first listen. No passive voice, no jargon without an analogy.
-- FACTS: stay inside the fact sheet. If it gives a hedge line, say it (in your own words) in the reveal or proof, never overstate the effect.
-- Historically accurate. No subscribe/like calls. No filler; every sentence pushes forward.
-- Plain, simple spoken words. Every line must make literal sense; no poetic metaphors ("glassy knuckles", "clock ticks in his ears"), no "us/we" from the narrator, refer to characters by role ("the cook", "his captain", "the pirates") more than by name.
-- Write the WHOLE narration first in "script" (polish it until it reads perfectly out loud), THEN split that exact text, word for word, into the scenes' "narration" fields.
-Visuals — a new shot about every 3 seconds with smooth continuous camera moves, so every scene is ONE clear action moment:
-- characters: 2–4 recurring characters with a fixed, very specific look (age, build, face, hair/beard, clothing colors, one signature prop). Reuse the exact names in scenes.
-- palette: one sentence of color direction (e.g. deep navy storm sea vs glowing amber oil). Even night/storm scenes must be BRIGHTLY lit and vivid — readable, saturated, never murky.
-- image_prompt: what the camera sees in that instant — subject + action + expression, setting, camera angle (close-up, low angle, over-the-shoulder, wide aerial...), lighting. Vary angles shot to shot. Characters are always DOING the action (pouring, grabbing, pointing, gripping the wheel) — never standing in a lineup or posing. At least 40% of shots show no faces at all: the threat (a ship, a towering wave, storm clouds), a key object in extreme close-up, or a wide aerial establishing shot. Include a simple explainer visual for the reveal (e.g. a bowl of soup with an oil droplet). Include the key prop in a contrasting color. Never put text, letters or signs in the image.
-- Narration safety (the voice engine blocks violent text): family-friendly words only — never "blood", "bleeding", "kill", "murder", "die/dead/death", "corpse", "stab", "slaughter", "drown" (say "sink", "swamped", "wiped out", "in trouble" instead).
-- Safety filter: never describe gore, blood, corpses, injuries, people dying, children, nudity or real living people. Show danger indirectly (towering waves, cracking stone, smoke, terrified faces, the rival ship swamped by foam).
-- camera: the motion that best sells the moment (punch_in for shocks/reveals, tilt_up for something huge, pan for chases).
-- angle: change it on every scene (wide, close, aerial, top_down, macro, pov, low_angle, over_shoulder); never the same angle twice in a row.
-- color: colour arc tracks emotion — "bright" for the sunny setup, "dark_cold" for tension/storm, "warm_interior" for the reveal, "golden_macro" for the proof close-up, "high_contrast" for the payoff spectacle.
-- sfx: the sound of the visual event (pour, wave, crash, clang, splash...). mood: "tension" until the reveal, then "reveal".
-- hookText: a 3-6 word on-screen version of the hook.`;
-    const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube story documentary, 16:9 (same storytelling style, more detail and more twists)"}.
+    const at = (f: number) => Math.round(D * f);
+    const system = `You write ${D}-second ${short ? "vertical story Shorts" : "story documentaries"} for a viral history & science channel. You write a STORY with a hero, not a lecture.
+First output the premise sentence and an impossible question of at most 10 words. Then output a beat sheet with fields: beat, start_s, end_s, words, purpose, loop_opened, loop_closed, visual (must literally show the narrated noun/action), camera_move.
+The video has ONE hero with a want, at most 3 recurring characters (hero, skeptic or ally, threat), and a money-shot image that appears early and again at the payoff.
+The hook (8-12 words) states a concrete oddity with a place or time anchor and never starts with a riddle, joke setup or greeting. By 8s the viewer knows who, where, when and what is at stake. From ~${at(0.15)}s to ~${at(0.7)}s run try-fail-adapt twice, each bigger than the last. Reveal the answer once, with one everyday analogy and one visual proof. Close the opening question in the last 8 seconds. Sentences are 3-12 words and must be grammatical when spoken aloud. Re-hook every 6-8 seconds.
+
+SKELETON (scale to ${D}s):
+- 0-3s hook: the oddity in concrete words, shown on screen (wide shot, money shot or the odd thing).
+- 3-${at(0.15)}s context: place, year, who, what is at stake. Premise fully clear by 8s. Say ALL anchors by 8s: subject, year, place, stakes; say the org by 15s.
+- by 8s question: the main question is SPOKEN (one sentence ending "?", max 12 words, plain words). It is the ONLY question before 15s. Then try #1 shown visibly.
+- ${at(0.3)}-${at(0.7)}s escalation: try -> fail -> adapt, twice; each bigger, riskier or stranger. One skeptic line in quoted dialogue ("That can't work."), one rival/threat. Beats "try", "fail", "escalation" (a "fail" or "escalation" beat must start before 30s).
+- myth beat at 40-60% of the words: "Most people think/picture X. Actually Y." before the proof.
+- reveal + analogy + proof (main loop closes at 65-75%): ONE reveal that answers the question, ONE household analogy starting "Ever ...?", ONE visual proof shot.
+- payoff (last ~${Math.max(6, at(0.12))}s): a consequence, twist, number or image the viewer did not expect (never an absence like "nobody came" unless framed as success: "It worked so well that..."). The final 8s REPEAT the opening question's words and answer it plainly ("So how do you hide a factory from the sky? You turn its roof into a fake street."). loopLine = that closing line.
+
+HERO & CAST:
+- The hero (a person, named if documented, else a clear role like "the head painter") states their want in a sentence by 10s ("Lockheed wants the factory gone from enemy maps."). The hero appears (in "characters") in at least 60% of scenes.
+- Every character is introduced with a name or role in the same sentence. Every "he/she/they" must refer to someone named in the previous sentence; otherwise repeat the name. Never introduce side characters, extra places or side examples.
+
+LANGUAGE:
+- Words a 5-year-old knows. Short, complete subject-verb-object sentences, present tense for action, one idea per sentence. Every sentence adds one new fact or a reversal; delete scene-only description.
+- Re-hook every 6-8s after 15s with a new danger, number, reversal or question.
+- Use sound words on key moments (knock, splash, crash, boom, creak, rustle, siren, plane, thunder) so the editor can add sound.
+- Family-friendly words only (never blood, kill, die, dead, corpse, stab, slaughter, drown). Stay inside the fact sheet; word disputed claims carefully ("no attack is documented").
+- No subscribe calls, no "in this video".
+
+LOOP REGISTRY: in scenes, set loop_opened/loop_closed to loop ids. The main question is id "main" (opened in the question scene, closed in the reveal at 65-75%). Every other loop you open (e.g. "q2") must be closed before the end.
+
+VISUALS (one scene ≈ 3s, one clear moment):
+- image_prompt shows exactly what the narration says (the main noun or action, literally): if the line says "a plane", show the plane. Show the process (hands painting, nets being hung, the view from above).
+- shot: wide/aerial (≥40% of scenes), action (~30%), macro/process insert (~20%), face close-up (≤30%, never the first scene). Avoid posed smiling groups looking at camera.
+- money: true for the money-shot scene (by 10s) and again for a payoff scene (both show the money-shot image).
+- color per beat with a story reason: bright (setup), dark_cold (tension), warm_interior (reveal), golden_macro (proof), high_contrast (payoff).
+- camera: a move every shot (push_in, pull_out, pan_left, pan_right, tilt_up, tilt_down, punch_in for shocks, orbit for scale). angle: vary every scene.
+- characters: max 3, each with name, role and a very specific fixed look (age, build, face, hair, clothing colours, one prop).
+- palette: one sentence. Even night scenes are brightly lit and readable.
+- Safety filter: no gore, injuries, corpses, children, nudity or real living people. Show danger indirectly. Never put text or letters in images.
+- sfx: the sound of the visual event (knock, rustle, plane, siren, impact, pour, wave, crash...).
+- hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook words.
+
+Write the WHOLE narration first in "script" (read it aloud in your head; fix anything that doesn't parse), THEN split that exact text, word for word, into the scenes' "narration" fields.
+
+EXAMPLES (learn the structure, never reuse content):
+${FEW_SHOT}`;
+    const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube story documentary, 16:9 (same structure, more tries and more detail)"}.
 Topic: ${data.topic}
 Viral archetype: ${data.archetype}
-Target: ${data.durationSec} seconds ≈ ${words} words of narration total (±8%). Exactly about ${scenes} scenes of ~${perScene} words each — a scene's narration may end mid-sentence; it continues in the next scene.
-${data.facts ? `Fact sheet (obey it): ${data.facts}\n` : ""}${data.hook ? `Open with this exact hook line: "${data.hook}"\n` : ""}${data.repair ? `A previous draft FAILED these checks — fix every one: ${data.repair}\n` : ""}Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) and a 2-sentence YouTube description.`;
+Target: ${D} seconds ≈ ${words} words of narration total (±8%). About ${scenes} scenes of ~${perScene} words each.
+${data.research ? `Research (use these anchors, hero, question, tries, payoff and money shot):\n${data.research}\n` : ""}${data.facts ? `Fact sheet (obey it):\n${data.facts}\n` : ""}${data.hook ? `Open with this exact hook line: "${data.hook}"\n` : ""}${data.repair ? `A previous draft FAILED these checks — fix every one, keep what passed:\n${data.repair}\n` : ""}Return a click-worthy title (under 60 chars) and a 2-sentence YouTube description.`;
 
     const plan = await azureJson<Plan>(data.deployment, system, user, "video_plan", planSchema, "Script writer");
     if (!plan.scenes?.length) throw new Error("Script writer returned an empty plan");
