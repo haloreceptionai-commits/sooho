@@ -180,9 +180,9 @@ export function optimizeScript(raw: string, topic?: string): string {
   const facts = stripFluff(narration(raw)).split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter((s) => s.length > 3);
   const subject = (topic?.trim() || facts[0]?.replace(/[.!?]$/, "") || "this").replace(/^(why|how|the)\s+/i, "");
   const take = (n: number) => facts.splice(0, n).join(" ");
-  const short = subject.split(/\s+/).slice(0, 5).join(" ");
+  const short = subject.replace(/^the\s+/i, "").split(/\s+/).slice(0, 3).join(" ").toLowerCase();
 
-  const hook = `[HOOK 0:00] The ${short} was failing — and nobody tried to stop it.`;
+  const hook = `[HOOK 0:00] The ${short} was cracking apart — and nobody tried to stop it.`;
   const stakes = `[STAKES & RIVAL] Their rivals called it a mistake. The experts said it would never work. ${take(2) || `Everyone believed there was a better way to build the ${short}.`}`;
   const defeat = `[FALSE DEFEAT] At first, the critics looked right. The perfect version won praise, contracts and crowds. ${take(2) || "For years, the flawed design was mocked as foolish."} [SFX: crowd murmur]`;
   const countdown = `[HIDDEN COUNTDOWN] But something was rising, slowly, every single day. Heat. Pressure. A storm nobody could see coming. ${take(2) || "Minutes turned to hours, and the pressure kept building."} [SFX: low ticking]`;

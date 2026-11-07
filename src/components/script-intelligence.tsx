@@ -54,8 +54,8 @@ export function ScriptIntelligence({ text, onOptimize, compact = false }: { text
           <p className="flex items-center gap-1.5 font-bold"><Brain className="h-4 w-4 text-primary" /> Viral Brain score</p>
           <p className="text-xs text-muted-foreground">Checked against the 5-beat high-tension Shorts formula.</p>
         </div>
-        {onOptimize && <button className={btnPrimary} onClick={onOptimize}><Wand2 className="h-4 w-4" /> Optimize with Viral Brain</button>}
       </div>
+      {onOptimize && <button className={`${btnPrimary} mt-4 w-full`} onClick={onOptimize}><Wand2 className="h-4 w-4" /> Optimize with Viral Brain</button>}
 
       <div className="mt-4"><PacingMeter words={a.words} /></div>
 
