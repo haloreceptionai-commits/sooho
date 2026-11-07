@@ -93,7 +93,7 @@ export function hookTextIssues(text: string, spoken: string): string[] {
 // ---------------- validators ----------------
 
 const MYTH = /\b(most people (think|picture|believe|imagine)|people (think|believe)|everyone (thinks|believes)|you might think|you'?d think)\b/i;
-const ABSENCE = /\b(no one|nobody|nothing|never|no \w+ (ever )?(came|happened|attacked|found|showed))\b/i;
+const ABSENCE = /\b(no one|nobody|nothing|never|no (\w+ ){1,3}(ever )?(came|happened|attacked|found|showed|arrived))\b/i;
 const ABSENCE_OK = /\b(so well|worked|because|thanks to|that'?s why|which is why)\b/i;
 const WANT = /\b(wants?|needs?|must|has to|have to|tries|trying|try to|goal|plans? to|hopes?|desperate)\b/i;
 const PRONOUN_START = /^["']?(he|she|they|him|her|his|them)\b/i;
@@ -284,7 +284,7 @@ export const GOLD_REWRITE: StoryScene[] = [
   g("myth", "Most people picture a whole fake town. Actually, it was a thin cover over one roof.", "wide", []),
   g("reveal", "The set builders know the trick. You don't hide the shape. You break it up.", "face", ["set builders"]),
   g("analogy", "Ever hide a toy under a blanket? From far away, it looks like a lumpy floor.", "macro", [], false, "", "main"),
-  g("proof", "From the air, the Lockheed roof becomes a soft street with tiny homes.", "aerial"),
+  g("proof", "From the air, the Lockheed roof becomes a soft street with tiny homes.", "macro"),
   g("payoff", "It worked so well that pilots got lost over their own factory. So how do you hide a factory from the sky? You turn its roof into a fake street.", "action", ["Lockheed", "pilot"], true),
 ];
 export const GOLD_STORY = (): StoryInput => ({
