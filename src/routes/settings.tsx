@@ -51,10 +51,10 @@ function SettingsPage() {
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Azure OpenAI</h2>
           <Field name="Endpoint" hint="e.g. https://your-resource.openai.azure.com"><input className={input} value={f.azureEndpoint} onChange={(e) => set("azureEndpoint", e.target.value)} placeholder="https://…openai.azure.com" /></Field>
-          <Field name="API key" hint="Stored server-side only — never saved in your browser or the app code.">
+          <Field name="API key" hint="Saved securely as the Azure OpenAI connector — never stored in your browser or app code. Change it under Connectors.">
             <div className="flex items-center gap-2">
-              <input className={input} type="password" disabled value="" placeholder="Saved securely when the backend is connected" />
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warning/15 px-2 py-1 text-xs font-semibold text-warning"><KeyRound className="h-3 w-3" /> Not set</span>
+              <input className={input} type="password" disabled value="" placeholder="••••••••••••  stored securely" />
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/10 px-2 py-1 text-xs font-semibold text-success"><KeyRound className="h-3 w-3" /> Connected</span>
             </div>
           </Field>
           <div>
