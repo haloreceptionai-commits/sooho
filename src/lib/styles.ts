@@ -1,7 +1,7 @@
 // Visual styles and the art-direction text sent with every image prompt.
 export const STYLE_ANCHORS: Record<string, string> = {
   "3D animated cartoon":
-    "Stylized 3D animated film still in the style of viral explainer Shorts (Zack D. Films look): clay-like semi-realistic 3D characters with expressive, slightly exaggerated faces and big readable emotions, smooth soft materials, cinematic volumetric lighting, shallow depth of field, rich saturated color with strong contrast, dynamic camera angle, crisp detail. Not photoreal, not 2D",
+    "Stylized 3D animated film still in the style of viral explainer Shorts (Zack D. Films look): clay-like semi-realistic 3D characters with expressive, slightly exaggerated faces and big readable emotions, smooth soft materials, bright high-key cinematic lighting with vivid saturated colors (even at night: luminous moonlight blues, glowing highlights), clean readable silhouettes, shallow depth of field, rich saturated color with strong contrast, dynamic camera angle, crisp detail. Not photoreal, not 2D",
   "Oil painting": "Dramatic museum-quality oil painting, visible brushwork, chiaroscuro lighting, rich pigments, cinematic composition",
   "Cinematic photoreal": "Cinematic photoreal film still, anamorphic lens, dramatic lighting, shallow depth of field, period-accurate detail",
   Chiaroscuro: "Baroque chiaroscuro painting, deep black shadows, single warm light source, Caravaggio mood",

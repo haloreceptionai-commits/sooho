@@ -110,7 +110,7 @@ export const generatePlan = createServerFn({ method: "POST" })
     const short = data.format === "short";
     const wpm = short ? 250 : 190; // measured speed of the fast storyteller narration
     const words = Math.round((data.durationSec / 60) * wpm);
-    const scenes = short ? Math.max(10, Math.round(data.durationSec / 3)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
+    const scenes = short ? Math.max(10, Math.round(data.durationSec / 2.5)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
     const perScene = Math.round(words / scenes);
     const system = `You are the head writer of a viral history & science Shorts channel (style of RicksClips3000 / Zack D. Films, 7.8M+ average views).
 You write a STORY, not a lecture: an ordinary protagonist does something that looks insane, a rival mocks or doubts it, danger escalates, then the hidden science/history is revealed and the rival gets the catastrophe.
@@ -119,10 +119,11 @@ Rules:
 - 0:00 hook: start mid-action with the strange act itself, under 12 words before the first comma or period. No greetings, no "did you know", no "in this video".
 - Third person, present tense, conversational ("goes,", "and all he gets back is,"). Short quoted dialogue lines between characters.
 - Beats in order: hook → stakes (rival foil doubts/mocks) → defeat (the conventional way looks like it's winning) → countdown (environment escalates: storm, heat, pressure, time) → climax (the threat arrives) → reveal ("You see, ..." name the real historical practice + one everyday analogy starting with "Ever ...?") → payoff (protagonist survives, rival suffers the catastrophe; last line lands hard).
-- Historically accurate. No subscribe/like calls. No pauses or filler; every sentence pushes forward.
+- FLOW: write it like one breathless story told out loud — mostly long run-on sentences chained with "and", "so", "but then", "while". NO choppy fragments ("Horns blare. Ladders rise."), no lists, at most 3 named characters, and the story must be crystal clear to a 12-year-old on first listen.
+- Historically accurate. No subscribe/like calls. No filler; every sentence pushes forward.
 Visuals — the video cuts every 1.5–2.5 seconds, so every scene is ONE frozen action moment:
 - characters: 2–4 recurring characters with a fixed, very specific look (age, build, face, hair/beard, clothing colors, one signature prop). Reuse the exact names in scenes.
-- palette: one sentence of color direction (e.g. dark navy storm sea vs glowing amber oil).
+- palette: one sentence of color direction (e.g. deep navy storm sea vs glowing amber oil). Even night/storm scenes must be BRIGHTLY lit and vivid — readable, saturated, never murky.
 - image_prompt: what the camera sees in that instant — subject + action + expression, setting, camera angle (close-up, low angle, over-the-shoulder, wide aerial...), lighting. Vary angles shot to shot. Include the key prop in a contrasting color. Never put text, letters or signs in the image.
 - Safety filter: never describe gore, blood, corpses, injuries, people dying, children, nudity or real living people. Show danger indirectly (towering waves, cracking stone, smoke, terrified faces, the rival ship swamped by foam).
 - camera: the motion that best sells the moment (punch_in for shocks/reveals, tilt_up for something huge, pan for chases).
@@ -136,7 +137,7 @@ Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) 
     const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
       max_completion_tokens: 32000,
-      reasoning_effort: "low",
+      reasoning_effort: "medium",
       response_format: { type: "json_schema", json_schema: { name: "video_plan", strict: true, schema: planSchema } },
     });
     if (!res.ok) await fail(res, "Script writer");

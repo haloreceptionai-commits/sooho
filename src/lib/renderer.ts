@@ -129,6 +129,42 @@ function speechBounds(b: AudioBuffer) {
   return { from: Math.max(0, s - pad) / b.sampleRate, to: Math.min(d.length, e + pad) / b.sampleRate };
 }
 
+/** Shortens every pause longer than ~0.16s to 0.1s — fast "no pauses" delivery. */
+export function tightenPauses(ctx: BaseAudioContext, b: AudioBuffer, maxPause = 0.16, keep = 0.1): AudioBuffer {
+  const d = b.getChannelData(0);
+  const win = Math.round(b.sampleRate * 0.01);
+  const quiet: boolean[] = [];
+  for (let i = 0; i < d.length; i += win) {
+    let m = 0;
+    for (let j = i; j < Math.min(d.length, i + win); j++) m = Math.max(m, Math.abs(d[j]!));
+    quiet.push(m < 0.015);
+  }
+  const keepWins = Math.round(keep / 0.01), maxWins = Math.round(maxPause / 0.01);
+  const segs: [number, number][] = [];
+  let i = 0;
+  while (i < quiet.length) {
+    let j = i;
+    while (j < quiet.length && quiet[j] === quiet[i]) j++;
+    const len = j - i;
+    if (quiet[i] && len > maxWins) { const h = Math.floor(keepWins / 2); segs.push([i, i + h], [j - h, j]); }
+    else segs.push([i, j]);
+    i = j;
+  }
+  const total = segs.reduce((a, [x, y]) => a + (y - x) * win, 0);
+  const out = ctx.createBuffer(b.numberOfChannels, Math.min(total, d.length), b.sampleRate);
+  for (let c = 0; c < b.numberOfChannels; c++) {
+    const src = b.getChannelData(c), dst = out.getChannelData(c);
+    let o = 0;
+    for (const [x, y] of segs) {
+      const part = src.subarray(x * win, Math.min(src.length, y * win));
+      dst.set(part.subarray(0, Math.max(0, dst.length - o)), o);
+      o += part.length;
+      if (o >= dst.length) break;
+    }
+  }
+  return out;
+}
+
 export interface Word { text: string; t0: number; t1: number }
 export interface SceneTiming { start: number; end: number; words: Word[] }
 
@@ -165,7 +201,7 @@ function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
   scenes.forEach((sc, i) => {
     const t = tl[i]!;
     const dur = Math.max(0.6, t.end - t.start);
-    const n = Math.max(1, Math.round(dur / 2.1));
+    const n = Math.max(1, Math.round(dur / 1.7));
     for (let k = 0; k < n; k++) {
       const s = t.start + (dur * k) / n, e = t.start + (dur * (k + 1)) / n;
       const v = (i * 7 + k * 3) % 5;
@@ -269,7 +305,7 @@ function scheduleMusic(ctx: AudioContext, out: AudioNode, at: number, step: numb
 export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number }> {
   const actx = new AudioContext();
   await actx.resume();
-  const buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
+  const buffers = (await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))))).map((b) => tightenPauses(actx, b));
   const LEAD = 0.15, JOIN = 0.06;
   let t = LEAD;
   const chunks = buffers.map((b, i) => {
