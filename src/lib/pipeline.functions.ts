@@ -327,6 +327,12 @@ First output the premise sentence and an impossible question of at most 10 words
 The video has ONE hero with a want, at most 3 recurring characters (hero, skeptic or ally, threat), and a money-shot image that appears early and again at the payoff.
 The hook (8-12 words) states a concrete oddity with a place or time anchor and never starts with a riddle, joke setup or greeting. By 8s the viewer knows who, where, when and what is at stake. From ~${at(0.15)}s to ~${at(0.7)}s run try-fail-adapt twice, each bigger than the last. Reveal the answer once, with one everyday analogy and one visual proof. Close the opening question in the last 8 seconds. Sentences are 3-12 words and must be grammatical when spoken aloud. Re-hook every 6-8 seconds.
 
+WORD CLOCK (the narrator says ~2.6 words per second — count words, this is checked by a machine):
+- Words 1-12: the hook. Words 1-20 (=8s): say ALL of subject, year, place and stakes words, AND finish the ONE main question sentence (ending "?", max 12 words, containing the subject word). No other "?" until word ~40.
+- Within words 1-26 (=10s): the sentence "[hero name] wants/needs ..." and the org name by word ~38 (=15s).
+- The main question is answered (loop_closed "main") in a scene starting at 65-75% of all words.
+- The LAST ~20 words repeat the main question's key words and answer it plainly.
+
 SKELETON (scale to ${D}s):
 - 0-3s hook: the oddity in concrete words, shown on screen (wide shot, money shot or the odd thing).
 - 3-${at(0.15)}s context: place, year, who, what is at stake. Premise fully clear by 8s. Say ALL anchors by 8s: subject, year, place, stakes; say the org by 15s.

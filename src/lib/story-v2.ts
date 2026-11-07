@@ -30,7 +30,8 @@ export interface Check { id: string; pass: boolean; msg: string }
 export interface StoryReport { checks: Check[]; failed: Check[]; words: number; revealSec: number; shotMix: Record<Shot, number> }
 
 export const wc = (t: string) => t.split(/\s+/).filter(Boolean).length;
-export const splitSentences = (t: string) => t.replace(/[“”]/g, '"').split(/(?<=[.!?]["']?)\s+/).map((x) => x.trim()).filter(Boolean);
+// splits on . ! ? but not after initials or titles ("John F. Ohmer", "Mr. Smith")
+export const splitSentences = (t: string) => t.replace(/[“”]/g, '"').split(/(?<!\b[A-Z]|\b(?:Mr|Mrs|Ms|Dr|St|Lt|Col|Gen|Maj|Capt|Sgt|Jr|Sr))(?<=[.!?]["']?)\s+/).map((x) => x.trim()).filter(Boolean);
 const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]/g, " ");
 const STOP = new Set("the a an and but so then of to in on at by as or is are was were be it its this that these those he she they his her their them him you your we our what who how why when where do does did can could would will just even very from with into for not no yes".split(" "));
 export const contentWords = (t: string) => norm(t).split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w));
@@ -198,7 +199,7 @@ export function validateStory(s: StoryInput): StoryReport {
   const anchorWords = new Set(Object.values(s.anchors).flatMap(contentWords).concat(contentWords(`${s.hero.name} ${s.cast.map((c) => c.name).join(" ")}`)));
   const hard = [...new Set(hardWords(all))].filter((w) => !anchorWords.has(w.toLowerCase().replace(/[^a-z]/g, "")));
   const labels = sents.filter((x) => LABEL.test(x));
-  const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || !VERBISH.test(x)) && !/\?["']?$/.test(x));
+  const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || (wc(x) <= 4 && !VERBISH.test(x))) && !/\?["']?$/.test(x));
   const budget = s.durationSec * 2.6;
   const langOk = longS <= 1 && hard.length <= 3 && !labels.length && frags.length <= 2 && words <= budget * 1.15 && words >= budget * 0.8;
   add("LANG", langOk, langOk ? "Plain short sentences" : [longS > 1 ? `${longS} sentences over 12 words` : "", hard.length > 3 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
