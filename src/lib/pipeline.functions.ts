@@ -138,12 +138,32 @@ Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) 
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
       max_completion_tokens: 32000,
       reasoning_effort: "low",
+      stream: true, // stream so the gateway sees bytes flowing on long scripts
       response_format: { type: "json_schema", json_schema: { name: "video_plan", strict: true, schema: planSchema } },
     });
-    if (!res.ok) await fail(res, "Script writer");
-    const json = (await res.json()) as { choices?: { message?: { content?: string; refusal?: string | null } }[] };
-    const msg = json.choices?.[0]?.message;
-    if (msg?.refusal) throw new Error(`Script writer refused: ${msg.refusal}`);
+    if (!res.ok || !res.body) await fail(res, "Script writer");
+    let content = "", refusal = "", buf = "";
+    const reader = res.body!.getReader();
+    const dec = new TextDecoder();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let nl: number;
+      while ((nl = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (payload === "[DONE]") continue;
+        try {
+          const j = JSON.parse(payload) as { choices?: { delta?: { content?: string; refusal?: string } }[] };
+          content += j.choices?.[0]?.delta?.content ?? "";
+          refusal += j.choices?.[0]?.delta?.refusal ?? "";
+        } catch { /* partial keep-alive */ }
+      }
+    }
+    if (refusal) throw new Error(`Script writer refused: ${refusal}`);
+    const msg = { content };
     try {
       const plan = JSON.parse(msg?.content ?? "") as Plan;
       if (!plan.scenes?.length) throw new Error("empty");
