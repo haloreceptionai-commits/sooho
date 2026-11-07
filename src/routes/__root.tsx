@@ -128,10 +128,10 @@ function RootComponent() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     hydrateStore();
-    void syncFromCloud();
+    void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted()));
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      if (event === "SIGNED_OUT") clearVideos(); else void syncFromCloud();
+      if (event === "SIGNED_OUT") clearVideos(); else void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted()));
       void router.invalidate();
     });
     return () => data.subscription.unsubscribe();

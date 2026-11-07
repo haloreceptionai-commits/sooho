@@ -566,6 +566,8 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   };
 
   const DISSOLVE = 0.35;
+  const ticker = backgroundTicker(1000 / 30);
+  const tick = ticker.next;
   await new Promise<void>((resolve) => {
     let si = 0, ci = 0, lastMeter = 0, acc = 0, accN = 0;
     const frame = () => {
@@ -599,10 +601,11 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
       for (let k = 0; k < mbuf.length; k += 2) { acc += mbuf[k]! * mbuf[k]!; accN++; }
       if (el - lastMeter >= 0.4) { loud.push(10 * Math.log10(acc / Math.max(1, accN) + 1e-12) - 0.691 + 3); acc = 0; accN = 0; lastMeter = el; }
       o.onProgress(Math.min(100, (el / total) * 100));
-      setTimeout(frame, 1000 / 30);
+      tick(frame);
     };
     frame();
   });
+  ticker.stop();
 
   rec.stop();
   await stopped;
@@ -619,4 +622,22 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   const words = scenes.reduce((a, s) => a + s.text.split(/\s+/).filter(Boolean).length, 0);
   const base = mime.split(";")[0] ?? "video/webm";
   return { blob: new Blob(parts, { type: base }), mime: base, duration: total, stats: { lufs, lra, avgShotSec: total / shots.length, wordsPerSec: words / total } };
+}
+
+/** Frame timer that keeps full speed when the tab is hidden or minimised.
+ *  Browsers throttle page timers in background tabs; timers inside a Web Worker are not throttled. */
+export function backgroundTicker(ms: number) {
+  let worker: Worker | null = null;
+  let pending: (() => void) | null = null;
+  try {
+    const src = `let t=null;onmessage=(e)=>{if(e.data==="stop"){clearTimeout(t);close();return;}t=setTimeout(()=>postMessage(0),e.data);}`;
+    worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+    worker.onmessage = () => { const f = pending; pending = null; f?.(); };
+  } catch { worker = null; }
+  return {
+    next(fn: () => void) {
+      if (worker) { pending = fn; worker.postMessage(ms); } else setTimeout(fn, ms);
+    },
+    stop() { worker?.postMessage("stop"); worker = null; },
+  };
 }

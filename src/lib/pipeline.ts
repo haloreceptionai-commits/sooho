@@ -92,6 +92,7 @@ const running = new Set<string>();
 export async function runVideo(id: string, input: VideoInput) {
   if (running.has(id)) return;
   running.add(id);
+  keepAlive();
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => actions.updateVideo(id, p);
   try {
@@ -339,6 +340,29 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ status: "failed", error: msg, detail: "Failed" });
   } finally {
     running.delete(id);
+    keepAlive();
+  }
+}
+
+// ---- Background safety: warn before closing, keep the screen awake, auto-resume.
+let wake: { release: () => Promise<void> } | null = null;
+const onLeave = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+function keepAlive() {
+  if (typeof window === "undefined") return;
+  if (running.size > 0) {
+    window.addEventListener("beforeunload", onLeave);
+    const nav = navigator as Navigator & { wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } };
+    if (!wake && nav.wakeLock && document.visibilityState === "visible") void nav.wakeLock.request("screen").then((w) => { wake = w; }).catch(() => undefined);
+  } else {
+    window.removeEventListener("beforeunload", onLeave);
+    void wake?.release().catch(() => undefined); wake = null;
+  }
+}
+
+/** Restarts videos that were cut off because the page was closed or reloaded mid-generation. */
+export function resumeInterrupted() {
+  for (const v of getState().videos) {
+    if (v.status === "failed" && v.detail === "Interrupted" && !running.has(v.id)) void runVideo(v.id, v.input);
   }
 }
 
