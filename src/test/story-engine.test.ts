@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildStory, TEMPLATES } from "@/lib/story-engine";
 
-const base = { topic: "Constantinople", template: TEMPLATES[0] };
+const base = { topic: "Constantinople", template: TEMPLATES[0]! };
 
 describe("story engine", () => {
   it("has exactly 5 beats with the Paradox Hook at 0:00", () => {
