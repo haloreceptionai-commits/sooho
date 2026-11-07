@@ -48,6 +48,92 @@ function toBase64(buf: ArrayBuffer) {
   return btoa(bin);
 }
 
+
+/** Streams a strict-JSON chat completion from Azure (streaming keeps the gateway alive on long calls). */
+async function azureJson<T>(deployment: string, system: string, user: string, name: string, schema: unknown, what: string): Promise<T> {
+  const res = await azure(`${safeName(deployment)}/chat/completions`, {
+    messages: [{ role: "system", content: system }, { role: "user", content: user }],
+    max_completion_tokens: 32000,
+    reasoning_effort: "low",
+    stream: true,
+    response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
+  });
+  if (!res.ok || !res.body) await fail(res, what);
+  let content = "", refusal = "", buf = "";
+  const reader = res.body!.getReader();
+  const dec = new TextDecoder();
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let nl: number;
+    while ((nl = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (payload === "[DONE]") continue;
+      try {
+        const j = JSON.parse(payload) as { choices?: { delta?: { content?: string; refusal?: string } }[] };
+        content += j.choices?.[0]?.delta?.content ?? "";
+        refusal += j.choices?.[0]?.delta?.refusal ?? "";
+      } catch { /* keep-alive */ }
+    }
+  }
+  if (refusal) throw new Error(`${what} refused: ${refusal}`);
+  try { return JSON.parse(content) as T; } catch { throw new Error(`${what} returned an unreadable answer`); }
+}
+
+// ---------------- Fact check ----------------
+
+export interface Claim { claim: string; sources: string[]; date: string; confidence: "high" | "medium" | "low" }
+export interface FactSheet { claims: Claim[]; myth: string; reality: string; hedge: string }
+const factSchema = {
+  type: "object", additionalProperties: false, required: ["claims", "myth", "reality", "hedge"],
+  properties: {
+    claims: { type: "array", items: { type: "object", additionalProperties: false, required: ["claim", "sources", "date", "confidence"], properties: {
+      claim: { type: "string" }, sources: { type: "array", items: { type: "string" } }, date: { type: "string" }, confidence: { type: "string", enum: ["high", "medium", "low"] },
+    } } },
+    myth: { type: "string" }, reality: { type: "string" }, hedge: { type: "string" },
+  },
+};
+
+export const factCheck = createServerFn({ method: "POST" })
+  .inputValidator((d: { topic: string; deployment: string }) => {
+    if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
+    return d;
+  })
+  .handler(async ({ data }) => azureJson<FactSheet>(data.deployment,
+    `You are a meticulous history & science fact-checker for a Shorts channel. List 5-8 atomic, checkable claims the video will rely on. For each give 2+ independent named sources (book, paper, museum, primary document, e.g. "Pliny, Natural History II.234", "Franklin letter to Brownrigg, 1774"), the date/period, and a confidence rating. Never invent sources; if you are unsure, lower confidence. "myth" = what the popular telling says, "reality" = what evidence supports. "hedge" = ONE short spoken line (max 12 words) the narrator must say if the effect is partial or overstated, else "".`,
+    `Topic: ${data.topic}`, "fact_sheet", factSchema, "Fact checker"));
+
+// ---------------- Hooks ----------------
+
+export interface Hook { type: string; line: string; visual: string; text: string; curiosity: number; clarity: number; visualness: number; speakability: number }
+const hookSchema = {
+  type: "object", additionalProperties: false, required: ["hooks"],
+  properties: { hooks: { type: "array", items: { type: "object", additionalProperties: false,
+    required: ["type", "line", "visual", "text", "curiosity", "clarity", "visualness", "speakability"],
+    properties: {
+      type: { type: "string", enum: ["paradox_image", "shocking_number", "mid_action", "direct_question", "contrarian"] },
+      line: { type: "string" }, visual: { type: "string" }, text: { type: "string" },
+      curiosity: { type: "integer" }, clarity: { type: "integer" }, visualness: { type: "integer" }, speakability: { type: "integer" },
+    } } } },
+};
+
+export const generateHooks = createServerFn({ method: "POST" })
+  .inputValidator((d: { topic: string; facts: string; deployment: string }) => {
+    if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
+    return { ...d, facts: (d.facts ?? "").slice(0, 4000) };
+  })
+  .handler(async ({ data }) => {
+    const r = await azureJson<{ hooks: Hook[] }>(data.deployment,
+      `You write 0:00 hooks for viral history Shorts (RicksClips / Zack D. Films style). Write exactly 10 hooks, 2 of each type: paradox_image, shocking_number, mid_action, direct_question, contrarian. Each "line" is the first spoken sentence: max 12 words, present tense, starts mid-action, no greeting, never "Did you know", no "in this video". "visual" = the matching first-frame image (an odd, concrete action). "text" = a 3-6 word on-screen version (no punctuation except ?). Score each 1-10 honestly on curiosity, clarity, visualness, speakability. Stay factually true to the fact sheet.`,
+      `Topic: ${data.topic}\nFact sheet: ${data.facts}`, "hooks", hookSchema, "Hook writer");
+    const total = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability - (h.line.split(/\s+/).length > 12 ? 10 : 0) - (/did you know|hello|hey guys|welcome/i.test(h.line) ? 20 : 0);
+    const ranked = [...r.hooks].sort((a, b) => total(b) - total(a));
+    return { best: ranked[0]!, runnerUp: ranked[1] ?? ranked[0]!, all: ranked };
+  });
+
 // ---------------- Script / plan ----------------
 
 export interface PlanInput {
@@ -57,20 +143,29 @@ export interface PlanInput {
   archetype: string;
   style: string;
   deployment: string;
+  facts?: string; // fact-check summary (claims, myth vs reality, hedge)
+  hook?: string; // chosen opening line
+  repair?: string; // validator issues from a previous draft
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in";
 export interface PlanCharacter { name: string; look: string }
 export interface PlanScene {
   beat: string; narration: string; image_prompt: string; characters: string[];
-  camera: Camera; sfx: string; mood: "tension" | "reveal";
+  camera: Camera; sfx: string; mood: "tension" | "reveal"; color: string; angle: string;
 }
-export interface Plan { script: string; title: string; description: string; palette: string; characters: PlanCharacter[]; scenes: PlanScene[] }
+export interface PlanBeat { beat: string; start_s: number; end_s: number; words: number; purpose: string; open_loop_id: string; visual_note: string }
+export interface Plan { beats: PlanBeat[]; script: string; title: string; description: string; palette: string; hookText: string; loopLine: string; characters: PlanCharacter[]; scenes: PlanScene[] }
 
 const planSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["script", "title", "description", "palette", "characters", "scenes"],
+  required: ["beats", "script", "title", "description", "palette", "hookText", "loopLine", "characters", "scenes"],
   properties: {
+    beats: { type: "array", items: { type: "object", additionalProperties: false, required: ["beat", "start_s", "end_s", "words", "purpose", "open_loop_id", "visual_note"], properties: {
+      beat: { type: "string" }, start_s: { type: "number" }, end_s: { type: "number" }, words: { type: "integer" }, purpose: { type: "string" }, open_loop_id: { type: "string" }, visual_note: { type: "string" },
+    } } },
+    hookText: { type: "string" },
+    loopLine: { type: "string" },
     script: { type: "string" },
     title: { type: "string" },
     description: { type: "string" },
@@ -84,14 +179,16 @@ const planSchema = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["beat", "narration", "image_prompt", "characters", "camera", "sfx", "mood"],
+        required: ["beat", "narration", "image_prompt", "characters", "camera", "sfx", "mood", "color", "angle"],
         properties: {
-          beat: { type: "string", enum: ["hook", "stakes", "defeat", "countdown", "climax", "reveal", "payoff"] },
+          beat: { type: "string", enum: ["hook", "stakes", "defeat", "countdown", "climax", "reveal", "proof", "payoff"] },
+          color: { type: "string", enum: ["bright", "dark_cold", "warm_interior", "golden_macro", "high_contrast"] },
+          angle: { type: "string", enum: ["wide", "close", "aerial", "top_down", "macro", "pov", "low_angle", "over_shoulder"] },
           narration: { type: "string" },
           image_prompt: { type: "string" },
           characters: { type: "array", items: { type: "string" } },
           camera: { type: "string", enum: ["push_in", "pull_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "punch_in"] },
-          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour"] },
+          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour", "wave", "crash"] },
           mood: { type: "string", enum: ["tension", "reveal"] },
         },
       },
