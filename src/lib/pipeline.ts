@@ -69,6 +69,24 @@ const COLOR: Record<string, string> = {
   high_contrast: "High-contrast dramatic lighting, crisp white foam against deep blue.",
 };
 
+const ROTATE: Record<string, string> = { wide: "low_angle", aerial: "top_down", close: "over_shoulder", top_down: "wide", macro: "close", pov: "wide", low_angle: "close", over_shoulder: "close" };
+
+/** A scene longer than ~4s would hold one picture too long: split it at a sentence into two shots (new picture, new angle). */
+export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["scenes"] {
+  const out: Plan["scenes"] = [];
+  for (const sc of scenes) {
+    const parts = splitSentences(sc.narration);
+    if (sc.narration.split(/\s+/).length <= maxWords || parts.length < 2) { out.push(sc); continue; }
+    const total = sc.narration.split(/\s+/).length;
+    let cut = 1, acc = parts[0]!.split(/\s+/).length;
+    while (cut < parts.length - 1 && acc + parts[cut]!.split(/\s+/).length <= total / 2 + 3) { acc += parts[cut]!.split(/\s+/).length; cut++; }
+    const a = parts.slice(0, cut).join(" "), b = parts.slice(cut).join(" ");
+    out.push({ ...sc, narration: a, loop_closed: "" });
+    out.push(...splitLongScenes([{ ...sc, narration: b, money: false, loop_opened: "", angle: ROTATE[sc.angle] ?? "close", camera: sc.camera === "push_in" ? "pan_right" : "push_in", image_prompt: `${sc.image_prompt} Next moment, from a different angle, showing: ${b.slice(0, 160)}` }], maxWords));
+  }
+  return out;
+}
+
 const running = new Set<string>();
 
 export async function runVideo(id: string, input: VideoInput) {
@@ -146,6 +164,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (ev2.gate.score >= ev.gate.score) { plan = repaired; ev = ev2; }
     }
     up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
+    plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${ev.gate.score}/100 · ${n} scenes` });
 
