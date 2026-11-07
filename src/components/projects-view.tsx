@@ -23,7 +23,7 @@ export function ProjectsView({ format }: { format: Format }) {
   const [dur, setDur] = useState(isLong ? 15 : 60);
 
   const create = () => {
-    if (!title.trim()) return toast.error("Give your video a title");
+    if (!title.trim()) { toast.error("Give your video a title"); return; }
     actions.addProject({ title, topic: topic || title, format, template, duration: isLong ? dur * 60 : dur });
     toast.success("Project created");
     setOpen(false); setTitle(""); setTopic("");

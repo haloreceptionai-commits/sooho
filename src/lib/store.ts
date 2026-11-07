@@ -14,8 +14,8 @@ export interface Project {
   step: number; // 0-5 pipeline steps complete
   updatedAt: number;
 }
-export interface Script { id: string; title: string; projectId?: string; body: string; updatedAt: number }
-export interface Voiceover { id: string; title: string; scriptId?: string; voice: string; speed: number; text: string; status: "pending" | "ready"; createdAt: number }
+export interface Script { id: string; title: string; projectId?: string | undefined; body: string; updatedAt: number }
+export interface Voiceover { id: string; title: string; scriptId?: string | undefined; voice: string; speed: number; text: string; status: "pending" | "ready"; createdAt: number }
 export interface ImageAsset { id: string; prompt: string; style: string; aspect: "16:9" | "9:16" | "1:1"; hue: number; createdAt: number }
 export interface RenderJob { id: string; projectId: string; title: string; format: Format; progress: number; status: "queued" | "rendering" | "done" | "failed"; createdAt: number }
 export interface Settings {
@@ -171,7 +171,7 @@ export const actions = {
       ),
     }));
   },
-  saveScript(sc: Omit<Script, "id" | "updatedAt"> & { id?: string }) {
+  saveScript(sc: Omit<Script, "id" | "updatedAt"> & { id?: string | undefined }) {
     const id = sc.id ?? uid();
     setState((s) => {
       const exists = s.scripts.some((x) => x.id === id);

@@ -35,9 +35,9 @@ function VoiceoversPage() {
   };
 
   const preview = (id: string, t: string, rate: number) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return toast.error("Preview not supported in this browser");
+    if (typeof window === "undefined" || !window.speechSynthesis) { toast.error("Preview not supported in this browser"); return; }
     window.speechSynthesis.cancel();
-    if (playing === id) return setPlaying(null);
+    if (playing === id) { setPlaying(null); return; }
     const u = new SpeechSynthesisUtterance(t.slice(0, 600));
     u.rate = rate;
     u.onend = () => setPlaying(null);
@@ -46,7 +46,7 @@ function VoiceoversPage() {
   };
 
   const create = () => {
-    if (!text.trim()) return toast.error("Add narration text or pick a script");
+    if (!text.trim()) { toast.error("Add narration text or pick a script"); return; }
     const sc = scripts.find((s) => s.id === scriptId);
     actions.addVoiceover({ title: sc ? `${sc.title} narration` : text.slice(0, 40), scriptId: scriptId || undefined, voice, speed, text });
     toast.success("Voiceover queued — will generate when Azure TTS is connected");

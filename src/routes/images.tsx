@@ -31,7 +31,7 @@ function ImagesPage() {
   const [filter, setFilter] = useState("All");
 
   const gen = () => {
-    if (!prompt.trim()) return toast.error("Describe the scene");
+    if (!prompt.trim()) { toast.error("Describe the scene"); return; }
     actions.addImages(Array.from({ length: count }, () => ({ prompt, style, aspect, hue: Math.floor(Math.random() * 360) })));
     toast.success(`${count} placeholder${count > 1 ? "s" : ""} added — real images arrive once Azure image generation is connected`);
     setPrompt("");

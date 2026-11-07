@@ -43,7 +43,7 @@ function Dashboard() {
   ];
 
   const quick = () => {
-    if (!idea.trim()) return toast.error("Type a video idea first");
+    if (!idea.trim()) { toast.error("Type a video idea first"); return; }
     actions.addProject({ title: idea, topic: idea, format, template: "paradox", duration: format === "long" ? 900 : 60 });
     toast.success("Project created");
     setIdea("");
