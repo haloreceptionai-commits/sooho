@@ -24,6 +24,7 @@ export interface Settings {
   scriptDeployment: string;
   ttsDeployment: string;
   imageDeployment: string;
+  videoDeployment: string;
   defaultVoice: string;
   defaultStyle: string;
   longResolution: string;
@@ -73,9 +74,10 @@ const seed: State = {
   settings: {
     channelName: "Chronicle History",
     azureEndpoint: "",
-    scriptDeployment: "gpt-4o",
-    ttsDeployment: "tts-hd",
-    imageDeployment: "dall-e-3",
+    scriptDeployment: "gpt-5",
+    ttsDeployment: "gpt-realtime",
+    imageDeployment: "gpt-image-1-mini",
+    videoDeployment: "gpt-5.1-codex",
     defaultVoice: "Narrator · Deep male",
     defaultStyle: "Oil painting",
     longResolution: "1920x1080",
@@ -92,7 +94,15 @@ const emit = () => listeners.forEach((l) => l());
 export function hydrateStore() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) state = { ...seed, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<State>;
+      const st = { ...seed.settings, ...parsed.settings };
+      // migrate old placeholder deployments to the configured Azure models
+      if (st.scriptDeployment === "gpt-4o") st.scriptDeployment = seed.settings.scriptDeployment;
+      if (st.ttsDeployment === "tts-hd") st.ttsDeployment = seed.settings.ttsDeployment;
+      if (st.imageDeployment === "dall-e-3") st.imageDeployment = seed.settings.imageDeployment;
+      state = { ...seed, ...parsed, settings: st };
+    }
     emit();
   } catch {
     /* ignore */
