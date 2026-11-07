@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -14,7 +15,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { hydrateStore } from "@/lib/store";
+import { hydrateStore, syncFromCloud, clearVideos } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -122,7 +124,27 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  useEffect(() => hydrateStore(), []);
+  const router = useRouter();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    hydrateStore();
+    void syncFromCloud();
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_OUT") clearVideos(); else void syncFromCloud();
+      void router.invalidate();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router]);
+
+  if (path === "/auth") {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <div className="min-h-screen bg-background text-foreground"><Outlet /></div>
+        <Toaster position="bottom-right" />
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

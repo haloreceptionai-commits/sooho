@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { styleAnchor } from "@/lib/styles";
 import { FEW_SHOT } from "@/lib/story-v2";
 
@@ -98,7 +99,7 @@ const factSchema = {
   },
 };
 
-export const factCheck = createServerFn({ method: "POST" })
+export const factCheck = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { topic: string; deployment: string }) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
     return d;
@@ -131,7 +132,7 @@ const researchSchema = {
   },
 };
 
-export const researchStory = createServerFn({ method: "POST" })
+export const researchStory = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { topic: string; facts: string; deployment: string }) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
     return { ...d, facts: (d.facts ?? "").slice(0, 5000) };
@@ -165,7 +166,7 @@ const gradeSchema = {
   },
 };
 
-export const judgeScript = createServerFn({ method: "POST" })
+export const judgeScript = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { first3: string; first15: string; full: string; truth: string; shots: string; deployment: string }) => ({
     ...d, first3: d.first3.slice(0, 1200), first15: d.first15.slice(0, 3000), full: d.full.slice(0, 12000), truth: d.truth.slice(0, 3000), shots: d.shots.slice(0, 12000),
   }))
@@ -185,7 +186,7 @@ export const judgeScript = createServerFn({ method: "POST" })
 
 // ---------------- Continuity gate (vision) ----------------
 
-export const checkContinuity = createServerFn({ method: "POST" })
+export const checkContinuity = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { sheet: string; shot: string; cast: string; deployment: string }) => {
     if (d.sheet.length > 6_000_000 || d.shot.length > 6_000_000) throw new Error("Image too large");
     return d;
@@ -222,7 +223,7 @@ const hookSchema = {
     } } } },
 };
 
-export const generateHooks = createServerFn({ method: "POST" })
+export const generateHooks = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { topic: string; facts: string; research: string; prefer?: string; deployment: string }) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
     return { ...d, facts: (d.facts ?? "").slice(0, 4000), research: (d.research ?? "").slice(0, 3000), prefer: (d.prefer ?? "").slice(0, 200) };
@@ -310,7 +311,7 @@ const planSchema = {
   },
 };
 
-export const generatePlan = createServerFn({ method: "POST" })
+export const generatePlan = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: PlanInput) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required (max 300 chars)");
     return { ...d, durationSec: Math.max(20, Math.min(1200, Math.round(d.durationSec))) };
@@ -389,7 +390,7 @@ export interface VoiceInput { text: string; voice: string; deployment: string; s
 
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
 
-export const generateVoice = createServerFn({ method: "POST" })
+export const generateVoice = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: VoiceInput) => {
     if (!d.text?.trim() || d.text.length > 4000) throw new Error("Narration text must be 1–4000 characters");
     if (!VOICES.has(d.voice)) throw new Error("Unknown voice");
@@ -458,7 +459,7 @@ async function imageCall(data: ImageInput, prompt: string) {
   });
 }
 
-export const generateImage = createServerFn({ method: "POST" })
+export const generateImage = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: ImageInput) => {
     if (!d.prompt?.trim() || d.prompt.length > 3000) throw new Error("Image prompt must be 1–3000 characters");
     if (d.reference && d.reference.length > 6_000_000) throw new Error("Reference image too large");

@@ -1,15 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Play, Download, Trash2, Film, Smartphone, Clapperboard, Plus, Copy, Upload } from "lucide-react";
+import { Play, Download, Film, Smartphone, Clapperboard, Plus, Copy, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { actions, timeAgo, useStore, type Video } from "@/lib/store";
-import { getVideoFile, deleteVideoFile, saveVideoFile } from "@/lib/video-db";
+import { getVideoFile, saveVideoFile } from "@/lib/video-db";
 import { fmt } from "@/lib/story-engine";
 import { Page, Panel, Empty, btnPrimary, btnOutline, btnDark } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
 
-export const Route = createFileRoute("/videos")({
+export const Route = createFileRoute("/_authenticated/videos")({
   head: () => ({
     meta: [
       { title: "My videos — Chronicle Studio" },
@@ -133,7 +133,6 @@ function Videos() {
                 <div className="mt-auto flex gap-2 pt-4">
                   <button className={`${btnDark} flex-1 px-3 text-xs`} onClick={() => setPlaying(v)}><Play className="h-3.5 w-3.5" /> Play now</button>
                   <button className={`${btnPrimary} flex-1 px-3 text-xs`} onClick={() => void download(v)}><Download className="h-3.5 w-3.5" /> Download</button>
-                  <button className={`${btnOutline} px-2.5`} aria-label="Delete" onClick={() => { if (confirm("Delete this video?")) { actions.removeVideo(v.id); void deleteVideoFile(v.id); } }}><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
               </div>
             </Panel>

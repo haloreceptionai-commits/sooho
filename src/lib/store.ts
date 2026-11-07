@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 export type Format = "long" | "short";
 export type VideoStatus = "running" | "done" | "failed";
@@ -139,13 +141,13 @@ export const actions = {
     const id = uid();
     const v: Video = { id, title: input.topic, description: "", input, status: "running", stage: "script", progress: 1, detail: "Writing script…", createdAt: Date.now() };
     setState((s) => ({ ...s, videos: [v, ...s.videos] }));
+    void flushVideo(id);
     return id;
   },
   updateVideo(id: string, patch: Partial<Video>) {
     setState((s) => ({ ...s, videos: s.videos.map((v) => (v.id === id ? { ...v, ...patch } : v)) }));
-  },
-  removeVideo(id: string) {
-    setState((s) => ({ ...s, videos: s.videos.filter((v) => v.id !== id) }));
+    if (patch.status && patch.status !== "running") void flushVideo(id);
+    else queueSync(id);
   },
   saveSettings(patch: Partial<Settings>) {
     setState((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
@@ -162,4 +164,69 @@ export function timeAgo(t: number) {
   if (hh < 24) return `${hh} h ago`;
   const d = Math.round(hh / 24);
   return d === 1 ? "Yesterday" : `${d} days ago`;
+}
+
+// ---- Cloud sync: every video record is saved to the signed-in owner's cloud library.
+// There is intentionally no delete path (no DELETE policy either) so videos are never lost.
+const timers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function queueSync(id: string) {
+  if (timers.has(id)) return;
+  timers.set(id, setTimeout(() => { timers.delete(id); void flushVideo(id); }, 2000));
+}
+
+export async function flushVideo(id: string) {
+  const t = timers.get(id);
+  if (t) { clearTimeout(t); timers.delete(id); }
+  const v = state.videos.find((x) => x.id === id);
+  if (!v) return;
+  const { error } = await supabase.from("videos").upsert({ id: v.id, data: v as unknown as Json, updated_at: new Date().toISOString() });
+  if (error) console.warn("Cloud sync failed", error.message);
+}
+
+let syncing = false;
+export async function syncFromCloud() {
+  if (syncing) return;
+  syncing = true;
+  try {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    const { data, error } = await supabase.from("videos").select("id, data, file_path").order("created_at", { ascending: false });
+    if (error) throw error;
+    const cloud = (data ?? []).map((r) => {
+      const v = r.data as unknown as Video;
+      const running = v.status === "running" && !state.videos.some((x) => x.id === v.id && x.status === "running");
+      return running ? { ...v, status: "failed" as const, error: "Interrupted — the page was closed while generating.", detail: "Interrupted" } : v;
+    });
+    const ids = new Set(cloud.map((v) => v.id));
+    const localOnly = state.videos.filter((v) => !ids.has(v.id));
+    const live = new Map(state.videos.filter((v) => v.status === "running").map((v) => [v.id, v]));
+    state = { ...state, videos: [...localOnly, ...cloud.map((v) => live.get(v.id) ?? v)].sort((a, b) => b.createdAt - a.createdAt) };
+    persist(); emit();
+    // Move videos that only existed in this browser into the cloud library.
+    const { getLocalVideoFile, uploadVideoFile } = await import("@/lib/video-db");
+    for (const v of localOnly) {
+      await flushVideo(v.id);
+      if (v.status === "done") {
+        const blob = await getLocalVideoFile(v.id);
+        if (blob) await uploadVideoFile(v.id, blob).catch((e) => console.warn(e));
+      }
+    }
+    for (const r of data ?? []) {
+      if (r.file_path) continue;
+      const v = r.data as unknown as Video;
+      if (v.status !== "done") continue;
+      const blob = await getLocalVideoFile(v.id);
+      if (blob) await uploadVideoFile(v.id, blob).catch((e) => console.warn(e));
+    }
+  } catch (e) {
+    console.warn("Cloud load failed", e);
+  } finally {
+    syncing = false;
+  }
+}
+
+export function clearVideos() {
+  state = { ...state, videos: [] };
+  persist(); emit();
 }

@@ -1,7 +1,6 @@
-import { FileText, Mic, ImageIcon, Clapperboard, Check, RotateCcw, Trash2, AlertTriangle } from "lucide-react";
+import { FileText, Mic, ImageIcon, Clapperboard, Check, RotateCcw, AlertTriangle } from "lucide-react";
 import { actions, type Video } from "@/lib/store";
 import { runVideo } from "@/lib/pipeline";
-import { deleteVideoFile } from "@/lib/video-db";
 import { btnOutline } from "@/components/page";
 
 const STAGES = [
@@ -46,7 +45,6 @@ export function VideoJob({ v }: { v: Video }) {
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <p className="flex-1 break-words">{v.error}</p>
           <button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> Retry</button>
-          <button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { actions.removeVideo(v.id); void deleteVideoFile(v.id); }}><Trash2 className="h-3 w-3" /></button>
         </div>
       )}
     </div>
