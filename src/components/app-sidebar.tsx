@@ -11,12 +11,15 @@ type To = "/" | "/long-form" | "/shorts" | "/story-generator" | "/scripts" | "/v
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const counts = useStore((s) => ({
-    long: s.projects.filter((p) => p.format === "long").length,
-    short: s.projects.filter((p) => p.format === "short").length,
-    scripts: s.scripts.length,
-    active: s.jobs.filter((j) => j.status === "rendering" || j.status === "queued").length,
-  }));
+  const projects = useStore((s) => s.projects);
+  const jobs = useStore((s) => s.jobs);
+  const scriptCount = useStore((s) => s.scripts.length);
+  const counts = {
+    long: projects.filter((p) => p.format === "long").length,
+    short: projects.filter((p) => p.format === "short").length,
+    scripts: scriptCount,
+    active: jobs.filter((j) => j.status === "rendering" || j.status === "queued").length,
+  };
   const azure = useStore((s) => !!s.settings.azureEndpoint);
   const channel = useStore((s) => s.settings.channelName);
 
