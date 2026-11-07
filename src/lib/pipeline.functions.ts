@@ -137,7 +137,7 @@ Return a click-worthy title (under 60 chars, curiosity "Why..."/"The..." style) 
     const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
       max_completion_tokens: 32000,
-      reasoning_effort: "medium",
+      reasoning_effort: "low",
       response_format: { type: "json_schema", json_schema: { name: "video_plan", strict: true, schema: planSchema } },
     });
     if (!res.ok) await fail(res, "Script writer");
