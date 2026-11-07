@@ -17,6 +17,7 @@ import { Route as ScriptsRouteImport } from './routes/scripts'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ShortsRouteImport } from './routes/shorts'
 import { Route as StoryGeneratorRouteImport } from './routes/story-generator'
+import { Route as ViralBrainRouteImport } from './routes/viral-brain'
 import { Route as VoiceoversRouteImport } from './routes/voiceovers'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const StoryGeneratorRoute = StoryGeneratorRouteImport.update({
   path: '/story-generator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ViralBrainRoute = ViralBrainRouteImport.update({
+  id: '/viral-brain',
+  path: '/viral-brain',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoiceoversRoute = VoiceoversRouteImport.update({
   id: '/voiceovers',
   path: '/voiceovers',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/shorts': typeof ShortsRoute
   '/story-generator': typeof StoryGeneratorRoute
+  '/viral-brain': typeof ViralBrainRoute
   '/voiceovers': typeof VoiceoversRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/shorts': typeof ShortsRoute
   '/story-generator': typeof StoryGeneratorRoute
+  '/viral-brain': typeof ViralBrainRoute
   '/voiceovers': typeof VoiceoversRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/shorts': typeof ShortsRoute
   '/story-generator': typeof StoryGeneratorRoute
+  '/viral-brain': typeof ViralBrainRoute
   '/voiceovers': typeof VoiceoversRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shorts'
     | '/story-generator'
+    | '/viral-brain'
     | '/voiceovers'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shorts'
     | '/story-generator'
+    | '/viral-brain'
     | '/voiceovers'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shorts'
     | '/story-generator'
+    | '/viral-brain'
     | '/voiceovers'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   ShortsRoute: typeof ShortsRoute
   StoryGeneratorRoute: typeof StoryGeneratorRoute
+  ViralBrainRoute: typeof ViralBrainRoute
   VoiceoversRoute: typeof VoiceoversRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryGeneratorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/viral-brain': {
+      id: '/viral-brain'
+      path: '/viral-brain'
+      fullPath: '/viral-brain'
+      preLoaderRoute: typeof ViralBrainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voiceovers': {
       id: '/voiceovers'
       path: '/voiceovers'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   ShortsRoute: ShortsRoute,
   StoryGeneratorRoute: StoryGeneratorRoute,
+  ViralBrainRoute: ViralBrainRoute,
   VoiceoversRoute: VoiceoversRoute,
 }
 export const routeTree = rootRouteImport

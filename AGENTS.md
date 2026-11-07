@@ -29,3 +29,4 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 - App data lives in a client store (src/lib/store.ts, localStorage-persisted) with all mutations in `actions`; why: pages work before APIs/backend exist, and actions are the single swap point for real API calls later.
+- Script intelligence (scoring, analysis, optimizer, SFX extraction) lives in src/lib/viral-brain.ts and is rendered via the shared ScriptIntelligence component; why: one engine serves Viral Brain, Scripts and Story Generator, and `optimizeScript` is the swap point for an AI rewrite.

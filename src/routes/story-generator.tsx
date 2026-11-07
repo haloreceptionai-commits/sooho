@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { actions } from "@/lib/store";
 import { Page, btnOutline, btnPrimary } from "@/components/page";
+import { ScriptIntelligence } from "@/components/script-intelligence";
+import { optimizeScript } from "@/lib/viral-brain";
 import { useMemo, useState } from "react";
 import { FileText, Plus, Eye, Volume2, Copy, Zap, Film, Smartphone } from "lucide-react";
 import { BEATS, TEMPLATES, buildStory, fmt, sceneLength, type Format } from "@/lib/story-engine";
@@ -122,6 +124,8 @@ function StoryGenerator() {
                 ))}
               </div>
             </section>
+            <ScriptIntelligence compact text={plan.flatMap((b) => b.scenes.map((sc) => `[${b.name.toUpperCase()}] ${sc.narration.startsWith("[") ? "" : sc.narration}`)).join("\n")}
+              onOptimize={() => { const body = optimizeScript(plan.flatMap((b) => b.scenes.map((sc) => sc.narration)).filter((n) => !n.startsWith("[")).join(" "), topic); actions.saveScript({ title: `${topic} — Viral Brain`, body }); toast.success("Optimized script saved to Scripts"); navigate({ to: "/scripts" }); }} />
           </div>
 
           {/* Preview */}

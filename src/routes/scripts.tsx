@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { FileText, Plus, Trash2, Save, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { actions, timeAgo, useStore, VOICES } from "@/lib/store";
+import { ScriptIntelligence } from "@/components/script-intelligence";
+import { optimizeScript } from "@/lib/viral-brain";
 import { Page, Panel, Empty, btnPrimary, btnOutline, btnDark, input, label } from "@/components/page";
 
 export const Route = createFileRoute("/scripts")({
@@ -37,7 +39,7 @@ function ScriptsPage() {
   }, [current?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const words = body.trim() ? body.trim().split(/\s+/).length : 0;
-  const mins = words / 150;
+  const mins = words / 205;
 
   const save = () => {
     const id = actions.saveScript({ id: current?.id, title: title || "Untitled script", body, projectId: projectId || undefined });
@@ -64,6 +66,7 @@ function ScriptsPage() {
             ))}
           </Panel>
           {current && (
+            <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
             <Panel className="p-5">
               <div className="grid gap-4 sm:grid-cols-[1fr_240px]">
                 <div><p className={label}>Title</p><input className={`${input} mt-1.5`} value={title} onChange={(e) => setTitle(e.target.value)} /></div>
@@ -78,7 +81,7 @@ function ScriptsPage() {
               <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={18} placeholder="Write your narration…"
                 className={`${input} mt-4 resize-y font-mono leading-relaxed`} />
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="font-mono text-xs text-muted-foreground">{words} words · ≈ {Math.floor(mins)}m {Math.round((mins % 1) * 60)}s narration @150 wpm</p>
+                <p className="font-mono text-xs text-muted-foreground">{words} words · ≈ {Math.floor(mins)}m {Math.round((mins % 1) * 60)}s narration @205 wpm</p>
                 <div className="flex gap-2">
                   <button className={btnOutline} onClick={() => { actions.deleteScript(current.id); setSel(null); toast("Script deleted"); }}><Trash2 className="h-4 w-4" /></button>
                   <button className={btnOutline} onClick={() => { save(); actions.addVoiceover({ title: `${title} narration`, scriptId: current.id, voice: defaultVoice, speed: 1, text: body }); toast.success("Sent to Voiceovers"); }}>
@@ -88,6 +91,8 @@ function ScriptsPage() {
                 </div>
               </div>
             </Panel>
+            <ScriptIntelligence compact text={body} onOptimize={() => { setBody(optimizeScript(body, title)); toast.success("Rewritten with Viral Brain — review and Save"); }} />
+            </div>
           )}
         </div>
       )}
