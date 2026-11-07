@@ -230,7 +230,8 @@ export async function runVideo(id: string, input: VideoInput) {
     });
     up({ qa, status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
+    let msg = e instanceof Error ? e.message : String(e);
+    if (/PROHIBITED_CONTENT/.test(msg)) msg = "The narrator voice refused part of this script (it reads as too violent). Try a gentler topic wording and generate again.";
     up({ status: "failed", error: msg, detail: "Failed" });
   } finally {
     running.delete(id);
