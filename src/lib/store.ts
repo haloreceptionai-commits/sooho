@@ -8,6 +8,8 @@ export type Stage = "script" | "voice" | "images" | "render" | "saving" | "done"
 
 export interface VideoInput {
   topic: string;
+  topicId?: string | undefined;
+  topicSource?: { url: string; fact: string };
   format: Format;
   durationSec: number;
   archetype: string;
