@@ -1,8 +1,8 @@
 // Client orchestrator: script → voice + images → render → save. Runs in the background
 // while the user moves around the app.
 import { actions, getState, type VideoInput } from "@/lib/store";
-import { factCheck, generateHooks, generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
-import { qaScore, validateScript } from "@/lib/quality";
+import { checkContinuity, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
@@ -54,6 +54,13 @@ const ANGLE: Record<string, string> = {
   wide: "Wide establishing shot:", close: "Close-up:", aerial: "High aerial drone shot:", top_down: "Straight top-down shot:",
   macro: "Extreme macro close-up:", pov: "First-person POV shot:", low_angle: "Dramatic low-angle shot:", over_shoulder: "Over-the-shoulder shot:",
 };
+const SHOT: Record<string, string> = {
+  wide: "WIDE ENVIRONMENT SHOT: the place fills the frame; people, if any, are tiny.",
+  aerial: "AERIAL VIEW from high in the sky looking down at the whole place; no faces.",
+  action: "ACTION SHOT: hands and bodies doing the physical task, motion and props in focus.",
+  macro: "MACRO PROCESS INSERT: extreme close-up of the object or material being worked on; no faces.",
+  face: "Expressive close-up of the character reacting.",
+};
 const COLOR: Record<string, string> = {
   bright: "Sunny bright daylight, clear blue sky, cheerful saturated colors.",
   dark_cold: "Dark stormy navy-blue palette, cold moonlit highlights, still clearly lit and readable.",
@@ -61,6 +68,24 @@ const COLOR: Record<string, string> = {
   golden_macro: "Glowing golden amber light, shallow depth of field.",
   high_contrast: "High-contrast dramatic lighting, crisp white foam against deep blue.",
 };
+
+const ROTATE: Record<string, string> = { wide: "low_angle", aerial: "top_down", close: "over_shoulder", top_down: "wide", macro: "close", pov: "wide", low_angle: "close", over_shoulder: "close" };
+
+/** A scene longer than ~4s would hold one picture too long: split it at a sentence into two shots (new picture, new angle). */
+export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["scenes"] {
+  const out: Plan["scenes"] = [];
+  for (const sc of scenes) {
+    const parts = splitSentences(sc.narration);
+    if (sc.narration.split(/\s+/).length <= maxWords || parts.length < 2) { out.push(sc); continue; }
+    const total = sc.narration.split(/\s+/).length;
+    let cut = 1, acc = parts[0]!.split(/\s+/).length;
+    while (cut < parts.length - 1 && acc + parts[cut]!.split(/\s+/).length <= total / 2 + 3) { acc += parts[cut]!.split(/\s+/).length; cut++; }
+    const a = parts.slice(0, cut).join(" "), b = parts.slice(cut).join(" ");
+    out.push({ ...sc, narration: a, loop_closed: "" });
+    out.push(...splitLongScenes([{ ...sc, narration: b, money: false, loop_opened: "", angle: ROTATE[sc.angle] ?? "close", camera: sc.camera === "push_in" ? "pan_right" : "push_in", image_prompt: `${sc.image_prompt} Next moment, from a different angle, showing: ${b.slice(0, 160)}` }], maxWords));
+  }
+  return out;
+}
 
 const running = new Set<string>();
 
@@ -76,35 +101,72 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ detail: "Fact-checking the story…" });
     const facts = await withRetry(() => factCheck({ data: { topic: input.topic, deployment: s.scriptDeployment } }));
     const factText = [
-      ...facts.claims.map((c) => `- ${c.claim} [${c.confidence}; ${c.sources.join("; ")}]`),
+      ...facts.claims.map((c) => `- ${c.claim} (${c.date}) [${c.confidence}; ${c.sources.join("; ")}]`),
       `Myth: ${facts.myth}`, `Reality: ${facts.reality}`, facts.hedge ? `Hedge line to include: ${facts.hedge}` : "",
     ].join("\n");
     const confidence = facts.claims.length ? facts.claims.filter((c) => c.confidence !== "low").length / facts.claims.length : 0;
-    up({ progress: 5, facts: { myth: facts.myth, reality: facts.reality, claims: facts.claims.length, confidence }, detail: "Writing 10 hooks…" });
-    // 2) hooks
-    const hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment } }));
-    const hb = hooks.best;
-    const hookScore = hb.curiosity + hb.clarity + hb.visualness + hb.speakability;
-    up({ progress: 7, hooks: { best: hb.line, runnerUp: hooks.runnerUp.line }, detail: "Viral Brain is writing the beat sheet and script…" });
-    // 3) beat sheet + script, checked, rewritten once if it fails
+    up({ progress: 4, facts: { myth: facts.myth, reality: facts.reality, claims: facts.claims.length, confidence }, detail: "Finding the hero, question and payoff…" });
+    // 2) research: anchors, premise, impossible question, payoff, money shot
+    const rs = await withRetry(() => researchStory({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment } }));
+    if (!rs.oneImage.ok) throw new Error("Pick a more visual topic: the odd thing in this story can't be shown in one picture.");
+    const researchText = [
+      `Anchors: subject "${rs.anchors.subject}", year "${rs.anchors.year}", place "${rs.anchors.place}", org "${rs.anchors.org}", stakes "${rs.anchors.stakes}"`,
+      `Premise: ${rs.premise}`, `Main question: ${rs.question}`,
+      `Hero: ${rs.hero.name} (${rs.hero.role}) wants: ${rs.hero.want}`, `Skeptic: ${rs.skeptic.name} (${rs.skeptic.role})`, `Threat: ${rs.threat}`,
+      `Tries: ${rs.tries.join(" -> ")}`, `Analogy: ${rs.analogy}`, `Proof shot: ${rs.proof}`, `Payoff: ${rs.payoff}`, `Money shot: ${rs.moneyShot}`,
+    ].join("\n");
+    up({ progress: 6, story: { premise: rs.premise, question: rs.question, hero: `${rs.hero.name} — ${rs.hero.want}`, anchors: Object.values(rs.anchors).join(" · ") }, detail: "Writing 10 hooks…" });
+    // 3) hooks: score, drop banned / unanchored ones, prefer types that performed best
+    const prefer = rankHookTypes(getState().videos.filter((v) => v.perf && v.analytics).map((v) => ({ hookType: v.analytics!.hookType, ...v.perf })));
+    const hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment } }));
+    const rate = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability
+      - hookIssues(h.line, rs.anchors, factText).length * 8 - hookTextIssues(h.text, h.line).length * 4 + (prefer[0] === h.type ? 3 : 0);
+    const ranked = [...hooks.all].sort((x, y) => rate(y) - rate(x));
+    const hb = ranked[0]!, runner = ranked[1] ?? hb;
+    up({ progress: 8, hooks: { best: hb.line, runnerUp: runner.line }, detail: "Writing the beat sheet and script…" });
+    // 4) beat sheet + script -> blocking validators + blind judges -> up to 2 repair rewrites (before any images or voice)
     const base = {
       topic: input.topic, format: input.format, durationSec: input.durationSec,
       archetype: archetype ? `${archetype.name} — ${archetype.formula}` : "Best fit", style: input.style, deployment: s.scriptDeployment,
-      facts: factText, hook: hb.line,
+      facts: factText, research: researchText, hook: hb.line,
+    };
+    const evaluate = async (p: Plan) => {
+      const story = {
+        scenes: p.scenes.map((x) => ({ beat: x.beat, narration: x.narration, characters: x.characters, shot: x.shot, money: x.money, loop_opened: x.loop_opened, loop_closed: x.loop_closed })),
+        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec,
+      };
+      const report = validateStory(story);
+      const ht = hookTextIssues(p.hookText, p.scenes[0]?.narration ?? "");
+      if (ht.length) report.checks.push({ id: "HOOKTEXT", pass: false, msg: ht.join("; ") }), report.failed.push(report.checks[report.checks.length - 1]!);
+      const hi = hookIssues(splitSentences(p.script || p.scenes.map((x) => x.narration).join(" "))[0] ?? "", rs.anchors, factText);
+      report.checks.push({ id: "HOOK", pass: !hi.length, msg: hi.length ? `Hook: ${hi.join("; ")}` : "Hook rules met" });
+      if (hi.length) report.failed.push(report.checks[report.checks.length - 1]!);
+      const full = p.scenes.map((x) => x.narration).join(" ");
+      const firstShots = (sec: number) => { const st = sceneStarts(story.scenes); return p.scenes.filter((_, i) => st[i]! < sec).map((x) => `[picture: ${x.image_prompt.slice(0, 200)}]`).join(" "); };
+      const judge = await withRetry(() => judgeScript({ data: {
+        first3: `${p.hookText ? `On-screen text: "${p.hookText}". ` : ""}Narration: "${spokenBy(story.scenes, 3.2)}" ${firstShots(3.2)}`,
+        first15: `Narration: "${spokenBy(story.scenes, 15)}" ${firstShots(15)}`,
+        full, truth: `${researchText}\nHook: ${hb.line}`,
+        shots: p.scenes.map((x, i) => `${i}: ${x.narration} => ${x.image_prompt.slice(0, 220)}`).join("\n"),
+        deployment: s.scriptDeployment,
+      } })).catch((e: unknown) => { console.warn("Judges unavailable:", e); return null; });
+      if (judge?.filler.length && judge.filler.length > 2) report.failed.push({ id: "V8j", pass: false, msg: `V8 new info (judge): "${judge.filler.slice(0, 2).join('", "')}" add nothing new` });
+      const gate = storyScore(report, judge, p.scenes.length);
+      return { report, judge, gate };
     };
     let plan = await withRetry(() => generatePlan({ data: base }));
-    let check = validateScript(plan.scenes, plan.loopLine, input.durationSec);
-    if (!check.ok) {
-      up({ detail: `Script checker: fixing ${check.issues.length} issue${check.issues.length === 1 ? "" : "s"}…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: check.issues.join("; ") } })).catch(() => null);
-      if (repaired) {
-        const c2 = validateScript(repaired.scenes, repaired.loopLine, input.durationSec);
-        if (c2.issues.length <= check.issues.length) { plan = repaired; check = c2; }
-      }
+    let ev = await evaluate(plan);
+    for (let attempt = 1; attempt <= 2 && !ev.gate.ready; attempt++) {
+      up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/2)…` });
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: `${ev.gate.blockers.map((b) => `- ${b}`).join("\n")}\nPrevious script (keep its good lines, rewrite only what breaks the checks above):\n${plan.scenes.map((x) => `[${x.beat}] ${x.narration}`).join(" ")}` } })).catch(() => null);
+      if (!repaired) break;
+      const ev2 = await evaluate(repaired);
+      if (ev2.gate.score >= ev.gate.score) { plan = repaired; ev = ev2; }
     }
-    up({ checks: check.issues });
+    up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
+    plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
     const n = plan.scenes.length;
-    up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 10, detail: `Script ready · ${n} scenes` });
+    up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${ev.gate.score}/100 · ${n} scenes` });
 
     const portrait = input.format === "short";
     const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
@@ -114,7 +176,7 @@ export async function runVideo(id: string, input: VideoInput) {
     plan.scenes.forEach((sc, i) => {
       const w = sc.narration.split(/\s+/).filter(Boolean).length;
       // new take when the pace class changes (action / reveal / normal) so each take gets its own rate
-      const cls = (b: string) => (["countdown", "climax", "defeat"].includes(b) ? 1 : ["reveal", "proof"].includes(b) ? 2 : 0);
+      const cls = (b: string) => (["try", "fail", "escalation"].includes(b) ? 1 : ["reveal", "analogy", "proof"].includes(b) ? 2 : 0);
       const brk = cur.length && cls(plan.scenes[cur[0]!]!.beat) !== cls(sc.beat);
       if (cur.length && (brk || wc + w > (portrait ? 60 : 90))) { groups.push(cur); cur = []; wc = 0; }
       cur.push(i); wc += w;
@@ -135,6 +197,7 @@ export async function runVideo(id: string, input: VideoInput) {
       up({ progress: 10 + Math.round((done / totalAssets) * 60), detail: `${what} · ${done}/${totalAssets} assets`, stage: "images" });
     };
     const rawImg: (string | undefined)[] = [];
+    const contScores: number[] = [];
     const looks = new Map(plan.characters.map((c) => [c.name.toLowerCase(), c]));
     const img = (extra: Partial<Parameters<typeof generateImage>[0]["data"]>, prompt: string) =>
       withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }), 9, 30000);
@@ -157,10 +220,30 @@ export async function runVideo(id: string, input: VideoInput) {
         }
         tick("Designing characters");
         await pool(plan.scenes, 2, async (sc, i) => {
-          const cast = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
-          const shot = `${ANGLE[sc.angle] ?? ""} ${sc.image_prompt} ${COLOR[sc.color] ?? ""}`.trim();
+          // Characters only lead action/face shots; wide, aerial and macro shots show the world, the process or the money shot,
+          // and skip the sheet reference (it pulls every frame back to a posed line-up).
+          const people = sc.shot === "action" || sc.shot === "face";
+          const castAll = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
+          const cast = people ? castAll : "";
+          const shot = [
+            SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && rs.moneyShot ? `MONEY SHOT: ${rs.moneyShot}.` : "", sc.image_prompt,
+            people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
+            COLOR[sc.color] ?? "",
+          ].filter(Boolean).join(" ");
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
+          // continuity gate: compare the cast to the character sheet; redraw once if it drifted
+          if (r.image && sheet && cast) {
+            const c = await withRetry(() => checkContinuity({ data: { sheet, shot: r!.image!, cast, deployment: s.scriptDeployment } })).catch(() => null);
+            if (c) contScores.push(c.score);
+            if (c && c.score < 6) {
+              const again = await img({ cast, reference: sheet }, `${shot} The characters must match the reference sheet exactly (${c.issue.slice(0, 160)}).`).catch(() => null);
+              if (again?.image) {
+                const c2 = await withRetry(() => checkContinuity({ data: { sheet, shot: again.image!, cast, deployment: s.scriptDeployment } })).catch(() => null);
+                if (!c2 || c2.score >= c.score) { r = again; if (c2) contScores[contScores.length - 1] = c2.score; }
+              }
+            }
+          }
           if (r.image) rawImg[i] = r.image;
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
@@ -243,9 +326,11 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ stage: "saving", progress: 99, detail: "Saving…" });
     await saveVideoFile(id, out.blob);
     const width = portrait ? 1080 : 1920, height = portrait ? 1920 : 1080;
-    const qa = qaScore({
-      hookScore, revealPos: check.revealPos, factConfidence: confidence, wordsPerSec: out.stats.wordsPerSec, avgShotSec: out.stats.avgShotSec,
-      captions: s.burnCaptions, lufs: out.stats.lufs, lra: out.stats.lra, loopLine: !!plan.loopLine.trim(), width, height,
+    const fin = finalScore(ev.gate, { wordsPerSec: out.stats.wordsPerSec, avgShotSec: out.stats.avgShotSec, lufs: out.stats.lufs, lra: out.stats.lra, width, height, captions: s.burnCaptions });
+    const qa = { score: fin.score, parts: fin.parts };
+    const continuity = contScores.length ? contScores.filter((x) => x >= 6).length / contScores.length : 1;
+    up({
+      ready: fin.ready, analytics: { hookType: hb.type, revealSec: ev.report.revealSec, castSize: plan.characters.length, shotMix: ev.report.shotMix, continuity },
     });
     up({ qa, status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
   } catch (e) {

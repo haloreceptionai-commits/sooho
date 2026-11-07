@@ -4,7 +4,7 @@ import { wordSoundCues } from "@/lib/sound-words";
 // camera moves, punch-ins, shake and whip transitions; flowing narration, synthesized music
 // bed + foley, and kinetic one-word captions. Records with MediaRecorder.
 
-export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in";
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit";
 
 export interface RenderScene {
   image: ImageBitmap;
@@ -97,6 +97,23 @@ function playSfx(ctx: AudioContext, out: AudioNode, kind: string, at: number) {
     o.connect(g); env(0.25, 0.005, 0.6); o.start(at); o.stop(at + 0.7);
     return;
   }
+  if (kind === "knock") {
+    [0, 0.22, 0.44].forEach((t) => {
+      const o = ctx.createOscillator(); const gg = ctx.createGain();
+      o.frequency.setValueAtTime(180, at + t); o.frequency.exponentialRampToValueAtTime(80, at + t + 0.08);
+      o.connect(gg); gg.connect(out);
+      gg.gain.setValueAtTime(0.0001, at + t); gg.gain.exponentialRampToValueAtTime(0.6, at + t + 0.004); gg.gain.exponentialRampToValueAtTime(0.0001, at + t + 0.12);
+      o.start(at + t); o.stop(at + t + 0.15);
+    });
+    return;
+  }
+  if (kind === "siren") {
+    const o = ctx.createOscillator(); o.type = "sawtooth"; o.connect(g);
+    o.frequency.setValueAtTime(600, at);
+    for (let k = 0; k < 4; k++) { o.frequency.linearRampToValueAtTime(950, at + k * 0.6 + 0.3); o.frequency.linearRampToValueAtTime(600, at + k * 0.6 + 0.6); }
+    env(0.06, 0.2, 2.2); o.start(at); o.stop(at + 2.5);
+    return;
+  }
   // noise-based: whoosh, snap, splash, creak, fire, crowd
   const n = ctx.createBufferSource(); n.buffer = noiseBuffer(ctx, 2);
   const f = ctx.createBiquadFilter();
@@ -113,11 +130,15 @@ function playSfx(ctx: AudioContext, out: AudioNode, kind: string, at: number) {
     wave: ["lowpass", 900, 0.4, 0.4, 1.6],
     crash: ["lowpass", 2600, 0.6, 0.01, 1.1],
     spray: ["highpass", 3500, 0.35, 0.03, 0.8],
+    rustle: ["bandpass", 2200, 0.22, 0.08, 0.7],
+    plane: ["lowpass", 300, 0.35, 1.0, 2.2],
+    impact: ["lowpass", 1200, 0.7, 0.003, 0.6],
   };
   const [type, freq, peak, a, d] = presets[kind] ?? presets["whoosh"]!;
   f.type = type; f.frequency.value = freq;
   if (kind === "wind") { f.Q.value = 3; f.frequency.setValueAtTime(400, at); f.frequency.linearRampToValueAtTime(1200, at + 1.2); f.frequency.linearRampToValueAtTime(500, at + 2.3); }
   if (kind === "pour") { const lfo = ctx.createOscillator(); const lg = ctx.createGain(); lfo.frequency.value = 9; lg.gain.value = 250; lfo.connect(lg); lg.connect(f.frequency); lfo.start(at); lfo.stop(at + 1.4); }
+  if (kind === "plane") { f.frequency.setValueAtTime(150, at); f.frequency.linearRampToValueAtTime(600, at + 1.2); f.frequency.linearRampToValueAtTime(200, at + 3); }
   if (kind === "whoosh") { f.frequency.setValueAtTime(300, at); f.frequency.exponentialRampToValueAtTime(3000, at + 0.5); }
   env(peak, a, d);
   n.start(at); n.stop(at + a + d + 0.1);
@@ -263,6 +284,7 @@ function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
       if (cam === "tilt_up") { sh.y0 = fy + 0.6; sh.y1 = fy - 0.6; sh.z0 = sh.z1 = base + m; }
       if (cam === "tilt_down") { sh.y0 = fy - 0.6; sh.y1 = fy + 0.6; sh.z0 = sh.z1 = base + m; }
       if (cam === "punch_in") { sh.punch = true; sh.z1 = base + 0.35; }
+      if (cam === "orbit") { sh.x0 = fx - 0.4; sh.x1 = fx + 0.4; sh.y0 = fy + 0.25; sh.y1 = fy - 0.25; sh.z0 = base + 0.05; sh.z1 = base + 0.2; }
       shots.push(sh);
     }
   });
@@ -327,7 +349,7 @@ function drawHook(ctx: CanvasRenderingContext2D, text: string, w: number, h: num
     const tryL = `${lines[lines.length - 1]} ${wd}`.trim();
     if (ctx.measureText(tryL).width > w * 0.82 && lines[lines.length - 1]) lines.push(wd); else lines[lines.length - 1] = tryL;
   }
-  const y0 = h * (vertical ? 0.2 : 0.15);
+  const y0 = h * (vertical ? 0.1 : 0.09); // top of frame, above faces
   lines.forEach((ln, i) => {
     const y = y0 + i * size * 1.15;
     ctx.lineWidth = size * 0.22; ctx.strokeStyle = "#000000"; ctx.strokeText(ln, w / 2, y);
@@ -391,8 +413,8 @@ export interface RenderStats { lufs: number; lra: number; avgShotSec: number; wo
 
 /** Atlas pace per beat: a touch faster in action, slower at the reveal. */
 export function beatRate(beat: string | undefined) {
-  if (beat === "countdown" || beat === "climax" || beat === "defeat") return 0.9;
-  if (beat === "reveal" || beat === "proof") return 0.82;
+  if (beat === "countdown" || beat === "climax" || beat === "defeat" || beat === "try" || beat === "fail" || beat === "escalation") return 0.9;
+  if (beat === "reveal" || beat === "proof" || beat === "analogy") return 0.82;
   return ATLAS_RATE;
 }
 
@@ -431,7 +453,7 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   // loudness: bring speech to about -17 dBFS RMS so the full mix lands near -14 LUFS
   const rmsDb = 10 * Math.log10(voiceRms / Math.max(1, voiceN) + 1e-12);
   const voiceGain = Math.min(4, Math.max(0.3, 10 ** ((-19 - rmsDb) / 20)));
-  const total = t + 0.5;
+  const total = t + 0.3; // final silence never longer than 0.3s
   const tl = timeline(chunks, scenes.map((s) => s.text));
   tl[0]!.start = 0; tl[tl.length - 1]!.end = total;
   for (let i = 1; i < tl.length; i++) tl[i]!.start = tl[i - 1]!.end;
@@ -455,7 +477,8 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   const sfxBus = actx.createGain(); sfxBus.gain.value = 0.45; sfxBus.connect(master);
   const wordSfx = actx.createGain(); wordSfx.gain.value = 0.32; wordSfx.connect(master);
   const musicLp = actx.createBiquadFilter(); musicLp.type = "lowpass"; musicLp.frequency.value = 18000; musicLp.connect(master);
-  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.13 : 0; musicBus.connect(musicLp);
+  const musicLift = actx.createGain(); musicLift.gain.value = 1; musicLift.connect(musicLp);
+  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.13 : 0; musicBus.connect(musicLift);
 
   const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
   const mime = pickMime();
@@ -491,8 +514,15 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
     });
     // sound on the spoken word: "spray" -> spray hiss, "crash" -> crash, ...
     for (const cue of wordSoundCues(tl.flatMap((x) => x.words))) playSfx(actx, wordSfx, cue.kind === "crash" ? "splash" : cue.kind, t0 + cue.at);
-    if (payoffIdx >= 0) playSfx(actx, sfxBus, "boom", t0 + tl[payoffIdx]!.start + 0.05);
-    playSfx(actx, sfxBus, "boom", t0 + total - 1.2);
+    if (payoffIdx >= 0) {
+      const pa = t0 + tl[payoffIdx]!.start;
+      playSfx(actx, sfxBus, "whoosh", pa - 0.5);
+      playSfx(actx, sfxBus, "boom", pa + 0.05);
+      // music lift at the payoff
+      musicLift.gain.setValueAtTime(1, pa - 0.6);
+      musicLift.gain.linearRampToValueAtTime(1.9, pa + 0.4);
+    }
+    playSfx(actx, sfxBus, "boom", t0 + Math.max(0, total - 1.2));
   }
   const stepLen = 60 / 128 / 2;
   let nextStep = 0;

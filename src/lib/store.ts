@@ -36,6 +36,11 @@ export interface Video {
   hooks?: { best: string; runnerUp: string } | undefined;
   facts?: { myth: string; reality: string; claims: number; confidence: number } | undefined;
   checks?: string[] | undefined; // script checker issues left after the rewrite
+  ready?: boolean | undefined; // passed the 85-point publish gate
+  story?: { premise: string; question: string; hero: string; anchors: string } | undefined;
+  judges?: { passA: number; passB: number; passC: boolean; payoff: string; weakest: string } | undefined;
+  analytics?: { hookType: string; revealSec: number; castSize: number; shotMix: Record<string, number>; continuity: number } | undefined;
+  perf?: { hold3?: number | undefined; ret30?: number | undefined; completion?: number | undefined; replays?: number | undefined } | undefined;
   createdAt: number;
 }
 

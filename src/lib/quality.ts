@@ -64,7 +64,7 @@ const HISTORY = ["sailor", "roman", "napoleon", "king", "army", "empire", "ancie
 const hits = (t: string, list: string[]) => list.filter((w) => t.includes(w)).length;
 const cap5 = (n: number) => Math.max(0, Math.min(5, Math.round(n)));
 
-/** The brief's 5 topic tests, 0-5 each; a topic passes at 18/25. */
+/** Brief #2 topic tests (0-5 each, pass 18/25): odd = visible oddity in one image, hidden = surprising reason, analogy = household analogy, demo = one proof shot, verifiable = two sources. */
 export function scoreTopic5(title: string): Topic5 {
   const t = title.toLowerCase();
   const odd = cap5(1 + hits(t, ODD) * 2);
@@ -85,13 +85,18 @@ export function madeBefore(topic: string, previous: string[]) {
 
 const STOP = new Set("the a an and but so then with into onto from that this they them their there his her him he she it its was were is are be been for of to in on at by as or not just even very really what when where which while who whom why how your you our out up down over".split(" "));
 
+const TWIST = new Set(["wrong", "secret", "fake", "real", "never", "nobody", "trick", "lie", "actually", "hidden", "worked", "impossible"]);
+
 /** Index of the word to highlight in a caption group: a number first, otherwise the longest content word (5+ letters). */
 export function emphasisIndex(words: string[]): number {
   const clean = words.map((w) => w.replace(/[^\p{L}\p{N}]/gu, ""));
   const num = clean.findIndex((w) => /\d/.test(w) || /^(one|two|three|four|five|six|seven|eight|nine|ten|hundred|thousand|million|fifty|twenty|thirty|forty)$/i.test(w));
   if (num >= 0) return num;
+  const twist = clean.findIndex((w) => TWIST.has(w.toLowerCase()));
+  if (twist >= 0) return twist;
+  // nouns only: skip verb-looking words (-ing/-ed) and stop words
   let best = -1, len = 4;
-  clean.forEach((w, i) => { if (!STOP.has(w.toLowerCase()) && w.length > len) { best = i; len = w.length; } });
+  clean.forEach((w, i) => { const l = w.toLowerCase(); if (!STOP.has(l) && !/(ing|ed|ly)$/.test(l) && w.length > len) { best = i; len = w.length; } });
   return best;
 }
 
