@@ -165,7 +165,7 @@ export const generateVoice = createServerFn({ method: "POST" })
       headers: { Authorization: `Bearer ${k.lovable}`, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
       body: JSON.stringify({
         model: "google/gemini-3.1-flash-tts-preview",
-        contents: [{ role: "user", parts: [{ text: `Say in a deep, slow, suspenseful documentary narrator voice: ${data.text}` }] }],
+        contents: [{ role: "user", parts: [{ text: `Narrate like a gripping viral history documentary, deep confident voice, ${data.style || "brisk pace"}: ${data.text}` }] }],
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_VOICE[data.voice] ?? "Charon" } } } },
         stream_format: "audio",
       }),

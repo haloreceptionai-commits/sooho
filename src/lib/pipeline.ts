@@ -74,7 +74,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const portrait = input.format === "short";
     await Promise.all([
       pool(plan.scenes, 3, async (sc, i) => {
-        const r = await withRetry(() => generateVoice({ data: { text: sc.narration, voice: input.voice, deployment: s.ttsDeployment, style: "" } }));
+        const r = await withRetry(() => generateVoice({ data: { text: sc.narration, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "fast punchy pace" : "brisk measured pace" } }));
         scenes[i]!.audio = b64ToBuf(r.audio);
         tick("Recording narration");
       }),
