@@ -2,7 +2,7 @@
 // while the user moves around the app.
 import { actions, getState, type VideoInput } from "@/lib/store";
 import { generateImage, generatePlan, generateVoice } from "@/lib/pipeline.functions";
-import { renderVideo, type RenderScene } from "@/lib/renderer";
+import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 
@@ -65,24 +65,54 @@ export async function runVideo(id: string, input: VideoInput) {
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 10, detail: `Script ready · ${n} scenes` });
 
-    const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx }));
+    const portrait = input.format === "short";
+    const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood }));
+    // narration is recorded in chunks of a few scenes so the delivery flows like one take
+    const groups: number[][] = [];
+    let cur: number[] = []; let wc = 0;
+    plan.scenes.forEach((sc, i) => {
+      const w = sc.narration.split(/\s+/).filter(Boolean).length;
+      if (cur.length && wc + w > (portrait ? 60 : 90)) { groups.push(cur); cur = []; wc = 0; }
+      cur.push(i); wc += w;
+    });
+    if (cur.length) groups.push(cur);
+    const voice: VoiceChunk[] = groups.map((g) => ({ scenes: g, audio: new ArrayBuffer(0) }));
+
+    const totalAssets = groups.length + n + 1;
     let done = 0;
     const tick = (what: string) => {
       done++;
-      up({ progress: 10 + Math.round((done / (n * 2)) * 60), detail: `${what} · ${done}/${n * 2} assets`, stage: done < n ? "voice" : "images" });
+      up({ progress: 10 + Math.round((done / totalAssets) * 60), detail: `${what} · ${done}/${totalAssets} assets`, stage: "images" });
     };
-    const portrait = input.format === "short";
+    const looks = new Map(plan.characters.map((c) => [c.name.toLowerCase(), c]));
+    const img = (extra: Partial<Parameters<typeof generateImage>[0]["data"]>, prompt: string) =>
+      withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }));
+
     await Promise.all([
-      pool(plan.scenes, 3, async (sc, i) => {
-        const r = await withRetry(() => generateVoice({ data: { text: sc.narration, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "fast punchy pace" : "brisk lively pace" } }));
-        scenes[i]!.audio = b64ToBuf(r.audio);
+      pool(groups, 3, async (g, gi) => {
+        const text = g.map((i) => plan.scenes[i]!.narration.trim()).join(" ");
+        const r = await withRetry(() => generateVoice({ data: { text, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "short" : "long" } }));
+        voice[gi]!.audio = b64ToBuf(r.audio);
         tick("Recording narration");
       }),
-      pool(plan.scenes, 2, async (sc, i) => {
-        const r = await withRetry(() => generateImage({ data: { prompt: sc.image_prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality } }));
-        if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
-        tick("Painting scenes");
-      }),
+      (async () => {
+        // 1) character sheet keeps the cast identical in every shot
+        let sheet: string | undefined;
+        if (plan.characters.length) {
+          try {
+            const r = await img({ sheet: true }, plan.characters.map((c) => `${c.name}: ${c.look}`).join("; "));
+            sheet = r.image ?? undefined;
+          } catch { /* continue without reference */ }
+        }
+        tick("Designing characters");
+        await pool(plan.scenes, 3, async (sc, i) => {
+          const cast = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
+          let r = await img({ cast, reference: cast && sheet ? sheet : undefined }, sc.image_prompt).catch(() => null);
+          if (!r) r = await img({ cast }, sc.image_prompt); // retry without the reference
+          if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
+          tick("Painting scenes");
+        });
+      })(),
     ]);
 
     // scenes whose image was blocked by the safety filter reuse the nearest image
@@ -92,7 +122,7 @@ export async function runVideo(id: string, input: VideoInput) {
     for (const sc of scenes) { if (sc.image) lastImg = sc.image; else sc.image = lastImg; }
     const full = scenes as RenderScene[];
     up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
-    const out = await renderVideo(full, {
+    const out = await renderVideo(full, voice, {
       width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080,
       captions: s.burnCaptions, sfx: s.soundEffects,
       onProgress: (p) => up({ progress: 72 + Math.round(p * 0.26) }),
