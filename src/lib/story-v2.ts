@@ -272,20 +272,27 @@ export const BENCH_SUCCESS = `SUCCESS — "Why Sailors Carried Storm Oil" (bench
 
 export const BENCH_FAILURE = `FAILURE — "The Fake City That Hid A War Factory" (our old script). Opening: "A mailman knocks on a rooftop door—who lives here?" (riddle, face close-up, hook text repeated the line). Never says "factory", "war", a year or the main place; "bombers" first heard at 58s. "He used British night decoys, and taught studios." (no referent). New characters with no role (Major, Seattle). Two questions late (30%, 42%). Ending: "No enemy bombers ever came to test." (absence). Validator results: V1 0/4 anchors, V2 fail, V3 fail, V4 fail, V5 fail, V6 fail, V10 fail. Kept parts that worked: the myth-bust "Most people think a full fake town stood here. But that's wrong." and the blanket analogy.`;
 
-export const GOLD_REWRITE = [
-  { beat: "hook", narration: "In 1942, America hid a bomber factory under a fake neighbourhood." },
-  { beat: "context", narration: "Painted houses. Plywood trees. Even fake laundry on the lines. From the sky over Burbank, California, it looked like a quiet street. Below it, the Lockheed workers built warplanes for the war." },
-  { beat: "question", narration: "After Pearl Harbor, everyone expected enemy bombers. So how do you hide a factory from the sky?" },
-  { beat: "try", narration: "Lockheed wants the factory gone from enemy maps. First, workers paint the big roof green." },
-  { beat: "fail", narration: "But from a plane, the giant flat roof still looks like a factory." },
-  { beat: "escalation", narration: "The army calls Hollywood set builders for help. The set builders hang huge nets with fake houses and trees." },
-  { beat: "myth", narration: "Most people picture a whole fake town. Actually, it was a thin cover over one huge roof." },
-  { beat: "reveal", narration: "The set builders know the trick. You don't hide the shape. You break it up." },
-  { beat: "analogy", narration: "Ever hide a toy under a blanket? From far away, it just looks like a lumpy floor." },
-  { beat: "proof", narration: "From the air, the factory roof becomes a soft green street with tiny homes." },
-  { beat: "payoff", narration: "It worked so well that pilots got lost above their own factory. So how do you hide a factory from the sky? You turn its roof into a fake street." },
+const g = (beat: string, narration: string, shot: Shot, characters: string[] = ["Lockheed"], money = false, loop_opened = "", loop_closed = ""): StoryScene => ({ beat, narration, shot, characters, money, loop_opened, loop_closed });
+/** Gold rewrite of the failure script (Brief #3 §5), tightened so it passes every validator. */
+export const GOLD_REWRITE: StoryScene[] = [
+  g("hook", "In 1942, Burbank hid a bomber factory under a fake street.", "aerial", ["Lockheed"], true),
+  g("context", "Lockheed wants the factory hidden from enemy bombers. So how do you hide a factory from the sky?", "wide", ["Lockheed"], false, "main"),
+  g("try", "The army calls Hollywood set builders to help Lockheed.", "action", ["Lockheed", "set builders"]),
+  g("try", "First, Lockheed workers paint the giant roof green.", "action"),
+  g("fail", "But from a plane, the green roof still looks like a factory.", "aerial", ["Lockheed", "pilot"]),
+  g("escalation", "The set builders hang huge nets over the roof. Lockheed adds fake houses, trees and even laundry.", "wide", ["Lockheed", "set builders"]),
+  g("myth", "Most people picture a whole fake town. Actually, it was a thin cover over one roof.", "wide", []),
+  g("reveal", "The set builders know the trick. You don't hide the shape. You break it up.", "face", ["set builders"]),
+  g("analogy", "Ever hide a toy under a blanket? From far away, it looks like a lumpy floor.", "macro", [], false, "", "main"),
+  g("proof", "From the air, the Lockheed roof becomes a soft street with tiny homes.", "aerial"),
+  g("payoff", "It worked so well that pilots got lost over their own factory. So how do you hide a factory from the sky? You turn its roof into a fake street.", "action", ["Lockheed", "pilot"], true),
 ];
+export const GOLD_STORY = (): StoryInput => ({
+  scenes: GOLD_REWRITE, anchors: GOLD_ANCHORS, question: "How do you hide a factory from the sky?",
+  hero: { name: "Lockheed", role: "factory", want: "hide the factory from bombers" },
+  cast: [{ name: "Lockheed", role: "factory" }, { name: "set builders", role: "Hollywood" }, { name: "pilot", role: "army" }], durationSec: 65,
+});
 export const GOLD_ANCHORS: Anchors = { year: "1942", place: "Burbank, California", org: "Lockheed", subject: "factory", stakes: "bombers" };
 
 /** Few-shot block added to the script writer's prompt. */
-export const FEW_SHOT = `${BENCH_SUCCESS}\n\n${BENCH_FAILURE}\n\nGOLD REWRITE of the failure (copy this STRUCTURE, never its content): ${GOLD_REWRITE.map((b) => `[${b.beat}] ${b.narration}`).join(" ")}`;
+export const FEW_SHOT = `${BENCH_SUCCESS}\n\n${BENCH_FAILURE}\n\nGOLD REWRITE of the failure (copy this STRUCTURE, never its content): ${GOLD_REWRITE.map((b) => `[${b.beat}${b.money ? ", money shot" : ""}] ${b.narration}`).join(" ")}`;
