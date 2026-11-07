@@ -135,6 +135,7 @@ Split into about ${scenes} scenes, spread across the beats in order. Return a cl
 export interface VoiceInput { text: string; voice: string; deployment: string; style: string }
 
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
+const GEMINI_VOICE: Record<string, string> = { onyx: "Charon", ash: "Algenib", echo: "Orus", ballad: "Rasalgethi", verse: "Fenrir", cedar: "Alnilam" };
 
 export const generateVoice = createServerFn({ method: "POST" })
   .inputValidator((d: VoiceInput) => {
@@ -157,12 +158,17 @@ export const generateVoice = createServerFn({ method: "POST" })
         throw new Error(`[${res.status}] Azure voice failed`);
       }
     }
-    // 2) Fallback: same OpenAI narrator voices via Lovable AI
+    // 2) Fallback: Lovable AI speech (Gemini TTS) with the closest male narrator voice
     const k = keys();
     const res = await fetch(`${LOVABLE_AI}/audio/speech`, {
       method: "POST",
       headers: { Authorization: `Bearer ${k.lovable}`, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
-      body: JSON.stringify({ model: "openai/gpt-4o-mini-tts", input: data.text, voice: data.voice, instructions, stream_format: "audio", response_format: "mp3" }),
+      body: JSON.stringify({
+        model: "google/gemini-3.1-flash-tts-preview",
+        contents: [{ role: "user", parts: [{ text: `Narrate as a deep-voiced documentary storyteller. ${instructions}\n\n${data.text}` }] }],
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_VOICE[data.voice] ?? "Charon" } } } },
+        stream_format: "audio",
+      }),
     });
     if (!res.ok) await fail(res, "Voice");
     return { audio: toBase64(await res.arrayBuffer()), engine: "lovable" };
