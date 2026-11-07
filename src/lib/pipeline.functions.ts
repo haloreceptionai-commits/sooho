@@ -109,7 +109,7 @@ export const generatePlan = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<Plan> => {
     const short = data.format === "short";
-    const wpm = short ? 250 : 190; // measured speed of the fast storyteller narration
+    const wpm = 153; // approved Atlas narrator pace
     const words = Math.round((data.durationSec / 60) * wpm);
     const scenes = short ? Math.max(10, Math.round(data.durationSec / 2.5)) : Math.min(90, Math.max(14, Math.round(data.durationSec / 7)));
     const perScene = Math.round(words / scenes);

@@ -167,8 +167,10 @@ export function tightenPauses(ctx: BaseAudioContext, b: AudioBuffer, maxPause = 
 }
 
 /** WSOLA time-stretch: speeds speech up by `rate` while keeping the voice's pitch. */
+export const ATLAS_RATE = 0.85;
+
 export function timeStretch(ctx: BaseAudioContext, b: AudioBuffer, rate: number): AudioBuffer {
-  if (rate <= 1.01) return b;
+  if (Math.abs(rate - 1) <= 0.01) return b;
   const sr = b.sampleRate;
   const N = Math.round(sr * 0.03), Hs = Math.round(N / 2), tol = Math.round(sr * 0.008);
   const win = new Float32Array(N);
@@ -338,10 +340,9 @@ function scheduleMusic(ctx: AudioContext, out: AudioNode, at: number, step: numb
 export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number }> {
   const actx = new AudioContext();
   await actx.resume();
-  let buffers = (await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))))).map((b) => tightenPauses(actx, b));
-  const raw = buffers.reduce((a, b) => a + b.duration, 0);
-  const rate = o.targetSec ? Math.max(1, Math.min(1.35, raw / Math.max(5, o.targetSec - 1))) : 1;
-  if (rate > 1.01) buffers = buffers.map((b) => timeStretch(actx, b, rate));
+  // Atlas narrator: keep natural pauses and apply the same 0.85 pace used for the approved audition.
+  let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
+  buffers = buffers.map((b) => timeStretch(actx, b, ATLAS_RATE));
   const LEAD = 0.15, JOIN = 0.06;
   let t = LEAD;
   const chunks = buffers.map((b, i) => {
