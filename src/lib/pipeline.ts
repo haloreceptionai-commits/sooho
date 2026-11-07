@@ -16,7 +16,7 @@ const b64ToBuf = (b64: string) => {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Retry only rate limits / transient server errors, with backoff. */
-async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, tries = 4, cap = 16000): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
     try {
@@ -25,7 +25,7 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
       last = e;
       const m = e instanceof Error ? e.message : String(e);
       if (!/\[(429|5\d\d)\]/.test(m) || i === tries - 1) throw e;
-      await sleep(2000 * 2 ** i + Math.random() * 1000);
+      await sleep(Math.min(cap, 2000 * 2 ** i) + Math.random() * 1500);
     }
   }
   throw last;
@@ -86,7 +86,7 @@ export async function runVideo(id: string, input: VideoInput) {
     };
     const looks = new Map(plan.characters.map((c) => [c.name.toLowerCase(), c]));
     const img = (extra: Partial<Parameters<typeof generateImage>[0]["data"]>, prompt: string) =>
-      withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }));
+      withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }), 9, 30000);
 
     await Promise.all([
       pool(groups, 3, async (g, gi) => {
@@ -105,9 +105,9 @@ export async function runVideo(id: string, input: VideoInput) {
           } catch { /* continue without reference */ }
         }
         tick("Designing characters");
-        await pool(plan.scenes, 3, async (sc, i) => {
+        await pool(plan.scenes, 2, async (sc, i) => {
           const cast = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
-          let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), sc.image_prompt).catch(() => null);
+          let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), sc.image_prompt).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, sc.image_prompt); // retry without the reference
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
