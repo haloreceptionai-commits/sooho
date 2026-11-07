@@ -188,7 +188,7 @@ const planSchema = {
           image_prompt: { type: "string" },
           characters: { type: "array", items: { type: "string" } },
           camera: { type: "string", enum: ["push_in", "pull_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "punch_in"] },
-          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour", "wave", "crash"] },
+          sfx: { type: "string", enum: ["none", "whoosh", "boom", "snap", "splash", "thunder", "creak", "coin", "fire", "heartbeat", "crowd", "clang", "wind", "pour", "wave", "crash", "spray"] },
           mood: { type: "string", enum: ["tension", "reveal"] },
         },
       },
@@ -218,8 +218,13 @@ Rules:
 - Third person, present tense, conversational ("goes,", "and all he gets back is,"). Short quoted dialogue lines between characters.
 - CURIOSITY-GAP MINI-STORY. Beats in order: hook (weird action, the open loop "why?") → stakes (antagonist + a SKEPTIC who doubts it out loud in quoted dialogue) → defeat → countdown (escalation with 2 mini-twists; a new event, place or question every 6-8 seconds; withhold the answer) → climax (peak tension) → reveal ("You see, ..." name the real practice + one everyday household analogy starting with "Ever ...?") → proof (one visual demo of the mechanism, e.g. a macro shot of soup) → payoff (spectacle; rival gets the catastrophe) and the LAST sentence is the loopLine: it loops back to the hook image or opens a follow-up question.
 - The reveal beat must START between 60% and 72% of the total words. Every question raised must be answered by the end.
+- WORDS A 5-YEAR-OLD KNOWS: use only short, common, everyday words a young kid hears at home ("big", "boat", "oil", "water", "scared", "trick"). Never words like "phenomenon", "viscosity", "surface tension", "maritime", "navigate", "catastrophic", "approximately", "mechanism", "unprecedented". If a science idea needs a name, say it once and explain it in kid words right away ("a thin skin on top of the water").
+- HOOK (first sentence): a strange action or a shocking picture that makes the viewer ask "WHY?". Never give the answer.
+- RE-HOOKS: every 8-10 seconds before the reveal, end a sentence with a NEW question the viewer now needs answered ("So why would he waste good oil?", "But how can oil stop a wave?"). Each one opens a new loop; at least ${Math.max(2, Math.floor((data.durationSec * 0.65) / 12))} questions before the reveal.
+- FALSE BELIEF BROKEN: once, state what most people believe, then smash it ("Most people think oil makes things slippery and worse. But that's wrong."). Put it right before or inside the reveal.
+- SOUND WORDS: use vivid action words the editor can add sound to (splash, spray, crash, boom, creak, pour, thunder) on the key moments.
 - First write the timed beat sheet in "beats" (start_s, end_s, words, purpose, open_loop_id, visual_note), THEN write the prose to match it.
-- SENTENCES: 6-12 words each (never fragments under 5 words like "Reed curses." or "Spray blinds the crew."), present-tense action, concrete nouns, one idea per sentence, questions as pivots, dialogue quoted inside narration. It must still flow as one story told out loud (use "But", "So", "Then" to link) — no lists, at most 3 named characters, crystal clear to a 12-year-old on first listen. No passive voice, no jargon without an analogy.
+- SENTENCES: 6-12 words each (never fragments under 5 words like "Reed curses." or "Spray blinds the crew."), present-tense action, concrete nouns, one idea per sentence, questions as pivots, dialogue quoted inside narration. It must still flow as one story told out loud (use "But", "So", "Then" to link) — no lists, at most 3 named characters, crystal clear to a 5-year-old on first listen. No passive voice, no jargon without an analogy.
 - FACTS: stay inside the fact sheet. If it gives a hedge line, say it (in your own words) in the reveal or proof, never overstate the effect.
 - Historically accurate. No subscribe/like calls. No filler; every sentence pushes forward.
 - Plain, simple spoken words. Every line must make literal sense; no poetic metaphors ("glassy knuckles", "clock ticks in his ears"), no "us/we" from the narrator, refer to characters by role ("the cook", "his captain", "the pirates") more than by name.
