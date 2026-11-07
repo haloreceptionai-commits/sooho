@@ -91,7 +91,7 @@ export const generatePlan = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<Plan> => {
     const short = data.format === "short";
-    const wpm = short ? 205 : 150;
+    const wpm = short ? 165 : 145; // matches measured narrator speed so videos land near the target length
     const words = Math.round((data.durationSec / 60) * wpm);
     const scenes = short ? Math.max(8, Math.round(data.durationSec / 5)) : Math.max(12, Math.round(data.durationSec / 18));
     const system = `You are the head writer of a history & facts YouTube channel whose Shorts average 7.8M views (style of RicksClips3000).
@@ -108,7 +108,7 @@ sfx: the single best sound effect for that scene, or "none".`;
     const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube documentary, 16:9"}.
 Topic: ${data.topic}
 Viral archetype: ${data.archetype}
-Target length: ${data.durationSec} seconds ≈ ${words} words of narration total (${short ? "195–215 words for 60s" : "~150 wpm"}).
+Target length: ${data.durationSec} seconds ≈ ${words} words of narration total — stay within ±10% of this word count.
 Split into about ${scenes} scenes, spread across the beats in order. Return a click-worthy title (under 60 chars) and a 2-sentence YouTube description.`;
 
     const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
