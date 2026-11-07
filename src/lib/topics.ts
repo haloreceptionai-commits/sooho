@@ -9,7 +9,7 @@ export interface FactTopic {
 }
 export interface TopicUse {
   topic: string;
-  topicId?: string;
+  topicId?: string | undefined;
   status: string;
 }
 

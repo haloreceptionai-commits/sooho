@@ -7,6 +7,7 @@ import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
+import { topicUnavailable } from "@/lib/topics";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -102,6 +103,7 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ detail: "Fact-checking the story…" });
     const facts = await withRetry(() => factCheck({ data: { topic: input.topic, deployment: s.scriptDeployment } }));
     const factText = [
+      ...(input.topicSource ? [`Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify this claim independently; do not treat the title as proof.`] : []),
       ...facts.claims.map((c) => `- ${c.claim} (${c.date}) [${c.confidence}; ${c.sources.join("; ")}]`),
       `Myth: ${facts.myth}`, `Reality: ${facts.reality}`, facts.hedge ? `Hedge line to include: ${facts.hedge}` : "",
     ].join("\n");
@@ -367,6 +369,8 @@ export function resumeInterrupted() {
 }
 
 export function startVideo(input: VideoInput) {
+  const used = getState().videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }));
+  if (topicUnavailable(input.topic, input.topicId, used)) throw new Error("This topic already has a video or is being made. Pick a new topic.");
   const id = actions.addVideo(input);
   void runVideo(id, input);
   return id;
