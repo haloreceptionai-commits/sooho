@@ -106,6 +106,107 @@ export const factCheck = createServerFn({ method: "POST" })
     `You are a meticulous history & science fact-checker for a Shorts channel. List 5-8 atomic, checkable claims the video will rely on. For each give 2+ independent named sources (book, paper, museum, primary document, e.g. "Pliny, Natural History II.234", "Franklin letter to Brownrigg, 1774"), the date/period, and a confidence rating. Never invent sources; if you are unsure, lower confidence. "myth" = what the popular telling says, "reality" = what evidence supports. "hedge" = ONE short spoken line (max 12 words) the narrator must say if the effect is partial or overstated, else "".`,
     `Topic: ${data.topic}`, "fact_sheet", factSchema, "Fact checker"));
 
+// ---------------- Research: anchors, premise, question, payoff, money shot ----------------
+
+export interface Research {
+  anchors: { year: string; place: string; org: string; subject: string; stakes: string };
+  premise: string; question: string;
+  oneImage: { ok: boolean; picture: string };
+  hero: { name: string; role: string; want: string };
+  skeptic: { name: string; role: string }; threat: string;
+  payoff: string; moneyShot: string; tries: string[]; analogy: string; proof: string;
+}
+const S = { type: "string" } as const;
+const researchSchema = {
+  type: "object", additionalProperties: false,
+  required: ["anchors", "premise", "question", "oneImage", "hero", "skeptic", "threat", "payoff", "moneyShot", "tries", "analogy", "proof"],
+  properties: {
+    anchors: { type: "object", additionalProperties: false, required: ["year", "place", "org", "subject", "stakes"], properties: { year: S, place: S, org: S, subject: S, stakes: S } },
+    premise: S, question: S,
+    oneImage: { type: "object", additionalProperties: false, required: ["ok", "picture"], properties: { ok: { type: "boolean" }, picture: S } },
+    hero: { type: "object", additionalProperties: false, required: ["name", "role", "want"], properties: { name: S, role: S, want: S } },
+    skeptic: { type: "object", additionalProperties: false, required: ["name", "role"], properties: { name: S, role: S } },
+    threat: S, payoff: S, moneyShot: S, tries: { type: "array", items: S }, analogy: S, proof: S,
+  },
+};
+
+export const researchStory = createServerFn({ method: "POST" })
+  .inputValidator((d: { topic: string; facts: string; deployment: string }) => {
+    if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
+    return { ...d, facts: (d.facts ?? "").slice(0, 5000) };
+  })
+  .handler(async ({ data }) => azureJson<Research>(data.deployment,
+    `You are the research producer of a story Shorts channel. From the topic and fact sheet, extract what the writer needs BEFORE writing:
+- anchors: year (or era like "1940s"), place (main location of THIS story), org (organisation/people involved), subject (the one concrete noun the story is about, e.g. "factory", "ship"), stakes (one word for what is at risk, e.g. "bombers", "storm", "war"). Each anchor is 1-3 plain words that the narrator will literally say.
+- premise: exactly "This video is about [WHO] who [ODD, VISIBLE ACTION] because [HIDDEN REASON]."
+- question: ONE impossible question, max 10 words, a stranger understands with no context (e.g. "How do you hide a factory from the sky?").
+- oneImage: ok=false if the odd action CANNOT be drawn in a single picture; picture = that single image.
+- hero: ONE real or representative protagonist (named person if documented, otherwise a role like "the head painter") who WANTS something visible; want = one short sentence.
+- skeptic: the person who voices the viewer's doubt. threat: the rival/danger.
+- tries: 2-3 real attempts in order (naive try, why it failed, the bigger adaptation).
+- payoff: the strongest documented consequence or twist for the ending. NEVER an absence ("nobody came"); if the result is an absence, frame it as success with a surprising detail.
+- moneyShot: the one image that sums up the video (e.g. split view: fake street above, real factory below).
+- analogy: one household analogy a 5-year-old gets. proof: one visual demonstration shot.
+Only use facts from the fact sheet; word disputed things carefully.`,
+    `Topic: ${data.topic}\nFact sheet:\n${data.facts}`, "research", researchSchema, "Research"));
+
+// ---------------- Blind judges (Pass A / B / C) ----------------
+
+interface PassAnswer { what: string; where: string; odd: string; next: string }
+const passASchema = { type: "object", additionalProperties: false, required: ["what", "where", "odd", "next"], properties: { what: S, where: S, odd: S, next: S } };
+const passBSchema = { type: "object", additionalProperties: false, required: ["premise", "hero", "want", "question"], properties: { premise: S, hero: S, want: S, question: S } };
+const passCSchema = { type: "object", additionalProperties: false, required: ["answered", "answer", "payoff", "weakest"], properties: { answered: { type: "boolean" }, answer: S, payoff: S, weakest: S } };
+const gradeSchema = {
+  type: "object", additionalProperties: false, required: ["passA", "passB", "readAloud", "literal", "filler"],
+  properties: {
+    passA: { type: "integer" }, passB: { type: "integer" },
+    readAloud: { type: "array", items: S }, literal: { type: "array", items: { type: "integer" } }, filler: { type: "array", items: S },
+  },
+};
+
+export const judgeScript = createServerFn({ method: "POST" })
+  .inputValidator((d: { first3: string; first15: string; full: string; truth: string; shots: string; deployment: string }) => ({
+    ...d, first3: d.first3.slice(0, 1200), first15: d.first15.slice(0, 3000), full: d.full.slice(0, 12000), truth: d.truth.slice(0, 3000), shots: d.shots.slice(0, 12000),
+  }))
+  .handler(async ({ data }) => {
+    const blind = "You are a cold viewer who has never heard of this topic. Answer ONLY from what you are shown; if you can't tell, answer \"unclear\".";
+    const [a, b, c] = await Promise.all([
+      azureJson<PassAnswer>(data.deployment, blind, `You saw the first 3 seconds of a Short:\n${data.first3}\nWhat is happening? Where? Why is it odd? What might happen next?`, "pass_a", passASchema, "Judge A"),
+      azureJson<{ premise: string; hero: string; want: string; question: string }>(data.deployment, blind, `You saw the first 15 seconds:\n${data.first15}\nState the premise, the hero, what the hero wants and the central question.`, "pass_b", passBSchema, "Judge B"),
+      azureJson<{ answered: boolean; answer: string; payoff: string; weakest: string }>(data.deployment, blind, `Full script:\n${data.full}\nWas the opening question answered (quote the answer)? What was the payoff? Which beat was weakest?`, "pass_c", passCSchema, "Judge C"),
+    ]);
+    const g = await azureJson<{ passA: number; passB: number; readAloud: string[]; literal: number[]; filler: string[] }>(data.deployment,
+      "You grade blind viewer answers against the truth, and audit a script. Be strict but fair: an answer is correct if a stranger clearly got the idea.",
+      `TRUTH:\n${data.truth}\n\nPass A answers (what/where/odd/next): ${JSON.stringify(a)}\nPass B answers (premise/hero/want/question): ${JSON.stringify(b)}\n\nFULL SCRIPT:\n${data.full}\n\nSCENES (index: narration => visual):\n${data.shots}\n\nReturn passA = number of the 4 Pass A answers that are correct, passB = number of the 4 Pass B answers that are correct. readAloud = sentences that are fragments, drop words, or don't parse when spoken aloud (quote them; [] if none). literal = scene indexes whose visual does NOT literally show the main noun/action of its narration. filler = sentences that only describe a scene and add no new fact or reversal.`,
+      "grade", gradeSchema, "Grader");
+    return { passA: g.passA, passB: g.passB, passC: !!c.answered, payoff: c.payoff, weakest: c.weakest, readAloud: g.readAloud, literal: g.literal, filler: g.filler, answers: { a, b, c } };
+  });
+
+// ---------------- Continuity gate (vision) ----------------
+
+export const checkContinuity = createServerFn({ method: "POST" })
+  .inputValidator((d: { sheet: string; shot: string; cast: string; deployment: string }) => {
+    if (d.sheet.length > 6_000_000 || d.shot.length > 6_000_000) throw new Error("Image too large");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
+      messages: [
+        { role: "system", content: "You check character continuity for an animated series. Compare the characters in the SHOT to the REFERENCE SHEET: same face, hair, outfit, colours, proportions." },
+        { role: "user", content: [
+          { type: "text", text: `Characters expected in the shot: ${data.cast.slice(0, 600)}. Image 1 = reference sheet, image 2 = shot. Score 0-10 how closely the characters match (10 = identical). Reply JSON {"score": n, "issue": "..."}.` },
+          { type: "image_url", image_url: { url: `data:image/jpeg;base64,${data.sheet}`, detail: "low" } },
+          { type: "image_url", image_url: { url: `data:image/jpeg;base64,${data.shot}`, detail: "low" } },
+        ] },
+      ],
+      max_completion_tokens: 2000, reasoning_effort: "low",
+      response_format: { type: "json_schema", json_schema: { name: "continuity", strict: true, schema: { type: "object", additionalProperties: false, required: ["score", "issue"], properties: { score: { type: "integer" }, issue: S } } } },
+    });
+    if (!res.ok) await fail(res, "Continuity check");
+    const j = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    try { return JSON.parse(j.choices?.[0]?.message?.content ?? "") as { score: number; issue: string }; } catch { return { score: 10, issue: "unreadable" }; }
+  });
+
 // ---------------- Hooks ----------------
 
 export interface Hook { type: string; line: string; visual: string; text: string; curiosity: number; clarity: number; visualness: number; speakability: number }
