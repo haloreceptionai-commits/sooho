@@ -10,7 +10,6 @@ const MODELS = [
 ] as const;
 import { toast } from "sonner";
 import { actions, useStore, STYLES, DEFAULT_SETTINGS, type Settings } from "@/lib/store";
-import { VOICES } from "@/lib/voices";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
 
 export const Route = createFileRoute("/settings")({
@@ -45,7 +44,6 @@ function SettingsPage() {
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Channel</h2>
           <Field name="Channel name"><input className={input} value={f.channelName} onChange={(e) => set("channelName", e.target.value)} /></Field>
-          <Field name="Default voice"><select className={input} value={f.defaultVoice} onChange={(e) => set("defaultVoice", e.target.value)}>{VOICES.map((v) => <option key={v.id} value={v.id}>{v.name} — {v.persona}</option>)}</select></Field>
           <Field name="Default visual style"><select className={input} value={f.defaultStyle} onChange={(e) => set("defaultStyle", e.target.value)}>{STYLES.map((v) => <option key={v}>{v}</option>)}</select></Field>
         </Panel>
 
