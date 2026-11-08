@@ -12,6 +12,12 @@ from capture import atomic_json, fingerprint
 from stems import synthesize
 from mix import mix_stems, read_pcm
 
+def jsround(x):
+    # Match JavaScript Math.round so frame counts agree with the scene validator (106.5 -> 107).
+    import math
+    return math.floor(x+0.5)
+
+
 ROOT=Path(__file__).resolve().parent
 
 def run(*args):
@@ -40,7 +46,7 @@ def main():
         run('node',str(ROOT/'prepare-scene.mjs'),str(manifest),str(prepared))
         state['stages']['prepared']=fingerprint(prepared/'web');atomic_json(state_path,state)
     elif fingerprint(prepared/'web')!=state['stages']['prepared']: raise ValueError('Prepared engine changed')
-    total=round(m['narration']['samples']/48000*30)
+    total=jsround(m['narration']['samples']/48000*30)
     if a.mode=='preflight':
         import importlib.util
         spec=importlib.util.spec_from_file_location('sheet_tool',ROOT/'contact-sheet.py')
@@ -69,7 +75,7 @@ def main():
     cues=[]
     for shot in m['shots']:
         for e in shot['events']:
-            cues.append({'frame':round(m['words'][e['word']]['start']*30)-e['lead'],'kind':e['kind']})
+            cues.append({'frame':jsround(m['words'][e['word']]['start']*30)-e['lead'],'kind':e['kind']})
     music,sfx=synthesize(len(narration),a.twist_frame,cues)
     mixed,report=mix_stems(narration,music,sfx,rate)
     np.save(work/'mix.npy',mixed);atomic_json(work/'mix-report.json',report)
