@@ -1,5 +1,7 @@
 # Roadmap — Cartoon Engine v2
 
+- [ ] Fix Dragon Jar script rejection: enforce valid hook selection, actionable full-plan repairs and blocker-aware repair selection; verify without generating media.
+
 - [x] Stage 1: Visual Director (per-sentence props/actors/shot/camera/cues) + manifest v2
 - [x] Stage 2: Performance (lip sync on dialogue, 11 expressions, 20 actions, up to 3 actors)
 - [x] Stage 3: Props library (42 props, moving set pieces)
