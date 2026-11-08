@@ -1,5 +1,7 @@
 # Roadmap — Cartoon Engine v2
 
+- [ ] Full background generation: move script, voice and media off the browser with durable claims, checkpoints and bounded recovery; implementation pending review of the plan.
+
 - [x] Correct false interrupted status across browsers: use cloud update freshness, preserve only actively orchestrated local jobs, no automatic restart; five regression tests and signed-in Dragon Jar display verified.
 
 - [x] Fix Dragon Jar repair defects: eligible hooks only, full-plan repair context, latest-draft progression, blocker-aware selection and mandatory deterministic gates; 122 tests passed, authenticated script-only checks exercised.
