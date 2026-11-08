@@ -11,7 +11,7 @@ export const recoverCartoonReview = createServerFn({ method: 'POST' }).middlewar
   .inputValidator((data: { videoId: string }) => ({ videoId: reviewApproval.shape.videoId.parse(data.videoId) }))
   .handler(async ({ data, context }) => {
     const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).single();
-    if (!job || job.user_id !== context.userId || job.status !== 'failed' || job.error !== 'Cloud callback unavailable' || !job.run_id) throw Error('No saved preview can be recovered');
+    if (!job || job.user_id !== context.userId || job.status !== 'failed' || !['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(job.error ?? '') || !job.run_id) throw Error('No saved preview can be recovered');
     const key = process.env['LOVABLE_API_KEY'], connection = process.env['APIFY_API_KEY'];
     if (!key || !connection) throw Error('Apify is not connected');
     const get = async (path: string) => {
@@ -24,6 +24,18 @@ export const recoverCartoonReview = createServerFn({ method: 'POST' }).middlewar
     if (!store) throw Error('Saved cartoon inputs not found');
     const lock = await get(`/key-value-stores/${store.id}/records/LOCK`);
     if (lock.jobId !== job.id || !/^[a-f0-9]{64}$/.test(lock.hash)) throw Error('Saved preview does not match this job');
+    const canonical = (value: Json): string => Array.isArray(value) ? `[${value.map(canonical).join(',')}]` : value !== null && typeof value === 'object' ? `{${Object.keys(value).sort().map(k => `${JSON.stringify(k)}:${canonical(value[k] ?? null)}`).join(',')}}` : JSON.stringify(value);
+    if (job.error === 'Owner review does not match locked inputs') {
+      const oldRuns = await get(`/acts/${CARTOON_ACTOR}/runs?limit=100&desc=true`);
+      let original: Json | undefined;
+      for (const oldRun of oldRuns.data.items) {
+        const candidate = await get(`/key-value-stores/${oldRun.defaultKeyValueStoreId}/records/INPUT`);
+        if (candidate.jobId === job.id && candidate.mode === 'preflight') { original = candidate.manifest; break; }
+      }
+      if (!original || canonical(original) !== canonical(job.manifest)) throw Error('Saved inputs changed; cannot recover automatically');
+      const response = await fetch(`https://connector-gateway.lovable.dev/apify/key-value-stores/${store.id}/records/LOCK`, { method: 'PUT', headers: { Authorization: `Bearer ${key}`, 'X-Connection-Api-Key': connection, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...lock, request: original, requestHash: await digest(canonical(original)) }) });
+      if (!response.ok) throw Error('Could not repair saved input ordering');
+    }
     const root = `${context.userId}/${data.videoId}/cartoon`;
     const { data: files, error } = await context.supabase.storage.from('videos').list(root);
     if (error || !files) throw Error('Could not inspect saved cartoon assets');

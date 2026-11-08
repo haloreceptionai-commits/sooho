@@ -60,7 +60,7 @@ export function VideoJob({ v }: { v: Video }) {
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <p className="flex-1 break-words">{v.error}</p>
           {!v.hostedRender && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> {v.seedanceCheckpoint || v.assemblyCheckpoint ? "Resume" : "Retry"}</Button>}
-          {v.input.engine === 'cartoon' && v.error === 'Cloud callback unavailable' && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { void recover({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not recover preview')); }}><RotateCcw className="h-3 w-3" /> Recover preview</Button>}
+          {v.input.engine === 'cartoon' && ['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(v.error ?? '') && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { void recover({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not recover preview')); }}><RotateCcw className="h-3 w-3" /> Recover preview</Button>}
         </div>
       )}
       <CartoonReviewPanel video={v} />
