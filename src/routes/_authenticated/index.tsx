@@ -16,6 +16,7 @@ import { topicHistoryQuery } from "@/lib/topics-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getTopicHistory } from "@/lib/topics.functions";
+import { seedanceEstimate } from "@/lib/seedance";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -130,8 +131,10 @@ function Create() {
             <select id="engine" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
               <option value="own">Own model — AI images with camera motion</option>
               <option value="omni">Gemini Omni — AI-animated video clips</option>
+              <option value="seedance">Seedance 2.5 — fluid cartoon animation · 720p</option>
             </select>
             {engine === "omni" && <p className="mt-2 text-xs text-muted-foreground">Characters really move. Uses far more AI credits and adds several minutes per video.</p>}
+            {engine === "seedance" && <p className="mt-2 text-xs text-muted-foreground">Estimated animation: ~{seedanceEstimate(format === "short" ? shortSec : longMin * 60)} credits, plus script, images and narration. Short clips · 720p source · Atlas voice. Actual cost varies with scene lengths.</p>}
           </Panel>
 
           <Button onClick={generate} disabled={checking || unavailable} className={`${btnPrimary} h-auto w-full py-4 text-base`}>

@@ -20,7 +20,7 @@ export interface VideoInput {
 }
 
 /** "own" = stills + camera motion (no AI video); "omni" = Gemini Omni AI-animated clips. */
-export type VideoEngine = "own" | "omni";
+export type VideoEngine = "own" | "omni" | "seedance";
 
 export interface Video {
   id: string;
