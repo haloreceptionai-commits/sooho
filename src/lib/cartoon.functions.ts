@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { CARTOON_LIFETIME_MS, cartoonStart, reviewApproval, reviewMatches, type CartoonStart, type CartoonReview } from '@/lib/cartoon-job';
 import { validRenderAssets } from '@/lib/hosted-render';
 import type { Json } from '@/integrations/supabase/types';
+import { startAzureCartoon } from '@/lib/azure-render.server';
 
 export const CARTOON_ACTOR = 'nifty_remnant~chronicle-cartoon-renderer';
 
@@ -61,8 +62,6 @@ export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requ
     if (!validRenderAssets(context.userId, data.videoId, [data.voicePath])) throw Error('Invalid narration asset');
     const { data: existing } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).maybeSingle();
     if (existing) return { id: existing.id, status: existing.status };
-    const key = process.env['LOVABLE_API_KEY'], connection = process.env['APIFY_API_KEY'];
-    if (!key || !connection) throw Error('Apify is not connected');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const token = crypto.randomUUID() + crypto.randomUUID();
     const tokenHash = await digest(token);
@@ -76,7 +75,7 @@ export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requ
     try {
       const { data: signed, error: signError } = await context.supabase.storage.from('videos').createSignedUrl(data.voicePath, 86400);
       if (signError || !signed) throw Error('Could not open the saved Atlas narration');
-      const run = await startActor(key, connection, { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, mode: 'preflight' });
+      const run = await startAzureCartoon(job.id, 'preflight', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, mode: 'preflight' });
       const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
       if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { hostedRender: { id: job.id, status: 'running' }, status: 'running', progress: 72, stage: 'render', detail: 'Cartoon preview · safe to close your browser' }, saved_path: '' });
@@ -96,14 +95,15 @@ export const approveCartoon = createServerFn({ method: 'POST' }).middleware([req
     if (!row || !job || job.user_id !== context.userId) throw Error('Video not found');
     const review = (row.data as Record<string, Json>)['cartoonReview'] as unknown as CartoonReview | undefined;
     if (!reviewMatches(review, data.hash) || !review || job.status !== 'review') throw Error('This preview changed or was already approved');
-    const key = process.env['LOVABLE_API_KEY'], connection = process.env['APIFY_API_KEY'];
-    if (!key || !connection) throw Error('Apify is not connected');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const token = crypto.randomUUID() + crypto.randomUUID(), tokenHash = await digest(token);
     const { data: claimed, error } = await supabaseAdmin.rpc('approve_cartoon_render', { job_id: job.id, owner_id: context.userId, review_hash: data.hash, next_token_hash: tokenHash });
     if (error || !claimed) throw Error('Preview was already approved or expired');
     try {
-      const run = await startActor(key, connection, { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: data.hash });
+      // Saved previews from the older Apify worker keep finishing there; new previews finish on Azure.
+      const legacy = !/^cartoon-[0-9a-f-]{36}$/.test(review.storeId);
+      const finishInput = { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: data.hash };
+      const run = legacy ? await startActor(...apifyKeys(), finishInput) : await startAzureCartoon(job.id, 'finish', finishInput);
       const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
       if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { detail: 'Full cartoon render · safe to close your browser', hostedRender: { id: job.id, status: 'running' } }, saved_path: '' });
@@ -115,6 +115,11 @@ export const approveCartoon = createServerFn({ method: 'POST' }).middleware([req
     }
   });
 
+function apifyKeys(): [string, string] {
+  const key = process.env['LOVABLE_API_KEY'], connection = process.env['APIFY_API_KEY'];
+  if (!key || !connection) throw Error('Apify is not connected');
+  return [key, connection];
+}
 async function digest(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), x => x.toString(16).padStart(2, '0')).join(''); }
 function callbackAddress() {
   const origin = new URL(getRequest().url).origin;
