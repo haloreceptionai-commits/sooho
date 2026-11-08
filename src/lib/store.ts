@@ -10,6 +10,7 @@ export interface VideoInput {
   topic: string;
   topicId?: string | undefined;
   topicSource?: { url: string; fact: string };
+  reference?: { url: string; transcript: string } | undefined; // remix: transcript of the YouTube Short it is based on
   format: Format;
   durationSec: number;
   archetype: string;
