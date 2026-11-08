@@ -1,8 +1,9 @@
 FROM apify/actor-node-playwright-chrome:22
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv ffmpeg fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv ffmpeg fonts-dejavu-core mesa-vulkan-drivers libvulkan1 && rm -rf /var/lib/apt/lists/*
 RUN python3 -m venv /opt/cartoon/venv && /opt/cartoon/venv/bin/pip install --no-cache-dir numpy==2.2.6 pillow==11.2.1 playwright==1.56.0 && /opt/cartoon/venv/bin/pip install --no-cache-dir torch==2.7.1+cpu torchaudio==2.7.1+cpu --index-url https://download.pytorch.org/whl/cpu
 RUN /opt/cartoon/venv/bin/playwright install --with-deps chromium
+ENV CARTOON_GL=auto
 ENV CARTOON_PYTHON=/opt/cartoon/venv/bin/python
 ENV CARTOON_WEIGHTS=/opt/cartoon/weights.pth
 WORKDIR /usr/src/app
