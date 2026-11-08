@@ -230,7 +230,9 @@ const LIBRARY=new Map();
     obj.traverse(o=>{ if(!o.isMesh)return; const mats=Array.isArray(o.material)?o.material:[o.material];
       const t=mats.map(m=>{ if(m.map)m.map.colorSpace=THREE.SRGBColorSpace; return toon({color:m.color||'#ffffff',map:m.map||null,transparent:m.transparent,opacity:m.opacity??1,side:THREE.DoubleSide}); });
       o.material=Array.isArray(o.material)?t:t[0]; o.castShadow=o.receiveShadow=true; });
-    const box=new THREE.Box3().setFromObject(obj),size=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
+    // Rigged models carry their scale on the armature: pose the idle clip and measure skinned vertices.
+    if(g.animations?.length){ const mx=new THREE.AnimationMixer(obj),c0=g.animations.find(c=>/idle|standing/i.test(c.name))||g.animations[0]; mx.clipAction(c0).play(); mx.setTime(0); obj.updateMatrixWorld(true); obj.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();}); mx.stopAllAction(); mx.uncacheRoot(obj); }
+    const box=new THREE.Box3().setFromObject(obj,!!g.animations?.length),size=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
     const k=e.h/Math.max(size.y,1e-3*Math.max(size.x,size.z),1e-4); obj.position.set(-c.x*k,-box.min.y*k,-c.z*k); obj.scale.setScalar(k);
     LIBRARY.set(e.id,{e,obj,clips:g.animations||[]}); } }
 function libraryModel(id){ const L=LIBRARY.get(id); if(!L)throw Error('Library object not prepared'); const g=new THREE.Group();
