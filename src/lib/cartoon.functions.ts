@@ -7,6 +7,38 @@ import type { Json } from '@/integrations/supabase/types';
 
 export const CARTOON_ACTOR = 'nifty_remnant~chronicle-cartoon-renderer';
 
+export const recoverCartoonReview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { videoId: string }) => ({ videoId: reviewApproval.shape.videoId.parse(data.videoId) }))
+  .handler(async ({ data, context }) => {
+    const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).single();
+    if (!job || job.user_id !== context.userId || job.status !== 'failed' || job.error !== 'Cloud callback unavailable' || !job.run_id) throw Error('No saved preview can be recovered');
+    const key = process.env['LOVABLE_API_KEY'], connection = process.env['APIFY_API_KEY'];
+    if (!key || !connection) throw Error('Apify is not connected');
+    const get = async (path: string) => {
+      const r = await fetch(`https://connector-gateway.lovable.dev/apify${path}`, { headers: { Authorization: `Bearer ${key}`, 'X-Connection-Api-Key': connection } });
+      if (!r.ok) throw Error(`Saved cartoon preview could not load [${r.status}]`);
+      return r.json();
+    };
+    const stores = await get('/key-value-stores?limit=100');
+    const store = stores.data.items.find((s: { name: string }) => s.name === `cartoon-${job.id}`);
+    if (!store) throw Error('Saved cartoon inputs not found');
+    const lock = await get(`/key-value-stores/${store.id}/records/LOCK`);
+    if (lock.jobId !== job.id || !/^[a-f0-9]{64}$/.test(lock.hash)) throw Error('Saved preview does not match this job');
+    const root = `${context.userId}/${data.videoId}/cartoon`;
+    const { data: files, error } = await context.supabase.storage.from('videos').list(root);
+    if (error || !files) throw Error('Could not inspect saved cartoon assets');
+    const sheets = files.filter(f => /^sheet-\d{2}\.jpg$/.test(f.name)).map(f => `${root}/${f.name}`).sort();
+    if (!sheets.length || !['voice.wav', 'alignment.json', 'manifest.json'].every(name => files.some(f => f.name === name && Number(f.metadata?.size) > 0))) throw Error('Saved cartoon preview is incomplete');
+    const { data: voiceManifest } = await context.supabase.storage.from('videos').download(`${root}/manifest.json`);
+    if (!voiceManifest) throw Error('Saved voice clock is missing');
+    const m = JSON.parse(await voiceManifest.text());
+    const review = { hash: lock.hash, storeId: store.id, sheets, voicePath: `${root}/voice.wav`, alignmentPath: `${root}/alignment.json`, duration: m.narration.samples / 48000, approved: false };
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: accepted, error: recoverError } = await supabaseAdmin.rpc('recover_cartoon_review', { job_id: job.id, owner_id: context.userId, saved_review: review as Json });
+    if (recoverError || !accepted) throw Error('Preview recovery was not accepted');
+    return { accepted: true };
+  });
+
 export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((input: CartoonStart) => cartoonStart.parse(input))
   .handler(async ({ data, context }) => {
