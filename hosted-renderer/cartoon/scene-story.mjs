@@ -1,4 +1,5 @@
 import { cameraAt, actorIdle } from './motion.js';
+import { actionState } from './action.js';
 import { LIGHTS } from './lights.js';
 import manifest from './manifest.json' with { type: 'json' };
 
@@ -33,7 +34,7 @@ const outfits = {
   worker: {tunic:'#527e57',skin:'#f5c9a0',hair:'#392b26',apron:'#dfd8c7'},
   scholar: {tunic:'#d6e6ed',skin:'#c99067',hair:'#29252a',apron:'#eff4f1'},
 };
-const actions = new Set(['idle','walk','point','react']);
+const actions = new Set(['idle','walk','point','react','lift','pour']);
 export const actorsAt = (f,T) => shotAt(f).actors.map(a => {
   const design = manifest.cast.find(c=>c.id===a.id);
   if (!design || !outfits[design.outfit]) throw Error('Unsupported cast design');
@@ -42,10 +43,12 @@ export const actorsAt = (f,T) => shotAt(f).actors.map(a => {
   const t=(f-shot.start)/30;
   const walking = a.action==='walk';
   const step = walking ? Math.sin(t*8) : 0;
+  const action=actionState(a.action,f,shot.start,shot.end);
   const opts={seed:design.seed,expr:a.expression,blink:(f+design.seed*13)%113<4?1:0,
     tilt:idle.tilt,headTilt:idle.headTilt,bob:idle.bob*5+(walking?.04*Math.abs(step):0),
-    L:'hang',R:a.action==='point'?'point':a.action==='react'?'cheek':'hang',step};
+    L:'hang',R:a.action==='point'?'point':a.action==='react'?'cheek':'hang',step,
+    action:a.action,progress:action.progress,lift:action.lift,frame:f};
   const rounded=Object.fromEntries(Object.entries(opts).map(([k,v])=>[k,typeof v==='number'?Math.round(v*(k==='bob'?1000:20))/(k==='bob'?1000:20):v]));
-  return {x:a.pos[0]+(walking?t*.35:0),y:a.pos[1],z:a.pos[2],key:JSON.stringify([design.id,rounded]),draw:p=>T.romanFront(p,outfits[design.outfit],rounded)};
+  return {x:a.pos[0]+(walking?t*.35:0),y:a.pos[1],z:a.pos[2],key:JSON.stringify([design.id,rounded]),draw:p=>T.propCharacter(p,outfits[design.outfit],rounded)};
 });
 export const fxAt = () => [];

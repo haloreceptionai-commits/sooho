@@ -8,7 +8,7 @@ if(!input||!destination)throw Error('Manifest and scratch destination required')
 const m=JSON.parse(await readFile(input,'utf8'));
 if(m.version!=='cartoon-v1'||m.fps!==30||m.width!==1080||m.height!==1920||!m.shots?.length)throw Error('Invalid manifest');
 if(m.captions)throw Error('Caption overlay is not implemented; release blocked');
-const allowed=new Set(['idle','walk','point','react']);
+const allowed=new Set(['idle','walk','point','react','lift','pour']);
 if(m.shots.some(s=>s.actors.some(a=>!allowed.has(a.action))))throw Error('Prop action implementation required');
 const result=spawnSync(process.execPath,[path.join(root,'prepare.mjs'),destination],{stdio:'inherit'});
 if(result.status!==0)throw Error('Pinned preparation failed');
@@ -19,6 +19,8 @@ const lightEnd=referenceStory.indexOf('export const lightFor');
 const lights=referenceStory.slice(lightStart,lightEnd)+`\nLIGHTS.night_bright={...LIGHTS.day,skyTop:'#597bad',skyHor:'#b5cce4',hemi:1.5,sunI:1.4};\n`;
 await writeFile(path.join(web,'lights.js'),lights);
 await cp(path.join(root,'motion.mjs'),path.join(web,'motion.js'));
+await cp(path.join(root,'action.mjs'),path.join(web,'action.js'));
+await writeFile(path.join(web,'toon.js'),await readFile(path.join(web,'toon.js'),'utf8')+'\n'+await readFile(path.join(root,'prop-cast.js'),'utf8'));
 await cp(path.join(root,'scene-story.mjs'),path.join(web,'story.js'));
 await writeFile(path.join(web,'manifest.json'),JSON.stringify(m));
 let engine=await readFile(path.join(web,'main.js'),'utf8');
