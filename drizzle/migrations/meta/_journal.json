@@ -113,6 +113,13 @@
       "when": 1794175264368,
       "tag": "0015_strict_generation_browser_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794175309866,
+      "tag": "0016_bounded_generation_lease_recovery",
+      "breakpoints": true
     }
   ]
 }

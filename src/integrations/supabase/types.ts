@@ -23,6 +23,7 @@ export type Database = {
           id: string
           lease_owner: string | null
           lease_until: string | null
+          recovery_count: number
           request: Json
           run_id: string | null
           status: string
@@ -39,6 +40,7 @@ export type Database = {
           id?: string
           lease_owner?: string | null
           lease_until?: string | null
+          recovery_count?: number
           request: Json
           run_id?: string | null
           status?: string
@@ -55,6 +57,7 @@ export type Database = {
           id?: string
           lease_owner?: string | null
           lease_until?: string | null
+          recovery_count?: number
           request?: Json
           run_id?: string | null
           status?: string
@@ -297,6 +300,10 @@ export type Database = {
       }
       recover_cartoon_review: {
         Args: { job_id: string; owner_id: string; saved_review: Json }
+        Returns: boolean
+      }
+      recover_generation_job: {
+        Args: { p_job: string; p_new_hash: string }
         Returns: boolean
       }
       start_generation_job: {
