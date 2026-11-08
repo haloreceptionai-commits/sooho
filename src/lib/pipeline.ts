@@ -14,7 +14,7 @@ import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
-import { eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
+import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
 const b64ToBuf = (b64: string) => {
