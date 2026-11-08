@@ -257,8 +257,37 @@ export type Database = {
         Returns: boolean
       }
       expire_render_jobs: { Args: never; Returns: undefined }
+      handoff_generation_job: {
+        Args: {
+          p_fence: number
+          p_hash: string
+          p_job: string
+          p_owner: string
+        }
+        Returns: boolean
+      }
       heartbeat_generation_job: {
         Args: {
+          p_fence: number
+          p_hash: string
+          p_job: string
+          p_owner: string
+        }
+        Returns: boolean
+      }
+      patch_generation_video: {
+        Args: {
+          p_fence: number
+          p_hash: string
+          p_job: string
+          p_owner: string
+          p_patch: Json
+        }
+        Returns: boolean
+      }
+      pause_generation_job: {
+        Args: {
+          p_error: string
           p_fence: number
           p_hash: string
           p_job: string

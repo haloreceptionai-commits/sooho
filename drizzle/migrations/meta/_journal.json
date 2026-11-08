@@ -85,6 +85,13 @@
       "when": 1794174581925,
       "tag": "0011_durable_generation_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794174710721,
+      "tag": "0012_fenced_generation_publication",
+      "breakpoints": true
     }
   ]
 }
