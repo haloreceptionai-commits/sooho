@@ -7,7 +7,7 @@ const flask = { kind: 'flask', place: 'ground_left', motion: 'none' };
 describe('cinematic pass', () => {
   it('carries the last main prop into an empty scene', () => {
     const out = cinematicPass([{ ...base, props: [flask] }, { ...base, shot: 'close', props: [] }]);
-    expect(out[1]!.props?.[0].kind).toBe('flask');
+    expect(out[1]!.props?.[0]?.kind).toBe('flask');
   });
   it('never repeats the same shot and move, nor two static cuts', () => {
     const out = cinematicPass([{ ...base }, { ...base }]);
