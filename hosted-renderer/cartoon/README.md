@@ -13,7 +13,8 @@ repairs the reversed GLSL smoothstep. This is a reference world, not the general
 scene generator. The Python mixer exports floating-point samples and measured
 gains. `finish.py` encodes validated frames using common linear mastering,
 an allowed limiter and a blocking structured QA report. A synthetic one-second
-fixture passed at -13.95 LUFS; this is not production video delivery.
+fixture passed at -13.95 LUFS. A complete two-second sailor animation also
+passed frame/black/freeze/codec QA at -13.99 LUFS; this is not production delivery.
 
 `prepare-scene.mjs` builds declarative ship/town/bridge/lab/landscape primitives
 while preserving the original ink and 48-tap DOF shaders. Sailor, worker and
@@ -29,6 +30,10 @@ and the ending, with paginated sheets.
 
 Checks: `python3 test_mix.py`, `test_alignment.py`, `test_stems.py`, `test_capture.py`;
 app tests `cartoon-contract`, `cartoon-motion`, `cartoon-manifest`.
+`test_sheet.py` verifies ending/action coverage; `test_workflow.py` rejects
+changed immutable inputs before rendering. `workflow.py` provides a local
+preflight/review/frames/sound/encode flow and rejects unreviewed long rendering.
+It is not connected to paid production jobs and does not simulate cloud saves.
 
 Pending release gates: immutable container/browser/fonts/model distribution,
 alignment calibration, full actions/props/effects/cast QA,
