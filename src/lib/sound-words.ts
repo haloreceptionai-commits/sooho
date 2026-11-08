@@ -58,6 +58,8 @@ export function syllables(word: string): number {
 /** Fancy words that are short but still too grown-up for a young kid. */
 const FANCY = new Set("thus hence whereby albeit amid notion vast mere sheer devise deploy vessel endeavor endeavour subsequent ensure utilize utilise obtain commence conceal ingenious crucial enormous strategy tactic illusion massive genuine renowned ancient tactics mission objective scheme disguise peculiar bizarre".split(" "));
 /** Words a young kid would struggle with: 4+ syllables, 3 syllables and 8+ letters, or a known fancy word. */
+/** Long but everyday spoken words a child says (the myth beat itself needs "Actually"). */
+const EVERYDAY = new Set("actually carefully everybody everyone everything anything somebody something everywhere already really usually suddenly finally probably together underneath another television helicopter elevator watermelon caterpillar spaghetti alligator".split(" "));
 export function hardWords(text: string): string[] {
-  return text.split(/\s+/).map(clean).filter((w) => w && (FANCY.has(w) || syllables(w) >= 4 || (syllables(w) >= 3 && w.length >= 8)));
+  return text.split(/\s+/).map(clean).filter((w) => w && !EVERYDAY.has(w) && (FANCY.has(w) || syllables(w) >= 4 || (syllables(w) >= 3 && w.length >= 8)));
 }
