@@ -20,7 +20,7 @@ export interface VideoInput {
 }
 
 /** "own" = stills + camera motion (no AI video); "omni" = Gemini Omni AI-animated clips. */
-export type VideoEngine = "own" | "omni";
+export type VideoEngine = "own" | "omni" | "seedance";
 
 export interface Video {
   id: string;
@@ -38,6 +38,8 @@ export interface Video {
   size?: number | undefined;
   thumb?: string | undefined; // small jpeg data URL
   sceneCount?: number | undefined;
+  seedanceCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
+  seedanceClips?: Record<string, { id?: string; path?: string; error?: string }>;
   qa?: { score: number; parts: Record<string, number> } | undefined;
   hooks?: { best: string; runnerUp: string } | undefined;
   facts?: { myth: string; reality: string; claims: number; confidence: number } | undefined;
@@ -103,7 +105,7 @@ export function hydrateStore() {
         settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } return st; })(),
         // jobs that were running when the page closed can't resume
         videos: (parsed.videos ?? []).map((v) =>
-          v.status === "running" ? { ...v, status: "failed", error: "Interrupted — the page was closed while generating.", detail: "Interrupted" } : v,
+          v.status === "running" ? { ...v, status: "failed", error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v,
         ),
       };
     }
@@ -184,7 +186,16 @@ export async function flushVideo(id: string) {
   if (t) { clearTimeout(t); timers.delete(id); }
   const v = state.videos.find((x) => x.id === id);
   if (!v) return;
-  const { error } = await supabase.from("videos").upsert({ id: v.id, data: v as unknown as Json, updated_at: new Date().toISOString() });
+  // Never let a delayed browser snapshot erase provider IDs or durable clips saved by the server.
+  let data = v;
+  if (v.input.engine === "seedance") {
+    const { data: row } = await supabase.from("videos").select("data").eq("id", id).maybeSingle();
+    const remote = row?.data as unknown as Video | undefined;
+    const clips = { ...v.seedanceClips };
+    for (const [index, run] of Object.entries(remote?.seedanceClips ?? {})) clips[index] = { ...clips[index], ...run };
+    data = { ...v, seedanceClips: clips };
+  }
+  const { error } = await supabase.from("videos").upsert({ id: v.id, data: data as unknown as Json, updated_at: new Date().toISOString() });
   if (error) console.warn("Cloud sync failed", error.message);
 }
 
@@ -200,7 +211,7 @@ export async function syncFromCloud() {
     const cloud = (data ?? []).map((r) => {
       const v = r.data as unknown as Video;
       const running = v.status === "running" && !state.videos.some((x) => x.id === v.id && x.status === "running");
-      return running ? { ...v, status: "failed" as const, error: "Interrupted — the page was closed while generating.", detail: "Interrupted" } : v;
+      return running ? { ...v, status: "failed" as const, error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v;
     });
     const ids = new Set(cloud.map((v) => v.id));
     const localOnly = state.videos.filter((v) => !ids.has(v.id));

@@ -2,6 +2,7 @@ import { FileText, Mic, ImageIcon, Clapperboard, Check, RotateCcw, AlertTriangle
 import { actions, type Video } from "@/lib/store";
 import { runVideo, removeFromQueue } from "@/lib/pipeline";
 import { btnOutline } from "@/components/page";
+import { Button } from "@/components/ui/button";
 
 const STAGES = [
   { key: "script", label: "Script", icon: FileText },
@@ -52,7 +53,7 @@ export function VideoJob({ v }: { v: Video }) {
         <div className="mt-3 flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-xs text-destructive">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <p className="flex-1 break-words">{v.error}</p>
-          <button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> Retry</button>
+          <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> {v.seedanceCheckpoint ? "Resume" : "Retry"}</Button>
         </div>
       )}
     </div>

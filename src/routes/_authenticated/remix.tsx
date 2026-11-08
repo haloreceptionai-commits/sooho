@@ -11,6 +11,7 @@ import { topicUnavailable } from "@/lib/topics";
 import { Page, Panel, btnPrimary, input, label } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { VideoJob } from "@/components/video-job";
+import { seedanceEstimate } from "@/lib/seedance";
 
 export const Route = createFileRoute("/_authenticated/remix")({
   head: () => ({
@@ -116,7 +117,9 @@ function Remix() {
                 <select aria-label="Video model" className={input} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
                   <option value="own">Own model — AI images with camera motion</option>
                   <option value="omni">Gemini Omni — AI-animated video clips</option>
+                  <option value="seedance">Seedance 2.5 — fluid cartoon animation · 720p</option>
                 </select>
+                {engine === "seedance" && <p className="text-xs text-muted-foreground">Estimated animation: ~{seedanceEstimate(format === "short" ? sec : 480)} credits, plus script, images and narration. Actual cost varies with scene lengths.</p>}
               </Panel>
 
               <Button onClick={generate} disabled={starting || !topic.trim()} className={`${btnPrimary} h-auto w-full py-4 text-base`}>
