@@ -43,9 +43,9 @@ export const actorsAt = (f,T) => shotAt(f).actors.map(a => {
   const walking = a.action==='walk';
   const step = walking ? Math.sin(t*8) : 0;
   const opts={seed:design.seed,expr:a.expression,blink:(f+design.seed*13)%113<4?1:0,
-    tilt:idle.tilt,headTilt:idle.headTilt,bob:idle.bob+(walking?.04*Math.abs(step):0),
+    tilt:idle.tilt,headTilt:idle.headTilt,bob:idle.bob*5+(walking?.04*Math.abs(step):0),
     L:'hang',R:a.action==='point'?'point':a.action==='react'?'cheek':'hang',step};
-  const rounded=Object.fromEntries(Object.entries(opts).map(([k,v])=>[k,typeof v==='number'?Math.round(v*20)/20:v]));
+  const rounded=Object.fromEntries(Object.entries(opts).map(([k,v])=>[k,typeof v==='number'?Math.round(v*(k==='bob'?1000:20))/(k==='bob'?1000:20):v]));
   return {x:a.pos[0]+(walking?t*.35:0),y:a.pos[1],z:a.pos[2],key:JSON.stringify([design.id,rounded]),draw:p=>T.romanFront(p,outfits[design.outfit],rounded)};
 });
 export const fxAt = () => [];

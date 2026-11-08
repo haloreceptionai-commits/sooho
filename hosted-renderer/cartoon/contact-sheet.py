@@ -17,12 +17,13 @@ def sheet(folder, frames, output):
     output.mkdir(parents=True, exist_ok=True)
     for batch_start in range(0,len(frames),12):
         batch = frames[batch_start:batch_start+12]
-        canvas = Image.new('RGB',(4*270,3*510),'white'); draw=ImageDraw.Draw(canvas)
+        columns=min(4,len(batch)); rows=(len(batch)+columns-1)//columns
+        canvas = Image.new('RGB',(columns*270,rows*510),'white'); draw=ImageDraw.Draw(canvas)
         for i,f in enumerate(batch):
             file=folder/f'f{f:06d}.jpg'
             with Image.open(file) as im:
                 im.load(); im=im.convert('RGB'); im.thumbnail((270,480))
-                x=(i%4)*270; y=(i//4)*510; canvas.paste(im,(x,y))
+                x=(i%columns)*270; y=(i//columns)*510; canvas.paste(im,(x,y))
                 draw.text((x+6,y+484),f'Frame {f} / {f/30:.2f}s',fill='black')
         canvas.save(output/f'sheet-{batch_start//12+1:02d}.jpg',quality=94)
 
