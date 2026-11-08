@@ -10,9 +10,9 @@ export function propCharacter(p, outfit, opts) {
   const chin=torsoBot-1.08*HH;
   const ta=(.4*W)/1.06;
   const shoulderY=chin+.12*HH;
-  const lift=opts.lift||0;
-  const handX=300+ta*1.1+(pose==='lift'?4:82)*u;
-  const handY=shoulderY-(pose==='lift'?.82:.5+.62*lift)*HH;
+  const lift=(opts.lift||0)*.15;
+  const handX=300+ta*1.1+(pose==='lift'?4:35)*u;
+  const handY=shoulderY-(pose==='lift'?.82:.1+lift)*HH;
   const g=p.g;g.save();g.translate(handX,handY);
   const angle=opts.action==='pour'?(opts.progress||0)*1.2:0;
   g.rotate(angle);g.lineWidth=5;g.strokeStyle=INK;g.fillStyle='#dfab57';

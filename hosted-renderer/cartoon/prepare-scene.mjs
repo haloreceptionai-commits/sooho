@@ -20,7 +20,12 @@ const lights=referenceStory.slice(lightStart,lightEnd)+`\nLIGHTS.night_bright={.
 await writeFile(path.join(web,'lights.js'),lights);
 await cp(path.join(root,'motion.mjs'),path.join(web,'motion.js'));
 await cp(path.join(root,'action.mjs'),path.join(web,'action.js'));
-await writeFile(path.join(web,'toon.js'),await readFile(path.join(web,'toon.js'),'utf8')+'\n'+await readFile(path.join(root,'prop-cast.js'),'utf8'));
+let cast=await readFile(path.join(web,'toon.js'),'utf8');
+// Shorten the supplied exaggerated reach to keep hand-held props inside cards.
+const reach='const lf = (opts.lift || 0) * 0.62 * HH; return { pts: [s, [X(42), s[1] - 0.12 * HH - lf * 0.6], [X(82), s[1] - 0.5 * HH - lf]], front: false };';
+if(!cast.includes(reach))throw Error('Reach pose contract changed');
+cast=cast.replace(reach,'const lf = (opts.lift || 0) * 0.15 * HH; return { pts: [s, [X(20), s[1] - 0.04 * HH - lf * 0.6], [X(35), s[1] - 0.1 * HH - lf]], front: false };');
+await writeFile(path.join(web,'toon.js'),cast+'\n'+await readFile(path.join(root,'prop-cast.js'),'utf8'));
 await cp(path.join(root,'scene-story.mjs'),path.join(web,'story.js'));
 await writeFile(path.join(web,'manifest.json'),JSON.stringify(m));
 let engine=await readFile(path.join(web,'main.js'),'utf8');
