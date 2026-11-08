@@ -106,7 +106,9 @@ try {
       }
     }
     console.log(`Rendering ${batches.length} batches with ${lanes} browsers on this machine`);
+    const tDraw=Date.now();
     await Promise.all(Array.from({length:Math.min(lanes,batches.length)},lane));
+    timing('draw-share',tDraw);
     // One replica assembles; the rest stop once their share is done.
     if(!(await store.claim('assemble'))){await platform.output({status:'rendered-share'});await platform.exit();process.exit(0);}
     const deadline=Date.now()+90*60*1000;
@@ -134,7 +136,9 @@ try {
       await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);
     });
     timing('join-fetch',tFetch);
+    timing('draw-all',tDraw);
     await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged));
+    const tFinish=Date.now();
     try {
       await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);
     } catch(e) {
@@ -142,6 +146,8 @@ try {
       if(report){await store.setValue('QA-REPORT',JSON.parse(report)).catch(()=>{});console.error('QA report',report);}
       throw e;
     }
+    timing('encode-mix-qa',tFinish);
+    await store.setValue('TIMINGS',timings).catch(()=>{});
     await guard(95);
     for(const n of ['output.mp4','output.qa.json','mix-report.json'])await writeFile(path.join(work,n),await readFile(path.join(work,'render',n)));
     const qa=JSON.parse(await readFile(path.join(work,'output.qa.json'),'utf8'));
