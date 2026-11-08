@@ -241,7 +241,7 @@ const modelPool=new Map();
 function props3dState(list){for(const m of modelPool.values())m.visible=false;
   for(const p of list||[]){const key=p.kind+':'+(p.asset||'')+':'+p.i;let m=modelPool.get(key);if(!m){m=p.kind==='asset'?libraryModel(p.asset):MODEL_BUILD[p.kind]();scene.add(m);modelPool.set(key,m);}
     m.visible=true;m.position.set(p.x,p.y,p.z);m.rotation.set(0,p.kind.includes('ship')||p.kind==='rowboat'?.5:0,p.roll||0);if(p.kind==='asset'){ // real-size object; far places get a mild boost so they still read; motion 'grow' scales k
-      const far={background:1.6,sea:2.2,sky:1.4}[p.place]||1; m.scale.setScalar(far*(p.k||1)); m.rotation.y=Math.atan2(camera.position.x-p.x,camera.position.z-p.z)*(m.children[0]?.userData.billboard?1:.35); continue; }
+      const far={background:1.6,sea:2.2,sky:1.4}[p.place]||Math.min(1,1.4/LIBRARY.get(p.asset).e.h); m.scale.setScalar(far*(p.k||1)); m.rotation.y=Math.atan2(camera.position.x-p.x,camera.position.z-p.z)*(m.children[0]?.userData.billboard?1:.35); continue; }
     m.scale.setScalar((p.s||1)*(p.kind==='wave'?.5:p.kind.includes('ship')?.45:.6));}}
 const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFrame still calls this hook
 function worldState(state,f) {

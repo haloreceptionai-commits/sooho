@@ -60,6 +60,6 @@ for pack, topic in [('animal-pack', 'animal wildlife zoo farm'), ('fish-pack', '
     if p.stem in seen or 'sample' in p.stem.lower(): continue
     seen.add(p.stem); shutil.copy(p, dest / p.name)
     name = p.stem.lower()
-    catalog.append({'id': f'{pack}/{p.stem}', 'pack': pack, 'name': re.sub(r'[-_]+', ' ', name), 'tags': sorted(set(re.split(r'[-_ ]+', name) + topic.split()) - {''}), 'h': 1 if pack == 'animal-pack' else .6, 'type': 'sprite'})
+    catalog.append({'id': f'{pack}/{p.stem}', 'pack': pack, 'name': re.sub(r'[-_]+', ' ', name), 'tags': sorted(set(re.split(r'[-_ ]+', name) + topic.split()) - {''}), 'h': 1.5 if pack == 'animal-pack' else .7, 'type': 'sprite'})
 (out / 'catalog.json').write_text(json.dumps(catalog, separators=(',', ':')))
 print(len(catalog), 'objects from', len({c['pack'] for c in catalog}), 'packs')
