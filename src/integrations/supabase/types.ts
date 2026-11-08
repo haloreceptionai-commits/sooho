@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      render_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          expires_at: string
+          id: string
+          manifest: Json
+          output_path: string
+          run_id: string | null
+          status: string
+          token_hash: string
+          updated_at: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          expires_at: string
+          id?: string
+          manifest: Json
+          output_path: string
+          run_id?: string | null
+          status?: string
+          token_hash: string
+          updated_at?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          expires_at?: string
+          id?: string
+          manifest?: Json
+          output_path?: string
+          run_id?: string | null
+          status?: string
+          token_hash?: string
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_jobs_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: true
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       videos: {
         Row: {
           created_at: string
