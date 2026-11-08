@@ -1,0 +1,2 @@
+ALTER TABLE public.render_jobs DROP CONSTRAINT IF EXISTS render_jobs_video_id_key;
+CREATE UNIQUE INDEX IF NOT EXISTS render_jobs_one_active_per_video ON public.render_jobs (video_id) WHERE status IN ('submitting','running','saving','review','done');

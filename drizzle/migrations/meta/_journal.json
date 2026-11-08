@@ -71,6 +71,13 @@
       "when": 1794107606774,
       "tag": "0009_recover_verified_cartoon_input_order",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794141931663,
+      "tag": "0010_render_jobs_allow_owner_retry",
+      "breakpoints": true
     }
   ]
 }
