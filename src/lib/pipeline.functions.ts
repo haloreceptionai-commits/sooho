@@ -111,7 +111,7 @@ export const directCartoon = createServerFn({ method: 'POST' }).middleware([requ
       data.scenes.map((s, i) => `${i}: ${s}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director');
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
     const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
-      actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? (s['props'] as Record<string, unknown>[]).map(p => ({ ...p, asset: p['asset'] || undefined })).filter(p => (p['kind'] === 'asset') === !!p['asset']).slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
+      actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? (s['props'] as Record<string, unknown>[]).map((p): Record<string, unknown> => ({ ...p, asset: p['asset'] || undefined })).filter(p => (p['kind'] === 'asset') === !!p['asset']).slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
     const result = cartoonDirection.parse({ cast: raw.cast, scenes });
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
