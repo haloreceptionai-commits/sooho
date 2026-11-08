@@ -522,3 +522,35 @@ function softenPrompt(p: string) {
   for (const [re, rep] of HARSH) out = out.replace(re, rep);
   return out.replace(/\s{2,}/g, " ").trim();
 }
+
+// ---------------- Remix a YouTube Short (Apify transcript -> new topic) ----------------
+
+const YT_URL = /^https:\/\/(www\.|m\.)?(youtube\.com\/(shorts\/|watch\?v=)|youtu\.be\/)[A-Za-z0-9_-]{6,20}/;
+
+export interface ShortImport { transcript: string; topic: string; summary: string; facts: string[] }
+
+export const importShort = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { url: string; deployment: string }) => {
+    const url = d.url?.trim() ?? "";
+    if (!YT_URL.test(url) || url.length > 200) throw new Error("Paste a YouTube Short link, like https://www.youtube.com/shorts/abc123");
+    return { url, deployment: d.deployment };
+  })
+  .handler(async ({ data }) => {
+    const lovable = process.env["LOVABLE_API_KEY"], apify = process.env["APIFY_API_KEY"];
+    if (!lovable || !apify) throw new Error("Apify is not connected");
+    const res = await fetch("https://connector-gateway.lovable.dev/apify/acts/pintostudio~youtube-transcript-scraper/run-sync-get-dataset-items", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${lovable}`, "X-Connection-Api-Key": apify, "Content-Type": "application/json" },
+      body: JSON.stringify({ videoUrl: data.url }),
+    });
+    if (!res.ok) await fail(res, "Transcript reader");
+    const items = (await res.json()) as { data?: { text?: string }[] }[];
+    const transcript = (items[0]?.data ?? []).map((x) => x.text ?? "").join(" ").replace(/\[(music|applause|laughter)\]/gi, "").replace(/\s+/g, " ").trim().slice(0, 8000);
+    if (transcript.split(" ").length < 15) throw new Error("This Short has no readable spoken words (no captions found). Try another link.");
+    const out = await azureJson<Omit<ShortImport, "transcript">>(data.deployment,
+      "You analyse a viral YouTube Short's transcript so a channel can make its OWN new video on the same true topic. topic: a short catchy video title (max 10 words) naming the real-world subject, e.g. 'Why Sailors Carried Storm Oil'. summary: 1-2 plain sentences on the true story/fact behind it. facts: 3-6 checkable real-world facts the video relies on. Never copy lines.",
+      `Transcript:\n${transcript}`, "short_import",
+      { type: "object", additionalProperties: false, required: ["topic", "summary", "facts"], properties: { topic: { type: "string" }, summary: { type: "string" }, facts: { type: "array", items: { type: "string" } } } },
+      "Topic reader");
+    return { transcript, ...out };
+  });
