@@ -2,11 +2,17 @@
 import argparse, hashlib, json, re, wave, math
 from pathlib import Path
 
+def jsround(x):
+    # Match JavaScript Math.round so frame counts agree with the scene validator (106.5 -> 107).
+    import math
+    return math.floor(x+0.5)
+
+
 def build(request, alignment, voice):
     with wave.open(str(voice)) as w:
         if w.getframerate()!=48000 or w.getsampwidth()!=2: raise ValueError('Expected locked PCM48k')
         samples=w.getnframes()
-    total=round(samples/48000*30)
+    total=jsround(samples/48000*30)
     words=alignment['words']
     if not words or len(words)>600:raise ValueError('Invalid alignment size')
     previous=0
@@ -20,7 +26,7 @@ def build(request, alignment, voice):
     for i,(text,d) in enumerate(zip(request['narration'],request['direction']['scenes'])):
         count=len(text.split()); end_index=index+count
         if end_index>len(words):raise ValueError('Incomplete aligned narration')
-        end=total if i==len(request['narration'])-1 else round(words[end_index]['start']*30)
+        end=total if i==len(request['narration'])-1 else jsround(words[end_index]['start']*30)
         if end<=start: raise ValueError('Scene too short on acoustic clock')
         x=1.8 if d['wide'] else 1.4; z=7 if d['wide'] else 3.5
         cues=[]

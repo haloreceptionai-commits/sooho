@@ -5,19 +5,25 @@ import wave
 from pathlib import Path
 import numpy as np
 
+def jsround(x):
+    # Match JavaScript Math.round so frame counts agree with the scene validator (106.5 -> 107).
+    import math
+    return math.floor(x+0.5)
+
+
 RATE = 48000
 KINDS = {'whoosh', 'impact', 'creak', 'pour', 'splash', 'reveal'}
 
 def synthesize(samples, twist_frame, cues, seed=1):
     if not isinstance(samples, int) or samples <= 0:
         raise ValueError('Invalid narration samples')
-    total = round(samples / RATE * 30)
+    total = jsround(samples / RATE * 30)
     if not isinstance(twist_frame, int) or not 0 <= twist_frame < total:
         raise ValueError('Twist must be inside the locked timeline')
     rng = np.random.default_rng(seed)
     music = np.zeros(samples, dtype=np.float64)
     sfx = np.zeros(samples, dtype=np.float64)
-    twist = min(samples, round(twist_frame * RATE / 30))
+    twist = min(samples, jsround(twist_frame * RATE / 30))
     t = np.arange(twist) / RATE
     # Short plucked bass notes and a warm brass-like pad, before the pivot only.
     phase = np.mod(t, .4)
@@ -34,7 +40,7 @@ def synthesize(samples, twist_frame, cues, seed=1):
     for index, cue in enumerate(cues):
         if cue['kind'] not in KINDS or not isinstance(cue['frame'], int) or not 0 <= cue['frame'] < total:
             raise ValueError('Invalid sound cue')
-        start = round(cue['frame']*RATE/30); n = min(int(.32*RATE), samples-start)
+        start = jsround(cue['frame']*RATE/30); n = min(int(.32*RATE), samples-start)
         ct = np.arange(n)/RATE
         noise = np.random.default_rng(seed*1000+index).standard_normal(n)
         envelope = np.sin(np.pi*np.minimum(1, ct/.32))**2
