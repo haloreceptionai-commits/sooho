@@ -5,7 +5,7 @@ import type { Json } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/api/public/render-callback")({
   server: { handlers: { POST: async ({ request }) => {
-    const id = request.headers.get("x-render-job"), token = request.headers.get("authorization")?.replace(/^Bearer /, "");
+    const id = request.headers.get("x-render-job"), token = request.headers.get("x-render-token");
     if (!id || !token || token.length > 200) return new Response("Unauthorized", { status: 401 });
     const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
     const tokenHash = Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, "0")).join("");

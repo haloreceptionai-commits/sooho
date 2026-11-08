@@ -10,7 +10,7 @@ const allowed = new URL(input.callbackUrl);
 if (allowed.protocol !== 'https:' || allowed.pathname !== '/api/public/render-callback' || !allowed.hostname.endsWith('.lovable.app')) throw new Error('Invalid completion address');
 async function notify(event) {
   for (let attempt = 0; attempt < 4; attempt++) {
-    const r = await fetch(input.callbackUrl, { method: 'POST', headers: { 'Authorization': `Bearer ${input.callbackToken}`, 'x-render-job': input.jobId, 'Content-Type': 'application/json' }, body: JSON.stringify(event) });
+    const r = await fetch(input.callbackUrl, { method: 'POST', headers: { 'x-render-token': input.callbackToken, 'x-render-job': input.jobId, 'Content-Type': 'application/json' }, body: JSON.stringify(event) });
     if (r.ok) return r.json();
     if (r.status < 500 && r.status !== 429) throw new Error(`Cloud save callback failed [${r.status}]`);
     await new Promise(r => setTimeout(r, 2000 * 2 ** attempt));
