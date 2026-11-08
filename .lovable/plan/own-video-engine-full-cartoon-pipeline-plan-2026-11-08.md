@@ -3,7 +3,7 @@
 ## Goal and audit status
 New **Own Shorts**: cartoon acting in painted, inked 3D worlds. Keep Atlas, four pages, owner-only private cloud library and Omni/Seedance.
 
-Read all SKILL.md and 13 ZIP text files: README; engine/index.html/main.js/motion.js/paint.js/roman.js; tools/setup.sh/timing.py/render.mjs/sheet.py/finish.sh; example/soldier/story.js/audio.py. Inspected all 14 sample panels and compared current pipeline/security/storage/tests. **Static audit only; nothing executed or generated.**
+Read all SKILL.md and 13 ZIP text files: README; engine/index.html/main.js/motion.js/paint.js/roman.js; tools/setup.sh/timing.py/render.mjs/sheet.py/finish.sh; example/soldier/story.js/audio.py. Inspected all 14 sample panels and compared current pipeline/security/storage/tests. **Audit complete; isolated foundation checks now pass.** The user confirms permission to use and distribute the kit’s custom code. A pinned reference frame renders and resumes from its checksum checkpoint; 18 JavaScript tests and 8 Python tests pass. A controlled one-second encoding fixture passes QA at −13.95 LUFS. These are foundation proofs, not an integrated cartoon video or hosted end-to-end delivery.
 
 ## Blocking gaps to repair—not skip
 | Supplied code | Required correction |
@@ -78,7 +78,7 @@ Enforce decode/codec/frame-count/duration/loudness/black/freeze ≥0.4s checks; 
 - Inspect live SQL claims/grants/locks/cancel/expiry before extension. Keep no-delete and stale-browser-write protection.
 - Checkpoint paid results. Timeout is not rejection: reconcile unknown submissions; no automatic Actor/paid-job recreation. Eligible transient bounded backoff; existing terminal refusal/access/credit pause rules.
 - Leases/attempt paths/idempotent callbacks reject stale completion. Uploaded file with lost callback finalizes without rerender; cancellation arbitrates atomically.
-- **Unverified speed:** kit’s 3–10s/frame implies 90–300 minutes for a 60s Short. Benchmark time/memory/cost; size limits/leases/renewed grants accordingly. No two-minute/no-timeout promise; Apify costs can rise.
+- **Speed gate:** a local three-frame reference run took 15.22 seconds including browser startup. Its crude extrapolation is about 152 minutes for a 60-second Short, not a hosted benchmark. Measure steady-state hosted time/memory/cost and optimize before rollout; size limits/leases/renewed grants accordingly. No two-minute/no-timeout promise; Apify costs can rise.
 
 ## Tests and release order
 1. Offline dependency/license/hash fixture and missing-file failures.
