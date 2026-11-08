@@ -110,7 +110,14 @@ for (const kind of new Set(SHOTS.map(s=>s.world))) {
     floor.visible=false;
     sea(root,-.9,kind==='storm_sea'?.45:.12,kind==='storm_sea'?'#3f7d99':'#5aabc7');
     deck(root);
-    if(kind==='storm_sea'){ const rocking=root; animated.push(f=>{ if(!rocking.visible)return; rocking.rotation.z=.035*Math.sin(f*.06); rocking.rotation.x=.02*Math.sin(f*.045+1); }); }
+    if(kind==='storm_sea'){
+      // Towering swells with foam crests behind the ship, rolling and rising like the reference's storm.
+      const wm=toon({color:'#1f4f9a'}),foam=toon({color:'#dff0ff'});
+      for(let i=0;i<6;i++){const g=new THREE.Group();g.position.set(-30+i*12,-2,-24-(i%3)*10);root.add(g);
+        const w=add(new THREE.CylinderGeometry(5,7,22,24,1,true,0,Math.PI),wm,0,0,0,g,{cast:false});w.rotation.set(0,0,Math.PI/2);w.scale.set(1,1,.9);
+        const c=add(new THREE.TorusGeometry(5.6,.55,8,24,Math.PI*.55),foam,0,1,1,g,{cast:false});c.rotation.y=Math.PI/2;c.scale.z=2;
+        animated.push(f=>{ if(!root.visible)return; g.position.y=-3.5+1.8*Math.sin(f*.035+i*1.7); g.rotation.z=.06*Math.sin(f*.03+i); });}
+      const rocking=root; animated.push(f=>{ if(!rocking.visible)return; rocking.rotation.z=.035*Math.sin(f*.06); rocking.rotation.x=.02*Math.sin(f*.045+1); }); }
   } else if(kind==='bridge') {
     floor.visible=false; sea(root,-2,.08,'#68b7ce');
     add(tbox(4,.3,14,1),M.plank,0,-.17,0,root);
