@@ -66,7 +66,7 @@ function propPose(prop, f, shot, index) {
   if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -7; s0 = 3.4; y0 = -1.3; x0 -= .3; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
   const ease = t * t * (3 - 2 * t);
-  let x = x0 + index * .25, y = y0, z = z0, s = s0, roll = 0;
+  let x = x0 + index * (prop.place === 'sea' || prop.place === 'sky' ? 1.9 : .25), y = y0, z = z0, s = s0, roll = 0;
   if (prop.motion === 'approach') { z = z0 - 10 + 10 * ease; x = x0 - 2 + 2 * ease; }
   if (prop.motion === 'rise') { y = y0 - s0 * .9 + s0 * .9 * ease; }
   if (prop.motion === 'fall') { y = y0 + 3 * (1 - ease * ease); }
