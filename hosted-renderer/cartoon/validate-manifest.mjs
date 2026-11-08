@@ -3,7 +3,7 @@ import V from './vocabulary.json' with { type: 'json' };
 import CATALOG from './assets/library/catalog.json' with { type: 'json' };
 export const LIBRARY = new Map(CATALOG.map(c => [c.id, c]));
 
-export const OUTFITS = ['sailor', 'worker', 'scholar', 'captain', 'pirate', 'king', 'farmer'];
+export const OUTFITS = V.outfits;
 
 export function validateManifest(m) {
   const fail=message=>{throw Error(message);};
