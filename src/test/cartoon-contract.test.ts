@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { frameCount, frameRange, reactionFrame } from '../../hosted-renderer/cartoon/frame-contract.mjs';
 
