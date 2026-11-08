@@ -120,11 +120,16 @@ export async function runVideo(id: string, input: VideoInput) {
   const prior = getState().videos.find(v => v.id === id);
   if (prior?.generationJob) return;
   if (!prior?.scriptCheckpoint && !prior?.cartoonCheckpoint && !prior?.assemblyCheckpoint && !prior?.seedanceCheckpoint) {
-    const rollout = await backgroundGenerationEnabled();
-    if (rollout.enabled) {
-      await flushVideo(id);
-      const job = await startBackgroundGeneration({ data: { videoId: id, settings: getState().settings } });
-      actions.updateVideo(id, { generationJob: { id: job.id, status: 'queued' }, detail: 'Background generation · safe to close your browser' });
+    try {
+      const rollout = await backgroundGenerationEnabled();
+      if (rollout.enabled) {
+        await flushVideo(id);
+        const job = await startBackgroundGeneration({ data: { videoId: id, settings: getState().settings } });
+        actions.updateVideo(id, { generationJob: { id: job.id, status: 'queued' }, detail: 'Background generation · safe to close your browser' });
+        return;
+      }
+    } catch (e) {
+      actions.updateVideo(id, { status: 'failed', error: e instanceof Error ? e.message : 'Start could not be confirmed', detail: 'Start unconfirmed · check saved progress before retrying' });
       return;
     }
   }
