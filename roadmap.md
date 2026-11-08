@@ -1,24 +1,10 @@
-# Roadmap
-- [ ] Add authenticated Script Writer with topic selection, detailed production scripts, copying/downloading, and a live generation check.
-- [x] Package pinned cartoon drawing dependencies, prove a real reference frame, and test frame/audio contracts without changing active engines.
-- [x] Confirm permission/license for the uploaded kit's custom source before distributing it in the hosted commercial renderer.
-- [x] Build isolated declarative cartoon scenes, deterministic stems, checksum frame recovery, full-duration preflight sheets, and blocking MP4 QA; verify a complete two-second animated fixture.
-- [x] Pin offline acoustic model and test actual Atlas alignment without retiming; uncertain words remain review-gated.
-- [x] Save approved sailor look, add hand-anchored pot lifting/pouring, correct prop clipping, and validate worker inputs before scene preparation.
-- [x] Connect cartoon Shorts to authenticated cloud jobs with locked Atlas narration, acoustic alignment and explicit owner preflight review.
-- [x] Package and deploy the cartoon worker with resumable frames, cancellation, MP4 QA and atomic private cloud completion.
-- [ ] Verify full cartoon cloud MP4 playback/download: blocked on a complete hosted test using the corrected finishing worker. The 1,010-frame, 33.67s local MP4 passes frame/audio/black/freeze QA after oversampled limiting; hosted rendering is significantly slower and final cloud delivery remains unverified. New cartoon submissions stay disabled until this gate passes.
-- [x] Fix the first test's Cloud callback unavailable error and recover its saved preview without regenerating or duplicate spending; UI recovery and narration playback verified.
-- [x] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
-- [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.
-- [x] Add hosted background assembly and cloud completion after browser closure; verified saved 1080×1920 output and playback after closing the browser.
-- [x] Expand internet-sourced topic library, searchable suggestions, and cloud-aware repeat prevention; verify selection flow.
-- [x] Refresh the five auditions with excited secret-fact delivery while preserving their approved pace; verify playback.
-- [x] Generate five clear, suspenseful narrator samples and save playable audio on Create; leave video voice unchanged until user chooses.
-- [x] Verify all five saved samples play on desktop and mobile.
-- [x] Match reference Short quality (Storm Oil)
-- [x] Test-generate a video and compare against reference
-- [x] Reconnect Azure OpenAI in the new workspace (custom connector re-created, verified end to end)
+# Roadmap — Cartoon Engine v2
 
-- [x] Pipeline upgrade to Storm Oil guide (fact-check, hooks, beat sheet + checker, colour arc, ~3s dissolves, white/yellow captions, pre-reveal pause, ducking, -14 LUFS, quality score)
-- [x] Story Engine v2 from Briefs #2 + #3 (research stage, hook rules, V1-V10 validators, blind judges, 85 gate, shot mix + continuity gate, captions/audio tweaks, analytics fields)
+- [ ] Stage 1: Visual Director (per-sentence props/actors/shot/camera/cues) + manifest v2
+- [ ] Stage 2: Performance (lip sync, expressions, more actions, multi-actor)
+- [ ] Stage 3: Props & set pieces library
+- [ ] Stage 4: Cinematography (shot types, moves, subject framing)
+- [ ] Stage 5: Worlds & effects
+- [ ] Stage 6: Captions & sound cues
+- [ ] Stage 7: Quality gates (per-sentence review frames)
+- [ ] Azure test render after each stage
