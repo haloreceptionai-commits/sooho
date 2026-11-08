@@ -10,6 +10,8 @@ from pathlib import Path
 import numpy as np
 
 def gated_rms(samples, rate):
+    if not isinstance(rate, int) or rate < 8000 or rate > 192000:
+        raise ValueError("Invalid sample rate")
     if not np.isfinite(samples).all():
         raise ValueError("Nonfinite audio samples")
     width = max(1, round(rate * 0.4))
@@ -18,6 +20,8 @@ def gated_rms(samples, rate):
     return float(np.sqrt(np.mean(active))) if active else 0.0
 
 def mix_stems(voice, music, sfx, rate):
+    if any(s.ndim != 2 or s.shape[1] not in (1, 2) for s in (voice, music, sfx)):
+        raise ValueError("Stems must be mono or stereo sample matrices")
     if voice.shape != music.shape or voice.shape != sfx.shape or not voice.size:
         raise ValueError("Stems must cover the same nonempty sample timeline")
     vr = gated_rms(voice, rate)

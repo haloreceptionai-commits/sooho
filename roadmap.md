@@ -1,7 +1,9 @@
 # Roadmap
 - [x] Package pinned cartoon drawing dependencies, prove a real reference frame, and test frame/audio contracts without changing active engines.
 - [x] Confirm permission/license for the uploaded kit's custom source before distributing it in the hosted commercial renderer.
-- [ ] Complete Own cartoon pipeline: durable orchestration, aligned Atlas, original scenes/preflight, resumable frames, mastering/QA and end-to-end cloud delivery.
+- [x] Build isolated declarative cartoon scenes, deterministic stems, checksum frame recovery, full-duration preflight sheets, and blocking MP4 QA; verify a complete two-second animated fixture.
+- [x] Pin offline acoustic model and test actual Atlas alignment without retiming; uncertain words remain review-gated.
+- [ ] Complete Own cartoon pipeline: calibrated alignment, full prop actions/effects/cast, authenticated durable orchestration and preflight approval, cloud checkpoints/callbacks and closed-browser full-video delivery. Release blocked until these implementation and verification gates pass; existing engines stay unchanged.
 - [x] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
 - [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.
 - [x] Add hosted background assembly and cloud completion after browser closure; verified saved 1080×1920 output and playback after closing the browser.

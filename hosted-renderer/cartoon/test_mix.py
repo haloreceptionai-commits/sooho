@@ -31,5 +31,16 @@ class MixerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "same"):
             mix_stems(self.voice, self.music[:-1], self.music, 48000)
 
+    def test_invalid_rate_and_channels_rejected(self):
+        with self.assertRaisesRegex(ValueError, "rate"):
+            mix_stems(self.voice, self.music, self.music, 0)
+        with self.assertRaisesRegex(ValueError, "mono or stereo"):
+            mix_stems(self.voice[:, 0], self.music[:, 0], self.music[:, 0], 48000)
+
+    def test_nonfinite_audio_rejected(self):
+        voice = self.voice.copy(); voice[0] = np.nan
+        with self.assertRaisesRegex(ValueError, "Nonfinite"):
+            mix_stems(voice, self.music, self.music, 48000)
+
 if __name__ == "__main__":
     unittest.main()
