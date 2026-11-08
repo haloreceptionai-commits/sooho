@@ -57,7 +57,7 @@ for pack, (topic, _) in TOPIC.items():
   seen = set()
   for fbx in sorted(base.rglob('*.fbx')):
     stem = re.sub(r'[^A-Za-z0-9_-]+', '_', fbx.stem)[:60]
-    if stem.lower() in seen: continue
+    if stem.lower() in seen or stem.lower().startswith('smooth_'): continue  # Smooth_* are duplicate shading variants
     with tempfile.TemporaryDirectory() as t:
       r = subprocess.run([conv, '-b', '-i', str(fbx), '-o', f'{t}/m'], capture_output=True, text=True, cwd=fbx.parent, timeout=120)
       g = Path(t) / 'm.glb'
