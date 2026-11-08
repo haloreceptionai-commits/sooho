@@ -46,11 +46,20 @@ REACTION={'wide':'close','medium':'close','close':'medium','extreme_close':'medi
 def performers(d):
     cast=d.get('actors') or [{'actor':d['actor'],'action':d['action'],'expression':d['expression'],'slot':'center','facing':0}]
     if len(cast)==1 and not d.get('actors'): cast=[{**cast[0],'slot':'center'}]
-    return [{'id':a['actor'],'pos':[SLOT_X[a['slot']],0,0],'expression':a['expression'],'action':a['action'],'facing':a.get('facing',0)} for a in cast]
+    # Two performers stand closer so both fit the narrow 9:16 frame.
+    spread={1:0,2:.72,3:1.05}[len(cast)]
+    xs={'left':-spread,'center':0.0,'right':spread} if len(cast)>1 else {'left':0.0,'center':0.0,'right':0.0}
+    return [{'id':a['actor'],'pos':[xs[a['slot']],0,0],'expression':a['expression'],'action':a['action'],'facing':a.get('facing',0)} for a in cast]
 
 def camera_keys(kind,move,subject,others,start,end,props):
     dist,height,look_y,fov=SHOT[kind]
-    sx=subject['pos'][0]; look=[sx,look_y,0]
+    sx=subject['pos'][0]
+    # Group framing: aim between performers and back off until all fit the horizontal field of view.
+    if others and kind in('wide','medium','low','high'):
+        xs=[subject['pos'][0]]+[o['pos'][0] for o in others]; sx=(min(xs)+max(xs))/2
+        half=(max(xs)-min(xs))/2+.55; hfov=2*math.atan(math.tan(math.radians(fov)/2)*9/16)
+        dist=max(dist,half/math.tan(hfov/2))
+    look=[sx,look_y,0]
     if kind=='insert':
         held=any(p['place']=='hand' for p in props)
         look=[sx+.35,1.15,0] if held else [sx,.9,0]

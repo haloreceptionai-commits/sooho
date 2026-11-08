@@ -57,9 +57,13 @@ const wordAt = (f, shot) => {
   for (let i = 0; i < WORDS.length; i++) { const w = WORDS[i]; if (t >= w.start && t < w.end) return { w, i, t: (t - w.start) / (w.end - w.start) }; }
   return null;
 };
-const PLACE = { ground_left: [-1.9, 0, .6, .55], ground_right: [1.9, 0, .6, .55], background: [1.5, 0, -7, 2.6], sky: [-1.2, 4.2, -9, 1.6], sea: [-2.5, -.9, -14, 4.2] };
+// x offsets are relative to where the camera looks, so story props stay inside the narrow frame.
+const PLACE = { ground_left: [-.95, 0, .7, .5], ground_right: [.95, 0, .7, .5], background: [.7, 0, -7, 3], sky: [.2, 3.6, -9, 2.2], sea: [-.4, -1.2, -15, 6] };
+const NEAR_SEA = new Set(['wave', 'fish']);
 function propPose(prop, f, shot, index) {
-  const [x0, y0, z0, s0] = PLACE[prop.place];
+  let [x0, y0, z0, s0] = PLACE[prop.place];
+  if (prop.place !== 'ground_left' && prop.place !== 'ground_right') x0 += camAt(f).look[0];
+  if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -6.5; s0 = 5.5; y0 = -1.4; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
   const ease = t * t * (3 - 2 * t);
   let x = x0 + index * .25, y = y0, z = z0, s = s0, roll = 0;

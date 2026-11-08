@@ -15,7 +15,7 @@
       const W = out.width, size = Math.round(W * .085), y = Math.round(out.height * .7);
       g.font = `900 ${size}px "DejaVu Sans", Arial, sans-serif`; g.textBaseline = 'middle'; g.lineJoin = 'round';
       const shown = words.filter(w => w.shown);
-      const widths = shown.map(w => g.measureText(w.text.toUpperCase()).width), gap = size * .28;
+      const widths = shown.map(w => g.measureText(w.text.toUpperCase()).width), gap = size * .42;
       const total = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, shown.length - 1);
       const scale = Math.min(1, W * .9 / Math.max(1, total));
       g.save(); g.translate(W / 2, y); g.scale(scale, scale);
