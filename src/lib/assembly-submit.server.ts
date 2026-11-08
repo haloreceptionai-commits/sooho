@@ -39,7 +39,7 @@ export const submitHostedRenderOperation = async ({ data, context }: { data: z.i
     };
     try {
       await update("submitting", "Sending to hosted assembly…");
-      const bucket = context.supabase.storage.from("videos");
+      const bucket = supabaseAdmin.storage.from("videos");
       const signed: Record<string, string> = {};
       for (const path of new Set(paths)) {
         const { data: url, error: signError } = await bucket.createSignedUrl(path, 3600);
