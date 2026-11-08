@@ -114,7 +114,11 @@ export function removeFromQueue(id: string) {
 
 export async function runVideo(id: string, input: VideoInput) {
   if (running.has(id)) return;
-  if (getState().videos.find(v => v.id === id)?.hostedRender) return;
+  const prior = getState().videos.find(v => v.id === id);
+  // Owner's explicit Resume: a failed/cancelled cartoon run restarts from its saved voice + direction (no new script or voice spend).
+  const resumable = !!prior?.cartoonCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '');
+  if (prior?.hostedRender && !resumable) return;
+  if (resumable) actions.updateVideo(id, { hostedRender: undefined, status: 'running', error: undefined, detail: 'Resuming saved cartoon…' });
   removed.delete(id);
   actions.updateVideo(id, { removed: false });
   running.add(id);
