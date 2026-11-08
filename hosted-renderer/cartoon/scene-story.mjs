@@ -81,8 +81,8 @@ function propPose(prop, f, shot, index) {
   return { x, y, z, s, roll };
 }
 // Story objects with a real 3D model render in the world (lit, inked, shadowed); the rest stay painted cards.
-export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat']);
-const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind)).map(([p, i]) => ({ kind: p.kind, i, ...propPose(p, f, shot, i) }));
+export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat', 'asset']);
+const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind)).map(([p, i]) => { const pose = propPose(p, f, shot, i); return { kind: p.kind, asset: p.asset, place: p.place, i, ...pose, k: pose.s / PLACE[p.place][3] }; });
 const q = (v, k = 20) => Math.round(v * k) / k;
 export const actorsAt = (f, T) => {
   const shot = shotAt(f), local = (f - shot.start) / 30;

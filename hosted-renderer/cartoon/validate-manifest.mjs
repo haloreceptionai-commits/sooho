@@ -1,5 +1,7 @@
 // Worker-side validation before preparing trusted renderer code.
 import V from './vocabulary.json' with { type: 'json' };
+import CATALOG from './assets/library/catalog.json' with { type: 'json' };
+export const LIBRARY = new Map(CATALOG.map(c => [c.id, c]));
 
 export const OUTFITS = ['sailor', 'worker', 'scholar', 'captain', 'pirate', 'king', 'farmer'];
 
