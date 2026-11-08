@@ -62,9 +62,13 @@ def camera_keys(kind,move,subject,others,start,end,props):
     look=[sx,look_y,0]
     if kind=='insert':
         held=any(p['place']=='hand' for p in props)
-        look=[sx+.35,1.15,0] if held else [sx,.9,0]
+        ground=next((p for p in props if p['place'] in('ground_left','ground_right')),None)
+        if held: look=[sx+.35,1.15,0]
+        elif ground: look=[-.95 if ground['place']=='ground_left' else .95,.45,.7]
+        else:
+            dist,height,look_y,fov=SHOT['close']; look=[sx,look_y,0]  # nothing to insert: a reaction close-up
     side=.25 if sx<=0 else -.25
-    if kind=='over_shoulder' and others: side=max(-1.2,min(1.2,others[0]['pos'][0]-sx))*.85
+    if kind=='over_shoulder' and others: side=max(-1.2,min(1.2,others[0]['pos'][0]-sx))*.6
     def at(d,yaw=0.,dx=0.,lk=None):
         l=lk or look
         return {'pos':[round(l[0]+side+dx+math.sin(yaw)*d,3),height,round(math.cos(yaw)*d,3)],'look':[round(v,3) for v in l],'fov':fov,'roll':0}

@@ -69,7 +69,7 @@ function propPose(prop, f, shot, index) {
   let x = x0 + index * (prop.place === 'sea' || prop.place === 'sky' ? 1.9 : .25), y = y0, z = z0, s = s0, roll = 0;
   if (prop.motion === 'approach') { z = z0 - 10 + 10 * ease; x = x0 - 2 + 2 * ease; }
   if (prop.motion === 'rise') { y = y0 - s0 * .9 + s0 * .9 * ease; }
-  if (prop.motion === 'fall') { y = y0 + 3 * (1 - ease * ease); }
+  if (prop.motion === 'fall') { y = prop.place === 'sea' ? y0 - s0 * .9 * ease : y0 + 3 * (1 - ease * ease); }
   if (prop.motion === 'bob') { y = y0 + .12 * Math.sin(f * .12 + index); roll = .05 * Math.sin(f * .09); }
   if (prop.motion === 'spin') { roll = f * .08; }
   if (prop.motion === 'grow') { s = s0 * (.4 + .6 * ease); }
@@ -116,7 +116,7 @@ export const fxAt = (f, T) => {
     const x = near ? c.pos[0] + dx / len * 1.2 : (shot.actors[0]?.pos[0] || 0) + .6 * (i - .5);
     const z = near ? c.pos[2] + dz / len * 1.2 : .4;
     const y = near ? c.pos[1] - .9 : 0;
-    out.push({ x, y, z, s: near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
+    out.push({ x, y, z, s: kind === 'sparkle' ? .8 : near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
       key: JSON.stringify(['fx', kind, f]), draw: p => T.FX_ART[kind](p, f) });
   });
   return out;
