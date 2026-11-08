@@ -1,4 +1,4 @@
-import { Actor, KeyValueStore } from 'apify';
+import { platform } from './platform.mjs';
 import { spawn } from 'node:child_process';
 import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -6,8 +6,8 @@ import path from 'node:path';
 import os from 'node:os';
 import { canonical } from './canonical.mjs';
 
-await Actor.init();
-const input = await Actor.getInput();
+await platform.init();
+const input = await platform.input();
 if (!input?.jobId || !input.callbackToken || input.manifest?.kind !== 'cartoon') throw Error('Invalid cartoon job');
 const address = new URL(input.callbackUrl);
 if (address.protocol !== 'https:' || address.hostname !== 'sooho.lovable.app' || address.pathname !== '/api/public/render-callback') throw Error('Invalid completion address');
@@ -40,7 +40,7 @@ async function uploadFiles(files) {
   for(const name of files){const grant=grants.uploads[name];const bytes=await readFile(path.join(work,name));const r=await fetch(grant.url,{method:'PUT',headers:{'Content-Type':name.endsWith('.jpg')?'image/jpeg':name.endsWith('.wav')?'audio/wav':name.endsWith('.mp4')?'video/mp4':'application/json','x-upsert':'true'},body:bytes});if(!r.ok)throw Error(`Private upload failed [${r.status}]`);paths[name]=grant.path;}
   return paths;
 }
-const store= input.mode==='finish' ? await KeyValueStore.open(input.storeId) : await KeyValueStore.open(`cartoon-${input.jobId}`);
+const store= await platform.open(input.mode==='finish' ? input.storeId : `cartoon-${input.jobId}`);
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 try {
   await guard(0);
@@ -65,7 +65,7 @@ try {
     const m=JSON.parse(await readFile(path.join(work,'manifest.json'),'utf8'));
     const accepted=await notify({type:'review',hash:approvedHash,storeId:store.id,sheets:sheets.map(n=>paths[n]),voicePath:paths['voice.wav'],alignmentPath:paths['alignment.json'],duration:m.narration.samples/48000});
     if(!accepted.accepted)throw Error('Review was not accepted');
-    await Actor.setValue('OUTPUT',{status:'review',duration:m.narration.samples/48000});
+    await platform.output({status:'review',duration:m.narration.samples/48000});
   } else if(input.mode==='finish') {
     const locked=await store.getValue('LOCK');
     if(!locked||locked.jobId!==input.jobId||locked.hash!==input.approvedHash||locked.requestHash!==hash(Buffer.from(canonical(input.manifest))))throw Error('Owner review does not match locked inputs');
@@ -76,43 +76,63 @@ try {
     const m=JSON.parse(await readFile(path.join(work,'manifest.json'),'utf8'));
     const total=Math.round(m.narration.samples/48000*30);
     const framesDir=path.join(work,'render/frames');await mkdir(framesDir,{recursive:true});
-    // A completed 60-frame batch and its checksummed checkpoint are durable before the next batch.
-    const saved=await store.getValue('FRAME-CHECKPOINT');
-    if(saved){await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(saved));for(const f of Object.keys(saved.frames)){const bytes=await store.getValue(`frame-${f}`);if(Buffer.isBuffer(bytes))await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);}}
-    // Frames are deterministic per index, so independent batches render in parallel browsers,
-    // each into its own folder, then merge into one checksummed checkpoint in frame order.
-    const merged=saved||{input_hash:null,frames:{}};
-    const pending=[];
-    for(let first=0;first<total;first+=60){const last=Math.min(total-1,first+59);let done=true;for(let f=first;f<=last;f++)if(!merged.frames[String(f)]){done=false;break;}if(!done)pending.push([first,last]);}
-    const lanes=Math.max(1,Math.min(Number(process.env.CARTOON_PARALLEL)||10,pending.length||1));
-    let finished=total-pending.reduce((n,[a,b])=>n+b-a+1,0),next=0,saveChain=Promise.resolve();
+    // Frames are deterministic per index. Batches are claimed atomically, so on Azure many replicas
+    // (and several browsers per replica) split the work; each finished batch is saved as a durable part.
+    const size=Math.max(10,Number(process.env.CARTOON_BATCH)||60);
+    const batches=[];for(let first=0;first<total;first+=size)batches.push([first,Math.min(total-1,first+size-1)]);
+    const lanes=Math.max(1,Number(process.env.CARTOON_PARALLEL)||10);
+    const STALE=15*60*1000;
+    const hasPart=async first=>Boolean(await store.getValue(`part-${first}`));
+    async function renderBatch([first,last]){
+      const dir=path.join(framesDir,`batch-${first}`);await mkdir(dir,{recursive:true});
+      await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
+      const part=JSON.parse(await readFile(path.join(dir,'checkpoint.json'),'utf8'));
+      const frames={};
+      for(let f=first;f<=last;f++){const bytes=await readFile(path.join(dir,`f${String(f).padStart(6,'0')}.jpg`));await store.setValue(`frame-${f}`,bytes,{contentType:'image/jpeg'});frames[String(f)]=part.frames[String(f)];}
+      await store.setValue(`part-${first}`,{input_hash:part.input_hash,frames});
+    }
+    let cursor=0;
     async function lane(){
-      while(next<pending.length){
-        const [first,last]=pending[next++];
-        await guard(15+finished/total*75);
-        const dir=path.join(framesDir,`batch-${first}`);await mkdir(dir,{recursive:true});
-        await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
-        const part=JSON.parse(await readFile(path.join(dir,'checkpoint.json'),'utf8'));
-        if(merged.input_hash&&merged.input_hash!==part.input_hash)throw Error('Scene inputs changed between batches');
-        for(let f=first;f<=last;f++){const name=`f${String(f).padStart(6,'0')}.jpg`;const bytes=await readFile(path.join(dir,name));await writeFile(path.join(framesDir,name),bytes);await store.setValue(`frame-${f}`,bytes,{contentType:'image/jpeg'});merged.frames[String(f)]=part.frames[String(f)];}
-        merged.input_hash=part.input_hash;finished+=last-first+1;
-        saveChain=saveChain.then(()=>Promise.all([store.setValue('FRAME-CHECKPOINT',merged),writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged))]));await saveChain;
+      while(cursor<batches.length){
+        const batch=batches[cursor++];
+        if(await hasPart(batch[0]))continue;
+        if(!(await store.claim(`claim-${batch[0]}`,STALE)))continue;
+        await guard(15+cursor/batches.length*75);
+        await renderBatch(batch);
       }
     }
-    console.log(`Rendering ${pending.length} batches across ${lanes} parallel browsers`);
-    await Promise.all(Array.from({length:lanes},lane));
+    console.log(`Rendering ${batches.length} batches with ${lanes} browsers on this machine`);
+    await Promise.all(Array.from({length:Math.min(lanes,batches.length)},lane));
+    // One replica assembles; the rest stop once their share is done.
+    if(!(await store.claim('assemble'))){await platform.output({status:'rendered-share'});await platform.exit();process.exit(0);}
+    const deadline=Date.now()+90*60*1000;
+    for(;;){
+      const missing=[];for(const b of batches)if(!(await hasPart(b[0])))missing.push(b);
+      if(!missing.length)break;
+      if(Date.now()>deadline)throw Error('Parallel frame batches did not finish');
+      for(const b of missing)if(await store.claim(`claim-${b[0]}`,STALE)){await guard(85);await renderBatch(b);}
+      await guard(88);await new Promise(r=>setTimeout(r,5000));
+    }
+    const merged={input_hash:null,frames:{}};
+    for(const [first,last] of batches){
+      const part=await store.getValue(`part-${first}`);
+      if(merged.input_hash&&merged.input_hash!==part.input_hash)throw Error('Scene inputs changed between batches');
+      merged.input_hash=part.input_hash;
+      for(let f=first;f<=last;f++){const bytes=await store.getValue(`frame-${f}`);if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);merged.frames[String(f)]=part.frames[String(f)];}
+    }
     await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged));
     await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);
     await guard(95);
     for(const n of ['output.mp4','output.qa.json','mix-report.json'])await writeFile(path.join(work,n),await readFile(path.join(work,'render',n)));
     const qa=JSON.parse(await readFile(path.join(work,'output.qa.json'),'utf8'));
+    await store.setValue('QA-REPORT',qa);
     if(qa.review_required)throw Error('Output did not pass QA');
     await uploadFiles(['output.mp4','output.qa.json','mix-report.json']);
     const bytes=await readFile(path.join(work,'output.mp4'));
     await store.setValue('FINAL',bytes,{contentType:'video/mp4'});
     const result=await notify({type:'done',duration:qa.duration,mime:'video/mp4',size:bytes.length,stats:{lufs:Number(qa.loudness.input_i),lra:Number(qa.loudness.input_lra),avgShotSec:qa.duration/m.shots.length,wordsPerSec:m.words.length/qa.duration}});
     if(!result.accepted)throw Error('Cloud completion was not accepted');
-    await Actor.setValue('OUTPUT',{status:'done',duration:qa.duration,size:bytes.length,sha256:hash(bytes)});
+    await platform.output({status:'done',duration:qa.duration,size:bytes.length,sha256:hash(bytes)});
   } else throw Error('Unsupported cartoon stage');
 } catch(error){await notify({type:'failed',error:String(error.message||error).slice(0,1000)}).catch(()=>{});throw error;}
-await Actor.exit();
+await platform.exit();
