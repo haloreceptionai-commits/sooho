@@ -3,7 +3,7 @@ import type { Database, Json } from '@/integrations/supabase/types';
 import type { VideoInput, Settings } from './store';
 import type { ScriptCheckpoint, SeedanceCheckpoint } from './pipeline';
 import { writeBackgroundScript } from './generation-script.server';
-import { directCartoonOperation, generateImageOperation, generateVoiceOperation } from './pipeline-operations.server';
+import { checkContinuityOperation, directCartoonOperation, generateImageOperation, generateVoiceOperation } from './pipeline-operations.server';
 import { cartoonStart } from './cartoon-job';
 import { spellNumbers } from './story-v2';
 import { submitCartoonOperation } from './cartoon-submit.server';
@@ -12,6 +12,7 @@ import { generationPath } from './generation-policy';
 
 type Client = SupabaseClient<Database>;
 type Job = Database['public']['Tables']['generation_jobs']['Row'];
+export class GenerationCheckpointSaved extends Error {}
 export async function digest(value: string) {
   return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -48,7 +49,8 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
     const result = await fn();
     const { data: accepted, error: saveError } = await db.rpc('complete_generation_step', { ...auth, p_key: key, p_input_hash: hash, p_result: result as Json });
     if (saveError || !accepted) throw Error('Step completed but its save was not confirmed; do not regenerate');
-    return result;
+    // Each invocation executes at most one operation, avoiding an hours-long app request.
+    throw new GenerationCheckpointSaved('continue');
   }
   async function asset(key: string, b64: string, mime: string) {
     const path = generationPath(job.user_id, job.video_id, job.id, key);
@@ -94,20 +96,49 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
       voices.push({ path, scenes: group });
       await up({ progress: 12 + Math.round((i + 1) / groups.length * 15), detail: `Recording narration · ${i + 1}/${groups.length}` });
     }
-    const images: string[] = [];
+    let sheet: string | undefined;
+    if (plan.characters.length) {
+      const sheetPath = await step('sheet', JSON.stringify(plan.characters), async () => {
+        const take = await generateImageOperation({ data: { prompt: plan.characters.map(c => `${c.name}: ${c.look}`).join('; '), aspect: 'landscape', deployment: settings.imageDeployment, quality: settings.imageQuality, style: input.style, sheet: true } });
+        if (!take.image) throw Error('Character reference was blocked');
+        return asset('sheet.jpg', take.image, 'image/jpeg');
+      });
+      const { data: file, error } = await db.storage.from('videos').download(sheetPath);
+      if (error || !file) throw Error('Saved character reference is unavailable');
+      sheet = toBase64(await file.arrayBuffer());
+    }
+    const images: string[] = [], continuity: number[] = [];
     for (let i = 0; i < plan.scenes.length; i++) {
       const sc = plan.scenes[i]; if (!sc) throw Error('Scene missing');
-      const path = await step(`image/${i}`, JSON.stringify(sc), async () => {
-        const image = await generateImageOperation({ data: { prompt: sc.image_prompt, aspect: portrait ? 'portrait' : 'landscape', deployment: settings.imageDeployment, quality: settings.imageQuality, style: input.style, palette: plan.palette, cast: plan.characters.filter(c => sc.characters.includes(c.name)).map(c => `${c.name}: ${c.look}`).join('; ') } });
+      const people = sc.shot === 'action' || sc.shot === 'face';
+      const cast = people ? plan.characters.filter(c => sc.characters.includes(c.name)).map(c => `${c.name}: ${c.look}`).join('; ') : '';
+      const prompt = `${sc.shot.toUpperCase()} ${sc.angle} shot. ${sc.money ? `MONEY SHOT: ${script.moneyShot}.` : ''} ${sc.image_prompt}. ${people ? 'Characters are busy mid-action, not posing or looking at the camera.' : 'Show the environment or process; any people are small in frame.'} ${sc.color} lighting. Bright, light and airy, high-key exposure, readable soft shadows, never gloomy or underexposed.`;
+      let path = await step(`image/${i}`, JSON.stringify(sc), async () => {
+        const image = await generateImageOperation({ data: { prompt: prompt.slice(0, 3000), aspect: portrait ? 'portrait' : 'landscape', deployment: settings.imageDeployment, quality: settings.imageQuality, style: input.style, palette: plan.palette, cast, ...(cast && sheet ? { reference: sheet } : {}) } });
         if (!image.image) throw Error(`Scene ${i + 1} was blocked; no silent substitution`);
         return asset(`image-${i}.jpg`, image.image, 'image/jpeg');
       });
+      if (cast && sheet) {
+        const score = await step(`continuity/${i}`, path, async () => {
+          const { data: file, error } = await db.storage.from('videos').download(path);
+          if (error || !file) throw Error('Saved image could not load');
+          return checkContinuityOperation({ data: { sheet: sheet ?? '', shot: toBase64(await file.arrayBuffer()), cast, deployment: settings.scriptDeployment } });
+        });
+        continuity.push(score.score);
+        if (score.score < 6) {
+          path = await step(`redraw/${i}`, `${path}:${score.issue}`, async () => {
+            const image = await generateImageOperation({ data: { prompt: `${prompt} Match the reference exactly: ${score.issue}`.slice(0, 3000), aspect: portrait ? 'portrait' : 'landscape', deployment: settings.imageDeployment, quality: settings.imageQuality, style: input.style, palette: plan.palette, cast, reference: sheet } });
+            if (!image.image) throw Error('Continuity redraw was blocked');
+            return asset(`image-${i}-redraw.jpg`, image.image, 'image/jpeg');
+          });
+        }
+      }
       images.push(path);
       await up({ stage: 'images', progress: 27 + Math.round((i + 1) / plan.scenes.length * 43), detail: `Painting scenes · ${i + 1}/${plan.scenes.length}` });
     }
     // Motion engines are not enabled for background ownership until their durable adapters are integrated.
     if (input.engine === 'omni' || input.engine === 'seedance') throw Error('Background motion handoff is not enabled');
-    const cp: SeedanceCheckpoint = { plan, gate: script.gate, report: script.report, hookType: script.hookType, continuity: 1, images, voice: voices };
+    const cp: SeedanceCheckpoint = { plan, gate: script.gate, report: script.report, hookType: script.hookType, continuity: continuity.length ? continuity.filter(n => n >= 6).length / continuity.length : 1, images, voice: voices };
     await up({ assemblyCheckpoint: cp });
     const rendered = await step('handoff', JSON.stringify(cp), () => submitHostedRenderOperation({ data: { videoId: job.video_id, checkpoint: cp, clips: [], captions: settings.burnCaptions, sfx: settings.soundEffects }, context }));
     await up({ hostedRender: rendered, stage: 'render', progress: 72, detail: 'Hosted assembly · safe to close your browser' });
@@ -115,4 +146,9 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
   const { data: handed, error } = await db.rpc('handoff_generation_job', auth);
   if (error || !handed) throw Error('Render handoff save was not confirmed');
   return { status: 'handoff' };
+}
+function toBase64(buffer: ArrayBuffer) {
+  let output = ''; const array = new Uint8Array(buffer);
+  for (let i = 0; i < array.length; i += 32768) output += String.fromCharCode(...array.subarray(i, i + 32768));
+  return btoa(output);
 }

@@ -12,6 +12,12 @@ if (!claim.fence) process.exit(0);
 const timer = setInterval(() => { request({ action: 'heartbeat', fence: claim.fence }).catch(() => {}); }, 60000);
 try {
   // Run is never blindly repeated after an uncertain response; the ledger reconciles first.
-  const result = await request({ action: 'run', fence: claim.fence });
-  console.log(JSON.stringify({ status: result.status }));
+  const deadline = Date.now() + 6 * 60 * 60 * 1000;
+  for (;;) {
+    if (Date.now() > deadline) throw Error('Generation execution deadline reached');
+    const result = await request({ action: 'run', fence: claim.fence });
+    if (result.status === 'continue') continue;
+    console.log(JSON.stringify({ status: result.status }));
+    break;
+  }
 } finally { clearInterval(timer); }
