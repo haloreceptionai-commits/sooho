@@ -1,101 +1,96 @@
 # Own video engine — complete cartoon pipeline plan
 
-## Goal and scope
-Replace **new Own-model Shorts** with genuine code-driven cartoon acting in painted, inked 3D worlds—not camera movement over still images. Keep automatic Atlas narration, the four existing pages, owner-only access, permanent private cloud saving, and existing Omni/Seedance behavior.
+## Goal
+New **Own-model Shorts** will use real cartoon acting inside painted, inked 3D worlds, not camera movement over stills. Keep automatic Atlas, the four pages, private owner-only access, permanent cloud videos, and unchanged Omni/Seedance behavior.
 
-This is a plan, not an implemented or tested upgrade. The uploaded **cartoon-audio-short** specification is the target; its ZIP is a prototype requiring repairs. Approval covers the explicit adaptations below, not an assertion that its current code works.
+This is a static audit and implementation plan: no uploaded code was executed and no video was generated. The **cartoon-audio-short** specification is the target; the ZIP is a prototype requiring repairs, not a complete production engine.
 
-## Review completed
-Read the entire SKILL.md and all 13 text files in the ZIP; inspected all 14 panels of the supplied stills sheet. Coverage: README; engine/index.html, main.js, motion.js, paint.js, roman.js; tools/setup.sh, timing.py, render.mjs, sheet.py, finish.sh; example/soldier/story.js and audio.py. Compared these against current generation, Story Engine v2, narration, renderer, hosted submission/callback, storage and tests.
+## Complete review and findings
+Read the entire SKILL.md and every ZIP text file: README; engine/index.html, main.js, motion.js, paint.js, roman.js; tools/setup.sh, timing.py, render.mjs, sheet.py, finish.sh; example/soldier/story.js and audio.py. Inspected all 14 sample-image panels. Compared against current generation, Story Engine v2, Atlas, rendering, hosted submission/callback, cloud saving and tests.
 
-### Blocking findings
-- **Missing:** mix.py, vendored Three.js and toon.ts, pinned dependencies/licenses, example narration and timing artifacts. The sample animation cannot be reproduced exactly from this upload alone.
-- Setup downloads an unpinned cast library, writes into the supposedly read-only kit, omits finish.sh, suppresses errors, and assumes a type-stripping API/global Playwright install without checking them.
-- audio.py uses a fixed 592-frame duration, edits narration, ducks music, saturates the mix and exports no separate stems. It does not implement the specified 50% audio relationship.
-- finish.sh uses dynamic loudnorm rather than one measured linear gain; QA only prints failures, and its sheet covers at most the first 20 seconds.
-- Timing estimates words from syllables, ignores script discrepancies after transcription, can fail on silence/impossible alignment, and has broken option parsing. It cannot establish three-frame accuracy.
-- The world is a hardcoded Roman bridge scene, not a general story engine; the example does not use mandatory idle motion for every actor.
-- Camera helpers mislabel uniform splines as centripetal, lose metadata during interpolation and allow unbounded FOV creep. The ink shader has reversed smoothstep bounds; focus distance uses the wrong depth metric.
-- Resume trusts filenames alone. Frame requests, local file serving, output paths and generated executable stories lack production-safe validation.
-- Current Own generates stills and retimes Atlas in a shared real-time editor. Hosted assembly starts only after media generation and has a 20-minute Actor timeout/30-minute capability lifetime, unsuitable for the kit’s stated frame cost.
+| Finding | Required repair |
+|---|---|
+| Missing mix.py, vendored Three.js/toon.ts, locks/licenses and example narration/timing | Supply verified pinned dependencies, licenses, mixer and reproducible fixtures; missing dependencies block release |
+| setup.sh downloads unpinned cast code, mutates the kit, omits finish.sh, suppresses failures | Immutable offline worker image; checked API/runtime versions, explicit copying, safe argument passing and unique temporary directories |
+| audio.py hardcodes 592 frames, edits voice, ducks/saturates audio, exports no stems | Voice-derived clock, stem-only synthesis, prescribed measured mixer |
+| finish.sh dynamically normalizes and only prints QA; sheet covers first 20 seconds | Linear mastering, enforceable structured QA and full-duration sheets |
+| timing.py guesses word positions; broken arguments, silence/DP/number handling | Script-aware forced alignment, checked failures and confidence gate |
+| Hardcoded Roman world; actors do not all idle | General scene/cast/prop interfaces and required motion tracks |
+| Mislabeled spline, disappearing camera metadata, unbounded FOV; reversed shader smoothstep and wrong focus metric | Validated centripetal paths, bounded camera state, portable shader and camera-space focus |
+| Resume trusts filenames; unsafe asset server/path handling; arbitrary story code | Validated declarative data, isolated worker, allowlisted loopback assets and checksummed atomic checkpoints |
+| Current Own retimes Atlas and animates stills in shared editor | Separate Own-only offline animation adapter; preserve other engines |
+| Current Actor timeout 20 minutes and job lifetime 30 minutes | Benchmark and implement appropriate leases/resource budgets; never hide timeout risk |
 
-## Explicit adaptations and precedence
-1. **Intake:** your selected choice is automatic Atlas, not mandatory voice upload. Topic selection remains on Create; Remix keeps using the transcript only as research. No narrator picker or new page.
-2. **Voice:** keep Atlas/Charon and its approved secret-fact energy, targeting approximately 153 WPM at recording time. New Own never trims, time-stretches, tightens pauses or inserts silence after recording. Natural reveal pauses must be spoken into the take. Existing Omni/Seedance pacing stays unchanged. “Unchanged” permits necessary decoding, common final gain/limiter and AAC encoding—not editorial alteration or bit-identical MP4 audio.
-3. **Script:** use Atlas’s word budget, not the kit’s 3.7 words/second. Keep factuality, simple English, one continuous story, escalation, analogy and final payoff. Version timing/shot rules so a short script is not forced through incompatible fixed time windows; retain the 85-point readiness threshold and fail required checks before media spending.
-4. **Text:** new Own defaults to no captions and no opening overlay. Explicit opt-in captions remain available; diegetic signs are allowed and checked for correct orientation. Do not change caption preferences for other engines or penalize permitted caption absence in QA.
-5. **Framing:** permit the kit’s immediate-action medium close-up when it makes the hook literal and clear; retain varied wide/action/insert/reaction views, early and final money shots, and bright readable lighting. No automatic hard cut every three seconds: continuous camera movement takes precedence; cuts/flash transitions serve place/time changes.
-6. **Ideas:** the existing large sourced topic catalog remains. A kit-format set of exactly ten ideas, with title/hook/twist/visual moments/true-or-legend status, is produced on explicit request within Create—not ten new API calls on every visit. Ten hooks for one topic are not misreported as ten ideas.
-7. **Long-form:** the supplied kit only establishes vertical shorts. Preserve the legacy Own long-form path until the same new engine passes horizontal framing, chapter continuity, resource and full-duration tests. This limitation stays visible; long-form migration is a separate gated deliverable below, not a silent fallback.
+## Explicit adaptations — approval includes these
+- **Your choice: automatic Atlas**, not the kit’s mandatory narration upload. Keep its identity/secret-fact energy and aim for ~153 WPM while recording, not the kit’s 3.7 words/second.
+- Once accepted, new Own narration is never trimmed, stretched, pause-tightened or given inserted silence. Record natural reveal pauses. Necessary decoding, common final gain/limiter and AAC encoding remain allowed; “unchanged” does not mean bit-identical MP4 audio. Other engines keep existing pacing.
+- New Own defaults to **no captions and no hook overlay**; explicit caption opt-in remains on existing pages. Correctly oriented diegetic signs are allowed. No QA penalty for permitted caption absence; other-engine preferences stay unchanged.
+- Preserve factuality, simple English, continuous original story, escalation/analogy/payoff and 85-point readiness. Version timing/shot rules for the new profile: permit a literal hook medium close-up, phrase-driven shots and continuous camera moves instead of rigid cuts. Required failures stop before paid media; do not silently generate an unready story.
+- Keep the sourced topic catalog. On explicit request within Create, provide exactly ten kit-format ideas: 5–8-word title, spoken hook, twist, visual moments and documented/disputed/legend status. Ten hooks for one topic are not ten ideas; no automatic idea-generation spending on page load.
+- The upload establishes **vertical Shorts**, not long-form. Keep legacy Own long-form until the separately gated horizontal/chapter migration below succeeds; never silently call legacy output the new cartoon engine.
 
-## End-to-end steps — none optional unless stated
+## Pipeline: every stage has a saved result and acceptance gate
 
-### 1. Package and prove the engine
-Preserve an untouched reference copy; build a clean, pinned runtime with Three.js r160, a verified compatible toon source commit, Playwright/Chromium, supported Node, Python/numpy/Pillow, FFmpeg and fonts. Include dependency hashes, lockfiles and MIT notices after license verification. No downloads, git clones or kit mutation during a video job.
-Fix setup copying/version/path handling and use isolated temporary directories. Missing cast dependencies are a blocker, not a placeholder implementation. First render a small reference fixture proving shader compilation, colour space, cards, ink, shadows and DOF.
+### 1. Package and prove the kit
+Preserve the supplied reference. Build a pinned, offline runtime: Three.js r160, verified toon source commit, compatible Node/Playwright/Chromium, Python/numpy/Pillow, FFmpeg and fonts. Verify dependency hashes and licenses; never clone/download during a render. Repair setup prerequisites/copying/path injection/read-only violations. Render a small fixture proving cards, shadows, ink, colour conversion and DOF before integrating story generation.
 
-### 2. Accept input and reserve one durable job
-Validate owner, topic, format, length, settings and duplicate-topic history. Save immutable input/profile/version snapshots and a logical job **before the first paid call**. Repeated clicks return the same accepted job. The browser observes progress; it does not own execution.
-States: queued → research → script → validation → voice → alignment → shot plan → look check → frames → stems/mix → encode → QA → save → done. Include needs-review, paused, submission-unknown, failed and cancelled states with concrete reasons.
+### 2. Intake and durable reservation
+Validate owner, input, selected length/settings and cloud topic history. Save immutable inputs, versions and a logical job before the first paid call. Duplicate clicks return that job. Browser observes; durable services own execution.
+States: queued → research → script/validation → voice → alignment → shot plan → look check → frames → stems/mix → encode → QA → save → done. Also persist needs-review, paused, submission-unknown, failed and cancelled with real reasons.
 
-### 3. Verify the story, then write it
-Keep Azure gpt-5 and existing request behavior/model selection; do not switch providers. Retrieve and inspect source evidence: an AI-generated list of links is not verification. Store claim excerpts, URLs, historical status and uncertainty. Require corroboration for core facts; label legend/disputed accounts plainly. Never use the soldier example as historical proof.
-Use ten scored hooks, an original chronological script and the kit’s hook → setting → escalating beats → mechanism/pivot → ironic final payoff. Enforce no graphic/political stories, real named living characters, logos or mascots. Remix must not copy wording or recreate another creator’s shots.
-Run deterministic validators and required blind judges; permit at most two targeted repairs. Stop on unresolved required failures or unavailable required judging—no null judge, approximate score or silent pass. Revalidate after all scene transformations. Save script, evidence and reports.
+### 3. Research, original script and checks
+Keep Azure gpt-5 and existing provider/model selection. Retrieve source evidence: model-generated links alone do not prove facts. Save excerpts, sources, confidence and historical status; corroborate core claims and label disputed accounts/legends. The soldier example is not historical evidence.
+Write ten scored hooks and one original chronological story: hook → setting → escalating physical beats → pivot/mechanism → ironic final payoff. Plain English, contractions, spoken number words; no graphic/political stories, named living characters or mascots/logos. Remix uses transcript research, never copied lines or shot-for-shot recreation.
+Run deterministic validators and required blind judges; at most two targeted repairs. Unavailable judging or unresolved required failures stop, never null-pass. Revalidate every transformed plan before media spending; save reports.
 
 ### 4. Record and lock Atlas
-Generate one coherent take for a Short, preserving exact approved voice identity/direction and aiming for the selected duration through script length and delivery. Save the original recording, decoded sample metadata and checksum immediately. Check audibility, completeness, transcription/script match and missing/extra words before accepting it.
-Once accepted, every later stage follows that take. A duration mismatch requires review or a deliberate new recording, never hidden retiming. Long-form uses complete chapter takes with recorded natural boundaries.
+Create one coherent Short take with approved Atlas direction and a script budget fitting its pace. Save original audio/checksum and decoded sample metadata immediately. Validate complete, audible narration against exact script. Duration mismatch enters review or requires an explicit new take—no hidden retiming. Long-form uses complete chapter takes with recorded natural boundaries.
 
-### 5. Align words and derive the clock
-Implement script-aware forced alignment using pinned local model weights in the worker; no provider change to narration. Repair CLI parsing, silence detection, number handling, error propagation and impossible-alignment checks. Silence/phrase DP may diagnose alignment, but may not claim word-level precision.
-Save confidence and word/phrase boundaries. Low-confidence action words require review, not guessed positions. Use 30 FPS and N = round(decoded duration × 30), rendering exactly frames 0 through N−1. Preserve all audio samples; document the resulting frame-grid difference (up to half a frame) and codec delay instead of promising mathematically identical arbitrary durations.
+### 5. Alignment and master clock
+Use script-aware forced alignment with pinned local weights; repair argument parsing, silence/number handling, subprocess checks and impossible alignment. Save word/phrase timings and confidence. Phrase/syllable estimates may diagnose but cannot certify word accuracy; uncertain action words require review.
+FPS = 30; N = round(decoded audio duration × 30); render exactly 0…N−1. Preserve every narration sample. Document frame-grid difference (up to half a frame) and encoding delay instead of promising identical arbitrary audio/video durations.
 
-### 6. Build the shot plan before scene code
-Persist a per-shot plan: frame interval, exact spoken words, set, light, camera path/FOV/roll/focus, actor identity/pose/expression/action, props/attachments, secondary effects, and SFX events. Use one phrase per shot where sensible; merge tiny phrases.
-Frame zero already shows the hook. Schedule visual reaction onsets 0–3 frames before aligned action words and the final physical payoff on the final spoken word. Use typed, bounded declarative scene data—not executable code returned by the model.
+### 6. Shot plan before scene construction
+Save rows containing frame interval, exact words, set/light, camera path/FOV/roll/focus, cast/poses/expressions, prop/attachment actions, secondary effects and SFX. Usually one phrase per shot; merge tiny phrases. Frame zero shows the hook; reaction onsets land 0–3 frames before aligned words; final physical payoff lands on the final spoken word. Use bounded typed declarative data, never model-produced executable story code.
 
-### 7. Construct original worlds and cast
-Separate renderer, scene builders, cast, materials, textures, tracks and asset registry. Replace every bridge/temple/helmet/DECK dependency with named scene objects and anchors. Provide reusable ship/sea, town/bridge, workshop/lab and landscape primitives plus extensible original props; unsupported actions/set types stop with a reason instead of reverting to stills.
-Preserve painted textures with constant texel density, two-step toon shading, horizon fog and bright story-driven lighting. Generalize outfits/expressions/props beyond Romans; retain 600×1000 design coordinates, sole anchor, 2.25 m scale, yaw-only cards, contact blobs, alpha-tested shadows and rounded redraw keys. Test detachable parts against head/hand anchors. Render a cast test sheet for every new design.
+### 7. Original world and cast
+Separate renderer, scene builders, cast, materials, tracks and asset registry; remove all bridge/temple/helmet/DECK assumptions. Reusable ship/sea, town/bridge, workshop/lab and landscape primitives support original scenes; unsupported sets/actions stop rather than fall back to stills.
+Preserve painted textures, constant texel density, two-step toon shading, horizon fog and readable bright lighting. Generalize outfits/expressions/props beyond Romans; retain design coordinates, sole anchor, 2.25 m scale, yaw-only billboards, contact blobs, alpha-tested shadows and rounded redraw keys. Test hand/head attachments and detached props; render a sheet for every new cast design.
 
-### 8. Make every scene genuinely animate
-Use validated centripetal camera paths, eased 18–45-frame glides, bounded creeping holds, intentional rolls/impact shakes and safe collision-free framing. Add anticipation, overshoot and settle to actions; idle, blinking and stressed-word bobs to every actor; planted-foot stance/swing gait; animated water, cloth, dust, leaves and droplets.
-Repair shader bounds, camera-space focus, alpha/depth/no-ink contracts, render-state cleanup and resource disposal. Preserve linear half-float colour passes, output conversion, near-side depth-jump ink, crease outlines, card exclusion, distance fade, 48-tap depth-aware DOF and action-centred sun shadows. Unsupported graphics capabilities fail explicitly, not with blank output.
+### 8. Animation and look contracts
+Validate centripetal paths, eased 18–45-frame glides, bounded hold creep, purposeful rolls/impact shakes and collision-free vertical framing. Every character gets breathing/sway, blinks and stressed-word bobs; actions use anticipation/overshoot/settle, planted-foot gait and secondary water/cloth/dust/leaves/drips.
+Repair reversed shader smoothstep, camera-space focus, alpha/depth/no-ink contracts, state restoration and disposal. Preserve linear half-float passes/output conversion, near-side depth-jump ink/creases, card exclusion/distance fade, depth-aware 48-tap DOF and action-centred sun shadows. Missing graphics capabilities fail visibly, not with blank frames.
 
-### 9. Look check before the expensive render
-Render shot midpoints, boundaries, key actions and transition frames; generate labelled full-story contact sheets. Check faces/props fit 9:16, railings/pillars never hide the hero, cameras avoid geometry, text reads correctly, attachments align, ink is present and focus is correct. Save the sheet privately and show it in the existing job view before full rendering; no new page or required narrator upload.
-Automated checks plus visual review gate the render. Low confidence enters needs-review; required failures are fixed and sheets regenerated. Preserve this preflight stage even when earlier stages run automatically.
+### 9. Mandatory preflight look check
+Render shot midpoints, boundaries, transitions and key actions; save labelled full-story contact sheets privately and show them in the existing job view before expensive rendering. Check 9:16 framing, hero/face occlusion, camera collisions, mirrored text, attachments, ink and focus. Automated checks plus visual inspection gate release; uncertain jobs enter needs-review. Fix failures and regenerate sheets—never skip this stage.
 
-### 10. Render durable frame ranges
-Run Chromium/WebGL and Python/FFmpeg only in the hosted worker, never in app server functions. Capture deterministic frames offline, not through wall-clock MediaRecorder. Pin runtime/seed and test random-access rendering.
-Persist input-hashed frame-range checkpoints, dimensions/checksums and verified completion metadata to private storage. Atomic writes and decoded-image checks prevent corrupt/stale files being skipped. Resume only missing valid ranges under the same job; record heartbeat, actual completed frames and resource usage. Stop promptly on cancellation or runtime errors; clean up in finally.
+### 10. Hosted resumable frames
+Run Chromium/WebGL, Python and FFmpeg in the hosted worker only. Capture offline deterministic frames, not real-time MediaRecorder. Save input-hashed frame-range checkpoints, dimensions/checksums and decoded completion checks privately. Atomic writes prevent partial frames being skipped; changed inputs cannot reuse stale frames. Resume only missing valid ranges under the same job. Persist actual progress/heartbeat, honor cancellation and clean up on every failure.
 
-### 11. Synthesize and mix sound exactly
-Rewrite audio.py as reusable cue-driven stem generation; remove fixed duration, voice loading, ducking, saturation and end-fade. Generate music.wav and sfx.wav from the locked frame clock and independent cue seeds. Stop the march precisely at the twist, then add the low drone; align whooshes, impacts, creaks, pours and splashes to events.
-Implement the missing mix.py with a documented shared gated-RMS measurement. Normalize music to 0.5× voice RMS (−6.0206 dB, displayed as −6.0). SFX targets at most that ratio and peaks at most 0.7× voice peak; lower SFX if both limits cannot be met. Handle silent stems/voice safely. No ducking or compression; store measured gains/ratios. Apply only one common measured linear finishing gain and permitted peak limiter.
+### 11. Exact stems and mixing
+Rewrite audio.py to export music.wav/sfx.wav only, using the locked clock and independent cue seeds. Remove fixed length, voice loading, ducking, saturation and whole-mix fades. Stop march at the twist precisely, then introduce drone; sounds follow actions.
+Implement missing mix.py with a documented common gated-RMS definition. Music = 0.5× voice RMS (−6.0206 dB, displayed −6.0); SFX ≤0.5× voice RMS and peak ≤0.7× voice peak. If targets conflict, lower SFX and report achieved levels. Handle silent input safely. No ducking/compression; store measurements. Master with one common measured linear gain plus the allowed peak limiter.
 
-### 12. Encode, enforce QA, then save
-Validate all N frames and full narration sample coverage before FFmpeg. Encode H.264/yuv420p CRF 17 at 1080×1920/30 FPS, AAC, faststart; no -shortest hiding missing frames. Target approximately −14 LUFS with a −1 dBFS sample-peak ceiling and also measure AAC true peaks; report any unavoidable limiter/loudness trade-off.
-Run full-file duration/codec/frame-count/decode, loudness/peak, black-frame and ≥0.4-second freeze checks. Review intentional flashes/holds rather than ignoring detectors. Generate labelled QA sheets across the entire video, including the ending. Save structured results and never mark invalid output Ready. Upload MP4, sheets and reports privately; verify final object metadata/checksum and complete the library record atomically. Playback/download must read the saved cloud file after a fresh browser session.
+### 12. Encode, enforce QA and cloud delivery
+Verify all N frames and full audio coverage. Encode 1080×1920/30 FPS H.264/yuv420p CRF17 + AAC/faststart; never use -shortest to conceal missing frames. Target ~−14 LUFS/−1 dBFS sample-peak ceiling; measure AAC true peaks and report unavoidable mastering trade-offs.
+Check decode, codec, frame count, duration, loudness/peaks, black frames and frozen spans ≥0.4s. Review intentional flashes/holds rather than ignoring detections. QA sheets span the entire video, including payoff. Save MP4/sheets/structured QA privately; verify saved object/checksum, finalize atomically, then confirm fresh-session playback/download. Invalid output cannot be Ready.
 
-## Technical delivery and reliability
-- Add an Own-only versioned manifest/adapter; preserve legacy assembly manifests, old saved videos and Omni/Seedance code paths. Do not import worker packages into the app bundle.
-- Authenticated app controls remain server functions; scoped raw worker callbacks use published public endpoints with in-handler authorization. Worker stage requests use restricted job capabilities, never owner sessions or gateway/service secrets.
-- Verify live SQL claims, grants, row locks and cancellation/completion functions before extending them. Retain no-delete rules and protection against stale browser writes.
-- Persist each paid operation’s identity/result. A timeout is not proof a call failed: mark ambiguous submissions unknown and reconcile; never automatically recreate Actors or paid AI jobs. Retry only eligible transient failures with bounded backoff; terminal refusals/access/credit problems stop or pause the chain under existing gateway rules.
-- Use leases, attempt-scoped paths, bounded resource budgets, cancel checks and idempotent finalization. Output uploaded but callback lost must finalize without rerendering; stale attempts cannot publish.
-- Benchmark first: the skill estimates 3–10 seconds/frame, implying **90–300 minutes for a 60-second Short**, before finishing. This is not measured here and cannot support a two-minute promise. Size Actor runtime, leases and renewed signed asset grants to measured budgets; longer sessions increase Apify charges. Present duration/cost expectations before rollout.
-- Migrate long-form only after a representative horizontal chapter and a complete multi-chapter video pass framing, alignment, music continuity, chapter checkpoints, full-duration QA and cost limits; do not offer an unverified cartoon long-form path.
+## Technical boundaries, recovery and capacity
+- New Own-only versioned adapter/manifests; preserve shared legacy renderer, old outputs, Omni and Seedance. Keep worker-only packages out of app server/browser bundles.
+- Owner controls use authenticated server functions; worker callbacks use published endpoints with restricted job/attempt capabilities. Never send owner sessions, gateway keys or service credentials to scene code/Actor. Restrict local asset paths, scratch space, egress and resources.
+- Inspect live SQL claims, locks, grants, cancellation and expiry reconciliation before extending them. Preserve no-delete and stale-browser-write protection.
+- Checkpoint each paid result. Timeouts do not prove rejection: reconcile ambiguous submissions, never automatically recreate Actors/paid jobs. Use bounded eligible transient backoff and existing terminal refusal/access/credit pause rules.
+- Attempt-scoped paths, leases and idempotent callbacks reject stale completion. Uploaded output with lost callback must finalize without rerendering. Cancel must stop future batches and arbitrate atomically with completion.
+- **Speed is unverified:** kit estimate 3–10 seconds/frame means 90–300 minutes for a 60s Short. Benchmark throughput/memory/cost before rollout; size budgets, leases and renewed grants accordingly. No two-minute/no-timeout guarantee; Apify charges can rise.
 
-## Release gates and tests
-1. Missing dependency/setup failure, pinned license/hash checks and clean offline worker startup.
-2. Invalid/silent audio, script mismatch, low-confidence alignment, exact N-frame coverage and concrete 0–3-frame event timing.
-3. Every required story rule; failed validators/judges stop before voice/media spending; permitted no-caption output does not lose points.
-4. Camera/spline bounds, actor idle/gait/attachments, shader/depth/focus and random-order/resumed-frame equality in the pinned runtime.
-5. Measured 0.5 RMS ratios, 0.7 SFX peak cap, no retiming/ducking, full narration coverage, codec/duration/black/freeze/loudness QA.
-6. Cross-owner/forged/expired callbacks, duplicate clicks, ambiguous submit, cancel-versus-done, corrupt checkpoints, interrupted upload and callback-loss reconciliation.
-7. End-to-end original short fixture, then a full approximately 60-second story: inspect motion and sheets, verify audio timing/mix, close the browser during execution, reopen My videos, play and download the persisted MP4.
-8. Desktop/mobile progress, preflight sheet, review/error/recovery controls; regression checks for all four pages, Omni/Seedance and old video playback.
+## Tests and delivery order
+1. Dependency/license/offline startup and intentional missing-file failures.
+2. Silence/script mismatch/alignment confidence; concrete N-frame and 0–3-frame event assertions.
+3. Every required story gate blocks spending; permitted no-caption scoring; transformed-plan revalidation.
+4. Camera/gait/idle/attachment/shader tests and same-frame sequential/random-order/resume equivalence in pinned runtime.
+5. Concrete 0.5 RMS/0.7 SFX cap, no retiming/ducking, complete narration and full-file encoding/QA tests.
+6. Forged/cross-owner/expired callbacks, duplicate clicks, ambiguous start, cancel-versus-done, corrupt checkpoints, interrupted upload and callback-loss recovery.
+7. Real original fixture, then ~60s story: inspect animation/sheets/audio, close browser during execution, reopen library, play and download saved MP4; test desktop/mobile and other-engine regressions.
+8. Long-form gate: horizontal chapter then complete multi-chapter render; continuity, alignment, music, checkpoint recovery, full-duration QA and measured costs must pass before migration.
 
-**Order:** repair/package reference → durable Own job control → verified script/locked Atlas/alignment → declarative scenes/motion → preflight → resumable frames → exact stems/mix/encode/QA → real cloud-library test → Own Shorts rollout → separately gated long-form migration. No placeholder success states, skipped required checks or silent still-image fallback.
+Order: package/repair → durable Own jobs → verified script/locked Atlas/alignment → scenes/motion → preflight → frames → stems/mix/encode/QA → cloud end-to-end proof → Own Shorts rollout → gated long-form migration. No skipped required checks, placeholder success or silent still-image fallback.
