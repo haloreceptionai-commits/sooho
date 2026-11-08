@@ -112,6 +112,7 @@ export function removeFromQueue(id: string) {
 
 export async function runVideo(id: string, input: VideoInput) {
   if (running.has(id)) return;
+  if (getState().videos.find(v => v.id === id)?.hostedRender) return;
   removed.delete(id);
   actions.updateVideo(id, { removed: false });
   running.add(id);
@@ -119,8 +120,11 @@ export async function runVideo(id: string, input: VideoInput) {
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
   try {
-    const hosted = getState().videos.find(v => v.id === id)?.hostedRender;
-    if (hosted) throw new Error("This video already has a hosted assembly job. Its saved inputs will not be regenerated.");
+    const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
+    if (assembly && input.engine !== "seedance") {
+      await handoffAssembly(id, assembly, getState().videos.find(v => v.id === id)?.assemblyClips ?? [], up);
+      return;
+    }
     const saved = getState().videos.find(v => v.id === id)?.seedanceCheckpoint;
     if (input.engine === "seedance" && saved) {
       await finishSeedance(id, input, saved, up);
@@ -396,7 +400,7 @@ export async function runVideo(id: string, input: VideoInput) {
         clipPaths.push({ path, scenes: clip.scenes });
       }
     }
-    up({ assemblyCheckpoint: cp, stage: "render", progress: 72, detail: "Sending to hosted assembly…", thumb: full[0] ? thumbnail(full[0].image) : undefined });
+    up({ assemblyCheckpoint: cp, assemblyClips: clipPaths, stage: "render", progress: 72, detail: "Sending to hosted assembly…", thumb: full[0] ? thumbnail(full[0].image) : undefined });
     await handoffAssembly(id, cp, clipPaths, up);
     for (const c of clips ?? []) { c.video.pause(); URL.revokeObjectURL(c.video.src); }
     for (const scene of full) scene.image.close();

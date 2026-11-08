@@ -29,6 +29,20 @@
       "when": 1794101815169,
       "tag": "0003_render_optional_output_path",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794101946042,
+      "tag": "0004_render_cancel_and_expiry",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794101971642,
+      "tag": "0005_render_expiry_scheduler",
+      "breakpoints": true
     }
   ]
 }

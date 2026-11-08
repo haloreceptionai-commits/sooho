@@ -109,6 +109,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      cancel_render_job: {
+        Args: { job_id: string; owner_id: string }
+        Returns: boolean
+      }
+      expire_render_jobs: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
