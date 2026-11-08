@@ -101,6 +101,7 @@ for (const kind of new Set(SHOTS.map(s=>s.world))) {
   } else throw Error('Unsupported world');
   if(kind==='ship'||kind==='storm_sea')rockRing(root,M.stone,6,40,4);
 }
+const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFrame still calls this hook
 function worldState(state,f) {
   for(const [kind,root]of worldGroups)root.visible=kind===state.world;
   for(const update of animated)update(f);
