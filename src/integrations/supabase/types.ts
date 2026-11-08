@@ -299,6 +299,15 @@ export type Database = {
         Args: { job_id: string; owner_id: string; saved_review: Json }
         Returns: boolean
       }
+      start_generation_job: {
+        Args: {
+          p_hash: string
+          p_settings: Json
+          p_user: string
+          p_video: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

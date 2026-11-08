@@ -92,6 +92,13 @@
       "when": 1794174710721,
       "tag": "0012_fenced_generation_publication",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794174843579,
+      "tag": "0013_atomic_generation_start",
+      "breakpoints": true
     }
   ]
 }
