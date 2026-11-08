@@ -89,11 +89,16 @@ export function sceneStarts(scenes: StoryScene[]) {
 
 export const BANNED_HOOK = /^(a|an|the)\s+\w+\s+knocks\b|\bdid you know\b|^imagine\b|^(hello|hey|hi|welcome)\b|\bin this video\b|\bguess (who|what)\b|\bwho lives here\b|\briddle\b/i;
 
+export const DATE_LEAD = /^(in|on|by|during|back in)?\s*(the\s+)?(year\s+)?(1[0-9]{3}|20[0-9]{2})s?\b/i;
+
 export function hookIssues(line: string, anchors?: Anchors, factText = ""): string[] {
   const out: string[] = [];
   const n = wc(line);
   if (n < 8 || n > 12) out.push(`Hook is ${n} words (needs 8-12)`);
   if (BANNED_HOOK.test(line.trim())) out.push("Hook uses a banned opening (riddle, greeting, 'Did you know', 'Imagine', '[job] knocks')");
+  // Gemini guide: open on stakes or action, never a dry date or biography lead ("In 1965...", "1942:", "Stephanie Kwolek was a chemist").
+  if (DATE_LEAD.test(line.trim())) out.push("Hook opens with a date; start with the crisis or the odd action, put the year later");
+  if (/^[A-Z][a-z]+(\s+[A-Z][a-z]+)?\s+(was|is)\s+(a|an|the)\b/.test(line.trim())) out.push("Hook opens like a biography; start with the crisis or the odd action");
   if (/\?\s*$/.test(line) && !anchors) out.push("Hook is an unanswerable question");
   if (anchors) {
     const anchored = mentions(line, anchors.year) || mentions(line, anchors.place) || /\b(1[0-9]{3}|20[0-9]{2})\b/.test(line);
@@ -314,7 +319,7 @@ export const BENCH_FAILURE = `FAILURE — "The Fake City That Hid A War Factory"
 const g = (beat: string, narration: string, shot: Shot, characters: string[] = ["Lockheed"], money = false, loop_opened = "", loop_closed = ""): StoryScene => ({ beat, narration, shot, characters, money, loop_opened, loop_closed });
 /** Gold rewrite of the failure script (Brief #3 §5), tightened so it passes every validator. */
 export const GOLD_REWRITE: StoryScene[] = [
-  g("hook", "In 1942, Burbank hid a bomber factory under a fake street.", "aerial", ["Lockheed"], true),
+  g("hook", "Burbank hid a whole bomber factory under a fake street in 1942.", "aerial", ["Lockheed"], true),
   g("context", "Lockheed wants the factory hidden from enemy bombers. So how do you hide a factory from the sky?", "wide", ["Lockheed"], false, "main"),
   g("try", "The army calls Hollywood set builders to help Lockheed.", "action", ["Lockheed", "set builders"]),
   g("try", "First, Lockheed workers paint the giant roof green.", "action"),
