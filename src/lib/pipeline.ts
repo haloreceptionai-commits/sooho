@@ -91,13 +91,24 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
 }
 
 const running = new Set<string>();
+const removed = new Set<string>();
+
+/** Takes a stuck or unwanted job out of the queue: stops it at its next step and hides it (the record is kept, never deleted). */
+export function removeFromQueue(id: string) {
+  removed.add(id);
+  running.delete(id);
+  keepAlive();
+  actions.updateVideo(id, { status: "failed", removed: true, detail: "Removed from queue", error: "Removed from queue" });
+}
 
 export async function runVideo(id: string, input: VideoInput) {
   if (running.has(id)) return;
+  removed.delete(id);
+  actions.updateVideo(id, { removed: false });
   running.add(id);
   keepAlive();
   const s = getState().settings;
-  const up = (p: Parameters<typeof actions.updateVideo>[1]) => actions.updateVideo(id, p);
+  const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
   try {
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
@@ -341,7 +352,7 @@ export async function runVideo(id: string, input: VideoInput) {
   } catch (e) {
     let msg = e instanceof Error ? e.message : String(e);
     if (/PROHIBITED_CONTENT/.test(msg)) msg = "The narrator voice refused part of this script (it reads as too violent). Try a gentler topic wording and generate again.";
-    up({ status: "failed", error: msg, detail: "Failed" });
+    if (!removed.has(id)) up({ status: "failed", error: msg, detail: "Failed" });
   } finally {
     running.delete(id);
     keepAlive();
@@ -366,7 +377,7 @@ function keepAlive() {
 /** Restarts videos that were cut off because the page was closed or reloaded mid-generation. */
 export function resumeInterrupted() {
   for (const v of getState().videos) {
-    if (v.status === "failed" && v.detail === "Interrupted" && !running.has(v.id)) void runVideo(v.id, v.input);
+    if (v.status === "failed" && v.detail === "Interrupted" && !v.removed && !running.has(v.id)) void runVideo(v.id, v.input);
   }
 }
 

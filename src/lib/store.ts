@@ -31,6 +31,7 @@ export interface Video {
   progress: number; // 0-100
   detail: string;
   error?: string | undefined;
+  removed?: boolean | undefined; // taken out of the queue by the owner; kept in the cloud, hidden from lists
   duration?: number | undefined; // seconds, after render
   mime?: string | undefined;
   size?: number | undefined;

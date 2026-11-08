@@ -75,7 +75,7 @@ function Videos() {
   }, [playing]);
 
   const done = videos.filter((v) => v.status === "done" && (filter === "all" || v.input.format === filter));
-  const inProgress = videos.filter((v) => v.status !== "done");
+  const inProgress = videos.filter((v) => v.status !== "done" && !v.removed);
 
   return (
     <Page eyebrow="Library" title="My videos" desc="Every finished video, ready to watch and download."
