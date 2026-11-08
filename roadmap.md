@@ -15,5 +15,6 @@
 - [x] Dense painted galleon deck (bulwarks, stern facade, striped sails, rigging, barrels, cannons, lanterns, foreground framing)
 - [x] Deep-blue storm grade, towering swells, finer rain, open views for wide/sea shots
 - [x] Real 3D story objects (ships, wave, barrel, cannon, lantern, chest, anchor, wheel)
-- [ ] Same density for town/market/castle/camp/lab/landscape + galley interior
+- [x] Same density for town/market/castle/camp/lab/landscape
+- [ ] Galley interior world
 - [ ] Large CC0 model library, more outfits/animals, one-word captions, reference-scored quality gate
