@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { renderCallback } from "@/lib/hosted-render";
 import { finalScore } from "@/lib/story-v2";
 import type { Json } from "@/integrations/supabase/types";
+import { cartoonReviewEvent } from '@/lib/cartoon-job';
+import { validRenderAssets } from '@/lib/hosted-render';
+import { z } from 'zod';
 
 export const Route = createFileRoute("/api/public/render-callback")({
   server: { handlers: { POST: async ({ request }) => {
@@ -14,7 +17,34 @@ export const Route = createFileRoute("/api/public/render-callback")({
     if (!job || Date.parse(job.expires_at) < Date.now()) return new Response("Unauthorized", { status: 401 });
     if (["done", "failed", "cancelled"].includes(job.status)) return Response.json({ accepted: false });
     if (Number(request.headers.get("content-length") ?? 0) > 5000) return new Response("Too large", { status: 413 });
-    const parsed = renderCallback.safeParse(await request.json().catch(() => null));
+    const body = await request.json().catch(() => null);
+    const kind = (job.manifest as Record<string, Json>)['kind'];
+    if (kind === 'cartoon') {
+      const grants = z.object({ type: z.literal('assets'), files: z.array(z.object({ name: z.string().regex(/^(sheet-\d{2}\.jpg|alignment\.json|voice\.wav|manifest\.json|output\.mp4|output\.qa\.json|mix-report\.json|checkpoint\.json)$/) })).min(1).max(40) }).safeParse(body);
+      if (grants.success) {
+        const uploads: Record<string, { path: string; url: string }> = {};
+        for (const file of grants.data.files) {
+          const path = file.name === 'output.mp4' ? job.output_path : `${job.user_id}/${job.video_id}/cartoon/${file.name}`;
+          const { data: grant, error } = await supabaseAdmin.storage.from('videos').createSignedUploadUrl(path, { upsert: true });
+          if (error || !grant) return new Response('Could not grant upload', { status: 500 });
+          uploads[file.name] = { path, url: grant.signedUrl };
+        }
+        return Response.json({ accepted: true, uploads });
+      }
+      const review = cartoonReviewEvent.safeParse(body);
+      if (review.success) {
+        const { type: _type, ...value } = review.data;
+        if (!validRenderAssets(job.user_id, job.video_id, [...value.sheets, value.alignmentPath, value.voicePath])) return new Response('Invalid review paths', { status: 400 });
+        for (const path of [...value.sheets, value.alignmentPath, value.voicePath]) {
+          const parts = path.split('/'), name = parts.pop();
+          const { data: files } = await supabaseAdmin.storage.from('videos').list(parts.join('/'), { search: name });
+          if (!files?.some(f => f.name === name && Number(f.metadata?.size) > 0)) return new Response('Review not saved', { status: 409 });
+        }
+        const { data: accepted, error } = await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'review', video_patch: { cartoonReview: { ...value, approved: false }, progress: 75, detail: 'Review cartoon preview and narration timing', hostedRender: { id: job.id, status: 'review' } } as Json, saved_path: '' });
+        return error ? new Response('Could not save review', { status: 500 }) : Response.json({ accepted });
+      }
+    }
+    const parsed = renderCallback.safeParse(body);
     if (!parsed.success) return new Response("Invalid callback", { status: 400 });
     const event = parsed.data;
     const { data: row } = await supabaseAdmin.from("videos").select("data").eq("id", job.video_id).eq("user_id", job.user_id).single();
@@ -34,7 +64,7 @@ export const Route = createFileRoute("/api/public/render-callback")({
       if (!file) return new Response("Invalid output", { status: 400 });
       const { data: files, error } = await supabaseAdmin.storage.from("videos").list(parts.join("/"), { search: file });
       if (error || !files?.some(f => f.name === file && Number(f.metadata?.size) === event.size)) return new Response("Output not saved", { status: 409 });
-      const fin = finalScore(manifest.checkpoint.gate, { ...event.stats, width: manifest.width, height: manifest.height, captions: manifest.captions });
+      const fin = finalScore(manifest.checkpoint.gate, { ...event.stats, width: manifest.width, height: manifest.height, captions: kind === 'cartoon' ? true : manifest.captions });
       status = "done";
       patch = { status: "done", stage: "done", progress: 100, detail: "Ready", error: null, duration: event.duration, mime: event.mime, size: event.size, ready: fin.ready, qa: { score: fin.score, parts: fin.parts }, analytics: { hookType: manifest.checkpoint.hookType, revealSec: manifest.checkpoint.report.revealSec, castSize: manifest.checkpoint.plan.characters.length, shotMix: manifest.checkpoint.report.shotMix, continuity: manifest.checkpoint.continuity } };
     }

@@ -11,9 +11,9 @@ describe('declarative cartoon manifest', () => {
     const f = fixture(); const shot = f.shots[0]; if (!shot) throw Error('fixture missing');
     shot.end = 29; expect(cartoonManifest.safeParse(f).success).toBe(false);
   });
-  it('rejects guessed low-confidence words', () => {
+  it('retains uncertain acoustic words for mandatory owner review', () => {
     const f = fixture(); const w = f.words[0]; if (!w) throw Error('fixture missing');
-    w.confidence = 0.5; expect(cartoonManifest.safeParse(f).success).toBe(false);
+    w.confidence = 0.5; expect(cartoonManifest.parse(f).words[0]?.confidence).toBe(0.5);
   });
   it('rejects unknown cast and reaction leads above three frames', () => {
     const f = fixture(); const s = f.shots[0]; if (!s) throw Error('fixture missing');

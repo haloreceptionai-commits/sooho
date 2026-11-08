@@ -4,7 +4,9 @@ import { actions, flushVideo, getState, type VideoInput } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { seedanceRuns } from "@/lib/seedance";
 import { submitSeedance, checkSeedance } from "@/lib/seedance.functions";
-import { checkContinuity, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { checkContinuity, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { submitCartoon } from '@/lib/cartoon.functions';
+import { cartoonStart } from '@/lib/cartoon-job';
 import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
@@ -121,6 +123,13 @@ export async function runVideo(id: string, input: VideoInput) {
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
   try {
     const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
+    const cartoon = getState().videos.find(v => v.id === id)?.cartoonCheckpoint;
+    if (input.engine === 'cartoon' && cartoon) {
+      await flushVideo(id);
+      const job = await submitCartoon({ data: cartoon });
+      up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
+      return;
+    }
     if (assembly && input.engine !== "seedance") {
       await handoffAssembly(id, assembly, getState().videos.find(v => v.id === id)?.assemblyClips ?? [], up);
       return;
@@ -204,6 +213,28 @@ export async function runVideo(id: string, input: VideoInput) {
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${ev.gate.score}/100 · ${n} scenes` });
+
+    if (input.engine === 'cartoon') {
+      if (input.format !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
+      if (!ev.gate.ready || !ev.judge) throw Error(`Cartoon story is not ready: ${ev.gate.blockers.join('; ') || 'Script judges must pass'}`);
+      const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment } }));
+      const narration = plan.scenes.map(sc => sc.narration.trim());
+      const script = narration.join(' ');
+      if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
+      up({ progress: 30, detail: 'Recording one locked Atlas take…' });
+      const take = await withRetry(() => generateVoice({ data: { text: script, voice: 'onyx', deployment: s.ttsDeployment, style: 'short' } }));
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw Error('Not signed in');
+      const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
+      const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
+      if (error) throw Error('Could not save locked Atlas narration');
+      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: ev.gate, hookType: hb.type, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, captions: false, sfx: s.soundEffects });
+      up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
+      await flushVideo(id);
+      const job = await submitCartoon({ data: cp });
+      up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
+      return;
+    }
 
     const portrait = input.format === "short";
     const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
