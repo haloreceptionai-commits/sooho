@@ -1,5 +1,7 @@
 # Roadmap — Cartoon Engine v2
 
+- [ ] Correct false interrupted status when loading a cloud video that is running in another tab/session; preserve saved work and avoid automatic duplicate starts.
+
 - [x] Fix Dragon Jar repair defects: eligible hooks only, full-plan repair context, latest-draft progression, blocker-aware selection and mandatory deterministic gates; 122 tests passed, authenticated script-only checks exercised.
 - [ ] Confirm Dragon Jar produces a ready script: live script-only trials still failed quality checks; bounded AI rewrites do not yet reliably converge. No media generated and voice unchanged.
 
