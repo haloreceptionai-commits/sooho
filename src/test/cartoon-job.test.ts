@@ -28,3 +28,15 @@ it('accepts Visual Director scenes and rejects things the engine cannot draw', (
   expect(bad({ speaker: 'stranger' })).toBe(false);
   expect(bad({ actors: [{ actor: 'hero', action: 'idle', expression: 'neutral', slot: 'left', facing: 0 }, { actor: 'captain', action: 'idle', expression: 'neutral', slot: 'left', facing: 0 }] })).toBe(false);
 });
+import { sanitizeDirection } from '@/lib/cartoon-job';
+it('repairs director slips so the job passes the strict start check', () => {
+  const f = fixture();
+  const scene = { ...f.direction.scenes[0]!, actor: 'ghost', cues: [{ word: 9, kind: 'splash' as never }], props: [{ kind: 'asset' as never, place: 'hand' as never, motion: 'still' as never, asset: 'kenney/barrel' }, { kind: 'asset' as never, place: 'ground_left' as never, motion: 'still' as never }] };
+  const direction = sanitizeDirection({ ...f.direction, scenes: [scene, scene] } as never, f.narration);
+  expect(direction.scenes).toHaveLength(1);
+  expect(direction.scenes[0]!.actor).toBe('hero');
+  expect(direction.scenes[0]!.cues![0]!.word).toBe(3);
+  expect(direction.scenes[0]!.props).toHaveLength(1);
+  expect(direction.scenes[0]!.props![0]!.place).toBe('ground_right');
+  expect(cartoonStart.safeParse({ ...f, direction }).success).toBe(true);
+});

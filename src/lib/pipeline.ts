@@ -6,7 +6,7 @@ import { seedanceRuns } from "@/lib/seedance";
 import { submitSeedance, checkSeedance } from "@/lib/seedance.functions";
 import { checkContinuity, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
 import { submitCartoon } from '@/lib/cartoon.functions';
-import { cartoonStart } from '@/lib/cartoon-job';
+import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
 import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
