@@ -279,6 +279,11 @@ export async function runVideo(id: string, input: VideoInput) {
         const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }
+      // The director sometimes counts words past the end of a sentence; land those sounds on the sentence's last word.
+      direction.scenes.forEach((sc, i) => {
+        const n = (narration[i] ?? '').split(/\s+/).filter(Boolean).length;
+        if (sc.cues) sc.cues = sc.cues.filter(c => n > 0 && Number.isInteger(c.word) && c.word >= 0).map(c => ({ ...c, word: Math.min(c.word, n - 1) }));
+      });
       const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: true, sfx: s.soundEffects });
       up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
