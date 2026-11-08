@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const CARTOON_LIFETIME_MS = 48 * 60 * 60_000;
 export const cartoonDirection = z.object({
   cast: z.array(z.object({ id: z.string().regex(/^[a-z0-9_-]{1,30}$/), seed: z.number().int().min(1).max(100000), outfit: z.enum(['sailor', 'worker', 'scholar']) })).min(1).max(3),
-  scenes: z.array(z.object({ world: z.enum(['ship', 'town', 'bridge', 'lab', 'landscape']), light: z.enum(['day', 'golden', 'night_bright']), action: z.enum(['idle', 'walk', 'point', 'lift', 'pour', 'react']), expression: z.enum(['neutral', 'happy', 'angry', 'nervous', 'shock']), actor: z.string().regex(/^[a-z0-9_-]{1,30}$/), wide: z.boolean() })).min(1).max(120),
+  scenes: z.array(z.object({ world: z.enum(['ship', 'town', 'bridge', 'lab', 'landscape']), light: z.enum(['day', 'golden', 'night_bright']), action: z.enum(['idle', 'walk', 'point', 'lift', 'pour', 'react']), expression: z.enum(['neutral', 'grin', 'stern', 'nervous', 'shock']), actor: z.string().regex(/^[a-z0-9_-]{1,30}$/), wide: z.boolean() })).min(1).max(120),
 });
 export const cartoonStart = z.object({
   videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), voicePath: z.string().min(1).max(500),
