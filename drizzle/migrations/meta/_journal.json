@@ -50,6 +50,13 @@
       "when": 1794106759100,
       "tag": "0006_cartoon_review_job_states",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794107440857,
+      "tag": "0007_allow_cartoon_review_status",
+      "breakpoints": true
     }
   ]
 }
