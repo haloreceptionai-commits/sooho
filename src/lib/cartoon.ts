@@ -4,7 +4,7 @@ const vector = z.tuple([z.number().finite(), z.number().finite(), z.number().fin
 const word = z.object({ text: z.string().min(1).max(100), start: z.number().nonnegative(), end: z.number().positive(), confidence: z.number().min(0).max(1) });
 const camera = z.object({ frame: z.number().int().nonnegative(), pos: vector, look: vector, fov: z.number().min(15).max(90), roll: z.number().min(-8).max(8).default(0) });
 export const cartoonManifest = z.object({
-  version: z.literal('cartoon-v1'),
+  version: z.enum(['cartoon-v1', 'cartoon-v2']),
   videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/),
   fps: z.literal(30), width: z.literal(1080), height: z.literal(1920),
   captions: z.boolean().default(false),
