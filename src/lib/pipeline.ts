@@ -228,7 +228,7 @@ export async function runVideo(id: string, input: VideoInput) {
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
       const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
       if (error) throw Error('Could not save locked Atlas narration');
-      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: ev.gate, hookType: hb.type, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, captions: false, sfx: s.soundEffects });
+      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: ev.gate, hookType: hb.type, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, captions: true, sfx: s.soundEffects });
       up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
       const job = await submitCartoon({ data: cp });

@@ -22,26 +22,112 @@ def build(request, alignment, voice):
     if len(request['narration'])!=len(request['direction']['scenes']):raise ValueError('Incomplete scene direction')
     normalize=lambda text: [re.sub(r"[^a-z']",'',t.lower()) for t in text.split()]
     if normalize(request['script'])!=[w['text'] for w in words]: raise ValueError('Aligned text differs from narration')
+    tokens=request['script'].split()
     shots=[]; index=0; start=0
     for i,(text,d) in enumerate(zip(request['narration'],request['direction']['scenes'])):
         count=len(text.split()); end_index=index+count
         if end_index>len(words):raise ValueError('Incomplete aligned narration')
         end=total if i==len(request['narration'])-1 else jsround(words[end_index]['start']*30)
         if end<=start: raise ValueError('Scene too short on acoustic clock')
-        x=1.8 if d['wide'] else 1.4; z=7 if d['wide'] else 3.5
-        cues=[]
-        for wi in range(index,end_index):
-            token=words[wi]['text']
-            kind=next((k for stem,k in [('pour','pour'),('splash','splash'),('crash','impact'),('creak','creak')] if token.startswith(stem)),None)
-            if kind and request['sfx']: cues.append({'word':wi,'lead':0,'kind':kind})
-        shots.append({'start':start,'end':end,'world':d['world'],'light':d['light'],
-          'camera':[{'frame':start,'pos':[x,1.5,z],'look':[0,1.2,0],'fov':40,'roll':0}, {'frame':end-1,'pos':[x-.2,1.5,z-.2],'look':[0,1.2,0],'fov':38,'roll':0}] if end-start>1 else [{'frame':start,'pos':[x,1.5,z],'look':[0,1.2,0],'fov':40,'roll':0}],
-          'actors':[{'id':d['actor'],'pos':[0,0,0],'expression':d['expression'],'action':d['action']}], 'events':cues})
+        shots.extend(sentence_shots(d,words,index,end_index,start,end,request['sfx'],shots[-1]['shot'] if shots else None))
         index=end_index;start=end
     if index!=len(words):raise ValueError('Scenes must cover every aligned word')
-    return {'version':'cartoon-v1','videoId':request['videoId'],'fps':30,'width':1080,'height':1920,'captions':False,
+    return {'version':'cartoon-v2','videoId':request['videoId'],'fps':30,'width':1080,'height':1920,'captions':bool(request.get('captions')),
       'narration':{'path':'voice.wav','sha256':hashlib.sha256(voice.read_bytes()).hexdigest(),'samples':samples,'rate':48000},
-      'words':words,'cast':request['direction']['cast'],'shots':shots}
+      'words':words,'caption_words':[t[:40] for t in tokens],'cast':request['direction']['cast'],'shots':shots}
+
+SLOT_X={'left':-1.15,'center':0.0,'right':1.15}
+# distance, camera height, look height, field of view (metres / degrees) for a 2.25 m character card.
+SHOT={'wide':(7.5,1.8,1.2,42),'medium':(4.2,1.5,1.25,38),'close':(2.5,1.75,1.65,34),'extreme_close':(1.55,1.85,1.8,30),
+      'low':(3.3,.35,1.5,44),'high':(5.2,4.6,.8,40),'over_shoulder':(2.6,1.65,1.6,36),'insert':(1.7,1.3,1.1,32)}
+AUTO_SOUNDS=[('pour','pour'),('splash','splash'),('crash','impact'),('creak','creak'),('thunder','thunder'),('storm','wind'),('bell','bell'),('coin','coin'),('gold','coin'),('boom','impact'),('cannon','impact'),('crowd','crowd')]
+REACTION={'wide':'close','medium':'close','close':'medium','extreme_close':'medium','low':'close','high':'medium','over_shoulder':'close','insert':'medium'}
+
+def performers(d):
+    cast=d.get('actors') or [{'actor':d['actor'],'action':d['action'],'expression':d['expression'],'slot':'center','facing':0}]
+    if len(cast)==1 and not d.get('actors'): cast=[{**cast[0],'slot':'center'}]
+    # Two performers stand closer so both fit the narrow 9:16 frame.
+    spread={1:0,2:.72,3:1.05}[len(cast)]
+    xs={'left':-spread,'center':0.0,'right':spread} if len(cast)>1 else {'left':0.0,'center':0.0,'right':0.0}
+    return [{'id':a['actor'],'pos':[xs[a['slot']],0,0],'expression':a['expression'],'action':a['action'],'facing':a.get('facing',0)} for a in cast]
+
+def camera_keys(kind,move,subject,others,start,end,props):
+    dist,height,look_y,fov=SHOT[kind]
+    sx=subject['pos'][0]
+    # Group framing: aim between performers and back off until all fit the horizontal field of view.
+    if others and kind in('wide','medium','low','high'):
+        xs=[subject['pos'][0]]+[o['pos'][0] for o in others]; sx=(min(xs)+max(xs))/2
+        half=(max(xs)-min(xs))/2+.55; hfov=2*math.atan(math.tan(math.radians(fov)/2)*9/16)
+        dist=max(dist,half/math.tan(hfov/2))
+    look=[sx,look_y,0]
+    if kind=='insert':
+        held=any(p['place']=='hand' for p in props)
+        ground=next((p for p in props if p['place'] in('ground_left','ground_right')),None)
+        if held: look=[sx+.35,1.15,0]
+        elif ground: look=[-.95 if ground['place']=='ground_left' else .95,.45,.7]
+        else:
+            dist,height,look_y,fov=SHOT['close']; look=[sx,look_y,0]  # nothing to insert: a reaction close-up
+    side=.25 if sx<=0 else -.25
+    if kind=='over_shoulder' and others: side=max(-1.2,min(1.2,others[0]['pos'][0]-sx))*.6
+    def at(d,yaw=0.,dx=0.,lk=None):
+        l=lk or look
+        return {'pos':[round(l[0]+side+dx+math.sin(yaw)*d,3),height,round(math.cos(yaw)*d,3)],'look':[round(v,3) for v in l],'fov':fov,'roll':0}
+    n=end-start
+    if move=='pull_back': a,b=at(dist*.78),at(dist*1.3)
+    elif move=='pan_left': a,b=at(dist,dx=.9),at(dist,dx=-.6)
+    elif move=='pan_right': a,b=at(dist,dx=-.9),at(dist,dx=.6)
+    elif move=='orbit': a,b=at(dist,yaw=-.35),at(dist,yaw=.35)
+    elif move in('static','shake'): a,b=at(dist),at(dist*.97)
+    else: a,b=at(dist*1.12),at(dist*.86)
+    if n<=1: return [{'frame':start,**a}]
+    keys=[{'frame':start,**a},{'frame':end-1,**b}]
+    if move=='whip' and n>10:
+        swing=at(dist*1.05,lk=[look[0]+3.2,look[1],look[2]-1])
+        keys=[{'frame':start,**swing},{'frame':start+6,**at(dist*1.05)},{'frame':end-1,**at(dist*.9)}]
+    return keys
+
+def sentence_shots(d,words,first,last,start,end,sfx,previous):
+    actors=performers(d); props=d.get('props') or []
+    speaker=d.get('speaker'); ids=[a['id'] for a in actors]
+    subject=next((a for a in actors if a['id']==speaker),None) or next((a for a in actors if a['id']==d['actor']),actors[0])
+    others=[a for a in actors if a is not subject]
+    kind=d.get('shot') or ('wide' if d['wide'] else 'medium')
+    if kind==previous: kind=REACTION[kind]  # never cut to the identical framing
+    move=d.get('move') or 'push_in'; mood=d.get('mood') or 'calm'
+    # Long sentences get a second angle on a word boundary, keeping the ~3 s cutting rhythm.
+    cuts=[start]
+    if end-start>132 and last-first>=4:
+        mid=start+(end-start)//2
+        wi=min(range(first+1,last),key=lambda k:abs(jsround(words[k]['start']*30)-mid))
+        f=jsround(words[wi]['start']*30)
+        if start+30<=f<=end-30: cuts.append(f)
+    cuts.append(end)
+    keyword=None
+    if d.get('keyword'):
+        want=re.sub(r"[^a-z']",'',d['keyword'].lower())
+        keyword=next((k for k in range(first,last) if words[k]['text']==want),None)
+    events=[]
+    if sfx:
+        for c in d.get('cues') or []:
+            if first+c['word']<last: events.append({'word':first+c['word'],'lead':0,'kind':c['kind']})
+        for wi in range(first,last):
+            kind_s=next((k for stem,k in AUTO_SOUNDS if words[wi]['text'].startswith(stem)),None)
+            if kind_s: events.append({'word':wi,'lead':0,'kind':kind_s})
+        if mood=='reveal': events.append({'word':first,'lead':0,'kind':'reveal'})
+        if move=='whip': events.append({'word':first,'lead':0,'kind':'whoosh'})
+        if move=='shake': events.append({'word':first,'lead':0,'kind':'impact'})
+    seen=set(); unique=[]
+    for e in events:
+        if e['word'] not in seen and len(unique)<30: seen.add(e['word']); unique.append(e)
+    out=[]
+    for n,(a,b) in enumerate(zip(cuts,cuts[1:])):
+        k=kind if n==0 else REACTION[kind]; mv=move if n==0 else ('push_in' if move!='push_in' else 'static')
+        mine=[e for e in unique if a<=jsround(words[e['word']]['start']*30)-e['lead']<b]
+        out.append({'start':a,'end':b,'world':d['world'],'light':d['light'],'shot':k,'move':mv,'mood':mood,
+          'shake':.6 if mv=='shake' else (.25 if 'lightning' in (d.get('fx') or []) else 0),
+          'speaker':speaker if speaker in ids else None,'keyword':keyword,'props':props,'fx':d.get('fx') or [],
+          'camera':camera_keys(k,mv,subject,others,a,b,props),'actors':actors,'events':mine})
+    return out
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--request',required=True);p.add_argument('--alignment',required=True);p.add_argument('--voice',required=True);p.add_argument('--out',required=True)

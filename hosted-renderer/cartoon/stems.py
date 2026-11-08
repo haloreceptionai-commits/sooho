@@ -12,7 +12,7 @@ def jsround(x):
 
 
 RATE = 48000
-KINDS = {'whoosh', 'impact', 'creak', 'pour', 'splash', 'reveal'}
+KINDS = {'whoosh', 'impact', 'creak', 'pour', 'splash', 'reveal', 'thunder', 'bell', 'coin', 'wind', 'crowd', 'pop'}
 
 def synthesize(samples, twist_frame, cues, seed=1):
     if not isinstance(samples, int) or samples <= 0:
@@ -49,6 +49,18 @@ def synthesize(samples, twist_frame, cues, seed=1):
             sound = .15*noise*envelope
         elif kind == 'creak':
             sound = .15*np.sin(2*np.pi*(160*ct+90*ct**2))*envelope
+        elif kind == 'thunder':
+            sound = .28*np.convolve(noise, np.ones(240)/240, 'same')*np.exp(-ct*4)*8 + .2*np.sin(2*np.pi*42*ct)*np.exp(-ct*6)
+        elif kind == 'wind':
+            sound = .1*np.convolve(noise, np.ones(60)/60, 'same')*envelope*6
+        elif kind == 'crowd':
+            sound = .08*np.convolve(noise, np.ones(30)/30, 'same')*envelope*5*(1+.5*np.sin(2*np.pi*3*ct))
+        elif kind == 'bell':
+            sound = .14*(np.sin(2*np.pi*660*ct)+.6*np.sin(2*np.pi*1650*ct)+.3*np.sin(2*np.pi*2310*ct))*np.exp(-ct*6)
+        elif kind == 'coin':
+            sound = .12*(np.sin(2*np.pi*2400*ct)+.7*np.sin(2*np.pi*3600*ct))*np.exp(-ct*25)
+        elif kind == 'pop':
+            sound = .2*np.sin(2*np.pi*(500-900*ct)*ct)*np.exp(-ct*45)
         elif kind == 'impact':
             sound = .3*np.sin(2*np.pi*58*ct)*np.exp(-ct*20)+.06*noise*np.exp(-ct*40)
         else:
