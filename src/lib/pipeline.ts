@@ -19,7 +19,7 @@ const b64ToBuf = (b64: string) => {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Retry only rate limits / transient server errors, with backoff. */
-export const STEP_TIMEOUT_MS = 6 * 60_000;
+export const STEP_TIMEOUT_MS = 3 * 60_000;
 async function withRetry<T>(fn: () => Promise<T>, tries = 4, cap = 16000): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
@@ -376,20 +376,9 @@ function keepAlive() {
   }
 }
 
-/** Watchdog: a "running" video that no job in this tab is working on is stuck (lost after a reload or crash) — restart it. */
-if (typeof window !== "undefined") {
-  setInterval(() => {
-    for (const v of getState().videos) {
-      if (v.status === "running" && !v.removed && !running.has(v.id)) void runVideo(v.id, v.input);
-    }
-  }, 60_000);
-}
-
 /** Restarts videos that were cut off because the page was closed or reloaded mid-generation. */
 export function resumeInterrupted() {
-  for (const v of getState().videos) {
-    if (v.status === "failed" && v.detail === "Interrupted" && !v.removed && !running.has(v.id)) void runVideo(v.id, v.input);
-  }
+  // Disabled: auto-restarting on reload trapped videos in a 3% loop. Interrupted videos stay failed with a manual retry.
 }
 
 export function startVideo(input: VideoInput) {
