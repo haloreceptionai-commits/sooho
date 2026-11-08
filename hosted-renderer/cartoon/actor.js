@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
+import { canonical } from './canonical.mjs';
 
 await Actor.init();
 const input = await Actor.getInput();
@@ -57,7 +58,7 @@ try {
     for(const n of sheets)await writeFile(path.join(work,n),await readFile(path.join(work,'render/sheets',n)));
     const reviewRequest=JSON.parse(await readFile(path.join(work,'render/review-request.json'),'utf8'));
     const approvedHash=hash(Buffer.from(JSON.stringify(reviewRequest)));
-    const locked={jobId:input.jobId,requestHash:hash(Buffer.from(JSON.stringify(input.manifest))),review:reviewRequest,hash:approvedHash};
+    const locked={jobId:input.jobId,requestHash:hash(Buffer.from(canonical(input.manifest))),request:input.manifest,review:reviewRequest,hash:approvedHash};
     await store.setValue('LOCK',locked);
     for(const n of ['voice.wav','manifest.json','alignment.json'])await store.setValue(n.replaceAll('.','-'),await readFile(path.join(work,n)),{contentType:'application/octet-stream'});
     const paths=await uploadFiles([...sheets,'voice.wav','alignment.json','manifest.json']);
@@ -67,7 +68,7 @@ try {
     await Actor.setValue('OUTPUT',{status:'review',duration:m.narration.samples/48000});
   } else if(input.mode==='finish') {
     const locked=await store.getValue('LOCK');
-    if(!locked||locked.jobId!==input.jobId||locked.hash!==input.approvedHash||locked.requestHash!==hash(Buffer.from(JSON.stringify(input.manifest))))throw Error('Owner review does not match locked inputs');
+    if(!locked||locked.jobId!==input.jobId||locked.hash!==input.approvedHash||locked.requestHash!==hash(Buffer.from(canonical(input.manifest))))throw Error('Owner review does not match locked inputs');
     for(const n of ['voice.wav','manifest.json','alignment.json']){const bytes=await store.getValue(n.replaceAll('.','-'));if(!Buffer.isBuffer(bytes))throw Error('Missing durable inputs');await writeFile(path.join(work,n),bytes);}
     await run('node',[path.join(root,'prepare-scene.mjs'),path.join(work,'manifest.json'),path.join(work,'render/prepared')]);
     await mkdir(path.join(work,'render'),{recursive:true});
