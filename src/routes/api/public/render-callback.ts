@@ -38,10 +38,8 @@ export const Route = createFileRoute("/api/public/render-callback")({
       status = "done";
       patch = { status: "done", stage: "done", progress: 100, detail: "Ready", error: null, duration: event.duration, mime: event.mime, size: event.size, ready: fin.ready, qa: { score: fin.score, parts: fin.parts }, analytics: { hookType: manifest.checkpoint.hookType, revealSec: manifest.checkpoint.report.revealSec, castSize: manifest.checkpoint.plan.characters.length, shotMix: manifest.checkpoint.report.shotMix, continuity: manifest.checkpoint.continuity } };
     }
-    const { error: saveError } = await supabaseAdmin.from("videos").update({ data: { ...record, ...patch, hostedRender: { id: job.id, status } } as Json, ...(status === "done" ? { file_path: job.output_path } : {}) }).eq("id", job.video_id).eq("user_id", job.user_id);
+    const { data: accepted, error: saveError } = await supabaseAdmin.rpc("apply_render_event", { job_id: job.id, job_token: tokenHash, next_status: status, video_patch: { ...patch, hostedRender: { id: job.id, status } } as Json, saved_path: status === "done" ? job.output_path : null });
     if (saveError) return new Response("Could not save", { status: 500 });
-    const { error: stateError } = await supabaseAdmin.from("render_jobs").update({ status, updated_at: new Date().toISOString(), ...(event.type === "failed" ? { error: event.error } : {}) }).eq("id", job.id).in("status", ["submitting", "running", "saving"]);
-    if (stateError) return new Response("Could not save state", { status: 500 });
-    return Response.json({ accepted: true });
+    return Response.json({ accepted });
   } } },
 });

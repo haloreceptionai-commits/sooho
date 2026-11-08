@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { renderRequest, RENDER_ACTOR, RENDER_LIFETIME_MS, validRenderAssets, type HostedRenderRequest } from "@/lib/hosted-render";
 import type { Json } from "@/integrations/supabase/types";
+import { getRequest } from "@tanstack/react-start/server";
 
 export const submitHostedRender = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -36,7 +37,7 @@ export const submitHostedRender = createServerFn({ method: "POST" })
       throw new Error("Could not reserve hosted assembly");
     }
     const update = async (status: string, detail: string) => {
-      const { error: e } = await supabaseAdmin.from("videos").update({ data: { ...record, hostedRender: { id: job.id, status }, status: status === "failed" ? "failed" : "running", stage: "render", progress: 72, detail, ...(status === "failed" ? { error: detail } : {}) } as Json }).eq("id", data.videoId);
+      const { error: e } = await supabaseAdmin.rpc("apply_render_event", { job_id: job.id, job_token: tokenHash, next_status: status, video_patch: { hostedRender: { id: job.id, status }, status: status === "failed" ? "failed" : "running", stage: "render", progress: 72, detail, ...(status === "failed" ? { error: detail } : {}) }, saved_path: null });
       if (e) throw new Error("Could not save hosted assembly state");
     };
     try {
@@ -50,7 +51,8 @@ export const submitHostedRender = createServerFn({ method: "POST" })
       }
       const { data: upload, error: uploadError } = await bucket.createSignedUploadUrl(outputPath, { upsert: true });
       if (uploadError || !upload) throw new Error("Could not prepare cloud video save");
-      const base = "https://project--2217d7bc-796a-4378-a377-45a65c909798-dev.lovable.app";
+      const origin = new URL(getRequest().url).origin;
+      const base = origin.includes("localhost") ? "https://id-preview--2217d7bc-796a-4378-a377-45a65c909798.lovable.app" : origin;
       const callbackUrl = `${base}/api/public/render-callback`;
       const response = await fetch(`https://connector-gateway.lovable.dev/apify/acts/${RENDER_ACTOR}/runs?memory=4096&timeout=1200`, {
         method: "POST", headers: { Authorization: `Bearer ${key}`, "X-Connection-Api-Key": connection, "Content-Type": "application/json" },
@@ -66,7 +68,6 @@ export const submitHostedRender = createServerFn({ method: "POST" })
       return { id: job.id, status: "running" };
     } catch (e) {
       const message = e instanceof Error ? e.message : "Hosted assembly could not start";
-      await supabaseAdmin.from("render_jobs").update({ status: "failed", error: message }).eq("id", job.id).eq("status", "submitting");
       await update("failed", message);
       throw new Error(message);
     }
