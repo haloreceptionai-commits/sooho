@@ -25,3 +25,5 @@
 
 - [x] Finish Kevlar cartoon
 - [x] Long-form resume after page close (script + media saved as made)
+- [x] Route all new narration through the owner's Azure OpenAI connection, without another-provider fallback (authenticated app call and 7 focused tests checked)
+- [ ] Verify and save a test video using Azure narration — blocked: configured gpt-realtime rejects audio/speech; gpt-4o-mini-tts and gpt-audio are not deployed on this connection. Needs a compatible Azure narration deployment or separately verified realtime integration.

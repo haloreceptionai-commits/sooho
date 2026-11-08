@@ -4,7 +4,7 @@ import { Save, RotateCcw, KeyRound, Brain, Mic, ImageIcon, Clapperboard } from "
 
 const MODELS = [
   { key: "scriptDeployment", name: "Script & Viral Brain", role: "Writes scripts, brainstorms topics, optimizes hooks", icon: Brain },
-  { key: "ttsDeployment", name: "Voice & Narration", role: "Narrator voices. Without an Azure speech deployment, Lovable AI voices are used automatically", icon: Mic },
+  { key: "ttsDeployment", name: "Voice & Narration", role: "Azure text-to-speech deployment only. No automatic fallback to another provider; gpt-realtime is not a speech-file model.", icon: Mic },
   { key: "imageDeployment", name: "Image Generation", role: "Scene stills in your visual style", icon: ImageIcon },
   { key: "videoDeployment", name: "Video Assembly & Automation", role: "Reserved for automation; videos are assembled in the browser", icon: Clapperboard },
 ] as const;
