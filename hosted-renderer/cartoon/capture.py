@@ -33,6 +33,22 @@ def valid_frame(path, metadata):
     except Exception:
         return False
 
+SWIFTSHADER = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
+VULKAN = ['--use-angle=vulkan', '--enable-features=Vulkan', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
+
+def gl_args(env=None):
+    """Pick the WebGL backend. CARTOON_GL=vulkan uses whatever Vulkan driver the machine has
+    (a real NVIDIA GPU, or Mesa lavapipe on CPU, ~3x faster than SwiftShader with matching
+    pixels); swiftshader is the always-available fallback. 'auto' prefers Vulkan when an ICD exists."""
+    import os
+    env = os.environ if env is None else env
+    mode = (env.get('CARTOON_GL') or 'auto').lower()
+    if mode == 'swiftshader': return list(SWIFTSHADER)
+    if mode == 'vulkan': return list(VULKAN)
+    icd = env.get('VK_ICD_FILENAMES') or ''
+    has_icd = any(Path(p).is_file() for p in icd.split(':') if p) or Path('/usr/share/vulkan/icd.d/lvp_icd.x86_64.json').is_file() or Path('/usr/share/vulkan/icd.d/nvidia_icd.json').is_file()
+    return list(VULKAN if has_icd else SWIFTSHADER)
+
 def atomic_json(path, value):
     tmp = path.with_suffix('.tmp'); tmp.write_text(json.dumps(value, indent=2)); tmp.replace(path)
 
@@ -60,7 +76,7 @@ async def capture(args):
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True, args=['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            browser = await p.chromium.launch(headless=True, args=gl_args())
             try:
                 page = await browser.new_page(viewport={'width': 1280, 'height': 1800})
                 errors = []
@@ -69,6 +85,8 @@ async def capture(args):
                 await page.wait_for_function('window.ready || window.err', timeout=60000)
                 total, page_err = await page.evaluate('[window.TOTAL, window.err || null]')
                 if page_err or errors: raise ValueError(f'Scene failed to load: {(page_err or errors[0])[:300]}')
+                gpu = await page.evaluate('(()=>{try{const c=[...document.querySelectorAll("canvas")].find(x=>x.getContext("webgl2"));const g=c.getContext("webgl2");const d=g.getExtension("WEBGL_debug_renderer_info");return d?g.getParameter(d.UNMASKED_RENDERER_WEBGL):"unknown"}catch(e){return "unknown"}})()')
+                print(json.dumps({'renderer': gpu}), flush=True)
                 if not isinstance(total, int) or total < 1 or args.first < 0 or args.last < args.first or args.last >= total:
                     raise ValueError('Invalid frame range')
                 selected=getattr(args,'selected',None)

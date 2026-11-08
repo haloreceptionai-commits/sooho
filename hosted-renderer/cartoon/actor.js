@@ -42,6 +42,9 @@ async function uploadFiles(files) {
 }
 const store= await platform.open(input.mode==='finish' ? input.storeId : `cartoon-${input.jobId}`);
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+// Bounded concurrency for many small storage calls (frame upload/download).
+async function pool(items,limit,fn){let i=0;await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(i<items.length){const it=items[i++];await fn(it);}}));}
+const timings={};const timing=(name,start)=>{timings[name]=Math.round((Date.now()-start)/100)/10;console.log(JSON.stringify({timing:name,sec:timings[name]}));};
 try {
   await guard(0);
   if(input.mode==='preflight') {
@@ -78,7 +81,9 @@ try {
     const framesDir=path.join(work,'render/frames');await mkdir(framesDir,{recursive:true});
     // Frames are deterministic per index. Batches are claimed atomically, so on Azure many replicas
     // (and several browsers per replica) split the work; each finished batch is saved as a durable part.
-    const size=Math.max(10,Number(process.env.CARTOON_BATCH)||60);
+    // One batch per browser lane across the whole fleet keeps every machine busy exactly once.
+    const fleet=Math.max(1,Number(process.env.CARTOON_REPLICAS)||1)*Math.max(1,Number(process.env.CARTOON_PARALLEL)||1);
+    const size=Number(process.env.CARTOON_BATCH)||Math.min(60,Math.max(12,Math.ceil(total/fleet)));
     const batches=[];for(let first=0;first<total;first+=size)batches.push([first,Math.min(total-1,first+size-1)]);
     const lanes=Math.max(1,Number(process.env.CARTOON_PARALLEL)||10);
     const STALE=15*60*1000;
@@ -88,7 +93,8 @@ try {
       await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
       const part=JSON.parse(await readFile(path.join(dir,'checkpoint.json'),'utf8'));
       const frames={};
-      for(let f=first;f<=last;f++){const bytes=await readFile(path.join(dir,`f${String(f).padStart(6,'0')}.jpg`));await store.setValue(`frame-${f}`,bytes,{contentType:'image/jpeg'});frames[String(f)]=part.frames[String(f)];}
+      const ids=[];for(let f=first;f<=last;f++)ids.push(f);
+      await pool(ids,16,async f=>{const bytes=await readFile(path.join(dir,`f${String(f).padStart(6,'0')}.jpg`));await store.setValue(`frame-${f}`,bytes,{contentType:'image/jpeg'});frames[String(f)]=part.frames[String(f)];});
       await store.setValue(`part-${first}`,{input_hash:part.input_hash,frames});
     }
     let cursor=0;
@@ -102,7 +108,9 @@ try {
       }
     }
     console.log(`Rendering ${batches.length} batches with ${lanes} browsers on this machine`);
+    const tDraw=Date.now();
     await Promise.all(Array.from({length:Math.min(lanes,batches.length)},lane));
+    timing('draw-share',tDraw);
     // One replica assembles; the rest stop once their share is done.
     if(!(await store.claim('assemble'))){await platform.output({status:'rendered-share'});await platform.exit();process.exit(0);}
     const deadline=Date.now()+90*60*1000;
@@ -118,9 +126,21 @@ try {
       const part=await store.getValue(`part-${first}`);
       if(merged.input_hash&&merged.input_hash!==part.input_hash)throw Error('Scene inputs changed between batches');
       merged.input_hash=part.input_hash;
-      for(let f=first;f<=last;f++){const bytes=await store.getValue(`frame-${f}`);if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);merged.frames[String(f)]=part.frames[String(f)];}
+      for(let f=first;f<=last;f++)merged.frames[String(f)]=part.frames[String(f)];
     }
+    // Frames this replica drew are already on disk; only fetch the rest, many at a time.
+    const tFetch=Date.now();
+    await pool(Array.from({length:total},(_,f)=>f),32,async f=>{
+      const local=path.join(framesDir,`batch-${batches.find(([a,b])=>f>=a&&f<=b)[0]}`,`f${String(f).padStart(6,'0')}.jpg`);
+      let bytes=await readFile(local).catch(()=>null);
+      if(!bytes||hash(bytes)!==merged.frames[String(f)]?.sha256)bytes=await store.getValue(`frame-${f}`);
+      if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);
+      await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);
+    });
+    timing('join-fetch',tFetch);
+    timing('draw-all',tDraw);
     await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged));
+    const tFinish=Date.now();
     try {
       await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);
     } catch(e) {
@@ -128,6 +148,8 @@ try {
       if(report){await store.setValue('QA-REPORT',JSON.parse(report)).catch(()=>{});console.error('QA report',report);}
       throw e;
     }
+    timing('encode-mix-qa',tFinish);
+    await store.setValue('TIMINGS',timings).catch(()=>{});
     await guard(95);
     for(const n of ['output.mp4','output.qa.json','mix-report.json'])await writeFile(path.join(work,n),await readFile(path.join(work,'render',n)));
     const qa=JSON.parse(await readFile(path.join(work,'output.qa.json'),'utf8'));
