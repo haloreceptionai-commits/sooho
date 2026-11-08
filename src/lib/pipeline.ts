@@ -64,11 +64,13 @@ const SHOT: Record<string, string> = {
 };
 const COLOR: Record<string, string> = {
   bright: "Sunny bright daylight, clear blue sky, cheerful saturated colors.",
-  dark_cold: "Dark stormy navy-blue palette, cold moonlit highlights, still clearly lit and readable.",
-  warm_interior: "Warm orange interior lantern light, cozy amber tones.",
-  golden_macro: "Glowing golden amber light, shallow depth of field.",
-  high_contrast: "High-contrast dramatic lighting, crisp white foam against deep blue.",
+  dark_cold: "Tense mood shown with soft cool blue tones, but bright and airy: overcast daylight or bright moonlight, light sky, no deep shadows.",
+  warm_interior: "Bright warm interior with big windows and soft golden light, light walls, cozy and well lit.",
+  golden_macro: "Bright glowing golden light on a light background, shallow depth of field.",
+  high_contrast: "Bright punchy daylight, vivid colors, crisp white highlights on light blue.",
 };
+/** Every picture leans to the lighter side (user request). */
+const LIGHT = "LIGHTING: bright, light and airy image, high-key exposure, pastel-bright light background, soft shadows, never dark, gloomy or underexposed.";
 
 const ROTATE: Record<string, string> = { wide: "low_angle", aerial: "top_down", close: "over_shoulder", top_down: "wide", macro: "close", pov: "wide", low_angle: "close", over_shoulder: "close" };
 
@@ -231,7 +233,7 @@ export async function runVideo(id: string, input: VideoInput) {
           const shot = [
             SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && rs.moneyShot ? `MONEY SHOT: ${rs.moneyShot}.` : "", sc.image_prompt,
             people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
-            COLOR[sc.color] ?? "",
+            COLOR[sc.color] ?? "", LIGHT,
           ].filter(Boolean).join(" ");
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference

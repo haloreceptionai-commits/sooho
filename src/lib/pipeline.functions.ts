@@ -347,7 +347,13 @@ HERO & CAST:
 - The hero (a person, named if documented, else a clear role like "the head painter") states their want by 10s in a sentence of the exact form "[hero name] wants/needs/must ..." ("Lockheed wants the factory hidden from enemy bombers."). Use the hero's name in that sentence and in "hero.name". The hero appears (in "characters") in at least 60% of scenes.
 - Every character is introduced with a name or role in the same sentence. Every "he/she/they" must refer to someone named in the previous sentence; otherwise repeat the name. Never introduce side characters, extra places or side examples.
 
+ONE CONTINUOUS STORY (most important):
+- The whole video is ONE story about ONE event, told in time order, start to finish. Never jump to a second example, another country, another era or "another time". No list of facts.
+- Every scene follows from the one before: it is caused by it, reacts to it, or continues it. Link scenes with plain joiners ("So", "But", "Then", "Now", "That's when"). If you removed one scene, the next one should stop making sense.
+- The same hero, place and problem run from the hook to the last line. The try/fail beats are the hero's own attempts at that same problem. The reveal, analogy and proof all explain that same event.
+
 LANGUAGE:
+- Write like you are telling a story to a 5-year-old at bedtime: tiny everyday words, grade-1 reading level. If a kid wouldn't say the word, swap it ("hide" not "conceal", "big" not "massive", "ship" not "vessel", "plan" not "strategy", "trick" not "illusion", "old" not "ancient", "smart" not "ingenious").
 - NEVER speak beat labels ("Try one:", "Proof:", "Step two:"). Every sentence is a full spoken sentence with a verb — never a list or a bare place name ("Burbank, California." is wrong; "This is Burbank, California." is right).
 - Words a 5-year-old knows. Apart from the anchor words, avoid words of 3+ syllables (say "street" not "neighborhood", "work" not "production", "can't be seen" not "invisible"). Short, complete subject-verb-object sentences, present tense for action, one idea per sentence. Every sentence adds one new fact or a reversal; delete scene-only description.
 - Re-hook every 6-8s after 15s with a new danger, number, reversal or question.
@@ -364,7 +370,7 @@ VISUALS (one scene ≈ 3s, one clear moment):
 - color per beat with a story reason: bright (setup), dark_cold (tension), warm_interior (reveal), golden_macro (proof), high_contrast (payoff).
 - camera: a move every shot (push_in, pull_out, pan_left, pan_right, tilt_up, tilt_down, punch_in for shocks, orbit for scale). angle: vary every scene.
 - characters: max 3, each with name, role and a very specific fixed look (age, build, face, hair, clothing colours, one prop).
-- palette: one sentence. Even night scenes are brightly lit and readable.
+- palette: one sentence of LIGHT, bright colors (light skies, soft pastels, sunny tones). Never a dark or gloomy palette; even night or storm scenes are brightly lit and readable.
 - Safety filter: no gore, injuries, corpses, children, nudity or real living people. Show danger indirectly. Never put text or letters in images.
 - sfx: the sound of the visual event (knock, rustle, plane, siren, impact, pour, wave, crash...).
 - hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook words.
