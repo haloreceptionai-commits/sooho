@@ -18,7 +18,7 @@ export const cartoonStart = z.object({
 export type CartoonStart = z.infer<typeof cartoonStart>;
 export const reviewApproval = z.object({ videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), hash: z.string().regex(/^[a-f0-9]{64}$/) });
 export const cartoonReviewEvent = z.object({
-  type: z.literal('review'), hash: z.string().regex(/^[a-f0-9]{64}$/), storeId: z.string().regex(/^[a-zA-Z0-9]{1,100}$/),
+  type: z.literal('review'), hash: z.string().regex(/^[a-f0-9]{64}$/), storeId: z.string().regex(/^([a-zA-Z0-9]{1,100}|cartoon-[0-9a-f-]{36})$/),
   sheets: z.array(z.string().min(1).max(500)).min(1).max(40), alignmentPath: z.string().min(1).max(500), voicePath: z.string().min(1).max(500), duration: z.number().min(1).max(90),
 });
 export interface CartoonReview { hash: string; storeId: string; sheets: string[]; alignmentPath: string; voicePath: string; duration: number; approved?: boolean }

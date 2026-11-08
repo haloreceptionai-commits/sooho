@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { CARTOON_LIFETIME_MS, cartoonStart, reviewApproval, reviewMatches, type CartoonStart, type CartoonReview } from '@/lib/cartoon-job';
 import { validRenderAssets } from '@/lib/hosted-render';
 import type { Json } from '@/integrations/supabase/types';
-import { startAzureCartoon } from '@/lib/azure-render.server';
+import { startAzureCartoon } from '@/lib/azure-render';
 
 export const CARTOON_ACTOR = 'nifty_remnant~chronicle-cartoon-renderer';
 
