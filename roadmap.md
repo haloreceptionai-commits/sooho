@@ -1,7 +1,7 @@
 # Roadmap — Cartoon Engine v2
 
 - [x] Background foundation: owner-readable jobs/steps, atomic Start, fenced ownership/checkpoints, individually checkpointed judges, shared server operations, generation coordinator and Azure on-demand job; rollout disabled.
-- [ ] Enable full background generation after real closed-browser completion and fault-injection checks. Published worker endpoint now responds correctly (unauthorized calls rejected); rollout remains disabled. Bounded recovery handler is implemented but not scheduled. Immutable output/callback binding and owner-authorized uncertain-step recovery still require implementation and verification before rollout.
+- [ ] Enable full background generation after real closed-browser completion and fault-injection checks. Published worker endpoint now responds correctly (unauthorized calls rejected); rollout remains disabled. Bounded recovery handler is implemented but not scheduled; isolated final-output paths and cancellation-aware callbacks added. Owner-authorized uncertain-step recovery and real worker/paid-asset fault tests remain required before rollout.
 
 - [x] Correct false interrupted status across browsers: use cloud update freshness, preserve only actively orchestrated local jobs, no automatic restart; five regression tests and signed-in Dragon Jar display verified.
 
