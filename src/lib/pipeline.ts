@@ -203,8 +203,9 @@ export async function runVideo(id: string, input: VideoInput) {
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
     let plan = await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait);
     let ev = await evaluate(plan);
-    for (let attempt = 1; attempt <= 2 && !ev.gate.ready; attempt++) {
-      up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/2)…` });
+    const tries = input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
+    for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
+      up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
       const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: `${ev.gate.blockers.map((b) => `- ${b}`).join("\n")}\nPrevious script (keep its good lines, rewrite only what breaks the checks above):\n${plan.scenes.map((x) => `[${x.beat}] ${x.narration}`).join(" ")}` } }), 4, 16000, planWait).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
@@ -219,7 +220,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (input.format !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
       if (!ev.gate.ready || !ev.judge) throw Error(`Cartoon story is not ready: ${ev.gate.blockers.join('; ') || 'Script judges must pass'}`);
       const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment } }));
-      const narration = plan.scenes.map(sc => sc.narration.trim());
+      const narration = plan.scenes.map(sc => spellNumbers(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
       up({ progress: 30, detail: 'Recording one locked Atlas take…' });

@@ -4,7 +4,32 @@
 
 import { hardWords } from "@/lib/sound-words";
 
-export const WPS = 153 / 60; // Atlas pace, words per second
+export const WPS = 153 / 60;
+/** Spoken numbers ("nineteen sixty-five") are plain speech, never "hard words". */
+const NUMBER_WORD = /^(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion)+$/;
+
+const ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split(" ");
+const TENS = "  twenty thirty forty fifty sixty seventy eighty ninety".split(" ");
+function under100(n: number) { return n < 20 ? ONES[n]! : TENS[Math.floor(n / 10)]! + (n % 10 ? `-${ONES[n % 10]}` : ""); }
+function under1000(n: number) { return n >= 100 ? `${ONES[Math.floor(n / 100)]} hundred${n % 100 ? ` ${under100(n % 100)}` : ""}` : under100(n); }
+/** Speaks a whole number the way a narrator says it; years 1100-1999 / 2010+ as pairs ("nineteen sixty-five"). */
+export function numberToWords(n: number, year = false): string {
+  if (year && n >= 1100 && n <= 2099 && !(n >= 2000 && n < 2010)) { const hi = Math.floor(n / 100), lo = n % 100; return `${under100(hi)} ${lo === 0 ? "hundred" : lo < 10 ? `oh ${ONES[lo]}` : under100(lo)}`; }
+  if (n >= 1_000_000) return `${numberToWords(Math.floor(n / 1_000_000))} million${n % 1_000_000 ? ` ${numberToWords(n % 1_000_000)}` : ""}`;
+  if (n >= 1000) return `${under1000(Math.floor(n / 1000))} thousand${n % 1000 ? ` ${under1000(n % 1000)}` : ""}`;
+  return under1000(n);
+}
+/** Replaces digits in narration with spoken words (1965 -> nineteen sixty-five, 3,000 -> three thousand, 40% -> forty percent). */
+export function spellNumbers(text: string): string {
+  return text
+    .replace(/(\d+)\s?%/g, (_, d: string) => `${numberToWords(+d)} percent`)
+    .replace(/\b(\d{1,3}(?:,\d{3})+|\d+)(s)?\b/g, (_, d: string, plural?: string) => {
+      const n = +d.replace(/,/g, "");
+      const yearish = !d.includes(",") && d.length === 4 && n >= 1100 && n <= 2099;
+      const w = numberToWords(n, yearish);
+      return plural ? (w.endsWith("y") ? `${w.slice(0, -1)}ies` : `${w}s`) : w;
+    });
+} // Atlas pace, words per second
 
 export type Shot = "wide" | "aerial" | "action" | "macro" | "face";
 export interface StoryScene {
@@ -197,7 +222,7 @@ export function validateStory(s: StoryInput): StoryReport {
   // Language: 3-12 word sentences, plain words, length
   const longS = sents.filter((x) => wc(x) > 12).length;
   const anchorWords = new Set(Object.values(s.anchors).flatMap(contentWords).concat(contentWords(`${s.hero.name} ${s.cast.map((c) => c.name).join(" ")}`)));
-  const hard = [...new Set(hardWords(all))].filter((w) => !anchorWords.has(w.toLowerCase().replace(/[^a-z]/g, "")));
+  const hard = [...new Set(hardWords(all))].filter((w) => { const k = w.toLowerCase().replace(/[’']s$/, "").replace(/[^a-z]/g, ""); return !anchorWords.has(k) && !anchorWords.has(k.replace(/s$/, "")) && !NUMBER_WORD.test(k); });
   const labels = sents.filter((x) => LABEL.test(x));
   const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || (wc(x) <= 4 && !VERBISH.test(x))) && !/\?["']?$/.test(x));
   const budget = s.durationSec * 2.6;
