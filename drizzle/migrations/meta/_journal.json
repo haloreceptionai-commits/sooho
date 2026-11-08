@@ -57,6 +57,13 @@
       "when": 1794107440857,
       "tag": "0007_allow_cartoon_review_status",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794107488006,
+      "tag": "0008_recover_saved_cartoon_review",
+      "breakpoints": true
     }
   ]
 }

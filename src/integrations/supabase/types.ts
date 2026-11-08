@@ -123,6 +123,10 @@ export type Database = {
         Returns: boolean
       }
       expire_render_jobs: { Args: never; Returns: undefined }
+      recover_cartoon_review: {
+        Args: { job_id: string; owner_id: string; saved_review: Json }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
