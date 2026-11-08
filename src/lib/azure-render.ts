@@ -21,7 +21,9 @@ async function putInput(key: string, input: unknown) {
   if (!r.ok) throw Error(`Cartoon input could not be saved [${r.status}]`);
 }
 
-export const AZURE_JOBS = { preflight: { name: 'cartoon-preflight', lanes: 1 }, finish: { name: 'cartoon-render', lanes: 2 } } as const;
+// Finish fans out to `replicas` machines (set on the Azure job as parallelism); frames are split evenly.
+// Each 4-vCPU machine runs 2 browsers on the Mesa lavapipe Vulkan driver (about 3x SwiftShader).
+export const AZURE_JOBS = { preflight: { name: 'cartoon-preflight', lanes: 2, replicas: 1 }, finish: { name: 'cartoon-render', lanes: 2, replicas: 40 } } as const;
 
 export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'finish', input: unknown) {
   const key = `cartoon-${jobId}/INPUT-${mode}-${Date.now().toString(36)}`;
@@ -37,7 +39,8 @@ export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'fini
         { name: 'AZURE_BLOB_BASE', value: env('AZURE_BLOB_BASE') },
         { name: 'AZURE_BLOB_SAS', secretRef: 'blobsas' },
         { name: 'CARTOON_PARALLEL', value: String(job.lanes) },
-        { name: 'CARTOON_BATCH', value: '30' },
+        { name: 'CARTOON_REPLICAS', value: String(job.replicas) },
+        { name: 'CARTOON_GL', value: 'auto' },
         { name: 'CARTOON_INPUT_KEY', value: key },
       ],
     }],
