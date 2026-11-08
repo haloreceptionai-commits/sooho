@@ -70,7 +70,6 @@ try {
     if(!locked||locked.jobId!==input.jobId||locked.hash!==input.approvedHash||locked.requestHash!==hash(Buffer.from(JSON.stringify(input.manifest))))throw Error('Owner review does not match locked inputs');
     for(const n of ['voice.wav','manifest.json','alignment.json']){const bytes=await store.getValue(n.replaceAll('.','-'));if(!Buffer.isBuffer(bytes))throw Error('Missing durable inputs');await writeFile(path.join(work,n),bytes);}
     await run('node',[path.join(root,'prepare-scene.mjs'),path.join(work,'manifest.json'),path.join(work,'render/prepared')]);
-    const { fingerprint } = {};
     await mkdir(path.join(work,'render'),{recursive:true});
     await writeFile(path.join(work,'render/review-approved.json'),JSON.stringify({...locked.review,approved:true}));
     const m=JSON.parse(await readFile(path.join(work,'manifest.json'),'utf8'));

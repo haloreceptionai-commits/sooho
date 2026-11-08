@@ -37,6 +37,7 @@ export const Route = createFileRoute("/api/public/render-callback")({
         if (!validRenderAssets(job.user_id, job.video_id, [...value.sheets, value.alignmentPath, value.voicePath])) return new Response('Invalid review paths', { status: 400 });
         for (const path of [...value.sheets, value.alignmentPath, value.voicePath]) {
           const parts = path.split('/'), name = parts.pop();
+          if (!name) return new Response('Invalid review path', { status: 400 });
           const { data: files } = await supabaseAdmin.storage.from('videos').list(parts.join('/'), { search: name });
           if (!files?.some(f => f.name === name && Number(f.metadata?.size) > 0)) return new Response('Review not saved', { status: 409 });
         }
