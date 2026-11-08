@@ -167,9 +167,30 @@ for (const kind of new Set(SHOTS.map(s=>s.world))) {
   } else throw Error('Unsupported world');
   if(kind==='ship'||kind==='storm_sea')rockRing(root,M.stone,6,40,4);
 }
+// 3D story objects: built once per (kind, slot), normalised to ~1 m tall, placed from the story's pose each frame.
+function shipModel(pirate){const g=new THREE.Group();const hull=pirate?toon({color:'#2b2230'}):PAINT.red;
+  const h=add(new THREE.CylinderGeometry(.5,.32,2.6,16,1,false,0,Math.PI),hull,0,.12,0,g);h.rotation.set(0,0,Math.PI/2);h.rotation.x=Math.PI;
+  add(tbox(2.5,.08,.9),M.plank,0,.13,0,g);add(tbox(2.62,.07,1.02),PAINT.gold,0,.16,0,g);add(tbox(.6,.35,.95),hull,-1,.32,0,g);
+  for(const [x,hh] of [[-.5,1.7],[.35,2.1]]){add(new THREE.CylinderGeometry(.03,.04,hh,6),M.wood,x,.15+hh/2,0,g);
+    for(const [y,w] of [[.6,1],[1.25,.8]]){const sg=new THREE.PlaneGeometry(w,.6,6,3);const sl=add(sg,pirate?toon({color:'#2a2a2a',side:THREE.DoubleSide}):PAINT.canvas,x,.15+y*hh/2+.2,.08,g);sl.rotation.y=Math.PI/2*.15;}}
+  const fl=add(new THREE.PlaneGeometry(.3,.18),PAINT.stripe,.35,2.35,0,g);g.scale.setScalar(.45);return g;}
+function waveModel(){const g=new THREE.Group();const w=add(new THREE.CylinderGeometry(.5,.62,3,24,1,true,0,Math.PI*1.2),toon({color:'#2a62b8',side:THREE.DoubleSide}),0,.5,0,g,{cast:false});w.rotation.z=Math.PI/2;
+  const c=add(new THREE.TorusGeometry(.55,.07,8,24,Math.PI*.7),toon({color:'#e6f4ff'}),0,.55,0,g,{cast:false});c.rotation.y=Math.PI/2;c.scale.z=3;return g;}
+const MODEL_BUILD={merchant_ship:()=>shipModel(false),pirate_ship:()=>shipModel(true),wave:waveModel,rowboat:()=>{const g=shipModel(false);g.children.slice(4).forEach(c=>c.visible=false);return g;},
+  barrel:()=>{const g=new THREE.Group();barrel(g,0,0,1.1);return g;},cannon:()=>{const g=new THREE.Group();cannon(g,0,0,Math.PI/2);g.scale.setScalar(1.3);return g;},
+  lantern:()=>{const g=new THREE.Group();lantern(g,0,.3,0);return g;},helm_wheel:()=>{const g=new THREE.Group();wheel(g,0,1.2,0);g.scale.setScalar(.8);return g;},
+  chest:()=>{const g=new THREE.Group();add(tbox(.9,.5,.55),M.wood,0,.25,0,g);const lid=add(new THREE.CylinderGeometry(.28,.28,.9,12,1,false,0,Math.PI),M.wood,0,.5,0,g);lid.rotation.z=Math.PI/2;
+    for(const x of [-.3,.3])add(tbox(.07,.82,.6),PAINT.gold,x,.4,0,g);add(tbox(.14,.16,.05),PAINT.gold,0,.45,.29,g);return g;},
+  anchor:()=>{const g=new THREE.Group();add(new THREE.CylinderGeometry(.05,.05,1,8),PAINT.iron,0,.6,0,g);add(new THREE.TorusGeometry(.38,.06,8,16,Math.PI),PAINT.iron,0,.42,0,g).rotation.z=Math.PI;
+    add(new THREE.TorusGeometry(.1,.04,6,12),PAINT.iron,0,1.15,0,g);add(tbox(.5,.06,.06),PAINT.iron,0,.95,0,g);return g;}};
+const modelPool=new Map();
+function props3dState(list){for(const m of modelPool.values())m.visible=false;
+  for(const p of list||[]){const key=p.kind+':'+p.i;let m=modelPool.get(key);if(!m){m=MODEL_BUILD[p.kind]();scene.add(m);modelPool.set(key,m);}
+    m.visible=true;m.position.set(p.x,p.y,p.z);m.rotation.set(0,p.kind.includes('ship')||p.kind==='rowboat'?.5:0,p.roll||0);m.scale.setScalar((p.s||1)*(p.kind==='wave'?1.3:p.kind.includes('ship')?1:.6));}}
 const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFrame still calls this hook
 function worldState(state,f) {
   for(const [kind,root]of worldGroups)root.visible=kind===state.world;
+  props3dState(state.props3d);
   for(const st of STERNS)st.visible=!state.open;
   for(const l of LANTERNS)l.intensity=state.world==='storm_sea'?4:2.2;
   for(const update of animated)update(f);

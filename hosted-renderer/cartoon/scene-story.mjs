@@ -45,7 +45,7 @@ export const dofAt = f => {
   return { focus: distance, cinf: distance < 6 ? 10 : 0, near: 1 };
 };
 // Wide shots and sea/sky story objects open the view past the stern so the horizon reads.
-export const worldAt = f => { const s = shotAt(f); return { world: s.world, open: s.shot === 'wide' || s.shot === 'high' || (s.props || []).some(p => p.place === 'sea' || p.place === 'sky' || p.place === 'background') }; };
+export const worldAt = f => { const s = shotAt(f); return { world: s.world, props3d: props3dAt(f, s), open: s.shot === 'wide' || s.shot === 'high' || (s.props || []).some(p => p.place === 'sea' || p.place === 'sky' || p.place === 'background') }; };
 const outfits = {
   sailor: { tunic: '#386e9a', skin: '#f5c9a0', cap: '#eee8df', hair: '#392b26' },
   worker: { tunic: '#527e57', skin: '#f5c9a0', hair: '#392b26', apron: '#dfd8c7' },
@@ -79,6 +79,9 @@ function propPose(prop, f, shot, index) {
   if (prop.motion === 'grow') { s = s0 * (.4 + .6 * ease); }
   return { x, y, z, s, roll };
 }
+// Story objects with a real 3D model render in the world (lit, inked, shadowed); the rest stay painted cards.
+export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat']);
+const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind)).map(([p, i]) => ({ kind: p.kind, i, ...propPose(p, f, shot, i) }));
 const q = (v, k = 20) => Math.round(v * k) / k;
 export const actorsAt = (f, T) => {
   const shot = shotAt(f), local = (f - shot.start) / 30;
@@ -108,7 +111,8 @@ export const actorsAt = (f, T) => {
 };
 export const fxAt = (f, T) => {
   const shot = shotAt(f), out = [];
-  (shot.props || []).filter(p => p.place !== 'hand').forEach((prop, i) => {
+  (shot.props || []).forEach((prop, i) => {
+    if (prop.place === 'hand' || MODEL3D.has(prop.kind)) return;
     const pose = propPose(prop, f, shot, i), animated = !['rock', 'tower', 'house', 'tree', 'chest', 'barrel', 'books', 'cart', 'crown', 'key', 'letter', 'scroll', 'bread', 'bottle', 'skull_sign', 'map', 'oil_jar', 'pot', 'sword', 'cannon', 'anchor', 'oar', 'moon', 'rowboat'].includes(prop.kind);
     out.push({ x: pose.x, y: pose.y, z: pose.z, s: pose.s, roll: pose.roll, order: 1, blob: prop.place.startsWith('ground'),
       key: JSON.stringify(['prop', prop.kind, animated ? f : 0]), draw: p => T.drawProp(p, prop.kind, f) });
@@ -120,7 +124,7 @@ export const fxAt = (f, T) => {
     const x = near ? c.pos[0] + dx / len * 1.2 : (shot.actors[0]?.pos[0] || 0) + .6 * (i - .5);
     const z = near ? c.pos[2] + dz / len * 1.2 : .4;
     const y = near ? c.pos[1] - .9 : 0;
-    out.push({ x, y, z, s: kind === 'sparkle' ? .8 : near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
+    out.push({ x, y, z, s: kind === 'sparkle' ? .8 : kind === 'rain' ? 2.6 : near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
       key: JSON.stringify(['fx', kind, f]), draw: p => T.FX_ART[kind](p, f) });
   });
   return out;
