@@ -59,7 +59,7 @@ for pack, (topic, _) in TOPIC.items():
     stem = re.sub(r'[^A-Za-z0-9_-]+', '_', fbx.stem)[:60]
     if stem.lower() in seen: continue
     with tempfile.TemporaryDirectory() as t:
-      r = subprocess.run([conv, '-b', '--khr-materials-unlit', '-i', str(fbx), '-o', f'{t}/m'], capture_output=True, text=True, cwd=fbx.parent, timeout=120)
+      r = subprocess.run([conv, '-b', '-i', str(fbx), '-o', f'{t}/m'], capture_output=True, text=True, cwd=fbx.parent, timeout=120)
       g = Path(t) / 'm.glb'
       if r.returncode or not g.exists(): skipped += 1; continue
       j, size = info(g)
