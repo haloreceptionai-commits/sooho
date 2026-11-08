@@ -11,7 +11,7 @@ export const CARTOON_ACTOR = 'nifty_remnant~chronicle-cartoon-renderer';
 export const recoverCartoonReview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { videoId: string }) => ({ videoId: reviewApproval.shape.videoId.parse(data.videoId) }))
   .handler(async ({ data, context }) => {
-    const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).single();
+    const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
     if (!job || job.user_id !== context.userId || job.status !== 'failed' || !['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(job.error ?? '') || !job.run_id) throw Error('No saved preview can be recovered');
     const key = process.env['LOVABLE_API_KEY'], connection = process.env['APIFY_API_KEY'];
     if (!key || !connection) throw Error('Apify is not connected');
@@ -60,15 +60,16 @@ export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requ
     const record = video.data as Record<string, Json>;
     if ((record['input'] as Record<string, Json>)?.['format'] !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
     if (!validRenderAssets(context.userId, data.videoId, [data.voicePath])) throw Error('Invalid narration asset');
-    const { data: existing } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).maybeSingle();
-    if (existing) return { id: existing.id, status: existing.status };
+    const { data: existing } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    // A failed/cancelled run may be resumed by the owner's explicit click; active runs are never duplicated.
+    if (existing && !['failed', 'cancelled'].includes(existing.status)) return { id: existing.id, status: existing.status };
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const token = crypto.randomUUID() + crypto.randomUUID();
     const tokenHash = await digest(token);
     const manifest = { ...data, kind: 'cartoon', width: 1080, height: 1920, checkpoint: { gate: data.gate, hookType: data.hookType, report: data.report, continuity: 1, plan: { characters: data.direction.cast } } };
     const { data: job, error } = await supabaseAdmin.from('render_jobs').insert({ video_id: data.videoId, user_id: context.userId, token_hash: tokenHash, expires_at: new Date(Date.now() + CARTOON_LIFETIME_MS).toISOString(), manifest: manifest as unknown as Json, output_path: `${context.userId}/${data.videoId}/cartoon-output.mp4` }).select('id').single();
     if (error || !job) {
-      const { data: claimed } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).single();
+      const { data: claimed } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (claimed) return { id: claimed.id, status: claimed.status };
       throw Error('Could not reserve cartoon rendering');
     }
@@ -91,7 +92,7 @@ export const approveCartoon = createServerFn({ method: 'POST' }).middleware([req
   .inputValidator((data: { videoId: string; hash: string }) => reviewApproval.parse(data))
   .handler(async ({ data, context }) => {
     const { data: row } = await context.supabase.from('videos').select('data').eq('id', data.videoId).single();
-    const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).single();
+    const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
     if (!row || !job || job.user_id !== context.userId) throw Error('Video not found');
     const review = (row.data as Record<string, Json>)['cartoonReview'] as unknown as CartoonReview | undefined;
     if (!reviewMatches(review, data.hash) || !review || job.status !== 'review') throw Error('This preview changed or was already approved');

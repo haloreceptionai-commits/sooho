@@ -114,7 +114,11 @@ export function removeFromQueue(id: string) {
 
 export async function runVideo(id: string, input: VideoInput) {
   if (running.has(id)) return;
-  if (getState().videos.find(v => v.id === id)?.hostedRender) return;
+  const prior = getState().videos.find(v => v.id === id);
+  // Owner's explicit Resume: a failed/cancelled cartoon run restarts from its saved voice + direction (no new script or voice spend).
+  const resumable = !!prior?.cartoonCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '');
+  if (prior?.hostedRender && !resumable) return;
+  if (resumable) actions.updateVideo(id, { hostedRender: undefined, status: 'running', error: undefined, detail: 'Resuming saved cartoon…' });
   removed.delete(id);
   actions.updateVideo(id, { removed: false });
   running.add(id);
@@ -139,6 +143,7 @@ export async function runVideo(id: string, input: VideoInput) {
       await finishSeedance(id, input, saved, up);
       return;
     }
+    const writeScript = async () => {
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
     // 1) fact check
@@ -213,12 +218,20 @@ export async function runVideo(id: string, input: VideoInput) {
     }
     up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
+      const saved: ScriptCheckpoint = { plan, gate: ev.gate, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, judgeOk: !!ev.judge, hookType: hb.type, moneyShot: rs.moneyShot };
+      // Persist the paid script at once so a closed page can resume without rewriting it.
+      if (input.engine !== 'cartoon') { up({ scriptCheckpoint: saved }); await flushVideo(id).catch(() => {}); }
+      return saved;
+    };
+    const savedScript = input.engine !== 'cartoon' ? getState().videos.find(v => v.id === id)?.scriptCheckpoint : undefined;
+    if (savedScript) up({ status: 'running', stage: 'images', progress: 12, error: undefined, detail: 'Resuming from the saved script…' });
+    const { plan, gate, report, judgeOk, hookType, moneyShot } = savedScript ?? await writeScript();
     const n = plan.scenes.length;
-    up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${ev.gate.score}/100 · ${n} scenes` });
+    up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${gate.score}/100 · ${n} scenes` });
 
     if (input.engine === 'cartoon') {
       if (input.format !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
-      if (!ev.gate.ready || !ev.judge) throw Error(`Cartoon story is not ready: ${ev.gate.blockers.join('; ') || 'Script judges must pass'}`);
+      if (!gate.ready || !judgeOk) throw Error(`Cartoon story is not ready: ${gate.blockers.join('; ') || 'Script judges must pass'}`);
       const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment } }));
       const narration = plan.scenes.map(sc => spellNumbers(sc.narration.trim()));
       const script = narration.join(' ');
@@ -230,7 +243,7 @@ export async function runVideo(id: string, input: VideoInput) {
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
       const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
       if (error) throw Error('Could not save locked Atlas narration');
-      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: ev.gate, hookType: hb.type, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, captions: true, sfx: s.soundEffects });
+      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: true, sfx: s.soundEffects });
       up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
       const job = await submitCartoon({ data: cp });
@@ -272,11 +285,16 @@ export async function runVideo(id: string, input: VideoInput) {
     const img = (extra: Partial<Parameters<typeof generateImage>[0]["data"]>, prompt: string) =>
       withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }), 9, 30000);
 
+    const media = await mediaCache(id);
     await Promise.all([
       pool(groups, 3, async (g, gi) => {
         const text = g.map((i) => plan.scenes[i]!.narration.trim()).join(" ");
+        const key = `voice-${textKey(text)}.wav`;
+        const kept = await media.get(key);
+        if (kept) { voice[gi]!.audio = kept; tick("Recording narration"); return; }
         const r = await withRetry(() => generateVoice({ data: { text, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "short" : "long" } }));
         voice[gi]!.audio = b64ToBuf(r.audio);
+        media.put(key, voice[gi]!.audio.slice(0), "audio/wav");
         tick("Recording narration");
       }),
       (async () => {
@@ -284,19 +302,31 @@ export async function runVideo(id: string, input: VideoInput) {
         let sheet: string | undefined;
         if (plan.characters.length) {
           try {
-            const r = await img({ sheet: true }, plan.characters.map((c) => `${c.name}: ${c.look}`).join("; "));
-            sheet = r.image ?? undefined;
+            const kept = await media.get("sheet.jpg");
+            if (kept) sheet = bufToB64(kept);
+            else {
+              const r = await img({ sheet: true }, plan.characters.map((c) => `${c.name}: ${c.look}`).join("; "));
+              sheet = r.image ?? undefined;
+              if (sheet) media.put("sheet.jpg", b64ToBuf(sheet), "image/jpeg");
+            }
           } catch { /* continue without reference */ }
         }
         tick("Designing characters");
         await pool(plan.scenes, 2, async (sc, i) => {
           // Characters only lead action/face shots; wide, aerial and macro shots show the world, the process or the money shot,
           // and skip the sheet reference (it pulls every frame back to a posed line-up).
+          const keptImg = await media.get(`scene-${i}-${textKey(sc.image_prompt)}.jpg`);
+          if (keptImg) {
+            rawImg[i] = bufToB64(keptImg);
+            scenes[i]!.image = await createImageBitmap(new Blob([keptImg], { type: "image/jpeg" }));
+            tick("Painting scenes");
+            return;
+          }
           const people = sc.shot === "action" || sc.shot === "face";
           const castAll = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
           const cast = people ? castAll : "";
           const shot = [
-            SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && rs.moneyShot ? `MONEY SHOT: ${rs.moneyShot}.` : "", sc.image_prompt,
+            SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
             people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
             COLOR[sc.color] ?? "", LIGHT,
           ].filter(Boolean).join(" ");
@@ -314,7 +344,7 @@ export async function runVideo(id: string, input: VideoInput) {
               }
             }
           }
-          if (r.image) rawImg[i] = r.image;
+          if (r.image) { rawImg[i] = r.image; media.put(`scene-${i}-${textKey(sc.image_prompt)}.jpg`, b64ToBuf(r.image), "image/jpeg"); }
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
         });
@@ -351,7 +381,7 @@ export async function runVideo(id: string, input: VideoInput) {
         if (error) throw new Error(error.message);
         voicePaths.push({ path, scenes: chunk.scenes });
       }
-      const checkpoint: SeedanceCheckpoint = { plan, gate: ev.gate, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, hookType: hb.type, continuity: contScores.length ? contScores.filter(x => x >= 6).length / contScores.length : 1, images: imagePaths, voice: voicePaths };
+      const checkpoint: SeedanceCheckpoint = { plan, gate: gate, report: { revealSec: report.revealSec, shotMix: report.shotMix }, hookType: hookType, continuity: contScores.length ? contScores.filter(x => x >= 6).length / contScores.length : 1, images: imagePaths, voice: voicePaths };
       up({ seedanceCheckpoint: checkpoint });
       await flushVideo(id);
       await finishSeedance(id, input, checkpoint, up);
@@ -418,7 +448,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (!made) throw new Error(`Gemini Omni could not animate any clip for this video (${lastClipErr || "unknown error"}). Try again or switch to Own model.`);
     }
     const continuity = contScores.length ? contScores.filter((x) => x >= 6).length / contScores.length : 1;
-    const cp = await saveAssemblyAssets(id, plan, full, voice, { gate: ev.gate, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, hookType: hb.type, continuity });
+    const cp = await saveAssemblyAssets(id, plan, full, voice, { gate: gate, report: { revealSec: report.revealSec, shotMix: report.shotMix }, hookType: hookType, continuity });
     const clipPaths: { path: string; scenes: number[] }[] = [];
     if (clips) {
       const { data: user } = await supabase.auth.getUser();
@@ -446,6 +476,37 @@ export async function runVideo(id: string, input: VideoInput) {
     keepAlive();
   }
 }
+
+export interface ScriptCheckpoint {
+  plan: Plan;
+  gate: Parameters<typeof finalScore>[0];
+  report: { revealSec: number; shotMix: Record<string, number> };
+  judgeOk: boolean;
+  hookType: string;
+  moneyShot: string;
+}
+
+/** Each paid image/voice take is saved as soon as it is made; a resumed run downloads it instead of paying again. */
+async function mediaCache(id: string) {
+  const { data: user } = await supabase.auth.getUser();
+  if (!user.user) throw new Error("Not signed in");
+  const root = `${user.user.id}/${id}/media`, bucket = supabase.storage.from("videos");
+  const { data: list } = await bucket.list(root, { limit: 1000 });
+  const have = new Set((list ?? []).map((f) => f.name));
+  return {
+    async get(name: string): Promise<ArrayBuffer | null> {
+      if (!have.has(name)) return null;
+      const { data } = await bucket.download(`${root}/${name}`);
+      return data ? await data.arrayBuffer() : null;
+    },
+    put(name: string, body: ArrayBuffer, contentType: string) {
+      // best effort: a failed save only means that item is regenerated on a later resume
+      void bucket.upload(`${root}/${name}`, body, { upsert: true, contentType }).then(({ error }) => { if (!error) have.add(name); });
+    },
+  };
+}
+const bufToB64 = (b: ArrayBuffer) => { const u = new Uint8Array(b); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
+const textKey = (t: string) => { let h = 2166136261; for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 16777619); return (h >>> 0).toString(36); };
 
 export interface SeedanceCheckpoint {
   plan: Plan;
