@@ -4,8 +4,8 @@
 - [x] Build isolated declarative cartoon scenes, deterministic stems, checksum frame recovery, full-duration preflight sheets, and blocking MP4 QA; verify a complete two-second animated fixture.
 - [x] Pin offline acoustic model and test actual Atlas alignment without retiming; uncertain words remain review-gated.
 - [x] Save approved sailor look, add hand-anchored pot lifting/pouring, correct prop clipping, and validate worker inputs before scene preparation.
-- [ ] Connect cartoon Shorts to authenticated cloud jobs with locked Atlas narration, acoustic alignment and explicit owner preflight review.
-- [ ] Package and deploy the cartoon worker with resumable frames, cancellation, MP4 QA and atomic private cloud completion.
+- [x] Connect cartoon Shorts to authenticated cloud jobs with locked Atlas narration, acoustic alignment and explicit owner preflight review.
+- [x] Package and deploy the cartoon worker with resumable frames, cancellation, MP4 QA and atomic private cloud completion.
 - [ ] Verify a full narrated cartoon Short after browser closure, library playback/download and existing-engine regressions; only enable verified capabilities.
 - [x] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
 - [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.
