@@ -49,7 +49,7 @@ function Create() {
   const used: TopicUse[] = [...history, ...videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }))];
   const unavailable = topicUnavailable(topic, topicId, used);
   const score = scoreTopic(topic);
-  const active = videos.filter((v) => v.status !== "done").slice(0, 5);
+  const active = videos.filter((v) => v.status !== "done" && !v.removed).slice(0, 5);
   const recent = videos.filter((v) => v.status === "done").slice(0, 4);
   const busy = videos.some((v) => v.status === "running");
 

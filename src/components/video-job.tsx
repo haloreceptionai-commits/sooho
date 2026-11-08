@@ -1,6 +1,6 @@
-import { FileText, Mic, ImageIcon, Clapperboard, Check, RotateCcw, AlertTriangle } from "lucide-react";
+import { FileText, Mic, ImageIcon, Clapperboard, Check, RotateCcw, AlertTriangle, X } from "lucide-react";
 import { actions, type Video } from "@/lib/store";
-import { runVideo } from "@/lib/pipeline";
+import { runVideo, removeFromQueue } from "@/lib/pipeline";
 import { btnOutline } from "@/components/page";
 
 const STAGES = [
@@ -25,6 +25,14 @@ export function VideoJob({ v }: { v: Video }) {
           <p className="text-xs text-muted-foreground">{v.input.format === "long" ? "Long-form 16:9" : "Short 9:16"} · {v.detail}</p>
         </div>
         <span className="font-mono text-sm font-bold">{v.progress}%</span>
+        <button
+          aria-label="Remove from queue"
+          title="Remove from queue"
+          className="rounded-md p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => { if (window.confirm(`Remove "${v.title}" from the queue? It will stop being made.`)) removeFromQueue(v.id); }}
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
         <div className={`h-full rounded-full transition-all duration-500 ${failed ? "bg-destructive" : "bg-primary"}`} style={{ width: `${v.progress}%` }} />
