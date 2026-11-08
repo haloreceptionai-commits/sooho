@@ -127,6 +127,13 @@
       "when": 1794175399298,
       "tag": "0017_private_generation_output_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794175420631,
+      "tag": "0018_render_callback_generation_lock_order",
+      "breakpoints": true
     }
   ]
 }
