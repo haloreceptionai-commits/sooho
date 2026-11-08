@@ -76,7 +76,7 @@ export function drawHeld(p, kind, x, y, frame) {
 }
 // Effects on the same 600 x 1000 card.
 export const FX_ART = {
-  rain: (p, f) => { for (let i = 0; i < 60; i++) { const x = (i * 97) % 600, y = ((i * 173 + f * 38) % 1100) - 80; p.stroke([[x, y], [x - 8, y + 50]], 3, 'rgba(210,230,255,.8)'); } },
+  rain: (p, f) => { for (let i = 0; i < 160; i++) { const x = (i * 97 + (i % 7) * 13) % 640 - 20, sp = 30 + (i % 5) * 6, y = ((i * 173 + f * sp) % 1150) - 80, l = 22 + (i % 4) * 9; p.stroke([[x, y], [x - 5, y + l]], i % 3 ? .7 : 1.1, i % 3 ? 'rgba(200,220,255,.45)' : 'rgba(235,245,255,.7)'); } },
   smoke: (p, f) => { for (let i = 0; i < 6; i++) { const t = ((f * .012 + i / 6) % 1), r = 50 + 90 * t; p.ell(300 + Math.sin(i * 2 + t * 3) * 60, 950 - t * 800, r, r * .8, `rgba(170,170,175,${(.75 * (1 - t)).toFixed(3)})`, 0); } },
   fire: (p, f) => { for (let i = 0; i < 5; i++) { const k = Math.sin(f * .6 + i) * 20; p.poly([[180 + i * 60, 970], [240 + i * 60, 970], [220 + i * 60 + k, 760 - (i % 2) * 120]], i % 2 ? '#ffb340' : '#f0662c', 3); } },
   sparkle: (p, f) => { for (let i = 0; i < 9; i++) { const t = ((f * .03 + i * .13) % 1); star(p, 80 + (i * 61) % 440, 300 + (i * 137) % 600 - t * 80, 26 * Math.sin(t * Math.PI) + 2, '#fff1a6'); } },

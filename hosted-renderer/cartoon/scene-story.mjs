@@ -18,7 +18,10 @@ export const lightFor = s => {
   const light = LIGHTS[s.light];
   if (!light) throw Error('Unsupported light');
   const out = { ...light, ...(MOOD[s.mood || 'calm'] || {}) };
-  if (s.world === 'storm_sea') Object.assign(out, { skyTop: '#46526b', skyHor: '#8d98a8', sunI: 1.3, hemi: .95, fog: '#9aa6b4', vig: .34 });
+  // Rich, saturated grade like the reference: warm sunny day, deep blue storm night lit by lanterns.
+  out.sat = (out.sat || 1.1) * 1.18;
+  if (s.world === 'storm_sea') Object.assign(out, { skyTop: '#0f1d4a', skyHor: '#34508f', sky: '#5a78c8', ground: '#1c2440', sun: '#9fb8ff', sunI: 1.1, hemi: .85,
+    fog: '#2a3f78', fogNear: 30, fogFar: 260, waterDeep: '#0e2a5c', waterShal: '#2f5fa8', glint: '#9fd0ff', vig: .42, gain: '#c8d6ff', sat: 1.25 });
   if (s.world === 'night_camp') Object.assign(out, { skyTop: '#22305a', skyHor: '#5a6f9c', sunI: .9, hemi: 1.0, vig: .3 });
   return out;
 };
@@ -41,7 +44,8 @@ export const dofAt = f => {
   const distance = Math.hypot(...c.pos.map((v, i) => v - c.look[i]));
   return { focus: distance, cinf: distance < 6 ? 10 : 0, near: 1 };
 };
-export const worldAt = f => ({ world: shotAt(f).world });
+// Wide shots and sea/sky story objects open the view past the stern so the horizon reads.
+export const worldAt = f => { const s = shotAt(f); return { world: s.world, props3d: props3dAt(f, s), open: s.shot === 'wide' || s.shot === 'high' || (s.props || []).some(p => p.place === 'sea' || p.place === 'sky' || p.place === 'background') }; };
 const outfits = {
   sailor: { tunic: '#386e9a', skin: '#f5c9a0', cap: '#eee8df', hair: '#392b26' },
   worker: { tunic: '#527e57', skin: '#f5c9a0', hair: '#392b26', apron: '#dfd8c7' },
@@ -63,7 +67,8 @@ const NEAR_SEA = new Set(['wave', 'fish']);
 function propPose(prop, f, shot, index) {
   let [x0, y0, z0, s0] = PLACE[prop.place];
   if (prop.place !== 'ground_left' && prop.place !== 'ground_right') x0 += camAt(f).look[0];
-  if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -7; s0 = 3.4; y0 = -1.3; x0 -= .3; }
+  if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -13; s0 = 5; y0 = -1.6; x0 -= .3; }
+  if (prop.place === 'sea' && MODEL3D.has(prop.kind) && !NEAR_SEA.has(prop.kind)) { y0 = .4; z0 = -20; s0 = 7; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
   const ease = t * t * (3 - 2 * t);
   let x = x0 + index * (prop.place === 'sea' || prop.place === 'sky' ? 1.9 : .25), y = y0, z = z0, s = s0, roll = 0;
@@ -75,6 +80,9 @@ function propPose(prop, f, shot, index) {
   if (prop.motion === 'grow') { s = s0 * (.4 + .6 * ease); }
   return { x, y, z, s, roll };
 }
+// Story objects with a real 3D model render in the world (lit, inked, shadowed); the rest stay painted cards.
+export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat']);
+const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind)).map(([p, i]) => ({ kind: p.kind, i, ...propPose(p, f, shot, i) }));
 const q = (v, k = 20) => Math.round(v * k) / k;
 export const actorsAt = (f, T) => {
   const shot = shotAt(f), local = (f - shot.start) / 30;
@@ -104,7 +112,8 @@ export const actorsAt = (f, T) => {
 };
 export const fxAt = (f, T) => {
   const shot = shotAt(f), out = [];
-  (shot.props || []).filter(p => p.place !== 'hand').forEach((prop, i) => {
+  (shot.props || []).forEach((prop, i) => {
+    if (prop.place === 'hand' || MODEL3D.has(prop.kind)) return;
     const pose = propPose(prop, f, shot, i), animated = !['rock', 'tower', 'house', 'tree', 'chest', 'barrel', 'books', 'cart', 'crown', 'key', 'letter', 'scroll', 'bread', 'bottle', 'skull_sign', 'map', 'oil_jar', 'pot', 'sword', 'cannon', 'anchor', 'oar', 'moon', 'rowboat'].includes(prop.kind);
     out.push({ x: pose.x, y: pose.y, z: pose.z, s: pose.s, roll: pose.roll, order: 1, blob: prop.place.startsWith('ground'),
       key: JSON.stringify(['prop', prop.kind, animated ? f : 0]), draw: p => T.drawProp(p, prop.kind, f) });
@@ -116,7 +125,7 @@ export const fxAt = (f, T) => {
     const x = near ? c.pos[0] + dx / len * 1.2 : (shot.actors[0]?.pos[0] || 0) + .6 * (i - .5);
     const z = near ? c.pos[2] + dz / len * 1.2 : .4;
     const y = near ? c.pos[1] - .9 : 0;
-    out.push({ x, y, z, s: kind === 'sparkle' ? .8 : near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
+    out.push({ x, y, z, s: kind === 'sparkle' ? .8 : kind === 'rain' ? 1.9 : near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
       key: JSON.stringify(['fx', kind, f]), draw: p => T.FX_ART[kind](p, f) });
   });
   return out;

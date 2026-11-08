@@ -10,3 +10,10 @@
 - [x] Azure end-to-end test (34 s Storm Oil, real Visual Director)
 - [ ] Follow-up: preview stage takes ~7 min on one machine; split review frames across machines
 - [ ] Follow-up: a real-hand "grab shoulder" contact pose and side-view walking
+
+## Cartoon Engine v3 (reference-level look)
+- [x] Dense painted galleon deck (bulwarks, stern facade, striped sails, rigging, barrels, cannons, lanterns, foreground framing)
+- [x] Deep-blue storm grade, towering swells, finer rain, open views for wide/sea shots
+- [x] Real 3D story objects (ships, wave, barrel, cannon, lantern, chest, anchor, wheel)
+- [ ] Same density for town/market/castle/camp/lab/landscape + galley interior
+- [ ] Large CC0 model library, more outfits/animals, one-word captions, reference-scored quality gate
