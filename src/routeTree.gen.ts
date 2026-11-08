@@ -16,6 +16,7 @@ import { Route as AuthenticatedRemixRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedScriptWriterRouteImport } from './routes/_authenticated/script-writer'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
+import { Route as ApiPublicGenerationWorkerRouteImport } from './routes/api/public/generation-worker'
 import { Route as ApiPublicRenderCallbackRouteImport } from './routes/api/public/render-callback'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -53,6 +54,12 @@ const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicGenerationWorkerRoute =
+  ApiPublicGenerationWorkerRouteImport.update({
+    id: '/api/public/generation-worker',
+    path: '/api/public/generation-worker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicRenderCallbackRoute = ApiPublicRenderCallbackRouteImport.update({
   id: '/api/public/render-callback',
   path: '/api/public/render-callback',
@@ -66,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/script-writer': typeof AuthenticatedScriptWriterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/videos': typeof AuthenticatedVideosRoute
+  '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -75,6 +83,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
 }
 export interface FileRoutesById {
@@ -86,6 +95,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
 }
 export interface FileRouteTypes {
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/script-writer'
     | '/settings'
     | '/videos'
+    | '/api/public/generation-worker'
     | '/api/public/render-callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/videos'
     | '/'
+    | '/api/public/generation-worker'
     | '/api/public/render-callback'
   id:
     | '__root__'
@@ -116,12 +128,14 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/videos'
     | '/_authenticated/'
+    | '/api/public/generation-worker'
     | '/api/public/render-callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicGenerationWorkerRoute: typeof ApiPublicGenerationWorkerRoute
   ApiPublicRenderCallbackRoute: typeof ApiPublicRenderCallbackRoute
 }
 
@@ -176,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVideosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/generation-worker': {
+      id: '/api/public/generation-worker'
+      path: '/api/public/generation-worker'
+      fullPath: '/api/public/generation-worker'
+      preLoaderRoute: typeof ApiPublicGenerationWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/render-callback': {
       id: '/api/public/render-callback'
       path: '/api/public/render-callback'
@@ -208,6 +229,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicGenerationWorkerRoute: ApiPublicGenerationWorkerRoute,
   ApiPublicRenderCallbackRoute: ApiPublicRenderCallbackRoute,
 }
 export const routeTree = rootRouteImport
