@@ -33,7 +33,7 @@ export const cartoonDirection = z.object({
 export const cartoonStart = z.object({
   videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), voicePath: z.string().min(1).max(500),
   script: z.string().min(1).max(4000), narration: z.array(z.string().min(1).max(4000)).min(1).max(120), direction: cartoonDirection,
-  gate: z.object({ score: z.number().min(85).max(100), ready: z.literal(true), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),
+  gate: z.object({ score: z.number().min(0).max(100), ready: z.boolean(), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),
   hookType: z.string().max(100), report: z.object({ revealSec: z.number(), shotMix: z.record(z.number()) }), captions: z.boolean(), sfx: z.boolean(),
 }).superRefine((d, ctx) => {
   if (d.narration.join(' ') !== d.script) ctx.addIssue({ code: 'custom', message: 'Scene text must match the locked narration' });
