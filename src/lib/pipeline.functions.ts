@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { styleAnchor } from "@/lib/styles";
 import { FEW_SHOT } from "@/lib/story-v2";
-import { cartoonDirection } from '@/lib/cartoon-job';
+import { cartoonDirection, OUTFITS, VOCAB } from '@/lib/cartoon-job';
 import { z } from 'zod';
 
 // Server-side calls to Azure OpenAI (through the Lovable connector gateway) and,
@@ -93,18 +93,41 @@ export interface Claim { claim: string; sources: string[]; date: string; confide
 export const directCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: { scenes: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(120), deployment: z.string().min(1).max(64) }).parse(d))
   .handler(async ({ data }) => {
+    const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
+    const performer = { type: 'object', additionalProperties: false, required: ['actor', 'action', 'expression', 'slot', 'facing'], properties: { actor: { type: 'string' }, action: en('actions'), expression: en('expressions'), slot: en('slots'), facing: { type: 'integer', enum: [-1, 0, 1] } } };
     const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes'], properties: {
-      cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: ['sailor', 'worker', 'scholar'] } } } },
-      scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['world', 'light', 'action', 'expression', 'actor', 'wide'], properties: {
-        world: { type: 'string', enum: ['ship', 'town', 'bridge', 'lab', 'landscape'] }, light: { type: 'string', enum: ['day', 'golden', 'night_bright'] }, action: { type: 'string', enum: ['idle', 'walk', 'point', 'lift', 'pour', 'react'] }, expression: { type: 'string', enum: ['neutral', 'grin', 'stern', 'nervous', 'shock'] }, actor: { type: 'string' }, wide: { type: 'boolean' },
+      cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: [...OUTFITS] } } } },
+      scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['world', 'light', 'action', 'expression', 'actor', 'wide', 'shot', 'move', 'mood', 'actors', 'speaker', 'props', 'fx', 'cues', 'keyword'], properties: {
+        world: en('worlds'), light: en('lights'), action: en('actions'), expression: en('expressions'), actor: { type: 'string' }, wide: { type: 'boolean' },
+        shot: en('shots'), move: en('moves'), mood: en('moods'), actors: { type: 'array', items: performer }, speaker: { type: 'string' },
+        props: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['kind', 'place', 'motion'], properties: { kind: en('props'), place: en('places'), motion: en('prop_motions') } } },
+        fx: { type: 'array', items: en('fx') }, cues: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['word', 'kind'], properties: { word: { type: 'integer' }, kind: en('sounds') } } }, keyword: { type: 'string' },
       } } },
     } };
-    const result = cartoonDirection.parse(await azureJson(data.deployment,
-      'Direct this original story using ONLY the implemented bright outlined cartoon capabilities. One continuous hero, maximum three cast, fixed seeds. For each input scene return exactly one direction in order. The only hand prop is a small pot for lift/pour; never assign those to other objects. Worlds are ship deck/sea, town street, timber bridge, simple lab table, grass landscape. If the central story needs unimplemented physical action/props (machines, flight, battles, underwater, space, animals), return empty scenes instead of pretending these capabilities exist. No generated code. Wide shots for setting/process, closer framing for hand actions. Expressions only from the enum.',
-      data.scenes.map((s, i) => `${i}: ${s}`).join('\n'), 'cartoon_direction', schema, 'Cartoon director'));
+    const raw = await azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(data.deployment, VISUAL_DIRECTOR,
+      data.scenes.map((s, i) => `${i}: ${s}`).join('\n'), 'cartoon_direction', schema, 'Visual director');
+    // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
+    const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
+      actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? s['props'].slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
+    const result = cartoonDirection.parse({ cast: raw.cast, scenes });
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   });
+const VISUAL_DIRECTOR = `You are the Visual Director of a bright outlined 3D cartoon Shorts studio. Every sentence must SHOW what the narrator says, using ONLY the listed vocabulary (the engine cannot draw anything else; never invent items, never write code).
+Return a cast (max 3, stable ids like hero/captain/rival, fixed seeds 1-999, outfits: sailor, worker, scholar, captain, pirate, king, farmer) and exactly one direction per input sentence, in order.
+Per sentence:
+- world + light: keep the same world across consecutive sentences unless the story moves; storm_sea for storms, night_camp for night outdoors.
+- actors: 1-3 performers on screen with distinct slots (left/center/right) and facing (-1 faces left, 1 faces right, 0 camera). If two characters interact, put both on screen facing each other. "actor"/"action"/"expression" repeat the main subject.
+- action and expression must act out the verb and emotion of the sentence (grab, point, cower, cheer, shout, look_back, think, carry, pour...). Do not leave everyone idle.
+- props: the concrete nouns the sentence names (pirate_ship approaching on the sea, wave rising, coins in hand, map, cannon). place=hand for something held (max one), sea for ships/waves, sky for clouds/sun/moon/gulls, background for buildings/towers, ground_left/right for objects. motion animates them (approach, rise, fall, bob, spin, grow).
+- shot + move: vary them like an editor. Establish with wide, show hands/objects with insert or close, reactions with close or extreme_close, threats with low; push_in on tension, shake on impact, whip on surprises, pull_back to reveal scale. Avoid the same shot twice in a row.
+- mood: calm, tense (danger/mystery) or reveal (the twist/payoff sentence).
+- fx: weather and moments (rain, lightning in storms, splash, smoke, fire, sparkle/burst on the reveal, dust on impacts).
+- speaker: the actor id ONLY if the sentence is that character's spoken line (quoted dialogue); otherwise empty string.
+- cues: up to 4 sound hits; word is the 0-based word index inside that sentence where the sound lands.
+- keyword: the single most important word of the sentence for the yellow caption highlight, copied exactly as written.
+If the core story truly cannot be shown with this vocabulary (space, underwater, animals as main characters, machines), return empty scenes.
+Vocabulary: ${JSON.stringify(VOCAB)}`;
 export interface FactSheet { claims: Claim[]; myth: string; reality: string; hedge: string }
 const factSchema = {
   type: "object", additionalProperties: false, required: ["claims", "myth", "reality", "hedge"],
