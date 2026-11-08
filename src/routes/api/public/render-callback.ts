@@ -31,6 +31,7 @@ export const Route = createFileRoute("/api/public/render-callback")({
       // Never mark done until the actual private file exists.
       const parts = job.output_path.split("/");
       const file = parts.pop();
+      if (!file) return new Response("Invalid output", { status: 400 });
       const { data: files, error } = await supabaseAdmin.storage.from("videos").list(parts.join("/"), { search: file });
       if (error || !files?.some(f => f.name === file && Number(f.metadata?.size) === event.size)) return new Response("Output not saved", { status: 409 });
       const fin = finalScore(manifest.checkpoint.gate, { ...event.stats, width: manifest.width, height: manifest.height, captions: manifest.captions });
