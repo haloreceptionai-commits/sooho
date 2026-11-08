@@ -66,11 +66,13 @@ describe("single rules", () => {
 });
 
 describe("hook rules", () => {
+  it("rejects a date-led hook", () => expect(hookIssues("In 1965 a cloudy solution made tougher thread inside DuPont lab.").join()).toMatch(/date/));
+  it("rejects a biography-led hook", () => expect(hookIssues("Stephanie Kwolek was a chemist who changed bulletproof vests forever.").join()).toMatch(/biography/));
   it("bans the mailman riddle", () => expect(hookIssues("A mailman knocks on a rooftop door—who lives here?", GOLD_ANCHORS).length).toBeGreaterThan(0));
-  it("accepts the anchored gold hook", () => expect(hookIssues("In 1942, Burbank hid a bomber factory under a fake street.", GOLD_ANCHORS, "1942")).toEqual([]));
-  it("rejects numbers not in the facts", () => expect(hookIssues("In 1943, Burbank hid a bomber factory under a fake street.", GOLD_ANCHORS, "1942").join()).toMatch(/1943/));
+  it("accepts the anchored gold hook", () => expect(hookIssues("Burbank hid a whole bomber factory under a fake street in 1942.", GOLD_ANCHORS, "1942")).toEqual([]));
+  it("rejects numbers not in the facts", () => expect(hookIssues("Burbank hid a whole bomber factory under a fake street in 1943.", GOLD_ANCHORS, "1942").join()).toMatch(/1943/));
   it("hook text max 6 words, no repeat", () => {
-    expect(hookTextIssues("FAKE STREET. REAL BOMBERS.", "In 1942, Burbank hid a bomber factory under a fake street.")).toEqual([]);
+    expect(hookTextIssues("FAKE STREET. REAL BOMBERS.", "Burbank hid a whole bomber factory under a fake street in 1942.")).toEqual([]);
     expect(hookTextIssues("ROOFTOP DOOR, WHO LIVES?", "x").length).toBeGreaterThan(0);
   });
 });

@@ -28,4 +28,4 @@
 - [x] Route all new narration through the owner's Azure OpenAI connection, without another-provider fallback (authenticated app call and 7 focused tests checked)
 - [ ] Verify and save a test video using Azure narration — blocked: configured gpt-realtime rejects audio/speech; gpt-4o-mini-tts and gpt-audio are not deployed on this connection. Needs a compatible Azure narration deployment or separately verified realtime integration.
 - [ ] Cut cartoon render time to 3-5 min (preview 8.5 min on 1 machine, full render 16 min on 10 measured Nov 8) — awaiting owner go-ahead
-- [ ] Apply Gemini review gaps (hook, payoff, metaphors, risers/impacts) — answer given, awaiting owner go-ahead
+- [x] Apply Gemini review gaps: hook/analogy/dialogue/payoff rules + twist impact + hook riser; constant beep tone removed (Azure image rebuilt)

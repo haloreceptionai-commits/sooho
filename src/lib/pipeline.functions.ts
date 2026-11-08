@@ -292,12 +292,13 @@ export const generateHooks = createServerFn({ method: "POST" }).middleware([requ
     const r = await azureJson<{ hooks: Hook[] }>(data.deployment,
       `You write the first 3 seconds of viral story Shorts. Write exactly 10 hooks, 2 of each type: paradox_image, shocking_number, mid_action, direct_question, contrarian.
 HARD RULES for "line" (the first spoken sentence):
-- 8-12 words. No greeting, no joke setup, no riddle, never "Did you know", never "Imagine", never "A [job] knocks...", nothing that needs context from later.
+- 8-12 words. Open mid-crisis or on the stakes (danger, a chase, a looming failure, a strange action happening NOW). NEVER start with a date ("In 1965..."), a name + biography ("X was a chemist"), or a dry fact; put the year later in the sentence. Use a strong action verb (roars, snaps, swallows, surges, races).
+- No greeting, no joke setup, no riddle, never "Did you know", never "Imagine", never "A [job] knocks...", nothing that needs context from later.
 - Must contain: a concrete subject (say the subject anchor word), an odd action or number, and a place OR time anchor (say the year/era or place).
 - States the oddity in concrete words a 5-year-old understands, so a stranger instantly knows what is odd. It may tease but must not give the hidden reason.
 - Every number must come from the fact sheet. Family-friendly words only. direct_question hooks must still contain the subject + anchor.
 "visual" = the first frame: a WIDE shot that shows the odd thing (never a face close-up).
-"text" = on-screen hook text, max 6 words, states the oddity as a FACT (no question mark), and must NOT repeat the spoken line's words (e.g. spoken "In 1942, America hid a bomber factory under a fake neighbourhood." -> text "FAKE STREET. REAL BOMBERS.").
+"text" = on-screen hook text, max 6 words, states the oddity as a FACT (no question mark), and must NOT repeat the spoken line's words (e.g. spoken "America hid a whole bomber factory under a fake street in 1942." -> text "FAKE STREET. REAL BOMBERS.").
 Score each 1-10 honestly on curiosity, clarity, visualness, speakability.${data.prefer ? `\nOur audience data says these hook types perform best (in order): ${data.prefer}.` : ""}`,
       `Topic: ${data.topic}\nResearch (anchors, premise, question):\n${data.research}\nFact sheet:\n${data.facts}`, "hooks", hookSchema, "Hook writer");
     return { all: r.hooks };
@@ -386,7 +387,7 @@ export const generatePlan = createServerFn({ method: "POST" }).middleware([requi
     const system = `You write ${D}-second ${short ? "vertical story Shorts" : "story documentaries"} for a viral history & science channel. You write a STORY with a hero, not a lecture.
 First output the premise sentence and an impossible question of at most 10 words. Then output a beat sheet with fields: beat, start_s, end_s, words, purpose, loop_opened, loop_closed, visual (must literally show the narrated noun/action), camera_move.
 The video has ONE hero with a want, at most 3 recurring characters (hero, skeptic or ally, threat), and a money-shot image that appears early and again at the payoff.
-The hook (8-12 words) states a concrete oddity with a place or time anchor and never starts with a riddle, joke setup or greeting. By 8s the viewer knows who, where, when and what is at stake. From ~${at(0.15)}s to ~${at(0.7)}s run try-fail-adapt twice, each bigger than the last. Reveal the answer once, with one everyday analogy and one visual proof. Close the opening question in the last 8 seconds. Sentences are 3-12 words and must be grammatical when spoken aloud. Re-hook every 6-8 seconds.
+The hook (8-12 words) opens mid-crisis or on the stakes with a concrete oddity and a place or time anchor; it never starts with a date ("In 1965..."), a biography line, a riddle, joke setup or greeting (put the year later in the sentence). By 8s the viewer knows who, where, when and what is at stake. From ~${at(0.15)}s to ~${at(0.7)}s run try-fail-adapt twice, each bigger than the last. Reveal the answer once, with one everyday analogy and one visual proof. Close the opening question in the last 8 seconds. Sentences are 3-12 words and must be grammatical when spoken aloud. Re-hook every 6-8 seconds.
 
 WORD CLOCK (the narrator says ~2.6 words per second — count words, this is checked by a machine):
 - Words 1-12: the hook. Words 1-20 (=8s): say ALL of subject, year, place and stakes words, AND finish the ONE main question sentence (ending "?", max 12 words, containing the subject word). No other "?" until word ~40.
@@ -400,8 +401,9 @@ SKELETON (scale to ${D}s):
 - by 8s question: the main question is SPOKEN (one sentence ending "?", max 12 words, plain words). It is the ONLY question before 15s. Then try #1 shown visibly.
 - ${at(0.3)}-${at(0.7)}s escalation: try -> fail -> adapt, twice; each bigger, riskier or stranger. One skeptic line in quoted dialogue ("That can't work."), one rival/threat. Beats "try", "fail", "escalation" (a "fail" or "escalation" beat must start before 30s).
 - myth beat at 40-60% of the words: "Most people think/picture X. Actually Y." before the proof.
-- reveal + analogy + proof (main loop closes at 65-75%): ONE reveal that answers the question, ONE household analogy starting "Ever ...?", ONE visual proof shot.
-- payoff (last ~${Math.max(6, at(0.12))}s): a consequence, twist, number or image the viewer did not expect (never an absence like "nobody came" unless framed as success: "It worked so well that..."). The final 8s REPEAT the opening question's words and answer it plainly ("So how do you hide a factory from the sky? You turn its roof into a fake street."). loopLine = that closing line.
+- reveal + analogy + proof (main loop closes at 65-75%): ONE reveal that answers the question, ONE household analogy starting "Ever ...?" built on a physical action every viewer has done and can picture instantly (blowing on hot soup, squeezing a sponge, ripping tape, shaking a snow globe); never a lab, chemistry or cooking-technique concept (no gelatin, solutions, polymers), ONE visual proof shot.
+- STORYTELLING VOICE: active voice and vivid physical verbs (roars, snaps, surges, slams); at least two short quoted lines of dialogue between characters across the video; every scene is something HAPPENING, not an explanation.
+- payoff (last ~${Math.max(6, at(0.12))}s): a dramatic on-screen EVENT the viewer did not expect (the wave hits the pirates, the vest stops the bullet), never a re-explanation or summary of the science (never an absence like "nobody came" unless framed as success: "It worked so well that..."). The final 8s REPEAT the opening question's words and answer it plainly ("So how do you hide a factory from the sky? You turn its roof into a fake street."). loopLine = that closing line.
 
 HERO & CAST:
 - The hero (a person, named if documented, else a clear role like "the head painter") states their want by 10s in a sentence of the exact form "[hero name] wants/needs/must ..." ("Lockheed wants the factory hidden from enemy bombers."). Use the hero's name in that sentence and in "hero.name". The hero appears (in "characters") in at least 60% of scenes.
