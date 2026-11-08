@@ -1,9 +1,10 @@
 import { expect, it } from 'vitest';
 import { cartoonStart, reviewMatches } from '@/lib/cartoon-job';
 const fixture = () => ({ videoId: 'test', voicePath: 'owner/test/voice.wav', script: 'A sailor pours oil.', narration: ['A sailor pours oil.'], direction: { cast: [{ id: 'hero', seed: 3, outfit: 'sailor' }], scenes: [{ world: 'ship', light: 'day', action: 'pour', expression: 'neutral', actor: 'hero', wide: false }] }, gate: { score: 85, ready: true, parts: {}, blockers: [] }, hookType: 'action', report: { revealSec: 1, shotMix: {} }, captions: false, sfx: true });
-it('blocks cartoon work below the approved 85-point story gate', () => {
-  const f = fixture(); f.gate.score = 84; expect(cartoonStart.safeParse(f).success).toBe(false);
-  f.gate.score = 85; expect(cartoonStart.safeParse(f).success).toBe(true);
+it('lets a below-85 story continue to the owner preview review', () => {
+  const f = fixture(); (f.gate as { score: number; ready: boolean }).score = 69; (f.gate as { ready: boolean }).ready = false;
+  expect(cartoonStart.safeParse(f).success).toBe(true);
+  f.gate.score = 101; expect(cartoonStart.safeParse(f).success).toBe(false);
 });
 it('requires matching immutable owner review and rejects duplicate approvals', () => {
   const review = { hash: 'a'.repeat(64), storeId: 'store', sheets: ['sheet'], alignmentPath: 'words', voicePath: 'voice', duration: 34 };
