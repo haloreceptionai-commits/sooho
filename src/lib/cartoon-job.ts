@@ -19,7 +19,7 @@ export const cartoonScene = z.object({
 }).superRefine((s, ctx) => {
   const ids = (s.actors ?? []).map(a => a.actor);
   if (new Set(ids).size !== ids.length) ctx.addIssue({ code: 'custom', message: 'An actor can appear once per scene' });
-  if ((s.actors ?? []).filter(a => a.slot).length !== new Set((s.actors ?? []).map(a => a.slot)).size) ctx.addIssue({ code: 'custom', message: 'Two actors cannot share a slot' });
+  if (new Set((s.actors ?? []).map(a => a.slot)).size !== ids.length) ctx.addIssue({ code: 'custom', message: 'Two actors cannot share a slot' });
   if (s.speaker && s.actors && !ids.includes(s.speaker)) ctx.addIssue({ code: 'custom', message: 'Speaker must be on screen' });
   if ((s.props ?? []).filter(p => p.place === 'hand').length > 1) ctx.addIssue({ code: 'custom', message: 'Only one hand prop per scene' });
 });
@@ -35,7 +35,9 @@ export const cartoonStart = z.object({
 }).superRefine((d, ctx) => {
   if (d.narration.join(' ') !== d.script) ctx.addIssue({ code: 'custom', message: 'Scene text must match the locked narration' });
   if (d.narration.length !== d.direction.scenes.length) ctx.addIssue({ code: 'custom', message: 'Every scene needs supported cartoon direction' });
-  if (d.direction.scenes.some(s => !d.direction.cast.some(c => c.id === s.actor))) ctx.addIssue({ code: 'custom', message: 'Unknown cartoon actor' });
+  const cast = new Set(d.direction.cast.map(c => c.id));
+  if (d.direction.scenes.some(s => !cast.has(s.actor) || (s.actors ?? []).some(a => !cast.has(a.actor)))) ctx.addIssue({ code: 'custom', message: 'Unknown cartoon actor' });
+  if (d.direction.scenes.some((s, i) => (s.cues ?? []).some(c => c.word >= (d.narration[i] ?? '').split(/\s+/).filter(Boolean).length))) ctx.addIssue({ code: 'custom', message: 'Sound cue points past its sentence' });
 });
 export type CartoonStart = z.infer<typeof cartoonStart>;
 export const reviewApproval = z.object({ videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), hash: z.string().regex(/^[a-f0-9]{64}$/) });
