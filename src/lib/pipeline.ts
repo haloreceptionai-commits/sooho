@@ -14,6 +14,7 @@ import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
+import { eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -169,11 +170,18 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ progress: 6, story: { premise: rs.premise, question: rs.question, hero: `${rs.hero.name} — ${rs.hero.want}`, anchors: Object.values(rs.anchors).join(" · ") }, detail: "Writing 10 hooks…" });
     // 3) hooks: score, drop banned / unanchored ones, prefer types that performed best
     const prefer = rankHookTypes(getState().videos.filter((v) => v.perf && v.analytics).map((v) => ({ hookType: v.analytics!.hookType, ...v.perf })));
-    const hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment } }));
+    let hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment } }));
+    let valid = eligibleHooks(hooks.all, rs.anchors, factText);
+    if (!valid.length) {
+      hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: `${researchText}\nPrevious hooks failed. Use the EXACT subject "${rs.anchors.subject}" in the first few words, plus a checked place/year. Do not substitute dragon or jar for seismoscope unless that is the subject anchor.`, prefer: prefer.join(', '), deployment: s.scriptDeployment } }));
+      valid = eligibleHooks(hooks.all, rs.anchors, factText);
+    }
     const rate = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability
       - hookIssues(h.line, rs.anchors, factText).length * 8 - hookTextIssues(h.text, h.line).length * 4 + (prefer[0] === h.type ? 3 : 0);
-    const ranked = [...hooks.all].sort((x, y) => rate(y) - rate(x));
-    const hb = ranked[0]!, runner = ranked[1] ?? hb;
+    const ranked = valid.sort((x, y) => rate(y) - rate(x));
+    const hb = ranked[0];
+    if (!hb) throw Error('No opening passed the story checks after a second hook draft. No voice or rendering was started.');
+    const runner = ranked[1] ?? hb;
     up({ progress: 8, hooks: { best: hb.line, runnerUp: runner.line }, detail: "Writing the beat sheet and script…" });
     // 4) beat sheet + script -> blocking validators + blind judges -> up to 2 repair rewrites (before any images or voice)
     const base = {
@@ -189,7 +197,7 @@ export async function runVideo(id: string, input: VideoInput) {
       const report = validateStory(story);
       const ht = hookTextIssues(p.hookText, p.scenes[0]?.narration ?? "");
       if (ht.length) report.checks.push({ id: "HOOKTEXT", pass: false, msg: ht.join("; ") }), report.failed.push(report.checks[report.checks.length - 1]!);
-      const hi = hookIssues(splitSentences(p.script || p.scenes.map((x) => x.narration).join(" "))[0] ?? "", rs.anchors, factText);
+      const hi = hookIssues(splitSentences(p.scenes.map((x) => x.narration).join(" "))[0] ?? "", rs.anchors, factText);
       report.checks.push({ id: "HOOK", pass: !hi.length, msg: hi.length ? `Hook: ${hi.join("; ")}` : "Hook rules met" });
       if (hi.length) report.failed.push(report.checks[report.checks.length - 1]!);
       const full = p.scenes.map((x) => x.narration).join(" ");
@@ -208,13 +216,15 @@ export async function runVideo(id: string, input: VideoInput) {
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
     let plan = await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait);
     let ev = await evaluate(plan);
+    let draft = plan, draftEv = ev;
     const tries = input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: `${ev.gate.blockers.map((b) => `- ${b}`).join("\n")}\nPrevious script (keep its good lines, rewrite only what breaks the checks above):\n${plan.scenes.map((x) => `[${x.beat}] ${x.narration}`).join(" ")}` } }), 4, 16000, planWait).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }), 4, 16000, planWait).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
-      if (ev2.gate.score >= ev.gate.score) { plan = repaired; ev = ev2; }
+      draft = repaired; draftEv = ev2;
+      if (preferRepair(ev.gate, ev2.gate)) { plan = repaired; ev = ev2; }
     }
     up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };

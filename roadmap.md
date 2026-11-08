@@ -1,5 +1,8 @@
 # Roadmap — Cartoon Engine v2
 
+- [x] Fix Dragon Jar repair defects: eligible hooks only, full-plan repair context, latest-draft progression, blocker-aware selection and mandatory deterministic gates; 122 tests passed, authenticated script-only checks exercised.
+- [ ] Confirm Dragon Jar produces a ready script: live script-only trials still failed quality checks; bounded AI rewrites do not yet reliably converge. No media generated and voice unchanged.
+
 - [x] Stage 1: Visual Director (per-sentence props/actors/shot/camera/cues) + manifest v2
 - [x] Stage 2: Performance (lip sync on dialogue, 11 expressions, 20 actions, up to 3 actors)
 - [x] Stage 3: Props library (42 props, moving set pieces)
