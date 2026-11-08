@@ -81,7 +81,9 @@ try {
     const framesDir=path.join(work,'render/frames');await mkdir(framesDir,{recursive:true});
     // Frames are deterministic per index. Batches are claimed atomically, so on Azure many replicas
     // (and several browsers per replica) split the work; each finished batch is saved as a durable part.
-    const size=Math.max(10,Number(process.env.CARTOON_BATCH)||60);
+    // One batch per browser lane across the whole fleet keeps every machine busy exactly once.
+    const fleet=Math.max(1,Number(process.env.CARTOON_REPLICAS)||1)*Math.max(1,Number(process.env.CARTOON_PARALLEL)||1);
+    const size=Number(process.env.CARTOON_BATCH)||Math.min(60,Math.max(12,Math.ceil(total/fleet)));
     const batches=[];for(let first=0;first<total;first+=size)batches.push([first,Math.min(total-1,first+size-1)]);
     const lanes=Math.max(1,Number(process.env.CARTOON_PARALLEL)||10);
     const STALE=15*60*1000;
