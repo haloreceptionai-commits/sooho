@@ -78,6 +78,62 @@
       "when": 1794141931663,
       "tag": "0010_render_jobs_allow_owner_retry",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794174581925,
+      "tag": "0011_durable_generation_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794174710721,
+      "tag": "0012_fenced_generation_publication",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794174843579,
+      "tag": "0013_atomic_generation_start",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794175196650,
+      "tag": "0014_generation_cancel_and_render_lifecycle",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1794175264368,
+      "tag": "0015_strict_generation_browser_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794175309866,
+      "tag": "0016_bounded_generation_lease_recovery",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794175399298,
+      "tag": "0017_private_generation_output_writes",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794175420631,
+      "tag": "0018_render_callback_generation_lock_order",
+      "breakpoints": true
     }
   ]
 }

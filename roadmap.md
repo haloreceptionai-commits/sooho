@@ -1,6 +1,7 @@
 # Roadmap — Cartoon Engine v2
 
-- [ ] Full background generation: move script, voice and media off the browser with durable claims, checkpoints and bounded recovery; implementation pending review of the plan.
+- [x] Background foundation: owner-readable jobs/steps, atomic Start, fenced ownership/checkpoints, individually checkpointed judges, shared server operations, generation coordinator and Azure on-demand job; rollout disabled.
+- [ ] Enable full background generation after real closed-browser completion and fault-injection checks. Published worker endpoint now responds correctly (unauthorized calls rejected); rollout remains disabled. Bounded recovery handler is implemented but not scheduled; isolated final-output paths, cancellation-aware callbacks and worker completion checkpoints added. Deploy updated assembly/cartoon workers, implement owner-authorized uncertain-step recovery, and verify real worker/paid-asset failures before rollout.
 
 - [x] Correct false interrupted status across browsers: use cloud update freshness, preserve only actively orchestrated local jobs, no automatic restart; five regression tests and signed-in Dragon Jar display verified.
 

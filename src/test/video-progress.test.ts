@@ -19,6 +19,10 @@ describe('cloud generation progress', () => {
     const hosted = { ...video, hostedRender: { id: 'job', status: 'running' } };
     expect(cloudProgress(hosted, '2026-11-08T20:00:00Z', now)).toBe(hosted);
   });
+  it('does not mark a cloud-owned generation interrupted when its browser closes', () => {
+    const background = { ...video, generationJob: { id: 'job', status: 'running' } };
+    expect(cloudProgress(background, '2026-11-08T20:00:00Z', now)).toBe(background);
+  });
   it('keeps checkpoints and offers resume for stale saved work', () => {
     const saved = { ...video, scriptCheckpoint: {} } as Video;
     const result = cloudProgress(saved, '2026-11-08T20:00:00Z', now);

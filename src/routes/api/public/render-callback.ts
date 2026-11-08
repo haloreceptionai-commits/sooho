@@ -15,7 +15,8 @@ export const Route = createFileRoute("/api/public/render-callback")({
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: job } = await supabaseAdmin.from("render_jobs").select("*").eq("id", id).eq("token_hash", tokenHash).maybeSingle();
     if (!job || Date.parse(job.expires_at) < Date.now()) return new Response("Unauthorized", { status: 401 });
-    if (["done", "failed", "cancelled"].includes(job.status)) return Response.json({ accepted: false });
+    if (job.status === 'done') return Response.json({ accepted: true, status: 'done' });
+    if (["failed", "cancelled"].includes(job.status)) return Response.json({ accepted: false });
     if (Number(request.headers.get("content-length") ?? 0) > 5000) return new Response("Too large", { status: 413 });
     const reader = request.body?.getReader();
     if (!reader) return new Response('Invalid callback', { status: 400 });

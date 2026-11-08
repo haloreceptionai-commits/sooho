@@ -136,7 +136,9 @@ try {
     await uploadFiles(['output.mp4','output.qa.json','mix-report.json']);
     const bytes=await readFile(path.join(work,'output.mp4'));
     await store.setValue('FINAL',bytes,{contentType:'video/mp4'});
-    const result=await notify({type:'done',duration:qa.duration,mime:'video/mp4',size:bytes.length,stats:{lufs:Number(qa.loudness.input_i),lra:Number(qa.loudness.input_lra),avgShotSec:qa.duration/m.shots.length,wordsPerSec:m.words.length/qa.duration}});
+    const completion={type:'done',duration:qa.duration,mime:'video/mp4',size:bytes.length,stats:{lufs:Number(qa.loudness.input_i),lra:Number(qa.loudness.input_lra),avgShotSec:qa.duration/m.shots.length,wordsPerSec:m.words.length/qa.duration}};
+    await store.setValue('PENDING-COMPLETION',completion);
+    const result=await notify(completion);
     if(!result.accepted)throw Error('Cloud completion was not accepted');
     await platform.output({status:'done',duration:qa.duration,size:bytes.length,sha256:hash(bytes)});
   } else throw Error('Unsupported cartoon stage');

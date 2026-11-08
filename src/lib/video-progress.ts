@@ -3,7 +3,7 @@ import type { Video } from '@/lib/store';
 // Long script calls can run for eight minutes; silence alone is not proof a tab closed.
 export const PROGRESS_STALE_MS = 12 * 60_000;
 export function cloudProgress(video: Video, updatedAt: string, now = Date.now()): Video {
-  if (video.status !== 'running' || video.hostedRender) return video;
+  if (video.status !== 'running' || video.hostedRender || video.generationJob) return video;
   const updated = Date.parse(updatedAt);
   if (!Number.isFinite(updated) || now - updated <= PROGRESS_STALE_MS) return video;
   const saved = !!(video.seedanceCheckpoint || video.scriptCheckpoint || video.cartoonCheckpoint || video.assemblyCheckpoint);

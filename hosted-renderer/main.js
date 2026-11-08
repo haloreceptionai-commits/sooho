@@ -61,9 +61,11 @@ try {
     if (!upload.ok) throw new Error(`Cloud video upload failed [${upload.status}]`);
     return { type: 'done', duration: out.duration, mime: out.mime, size: out.blob.size, stats: out.stats };
   }, input);
+  await Actor.setValue('PENDING-COMPLETION', result);
   const saved = await notify(result);
   if (!saved.accepted) throw new Error('Video completion was not accepted');
   await Actor.setValue('OUTPUT', { status: 'done', duration: result.duration, size: result.size });
+  await Actor.setValue('PENDING-COMPLETION', null);
 } catch (error) {
   const message = error instanceof Error ? error.message : 'Hosted assembly failed';
   await notify({ type: 'failed', error: message }).catch(() => {});

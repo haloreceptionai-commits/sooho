@@ -1,0 +1,2 @@
+CREATE POLICY "Browser cannot write generation outputs" ON storage.objects AS RESTRICTIVE FOR INSERT TO authenticated WITH CHECK (bucket_id <> 'videos' OR NOT (name ~ '^[^/]+/[^/]+/(generation-output|generation)/'));
+CREATE POLICY "Browser cannot overwrite generation outputs" ON storage.objects AS RESTRICTIVE FOR UPDATE TO authenticated USING (bucket_id <> 'videos' OR NOT (name ~ '^[^/]+/[^/]+/(generation-output|generation)/')) WITH CHECK (bucket_id <> 'videos' OR NOT (name ~ '^[^/]+/[^/]+/(generation-output|generation)/'));
