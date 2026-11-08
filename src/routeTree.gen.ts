@@ -19,6 +19,7 @@ import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated
 import { Route as ApiPublicGenerationRecoveryRouteImport } from './routes/api/public/generation-recovery'
 import { Route as ApiPublicGenerationWorkerRouteImport } from './routes/api/public/generation-worker'
 import { Route as ApiPublicRenderCallbackRouteImport } from './routes/api/public/render-callback'
+import { Route as ApiPublicYoutubeCallbackRouteImport } from './routes/api/public/youtube/callback'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -72,6 +73,12 @@ const ApiPublicRenderCallbackRoute = ApiPublicRenderCallbackRouteImport.update({
   path: '/api/public/render-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicYoutubeCallbackRoute =
+  ApiPublicYoutubeCallbackRouteImport.update({
+    id: '/api/public/youtube/callback',
+    path: '/api/public/youtube/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -94,6 +102,7 @@ export interface FileRoutesByTo {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +116,7 @@ export interface FileRoutesById {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/callback'
   id:
     | '__root__'
     | '/_authenticated'
@@ -143,6 +155,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -151,6 +164,7 @@ export interface RootRouteChildren {
   ApiPublicGenerationRecoveryRoute: typeof ApiPublicGenerationRecoveryRoute
   ApiPublicGenerationWorkerRoute: typeof ApiPublicGenerationWorkerRoute
   ApiPublicRenderCallbackRoute: typeof ApiPublicRenderCallbackRoute
+  ApiPublicYoutubeCallbackRoute: typeof ApiPublicYoutubeCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRenderCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/youtube/callback': {
+      id: '/api/public/youtube/callback'
+      path: '/api/public/youtube/callback'
+      fullPath: '/api/public/youtube/callback'
+      preLoaderRoute: typeof ApiPublicYoutubeCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -253,6 +274,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGenerationRecoveryRoute: ApiPublicGenerationRecoveryRoute,
   ApiPublicGenerationWorkerRoute: ApiPublicGenerationWorkerRoute,
   ApiPublicRenderCallbackRoute: ApiPublicRenderCallbackRoute,
+  ApiPublicYoutubeCallbackRoute: ApiPublicYoutubeCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
