@@ -4,7 +4,7 @@ import vocab from '../../hosted-renderer/cartoon/vocabulary.json';
 export const CARTOON_LIFETIME_MS = 48 * 60 * 60_000;
 // One vocabulary shared with the hosted worker, so the director can only ask for what the engine draws.
 export const VOCAB = vocab as { [K in keyof typeof vocab]: [string, ...string[]] };
-export const OUTFITS = ['sailor', 'worker', 'scholar', 'captain', 'pirate', 'king', 'farmer'] as const;
+export const OUTFITS = VOCAB.outfits;
 const id = z.string().regex(/^[a-z0-9_-]{1,30}$/);
 const performer = z.object({ actor: id, action: z.enum(VOCAB.actions), expression: z.enum(VOCAB.expressions), slot: z.enum(VOCAB.slots), facing: z.number().int().min(-1).max(1) });
 export const cartoonScene = z.object({

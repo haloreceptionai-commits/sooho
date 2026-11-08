@@ -112,12 +112,28 @@ export const directCartoon = createServerFn({ method: 'POST' }).middleware([requ
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
     const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
       actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? (s['props'] as Record<string, unknown>[]).map((p): Record<string, unknown> => ({ ...p, asset: p['asset'] || undefined })).filter(p => (p['kind'] === 'asset') === !!p['asset']).slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
-    const result = cartoonDirection.parse({ cast: raw.cast, scenes });
+    const result = cartoonDirection.parse({ cast: diversifyCast(raw.cast as CastMember[]), scenes });
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   });
+type CastMember = { id: string; seed: number; outfit: string };
+// Distinct looks per cast member: duplicate outfits/seeds are swapped for unused ones so characters never read as clones.
+export function diversifyCast(cast: CastMember[]): CastMember[] {
+  const used = new Set<string>(), seeds = new Set<number>();
+  return (cast || []).slice(0, 3).map((c, i) => {
+    let outfit = (OUTFITS as readonly string[]).includes(c.outfit) ? c.outfit : OUTFITS[0];
+    if (used.has(outfit)) outfit = OUTFITS.find(o => !used.has(o)) ?? outfit;
+    used.add(outfit);
+    let seed = Number.isInteger(c.seed) && c.seed >= 1 ? c.seed : 7 + i * 131;
+    while (seeds.has(seed)) seed = (seed * 7 + 113) % 997 + 1;
+    seeds.add(seed);
+    return { id: c.id, seed, outfit };
+  });
+}
 const VISUAL_DIRECTOR = `You are the Visual Director of a bright outlined 3D cartoon Shorts studio. Every sentence must SHOW what the narrator says, using ONLY the listed vocabulary (the engine cannot draw anything else; never invent items, never write code).
-Return a cast (max 3, stable ids like hero/captain/rival, fixed seeds 1-999, outfits: sailor, worker, scholar, captain, pirate, king, farmer) and exactly one direction per input sentence, in order.
+Return a cast and exactly one direction per input sentence, in order.
+Cast (2-3 members whenever the story involves more than one person or group; 1 only for a true solo story): stable ids that name the role (hero, captain, rival, queen, doctor...), different seeds 1-999, and an outfit from the outfits list that matches each person's job, era and place (soldier/knight/veteran for armies, queen/noble/king for royalty, doctor/nurse for medicine, pharaoh for ancient Egypt, cowboy for the Wild West, chef for food, monk/priest for religion, woman/maid/peasant for townsfolk). Every cast member gets a DIFFERENT outfit so viewers can tell them apart.
+Use the whole cast: introduce each member on screen early, put the person a sentence is about on screen as the subject, and give the others reaction roles. Do not show the same single character in every scene.
 Per sentence:
 - world + light: keep the same world across consecutive sentences unless the story moves; storm_sea for storms, night_camp for night outdoors.
 - actors: 1-3 performers on screen with distinct slots (left/center/right) and facing (-1 faces left, 1 faces right, 0 camera). If two characters interact, put both on screen facing each other. "actor"/"action"/"expression" repeat the main subject.
