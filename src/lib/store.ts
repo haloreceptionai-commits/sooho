@@ -186,7 +186,16 @@ export async function flushVideo(id: string) {
   if (t) { clearTimeout(t); timers.delete(id); }
   const v = state.videos.find((x) => x.id === id);
   if (!v) return;
-  const { error } = await supabase.from("videos").upsert({ id: v.id, data: v as unknown as Json, updated_at: new Date().toISOString() });
+  // Never let a delayed browser snapshot erase provider IDs or durable clips saved by the server.
+  let data = v;
+  if (v.input.engine === "seedance") {
+    const { data: row } = await supabase.from("videos").select("data").eq("id", id).maybeSingle();
+    const remote = row?.data as unknown as Video | undefined;
+    const clips = { ...v.seedanceClips };
+    for (const [index, run] of Object.entries(remote?.seedanceClips ?? {})) clips[index] = { ...clips[index], ...run };
+    data = { ...v, seedanceClips: clips };
+  }
+  const { error } = await supabase.from("videos").upsert({ id: v.id, data: data as unknown as Json, updated_at: new Date().toISOString() });
   if (error) console.warn("Cloud sync failed", error.message);
 }
 
