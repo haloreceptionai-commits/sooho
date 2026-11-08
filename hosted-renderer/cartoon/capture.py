@@ -51,7 +51,7 @@ async def capture(args):
             try:
                 name = unquote(urlsplit(self.path).path).lstrip('/') or 'index.html'
                 path = (root / name).resolve()
-                if not path.is_relative_to(root) or not path.is_file() or path.suffix not in ('.html', '.js', '.json'):
+                if not path.is_relative_to(root) or not path.is_file() or path.suffix.lower() not in ('.html', '.js', '.json', '.glb', '.png', '.jpg', '.jpeg', '.bin'):
                     self.send_error(404); return
                 self.path = '/' + str(path.relative_to(root))
                 super().do_GET()
@@ -67,7 +67,8 @@ async def capture(args):
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 await page.goto(f'http://localhost:{server.server_port}', wait_until='load')
                 await page.wait_for_function('window.ready || window.err', timeout=60000)
-                total = await page.evaluate('window.TOTAL')
+                total, page_err = await page.evaluate('[window.TOTAL, window.err || null]')
+                if page_err or errors: raise ValueError(f'Scene failed to load: {(page_err or errors[0])[:300]}')
                 if not isinstance(total, int) or total < 1 or args.first < 0 or args.last < args.first or args.last >= total:
                     raise ValueError('Invalid frame range')
                 selected=getattr(args,'selected',None)
