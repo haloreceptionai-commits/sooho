@@ -15,7 +15,7 @@ export const submitHostedRender = createServerFn({ method: "POST" })
     if (data.checkpoint.images.length !== data.checkpoint.plan.scenes.length) throw new Error("Scene images are incomplete");
     const n = data.checkpoint.plan.scenes.length;
     if ([...data.checkpoint.voice, ...data.clips].some(c => c.scenes.some(i => i >= n))) throw new Error("Invalid scene order");
-    const { data: existing } = await context.supabase.from("render_jobs").select("id,status,run_id,error").eq("video_id", data.videoId).maybeSingle();
+    const { data: existing } = await context.supabase.from("render_jobs").select("id,status,run_id,error").eq("video_id", data.videoId).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (existing) {
       if (existing.status === "failed" || existing.status === "cancelled") throw new Error(existing.error ?? "Hosted assembly stopped; saved inputs are safe.");
       return { id: existing.id, status: existing.status };
@@ -32,7 +32,7 @@ export const submitHostedRender = createServerFn({ method: "POST" })
     const manifest = { ...data, width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080 };
     const { data: job, error: claimError } = await supabaseAdmin.from("render_jobs").insert({ video_id: data.videoId, user_id: context.userId, token_hash: tokenHash, expires_at: new Date(Date.now() + RENDER_LIFETIME_MS).toISOString(), manifest: manifest as unknown as Json, output_path: outputPath }).select("id").single();
     if (claimError || !job) {
-      const { data: claimed } = await context.supabase.from("render_jobs").select("id,status").eq("video_id", data.videoId).single();
+      const { data: claimed } = await context.supabase.from("render_jobs").select("id,status").eq("video_id", data.videoId).order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (claimed) return { id: claimed.id, status: claimed.status };
       throw new Error("Could not reserve hosted assembly");
     }
@@ -81,7 +81,7 @@ export async function hashToken(token: string) {
 export const cancelHostedRender = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((data: { videoId: string }) => ({ videoId: renderRequest.shape.videoId.parse(data.videoId) }))
   .handler(async ({ data, context }) => {
-    const { data: job } = await context.supabase.from("render_jobs").select("id,status,run_id").eq("video_id", data.videoId).maybeSingle();
+    const { data: job } = await context.supabase.from("render_jobs").select("id,status,run_id").eq("video_id", data.videoId).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!job || job.status === "done") return { cancelled: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: cancelled, error } = await supabaseAdmin.rpc("cancel_render_job", { job_id: job.id, owner_id: context.userId });
