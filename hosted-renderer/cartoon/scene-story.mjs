@@ -125,6 +125,6 @@ export const captionAt = f => {
   if (i < 0) i = WORDS.length - 1;
   if (t < WORDS[0].start - .1) return null;
   const startGroup = i - (i % 3), words = [];
-  for (let k = startGroup; k < Math.min(WORDS.length, startGroup + 3); k++) words.push({ text: manifest.caption_words[k], key: k === shot.keyword || k === i, live: k === i, shown: WORDS[k].start <= t + .05 });
+  for (let k = startGroup; k < Math.min(WORDS.length, startGroup + 3); k++) words.push({ text: manifest.caption_words[k], key: shot.keyword != null ? k === shot.keyword : k === i, live: k === i, shown: WORDS[k].start <= t + .05 });
   return words;
 };
