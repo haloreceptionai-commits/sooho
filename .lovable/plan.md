@@ -9,21 +9,21 @@ Read all SKILL.md and 13 ZIP text files: README; engine/index.html/main.js/motio
 | Supplied code | Required correction |
 |---|---|
 | Missing mix.py, vendored Three.js/toon.ts, locks/licenses and example voice/timings | Supply verified dependencies/mixer and reproducible fixtures; missing source remains a blocker |
-| setup downloads unpinned cast code, mutates kit, omits finish.sh, hides errors | Immutable offline package, checked runtime APIs, explicit copies, safe path arguments and isolated scratch directories |
+| Broken setup/copies, unpinned downloads and kit mutation | Pinned offline package, checked prerequisites/safe paths |
 | audio.py hardcodes 592 frames, edits voice, ducks/saturates mix; no stems | Voice-derived clock, stem-only synthesis, measured ratio mixer |
 | finish.sh uses dynamic loudnorm, prints rather than enforces QA; sheet stops at 20s | Linear mastering, structured enforceable QA and full-duration sheets |
 | timing.py guesses words; broken CLI/silence/number/impossible-DP behavior | Script-aware forced alignment and confidence/error gates |
 | Roman world hardcoded; actors do not all idle | General worlds/cast/props and required motion |
-| Uniform spline mislabeled centripetal, camera loses fields/FOV unbounded; shader/focus defects | Correct interpolation, validated tracks, portable shader and camera-space focus |
+| Spline/camera/FOV/shader/focus defects | Validated tracks, portable shader/camera-space focus |
 | Resume trusts filenames; unsafe asset server/path handling and executable story input | Declarative validated scenes, isolated worker, allowlisted loopback assets and atomic checked checkpoints |
 | Current Own retimes Atlas, renders stills; hosted 20min timeout/30min lifetime | Own-only offline adapter; benchmark-aware durable jobs/leases |
 
 ## Explicit adaptations for approval
 - **Your choice: automatic Atlas**, not mandatory voice upload. Keep approved voice/direction and ~153 WPM at recording time; not the kit’s 3.7 words/s.
 - No trimming/stretching/pause edits after Atlas acceptance; record reveal pauses. Decoding/common mastering/AAC are permitted, not bit-identical audio. Other engines keep pacing.
-- Own defaults to **no captions or hook overlay**; explicit opt-in captions remain available on existing pages. Diegetic signs must read correctly. No penalty for permitted caption absence; other-engine settings unchanged.
+- Own defaults **no captions/overlay**; existing-page opt-in remains. Signs must read correctly; no no-caption penalty. Other engines unchanged.
 - Keep sourced topics/simple original stories/escalation/analogy/payoff/85 threshold. Version editorial rules: literal hook MCU, phrase-driven shots/continuous moves. Required failures stop paid media.
-- On explicit request within Create, offer exactly ten kit-format ideas: 5–8-word title, hook, twist, visual moments and documented/disputed/legend status. Ten hooks for one topic are not ten ideas; never spend on page load.
+- On request in Create: ten ideas with 5–8-word title/hook/twist/visuals/factual status. Hooks are not ideas; no page-load spending.
 - ZIP establishes vertical Shorts only. Preserve legacy Own long-form until the separate horizontal/chapter release gate passes; never label legacy output the new cartoon engine.
 
 ## Pipeline stages and acceptance gates
@@ -55,8 +55,8 @@ Separate renderer/world/cast/materials/tracks; remove Roman-world assumptions. P
 Preserve painted texel density/two-step toon/horizon fog/bright lighting. Generalize cast; keep design/sole anchors, 2.25m scale, yaw-only cards/contact blobs/alpha shadows/rounded keys. Test detached props and each new cast sheet.
 
 ### 8. Smooth, living animation and render contracts
-Validated centripetal paths, 18–45-frame eased glides, bounded hold creep, purposeful rolls/shakes and safe framing. Every actor: idle/blink/stressed-word bob; actions: anticipation/overshoot/settle/planted gait; secondary water/cloth/dust/leaves/drips.
-Fix reversed smoothstep, camera-space focus, alpha/depth/no-ink handling, state cleanup and disposal. Preserve linear half-float/output conversion, near-side depth-jump/crease ink, card exclusion/distance fade, depth-aware 48-tap DOF, action-centred sun shadows. Unsupported capabilities fail explicitly, not blank output.
+Centripetal paths/18–45-frame glides/bounded creep/rolls/shakes; every actor idles/blinks/bobs. Actions anticipate/overshoot/settle with planted gait; water/cloth/dust/leaves/drips move.
+Fix smoothstep/focus/alpha-depth/no-ink/cleanup. Preserve linear half-float/output conversion, near-side ink/creases/card exclusion/distance fade, 48-tap depth-aware DOF/action-centred shadows. Unsupported capabilities fail explicitly.
 
 ### 9. Mandatory look check
 Render midpoints/boundaries/transitions/actions; show private labelled full-story sheet before full render in existing job view. Check framing/occlusion/collisions/text/attachments/ink/focus. Automated and visual gates; uncertainty needs review. Fix/regenerate, never skip.
@@ -74,7 +74,7 @@ Enforce decode/codec/frame-count/duration/loudness/black/freeze ≥0.4s checks; 
 
 ## Technical boundaries and reliability
 - Own-only versioned manifests/adapter; preserve old outputs/legacy assembly and Omni/Seedance. Worker packages never enter app bundle.
-- Owner controls: authenticated server functions. Published raw callbacks: verified attempt/job capabilities. Never give Actor/scene code owner sessions or gateway/service keys; limit assets/egress/scratch/resources.
+- Authenticated controls; verified published job callbacks. No owner sessions/gateway/service keys in Actor; restricted assets/egress/resources.
 - Inspect live SQL claims/grants/locks/cancel/expiry before extension. Keep no-delete and stale-browser-write protection.
 - Checkpoint paid results. Timeout is not rejection: reconcile unknown submissions; no automatic Actor/paid-job recreation. Eligible transient bounded backoff; existing terminal refusal/access/credit pause rules.
 - Leases/attempt paths/idempotent callbacks reject stale completion. Uploaded file with lost callback finalizes without rerender; cancellation arbitrates atomically.
@@ -90,4 +90,4 @@ Enforce decode/codec/frame-count/duration/loudness/black/freeze ≥0.4s checks; 
 7. Original fixture then ~60s story: inspect motion/sheets/audio; close browser mid-execution, reopen library, play/download saved MP4; desktop/mobile and other-engine regressions.
 8. Long-form gate: horizontal chapter then complete multi-chapter output; continuity/music/alignment/checkpoint recovery/full QA and measured costs before migration.
 
-Order: repair/package → durable jobs → verified script/locked Atlas/alignment → scenes/motion → preflight → frames → mix/encode/QA → cloud end-to-end proof → Own Shorts rollout → gated long-form migration. No placeholder success, skipped required gate or silent slideshow fallback.
+Order: package → durable jobs → script/Atlas/alignment → scenes/preflight → frames/mix/QA → cloud proof → Shorts → gated long-form. No skipped gates or slideshow fallback.

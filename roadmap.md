@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
+- [x] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
 - [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.
 - [x] Add hosted background assembly and cloud completion after browser closure; verified saved 1080×1920 output and playback after closing the browser.
 - [x] Expand internet-sourced topic library, searchable suggestions, and cloud-aware repeat prevention; verify selection flow.
