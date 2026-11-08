@@ -24,19 +24,30 @@ def synthesize(samples, twist_frame, cues, seed=1):
     music = np.zeros(samples, dtype=np.float64)
     sfx = np.zeros(samples, dtype=np.float64)
     twist = min(samples, jsround(twist_frame * RATE / 30))
-    t = np.arange(twist) / RATE
-    # Short plucked bass notes and a warm brass-like pad, before the pivot only.
-    phase = np.mod(t, .4)
-    notes = np.array([110., 130.8128, 98., 146.8324])[(t // .8).astype(int) % 4]
-    music[:twist] = .12 * np.sin(2*np.pi*notes*t) * np.exp(-phase*12)
-    music[:twist] += .025 * (np.sin(2*np.pi*220*t) + .3*np.sin(2*np.pi*440*t))
-    for start in range(0, twist, int(.4*RATE)):
-        n = min(int(.1*RATE), twist-start); tt = np.arange(n)/RATE
-        music[start:start+n] += .12*np.sin(2*np.pi*(75*tt+45*.018*(1-np.exp(-tt/.018))))*np.exp(-tt*40)
-        if (start // int(.4*RATE)) % 2:
-            music[start:start+n] += .04*rng.standard_normal(n)*np.exp(-tt*55)
-    tt = np.arange(samples-twist)/RATE
-    music[twist:] = .065*np.sin(2*np.pi*65.4064*tt) + .02*np.sin(2*np.pi*98*tt)
+    # Soft background bed: low warm chord pads only. No sustained mid/high sine (the old 220/440 Hz tone read
+    # as a constant beep) and no repeating clicks; a filtered-noise riser builds tension in the hook.
+    t = np.arange(samples) / RATE
+    def pad(freqs, tt):
+        out = np.zeros_like(tt)
+        for i, f in enumerate(freqs):
+            out += (np.sin(2*np.pi*f*tt) + .25*np.sin(2*np.pi*2*f*tt)) * (.75 + .25*np.sin(2*np.pi*(.07+.03*i)*tt + i))
+        return out / len(freqs)
+    music[:twist] = .05 * pad([110., 130.8128, 164.8138], t[:twist])
+    music[twist:] = .05 * pad([130.8128, 164.8138, 195.9977], t[twist:] - (t[twist] if twist < samples else 0))
+    fade = int(.08*RATE)
+    if 0 < twist < samples:
+        w = np.linspace(0, 1, min(fade, samples-twist)); music[twist:twist+len(w)] *= w
+    n = min(samples, int(3*RATE))
+    if n:
+        rt = np.arange(n)/RATE
+        riser = np.convolve(rng.standard_normal(n), np.ones(48)/48, 'same') * 3 * (rt/3)**2
+        riser += .03*np.sin(2*np.pi*(55*rt + 20*rt**2)) * (rt/3)
+        music[:n] += .06*riser
+    edge = min(samples, int(.05*RATE)); music[:edge] *= np.linspace(0, 1, edge)
+    music[samples-edge:] *= np.linspace(1, 0, edge)
+    # Gemini guide: always land an impact on the twist beat.
+    if 0 < twist < samples and not any(c.get('kind') == 'impact' and abs(c.get('frame', -99) - twist_frame) < 6 for c in cues):
+        cues = list(cues) + [{'frame': twist_frame, 'kind': 'impact'}]
     for index, cue in enumerate(cues):
         if cue['kind'] not in KINDS or not isinstance(cue['frame'], int) or not 0 <= cue['frame'] < total:
             raise ValueError('Invalid sound cue')
