@@ -81,13 +81,13 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       if (hi.length) report.failed.push({ id: "HOOK", pass: false, msg: hi.join("; ") });
       const full = p.scenes.map((x) => x.narration).join(" ");
       const firstShots = (sec: number) => { const st = sceneStarts(story.scenes); return p.scenes.filter((_, i) => (st[i] ?? 0) < sec).map((x) => `[picture: ${x.image_prompt.slice(0, 200)}]`).join(" "); };
-      const judge = await api.call(() => judgeScript({ data: {
+      const judge = await judgeScript({ checkpoint: api.call, data: {
         first3: `${p.hookText ? `On-screen text: "${p.hookText}". ` : ""}Narration: "${spokenBy(story.scenes, 3.2)}" ${firstShots(3.2)}`,
         first15: `Narration: "${spokenBy(story.scenes, 15)}" ${firstShots(15)}`,
         full, truth: `${researchText}\nHook: ${hb.line}`,
         shots: p.scenes.map((x, i) => `${i}: ${x.narration} => ${x.image_prompt.slice(0, 220)}`).join("\n"),
         deployment: s.scriptDeployment,
-      } }));
+      } });
       if (judge?.filler.length && judge.filler.length > 2) report.failed.push({ id: "V8j", pass: false, msg: `V8 new info (judge): "${judge.filler.slice(0, 2).join('", "')}" add nothing new` });
       const gate = storyScore(report, judge, p.scenes.length);
       return { report, judge, gate };

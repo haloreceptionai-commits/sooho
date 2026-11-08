@@ -212,17 +212,15 @@ const gradeSchema = {
   },
 };
 
-export const judgeScriptOperation = async ({ data }: { data: { first3: string; first15: string; full: string; truth: string; shots: string; deployment: string } }) => {
+export const judgeScriptOperation = async ({ data, checkpoint = <T,>(fn: () => Promise<T>) => fn() }: { data: { first3: string; first15: string; full: string; truth: string; shots: string; deployment: string }; checkpoint?: <T>(fn: () => Promise<T>) => Promise<T> }) => {
     const blind = "You are a cold viewer who has never heard of this topic. Answer ONLY from what you are shown; if you can't tell, answer \"unclear\".";
-    const [a, b, c] = await Promise.all([
-      azureJson<PassAnswer>(data.deployment, blind, `You saw the first 3 seconds of a Short:\n${data.first3}\nWhat is happening? Where? Why is it odd? What might happen next?`, "pass_a", passASchema, "Judge A"),
-      azureJson<{ premise: string; hero: string; want: string; question: string }>(data.deployment, blind, `You saw the first 15 seconds:\n${data.first15}\nState the premise, the hero, what the hero wants and the central question.`, "pass_b", passBSchema, "Judge B"),
-      azureJson<{ answered: boolean; answer: string; payoff: string; weakest: string }>(data.deployment, blind, `Full script:\n${data.full}\nWas the opening question answered (quote the answer)? What was the payoff? Which beat was weakest?`, "pass_c", passCSchema, "Judge C"),
-    ]);
-    const g = await azureJson<{ passA: number; passB: number; readAloud: string[]; literal: number[]; filler: string[] }>(data.deployment,
+    const a = await checkpoint(() => azureJson<PassAnswer>(data.deployment, blind, `You saw the first 3 seconds of a Short:\n${data.first3}\nWhat is happening? Where? Why is it odd? What might happen next?`, "pass_a", passASchema, "Judge A"));
+    const b = await checkpoint(() => azureJson<{ premise: string; hero: string; want: string; question: string }>(data.deployment, blind, `You saw the first 15 seconds:\n${data.first15}\nState the premise, the hero, what the hero wants and the central question.`, "pass_b", passBSchema, "Judge B"));
+    const c = await checkpoint(() => azureJson<{ answered: boolean; answer: string; payoff: string; weakest: string }>(data.deployment, blind, `Full script:\n${data.full}\nWas the opening question answered (quote the answer)? What was the payoff? Which beat was weakest?`, "pass_c", passCSchema, "Judge C"));
+    const g = await checkpoint(() => azureJson<{ passA: number; passB: number; readAloud: string[]; literal: number[]; filler: string[] }>(data.deployment,
       "You grade blind viewer answers against the truth, and audit a script. Be strict but fair: an answer is correct if a stranger clearly got the idea. readAloud flags grammatical defects only, never brevity, quoted dialogue, present tense or unfamiliar subject matter. A full subject-verb sentence such as 'Then a dragon clicks.' or 'A bronze ball drops west.' is grammatical. Dialogue with attribution such as '\"That cannot work,\" a minister laughs.' is grammatical. filler must exclude first introductions of a checked year/place and new consequences such as a delayed courier confirming the event. literal audits the visible noun/action, not whether an invisible idea can be photographed.",
       `TRUTH:\n${data.truth}\n\nPass A answers (what/where/odd/next): ${JSON.stringify(a)}\nPass B answers (premise/hero/want/question): ${JSON.stringify(b)}\n\nFULL SCRIPT:\n${data.full}\n\nSCENES (index: narration => visual):\n${data.shots}\n\nReturn passA = number of the 4 Pass A answers that are correct, passB = number of the 4 Pass B answers that are correct. readAloud = sentences that are fragments, drop words, or don't parse when spoken aloud (quote them; [] if none). literal = scene indexes whose visual does NOT literally show the main noun/action of its narration. filler = sentences that only describe a scene and add no new fact or reversal.`,
-      "grade", gradeSchema, "Grader");
+      "grade", gradeSchema, "Grader"));
     return { passA: g.passA, passB: g.passB, passC: !!c.answered, payoff: c.payoff, weakest: c.weakest, readAloud: g.readAloud, literal: g.literal, filler: g.filler, answers: { a, b, c } };
   };
 

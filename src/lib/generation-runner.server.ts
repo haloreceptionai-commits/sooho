@@ -8,6 +8,7 @@ import { cartoonStart } from './cartoon-job';
 import { spellNumbers } from './story-v2';
 import { submitCartoonOperation } from './cartoon-submit.server';
 import { submitHostedRenderOperation } from './assembly-submit.server';
+import { renderRequest } from './hosted-render';
 import { generationPath } from './generation-policy';
 
 type Client = SupabaseClient<Database>;
@@ -140,7 +141,7 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
     if (input.engine === 'omni' || input.engine === 'seedance') throw Error('Background motion handoff is not enabled');
     const cp: SeedanceCheckpoint = { plan, gate: script.gate, report: script.report, hookType: script.hookType, continuity: continuity.length ? continuity.filter(n => n >= 6).length / continuity.length : 1, images, voice: voices };
     await up({ assemblyCheckpoint: cp });
-    const rendered = await step('handoff', JSON.stringify(cp), () => submitHostedRenderOperation({ data: { videoId: job.video_id, checkpoint: cp, clips: [], captions: settings.burnCaptions, sfx: settings.soundEffects }, context }));
+    const rendered = await step('handoff', JSON.stringify(cp), () => submitHostedRenderOperation({ data: renderRequest.parse({ videoId: job.video_id, checkpoint: cp, clips: [], captions: settings.burnCaptions, sfx: settings.soundEffects }), context }));
     await up({ hostedRender: rendered, stage: 'render', progress: 72, detail: 'Hosted assembly · safe to close your browser' });
   }
   const { data: handed, error } = await db.rpc('handoff_generation_job', auth);
