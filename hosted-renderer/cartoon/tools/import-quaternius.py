@@ -31,7 +31,10 @@ TOPIC = {
  'ultimatemodularscifi': ('sci-fi space station', 2.5), 'ultimatemodularwomen': ('person woman character', 1.65), 'ultimatemonsters': ('monster creature', 1.6),
  'ultimatenature': ('nature tree forest rock plant', 2), 'ultimateplatformer': ('platform game', 1), 'ultimaterpg': ('fantasy medieval rpg', 1),
  'ultimatespacekit': ('space planet astronaut rocket', 2), 'ultimatespaceships': ('spaceship space', 6), 'ultimatestylizednature': ('nature tree forest', 3),
- 'ultimatetexturedbuildings': ('building city house', 8), 'zombieapocalypsekit': ('zombie apocalypse ruin city', 1.5), 'cubeworldkit': ('cube block world game', 1),
+ 'ultimatetexturedbuildings': ('building city house', 8),
+ 'fantasypropsmegakit': ('fantasy medieval props tavern', 1), 'medievalvillagemegakit': ('medieval village town building', 3),
+ 'modularscifimegakit': ('sci-fi space station future', 2.5), 'scifiessentialskit': ('sci-fi future lab', 1), 'stylizednaturemegakit': ('nature tree forest rock plant', 2),
+ 'desert': ('desert sand cactus egypt', 1.5), 'lowpolyanimals': ('animal wildlife', 1.2), 'knightcharacter': ('knight medieval warrior armor', 1.8), 'zombieapocalypsekit': ('zombie apocalypse ruin city', 1.5), 'cubeworldkit': ('cube block world game', 1),
 }
 SIZE = [(r'dino|t-?rex|trex|brachio|stego|elephant|giraffe', 3.5), (r'horse|cow|deer|bull|camel|stag', 1.6), (r'dog|wolf|fox|sheep|pig|alpaca|husky', .9),
         (r'cat|chicken|rabbit|bunny|duck|frog|bird|penguin', .45), (r'tree|pine|palm|tower|building|house|church|castle|windmill|lighthouse', 4),
@@ -50,12 +53,14 @@ added = skipped = 0
 for pack, (topic, _) in TOPIC.items():
   base = src / pack
   if not base.exists(): continue
-  lic = next(base.rglob('License.txt'), None)
+  lic = next((p for p in base.rglob('*') if p.is_file() and p.name.lower().startswith('licen')), None)
   text = lic.read_text(errors='ignore') if lic else ''
   if 'CC0' not in text and 'Creative Commons Zero' not in text and 'publicdomain/zero' not in text: print('skip (licence not CC0):', pack); continue
   dest = out / f'q-{pack}'; dest.mkdir(parents=True); shutil.copy(lic, dest / 'License.txt')
   seen = set()
-  for fbx in sorted(base.rglob('*.fbx')):
+  models = sorted(p for p in base.rglob('*') if p.suffix.lower() == '.fbx' and 'blend' not in str(p).lower())
+  if not models: models = sorted(p for p in base.rglob('*') if p.suffix.lower() == '.obj')  # OBJ-only packs
+  for fbx in models:
     stem = re.sub(r'[^A-Za-z0-9_-]+', '_', fbx.stem)[:60]
     if stem.lower() in seen or stem.lower().startswith('smooth_'): continue  # Smooth_* are duplicate shading variants
     with tempfile.TemporaryDirectory() as t:
