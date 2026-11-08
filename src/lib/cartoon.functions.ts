@@ -121,7 +121,7 @@ function callbackAddress() {
   return `${origin.includes('localhost') || origin.includes('id-preview') ? 'https://sooho.lovable.app' : origin}/api/public/render-callback`;
 }
 async function startActor(key: string, connection: string, input: unknown) {
-  const response = await fetch(`https://connector-gateway.lovable.dev/apify/acts/${CARTOON_ACTOR}/runs?memory=8192&timeout=21600`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'X-Connection-Api-Key': connection, 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+  const response = await fetch(`https://connector-gateway.lovable.dev/apify/acts/${CARTOON_ACTOR}/runs?memory=32768&timeout=21600`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'X-Connection-Api-Key': connection, 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
   if (!response.ok) { const body = await response.text(); console.error('Cartoon start', response.status, body); throw Error(`Cartoon rendering could not start [${response.status}]`); }
   const result = await response.json() as { data?: { id?: string } };
   if (!result.data?.id) throw Error('Cartoon start was not confirmed; do not resubmit');
