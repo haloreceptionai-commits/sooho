@@ -18,7 +18,10 @@ export const lightFor = s => {
   const light = LIGHTS[s.light];
   if (!light) throw Error('Unsupported light');
   const out = { ...light, ...(MOOD[s.mood || 'calm'] || {}) };
-  if (s.world === 'storm_sea') Object.assign(out, { skyTop: '#46526b', skyHor: '#8d98a8', sunI: 1.3, hemi: .95, fog: '#9aa6b4', vig: .34 });
+  // Rich, saturated grade like the reference: warm sunny day, deep blue storm night lit by lanterns.
+  out.sat = (out.sat || 1.1) * 1.18;
+  if (s.world === 'storm_sea') Object.assign(out, { skyTop: '#0f1d4a', skyHor: '#34508f', sky: '#5a78c8', ground: '#1c2440', sun: '#9fb8ff', sunI: 1.1, hemi: .85,
+    fog: '#2a3f78', fogNear: 30, fogFar: 260, waterDeep: '#0e2a5c', waterShal: '#2f5fa8', glint: '#9fd0ff', vig: .42, gain: '#c8d6ff', sat: 1.25 });
   if (s.world === 'night_camp') Object.assign(out, { skyTop: '#22305a', skyHor: '#5a6f9c', sunI: .9, hemi: 1.0, vig: .3 });
   return out;
 };
