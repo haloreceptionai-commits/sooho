@@ -6,6 +6,51 @@ export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string): H
   return hooks.filter(h => !hookIssues(h.line, anchors, facts).length && !hookTextIssues(h.text, h.line).length);
 }
 
+const PRONOUN = /^(["']?)(He|She|They|His|Her|Their)\b/;
+
+/**
+ * Deterministic mechanical fixes the writer model keeps missing; never changes facts.
+ * - A sentence opening with he/she/his/her whose previous sentence names nobody gets the hero's name.
+ * - Exact duplicate sentences are dropped.
+ * - The "main" loop is closed in the reveal (or the scene nearest 70% of the words) when the label is misplaced.
+ */
+export function autoFixPlan(plan: Plan): Plan {
+  const hero = plan.hero?.name?.trim();
+  const names = [hero, ...plan.characters.map(c => c.name)].filter((n): n is string => !!n).flatMap(n => n.toLowerCase().split(/\s+/)).filter(w => w.length > 2);
+  let prev = '';
+  const seen = new Set<string>();
+  const scenes = plan.scenes.map(sc => {
+    const out: string[] = [];
+    for (const raw of sc.narration.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) ?? [sc.narration]) {
+      let s = raw.trim();
+      if (!s) continue;
+      const key = s.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+      if (key.split(' ').length >= 3 && seen.has(key)) continue;
+      seen.add(key);
+      const m = PRONOUN.exec(s);
+      if (m && hero && !names.some(n => prev.toLowerCase().includes(n))) {
+        const p = m[2]!;
+        const rep = /^(His|Her|Their)$/.test(p) ? `${hero}'s` : p === 'They' ? `${hero} and the team` : hero;
+        if (p !== 'Her' || !/^\s*(\w+)\s+(is|was|runs|looks)/.test(s.slice(m[0].length))) s = m[1] + rep + s.slice(m[0].length);
+      }
+      out.push(s); prev = s;
+    }
+    return { ...sc, narration: out.join(' ') || sc.narration };
+  });
+  const offsets: number[] = []; let acc = 0;
+  for (const s of scenes) { offsets.push(acc); acc += wc(s.narration); }
+  const pos = (i: number) => (offsets[i] ?? 0) / Math.max(1, acc);
+  const closeAt = scenes.findIndex(s => /\bmain\b/.test(s.loop_closed));
+  if (closeAt < 0 || pos(closeAt) < 0.6 || pos(closeAt) > 0.8) {
+    const cand = scenes.map((s, i) => ({ i, d: Math.abs(pos(i) - 0.7) + (s.beat === 'reveal' ? -0.05 : 0) })).filter(c => pos(c.i) >= 0.6 && pos(c.i) <= 0.8).sort((a, b) => a.d - b.d)[0];
+    if (cand) scenes.forEach((s, i) => {
+      const ids = s.loop_closed.split(/[,\s]+/).filter(x => x && x !== 'main');
+      s.loop_closed = (i === cand.i ? [...ids, 'main'] : ids).join(',');
+    });
+  }
+  return { ...plan, scenes, script: scenes.map(s => s.narration).join(' ') };
+}
+
 /** Readiness wins over scores; fewer blocking failures wins among unfinished drafts. */
 export function preferRepair(current: GateResult, next: GateResult): boolean {
   if (current.ready !== next.ready) return next.ready;

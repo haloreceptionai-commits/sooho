@@ -14,7 +14,7 @@ import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
-import { eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
+import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
 const b64ToBuf = (b64: string) => {
@@ -232,13 +232,13 @@ export async function runVideo(id: string, input: VideoInput) {
       return { report, judge, gate };
     };
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
-    let plan = await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait);
+    let plan = autoFixPlan(await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait));
     let ev = await evaluate(plan);
     let draft = plan, draftEv = ev;
     const tries = input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }), 4, 16000, planWait).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;

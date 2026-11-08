@@ -31,3 +31,27 @@ describe('Dragon Jar script repairs', () => {
     expect(previous.sceneAudit[0]).toEqual({ index: 0, startSec: 0, words: 5 });
   });
 });
+import { autoFixPlan } from "@/lib/script-repair";
+import { storyScore } from "@/lib/story-v2";
+describe("autoFixPlan", () => {
+  const sc = (narration: string, extra: Record<string, unknown> = {}) => ({ beat: "try", narration, image_prompt: "", characters: [], shot: "wide", money: false, loop_opened: "", loop_closed: "", purpose: "", ...extra });
+  const mk = (scenes: ReturnType<typeof sc>[]) => ({ hero: { name: "Zhang Heng", role: "inventor" }, characters: [{ name: "Zhang Heng", role: "hero" }], scenes, script: "" }) as never;
+  it("names the hero when a pronoun has no named person before it", () => {
+    const p = autoFixPlan(mk([sc("The jar sits in the hall."), sc("He adds a heavier weight.")]));
+    expect(p.scenes[1]!.narration).toBe("Zhang Heng adds a heavier weight.");
+  });
+  it("drops exact repeated sentences", () => {
+    const p = autoFixPlan(mk([sc("The west ball drops."), sc("The west ball drops. Officials gasp.")]));
+    expect(p.scenes[1]!.narration).toBe("Officials gasp.");
+  });
+  it("moves the main loop close to 60-80% of the words", () => {
+    const s = Array.from({ length: 10 }, (_, i) => sc(`Line number ${i} is here.`, i === 4 ? { loop_closed: "main" } : {}));
+    const p = autoFixPlan(mk(s));
+    const at = p.scenes.findIndex((x) => x.loop_closed.includes("main"));
+    expect(at).toBeGreaterThanOrEqual(6); expect(at).toBeLessThanOrEqual(8);
+  });
+  it("repetition alone does not block a high-scoring story", () => {
+    const g = storyScore({ checks: [{ id: "A", pass: true, msg: "" }, { id: "V8", pass: false, msg: "rep" }], failed: [{ id: "V8", pass: false, msg: "rep" }], words: 0, revealSec: 0, shotMix: {} } as never, { passA: 4, passB: 4, passC: true, payoff: "", weakest: "", readAloud: [], literal: [], filler: [] }, 10);
+    expect(g.ready).toBe(g.score >= 85);
+  });
+});
