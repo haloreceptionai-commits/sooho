@@ -1,6 +1,6 @@
 # Roadmap
 - [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.
-- [ ] Add hosted background assembly and cloud completion after browser closure; verify with the browser closed.
+- [x] Add hosted background assembly and cloud completion after browser closure; verified saved 1080×1920 output and playback after closing the browser.
 - [x] Expand internet-sourced topic library, searchable suggestions, and cloud-aware repeat prevention; verify selection flow.
 - [x] Refresh the five auditions with excited secret-fact delivery while preserving their approved pace; verify playback.
 - [x] Generate five clear, suspenseful narrator samples and save playable audio on Create; leave video voice unchanged until user chooses.
