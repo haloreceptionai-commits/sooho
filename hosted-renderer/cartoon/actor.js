@@ -79,13 +79,29 @@ try {
     // A completed 60-frame batch and its checksummed checkpoint are durable before the next batch.
     const saved=await store.getValue('FRAME-CHECKPOINT');
     if(saved){await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(saved));for(const f of Object.keys(saved.frames)){const bytes=await store.getValue(`frame-${f}`);if(Buffer.isBuffer(bytes))await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);}}
-    for(let first=0;first<total;first+=60){
-      await guard(15+first/total*75);
-      await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',framesDir,'--first',String(first),'--last',String(Math.min(total-1,first+59))]);
-      const checkpoint=JSON.parse(await readFile(path.join(framesDir,'checkpoint.json'),'utf8'));
-      for(let f=first;f<Math.min(total,first+60);f++)await store.setValue(`frame-${f}`,await readFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`)),{contentType:'image/jpeg'});
-      await store.setValue('FRAME-CHECKPOINT',checkpoint);
+    // Frames are deterministic per index, so independent batches render in parallel browsers,
+    // each into its own folder, then merge into one checksummed checkpoint in frame order.
+    const merged=saved||{input_hash:null,frames:{}};
+    const pending=[];
+    for(let first=0;first<total;first+=60){const last=Math.min(total-1,first+59);let done=true;for(let f=first;f<=last;f++)if(!merged.frames[String(f)]){done=false;break;}if(!done)pending.push([first,last]);}
+    const lanes=Math.max(1,Math.min(Number(process.env.CARTOON_PARALLEL)||6,os.availableParallelism?.()||os.cpus().length,pending.length||1));
+    let finished=total-pending.reduce((n,[a,b])=>n+b-a+1,0),next=0,saveChain=Promise.resolve();
+    async function lane(){
+      while(next<pending.length){
+        const [first,last]=pending[next++];
+        await guard(15+finished/total*75);
+        const dir=path.join(framesDir,`batch-${first}`);await mkdir(dir,{recursive:true});
+        await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
+        const part=JSON.parse(await readFile(path.join(dir,'checkpoint.json'),'utf8'));
+        if(merged.input_hash&&merged.input_hash!==part.input_hash)throw Error('Scene inputs changed between batches');
+        for(let f=first;f<=last;f++){const name=`f${String(f).padStart(6,'0')}.jpg`;const bytes=await readFile(path.join(dir,name));await writeFile(path.join(framesDir,name),bytes);await store.setValue(`frame-${f}`,bytes,{contentType:'image/jpeg'});merged.frames[String(f)]=part.frames[String(f)];}
+        merged.input_hash=part.input_hash;finished+=last-first+1;
+        saveChain=saveChain.then(()=>Promise.all([store.setValue('FRAME-CHECKPOINT',merged),writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged))]));await saveChain;
+      }
     }
+    console.log(`Rendering ${pending.length} batches across ${lanes} parallel browsers`);
+    await Promise.all(Array.from({length:lanes},lane));
+    await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged));
     await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);
     await guard(95);
     for(const n of ['output.mp4','output.qa.json','mix-report.json'])await writeFile(path.join(work,n),await readFile(path.join(work,'render',n)));
