@@ -23,7 +23,7 @@ export const submitHostedRenderOperation = async ({ data, context }: { data: z.i
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const token = crypto.randomUUID() + crypto.randomUUID();
     const tokenHash = await hashToken(token);
-    const outputPath = `${context.userId}/${data.videoId}/hosted-output.webm`;
+    const outputPath = `${context.userId}/${data.videoId}/generation-output/${crypto.randomUUID()}.webm`;
     const record = video.data as Record<string, Json>;
     const portrait = (record["input"] as Record<string, Json>)?.["format"] === "short";
     const manifest = { ...data, width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080 };
