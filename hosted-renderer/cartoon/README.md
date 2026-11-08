@@ -48,5 +48,8 @@ set remain unsupported; the director must reject unsupported stories rather
 than substitute slideshow images. Acoustic timing always requires owner review.
 Automatic resubmission of failed/ambiguous jobs is prohibited. Full-length cloud
 completion/playback remains a release-verification gate until the real test
-finishes; no speed promise is made. A local steady-state ten-frame test took
+finishes; new cartoon submissions remain disabled until then. The full 1,010-frame
+33.67s local MP4 passed QA after oversampled limiting corrected AAC true-peak
+overshoot; this is not proof of hosted completion. No speed promise is made.
+A local steady-state ten-frame test took
 7.26 seconds excluding startup; hosted timings differ materially.
