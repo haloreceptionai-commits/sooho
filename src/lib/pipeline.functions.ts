@@ -476,7 +476,7 @@ export const generateVoice = createServerFn({ method: "POST" }).middleware([requ
   .handler(async ({ data }): Promise<{ audio: string; engine: "lovable"; deployment: string; voice: string }> => {
     // Atlas narrator: Gemini Charon via Lovable AI (owner's choice; Azure has no cloning and no TTS deployment).
     const longDirection = "A warm, grounded male documentary narrator telling a true story to a curious friend. Calm, clear and confident at a natural storytelling pace, never rushed; gentle curiosity rising into each question, a small pause before every answer, quiet intensity in tense moments and real wonder at the reveal. Every word crisp and easy to follow. Not shouting, not whispering, not sleepy";
-    const direction = data.style === "long" ? longDirection : "A grounded male baritone with bright, excited energy. You are thrilled to tell one friend a fascinating secret fact. Speak a little faster than a calm documentary, lively and upbeat, with a knowing grin in the voice, punchy emphasis on the twist lines, rising anticipation, then delighted amazement at the reveal. Keep every word crisp and clear, short natural pauses only. Not shouting, not whispering, not rushed";
+    const direction = data.style === "long" ? longDirection : "A light, relaxed, friendly male storyteller, amused, like telling a buddy a wild true story. Fast and nearly non-stop, only tiny breaths between sentences, an easy grin in the voice, quick playful character voices for any quoted lines, a little extra punch on the twist and the reveal. Every word crisp and clear. Not dramatic, not shouting, not whispering";
     const lovable = process.env["LOVABLE_API_KEY"];
     if (!lovable) throw new Error("Lovable AI is not configured");
     const res = await fetch(`https://ai.gateway.lovable.dev/v1/audio/speech`, {
@@ -485,12 +485,13 @@ export const generateVoice = createServerFn({ method: "POST" }).middleware([requ
       body: JSON.stringify({
         model: "google/gemini-3.1-flash-tts-preview",
         contents: [{ role: "user", parts: [{ text: `${direction}: Read the following narration aloud, word for word. Narration: ${data.text}` }] }],
-        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } },
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.style === "long" ? "Charon" : "Puck" } } } },
         stream_format: "audio",
       }),
     });
     if (!res.ok) { console.error(`Voice text was: ${data.text.slice(0, 600)}`); await fail(res, "Voice"); }
-    return { audio: toBase64(await res.arrayBuffer()), engine: "lovable", deployment: "gemini-charon", voice: "Charon" };
+    const v = data.style === "long" ? "Charon" : "Puck";
+    return { audio: toBase64(await res.arrayBuffer()), engine: "lovable", deployment: `gemini-${v.toLowerCase()}`, voice: v };
   });
 
 // ---------------- Images ----------------
