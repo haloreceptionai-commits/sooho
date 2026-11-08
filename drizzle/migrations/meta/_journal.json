@@ -120,6 +120,13 @@
       "when": 1794175309866,
       "tag": "0016_bounded_generation_lease_recovery",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794175399298,
+      "tag": "0017_private_generation_output_writes",
+      "breakpoints": true
     }
   ]
 }
