@@ -366,15 +366,12 @@ export async function runVideo(id: string, input: VideoInput) {
 
 // ---- Background safety: warn before closing, keep the screen awake, auto-resume.
 let wake: { release: () => Promise<void> } | null = null;
-const onLeave = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
 function keepAlive() {
   if (typeof window === "undefined") return;
   if (running.size > 0) {
-    window.addEventListener("beforeunload", onLeave);
     const nav = navigator as Navigator & { wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } };
     if (!wake && nav.wakeLock && document.visibilityState === "visible") void nav.wakeLock.request("screen").then((w) => { wake = w; }).catch(() => undefined);
   } else {
-    window.removeEventListener("beforeunload", onLeave);
     void wake?.release().catch(() => undefined); wake = null;
   }
 }
