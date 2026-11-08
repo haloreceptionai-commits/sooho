@@ -103,6 +103,43 @@ function stall(root,x,z,cloth){
   const roof=add(tbox(2.5,.08,1.4),toon({color:cloth}),0,2.4,.2,g);roof.rotation.x=.2;
   for(let i=0;i<4;i++)add(new THREE.SphereGeometry(.16,10,8),toon({color:['#e2563c','#f2c14e','#8bc34a','#f08a2c'][i]}),-.75+i*.5,1.02,0,g);
 }
+// Set dressing: every land world gets a filled backdrop, mid-ground story clutter and foreground framing near the lens.
+const PAL=['#c3322c','#2f6fb0','#e8b23a','#3f8a4f','#8a4fa0','#e07a2c'];
+function bunting(root,y,z,w){rope(root,[-w,y,z],[w,y,z],.02);for(let x=-w+.3,i=0;x<w;x+=.5,i++){const t=add(new THREE.ConeGeometry(.16,.32,3),toon({color:PAL[i%6]}),x,y-.2,z,root,{cast:false});t.rotation.x=Math.PI;}}
+function facade(root,x,z,w,h,c,roofC){const g=new THREE.Group();g.position.set(x,0,z);root.add(g);
+  add(tbox(w,h,1.2),toon({color:c}),0,h/2,0,g);add(tbox(w+.2,.18,1.3),PAINT.dark,0,h,0,g);
+  const r=add(new THREE.CylinderGeometry(.01,w*.75,1.4,4),toon({color:roofC}),0,h+.7,0,g);r.rotation.y=Math.PI/4;r.scale.z=.6;
+  for(let wx=-w/2+.7;wx<w/2-.3;wx+=1.1)for(let wy=1.6;wy<h-.4;wy+=1.3){add(tbox(.55,.7,.05),PAINT.glass,wx,wy,.62,g,{cast:false});add(tbox(.7,.08,.12),PAINT.dark,wx,wy-.4,.64,g);
+    add(tbox(.12,.7,.06),toon({color:'#3f8a4f'}),wx-.36,wy,.63,g);add(tbox(.12,.7,.06),toon({color:'#3f8a4f'}),wx+.36,wy,.63,g);}
+  add(tbox(.8,1.4,.06),PAINT.dark,0,.7,.62,g);add(tbox(.12,.12,.4),PAINT.gold,.6,2.6,.8,g);return g;}
+function dress(kind,root){
+  if(kind==='town'||kind==='market'){
+    let x=-7;for(let i=0;x<7;i++){const w=1.8+(i%3)*.5,h=3+(i%4)*.7;facade(root,x+w/2,-7.5,w,h,['#f3e2c0','#e9c9a0','#d9e4ec','#f0d0c8'][i%4],['#b8462e','#6a4a8a','#2f5f8f'][i%3]);x+=w+.05;}
+    bunting(root,4,-5,6);barrel(root,-2.6,-3.2);crate(root,2.7,-3,1,0,.4);crate(root,2.4,-3.8,.8,.8,-.3);
+    for(const x of [-3.2,3.2]){add(new THREE.CylinderGeometry(.06,.08,3,8),PAINT.iron,x,1.5,-1.5,root);lantern(root,x,3.1,-1.5);}
+    add(new THREE.CylinderGeometry(.5,.6,.5,16),M.wood,-2.2,.25,3.6,root);crate(root,2.1,3.8,1.1,0,.5);
+    if(kind==='market')for(let i=0;i<6;i++)add(new THREE.SphereGeometry(.14,10,8),toon({color:PAL[i]}),2.4+(i%3)*.25,.95,-3+(i>2?.25:0),root);
+  } else if(kind==='castle'){
+    for(const x of [-4.5,4.5]){add(tbox(1,4.5,1),M.stone,x,2.25,-4,root);add(new THREE.CylinderGeometry(.06,.06,1.2,6),PAINT.iron,x,2.2,-3.4,root);
+      const fl=add(new THREE.ConeGeometry(.15,.4,8),new THREE.MeshBasicMaterial({color:'#ffb340'}),x,2.95,-3.4,root,{cast:false});animated.push(f=>{fl.scale.y=1+.2*Math.sin(f*.9+x);});}
+    for(const x of [-2.2,2.2]){const b=add(new THREE.PlaneGeometry(1.1,3),toon({color:'#2f4f8c',side:THREE.DoubleSide}),x,4,-8.25,root);add(tbox(.3,.3,.05),PAINT.gold,x,4.5,-8.2,root);}
+    add(tbox(3,.05,6),toon({color:'#a8252a'}),0,.03,-2,root,{cast:false});
+    add(tbox(1.6,2.2,.8),PAINT.gold,0,1.1,-7.6,root);barrel(root,-3,2.8,1);crate(root,3,3,1,0,.4);
+  } else if(kind==='night_camp'){
+    for(let i=0;i<4;i++)crate(root,-2.6+(i%2)*.5,-1.6-i*.5,.7+i%2*.2,0,i);barrel(root,3,-2);coil(root,-1.2,2.6);
+    for(let i=0;i<40;i++){const st=add(new THREE.SphereGeometry(.25,6,4),new THREE.MeshBasicMaterial({color:'#fff6d0'}),-60+((i*37)%120),25+((i*53)%30),-90,root,{cast:false});st.userData.ndSkip=true;}
+    lantern(root,-3.2,1.6,-1.6);
+  } else if(kind==='lab'){
+    for(const x of [-3,3])for(let y=.6;y<2.6;y+=.55)for(let k=0;k<5;k++)add(tbox(.12,.42,.32),toon({color:PAL[(k+Math.round(y*3))%6]}),x-.6+k*.24+(x>0?0:0),y+.21,-3.25,root);
+    add(tbox(2.4,1.6,.08),toon({color:'#2f4a3a'}),0,2.6,-3.82,root);for(let i=0;i<4;i++)add(tbox(1.6-i*.3,.04,.02),PAINT.white,-.1,3.1-i*.3,-3.76,root,{cast:false});
+    for(const x of [-.6,.6])add(new THREE.SphereGeometry(.2,12,10),toon({color:x<0?'#9ccc65':'#e65a7a'}),x,1.2,-1.6,root);
+    lantern(root,0,3.6,-2.2);barrel(root,-2.6,2.8,.9);crate(root,2.6,3.2,1,0,.3);
+  } else if(kind==='landscape'||kind==='bridge'){
+    for(let i=0;i<14;i++){const x=-12+((i*41)%24),z=-6-((i*29)%14);add(new THREE.CylinderGeometry(.14,.2,1.6,8),M.trunk,x,.8,z,root);add(new THREE.SphereGeometry(.9+(i%3)*.3,12,10),i%2?M.bush:M.pine,x,2+(i%3)*.2,z,root);}
+    for(let i=0;i<30;i++)add(new THREE.SphereGeometry(.07,6,4),toon({color:PAL[i%6]}),-4+((i*13)%80)/10,.06,-1-((i*7)%40)/10,root,{cast:false});
+    if(kind==='landscape'){add(tbox(.12,1,.12),M.beam,-2.4,.5,-2.2,root);add(tbox(1.2,.5,.06),M.plank,-2.4,1.1,-2.15,root);for(let x=-4;x<=4;x+=1)add(tbox(.1,.8,.1),M.beam,x,.4,-3.4,root);add(tbox(8,.08,.06),M.beam,0,.65,-3.4,root);}
+  }
+}
 for (const kind of new Set(SHOTS.map(s=>s.world))) {
   const root=new THREE.Group(); scene.add(root); worldGroups.set(kind,root);
   const floor=add(new THREE.PlaneGeometry(160,160),kind==='lab'||kind==='castle'?M.marble:M.grass,0,-.03,0,root,{cast:false}); floor.rotation.x=-Math.PI/2;
@@ -166,6 +203,7 @@ for (const kind of new Set(SHOTS.map(s=>s.world))) {
     for(let i=0;i<8;i++)add(new THREE.SphereGeometry(.7,10,8),M.bush,-8+i*2.3,.3,-6-i%3*2,root);
   } else throw Error('Unsupported world');
   if(kind==='ship'||kind==='storm_sea')rockRing(root,M.stone,6,40,4);
+  dress(kind,root);
 }
 // 3D story objects: built once per (kind, slot), normalised to ~1 m tall, placed from the story's pose each frame.
 function shipModel(pirate){const g=new THREE.Group();const hull=pirate?toon({color:'#2b2230'}):PAINT.red;
