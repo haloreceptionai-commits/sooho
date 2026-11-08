@@ -17,6 +17,7 @@ try {
     if (Date.now() > deadline) throw Error('Generation execution deadline reached');
     const result = await request({ action: 'run', fence: claim.fence });
     if (result.status === 'continue') continue;
+    if (result.status === 'waiting') { await new Promise(resolve => setTimeout(resolve, 8000)); continue; }
     console.log(JSON.stringify({ status: result.status }));
     break;
   }
