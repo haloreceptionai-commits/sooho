@@ -25,12 +25,16 @@ export const submitSeedance = createServerFn({ method: "POST" }).middleware([req
     const { data: row, error } = await context.supabase.from("videos").select("data").eq("id", data.videoId).single();
     if (error || !row) throw new Error("Video not found");
     const record = row.data as unknown as Record<string, unknown> & { seedanceClips?: Record<string, Run> };
-    const existing = record.seedanceClips?.[data.index];
+    const manifest = `${context.userId}/${data.videoId}/seedance-${data.index}.json`;
+    const { data: saved } = await context.supabase.storage.from("videos").download(manifest);
+    const existing = saved ? await saved.json() as Run : record.seedanceClips?.[data.index];
     if (existing?.id) return { id: existing.id }; // explicit resume never creates another job
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) throw new Error("AI is not configured");
     const j = await response(await fetch(`${GATEWAY}/videos`, { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(seedanceBody(data.prompt, data.image, data.seconds, data.portrait)) }));
     if (typeof j.id !== "string") throw new Error("Seedance did not return a job ID");
+    const { error: manifestError } = await context.supabase.storage.from("videos").upload(manifest, new Blob([JSON.stringify({ id: j.id })], { type: "application/json" }), { contentType: "application/json", upsert: true });
+    if (manifestError) throw new Error("Could not save Seedance job ID; do not resubmit this clip.");
     const next = { ...record, seedanceClips: { ...record.seedanceClips, [data.index]: { id: j.id } } };
     const { error: saveError } = await context.supabase.from("videos").update({ data: next as never }).eq("id", data.videoId);
     if (saveError) throw new Error("Seedance started but its job ID could not be saved. Do not retry; check your connection.");
@@ -43,7 +47,9 @@ export const checkSeedance = createServerFn({ method: "POST" }).middleware([requ
     const { data: row, error } = await context.supabase.from("videos").select("data").eq("id", data.videoId).single();
     if (error || !row) throw new Error("Video not found");
     const record = row.data as unknown as Record<string, unknown> & { seedanceClips?: Record<string, Run> };
-    const run = record.seedanceClips?.[data.index];
+    const manifest = `${context.userId}/${data.videoId}/seedance-${data.index}.json`;
+    const { data: saved } = await context.supabase.storage.from("videos").download(manifest);
+    const run = saved ? await saved.json() as Run : record.seedanceClips?.[data.index];
     if (!run?.id) throw new Error("Seedance job not found");
     if (run.path) return { status: "completed", progress: 100, path: run.path };
     if (run.error) return { status: "failed", progress: 0, error: run.error };
@@ -65,6 +71,8 @@ export const checkSeedance = createServerFn({ method: "POST" }).middleware([requ
       patch = { ...run, path };
     }
     if (patch) {
+      const { error: manifestError } = await context.supabase.storage.from("videos").upload(manifest, new Blob([JSON.stringify(patch)], { type: "application/json" }), { contentType: "application/json", upsert: true });
+      if (manifestError) throw new Error("Could not save Seedance clip progress");
       const { error: saveError } = await context.supabase.from("videos").update({ data: { ...record, seedanceClips: { ...record.seedanceClips, [data.index]: patch } } as never }).eq("id", data.videoId);
       if (saveError) throw new Error("Could not save Seedance progress");
     }
