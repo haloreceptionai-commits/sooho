@@ -10,7 +10,7 @@ it('retains shadow metadata without unbounded FOV creep', () => {
   const keys = [{ frame: 0, pos: [0, 0, 4], look: [0, 0, 0], fov: 40, shadowAt: [0, 1, 0] }, { frame: 30, pos: [0, 0, 2], look: [0, 0, 0], fov: 30 }];
   expect(cameraAt(keys, 15).shadowAt).toEqual([0, 1, 0]);
   expect(cameraAt(keys, 100000).fov).toBe(30);
-  expect(() => cameraAt([{ ...keys[0], fov: 0 }], 0)).toThrow();
+  expect(() => cameraAt([{ frame: 0, pos: [0, 0, 4], look: [0, 0, 0], fov: 0 }], 0)).toThrow();
 });
 it('keeps each actor alive and deterministic', () => {
   expect(actorIdle(20, 1)).toEqual(actorIdle(20, 1));
