@@ -40,6 +40,8 @@ export interface Video {
   sceneCount?: number | undefined;
   seedanceCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
   seedanceClips?: Record<string, { id?: string; path?: string; error?: string }>;
+  assemblyCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
+  hostedRender?: { id: string; status: string };
   qa?: { score: number; parts: Record<string, number> } | undefined;
   hooks?: { best: string; runnerUp: string } | undefined;
   facts?: { myth: string; reality: string; claims: number; confidence: number } | undefined;
@@ -105,7 +107,7 @@ export function hydrateStore() {
         settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } return st; })(),
         // jobs that were running when the page closed can't resume
         videos: (parsed.videos ?? []).map((v) =>
-          v.status === "running" ? { ...v, status: "failed", error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v,
+          v.status === "running" && !v.hostedRender ? { ...v, status: "failed", error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v,
         ),
       };
     }
@@ -186,6 +188,7 @@ export async function flushVideo(id: string) {
   if (t) { clearTimeout(t); timers.delete(id); }
   const v = state.videos.find((x) => x.id === id);
   if (!v) return;
+  if (v.hostedRender) return; // Once handed off, only the hosted service owns progress and completion.
   // Never let a delayed browser snapshot erase provider IDs or durable clips saved by the server.
   let data = v;
   if (v.input.engine === "seedance") {
@@ -210,13 +213,13 @@ export async function syncFromCloud() {
     if (error) throw error;
     const cloud = (data ?? []).map((r) => {
       const v = r.data as unknown as Video;
-      const running = v.status === "running" && !state.videos.some((x) => x.id === v.id && x.status === "running");
+      const running = v.status === "running" && !v.hostedRender && !state.videos.some((x) => x.id === v.id && x.status === "running");
       return running ? { ...v, status: "failed" as const, error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v;
     });
     const ids = new Set(cloud.map((v) => v.id));
     const localOnly = state.videos.filter((v) => !ids.has(v.id));
-    const live = new Map(state.videos.filter((v) => v.status === "running").map((v) => [v.id, v]));
-    state = { ...state, videos: [...localOnly, ...cloud.map((v) => live.get(v.id) ?? v)].sort((a, b) => b.createdAt - a.createdAt) };
+    const live = new Map(state.videos.filter((v) => v.status === "running" && !v.hostedRender).map((v) => [v.id, v]));
+    state = { ...state, videos: [...localOnly, ...cloud.map((v) => v.hostedRender ? v : live.get(v.id) ?? v)].sort((a, b) => b.createdAt - a.createdAt) };
     persist(); emit();
     // Move videos that only existed in this browser into the cloud library.
     const { getLocalVideoFile, uploadVideoFile } = await import("@/lib/video-db");
