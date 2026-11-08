@@ -45,6 +45,7 @@ export interface Video {
   assemblyCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
   assemblyClips?: { path: string; scenes: number[] }[];
   hostedRender?: { id: string; status: string } | undefined;
+  generationJob?: { id: string; status: string } | undefined;
   cartoonCheckpoint?: import('@/lib/cartoon-job').CartoonStart;
   cartoonReview?: import('@/lib/cartoon-job').CartoonReview;
   qa?: { score: number; parts: Record<string, number> } | undefined;
@@ -195,7 +196,7 @@ export async function flushVideo(id: string) {
   if (t) { clearTimeout(t); timers.delete(id); }
   const v = state.videos.find((x) => x.id === id);
   if (!v) return;
-  if (v.hostedRender) return; // Once handed off, only the hosted service owns progress and completion.
+  if (v.hostedRender || v.generationJob) return; // Background services own progress and completion.
   // Never let a delayed browser snapshot erase provider IDs or durable clips saved by the server.
   let data = v;
   if (v.input.engine === "seedance") {
@@ -224,8 +225,8 @@ export async function syncFromCloud() {
     });
     const ids = new Set(cloud.map((v) => v.id));
     const localOnly = state.videos.filter((v) => !ids.has(v.id));
-    const live = new Map(state.videos.filter((v) => activeVideoIds.has(v.id) && v.status === "running" && !v.hostedRender).map((v) => [v.id, v]));
-    state = { ...state, videos: [...localOnly, ...cloud.map((v) => v.hostedRender ? v : live.get(v.id) ?? v)].sort((a, b) => b.createdAt - a.createdAt) };
+    const live = new Map(state.videos.filter((v) => activeVideoIds.has(v.id) && v.status === "running" && !v.hostedRender && !v.generationJob).map((v) => [v.id, v]));
+    state = { ...state, videos: [...localOnly, ...cloud.map((v) => v.hostedRender || v.generationJob ? v : live.get(v.id) ?? v)].sort((a, b) => b.createdAt - a.createdAt) };
     persist(); emit();
     // Move videos that only existed in this browser into the cloud library.
     const { getLocalVideoFile, uploadVideoFile } = await import("@/lib/video-db");

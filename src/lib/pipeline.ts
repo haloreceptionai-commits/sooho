@@ -15,6 +15,7 @@ import { ARCHETYPES } from "@/lib/viral-brain";
 import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
 import { eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
+import { backgroundGenerationEnabled, startBackgroundGeneration } from './generation.functions';
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -116,6 +117,16 @@ export function removeFromQueue(id: string) {
 export async function runVideo(id: string, input: VideoInput) {
   if (running.has(id)) return;
   const prior = getState().videos.find(v => v.id === id);
+  if (prior?.generationJob) return;
+  if (!prior?.scriptCheckpoint && !prior?.cartoonCheckpoint && !prior?.assemblyCheckpoint && !prior?.seedanceCheckpoint) {
+    const rollout = await backgroundGenerationEnabled();
+    if (rollout.enabled) {
+      await flushVideo(id);
+      const job = await startBackgroundGeneration({ data: { videoId: id, settings: getState().settings } });
+      actions.updateVideo(id, { generationJob: { id: job.id, status: 'queued' }, detail: 'Background generation · safe to close your browser' });
+      return;
+    }
+  }
   // Owner's explicit Resume: a failed/cancelled cartoon run restarts from its saved voice + direction (no new script or voice spend).
   const resumable = !!prior?.cartoonCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '');
   if (prior?.hostedRender && !resumable) return;
