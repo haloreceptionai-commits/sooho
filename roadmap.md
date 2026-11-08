@@ -4,9 +4,10 @@
 - [x] Build isolated declarative cartoon scenes, deterministic stems, checksum frame recovery, full-duration preflight sheets, and blocking MP4 QA; verify a complete two-second animated fixture.
 - [x] Pin offline acoustic model and test actual Atlas alignment without retiming; uncertain words remain review-gated.
 - [x] Save approved sailor look, add hand-anchored pot lifting/pouring, correct prop clipping, and validate worker inputs before scene preparation.
-- [ ] Connect cartoon Shorts to authenticated cloud jobs with locked Atlas narration, acoustic alignment and explicit owner preflight review.
-- [ ] Package and deploy the cartoon worker with resumable frames, cancellation, MP4 QA and atomic private cloud completion.
-- [ ] Verify a full narrated cartoon Short after browser closure, library playback/download and existing-engine regressions; only enable verified capabilities.
+- [x] Connect cartoon Shorts to authenticated cloud jobs with locked Atlas narration, acoustic alignment and explicit owner preflight review.
+- [x] Package and deploy the cartoon worker with resumable frames, cancellation, MP4 QA and atomic private cloud completion.
+- [ ] Verify full cartoon cloud MP4 playback/download: blocked on a complete hosted test using the corrected finishing worker. The 1,010-frame, 33.67s local MP4 passes frame/audio/black/freeze QA after oversampled limiting; hosted rendering is significantly slower and final cloud delivery remains unverified. New cartoon submissions stay disabled until this gate passes.
+- [x] Fix the first test's Cloud callback unavailable error and recover its saved preview without regenerating or duplicate spending; UI recovery and narration playback verified.
 - [x] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
 - [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.
 - [x] Add hosted background assembly and cloud completion after browser closure; verified saved 1080×1920 output and playback after closing the browser.

@@ -1,8 +1,8 @@
-# Cartoon worker foundation — not enabled in production
+# Reviewed cartoon Shorts worker
 
-The approved plan is implemented incrementally here. The app continues using its
-existing engines until all release gates pass. This folder is never imported by
-the app server or browser.
+The separate private `chronicle-cartoon-renderer` Actor is deployed from this
+folder using `node deploy.mjs`. Legacy Own, Omni and Seedance are unchanged.
+Worker source is never imported by the app server or browser.
 
 `reference/` contains the uploaded source, intentionally unchanged. `vendor/`
 pins Three.js r160 and the MIT toon library at the commit in manifest.json, with
@@ -37,11 +37,19 @@ all clocks, cast, camera tracks, worlds and events before creating scene files.
 `test_sheet.py` verifies ending/action coverage; `test_workflow.py` rejects
 changed immutable inputs before rendering. `workflow.py` provides a local
 preflight/review/frames/sound/encode flow and rejects unreviewed long rendering.
-It is not connected to paid production jobs and does not simulate cloud saves.
+`actor.js` performs preflight with locked automatic Atlas, offline acoustic
+alignment, full-story contact sheets and cloud review. Owner approval rotates
+the job capability and submits a distinct finishing stage with the same locked
+inputs. Captured frame batches and hashes persist in a private Actor store.
+MP4/audio/frame QA must pass before output is uploaded and completed atomically.
 
-Pending release gates: immutable container/browser/fonts/model distribution,
-alignment calibration, full actions/props/effects/cast QA,
-durable generation/cancellation/recovery, owner preflight review,
-cloud frame checkpoints, full-video finishing/QA, owner callback
-verification and real closed-browser library playback. Do not claim this is a
-completed video engine or submit it as the production Actor.
+Captions, arbitrary props and physical actions outside the declared supported
+set remain unsupported; the director must reject unsupported stories rather
+than substitute slideshow images. Acoustic timing always requires owner review.
+Automatic resubmission of failed/ambiguous jobs is prohibited. Full-length cloud
+completion/playback remains a release-verification gate until the real test
+finishes; new cartoon submissions remain disabled until then. The full 1,010-frame
+33.67s local MP4 passed QA after oversampled limiting corrected AAC true-peak
+overshoot; this is not proof of hosted completion. No speed promise is made.
+A local steady-state ten-frame test took
+7.26 seconds excluding startup; hosted timings differ materially.

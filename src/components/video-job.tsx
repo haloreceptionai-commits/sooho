@@ -4,6 +4,10 @@ import { runVideo, removeFromQueue } from "@/lib/pipeline";
 import { btnOutline } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { CartoonReviewPanel } from '@/components/cartoon-review';
+import { recoverCartoonReview } from '@/lib/cartoon.functions';
+import { useServerFn } from '@tanstack/react-start';
+import { syncFromCloud } from '@/lib/store';
+import { toast } from 'sonner';
 
 const STAGES = [
   { key: "script", label: "Script", icon: FileText },
@@ -14,6 +18,7 @@ const STAGES = [
 const ORDER = ["script", "voice", "images", "render", "saving", "done"];
 
 export function VideoJob({ v }: { v: Video }) {
+  const recover = useServerFn(recoverCartoonReview);
   const cur = ORDER.indexOf(v.stage);
   const failed = v.status === "failed";
   return (
@@ -55,6 +60,7 @@ export function VideoJob({ v }: { v: Video }) {
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <p className="flex-1 break-words">{v.error}</p>
           {!v.hostedRender && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> {v.seedanceCheckpoint || v.assemblyCheckpoint ? "Resume" : "Retry"}</Button>}
+          {v.input.engine === 'cartoon' && ['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(v.error ?? '') && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { void recover({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not recover preview')); }}><RotateCcw className="h-3 w-3" /> Recover preview</Button>}
         </div>
       )}
       <CartoonReviewPanel video={v} />

@@ -1,5 +1,5 @@
 """Acoustic word clock to bounded, supported declarative scenes; no guessed timing."""
-import argparse, hashlib, json, re, wave
+import argparse, hashlib, json, re, wave, math
 from pathlib import Path
 
 def build(request, alignment, voice):
@@ -8,11 +8,18 @@ def build(request, alignment, voice):
         samples=w.getnframes()
     total=round(samples/48000*30)
     words=alignment['words']
+    if not words or len(words)>600:raise ValueError('Invalid alignment size')
+    previous=0
+    for word in words:
+        if not all(math.isfinite(word[k]) for k in ['start','end','confidence']) or word['start']<previous or word['end']<=word['start'] or word['end']>samples/48000 or not 0<=word['confidence']<=1:raise ValueError('Invalid acoustic word timing')
+        previous=word['end']
+    if len(request['narration'])!=len(request['direction']['scenes']):raise ValueError('Incomplete scene direction')
     normalize=lambda text: [re.sub(r"[^a-z']",'',t.lower()) for t in text.split()]
     if normalize(request['script'])!=[w['text'] for w in words]: raise ValueError('Aligned text differs from narration')
     shots=[]; index=0; start=0
     for i,(text,d) in enumerate(zip(request['narration'],request['direction']['scenes'])):
         count=len(text.split()); end_index=index+count
+        if end_index>len(words):raise ValueError('Incomplete aligned narration')
         end=total if i==len(request['narration'])-1 else round(words[end_index]['start']*30)
         if end<=start: raise ValueError('Scene too short on acoustic clock')
         x=1.8 if d['wide'] else 1.4; z=7 if d['wide'] else 3.5

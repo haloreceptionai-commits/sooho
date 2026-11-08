@@ -130,7 +130,7 @@ function Create() {
             <label htmlFor="engine" className={label}>4 · Video model</label>
             <select id="engine" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
               <option value="own">Own model — AI images with camera motion</option>
-              <option value="cartoon" disabled={format !== 'short'}>Own cartoon — outlined animation · Shorts</option>
+              <option value="cartoon" disabled>Own cartoon — final cloud verification pending</option>
               <option value="omni">Gemini Omni — AI-animated video clips</option>
               <option value="seedance">Seedance 2.5 — fluid cartoon animation · 720p</option>
             </select>

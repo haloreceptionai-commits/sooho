@@ -43,7 +43,8 @@ def main():
     if not np.isfinite(integrated): raise ValueError('Mix loudness cannot be measured')
     gain_db = -14 - integrated
     # Explicit common gain followed by peak limiter; no loudnorm in actual encode.
-    audio_filter = f'volume={gain_db}dB,alimiter=limit=0.891250938:level=false:latency=true'
+    # Oversampled limiting leaves codec reconstruction headroom; validate AAC true peak, not just PCM sample peak.
+    audio_filter = f'volume={gain_db}dB,aresample=192000,alimiter=limit=0.707945784:level=false:latency=true,aresample=48000'
     tmp = out.with_name(out.stem + '.partial.mp4')
     try:
         run(['ffmpeg', '-v', 'error', '-y', '-framerate', '30', '-i', str(folder / 'f%06d.jpg'), *audio_in,

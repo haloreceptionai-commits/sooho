@@ -7,6 +7,50 @@ import type { Json } from '@/integrations/supabase/types';
 
 export const CARTOON_ACTOR = 'nifty_remnant~chronicle-cartoon-renderer';
 
+export const recoverCartoonReview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { videoId: string }) => ({ videoId: reviewApproval.shape.videoId.parse(data.videoId) }))
+  .handler(async ({ data, context }) => {
+    const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).single();
+    if (!job || job.user_id !== context.userId || job.status !== 'failed' || !['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(job.error ?? '') || !job.run_id) throw Error('No saved preview can be recovered');
+    const key = process.env['LOVABLE_API_KEY'], connection = process.env['APIFY_API_KEY'];
+    if (!key || !connection) throw Error('Apify is not connected');
+    const get = async (path: string) => {
+      const r = await fetch(`https://connector-gateway.lovable.dev/apify${path}`, { headers: { Authorization: `Bearer ${key}`, 'X-Connection-Api-Key': connection } });
+      if (!r.ok) throw Error(`Saved cartoon preview could not load [${r.status}]`);
+      return r.json();
+    };
+    const stores = await get('/key-value-stores?limit=100');
+    const store = stores.data.items.find((s: { name: string }) => s.name === `cartoon-${job.id}`);
+    if (!store) throw Error('Saved cartoon inputs not found');
+    const lock = await get(`/key-value-stores/${store.id}/records/LOCK`);
+    if (lock.jobId !== job.id || !/^[a-f0-9]{64}$/.test(lock.hash)) throw Error('Saved preview does not match this job');
+    const canonical = (value: Json): string => Array.isArray(value) ? `[${value.map(canonical).join(',')}]` : value !== null && typeof value === 'object' ? `{${Object.keys(value).sort().map(k => `${JSON.stringify(k)}:${canonical(value[k] ?? null)}`).join(',')}}` : JSON.stringify(value);
+    if (job.error === 'Owner review does not match locked inputs') {
+      const oldRuns = await get(`/acts/${CARTOON_ACTOR}/runs?limit=100&desc=true`);
+      let original: Json | undefined;
+      for (const oldRun of oldRuns.data.items) {
+        const candidate = await get(`/key-value-stores/${oldRun.defaultKeyValueStoreId}/records/INPUT`);
+        if (candidate.jobId === job.id && candidate.mode === 'preflight') { original = candidate.manifest; break; }
+      }
+      if (!original || canonical(original) !== canonical(job.manifest)) throw Error('Saved inputs changed; cannot recover automatically');
+      const response = await fetch(`https://connector-gateway.lovable.dev/apify/key-value-stores/${store.id}/records/LOCK`, { method: 'PUT', headers: { Authorization: `Bearer ${key}`, 'X-Connection-Api-Key': connection, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...lock, request: original, requestHash: await digest(canonical(original)) }) });
+      if (!response.ok) throw Error('Could not repair saved input ordering');
+    }
+    const root = `${context.userId}/${data.videoId}/cartoon`;
+    const { data: files, error } = await context.supabase.storage.from('videos').list(root);
+    if (error || !files) throw Error('Could not inspect saved cartoon assets');
+    const sheets = files.filter(f => /^sheet-\d{2}\.jpg$/.test(f.name)).map(f => `${root}/${f.name}`).sort();
+    if (!sheets.length || !['voice.wav', 'alignment.json', 'manifest.json'].every(name => files.some(f => f.name === name && Number(f.metadata?.size) > 0))) throw Error('Saved cartoon preview is incomplete');
+    const { data: voiceManifest } = await context.supabase.storage.from('videos').download(`${root}/manifest.json`);
+    if (!voiceManifest) throw Error('Saved voice clock is missing');
+    const m = JSON.parse(await voiceManifest.text());
+    const review = { hash: lock.hash, storeId: store.id, sheets, voicePath: `${root}/voice.wav`, alignmentPath: `${root}/alignment.json`, duration: m.narration.samples / 48000, approved: false };
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: accepted, error: recoverError } = await supabaseAdmin.rpc('recover_cartoon_review', { job_id: job.id, owner_id: context.userId, saved_review: review as Json });
+    if (recoverError || !accepted) throw Error('Preview recovery was not accepted');
+    return { accepted: true };
+  });
+
 export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((input: CartoonStart) => cartoonStart.parse(input))
   .handler(async ({ data, context }) => {
@@ -29,11 +73,12 @@ export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requ
       if (claimed) return { id: claimed.id, status: claimed.status };
       throw Error('Could not reserve cartoon rendering');
     }
-    const { data: signed, error: signError } = await context.supabase.storage.from('videos').createSignedUrl(data.voicePath, 86400);
-    if (signError || !signed) throw Error('Could not open the saved Atlas narration');
     try {
+      const { data: signed, error: signError } = await context.supabase.storage.from('videos').createSignedUrl(data.voicePath, 86400);
+      if (signError || !signed) throw Error('Could not open the saved Atlas narration');
       const run = await startActor(key, connection, { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, mode: 'preflight' });
-      await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('status', 'submitting');
+      const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
+      if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { hostedRender: { id: job.id, status: 'running' }, status: 'running', progress: 72, stage: 'render', detail: 'Cartoon preview · safe to close your browser' }, saved_path: '' });
       return { id: job.id, status: 'running' };
     } catch (e) {
@@ -59,7 +104,8 @@ export const approveCartoon = createServerFn({ method: 'POST' }).middleware([req
     if (error || !claimed) throw Error('Preview was already approved or expired');
     try {
       const run = await startActor(key, connection, { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: data.hash });
-      await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('status', 'submitting');
+      const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
+      if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { detail: 'Full cartoon render · safe to close your browser', hostedRender: { id: job.id, status: 'running' } }, saved_path: '' });
       return { accepted: true };
     } catch (e) {
