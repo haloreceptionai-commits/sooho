@@ -3,7 +3,8 @@ import type { Json } from "@/integrations/supabase/types";
 import { getRequest } from "@tanstack/react-start/server";
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
-export const submitHostedRenderOperation = async ({ data, context }: { data: HostedRenderRequest; context: { supabase: SupabaseClient<Database>; userId: string } }) => {
+import type { z } from 'zod';
+export const submitHostedRenderOperation = async ({ data, context }: { data: z.infer<typeof renderRequest>; context: { supabase: SupabaseClient<Database>; userId: string } }) => {
     const { data: video, error } = await context.supabase.from("videos").select("data,user_id").eq("id", data.videoId).single();
     if (error || !video || video.user_id !== context.userId) throw new Error("Video not found");
     const paths = [...data.checkpoint.images, ...data.checkpoint.voice.map(v => v.path), ...data.clips.map(v => v.path)];

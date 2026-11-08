@@ -78,7 +78,7 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       if (ht.length) report.checks.push({ id: "HOOKTEXT", pass: false, msg: ht.join("; ") }), report.failed.push({ id: "HOOKTEXT", pass: false, msg: ht.join("; ") });
       const hi = hookIssues(splitSentences(p.scenes.map((x) => x.narration).join(" "))[0] ?? "", rs.anchors, factText);
       report.checks.push({ id: "HOOK", pass: !hi.length, msg: hi.length ? `Hook: ${hi.join("; ")}` : "Hook rules met" });
-      if (hi.length) report.failed.push({ id: "HOOKTEXT", pass: false, msg: ht.join("; ") });
+      if (hi.length) report.failed.push({ id: "HOOK", pass: false, msg: hi.join("; ") });
       const full = p.scenes.map((x) => x.narration).join(" ");
       const firstShots = (sec: number) => { const st = sceneStarts(story.scenes); return p.scenes.filter((_, i) => (st[i] ?? 0) < sec).map((x) => `[picture: ${x.image_prompt.slice(0, 200)}]`).join(" "); };
       const judge = await api.call(() => judgeScript({ data: {
