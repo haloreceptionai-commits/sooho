@@ -68,7 +68,7 @@ function propPose(prop, f, shot, index) {
   let [x0, y0, z0, s0] = PLACE[prop.place];
   if (prop.place !== 'ground_left' && prop.place !== 'ground_right') x0 += camAt(f).look[0];
   if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -13; s0 = 5; y0 = -1.6; x0 -= .3; }
-  if (prop.place === 'sea' && MODEL3D.has(prop.kind) && !NEAR_SEA.has(prop.kind)) { y0 = -.3; z0 = -18; }
+  if (prop.place === 'sea' && MODEL3D.has(prop.kind) && !NEAR_SEA.has(prop.kind)) { y0 = .4; z0 = -20; s0 = 7; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
   const ease = t * t * (3 - 2 * t);
   let x = x0 + index * (prop.place === 'sea' || prop.place === 'sky' ? 1.9 : .25), y = y0, z = z0, s = s0, roll = 0;

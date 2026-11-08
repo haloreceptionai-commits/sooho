@@ -36,7 +36,7 @@ function wheel(root,x,y,z){const g=new THREE.Group();g.position.set(x,y,z);root.
   add(new THREE.CylinderGeometry(.1,.1,.18,12),PAINT.gold,0,0,0,g).rotation.x=Math.PI/2;
   for(let i=0;i<8;i++){const sp=add(new THREE.CylinderGeometry(.03,.04,1.5,6),M.wood,0,0,0,g);sp.rotation.z=i*Math.PI/8*2/2;}
   add(tbox(.2,1.1,.2),M.beam,0,-.75,-.1,g);return g;}
-const LANTERNS=[];const STERNS=[];
+const LANTERNS=[];const STERNS=[];const SAILS=[];
 function bulwark(root,x,len,side){
   // Painted hull wall: red with white band and gold cap, gun ports and portholes, like the reference's galleon.
   add(tbox(.25,1.25,len),PAINT.red,x,.62,0,root);add(tbox(.27,.28,len),PAINT.white,x,.86,0,root);add(tbox(.38,.1,len+.1),PAINT.gold,x,1.3,0,root);
@@ -66,7 +66,7 @@ function deck(root){
     const col=g.attributes.position;const colors=[];for(let i=0;i<col.count;i++){const band=Math.floor((col.getX(i)/w+.5)*6);colors.push(...(band%2?[.77,.2,.17]:[.96,.92,.86]));}
     g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
     const sm=new THREE.MeshToonMaterial({gradientMap:grad,vertexColors:true,side:THREE.DoubleSide});
-    const sl=add(g,sm,0,(y0+y1)/2,-3.3,root);sails.push([sl,g.attributes.position.array.slice()]);}
+    const sl=add(g,sm,0,(y0+y1)/2,-3.3,root);SAILS.push(sl);sails.push([sl,g.attributes.position.array.slice()]);}
   animated.push(f=>{ if(!root.visible)return; for(const [sl,base] of sails){const p=sl.geometry.attributes.position;for(let i=0;i<p.count;i++){const x=base[i*3],y=base[i*3+1];p.setZ(i,.35*(1-(2*x/5)**2)+.08*Math.sin(f*.09+x*1.3+y));}p.needsUpdate=true;sl.geometry.computeVertexNormals();}});
   for(const s of [-1,1]){for(let k=0;k<5;k++)rope(root,[s*3.6,1.35,-4.6+k*.5],[s*.15,13.5,-3.6]);rope(root,[s*3.6,1.35,1],[s*.2,9.6,-3.5]);}
   rope(root,[0,15.5,-3.6],[0,3,8],.03);
@@ -192,6 +192,8 @@ function worldState(state,f) {
   for(const [kind,root]of worldGroups)root.visible=kind===state.world;
   props3dState(state.props3d);
   for(const st of STERNS)st.visible=!state.open;
+  // Open views furl the lower sails so the horizon, ships and waves read.
+  SAILS.forEach((sl,i)=>{sl.visible=!state.open||i>0;});
   for(const l of LANTERNS)l.intensity=state.world==='storm_sea'?4:2.2;
   for(const update of animated)update(f);
   waterU.t.value=f/30;
