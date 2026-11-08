@@ -23,5 +23,5 @@
 - [ ] Re-try Quaternius packs still blocked by Google Drive limits (animatedguns, modulartrain etc.)
 - [ ] One-word captions, reference-scored quality gate
 
-- [ ] Finish Kevlar cartoon (resumed preflight on Azure)
-- [ ] Long-form "Five Visible Firsts": find why it was interrupted at 70%, fix, finish
+- [x] Finish Kevlar cartoon
+- [x] Long-form resume after page close (script + media saved as made)
