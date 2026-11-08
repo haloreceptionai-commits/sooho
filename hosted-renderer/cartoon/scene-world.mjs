@@ -223,7 +223,7 @@ const MODEL_BUILD={merchant_ship:()=>shipModel(false),pirate_ship:()=>shipModel(
     add(new THREE.TorusGeometry(.1,.04,6,12),PAINT.iron,0,1.15,0,g);add(tbox(.5,.06,.06),PAINT.iron,0,.95,0,g);return g;}};
 // CC0 object library: only the objects this story uses are loaded, restyled to the toon look and normalised to real-world height.
 const LIBRARY=new Map();
-{ const {GLTFLoader}=await import('./lib/GLTFLoader.js'); const used=await (await fetch('./library.json')).json(); const loader=new GLTFLoader(); const tl=new THREE.TextureLoader();
+{ const {GLTFLoader}=await import('./lib/GLTFLoader.js'); const SKEL=await import('./lib/SkeletonUtils.js'); globalThis.__SKEL=SKEL; const used=await (await fetch('./library.json')).json(); const loader=new GLTFLoader(); const tl=new THREE.TextureLoader();
   for(const e of used){ const name=e.id.split('/')[1];
     if(e.type==='sprite'){ const map=await tl.loadAsync(`./assets/${e.pack}/${name}.png`); map.colorSpace=THREE.SRGBColorSpace; LIBRARY.set(e.id,{e,map,aspect:map.image.width/map.image.height}); continue; }
     const g=await loader.loadAsync(`./assets/${e.pack}/${name}.glb`); const obj=g.scene;
@@ -232,16 +232,24 @@ const LIBRARY=new Map();
       o.material=Array.isArray(o.material)?t:t[0]; o.castShadow=o.receiveShadow=true; });
     const box=new THREE.Box3().setFromObject(obj),size=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
     const k=e.h/Math.max(size.y,1e-3*Math.max(size.x,size.z),1e-4); obj.position.set(-c.x*k,-box.min.y*k,-c.z*k); obj.scale.setScalar(k);
-    LIBRARY.set(e.id,{e,obj}); } }
+    LIBRARY.set(e.id,{e,obj,clips:g.animations||[]}); } }
 function libraryModel(id){ const L=LIBRARY.get(id); if(!L)throw Error('Library object not prepared'); const g=new THREE.Group();
   if(L.map){ const h=L.e.h,m=new THREE.Mesh(new THREE.PlaneGeometry(h*L.aspect,h),new THREE.MeshBasicMaterial({map:L.map,alphaTest:.5,side:THREE.DoubleSide}));
     m.position.y=h/2; m.userData.nd=cardNd(L.map); m.userData.billboard=true; g.add(m); }
+  else if(L.clips.length){ // rigged characters/animals: skeleton-safe clone with a mixer seeked per frame (deterministic)
+    const o=globalThis.__SKEL.clone(L.obj); g.add(o); const mixer=new THREE.AnimationMixer(o);
+    const pick=re=>L.clips.find(c=>re.test(c.name)); g.userData.clips={mixer,acts:{}};
+    for(const [k,re] of [['idle',/idle|standing|breath/i],['walk',/walk/i],['run',/run|gallop|swim|fly/i],['cheer',/clap|wave|yes|victory|jump/i]]){const c=pick(re);if(c)g.userData.clips.acts[k]=mixer.clipAction(c);}
+    if(!g.userData.clips.acts.idle)g.userData.clips.acts.idle=mixer.clipAction(L.clips[0]); }
   else g.add(L.obj.clone(true)); return g; }
+// Rigged library objects pick a clip from the prop motion and seek to the frame time, so every batch renders the same pose.
+function animateLibrary(m,p,f){const c=m.userData.clips;if(!c)return;const want=p.motion==='approach'?(c.acts.walk||c.acts.run):p.motion==='spin'||p.motion==='grow'?(c.acts.cheer):p.motion==='rise'||p.motion==='fall'?(c.acts.run):null;
+  const a=want||c.acts.idle;for(const x of Object.values(c.acts))if(x!==a){x.stop();}a.play();a.time=0;c.mixer.setTime(((f+p.i*17)/30)%Math.max(a.getClip().duration,1e-3));}
 const modelPool=new Map();
 function props3dState(list){for(const m of modelPool.values())m.visible=false;
   for(const p of list||[]){const key=p.kind+':'+(p.asset||'')+':'+p.i;let m=modelPool.get(key);if(!m){m=p.kind==='asset'?libraryModel(p.asset):MODEL_BUILD[p.kind]();scene.add(m);modelPool.set(key,m);}
     m.visible=true;m.position.set(p.x,p.y,p.z);m.rotation.set(0,p.kind.includes('ship')||p.kind==='rowboat'?.5:0,p.roll||0);if(p.kind==='asset'){ // real-size object; far places get a mild boost so they still read; motion 'grow' scales k
-      const far={background:1.6,sea:2.2,sky:1.4}[p.place]||Math.min(1,1.4/LIBRARY.get(p.asset).e.h); m.scale.setScalar(far*(p.k||1)); m.rotation.y=Math.atan2(camera.position.x-p.x,camera.position.z-p.z)*(m.children[0]?.userData.billboard?1:.35); continue; }
+      const far={background:1.6,sea:2.2,sky:1.4}[p.place]||Math.min(1,1.4/LIBRARY.get(p.asset).e.h); m.scale.setScalar(far*(p.k||1)); m.rotation.y=Math.atan2(camera.position.x-p.x,camera.position.z-p.z)*(m.children[0]?.userData.billboard?1:.35); animateLibrary(m,p,p.f??0); continue; }
     m.scale.setScalar((p.s||1)*(p.kind==='wave'?.5:p.kind.includes('ship')?.45:.6));}}
 const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFrame still calls this hook
 function worldState(state,f) {
