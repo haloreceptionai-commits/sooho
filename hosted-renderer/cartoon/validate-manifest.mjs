@@ -46,6 +46,8 @@ export function validateManifest(m) {
       if(s.keyword!=null&&(!Number.isInteger(s.keyword)||!m.words[s.keyword]))fail('Invalid caption keyword');
       if(!Array.isArray(s.props)||s.props.length>4||s.props.some(p=>!V.props.includes(p.kind)||!V.places.includes(p.place)||!V.prop_motions.includes(p.motion)))fail('Unsupported prop');
       if(s.props.filter(p=>p.place==='hand').length>1)fail('Only one hand prop');
+      // Library objects must exist in the bundled CC0 catalog and are never hand-held cards.
+      if(s.props.some(p=>p.kind==='asset'?(p.place==='hand'||!LIBRARY.has(p.asset)):p.asset!==undefined))fail('Unknown library object');
       if(!Array.isArray(s.fx)||s.fx.length>3||s.fx.some(x=>!V.fx.includes(x)))fail('Unsupported effect');
     }
     if(!Array.isArray(s.camera)||s.camera.length<1||s.camera.length>20)fail('Invalid camera');
