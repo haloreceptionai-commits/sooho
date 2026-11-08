@@ -128,7 +128,11 @@ export const captionAt = f => {
   let i = WORDS.findIndex(w => t < w.end);
   if (i < 0) i = WORDS.length - 1;
   if (t < WORDS[0].start - .1) return null;
-  const startGroup = i - (i % 3), words = [];
-  for (let k = startGroup; k < Math.min(WORDS.length, startGroup + 3); k++) words.push({ text: manifest.caption_words[k], key: shot.keyword != null ? k === shot.keyword : k === i, live: k === i, shown: WORDS[k].start <= t + .05 });
+  // Groups of three restart at each sentence/shot so a caption never mixes two sentences.
+  let first = WORDS.findIndex(w => Math.round(w.start * 30) >= shot.start);
+  if (first < 0 || first > i) first = i;
+  const startGroup = i - ((i - first) % 3), words = [];
+  let last = WORDS.findIndex(w => Math.round(w.start * 30) >= shot.end); if (last < 0) last = WORDS.length;
+  for (let k = startGroup; k < Math.min(last, startGroup + 3); k++) words.push({ text: manifest.caption_words[k], key: shot.keyword != null ? k === shot.keyword : k === i, live: k === i, shown: WORDS[k].start <= t + .05 });
   return words;
 };
