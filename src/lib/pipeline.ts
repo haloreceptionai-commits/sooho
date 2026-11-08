@@ -15,7 +15,7 @@ import { ARCHETYPES } from "@/lib/viral-brain";
 import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
 import { eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
-import { backgroundGenerationEnabled, startBackgroundGeneration } from './generation.functions';
+import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -32,14 +32,14 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 4, cap = 16000, timeou
   let last: unknown;
   for (let i = 0; i < tries; i++) {
     try {
-      // a call that never answers would freeze the video forever: give up after 6 min and retry
+      // A timeout does not cancel a paid call: never submit it again automatically.
       let t: ReturnType<typeof setTimeout> | undefined;
-      const timeout = new Promise<never>((_, rej) => { t = setTimeout(() => rej(new Error("[504] The AI took too long to answer")), timeoutMs); });
+      const timeout = new Promise<never>((_, rej) => { t = setTimeout(() => rej(new Error("The AI response is unconfirmed. Saved work is safe; do not restart this paid step automatically.")), timeoutMs); });
       try { return await Promise.race([fn(), timeout]); } finally { clearTimeout(t); }
     } catch (e) {
       last = e;
       const m = e instanceof Error ? e.message : String(e);
-      if (!/\[(429|5\d\d)\]/.test(m) || i === tries - 1) throw e;
+      if (!/^\[429\]/.test(m) || i === tries - 1) throw e;
       await sleep(Math.min(cap, 2000 * 2 ** i) + Math.random() * 1500);
     }
   }
@@ -112,6 +112,7 @@ export function removeFromQueue(id: string) {
   keepAlive();
   actions.updateVideo(id, { status: "failed", removed: true, detail: "Removed from queue", error: "Removed from queue" });
   void cancelHostedRender({ data: { videoId: id } }).catch(e => console.error("Could not stop hosted assembly", e));
+  void cancelBackgroundGeneration({ data: { videoId: id } }).catch(e => console.error('Could not stop background generation', e));
 }
 
 export async function runVideo(id: string, input: VideoInput) {
@@ -242,10 +243,10 @@ export async function runVideo(id: string, input: VideoInput) {
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
       const saved: ScriptCheckpoint = { plan, gate: ev.gate, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, judgeOk: !!ev.judge, hookType: hb.type, moneyShot: rs.moneyShot };
       // Persist the paid script at once so a closed page can resume without rewriting it.
-      if (input.engine !== 'cartoon') { up({ scriptCheckpoint: saved }); await flushVideo(id).catch(() => {}); }
+      up({ scriptCheckpoint: saved }); await flushVideo(id);
       return saved;
     };
-    const savedScript = input.engine !== 'cartoon' ? getState().videos.find(v => v.id === id)?.scriptCheckpoint : undefined;
+    const savedScript = getState().videos.find(v => v.id === id)?.scriptCheckpoint;
     if (savedScript) up({ status: 'running', stage: 'images', progress: 12, error: undefined, detail: 'Resuming from the saved script…' });
     const { plan, gate, report, judgeOk, hookType, moneyShot } = savedScript ?? await writeScript();
     const n = plan.scenes.length;
@@ -316,7 +317,7 @@ export async function runVideo(id: string, input: VideoInput) {
         if (kept) { voice[gi]!.audio = kept; tick("Recording narration"); return; }
         const r = await withRetry(() => generateVoice({ data: { text, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "short" : "long" } }));
         voice[gi]!.audio = b64ToBuf(r.audio);
-        media.put(key, voice[gi]!.audio.slice(0), "audio/wav");
+        await media.put(key, voice[gi]!.audio.slice(0), "audio/wav");
         tick("Recording narration");
       }),
       (async () => {
@@ -329,7 +330,7 @@ export async function runVideo(id: string, input: VideoInput) {
             else {
               const r = await img({ sheet: true }, plan.characters.map((c) => `${c.name}: ${c.look}`).join("; "));
               sheet = r.image ?? undefined;
-              if (sheet) media.put("sheet.jpg", b64ToBuf(sheet), "image/jpeg");
+              if (sheet) await media.put("sheet.jpg", b64ToBuf(sheet), "image/jpeg");
             }
           } catch { /* continue without reference */ }
         }
@@ -366,7 +367,7 @@ export async function runVideo(id: string, input: VideoInput) {
               }
             }
           }
-          if (r.image) { rawImg[i] = r.image; media.put(`scene-${i}-${textKey(sc.image_prompt)}.jpg`, b64ToBuf(r.image), "image/jpeg"); }
+          if (r.image) { rawImg[i] = r.image; await media.put(`scene-${i}-${textKey(sc.image_prompt)}.jpg`, b64ToBuf(r.image), "image/jpeg"); }
           if (r.image) scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" }));
           tick("Painting scenes");
         });
@@ -522,9 +523,10 @@ async function mediaCache(id: string) {
       const { data } = await bucket.download(`${root}/${name}`);
       return data ? await data.arrayBuffer() : null;
     },
-    put(name: string, body: ArrayBuffer, contentType: string) {
-      // best effort: a failed save only means that item is regenerated on a later resume
-      void bucket.upload(`${root}/${name}`, body, { upsert: true, contentType }).then(({ error }) => { if (!error) have.add(name); });
+    async put(name: string, body: ArrayBuffer, contentType: string) {
+      const { error } = await bucket.upload(`${root}/${name}`, body, { upsert: true, contentType });
+      if (error) throw Error('Paid media could not be saved. Do not regenerate; check your connection.');
+      have.add(name);
     },
   };
 }

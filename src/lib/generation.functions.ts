@@ -27,3 +27,14 @@ export const startBackgroundGeneration = createServerFn({ method: 'POST' }).midd
 
 export const backgroundGenerationEnabled = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .handler(() => ({ enabled: process.env['GENERATION_ROLLOUT_ENABLED'] === 'true' }));
+
+export const cancelBackgroundGeneration = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { videoId: string }) => ({ videoId: videoId.parse(data.videoId) }))
+  .handler(async ({ data, context }) => {
+    const { data: job } = await context.supabase.from('generation_jobs').select('id').eq('video_id', data.videoId).in('status', ['queued','running','paused','handoff']).maybeSingle();
+    if (!job) return { cancelled: false };
+    const { supabaseAdmin: db } = await import('@/integrations/supabase/client.server');
+    const { data: cancelled, error } = await db.rpc('cancel_generation_job', { p_job: job.id, p_user: context.userId });
+    if (error) throw Error('Cancellation could not be saved');
+    return { cancelled };
+  });
