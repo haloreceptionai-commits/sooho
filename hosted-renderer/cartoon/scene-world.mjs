@@ -246,15 +246,15 @@ function libraryModel(id){ const L=LIBRARY.get(id); if(!L)throw Error('Library o
 function animateLibrary(m,p,f){const c=m.userData.clips;if(!c)return;const want=p.motion==='approach'?(c.acts.walk||c.acts.run):p.motion==='spin'||p.motion==='grow'?(c.acts.cheer):p.motion==='rise'||p.motion==='fall'?(c.acts.run):null;
   const a=want||c.acts.idle;for(const x of Object.values(c.acts))if(x!==a){x.stop();}a.play();a.time=0;c.mixer.setTime(((f+p.i*17)/30)%Math.max(a.getClip().duration,1e-3));}
 const modelPool=new Map();
-function props3dState(list){for(const m of modelPool.values())m.visible=false;
+function props3dState(list,f=0){for(const m of modelPool.values())m.visible=false;
   for(const p of list||[]){const key=p.kind+':'+(p.asset||'')+':'+p.i;let m=modelPool.get(key);if(!m){m=p.kind==='asset'?libraryModel(p.asset):MODEL_BUILD[p.kind]();scene.add(m);modelPool.set(key,m);}
     m.visible=true;m.position.set(p.x,p.y,p.z);m.rotation.set(0,p.kind.includes('ship')||p.kind==='rowboat'?.5:0,p.roll||0);if(p.kind==='asset'){ // real-size object; far places get a mild boost so they still read; motion 'grow' scales k
-      const far={background:1.6,sea:2.2,sky:1.4}[p.place]||Math.min(1,1.4/LIBRARY.get(p.asset).e.h); m.scale.setScalar(far*(p.k||1)); m.rotation.y=Math.atan2(camera.position.x-p.x,camera.position.z-p.z)*(m.children[0]?.userData.billboard?1:.35); animateLibrary(m,p,p.f??0); continue; }
+      const far={background:1.6,sea:2.2,sky:1.4}[p.place]||Math.min(1,1.4/LIBRARY.get(p.asset).e.h); m.scale.setScalar(far*(p.k||1)); m.rotation.y=Math.atan2(camera.position.x-p.x,camera.position.z-p.z)*(m.children[0]?.userData.billboard?1:.35); animateLibrary(m,p,f); continue; }
     m.scale.setScalar((p.s||1)*(p.kind==='wave'?.5:p.kind.includes('ship')?.45:.6));}}
 const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFrame still calls this hook
 function worldState(state,f) {
   for(const [kind,root]of worldGroups)root.visible=kind===state.world;
-  props3dState(state.props3d);
+  props3dState(state.props3d,f);
   for(const st of STERNS)st.visible=!state.open;
   // Open views furl the lower sails so the horizon, ships and waves read.
   SAILS.forEach((sl,i)=>{sl.visible=!state.open||i>0;});
