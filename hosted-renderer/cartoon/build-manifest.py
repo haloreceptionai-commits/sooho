@@ -79,7 +79,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
     subject=next((a for a in actors if a['id']==speaker),None) or next((a for a in actors if a['id']==d['actor']),actors[0])
     others=[a for a in actors if a is not subject]
     kind=d.get('shot') or ('wide' if d['wide'] else 'medium')
-    if kind==previous and kind in REACTION and len(words)>0: kind=kind  # director owns repeats; validator only bounds them
+    if kind==previous: kind=REACTION[kind]  # never cut to the identical framing
     move=d.get('move') or 'push_in'; mood=d.get('mood') or 'calm'
     # Long sentences get a second angle on a word boundary, keeping the ~3 s cutting rhythm.
     cuts=[start]
