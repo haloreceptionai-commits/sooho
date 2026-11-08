@@ -201,8 +201,15 @@ export function validateStory(s: StoryInput): StoryReport {
   const labels = sents.filter((x) => LABEL.test(x));
   const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || (wc(x) <= 4 && !VERBISH.test(x))) && !/\?["']?$/.test(x));
   const budget = s.durationSec * 2.6;
-  const langOk = longS <= 1 && hard.length <= 2 && !labels.length && frags.length <= 2 && words <= budget * 1.15 && words >= budget * 0.8;
-  add("LANG", langOk, langOk ? "Plain short sentences" : [longS > 1 ? `${longS} sentences over 12 words` : "", hard.length > 2 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
+  const longOk = longS <= Math.max(1, Math.round(words / 150)); // long-form allows an occasional longer sentence
+  const langOk = longOk && hard.length <= 2 && !labels.length && frags.length <= 2 && words <= budget * 1.15 && words >= budget * 0.8;
+  add("LANG", langOk, langOk ? "Plain short sentences" : [!longOk ? `${longS} sentences over 12 words` : "", hard.length > 2 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
+
+  // RETAIN (long-form only): a fresh open question at least every ~75s so viewers always wait for an answer
+  if (s.durationSec >= 120) {
+    const r = retentionIssues(s.scenes, s.durationSec);
+    add("RETAIN", !r.length, r.length ? r.join("; ") : "Fresh open loop at least every 75s");
+  }
 
   const ri = s.scenes.findIndex((x) => x.beat === "reveal");
   return { checks, failed: checks.filter((c) => !c.pass), words, revealSec: ri >= 0 ? starts[ri]! : 0, shotMix };
@@ -303,3 +310,26 @@ export const GOLD_ANCHORS: Anchors = { year: "1942", place: "Burbank, California
 
 /** Few-shot block added to the script writer's prompt. */
 export const FEW_SHOT = `${BENCH_SUCCESS}\n\n${BENCH_FAILURE}\n\nGOLD REWRITE of the failure (copy this STRUCTURE, never its content): ${GOLD_REWRITE.map((b) => `[${b.beat}${b.money ? ", money shot" : ""}] ${b.narration}`).join(" ")}`;
+
+/** Long-form retention: enough chapter loops, no stretch over 75s without a new open loop, never a moment with nothing left to wait for. */
+export function retentionIssues(scenes: StoryScene[], durationSec: number): string[] {
+  const out: string[] = [];
+  const starts = sceneStarts(scenes);
+  const total = starts.length ? starts[starts.length - 1]! + wc(scenes[scenes.length - 1]!.narration) / WPS : 0;
+  const opens = scenes.map((x, i) => (x.loop_opened && x.loop_opened !== "main" ? starts[i]! : -1)).filter((t) => t >= 0);
+  const need = Math.max(2, Math.floor(durationSec / 90));
+  if (opens.length < need) out.push(`only ${opens.length} chapter loops opened (need ${need}+ for ${Math.round(durationSec / 60)} min)`);
+  const marks = [15, ...opens, Math.max(15, total - 30)].sort((a, b) => a - b);
+  let gap = 0;
+  for (let i = 1; i < marks.length; i++) gap = Math.max(gap, marks[i]! - marks[i - 1]!);
+  if (gap > 75) out.push(`${Math.round(gap)}s with no new open question (max 75s)`);
+  // stacked loops: at every scene before the final payoff, at least one loop is still open
+  const open = new Set<string>();
+  for (let i = 0; i < scenes.length; i++) {
+    const x = scenes[i]!;
+    if (x.loop_opened) open.add(x.loop_opened);
+    if (x.loop_closed) open.delete(x.loop_closed);
+    if (!open.size && starts[i]! > 15 && starts[i]! < total - 40) { out.push(`every question is answered at ${Math.round(starts[i]!)}s — open the next one before closing the last`); break; }
+  }
+  return out;
+}

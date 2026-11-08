@@ -26,13 +26,13 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Retry only rate limits / transient server errors, with backoff. */
 export const STEP_TIMEOUT_MS = 3 * 60_000;
-async function withRetry<T>(fn: () => Promise<T>, tries = 4, cap = 16000): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, tries = 4, cap = 16000, timeoutMs = STEP_TIMEOUT_MS): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
     try {
       // a call that never answers would freeze the video forever: give up after 6 min and retry
       let t: ReturnType<typeof setTimeout> | undefined;
-      const timeout = new Promise<never>((_, rej) => { t = setTimeout(() => rej(new Error("[504] The AI took too long to answer")), STEP_TIMEOUT_MS); });
+      const timeout = new Promise<never>((_, rej) => { t = setTimeout(() => rej(new Error("[504] The AI took too long to answer")), timeoutMs); });
       try { return await Promise.race([fn(), timeout]); } finally { clearTimeout(t); }
     } catch (e) {
       last = e;
@@ -200,11 +200,12 @@ export async function runVideo(id: string, input: VideoInput) {
       const gate = storyScore(report, judge, p.scenes.length);
       return { report, judge, gate };
     };
-    let plan = await withRetry(() => generatePlan({ data: base }));
+    const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
+    let plan = await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait);
     let ev = await evaluate(plan);
     for (let attempt = 1; attempt <= 2 && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/2)…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: `${ev.gate.blockers.map((b) => `- ${b}`).join("\n")}\nPrevious script (keep its good lines, rewrite only what breaks the checks above):\n${plan.scenes.map((x) => `[${x.beat}] ${x.narration}`).join(" ")}` } })).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: `${ev.gate.blockers.map((b) => `- ${b}`).join("\n")}\nPrevious script (keep its good lines, rewrite only what breaks the checks above):\n${plan.scenes.map((x) => `[${x.beat}] ${x.narration}`).join(" ")}` } }), 4, 16000, planWait).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       if (ev2.gate.score >= ev.gate.score) { plan = repaired; ev = ev2; }
