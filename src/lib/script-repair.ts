@@ -37,9 +37,9 @@ export function autoFixPlan(plan: Plan): Plan {
     }
     return { ...sc, narration: out.join(' ') || sc.narration };
   });
-  const starts = sceneStarts(scenes);
-  const total = wc(scenes.map(s => s.narration).join(' '));
-  const pos = (i: number) => (starts[i] ?? 0) * 2.6 / Math.max(1, total);
+  const offsets: number[] = []; let acc = 0;
+  for (const s of scenes) { offsets.push(acc); acc += wc(s.narration); }
+  const pos = (i: number) => (offsets[i] ?? 0) / Math.max(1, acc);
   const closeAt = scenes.findIndex(s => /\bmain\b/.test(s.loop_closed));
   if (closeAt < 0 || pos(closeAt) < 0.6 || pos(closeAt) > 0.8) {
     const cand = scenes.map((s, i) => ({ i, d: Math.abs(pos(i) - 0.7) + (s.beat === 'reveal' ? -0.05 : 0) })).filter(c => pos(c.i) >= 0.6 && pos(c.i) <= 0.8).sort((a, b) => a.d - b.d)[0];

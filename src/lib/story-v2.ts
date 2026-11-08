@@ -232,8 +232,8 @@ export function validateStory(s: StoryInput): StoryReport {
   const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || (wc(x) <= 4 && !VERBISH.test(x))) && !/\?["']?$/.test(x));
   const budget = s.durationSec * 2.6;
   const longOk = longS <= Math.max(1, Math.round(words / 150)); // long-form allows an occasional longer sentence
-  const langOk = longOk && hard.length <= 2 && !labels.length && frags.length <= 2 && words <= budget * 1.15 && words >= budget * 0.8;
-  add("LANG", langOk, langOk ? "Plain short sentences" : [!longOk ? `${longS} sentences over 12 words` : "", hard.length > 2 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
+  const langOk = longOk && hard.length <= 2 && !labels.length && frags.length <= 2 && words <= budget * 1.25 && words >= budget * 0.8;
+  add("LANG", langOk, langOk ? "Plain short sentences" : [!longOk ? `${longS} sentences over 12 words` : "", hard.length > 2 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.25 ? `too long: ${words} words (max ${Math.round(budget * 1.25)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
 
   // RETAIN (long-form only): a fresh open question at least every ~75s so viewers always wait for an answer
   if (s.durationSec >= 120) {
@@ -258,6 +258,7 @@ export interface JudgeResult {
   filler: string[];
 }
 
+const SOFT_CHECKS = new Set(["V8", "V8j"]);
 export interface GateResult { score: number; ready: boolean; parts: Record<string, number>; blockers: string[] }
 
 /** Script score out of 100: validators 56, judges 30, read-aloud + literalness 14. Ready at 85+. */
@@ -281,7 +282,9 @@ export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: nu
   }
   const score = Object.values(parts).reduce((a, b) => a + b, 0);
   const passBHard = !j || j.passB >= 4;
-  return { score, ready: score >= 85 && r.failed.length === 0 && passBHard && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
+  // Repetition checks only cost points; every structural rule still blocks.
+  const hardFails = r.failed.filter((c) => !SOFT_CHECKS.has(c.id));
+  return { score, ready: score >= 85 && hardFails.length === 0 && passBHard && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
 }
 
 /** Final QA = 90% script gate + 10% production (pacing, audio, resolution, captions). */

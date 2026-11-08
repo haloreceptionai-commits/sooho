@@ -14,7 +14,7 @@ import { ARCHETYPES } from '@/lib/viral-brain';
 import { factCheck, researchStory, generateHooks, generatePlan, judgeScript, type Plan, type FactSheet } from '@/lib/pipeline.functions';
 import { hookIssues, hookTextIssues, splitSentences, spokenBy, validateStory, storyScore, wc, type GateResult } from '@/lib/story-v2';
 import { motionPrompt, scriptExport, scriptTimeline } from '@/lib/script-writer';
-import { eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
+import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
 
 export const Route = createFileRoute('/_authenticated/script-writer')({
   head: () => ({ meta: [
@@ -60,7 +60,7 @@ function ScriptWriter() {
       const arch = ARCHETYPES.find(a => a.id === source?.archetype);
       const base = { topic, format, durationSec: duration, style, deployment, facts: factText, research: JSON.stringify(rs), hook: hook.line, archetype: arch ? `${arch.name} — ${arch.formula}` : 'Best fit' };
       setStage('Writing narration and scenes…');
-      let plan = await write({ data: base });
+      let plan = autoFixPlan(await write({ data: base }));
       const evaluate = async (p: Plan) => {
         const full = p.scenes.map(s => s.narration).join(' ');
         const report = validateStory({ scenes: p.scenes, anchors: rs.anchors, question: p.question, hero: p.hero, cast: p.characters, durationSec: duration });
@@ -74,7 +74,7 @@ function ScriptWriter() {
       let draft = plan, draftGate = gate;
       for (let attempt = 1; attempt <= 2 && !gate.ready; attempt++) {
         setStage(`Improving the draft (${attempt}/2)…`);
-        const revised = await write({ data: { ...base, repair: repairBrief(draft, draftGate, rs.anchors) } });
+        const revised = autoFixPlan(await write({ data: { ...base, repair: repairBrief(draft, draftGate, rs.anchors) } }));
         const next = await evaluate(revised);
         draft = revised; draftGate = next;
         if (preferRepair(gate, next)) { plan = revised; gate = next; }

@@ -1,7 +1,7 @@
 import { ARCHETYPES } from './viral-brain';
 import { factCheckOperation as factCheck, researchStoryOperation as researchStory, generateHooksOperation as generateHooks, generatePlanOperation as generatePlan, judgeScriptOperation as judgeScript, type Plan, type Hook } from './pipeline-operations.server';
 import { hookIssues, hookTextIssues, sceneStarts, splitSentences, spokenBy, storyScore, validateStory } from './story-v2';
-import { eligibleHooks, preferRepair, repairBrief } from './script-repair';
+import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from './script-repair';
 import type { VideoInput, Settings } from './store';
 import type { ScriptCheckpoint } from './pipeline';
 export interface ScriptAPI { call<T>(fn: () => Promise<T>): Promise<T> }
@@ -93,13 +93,14 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       return { report, judge, gate };
     };
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
-    let plan = await api.call(() => generatePlan({ data: base }));
+    let plan = autoFixPlan(await api.call(() => generatePlan({ data: base })));
     let ev = await evaluate(plan);
     let draft = plan, draftEv = ev;
     const tries = input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       await up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
-      const repaired = await api.call(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }));
+      const repairedRaw = await api.call(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }));
+      const repaired = repairedRaw ? autoFixPlan(repairedRaw) : repairedRaw;
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
