@@ -38,6 +38,8 @@ export interface Video {
   size?: number | undefined;
   thumb?: string | undefined; // small jpeg data URL
   sceneCount?: number | undefined;
+  seedanceCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
+  seedanceClips?: Record<string, { id?: string; path?: string; error?: string }>;
   qa?: { score: number; parts: Record<string, number> } | undefined;
   hooks?: { best: string; runnerUp: string } | undefined;
   facts?: { myth: string; reality: string; claims: number; confidence: number } | undefined;

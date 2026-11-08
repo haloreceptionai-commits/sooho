@@ -1,6 +1,9 @@
 // Client orchestrator: script → voice + images → render → save. Runs in the background
 // while the user moves around the app.
-import { actions, getState, type VideoInput } from "@/lib/store";
+import { actions, flushVideo, getState, type VideoInput } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
+import { seedanceRuns } from "@/lib/seedance";
+import { submitSeedance, checkSeedance } from "@/lib/seedance.functions";
 import { checkContinuity, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
 import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
@@ -114,6 +117,11 @@ export async function runVideo(id: string, input: VideoInput) {
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
   try {
+    const saved = getState().videos.find(v => v.id === id)?.seedanceCheckpoint;
+    if (input.engine === "seedance" && saved) {
+      await finishSeedance(id, input, saved, up);
+      return;
+    }
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
     // 1) fact check
@@ -279,6 +287,36 @@ export async function runVideo(id: string, input: VideoInput) {
     for (const sc of scenes) { if (sc.image) lastImg = sc.image; else sc.image = lastImg; }
     const full = scenes as RenderScene[];
 
+    if (input.engine === "seedance") {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not signed in");
+      const root = `${user.user.id}/${id}/assets`;
+      const bucket = supabase.storage.from("videos");
+      const imagePaths: string[] = [], voicePaths: { path: string; scenes: number[] }[] = [];
+      up({ progress: 70, detail: "Saving scene inputs for safe resume…" });
+      for (let i = 0; i < scenes.length; i++) {
+        const raw = rawImg[i];
+        if (!raw) throw new Error(`Scene ${i + 1} has no image for Seedance animation`);
+        const path = `${root}/image-${i}.jpg`;
+        const { error } = await bucket.upload(path, b64ToBuf(raw), { contentType: "image/jpeg", upsert: true });
+        if (error) throw new Error(error.message);
+        imagePaths.push(path);
+      }
+      for (let i = 0; i < voice.length; i++) {
+        const chunk = voice[i];
+        if (!chunk) continue;
+        const path = `${root}/voice-${i}`;
+        const { error } = await bucket.upload(path, chunk.audio, { contentType: "audio/wav", upsert: true });
+        if (error) throw new Error(error.message);
+        voicePaths.push({ path, scenes: chunk.scenes });
+      }
+      const checkpoint: SeedanceCheckpoint = { plan, gate: ev.gate, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, hookType: hb.type, continuity: contScores.length ? contScores.filter(x => x >= 6).length / contScores.length : 1, images: imagePaths, voice: voicePaths };
+      up({ seedanceCheckpoint: checkpoint });
+      await flushVideo(id);
+      await finishSeedance(id, input, checkpoint, up);
+      return;
+    }
+
     // Gemini Omni engine: animate runs of scenes (~8s each) starting from their scene image.
     let clips: { scenes: number[]; video: HTMLVideoElement }[] | undefined;
     if (input.engine === "omni") {
@@ -361,6 +399,82 @@ export async function runVideo(id: string, input: VideoInput) {
   } finally {
     running.delete(id);
     keepAlive();
+  }
+}
+
+export interface SeedanceCheckpoint {
+  plan: Plan;
+  gate: Parameters<typeof finalScore>[0];
+  report: { revealSec: number; shotMix: Record<string, number> };
+  hookType: string;
+  continuity: number;
+  images: string[];
+  voice: { path: string; scenes: number[] }[];
+}
+
+async function finishSeedance(id: string, input: VideoInput, cp: SeedanceCheckpoint, up: (p: Parameters<typeof actions.updateVideo>[1]) => void) {
+  const bucket = supabase.storage.from("videos");
+  const download = async (path: string) => {
+    const { data, error } = await bucket.download(path);
+    if (error || !data) throw new Error(`Saved scene could not load: ${error?.message ?? path}`);
+    return data;
+  };
+  up({ status: "running", stage: "images", progress: 70, detail: "Continuing Seedance animation from saved scenes…", error: undefined });
+  const scenes: RenderScene[] = await Promise.all(cp.plan.scenes.map(async (sc, i) => {
+    const path = cp.images[i];
+    if (!path) throw new Error("Saved scene is missing");
+    return { image: await createImageBitmap(await download(path)), text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat };
+  }));
+  const voice = await Promise.all(cp.voice.map(async c => ({ scenes: c.scenes, audio: await (await download(c.path)).arrayBuffer() })));
+  const runs = seedanceRuns(cp.plan.scenes);
+  const clips: { scenes: number[]; video: HTMLVideoElement }[] = [];
+  try {
+    // Sequential submission respects the shared video concurrency budget. A saved ID is never resubmitted.
+    for (let i = 0; i < runs.length; i++) {
+      const run = runs[i];
+      if (!run) continue;
+      up({ detail: `Seedance clip ${i + 1}/${runs.length} · submitting or resuming…` });
+      const imagePath = cp.images[run.scenes[0] ?? 0];
+      if (!imagePath) throw new Error("Starting image is missing");
+      const blob = await download(imagePath);
+      const image = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(blob); });
+      // No create retry: an ambiguous network failure must not spend credits on another job.
+      const job = await submitSeedance({ data: { videoId: id, index: i, image, prompt: run.prompt, seconds: run.seconds, portrait: input.format === "short" } });
+      const previous = getState().videos.find(v => v.id === id)?.seedanceClips ?? {};
+      up({ seedanceClips: { ...previous, [i]: { ...previous[i], id: job.id } } });
+      await flushVideo(id);
+      let path: string | undefined;
+      while (!path) {
+        up({ detail: `Seedance clip ${i + 1}/${runs.length} · waiting for animation…` });
+        await sleep(8000);
+        if (removed.has(id)) throw new Error("Removed from queue");
+        const st = await checkSeedance({ data: { videoId: id, index: i } });
+        if (st.status === "failed") throw new Error(st.error ?? "Seedance clip failed");
+        if (st.status === "completed") {
+          if (!st.path) throw new Error("Seedance clip has not been saved");
+          path = st.path;
+        }
+        up({ progress: 70 + Math.round((i + (st.progress / 100)) / runs.length * 2) });
+      }
+      const current = getState().videos.find(v => v.id === id)?.seedanceClips ?? {};
+      up({ seedanceClips: { ...current, [i]: { id: job.id, path } } });
+      await flushVideo(id);
+      const v = document.createElement("video");
+      v.muted = true; v.playsInline = true; v.preload = "auto";
+      v.src = URL.createObjectURL(await download(path));
+      await new Promise<void>((resolve, reject) => { v.onloadeddata = () => resolve(); v.onerror = () => reject(new Error("Seedance clip could not play")); });
+      clips.push({ scenes: run.scenes, video: v });
+    }
+    const settings = getState().settings, portrait = input.format === "short";
+    up({ stage: "render", progress: 72, detail: "Assembling Seedance video — keep this tab open…", thumb: scenes[0] ? thumbnail(scenes[0].image) : undefined });
+    const out = await renderVideo(scenes, voice, { width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080, captions: settings.burnCaptions, sfx: settings.soundEffects, hookText: cp.plan.hookText, clips, onProgress: p => up({ progress: 72 + Math.round(p * 0.26) }) });
+    up({ stage: "saving", progress: 99, detail: "Saving…" });
+    await saveVideoFile(id, out.blob);
+    const fin = finalScore(cp.gate, { ...out.stats, width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080, captions: settings.burnCaptions });
+    up({ qa: { score: fin.score, parts: fin.parts }, ready: fin.ready, analytics: { hookType: cp.hookType, revealSec: cp.report.revealSec, castSize: cp.plan.characters.length, shotMix: cp.report.shotMix, continuity: cp.continuity }, status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
+  } finally {
+    for (const c of clips) { c.video.pause(); URL.revokeObjectURL(c.video.src); }
+    for (const sc of scenes) sc.image.close();
   }
 }
 
