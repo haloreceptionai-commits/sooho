@@ -44,7 +44,8 @@ export const dofAt = f => {
   const distance = Math.hypot(...c.pos.map((v, i) => v - c.look[i]));
   return { focus: distance, cinf: distance < 6 ? 10 : 0, near: 1 };
 };
-export const worldAt = f => ({ world: shotAt(f).world });
+// Wide shots and sea/sky story objects open the view past the stern so the horizon reads.
+export const worldAt = f => { const s = shotAt(f); return { world: s.world, open: s.shot === 'wide' || s.shot === 'high' || (s.props || []).some(p => p.place === 'sea' || p.place === 'sky' || p.place === 'background') }; };
 const outfits = {
   sailor: { tunic: '#386e9a', skin: '#f5c9a0', cap: '#eee8df', hair: '#392b26' },
   worker: { tunic: '#527e57', skin: '#f5c9a0', hair: '#392b26', apron: '#dfd8c7' },

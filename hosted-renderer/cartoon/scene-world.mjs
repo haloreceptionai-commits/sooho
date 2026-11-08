@@ -36,7 +36,7 @@ function wheel(root,x,y,z){const g=new THREE.Group();g.position.set(x,y,z);root.
   add(new THREE.CylinderGeometry(.1,.1,.18,12),PAINT.gold,0,0,0,g).rotation.x=Math.PI/2;
   for(let i=0;i<8;i++){const sp=add(new THREE.CylinderGeometry(.03,.04,1.5,6),M.wood,0,0,0,g);sp.rotation.z=i*Math.PI/8*2/2;}
   add(tbox(.2,1.1,.2),M.beam,0,-.75,-.1,g);return g;}
-const LANTERNS=[];
+const LANTERNS=[];const STERNS=[];
 function bulwark(root,x,len,side){
   // Painted hull wall: red with white band and gold cap, gun ports and portholes, like the reference's galleon.
   add(tbox(.25,1.25,len),PAINT.red,x,.62,0,root);add(tbox(.27,.28,len),PAINT.white,x,.86,0,root);add(tbox(.38,.1,len+.1),PAINT.gold,x,1.3,0,root);
@@ -47,7 +47,7 @@ function deck(root){
   add(tbox(7.4,.5,16,1),M.plank,0,-.28,-1,root);
   bulwark(root,-3.6,16,-1);bulwark(root,3.6,16,1);
   // Raised stern deck facade behind the cast: cabin wall with door, windows, lanterns, rail and helm.
-  const st=new THREE.Group();st.position.set(0,0,-6.4);root.add(st);
+  const st=new THREE.Group();st.position.set(0,0,-6.4);root.add(st);STERNS.push(st);
   add(tbox(7.2,2.3,.4),PAINT.red,0,1.15,0,st);add(tbox(7.3,.35,.45),PAINT.white,0,1.9,0,st);add(tbox(7.4,.12,.6),PAINT.gold,0,2.35,0,st);
   add(tbox(1.1,1.7,.1),PAINT.dark,0,.85,.22,st);add(new THREE.TorusGeometry(.08,.03,6,10),PAINT.gold,.35,.85,.3,st);
   for(const x of [-2.4,2.4]){add(tbox(1,.8,.08),PAINT.glass,x,1.1,.22,st,{cast:false});add(tbox(1.15,.1,.12),PAINT.gold,x,1.55,.24,st);add(tbox(.08,.8,.12),PAINT.dark,x,1.1,.25,st);}
@@ -163,6 +163,8 @@ for (const kind of new Set(SHOTS.map(s=>s.world))) {
 const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFrame still calls this hook
 function worldState(state,f) {
   for(const [kind,root]of worldGroups)root.visible=kind===state.world;
+  for(const st of STERNS)st.visible=!state.open;
+  for(const l of LANTERNS)l.intensity=state.world==='storm_sea'?4:2.2;
   for(const update of animated)update(f);
   waterU.t.value=f/30;
 }
