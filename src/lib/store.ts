@@ -42,7 +42,7 @@ export interface Video {
   seedanceClips?: Record<string, { id?: string; path?: string; error?: string }>;
   assemblyCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
   assemblyClips?: { path: string; scenes: number[] }[];
-  hostedRender?: { id: string; status: string };
+  hostedRender?: { id: string; status: string } | undefined;
   cartoonCheckpoint?: import('@/lib/cartoon-job').CartoonStart;
   cartoonReview?: import('@/lib/cartoon-job').CartoonReview;
   qa?: { score: number; parts: Record<string, number> } | undefined;
