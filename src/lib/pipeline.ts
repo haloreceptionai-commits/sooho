@@ -259,7 +259,9 @@ export async function runVideo(id: string, input: VideoInput) {
 
     if (input.engine === 'cartoon') {
       if (input.format !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
-      if (!gate.ready || !judgeOk) throw Error(`Cartoon story is not ready: ${gate.blockers.join('; ') || 'Script judges must pass'}`);
+      // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
+      if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
+      if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft; check the preview before approving` });
       const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment } }));
       const narration = plan.scenes.map(sc => spellNumbers(sc.narration.trim()));
       const script = narration.join(' ');
