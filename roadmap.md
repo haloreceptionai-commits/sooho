@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add authenticated Script Writer with topic selection, detailed production scripts, copying/downloading, and a live generation check.
 - [x] Package pinned cartoon drawing dependencies, prove a real reference frame, and test frame/audio contracts without changing active engines.
 - [x] Confirm permission/license for the uploaded kit's custom source before distributing it in the hosted commercial renderer.
 - [x] Build isolated declarative cartoon scenes, deterministic stems, checksum frame recovery, full-duration preflight sheets, and blocking MP4 QA; verify a complete two-second animated fixture.
