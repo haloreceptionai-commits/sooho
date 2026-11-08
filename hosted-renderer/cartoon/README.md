@@ -18,8 +18,10 @@ passed frame/black/freeze/codec QA at -13.99 LUFS; this is not production delive
 
 `prepare-scene.mjs` builds declarative ship/town/bridge/lab/landscape primitives
 while preserving the original ink and 48-tap DOF shaders. Sailor, worker and
-scholar designs support idle/walk/point/react. Lift/pour attachments, captions
-and complete secondary effects are explicitly unsupported, not silently replaced.
+scholar designs support idle/walk/point/react plus hand-anchored pot lift/pour.
+The corrected pour frame was visually inspected with the pot fully inside
+the card. Additional prop types, captions and complete secondary effects
+remain unsupported, not silently replaced.
 
 `acoustic.py` loads hash-pinned wav2vec2 weights offline. It successfully aligned
 the actual 33.67-second Atlas sample to 86 script words. Uncalibrated CTC scores
@@ -29,7 +31,9 @@ always require review; no syllable fallback or voice retiming occurs.
 and the ending, with paginated sheets.
 
 Checks: `python3 test_mix.py`, `test_alignment.py`, `test_stems.py`, `test_capture.py`;
-app tests `cartoon-contract`, `cartoon-motion`, `cartoon-manifest`.
+app tests `cartoon-contract`, `cartoon-motion`, `cartoon-manifest`,
+`cartoon-action`, `cartoon-worker-validation`. Worker preparation validates
+all clocks, cast, camera tracks, worlds and events before creating scene files.
 `test_sheet.py` verifies ending/action coverage; `test_workflow.py` rejects
 changed immutable inputs before rendering. `workflow.py` provides a local
 preflight/review/frames/sound/encode flow and rejects unreviewed long rendering.
