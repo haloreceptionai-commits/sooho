@@ -84,7 +84,7 @@ try {
     const merged=saved||{input_hash:null,frames:{}};
     const pending=[];
     for(let first=0;first<total;first+=60){const last=Math.min(total-1,first+59);let done=true;for(let f=first;f<=last;f++)if(!merged.frames[String(f)]){done=false;break;}if(!done)pending.push([first,last]);}
-    const lanes=Math.max(1,Math.min(Number(process.env.CARTOON_PARALLEL)||6,os.availableParallelism?.()||os.cpus().length,pending.length||1));
+    const lanes=Math.max(1,Math.min(Number(process.env.CARTOON_PARALLEL)||10,pending.length||1));
     let finished=total-pending.reduce((n,[a,b])=>n+b-a+1,0),next=0,saveChain=Promise.resolve();
     async function lane(){
       while(next<pending.length){
