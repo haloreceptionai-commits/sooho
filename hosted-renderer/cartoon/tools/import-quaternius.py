@@ -44,9 +44,11 @@ def height(pack, name):
   for pat, h in SIZE:
     if re.search(pat, name): return h
   return TOPIC[pack][1]
-def pack_gltf(src_path, out_path):
-  # .gltf + external .bin/.png -> one self-contained .glb (buffers and images moved into the binary chunk).
+def pack_gltf(src_path, out_path, texdir):
+  # .gltf + external .bin -> one .glb. Only base-colour textures are kept (the toon shader ignores PBR maps);
+  # they are downscaled once into the pack's shared Textures/ folder, which prepare-scene copies with the model.
   import base64
+  from PIL import Image
   j = json.loads(src_path.read_text()); blob = bytearray(); views = j.setdefault('bufferViews', [])
   def add(data):
     while len(blob) % 4: blob.append(0)
@@ -56,12 +58,19 @@ def pack_gltf(src_path, out_path):
     u = b.get('uri', ''); data = base64.b64decode(u.split(',', 1)[1]) if u.startswith('data:') else (src_path.parent / u).read_bytes()
     offsets.append(add(data))
   for v in views: v['byteOffset'] = v.get('byteOffset', 0) + offsets[v['buffer']]; v['buffer'] = 0
-  for im in j.get('images', []):
-    u = im.pop('uri', None)
-    if u is None: continue
-    data = base64.b64decode(u.split(',', 1)[1]) if u.startswith('data:') else (src_path.parent / u).read_bytes()
-    views.append({'buffer': 0, 'byteOffset': add(data), 'byteLength': len(data)}); im['bufferView'] = len(views) - 1
-    im['mimeType'] = 'image/jpeg' if data[:2] == b'\xff\xd8' else 'image/png'
+  keep = set()
+  for m in j.get('materials', []):
+    for k in ('normalTexture', 'occlusionTexture', 'emissiveTexture'): m.pop(k, None)
+    pbr = m.get('pbrMetallicRoughness', {}); pbr.pop('metallicRoughnessTexture', None)
+    if 'baseColorTexture' in pbr: keep.add(j['textures'][pbr['baseColorTexture']['index']]['source'])
+  for i, im in enumerate(j.get('images', [])):
+    u = im.get('uri')
+    if i not in keep or not u or u.startswith('data:'):
+      im.clear(); im['uri'] = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='; continue
+    name = re.sub(r'[^A-Za-z0-9_-]+', '_', Path(u).stem) + '.png'; dst = texdir / name
+    if not dst.exists():
+      texdir.mkdir(parents=True, exist_ok=True); img = Image.open(src_path.parent / u.replace('%20', ' ')).convert('RGBA'); img.thumbnail((512, 512)); img.save(dst, optimize=True)
+    im.clear(); im['uri'] = f'Textures/{name}'
   while len(blob) % 4: blob.append(0)
   j['buffers'] = [{'byteLength': len(blob)}]
   js = json.dumps(j, separators=(',', ':')).encode(); js += b' ' * ((4 - len(js) % 4) % 4)
@@ -89,13 +98,13 @@ for pack, (topic, _) in TOPIC.items():
     with tempfile.TemporaryDirectory() as t:
       g = Path(t) / 'm.glb'
       if fbx.suffix.lower() == '.gltf':
-        try: pack_gltf(fbx, g)
+        try: pack_gltf(fbx, g, dest / 'Textures')
         except Exception: skipped += 1; continue
       else:
         r = subprocess.run([conv, '-b', '-i', str(fbx), '-o', f'{t}/m'], capture_output=True, text=True, cwd=fbx.parent, timeout=120)
         if r.returncode or not g.exists(): skipped += 1; continue
       j, size = info(g)
-      if size > 6_000_000 or not j.get('meshes') or any(not im.get('uri', 'data:').startswith('data:') for im in j.get('images', [])): skipped += 1; continue
+      if size > 6_000_000 or not j.get('meshes') or any(not im.get('uri', 'data:').startswith(('data:', 'Textures/')) for im in j.get('images', [])): skipped += 1; continue
       shutil.copy(g, dest / f'{stem}.glb')
     seen.add(stem.lower())
     name = re.sub(r'[-_]+', ' ', stem).lower().strip()
