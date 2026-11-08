@@ -130,10 +130,11 @@ function Create() {
             <label htmlFor="engine" className={label}>4 · Video model</label>
             <select id="engine" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
               <option value="own">Own model — AI images with camera motion</option>
-              <option value="cartoon" disabled>Own cartoon — final cloud verification pending</option>
+              <option value="cartoon">Own cartoon — 3D cartoon on Azure · Shorts only</option>
               <option value="omni">Gemini Omni — AI-animated video clips</option>
               <option value="seedance">Seedance 2.5 — fluid cartoon animation · 720p</option>
             </select>
+            {engine === "cartoon" && format !== "short" && <p className="mt-2 text-xs text-destructive">Own cartoon works for Shorts only. Switch the format to Short.</p>}
             {engine === "omni" && <p className="mt-2 text-xs text-muted-foreground">Characters really move. Uses far more AI credits and adds several minutes per video.</p>}
             {engine === "seedance" && <p className="mt-2 text-xs text-muted-foreground">Estimated animation: ~{seedanceEstimate(format === "short" ? shortSec : longMin * 60)} credits, plus script, images and narration. Short clips · 720p source · Atlas voice. Actual cost varies with scene lengths.</p>}
           </Panel>
