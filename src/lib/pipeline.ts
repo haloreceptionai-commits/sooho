@@ -279,18 +279,8 @@ export async function runVideo(id: string, input: VideoInput) {
         const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }
-      // Keep one direction per sentence and only known actors, so a small AI slip never kills the job.
-      if (!direction.scenes.length || !direction.cast.length) throw Error('Cartoon direction came back empty. No rendering was started.');
-      while (direction.scenes.length < narration.length) direction.scenes.push({ ...direction.scenes[direction.scenes.length - 1]! });
-      direction.scenes.length = narration.length;
-      const castIds = new Set(direction.cast.map(c => c.id)), lead = direction.cast[0]!.id;
-      direction.scenes.forEach(sc => { if (!castIds.has(sc.actor)) sc.actor = lead; if (sc.actors) sc.actors = sc.actors.filter(a => castIds.has(a.actor)); });
-      // The director sometimes counts words past the end of a sentence; land those sounds on the sentence's last word.
-      direction.scenes.forEach((sc, i) => {
-        const n = (narration[i] ?? '').split(/\s+/).filter(Boolean).length;
-        if (sc.cues) sc.cues = sc.cues.filter(c => n > 0 && Number.isInteger(c.word) && c.word >= 0).map(c => ({ ...c, word: Math.min(c.word, n - 1) }));
-      });
-      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: true, sfx: s.soundEffects });
+      const safeDirection = sanitizeDirection(direction, narration);
+      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: true, sfx: s.soundEffects });
       up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
       const job = await submitCartoon({ data: cp });
