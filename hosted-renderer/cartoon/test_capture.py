@@ -32,3 +32,18 @@ class CheckpointTests(unittest.TestCase):
             self.assertNotEqual(before, fingerprint(root))
 
 if __name__ == '__main__': unittest.main()
+
+class GlBackendTest(unittest.TestCase):
+    def test_forced_backends(self):
+        from capture import gl_args
+        self.assertIn('--use-angle=swiftshader', gl_args({'CARTOON_GL': 'swiftshader'}))
+        self.assertIn('--use-angle=vulkan', gl_args({'CARTOON_GL': 'vulkan'}))
+
+    def test_auto_uses_vulkan_only_with_a_driver(self):
+        from capture import gl_args
+        with tempfile.TemporaryDirectory() as d:
+            icd = Path(d) / 'lvp.json'; icd.write_text('{}')
+            self.assertIn('--use-angle=vulkan', gl_args({'VK_ICD_FILENAMES': str(icd)}))
+        missing = gl_args({'VK_ICD_FILENAMES': '/nonexistent.json'})
+        if not Path('/usr/share/vulkan/icd.d/lvp_icd.x86_64.json').exists():
+            self.assertIn('--use-angle=swiftshader', missing)
