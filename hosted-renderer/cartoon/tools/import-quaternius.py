@@ -44,6 +44,28 @@ def height(pack, name):
   for pat, h in SIZE:
     if re.search(pat, name): return h
   return TOPIC[pack][1]
+def pack_gltf(src_path, out_path):
+  # .gltf + external .bin/.png -> one self-contained .glb (buffers and images moved into the binary chunk).
+  import base64
+  j = json.loads(src_path.read_text()); blob = bytearray(); views = j.setdefault('bufferViews', [])
+  def add(data):
+    while len(blob) % 4: blob.append(0)
+    off = len(blob); blob.extend(data); return off
+  offsets = []
+  for b in j.get('buffers', []):
+    u = b.get('uri', ''); data = base64.b64decode(u.split(',', 1)[1]) if u.startswith('data:') else (src_path.parent / u).read_bytes()
+    offsets.append(add(data))
+  for v in views: v['byteOffset'] = v.get('byteOffset', 0) + offsets[v['buffer']]; v['buffer'] = 0
+  for im in j.get('images', []):
+    u = im.pop('uri', None)
+    if u is None: continue
+    data = base64.b64decode(u.split(',', 1)[1]) if u.startswith('data:') else (src_path.parent / u).read_bytes()
+    views.append({'buffer': 0, 'byteOffset': add(data), 'byteLength': len(data)}); im['bufferView'] = len(views) - 1
+    im['mimeType'] = 'image/jpeg' if data[:2] == b'\xff\xd8' else 'image/png'
+  while len(blob) % 4: blob.append(0)
+  j['buffers'] = [{'byteLength': len(blob)}]
+  js = json.dumps(j, separators=(',', ':')).encode(); js += b' ' * ((4 - len(js) % 4) % 4)
+  out_path.write_bytes(struct.pack('<III', 0x46546C67, 2, 28 + len(js) + len(blob)) + struct.pack('<II', len(js), 0x4E4F534A) + js + struct.pack('<II', len(blob), 0x004E4942) + bytes(blob))
 def info(glb):
   b = glb.read_bytes(); n = struct.unpack('<I', b[12:16])[0]; j = json.loads(b[20:20 + n])
   return j, len(b)
@@ -58,17 +80,22 @@ for pack, (topic, _) in TOPIC.items():
   if 'CC0' not in text and 'Creative Commons Zero' not in text and 'publicdomain/zero' not in text: print('skip (licence not CC0):', pack); continue
   dest = out / f'q-{pack}'; dest.mkdir(parents=True); shutil.copy(lic, dest / 'License.txt')
   seen = set()
-  models = sorted(p for p in base.rglob('*') if p.suffix.lower() == '.fbx' and 'blend' not in str(p).lower())
+  gltfs = sorted(p for p in base.rglob('*') if p.suffix.lower() == '.gltf')
+  models = gltfs or sorted(p for p in base.rglob('*') if p.suffix.lower() == '.fbx' and 'blend' not in str(p).lower())
   if not models: models = sorted(p for p in base.rglob('*') if p.suffix.lower() == '.obj')  # OBJ-only packs
   for fbx in models:
     stem = re.sub(r'[^A-Za-z0-9_-]+', '_', fbx.stem)[:60]
     if stem.lower() in seen or stem.lower().startswith('smooth_'): continue  # Smooth_* are duplicate shading variants
     with tempfile.TemporaryDirectory() as t:
-      r = subprocess.run([conv, '-b', '-i', str(fbx), '-o', f'{t}/m'], capture_output=True, text=True, cwd=fbx.parent, timeout=120)
       g = Path(t) / 'm.glb'
-      if r.returncode or not g.exists(): skipped += 1; continue
+      if fbx.suffix.lower() == '.gltf':
+        try: pack_gltf(fbx, g)
+        except Exception: skipped += 1; continue
+      else:
+        r = subprocess.run([conv, '-b', '-i', str(fbx), '-o', f'{t}/m'], capture_output=True, text=True, cwd=fbx.parent, timeout=120)
+        if r.returncode or not g.exists(): skipped += 1; continue
       j, size = info(g)
-      if size > 6_000_000 or not j.get('meshes') or any('uri' in im for im in j.get('images', [])): skipped += 1; continue
+      if size > 6_000_000 or not j.get('meshes') or any(not im.get('uri', 'data:').startswith('data:') for im in j.get('images', [])): skipped += 1; continue
       shutil.copy(g, dest / f'{stem}.glb')
     seen.add(stem.lower())
     name = re.sub(r'[-_]+', ' ', stem).lower().strip()
