@@ -22,3 +22,6 @@
 - [x] Quaternius CC0 library: ~2,400 objects, ~230 animated (Poly Pizza skipped: needs account key)
 - [ ] Re-try Quaternius packs still blocked by Google Drive limits (animatedguns, modulartrain etc.)
 - [ ] One-word captions, reference-scored quality gate
+
+- [ ] Finish Kevlar cartoon (resumed preflight on Azure)
+- [ ] Long-form "Five Visible Firsts": find why it was interrupted at 70%, fix, finish
