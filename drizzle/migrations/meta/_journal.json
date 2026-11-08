@@ -8,6 +8,27 @@
       "when": 1794093950924,
       "tag": "0000_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794101593350,
+      "tag": "0001_hosted_render_jobs",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794101778938,
+      "tag": "0002_atomic_render_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794101815169,
+      "tag": "0003_render_optional_output_path",
+      "breakpoints": true
     }
   ]
 }

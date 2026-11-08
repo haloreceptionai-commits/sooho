@@ -136,6 +136,10 @@ function RootComponent() {
     });
     return () => data.subscription.unsubscribe();
   }, [router]);
+  useEffect(() => {
+    const timer = setInterval(() => { void syncFromCloud(); }, 15_000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (path === "/auth") {
     return (

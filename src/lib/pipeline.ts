@@ -11,6 +11,7 @@ import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 import { topicUnavailable } from "@/lib/topics";
+import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -106,6 +107,7 @@ export function removeFromQueue(id: string) {
   running.delete(id);
   keepAlive();
   actions.updateVideo(id, { status: "failed", removed: true, detail: "Removed from queue", error: "Removed from queue" });
+  void cancelHostedRender({ data: { videoId: id } }).catch(e => console.error("Could not stop hosted assembly", e));
 }
 
 export async function runVideo(id: string, input: VideoInput) {
@@ -117,6 +119,8 @@ export async function runVideo(id: string, input: VideoInput) {
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
   try {
+    const hosted = getState().videos.find(v => v.id === id)?.hostedRender;
+    if (hosted) throw new Error("This video already has a hosted assembly job. Its saved inputs will not be regenerated.");
     const saved = getState().videos.find(v => v.id === id)?.seedanceCheckpoint;
     if (input.engine === "seedance" && saved) {
       await finishSeedance(id, input, saved, up);
@@ -376,22 +380,26 @@ export async function runVideo(id: string, input: VideoInput) {
       });
       if (!made) throw new Error(`Gemini Omni could not animate any clip for this video (${lastClipErr || "unknown error"}). Try again or switch to Own model.`);
     }
-    up({ stage: "render", progress: 72, detail: "Assembling video (renders in real time — keep this tab open)…", thumb: thumbnail(full[0]!.image) });
-    const out = await renderVideo(full, voice, {
-      width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080,
-      captions: s.burnCaptions, sfx: s.soundEffects, targetSec: input.durationSec, hookText: plan.hookText, ...(clips ? { clips } : {}),
-      onProgress: (p) => up({ progress: 72 + Math.round(p * 0.26) }),
-    });
-    up({ stage: "saving", progress: 99, detail: "Saving…" });
-    await saveVideoFile(id, out.blob);
-    const width = portrait ? 1080 : 1920, height = portrait ? 1920 : 1080;
-    const fin = finalScore(ev.gate, { wordsPerSec: out.stats.wordsPerSec, avgShotSec: out.stats.avgShotSec, lufs: out.stats.lufs, lra: out.stats.lra, width, height, captions: s.burnCaptions });
-    const qa = { score: fin.score, parts: fin.parts };
     const continuity = contScores.length ? contScores.filter((x) => x >= 6).length / contScores.length : 1;
-    up({
-      ready: fin.ready, analytics: { hookType: hb.type, revealSec: ev.report.revealSec, castSize: plan.characters.length, shotMix: ev.report.shotMix, continuity },
-    });
-    up({ qa, status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
+    const cp = await saveAssemblyAssets(id, plan, full, voice, { gate: ev.gate, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, hookType: hb.type, continuity });
+    const clipPaths: { path: string; scenes: number[] }[] = [];
+    if (clips) {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not signed in");
+      for (let i = 0; i < clips.length; i++) {
+        const clip = clips[i];
+        if (!clip) continue;
+        const path = `${user.user.id}/${id}/assets/omni-${i}.mp4`;
+        const blob = await (await fetch(clip.video.src)).blob();
+        const { error } = await supabase.storage.from("videos").upload(path, blob, { upsert: true, contentType: "video/mp4" });
+        if (error) throw new Error("Could not save animation for hosted assembly");
+        clipPaths.push({ path, scenes: clip.scenes });
+      }
+    }
+    up({ assemblyCheckpoint: cp, stage: "render", progress: 72, detail: "Sending to hosted assembly…", thumb: full[0] ? thumbnail(full[0].image) : undefined });
+    await handoffAssembly(id, cp, clipPaths, up);
+    for (const c of clips ?? []) { c.video.pause(); URL.revokeObjectURL(c.video.src); }
+    for (const scene of full) scene.image.close();
   } catch (e) {
     let msg = e instanceof Error ? e.message : String(e);
     if (/PROHIBITED_CONTENT/.test(msg)) msg = "The narrator voice refused part of this script (it reads as too violent). Try a gentler topic wording and generate again.";
@@ -412,6 +420,44 @@ export interface SeedanceCheckpoint {
   voice: { path: string; scenes: number[] }[];
 }
 
+async function saveAssemblyAssets(id: string, plan: Plan, scenes: RenderScene[], voice: VoiceChunk[], meta: Omit<SeedanceCheckpoint, "plan" | "images" | "voice">): Promise<SeedanceCheckpoint> {
+  const { data: user } = await supabase.auth.getUser();
+  if (!user.user) throw new Error("Not signed in");
+  const root = `${user.user.id}/${id}/assets`, bucket = supabase.storage.from("videos");
+  const images: string[] = [], takes: SeedanceCheckpoint["voice"] = [];
+  for (let i = 0; i < scenes.length; i++) {
+    const scene = scenes[i];
+    if (!scene) throw new Error("Scene missing");
+    const canvas = document.createElement("canvas");
+    canvas.width = scene.image.width; canvas.height = scene.image.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not save scene image");
+    ctx.drawImage(scene.image, 0, 0);
+    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error("Could not save scene")), "image/png"));
+    const path = `${root}/render-image-${i}.png`;
+    const { error } = await bucket.upload(path, blob, { upsert: true, contentType: "image/png" });
+    if (error) throw new Error(`Could not save scene ${i + 1}`);
+    images.push(path);
+  }
+  for (let i = 0; i < voice.length; i++) {
+    const take = voice[i];
+    if (!take) continue;
+    const path = `${root}/render-voice-${i}.wav`;
+    const { error } = await bucket.upload(path, take.audio, { upsert: true, contentType: "audio/wav" });
+    if (error) throw new Error("Could not save narration");
+    takes.push({ path, scenes: take.scenes });
+  }
+  return { ...meta, plan, images, voice: takes };
+}
+
+async function handoffAssembly(id: string, cp: SeedanceCheckpoint, clips: { path: string; scenes: number[] }[], up: (p: Parameters<typeof actions.updateVideo>[1]) => void) {
+  await flushVideo(id);
+  const settings = getState().settings;
+  // Single submission: never retry an ambiguous start and create a duplicate paid render.
+  const job = await submitHostedRender({ data: { videoId: id, checkpoint: cp, clips, captions: settings.burnCaptions, sfx: settings.soundEffects } });
+  up({ hostedRender: { id: job.id, status: job.status }, stage: "render", progress: 72, detail: "Hosted assembly · safe to close your browser" });
+}
+
 async function finishSeedance(id: string, input: VideoInput, cp: SeedanceCheckpoint, up: (p: Parameters<typeof actions.updateVideo>[1]) => void) {
   const bucket = supabase.storage.from("videos");
   const download = async (path: string) => {
@@ -428,6 +474,7 @@ async function finishSeedance(id: string, input: VideoInput, cp: SeedanceCheckpo
   const voice = await Promise.all(cp.voice.map(async c => ({ scenes: c.scenes, audio: await (await download(c.path)).arrayBuffer() })));
   const runs = seedanceRuns(cp.plan.scenes);
   const clips: { scenes: number[]; video: HTMLVideoElement }[] = [];
+  const clipPaths: { scenes: number[]; path: string }[] = [];
   try {
     // Sequential submission respects the shared video concurrency budget. A saved ID is never resubmitted.
     for (let i = 0; i < runs.length; i++) {
@@ -459,19 +506,10 @@ async function finishSeedance(id: string, input: VideoInput, cp: SeedanceCheckpo
       const current = getState().videos.find(v => v.id === id)?.seedanceClips ?? {};
       up({ seedanceClips: { ...current, [i]: { id: job.id, path } } });
       await flushVideo(id);
-      const v = document.createElement("video");
-      v.muted = true; v.playsInline = true; v.preload = "auto";
-      v.src = URL.createObjectURL(await download(path));
-      await new Promise<void>((resolve, reject) => { v.onloadeddata = () => resolve(); v.onerror = () => reject(new Error("Seedance clip could not play")); });
-      clips.push({ scenes: run.scenes, video: v });
+      clipPaths.push({ scenes: run.scenes, path });
     }
-    const settings = getState().settings, portrait = input.format === "short";
-    up({ stage: "render", progress: 72, detail: "Assembling Seedance video — keep this tab open…", thumb: scenes[0] ? thumbnail(scenes[0].image) : undefined });
-    const out = await renderVideo(scenes, voice, { width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080, captions: settings.burnCaptions, sfx: settings.soundEffects, hookText: cp.plan.hookText, clips, onProgress: p => up({ progress: 72 + Math.round(p * 0.26) }) });
-    up({ stage: "saving", progress: 99, detail: "Saving…" });
-    await saveVideoFile(id, out.blob);
-    const fin = finalScore(cp.gate, { ...out.stats, width: portrait ? 1080 : 1920, height: portrait ? 1920 : 1080, captions: settings.burnCaptions });
-    up({ qa: { score: fin.score, parts: fin.parts }, ready: fin.ready, analytics: { hookType: cp.hookType, revealSec: cp.report.revealSec, castSize: cp.plan.characters.length, shotMix: cp.report.shotMix, continuity: cp.continuity }, status: "done", stage: "done", progress: 100, detail: "Ready", duration: out.duration, mime: out.mime, size: out.blob.size });
+    up({ assemblyCheckpoint: cp, stage: "render", progress: 72, detail: "Sending to hosted assembly…", thumb: scenes[0] ? thumbnail(scenes[0].image) : undefined });
+    await handoffAssembly(id, cp, clipPaths, up);
   } finally {
     for (const c of clips) { c.video.pause(); URL.revokeObjectURL(c.video.src); }
     for (const sc of scenes) sc.image.close();
