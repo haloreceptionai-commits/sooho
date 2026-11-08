@@ -6,7 +6,7 @@
 - [x] Save approved sailor look, add hand-anchored pot lifting/pouring, correct prop clipping, and validate worker inputs before scene preparation.
 - [x] Connect cartoon Shorts to authenticated cloud jobs with locked Atlas narration, acoustic alignment and explicit owner preflight review.
 - [x] Package and deploy the cartoon worker with resumable frames, cancellation, MP4 QA and atomic private cloud completion.
-- [ ] Verify a full narrated cartoon Short after browser closure, library playback/download and existing-engine regressions; only enable verified capabilities.
+- [ ] Verify full cartoon cloud MP4 playback/download: recovered hosted test is rendering, but final delivery is not yet verified. The 1,010-frame local test found AAC true-peak overshoot; oversampled limiting is being verified before release.
 - [x] Fix the first test's Cloud callback unavailable error and recover its saved preview without regenerating or duplicate spending; UI recovery and narration playback verified.
 - [x] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
 - [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.
