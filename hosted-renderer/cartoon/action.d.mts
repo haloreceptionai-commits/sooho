@@ -1,0 +1,1 @@
+export function actionState(action: string, frame: number, start: number, end: number): { progress: number; lift: number; t: number };

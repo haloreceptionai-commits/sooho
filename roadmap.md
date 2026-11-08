@@ -3,6 +3,7 @@
 - [x] Confirm permission/license for the uploaded kit's custom source before distributing it in the hosted commercial renderer.
 - [x] Build isolated declarative cartoon scenes, deterministic stems, checksum frame recovery, full-duration preflight sheets, and blocking MP4 QA; verify a complete two-second animated fixture.
 - [x] Pin offline acoustic model and test actual Atlas alignment without retiming; uncertain words remain review-gated.
+- [x] Save approved sailor look, add hand-anchored pot lifting/pouring, correct prop clipping, and validate worker inputs before scene preparation.
 - [ ] Complete Own cartoon pipeline: calibrated alignment, full prop actions/effects/cast, authenticated durable orchestration and preflight approval, cloud checkpoints/callbacks and closed-browser full-video delivery. Release blocked until these implementation and verification gates pass; existing engines stay unchanged.
 - [x] Review every uploaded cartoon kit file and deliver a detailed Own-model pipeline plan, including missing steps and verification gates.
 - [x] Add Seedance as third video engine, reference-inspired motion prompts, persistent clip recovery, and verify generation.

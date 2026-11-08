@@ -1,0 +1,1 @@
+export function validateManifest(m: unknown): unknown;
