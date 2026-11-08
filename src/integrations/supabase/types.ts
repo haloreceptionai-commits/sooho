@@ -14,6 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
+      generation_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          expires_at: string
+          fence: number
+          id: string
+          lease_owner: string | null
+          lease_until: string | null
+          request: Json
+          run_id: string | null
+          status: string
+          token_hash: string
+          updated_at: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          expires_at: string
+          fence?: number
+          id?: string
+          lease_owner?: string | null
+          lease_until?: string | null
+          request: Json
+          run_id?: string | null
+          status?: string
+          token_hash: string
+          updated_at?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          expires_at?: string
+          fence?: number
+          id?: string
+          lease_owner?: string | null
+          lease_until?: string | null
+          request?: Json
+          run_id?: string | null
+          status?: string
+          token_hash?: string
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_jobs_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generation_steps: {
+        Row: {
+          created_at: string
+          error: string | null
+          fence: number
+          input_hash: string
+          job_id: string
+          result: Json | null
+          status: string
+          step_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          fence: number
+          input_hash: string
+          job_id: string
+          result?: Json | null
+          status: string
+          step_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          fence?: number
+          input_hash?: string
+          job_id?: string
+          result?: Json | null
+          status?: string
+          step_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_steps_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       render_jobs: {
         Row: {
           created_at: string
@@ -118,11 +221,51 @@ export type Database = {
         }
         Returns: boolean
       }
+      begin_generation_step: {
+        Args: {
+          p_fence: number
+          p_hash: string
+          p_input_hash: string
+          p_job: string
+          p_key: string
+          p_owner: string
+        }
+        Returns: string
+      }
+      cancel_generation_job: {
+        Args: { p_job: string; p_user: string }
+        Returns: boolean
+      }
       cancel_render_job: {
         Args: { job_id: string; owner_id: string }
         Returns: boolean
       }
+      claim_generation_job: {
+        Args: { p_hash: string; p_job: string; p_owner: string }
+        Returns: number
+      }
+      complete_generation_step: {
+        Args: {
+          p_fence: number
+          p_hash: string
+          p_input_hash: string
+          p_job: string
+          p_key: string
+          p_owner: string
+          p_result: Json
+        }
+        Returns: boolean
+      }
       expire_render_jobs: { Args: never; Returns: undefined }
+      heartbeat_generation_job: {
+        Args: {
+          p_fence: number
+          p_hash: string
+          p_job: string
+          p_owner: string
+        }
+        Returns: boolean
+      }
       recover_cartoon_review: {
         Args: { job_id: string; owner_id: string; saved_review: Json }
         Returns: boolean
