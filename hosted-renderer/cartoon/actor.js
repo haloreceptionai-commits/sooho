@@ -42,6 +42,9 @@ async function uploadFiles(files) {
 }
 const store= await platform.open(input.mode==='finish' ? input.storeId : `cartoon-${input.jobId}`);
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+// Bounded concurrency for many small storage calls (frame upload/download).
+async function pool(items,limit,fn){let i=0;await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(i<items.length){const it=items[i++];await fn(it);}}));}
+const timings={};const timing=(name,start)=>{timings[name]=Math.round((Date.now()-start)/100)/10;console.log(JSON.stringify({timing:name,sec:timings[name]}));};
 try {
   await guard(0);
   if(input.mode==='preflight') {
@@ -125,7 +128,8 @@ try {
     const tFetch=Date.now();
     await pool(Array.from({length:total},(_,f)=>f),32,async f=>{
       const local=path.join(framesDir,`batch-${batches.find(([a,b])=>f>=a&&f<=b)[0]}`,`f${String(f).padStart(6,'0')}.jpg`);
-      const bytes=await readFile(local).catch(()=>null)||await store.getValue(`frame-${f}`);
+      let bytes=await readFile(local).catch(()=>null);
+      if(!bytes||hash(bytes)!==merged.frames[String(f)]?.sha256)bytes=await store.getValue(`frame-${f}`);
       if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);
       await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);
     });
