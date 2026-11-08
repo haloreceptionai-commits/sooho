@@ -88,7 +88,8 @@ try {
       await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
       const part=JSON.parse(await readFile(path.join(dir,'checkpoint.json'),'utf8'));
       const frames={};
-      for(let f=first;f<=last;f++){const bytes=await readFile(path.join(dir,`f${String(f).padStart(6,'0')}.jpg`));await store.setValue(`frame-${f}`,bytes,{contentType:'image/jpeg'});frames[String(f)]=part.frames[String(f)];}
+      const ids=[];for(let f=first;f<=last;f++)ids.push(f);
+      await pool(ids,16,async f=>{const bytes=await readFile(path.join(dir,`f${String(f).padStart(6,'0')}.jpg`));await store.setValue(`frame-${f}`,bytes,{contentType:'image/jpeg'});frames[String(f)]=part.frames[String(f)];});
       await store.setValue(`part-${first}`,{input_hash:part.input_hash,frames});
     }
     let cursor=0;
@@ -118,8 +119,17 @@ try {
       const part=await store.getValue(`part-${first}`);
       if(merged.input_hash&&merged.input_hash!==part.input_hash)throw Error('Scene inputs changed between batches');
       merged.input_hash=part.input_hash;
-      for(let f=first;f<=last;f++){const bytes=await store.getValue(`frame-${f}`);if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);merged.frames[String(f)]=part.frames[String(f)];}
+      for(let f=first;f<=last;f++)merged.frames[String(f)]=part.frames[String(f)];
     }
+    // Frames this replica drew are already on disk; only fetch the rest, many at a time.
+    const tFetch=Date.now();
+    await pool(Array.from({length:total},(_,f)=>f),32,async f=>{
+      const local=path.join(framesDir,`batch-${batches.find(([a,b])=>f>=a&&f<=b)[0]}`,`f${String(f).padStart(6,'0')}.jpg`);
+      const bytes=await readFile(local).catch(()=>null)||await store.getValue(`frame-${f}`);
+      if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);
+      await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);
+    });
+    timing('join-fetch',tFetch);
     await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged));
     try {
       await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);
