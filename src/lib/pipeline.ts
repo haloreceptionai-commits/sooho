@@ -266,13 +266,19 @@ export async function runVideo(id: string, input: VideoInput) {
       const narration = plan.scenes.map(sc => spellNumbers(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
-      up({ progress: 30, detail: 'Recording one locked Atlas take…' });
-      const take = await withRetry(() => generateVoice({ data: { text: script, voice: 'onyx', deployment: s.ttsDeployment, style: 'short' } }));
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw Error('Not signed in');
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
-      const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
-      if (error) throw Error('Could not save locked Atlas narration');
+      // Resume: the locked take for this same saved script is already stored, so reuse it instead of paying again.
+      const { data: existing } = await supabase.storage.from('videos').list(`${user.user.id}/${id}/cartoon`, { search: 'original-voice.wav' });
+      if (existing?.some(f => f.name === 'original-voice.wav')) {
+        up({ progress: 30, detail: 'Reusing the saved Atlas take…' });
+      } else {
+        up({ progress: 30, detail: 'Recording one locked Atlas take…' });
+        const take = await withRetry(() => generateVoice({ data: { text: script, voice: 'onyx', deployment: s.ttsDeployment, style: 'short' } }));
+        const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
+        if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
+      }
       const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: true, sfx: s.soundEffects });
       up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
