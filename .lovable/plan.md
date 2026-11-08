@@ -1,7 +1,7 @@
 # Own video engine — full cartoon pipeline plan
 
 ## Goal and audit status
-Replace new **Own-model Shorts** with real cartoon acting in painted, inked 3D worlds—not camera movement over stills. Keep automatic Atlas, four pages, owner-only access, permanent private cloud videos, and unchanged Omni/Seedance.
+New **Own Shorts**: cartoon acting in painted, inked 3D worlds. Keep Atlas, four pages, owner-only private cloud library and Omni/Seedance.
 
 Read all SKILL.md and 13 ZIP text files: README; engine/index.html/main.js/motion.js/paint.js/roman.js; tools/setup.sh/timing.py/render.mjs/sheet.py/finish.sh; example/soldier/story.js/audio.py. Inspected all 14 sample panels and compared current pipeline/security/storage/tests. **Static audit only; nothing executed or generated.**
 
@@ -24,7 +24,7 @@ Read all SKILL.md and 13 ZIP text files: README; engine/index.html/main.js/motio
 - Own defaults **no captions/overlay**; existing-page opt-in remains. Signs must read correctly; no no-caption penalty. Other engines unchanged.
 - Keep sourced topics/simple original stories/escalation/analogy/payoff/85 threshold. Version editorial rules: literal hook MCU, phrase-driven shots/continuous moves. Required failures stop paid media.
 - On request in Create: ten ideas with 5–8-word title/hook/twist/visuals/factual status. Hooks are not ideas; no page-load spending.
-- ZIP establishes vertical Shorts only. Preserve legacy Own long-form until the separate horizontal/chapter release gate passes; never label legacy output the new cartoon engine.
+- Kit supports Shorts only; keep legacy long-form until horizontal/chapter tests pass, clearly distinguished.
 
 ## Pipeline stages and acceptance gates
 
@@ -32,7 +32,7 @@ Read all SKILL.md and 13 ZIP text files: README; engine/index.html/main.js/motio
 Pin Three.js r160, compatible verified toon commit, Node/Playwright/Chromium, Python/numpy/Pillow, FFmpeg/fonts; verify hashes/licenses and ship offline. Repair setup/copy/API/path/read-only failures. Missing cast code blocks release. Prove cards/shadows/ink/colour/DOF with a small fixture.
 
 ### 2. Intake and durable reservation
-Validate owner/input/length/settings/cloud topic history; save immutable versions and one logical job before paid calls. Duplicate clicks return that job. Browser observes, durable services execute.
+Validate owner/input/history; save immutable job/settings before spending. Duplicate clicks return same job; browser only observes.
 States: queued → research → script/validation → voice → alignment → shot plan → look check → frames → stems/mix → encode → QA → save → done; explicit review/paused/unknown/failed/cancelled states carry reasons.
 
 ### 3. Research and original script
