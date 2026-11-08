@@ -58,12 +58,12 @@ const wordAt = (f, shot) => {
   return null;
 };
 // x offsets are relative to where the camera looks, so story props stay inside the narrow frame.
-const PLACE = { ground_left: [-.95, 0, .7, .5], ground_right: [.95, 0, .7, .5], background: [.7, 0, -7, 3], sky: [.2, 3.6, -9, 2.2], sea: [-.4, -1.2, -15, 6] };
+const PLACE = { ground_left: [-.95, 0, .7, .5], ground_right: [.95, 0, .7, .5], background: [.7, 0, -7, 3], sky: [.2, 3.6, -9, 2.2], sea: [-1.1, -1.2, -15, 6] };
 const NEAR_SEA = new Set(['wave', 'fish']);
 function propPose(prop, f, shot, index) {
   let [x0, y0, z0, s0] = PLACE[prop.place];
   if (prop.place !== 'ground_left' && prop.place !== 'ground_right') x0 += camAt(f).look[0];
-  if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -6.5; s0 = 5.5; y0 = -1.4; }
+  if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -7; s0 = 3.4; y0 = -1.3; x0 -= .3; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
   const ease = t * t * (3 - 2 * t);
   let x = x0 + index * .25, y = y0, z = z0, s = s0, roll = 0;

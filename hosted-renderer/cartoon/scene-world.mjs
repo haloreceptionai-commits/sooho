@@ -21,9 +21,10 @@ function deck(root){
     add(tbox(.12,.15,14),M.beam,x,.65,0,root);
     for(let z=-6;z<=6;z+=2) add(tbox(.12,.7,.12),M.beam,x,.28,z,root);
   }
-  add(tbox(.18,9,.18),M.beam,0,4.3,-4,root);
-  add(tbox(4.4,.12,.12),M.beam,0,7.2,-4,root);
-  const sail=add(new THREE.PlaneGeometry(4,5,10,10),toon({color:'#edf3ee',side:THREE.DoubleSide}),0,4.8,-3.9,root);
+  add(tbox(.18,12,.18),M.beam,0,5.8,-5,root);
+  add(tbox(4.4,.12,.12),M.beam,0,9.6,-5,root);
+  // Sail sits high so medium and close shots keep sky and sea behind the cast.
+  const sail=add(new THREE.PlaneGeometry(4,4,10,10),toon({color:'#edf3ee',side:THREE.DoubleSide}),0,7.5,-4.9,root);
   const base=sail.geometry.attributes.position.array.slice();
   animated.push(f=>{ if(!root.visible)return; const p=sail.geometry.attributes.position; for(let i=0;i<p.count;i++)p.setZ(i,base[i*3+2]+.12*Math.sin(f*.09+base[i*3]*1.3)); p.needsUpdate=true; });
   for(const [x,z] of [[-2.4,-1.5],[2.5,2]]) add(new THREE.CylinderGeometry(.35,.32,.8,14),M.wood,x,.4,z,root);

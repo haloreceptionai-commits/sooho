@@ -82,7 +82,7 @@ export const FX_ART = {
   sparkle: (p, f) => { for (let i = 0; i < 9; i++) { const t = ((f * .03 + i * .13) % 1); star(p, 80 + (i * 61) % 440, 300 + (i * 137) % 600 - t * 80, 26 * Math.sin(t * Math.PI) + 2, '#fff1a6'); } },
   splash: (p, f) => { const t = (f % 24) / 24; p.g.save(); p.g.translate(0, 300); p.g.scale(.75, .75); fxSplash(p, t); p.g.restore(); },
   dust: (p, f) => { const t = (f % 30) / 30; p.g.save(); p.g.translate(150, 700); p.g.scale(1.1, 1.1); fxPuff(p, t); p.g.restore(); },
-  wind: (p, f) => { for (let i = 0; i < 7; i++) { const x = ((f * 30 + i * 140) % 900) - 150, y = 200 + i * 110; p.stroke([[x, y], [x + 160, y - 10], [x + 220, y + 10]], 4, 'rgba(255,255,255,.85)'); } },
+  wind: (p, f) => { for (let i = 0; i < 7; i++) { const x = ((f * 30 + i * 140) % 900) - 150, y = 200 + i * 110; p.stroke([[x, y], [x + 120, y - 6], [x + 170, y + 6]], 2.5, 'rgba(255,255,255,.55)'); } },
   burst: (p, f) => { const t = Math.min(1, (f % 45) / 25); p.g.save(); p.g.translate(50, 250); fxBurst(p, t); p.g.restore(); },
   lightning: () => {},
 };
