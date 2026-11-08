@@ -17,13 +17,25 @@ export const Route = createFileRoute("/api/public/render-callback")({
     if (!job || Date.parse(job.expires_at) < Date.now()) return new Response("Unauthorized", { status: 401 });
     if (["done", "failed", "cancelled"].includes(job.status)) return Response.json({ accepted: false });
     if (Number(request.headers.get("content-length") ?? 0) > 5000) return new Response("Too large", { status: 413 });
-    const body = await request.json().catch(() => null);
+    const reader = request.body?.getReader();
+    if (!reader) return new Response('Invalid callback', { status: 400 });
+    const chunks: Uint8Array[] = []; let bytes = 0;
+    for (;;) { const next = await reader.read(); if (next.done) break; bytes += next.value.byteLength; if (bytes > 12000) { await reader.cancel(); return new Response('Too large', { status: 413 }); } chunks.push(next.value); }
+    const payload = new Uint8Array(bytes); let offset = 0;
+    for (const chunk of chunks) { payload.set(chunk, offset); offset += chunk.byteLength; }
+    let body: unknown;
+    try { body = JSON.parse(new TextDecoder().decode(payload)); } catch { return new Response('Invalid callback', { status: 400 }); }
     const kind = (job.manifest as Record<string, Json>)['kind'];
     if (kind === 'cartoon') {
       const grants = z.object({ type: z.literal('assets'), files: z.array(z.object({ name: z.string().regex(/^(sheet-\d{2}\.jpg|alignment\.json|voice\.wav|manifest\.json|output\.mp4|output\.qa\.json|mix-report\.json|checkpoint\.json)$/) })).min(1).max(40) }).safeParse(body);
       if (grants.success) {
         const uploads: Record<string, { path: string; url: string }> = {};
         for (const file of grants.data.files) {
+          const finalAsset = ['output.mp4', 'output.qa.json', 'mix-report.json'].includes(file.name);
+          if (finalAsset && !(job.manifest as Record<string, Json>)['kind']) return new Response('Invalid stage', { status: 409 });
+          const { data: ownerVideo } = await supabaseAdmin.from('videos').select('data').eq('id', job.video_id).single();
+          const approved = (ownerVideo?.data as Record<string, Json>)?.['cartoonReview'] as Record<string, Json> | undefined;
+          if ((finalAsset && approved?.['approved'] !== true) || (!finalAsset && job.status === 'review')) return new Response('Invalid upload stage', { status: 409 });
           const path = file.name === 'output.mp4' ? job.output_path : `${job.user_id}/${job.video_id}/cartoon/${file.name}`;
           const { data: grant, error } = await supabaseAdmin.storage.from('videos').createSignedUploadUrl(path, { upsert: true });
           if (error || !grant) return new Response('Could not grant upload', { status: 500 });

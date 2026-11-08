@@ -29,11 +29,12 @@ export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requ
       if (claimed) return { id: claimed.id, status: claimed.status };
       throw Error('Could not reserve cartoon rendering');
     }
-    const { data: signed, error: signError } = await context.supabase.storage.from('videos').createSignedUrl(data.voicePath, 86400);
-    if (signError || !signed) throw Error('Could not open the saved Atlas narration');
     try {
+      const { data: signed, error: signError } = await context.supabase.storage.from('videos').createSignedUrl(data.voicePath, 86400);
+      if (signError || !signed) throw Error('Could not open the saved Atlas narration');
       const run = await startActor(key, connection, { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, mode: 'preflight' });
-      await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('status', 'submitting');
+      const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
+      if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { hostedRender: { id: job.id, status: 'running' }, status: 'running', progress: 72, stage: 'render', detail: 'Cartoon preview · safe to close your browser' }, saved_path: '' });
       return { id: job.id, status: 'running' };
     } catch (e) {
@@ -59,7 +60,8 @@ export const approveCartoon = createServerFn({ method: 'POST' }).middleware([req
     if (error || !claimed) throw Error('Preview was already approved or expired');
     try {
       const run = await startActor(key, connection, { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: data.hash });
-      await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('status', 'submitting');
+      const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
+      if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { detail: 'Full cartoon render · safe to close your browser', hostedRender: { id: job.id, status: 'running' } }, saved_path: '' });
       return { accepted: true };
     } catch (e) {
