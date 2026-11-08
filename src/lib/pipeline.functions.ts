@@ -57,7 +57,7 @@ async function azureJson<T>(deployment: string, system: string, user: string, na
   const res = await azure(`${safeName(deployment)}/chat/completions`, {
     messages: [{ role: "system", content: system }, { role: "user", content: user }],
     max_completion_tokens: 32000,
-    reasoning_effort: "none",
+    reasoning_effort: name === 'video_plan' ? 'low' : 'none',
     stream: true,
     response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
   });
@@ -458,7 +458,8 @@ Viral archetype: ${data.archetype}
 Target: ${D} seconds ≈ ${words} words of narration total (±8%). About ${scenes} scenes of ~${perScene} words each.
 ${data.research ? `Research (use these anchors, hero, question, tries, payoff and money shot):\n${data.research}\n` : ""}${data.facts ? `Fact sheet (obey it):\n${data.facts}\n` : ""}${data.hook ? data.repair ? `Preferred hook: "${data.hook}". Rewrite it if the opening checks require it.\n` : `Open with this exact hook line: "${data.hook}"\n` : ""}${data.repair ? `A previous draft FAILED these checks — fix every one, including scene metadata and visuals. Structural failures require a structural rewrite, not cosmetic edits:\n${data.repair}\n` : ""}Return a click-worthy title (under 60 chars) and a 2-sentence YouTube description.`;
 
-    const plan = await azureJson<Plan>(data.deployment, system, user, "video_plan", planSchema, "Script writer");
+    const repairPriority = data.repair ? `\nFINAL REPAIR PRIORITY: The earlier examples are structure references, not exceptions. The repair contract and checked facts override every example and preferred hook. Before returning JSON, count the opening words and verify the main question STARTS by word 20. Put it immediately after the hook, before secondary context. Then state the hero's want. Do not put decorative setting lines before the question. Recount the WHOLE scene narration: target ${words} words, maximum ${Math.floor(words * 1.08)}. Verify every named character, shot and loop field as well as the spoken lines. Do not present a speculative reconstruction or invented try/fail as a historical fact.` : '';
+    const plan = await azureJson<Plan>(data.deployment, system + repairPriority, user, "video_plan", planSchema, "Script writer");
     if (!plan.scenes?.length) throw new Error("Script writer returned an empty plan");
     return plan;
   });
