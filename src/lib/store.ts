@@ -39,6 +39,7 @@ export interface Video {
   thumb?: string | undefined; // small jpeg data URL
   sceneCount?: number | undefined;
   seedanceCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
+  scriptCheckpoint?: import("@/lib/pipeline").ScriptCheckpoint;
   seedanceClips?: Record<string, { id?: string; path?: string; error?: string }>;
   assemblyCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
   assemblyClips?: { path: string; scenes: number[] }[];
@@ -110,7 +111,7 @@ export function hydrateStore() {
         settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } return st; })(),
         // jobs that were running when the page closed can't resume
         videos: (parsed.videos ?? []).map((v) =>
-          v.status === "running" && !v.hostedRender ? { ...v, status: "failed", error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v,
+          v.status === "running" && !v.hostedRender ? { ...v, status: "failed", error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : v.scriptCheckpoint ? "Page was closed. Script and finished pictures/voice are saved — click Resume to continue." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint || v.scriptCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v,
         ),
       };
     }
