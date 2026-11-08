@@ -60,7 +60,7 @@ async def capture(args):
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True, args=['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            browser = await p.chromium.launch(headless=True, args=gl_args())
             try:
                 page = await browser.new_page(viewport={'width': 1280, 'height': 1800})
                 errors = []
