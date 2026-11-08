@@ -24,6 +24,8 @@ export interface RenderOptions {
   captions: boolean;
   sfx: boolean;
   targetSec?: number;
+  /** Narration pace; defaults to the Atlas Shorts pace, or the calmer long-form pace for landscape videos. */
+  wpm?: number;
   hookText?: string; // 3-6 word on-screen hook for the first 3 seconds
   /** AI-animated clips (Gemini Omni engine); each covers a run of consecutive scenes. */
   clips?: { scenes: number[]; video: HTMLVideoElement }[];
@@ -420,6 +422,9 @@ export function beatRate(beat: string | undefined) {
 
 export const PRE_REVEAL_PAUSE = 0.4;
 export const ATLAS_WPM = 153;
+/** Long-form documentary narrator: same voice, calmer storytelling pace. */
+export const LONG_WPM = 142;
+export const narrationWpm = (width: number, height: number) => (width > height ? LONG_WPM : ATLAS_WPM);
 /** Stretch factor that brings a take of `actual` seconds to `target` seconds (limited so the voice stays natural). */
 export function paceRate(actual: number, target: number) {
   return Math.max(0.8, Math.min(1.45, actual / Math.max(0.5, target)));
@@ -430,11 +435,12 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   await actx.resume();
   let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
   // Fit every take to the approved Atlas pace (~153 wpm), a touch faster in action and slower at the reveal.
+  const wpm = o.wpm ?? narrationWpm(o.width, o.height);
   buffers = buffers.map((b, i) => {
     const tb = tightenPauses(actx, b, 0.35, 0.25);
     const words = voice[i]!.scenes.reduce((a, si) => a + scenes[si]!.text.split(/\s+/).filter(Boolean).length, 0);
     const bd = speechBounds(tb);
-    const target = ((words * 60) / ATLAS_WPM) * (ATLAS_RATE / beatRate(scenes[voice[i]!.scenes[0]!]?.beat));
+    const target = ((words * 60) / wpm) * (ATLAS_RATE / beatRate(scenes[voice[i]!.scenes[0]!]?.beat));
     return timeStretch(actx, tb, paceRate(bd.to - bd.from, target));
   });
   const LEAD = 0.15, JOIN = 0.06;

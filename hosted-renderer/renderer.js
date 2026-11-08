@@ -557,6 +557,8 @@ function beatRate(beat) {
 }
 var PRE_REVEAL_PAUSE = 0.4;
 var ATLAS_WPM = 153;
+var LONG_WPM = 142;
+var narrationWpm = (width, height) => width > height ? LONG_WPM : ATLAS_WPM;
 function paceRate(actual, target) {
   return Math.max(0.8, Math.min(1.45, actual / Math.max(0.5, target)));
 }
@@ -564,11 +566,12 @@ async function renderVideo(scenes, voice, o) {
   const actx = new AudioContext;
   await actx.resume();
   let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
+  const wpm = o.wpm ?? narrationWpm(o.width, o.height);
   buffers = buffers.map((b, i) => {
     const tb = tightenPauses(actx, b, 0.35, 0.25);
     const words = voice[i].scenes.reduce((a, si) => a + scenes[si].text.split(/\s+/).filter(Boolean).length, 0);
     const bd = speechBounds(tb);
-    const target = words * 60 / ATLAS_WPM * (ATLAS_RATE / beatRate(scenes[voice[i].scenes[0]]?.beat));
+    const target = words * 60 / wpm * (ATLAS_RATE / beatRate(scenes[voice[i].scenes[0]]?.beat));
     return timeStretch(actx, tb, paceRate(bd.to - bd.from, target));
   });
   const LEAD = 0.15, JOIN = 0.06;
@@ -839,10 +842,12 @@ function backgroundTicker(ms) {
 export {
   ATLAS_RATE,
   ATLAS_WPM,
+  LONG_WPM,
   PRE_REVEAL_PAUSE,
   backgroundTicker,
   beatRate,
   clipRate,
+  narrationWpm,
   paceRate,
   pickMime,
   renderVideo,
