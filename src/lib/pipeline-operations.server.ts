@@ -107,7 +107,8 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
     const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
       actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? (s['props'] as Record<string, unknown>[]).map((p): Record<string, unknown> => ({ ...p, asset: p['asset'] || undefined })).filter(p => (p['kind'] === 'asset') === !!p['asset']).slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
-    const result = cartoonDirection.parse({ cast: diversifyCast(raw.cast as CastMember[]), scenes });
+    const { cinematicPass } = await import('./cinematic-pass');
+    const result = cartoonDirection.parse({ cast: diversifyCast(raw.cast as CastMember[]), scenes: cinematicPass(scenes as Parameters<typeof cinematicPass>[0]) });
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   };
