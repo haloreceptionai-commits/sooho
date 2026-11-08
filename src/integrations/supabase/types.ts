@@ -200,6 +200,30 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_connections: {
+        Row: {
+          channel_id: string | null
+          channel_title: string | null
+          refresh_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_id?: string | null
+          channel_title?: string | null
+          refresh_token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string | null
+          channel_title?: string | null
+          refresh_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

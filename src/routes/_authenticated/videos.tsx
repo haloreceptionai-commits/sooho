@@ -8,6 +8,7 @@ import { getVideoFile, saveVideoFile } from "@/lib/video-db";
 import { fmt } from "@/lib/story-engine";
 import { Page, Panel, Empty, btnPrimary, btnOutline, btnDark } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
+import { PublishButton } from "@/components/youtube";
 
 export const Route = createFileRoute("/_authenticated/videos")({
   head: () => ({
@@ -134,6 +135,7 @@ function Videos() {
                   <button className={`${btnDark} flex-1 px-3 text-xs`} onClick={() => setPlaying(v)}><Play className="h-3.5 w-3.5" /> Play now</button>
                   <button className={`${btnPrimary} flex-1 px-3 text-xs`} onClick={() => void download(v)}><Download className="h-3.5 w-3.5" /> Download</button>
                 </div>
+                <PublishButton v={v} className={`${btnOutline} mt-2 w-full px-3 text-xs`} />
               </div>
             </Panel>
           ))}

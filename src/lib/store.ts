@@ -27,6 +27,7 @@ export interface Video {
   id: string;
   title: string;
   description: string;
+  youtubeId?: string | undefined;
   input: VideoInput;
   status: VideoStatus;
   stage: Stage;

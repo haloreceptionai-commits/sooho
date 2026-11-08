@@ -8,6 +8,7 @@ const MODELS = [
   { key: "videoDeployment", name: "Video Assembly & Automation", role: "Reserved for automation; videos are assembled in the browser", icon: Clapperboard },
 ] as const;
 import { toast } from "sonner";
+import { YouTubePanel } from "@/components/youtube";
 import { actions, useStore, STYLES, DEFAULT_SETTINGS, type Settings } from "@/lib/store";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
 
@@ -45,6 +46,8 @@ function SettingsPage() {
           <Field name="Channel name"><input className={input} value={f.channelName} onChange={(e) => set("channelName", e.target.value)} /></Field>
           <Field name="Default visual style"><select className={input} value={f.defaultStyle} onChange={(e) => set("defaultStyle", e.target.value)}>{STYLES.map((v) => <option key={v}>{v}</option>)}</select></Field>
         </Panel>
+
+        <YouTubePanel />
 
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Azure OpenAI</h2>
