@@ -67,7 +67,8 @@ const NEAR_SEA = new Set(['wave', 'fish']);
 function propPose(prop, f, shot, index) {
   let [x0, y0, z0, s0] = PLACE[prop.place];
   if (prop.place !== 'ground_left' && prop.place !== 'ground_right') x0 += camAt(f).look[0];
-  if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -7; s0 = 3.4; y0 = -1.3; x0 -= .3; }
+  if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -13; s0 = 5; y0 = -1.6; x0 -= .3; }
+  if (prop.place === 'sea' && MODEL3D.has(prop.kind) && !NEAR_SEA.has(prop.kind)) { y0 = -.3; z0 = -18; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
   const ease = t * t * (3 - 2 * t);
   let x = x0 + index * (prop.place === 'sea' || prop.place === 'sky' ? 1.9 : .25), y = y0, z = z0, s = s0, roll = 0;
@@ -124,7 +125,7 @@ export const fxAt = (f, T) => {
     const x = near ? c.pos[0] + dx / len * 1.2 : (shot.actors[0]?.pos[0] || 0) + .6 * (i - .5);
     const z = near ? c.pos[2] + dz / len * 1.2 : .4;
     const y = near ? c.pos[1] - .9 : 0;
-    out.push({ x, y, z, s: kind === 'sparkle' ? .8 : kind === 'rain' ? 2.6 : near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
+    out.push({ x, y, z, s: kind === 'sparkle' ? .8 : kind === 'rain' ? 1.9 : near ? 1.4 : 1, shadow: false, blob: false, order: 3, alpha: .95,
       key: JSON.stringify(['fx', kind, f]), draw: p => T.FX_ART[kind](p, f) });
   });
   return out;
