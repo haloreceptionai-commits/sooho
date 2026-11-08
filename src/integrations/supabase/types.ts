@@ -99,7 +99,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      apply_render_event: {
+        Args: {
+          job_id: string
+          job_token: string
+          next_status: string
+          saved_path: string
+          video_patch: Json
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

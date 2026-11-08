@@ -15,6 +15,13 @@
       "when": 1794101593350,
       "tag": "0001_hosted_render_jobs",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794101778938,
+      "tag": "0002_atomic_render_events",
+      "breakpoints": true
     }
   ]
 }
