@@ -24,7 +24,12 @@ def infer(audio, weights, transcript, output):
     bundle=torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
     # Build the published bundle architecture, then load only the hash-checked local state.
     model=torchaudio.models.wav2vec2_base(aux_num_out=len(bundle.get_labels()))
-    model.load_state_dict(torch.load(weights,map_location='cpu',weights_only=True));model.eval()
+    state=torch.load(weights,map_location='cpu',weights_only=True)
+    # The official bundle removes fairseq's three unused special labels.
+    keep=[i for i in range(32) if i not in (1,2,3)]
+    state['aux.weight']=state['aux.weight'][keep]
+    state['aux.bias']=state['aux.bias'][keep]
+    model.load_state_dict(state);model.eval()
     with torch.inference_mode():
         logits,_=model(torch.from_numpy(waveform)[None,:])
         emissions=torch.log_softmax(logits[0],dim=-1).numpy()
