@@ -33,7 +33,8 @@ export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'fini
   const template = {
     containers: [{
       name: job.name,
-      image: env('AZURE_RENDER_IMAGE'),
+      // Drawing machines use the slim tag (no speech-alignment model) so 40 replicas start faster.
+      image: mode === 'finish' ? env('AZURE_RENDER_IMAGE').replace(/:[^:/]+$/, ':slim') : env('AZURE_RENDER_IMAGE'),
       resources: { cpu: 4, memory: '8Gi' },
       env: [
         { name: 'AZURE_BLOB_BASE', value: env('AZURE_BLOB_BASE') },

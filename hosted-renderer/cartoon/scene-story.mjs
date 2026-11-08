@@ -13,7 +13,8 @@ export const shotAt = f => {
 };
 export { LIGHTS };
 // Beat moods grade the same light instead of switching worlds.
-const MOOD = { calm: {}, tense: { vig: .36, sat: .95, hemi: .9 }, reveal: { vig: .16, sat: 1.22, hemi: 1.25 } };
+// Cinematic grade: a soft vignette always, cool low-key contrast on tension, warm bright payoff.
+const MOOD = { calm: { vig: .22 }, tense: { vig: .44, sat: .98, hemi: .82, gain: '#d6e0ff' }, reveal: { vig: .2, sat: 1.28, hemi: 1.3, gain: '#fff1d6' } };
 export const lightFor = s => {
   const light = LIGHTS[s.light];
   if (!light) throw Error('Unsupported light');
