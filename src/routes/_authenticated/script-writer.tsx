@@ -14,6 +14,7 @@ import { ARCHETYPES } from '@/lib/viral-brain';
 import { factCheck, researchStory, generateHooks, generatePlan, judgeScript, type Plan, type FactSheet } from '@/lib/pipeline.functions';
 import { hookIssues, hookTextIssues, splitSentences, spokenBy, validateStory, storyScore, wc, type GateResult } from '@/lib/story-v2';
 import { motionPrompt, scriptExport, scriptTimeline } from '@/lib/script-writer';
+import { eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
 
 export const Route = createFileRoute('/_authenticated/script-writer')({
   head: () => ({ meta: [
@@ -53,7 +54,7 @@ function ScriptWriter() {
       const rs = await research({ data: { topic, facts: factText, deployment } });
       setStage('Writing 10 hooks…');
       const candidates = await hooks({ data: { topic, facts: factText, research: JSON.stringify(rs), deployment } });
-      const ranked = candidates.all.filter(h => !hookIssues(h.line, rs.anchors, factText).length && !hookTextIssues(h.text, h.line).length).sort((a, b) => (b.curiosity + b.clarity + b.visualness + b.speakability) - (a.curiosity + a.clarity + a.visualness + a.speakability));
+      const ranked = eligibleHooks(candidates.all, rs.anchors, factText).sort((a, b) => (b.curiosity + b.clarity + b.visualness + b.speakability) - (a.curiosity + a.clarity + a.visualness + a.speakability));
       const hook = ranked[0];
       if (!hook) throw Error('No opening passed the hook checks. Choose a clearer topic and try again.');
       const arch = ARCHETYPES.find(a => a.id === source?.archetype);
@@ -70,11 +71,13 @@ function ScriptWriter() {
         return storyScore(report, j, p.scenes.length);
       };
       let gate = await evaluate(plan);
+      let draft = plan, draftGate = gate;
       for (let attempt = 1; attempt <= 2 && !gate.ready; attempt++) {
         setStage(`Improving the draft (${attempt}/2)…`);
-        const revised = await write({ data: { ...base, repair: `${gate.blockers.join('\n')}\nPrevious draft:\n${plan.scenes.map(s => `[${s.beat}] ${s.narration}`).join(' ')}` } });
+        const revised = await write({ data: { ...base, repair: repairBrief(draft, draftGate, rs.anchors) } });
         const next = await evaluate(revised);
-        if (next.score >= gate.score) { plan = revised; gate = next; }
+        draft = revised; draftGate = next;
+        if (preferRepair(gate, next)) { plan = revised; gate = next; }
       }
       setResult({ plan, facts, gate, style, format });
     } catch (e) { setError(e instanceof Error ? e.message : 'Script generation failed'); }
