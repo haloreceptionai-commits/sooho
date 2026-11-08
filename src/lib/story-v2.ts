@@ -281,7 +281,7 @@ export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: nu
   }
   const score = Object.values(parts).reduce((a, b) => a + b, 0);
   const passBHard = !j || j.passB >= 4;
-  return { score, ready: score >= 85 && passBHard && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
+  return { score, ready: score >= 85 && r.failed.length === 0 && passBHard && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
 }
 
 /** Final QA = 90% script gate + 10% production (pacing, audio, resolution, captions). */

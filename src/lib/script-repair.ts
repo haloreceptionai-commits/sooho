@@ -21,6 +21,12 @@ export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors): str
   return `Fix ALL failures below. Rewrite the opening or rearrange scenes when needed; do not preserve broken lines or a broken hook. Never invent events to satisfy a beat. Keep uncertainty from the checked facts.
 ${gate.blockers.map(b => `- ${b}`).join('\n')}
 Required spoken anchors: ${JSON.stringify(anchors)}.
+OPENING REWRITE CONTRACT (mandatory, measured on scene narration, not the separate script field):
+- First sentence: 8-12 words; literally say "${anchors.subject}" in its first 8 words and include "${anchors.place}" or "${anchors.year}". Do not open with a date. The preferred hook is NOT locked during repairs.
+- By word 20: literally say "${anchors.stakes}", "${anchors.year}" and "${anchors.place}" as well as the subject. Combine the date/place/stakes into the hook when possible; omit ornamental scene-description lines.
+- Start a plain question about "${anchors.subject}" by word 20, max 12 words. Only one question starts before word 39.
+- By word 26: say "${plan.hero.name} wants/needs/must ...". By word 38: say "${anchors.org}". Put this before tries or ornamental descriptions.
+- Set script to the exact concatenation of the scene narrations; calculate all timings from those words, not guessed beat times.
 Current word count: ${words}. Hero scenes: ${heroCount}/${plan.scenes.length}; need at least ${Math.ceil(plan.scenes.length * 0.6)}.
 Wide/aerial scenes: need at least ${Math.ceil(plan.scenes.length * 0.4)}; change BOTH shot and image_prompt, never relabel a close-up.
 Close main in a scene starting between words ${Math.ceil(words * 0.65)} and ${Math.floor(words * 0.75)}. Recalculate after editing.

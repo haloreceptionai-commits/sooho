@@ -42,6 +42,15 @@ describe("gold rewrite passes every blocking validator", () => {
     const g = storyScore(validateStory(GOLD_STORY()), { passA: 4, passB: 3, passC: true, payoff: "", weakest: "", readAloud: [], literal: [], filler: [] }, 11);
     expect(g.ready).toBe(false);
   });
+  it('cannot pass a blocking anchor failure just because the judges give a high score', () => {
+    const report = validateStory(GOLD_STORY());
+    const failure = { id: 'V1', pass: false, msg: 'Subject never spoken by 8s' };
+    report.checks = report.checks.map(c => c.id === 'V1' ? failure : c);
+    report.failed = [failure];
+    const result = storyScore(report, { passA: 4, passB: 4, passC: true, payoff: '', weakest: '', readAloud: [], literal: [], filler: [] }, 11);
+    expect(result.score).toBeGreaterThanOrEqual(85);
+    expect(result.ready).toBe(false);
+  });
 });
 
 describe("single rules", () => {
