@@ -23,3 +23,13 @@ describe("kid-simple script rules", () => {
     expect(validateScript(sc("Most people think oil is useless."), "x", 60).issues.some((i) => i.includes("false belief"))).toBe(false);
   });
 });
+
+import { hardWords as hw } from "@/lib/sound-words";
+describe("kid-level words", () => {
+  it("flags grown-up words even when short", () => {
+    expect(hw("They conceal the massive vessel")).toEqual(["conceal", "massive", "vessel"]);
+  });
+  it("keeps simple words", () => {
+    expect(hw("They hide the big ship")).toEqual([]);
+  });
+});
