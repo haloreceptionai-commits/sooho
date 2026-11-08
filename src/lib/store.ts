@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
+import { cloudProgress } from '@/lib/video-progress';
 
 export type Format = "long" | "short";
 export type VideoStatus = "running" | "done" | "failed";
@@ -101,6 +102,10 @@ const KEY = "chronicle-studio-v2";
 let state: State = seed;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
+const activeVideoIds = new Set<string>();
+export function setVideoActive(id: string, active: boolean) {
+  if (active) activeVideoIds.add(id); else activeVideoIds.delete(id);
+}
 
 export function hydrateStore() {
   try {
@@ -109,10 +114,8 @@ export function hydrateStore() {
       const parsed = JSON.parse(raw) as Partial<State>;
       state = {
         settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } return st; })(),
-        // jobs that were running when the page closed can't resume
-        videos: (parsed.videos ?? []).map((v) =>
-          v.status === "running" && !v.hostedRender ? { ...v, status: "failed", error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : v.scriptCheckpoint ? "Page was closed. Script and finished pictures/voice are saved — click Resume to continue." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint || v.scriptCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v,
-        ),
+        // A cached record does not establish whether another tab is still generating.
+        videos: parsed.videos ?? [],
       };
     }
     emit();
@@ -213,16 +216,15 @@ export async function syncFromCloud() {
   try {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
-    const { data, error } = await supabase.from("videos").select("id, data, file_path").order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("videos").select("id, data, file_path, updated_at").order("created_at", { ascending: false });
     if (error) throw error;
     const cloud = (data ?? []).map((r) => {
       const v = r.data as unknown as Video;
-      const running = v.status === "running" && !v.hostedRender && !state.videos.some((x) => x.id === v.id && x.status === "running");
-      return running ? { ...v, status: "failed" as const, error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v;
+      return cloudProgress(v, r.updated_at);
     });
     const ids = new Set(cloud.map((v) => v.id));
     const localOnly = state.videos.filter((v) => !ids.has(v.id));
-    const live = new Map(state.videos.filter((v) => v.status === "running" && !v.hostedRender).map((v) => [v.id, v]));
+    const live = new Map(state.videos.filter((v) => activeVideoIds.has(v.id) && v.status === "running" && !v.hostedRender).map((v) => [v.id, v]));
     state = { ...state, videos: [...localOnly, ...cloud.map((v) => v.hostedRender ? v : live.get(v.id) ?? v)].sort((a, b) => b.createdAt - a.createdAt) };
     persist(); emit();
     // Move videos that only existed in this browser into the cloud library.

@@ -1,5 +1,7 @@
 # Roadmap — Cartoon Engine v2
 
+- [x] Correct false interrupted status across browsers: use cloud update freshness, preserve only actively orchestrated local jobs, no automatic restart; five regression tests and signed-in Dragon Jar display verified.
+
 - [x] Fix Dragon Jar repair defects: eligible hooks only, full-plan repair context, latest-draft progression, blocker-aware selection and mandatory deterministic gates; 122 tests passed, authenticated script-only checks exercised.
 - [ ] Confirm Dragon Jar produces a ready script: live script-only trials still failed quality checks; bounded AI rewrites do not yet reliably converge. No media generated and voice unchanged.
 

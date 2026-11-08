@@ -1,6 +1,6 @@
 // Client orchestrator: script → voice + images → render → save. Runs in the background
 // while the user moves around the app.
-import { actions, flushVideo, getState, type VideoInput } from "@/lib/store";
+import { actions, flushVideo, getState, setVideoActive, type VideoInput } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { seedanceRuns } from "@/lib/seedance";
 import { submitSeedance, checkSeedance } from "@/lib/seedance.functions";
@@ -123,6 +123,7 @@ export async function runVideo(id: string, input: VideoInput) {
   removed.delete(id);
   actions.updateVideo(id, { removed: false });
   running.add(id);
+  setVideoActive(id, true);
   keepAlive();
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
@@ -483,6 +484,7 @@ export async function runVideo(id: string, input: VideoInput) {
     if (!removed.has(id)) up({ status: "failed", error: msg, detail: "Failed" });
   } finally {
     running.delete(id);
+    setVideoActive(id, false);
     keepAlive();
   }
 }
