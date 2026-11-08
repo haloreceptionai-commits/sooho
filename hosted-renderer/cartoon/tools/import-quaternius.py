@@ -44,7 +44,7 @@ def height(pack, name):
   for pat, h in SIZE:
     if re.search(pat, name): return h
   return TOPIC[pack][1]
-def pack_gltf(src_path, out_path, texdir):
+def pack_gltf(src_path, out_path, texdir, pack_root):
   # .gltf + external .bin -> one .glb. Only base-colour textures are kept (the toon shader ignores PBR maps);
   # they are downscaled once into the pack's shared Textures/ folder, which prepare-scene copies with the model.
   import base64
@@ -69,7 +69,10 @@ def pack_gltf(src_path, out_path, texdir):
       im.clear(); im['uri'] = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='; continue
     name = re.sub(r'[^A-Za-z0-9_-]+', '_', Path(u).stem) + '.png'; dst = texdir / name
     if not dst.exists():
-      texdir.mkdir(parents=True, exist_ok=True); img = Image.open(src_path.parent / u.replace('%20', ' ')).convert('RGBA'); img.thumbnail((512, 512)); img.save(dst, optimize=True)
+      texdir.mkdir(parents=True, exist_ok=True); f = src_path.parent / u.replace('%20', ' ')
+      if not f.exists():  # megakits keep textures in a shared folder elsewhere in the pack
+        f = next((q for q in pack_root.rglob(Path(u).name.replace('%20', ' ')) if 'normal' not in str(q).lower()), f)
+      img = Image.open(f).convert('RGBA'); img.thumbnail((512, 512)); img.save(dst, optimize=True)
     im.clear(); im['uri'] = f'Textures/{name}'
   while len(blob) % 4: blob.append(0)
   j['buffers'] = [{'byteLength': len(blob)}]
@@ -98,7 +101,7 @@ for pack, (topic, _) in TOPIC.items():
     with tempfile.TemporaryDirectory() as t:
       g = Path(t) / 'm.glb'
       if fbx.suffix.lower() == '.gltf':
-        try: pack_gltf(fbx, g, dest / 'Textures')
+        try: pack_gltf(fbx, g, dest / 'Textures', base)
         except Exception: skipped += 1; continue
       else:
         r = subprocess.run([conv, '-b', '-i', str(fbx), '-o', f'{t}/m'], capture_output=True, text=True, cwd=fbx.parent, timeout=120)
