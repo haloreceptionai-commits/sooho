@@ -380,7 +380,7 @@ export const generatePlan = createServerFn({ method: "POST" }).middleware([requi
   .handler(async ({ data }): Promise<Plan> => {
     const short = data.format === "short";
     const D = data.durationSec;
-    const words = Math.round(D * 2.6); // ~2.6 spoken words per second (Atlas pace)
+    const words = Math.round(D * (short ? 2.6 : 2.37)); // Atlas Shorts pace ~153 wpm; long-form narrator ~142 wpm
     const scenes = short ? Math.max(8, Math.round(D / 3)) : Math.min(90, Math.max(14, Math.round(D / 6)));
     const perScene = Math.round(words / scenes);
     const at = (f: number) => Math.round(D * f);
@@ -438,6 +438,17 @@ VISUALS (one scene ≈ 3s, one clear moment):
 
 Write the WHOLE narration first in "script" (read it aloud in your head; fix anything that doesn't parse), THEN split that exact text, word for word, into the scenes' "narration" fields.
 
+${short ? "" : `
+LONG-FORM RETENTION (this is a ${Math.round(D / 60)}-minute video; these rules override the Shorts timings above where they differ):
+- Open with the same hook, main question and hero want inside the first 20 seconds, then ONE promise line before 30s that the ending pays off ("By the end, you will see why that one bucket saved the whole ship."). Never say "in this video".
+- Split the story into CHAPTERS of ~60-90 seconds (${Math.max(3, Math.round(D / 75))} chapters). Each chapter has its own small question: open it in the chapter's first scene (loop_opened "c1", "c2", ...) and answer it in that chapter's last scene.
+- STACK THE LOOPS: open the next chapter's question BEFORE you answer the current one ("That fixed the leak. But it caused a much bigger problem."), so at every moment the viewer is waiting for at least one answer. The main question stays open until ~70%.
+- Every 15-25 seconds add a re-hook: a surprising number, a reversal ("But it didn't work."), a ticking stake, or a tease of what's coming ("And that's not even the strangest part.").
+- A big twist at ~50% that changes what the viewer thought was going on.
+- Each chapter moves the SAME story forward in time (new try, new obstacle, new discovery). More detail, more tries and more real facts than a Short, but still one story, never a list.
+- Narrator voice is a calm, warm documentary storyteller: sentences may run up to 16 words now and then, but most stay short and spoken.
+- One scene ≈ 5-7 seconds of narration; vary shots and camera moves so the picture changes at every scene.
+- Last 20 seconds: answer the main question plainly, then a closing line that makes the payoff stick.`}
 EXAMPLES (learn the structure, never reuse content):
 ${FEW_SHOT}`;
     const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube story documentary, 16:9 (same structure, more tries and more detail)"}.
@@ -465,7 +476,8 @@ export const generateVoice = createServerFn({ method: "POST" }).middleware([requ
   })
   .handler(async ({ data }): Promise<{ audio: string; engine: "azure" | "lovable" }> => {
     // Atlas narrator: exact voice + direction of the approved audition (renderer applies the 0.85 pace).
-    const direction = "A grounded male baritone with bright, excited energy. You are thrilled to tell one friend a fascinating secret fact. Speak a little faster than a calm documentary, lively and upbeat, with a knowing grin in the voice, punchy emphasis on the twist lines, rising anticipation, then delighted amazement at the reveal. Keep every word crisp and clear, short natural pauses only. Not shouting, not whispering, not rushed";
+    const longDirection = "A warm, grounded male documentary narrator telling a true story to a curious friend. Calm, clear and confident at a natural storytelling pace, never rushed; gentle curiosity rising into each question, a small pause before every answer, quiet intensity in tense moments and real wonder at the reveal. Every word crisp and easy to follow. Not shouting, not whispering, not sleepy";
+    const direction = data.style === "long" ? longDirection : "A grounded male baritone with bright, excited energy. You are thrilled to tell one friend a fascinating secret fact. Speak a little faster than a calm documentary, lively and upbeat, with a knowing grin in the voice, punchy emphasis on the twist lines, rising anticipation, then delighted amazement at the reveal. Keep every word crisp and clear, short natural pauses only. Not shouting, not whispering, not rushed";
     // 2) Fallback: Lovable AI speech (Gemini TTS)
     const k = keys();
     const res = await fetch(`${LOVABLE_AI}/audio/speech`, {
