@@ -105,7 +105,7 @@ export function hydrateStore() {
         settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } return st; })(),
         // jobs that were running when the page closed can't resume
         videos: (parsed.videos ?? []).map((v) =>
-          v.status === "running" ? { ...v, status: "failed", error: "Interrupted — the page was closed while generating.", detail: "Interrupted" } : v,
+          v.status === "running" ? { ...v, status: "failed", error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v,
         ),
       };
     }
@@ -211,7 +211,7 @@ export async function syncFromCloud() {
     const cloud = (data ?? []).map((r) => {
       const v = r.data as unknown as Video;
       const running = v.status === "running" && !state.videos.some((x) => x.id === v.id && x.status === "running");
-      return running ? { ...v, status: "failed" as const, error: "Interrupted — the page was closed while generating.", detail: "Interrupted" } : v;
+      return running ? { ...v, status: "failed" as const, error: v.seedanceCheckpoint ? "Saved animation is safe. Click Resume to continue without restarting." : "Interrupted — the page was closed while generating.", detail: v.seedanceCheckpoint ? "Saved · ready to resume" : "Interrupted" } : v;
     });
     const ids = new Set(cloud.map((v) => v.id));
     const localOnly = state.videos.filter((v) => !ids.has(v.id));
