@@ -4,12 +4,11 @@ import { styleAnchor } from "@/lib/styles";
 import { FEW_SHOT } from "@/lib/story-v2";
 import { cartoonDirection, OUTFITS, VOCAB } from '@/lib/cartoon-job';
 import { z } from 'zod';
+import { requestAzureVoice } from '@/lib/azure-voice';
 
-// Server-side calls to Azure OpenAI (through the Lovable connector gateway) and,
-// for narration when no Azure speech deployment exists, Lovable AI speech.
+// All script, image and narration calls use the owner's Azure connection.
 
 const AZURE_GATEWAY = "https://connector-gateway.lovable.dev/udc_azure_openai";
-const LOVABLE_AI = "https://ai.gateway.lovable.dev/v1";
 const API_VERSION = "2025-04-01-preview";
 
 const safeName = (s: string) => {
@@ -472,26 +471,12 @@ export const generateVoice = createServerFn({ method: "POST" }).middleware([requ
   .inputValidator((d: VoiceInput) => {
     if (!d.text?.trim() || d.text.length > 4000) throw new Error("Narration text must be 1–4000 characters");
     if (!VOICES.has(d.voice)) throw new Error("Unknown voice");
+    safeName(d.deployment);
     return d;
   })
-  .handler(async ({ data }): Promise<{ audio: string; engine: "azure" | "lovable" }> => {
-    // Atlas narrator: exact voice + direction of the approved audition (renderer applies the 0.85 pace).
-    const longDirection = "A warm, grounded male documentary narrator telling a true story to a curious friend. Calm, clear and confident at a natural storytelling pace, never rushed; gentle curiosity rising into each question, a small pause before every answer, quiet intensity in tense moments and real wonder at the reveal. Every word crisp and easy to follow. Not shouting, not whispering, not sleepy";
-    const direction = data.style === "long" ? longDirection : "A grounded male baritone with bright, excited energy. You are thrilled to tell one friend a fascinating secret fact. Speak a little faster than a calm documentary, lively and upbeat, with a knowing grin in the voice, punchy emphasis on the twist lines, rising anticipation, then delighted amazement at the reveal. Keep every word crisp and clear, short natural pauses only. Not shouting, not whispering, not rushed";
-    // 2) Fallback: Lovable AI speech (Gemini TTS)
-    const k = keys();
-    const res = await fetch(`${LOVABLE_AI}/audio/speech`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${k.lovable}`, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
-      body: JSON.stringify({
-        model: "google/gemini-3.1-flash-tts-preview",
-        contents: [{ role: "user", parts: [{ text: `${direction}: Read the following narration aloud, word for word. Narration: ${data.text}` }] }],
-        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } },
-        stream_format: "audio",
-      }),
-    });
-    if (!res.ok) { console.error(`Voice text was: ${data.text.slice(0, 600)}`); await fail(res, "Voice"); }
-    return { audio: toBase64(await res.arrayBuffer()), engine: "lovable" };
+  .handler(async ({ data }): Promise<{ audio: string; engine: "azure"; deployment: string; voice: string }> => {
+    const audio = await requestAzureVoice(data, azure);
+    return { audio: toBase64(audio), engine: "azure", deployment: data.deployment, voice: data.voice };
   });
 
 // ---------------- Images ----------------
