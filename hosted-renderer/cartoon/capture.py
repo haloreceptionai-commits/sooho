@@ -70,7 +70,10 @@ async def capture(args):
                 total = await page.evaluate('window.TOTAL')
                 if not isinstance(total, int) or total < 1 or args.first < 0 or args.last < args.first or args.last >= total:
                     raise ValueError('Invalid frame range')
-                for frame in range(args.first, args.last + 1):
+                selected=getattr(args,'selected',None)
+                indices=sorted(set(int(f) for f in selected.split(','))) if selected else range(args.first,args.last+1)
+                if any(f<args.first or f>args.last for f in indices):raise ValueError('Invalid selected frame')
+                for frame in indices:
                     if (out / 'CANCEL').exists(): raise ValueError('Cancelled')
                     file = out / f'f{frame:06d}.jpg'
                     if valid_frame(file, saved['frames'].get(str(frame))): continue
@@ -91,4 +94,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--web', required=True); parser.add_argument('--out', required=True)
     parser.add_argument('--first', type=int, required=True); parser.add_argument('--last', type=int, required=True)
+    parser.add_argument('--selected')
     asyncio.run(capture(parser.parse_args()))

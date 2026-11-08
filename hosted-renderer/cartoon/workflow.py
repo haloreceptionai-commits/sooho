@@ -47,8 +47,8 @@ def main():
         if spec is None or spec.loader is None: raise ValueError('Missing sheet utility')
         sheet_tool=importlib.util.module_from_spec(spec);spec.loader.exec_module(sheet_tool)
         stage('preflight')
-        for frame in sheet_tool.preflight_frames(m['shots'],m['words'],total):
-            run(sys.executable,str(ROOT/'capture.py'),'--web',str(prepared/'web'),'--out',str(frames),'--first',str(frame),'--last',str(frame))
+        selected=sheet_tool.preflight_frames(m['shots'],m['words'],total)
+        run(sys.executable,str(ROOT/'capture.py'),'--web',str(prepared/'web'),'--out',str(frames),'--first','0','--last',str(total-1),'--selected',','.join(map(str,selected)))
         run(sys.executable,str(ROOT/'contact-sheet.py'),'--frames',str(frames),'--manifest',str(manifest),'--out',str(work/'sheets'))
         stage('review_required')
         atomic_json(work/'review-request.json',{'input_hash':signature,'engine_hash':state['stages']['prepared'],'sheets':sorted(p.name for p in (work/'sheets').glob('*.jpg'))})
@@ -60,9 +60,7 @@ def main():
         raise ValueError('Review does not match immutable scene')
     stage('frames')
     # Small bounded ranges, checkpoints survive process interruption.
-    for first in range(0,total,60):
-        if (work/'CANCEL').exists(): raise ValueError('Cancelled')
-        run(sys.executable,str(ROOT/'capture.py'),'--web',str(prepared/'web'),'--out',str(frames),'--first',str(first),'--last',str(min(total-1,first+59)))
+    run(sys.executable,str(ROOT/'capture.py'),'--web',str(prepared/'web'),'--out',str(frames),'--first','0','--last',str(total-1))
     stage('sound')
     decoded=work/'voice.wav'
     run('ffmpeg','-v','error','-y','-i',str(voice),'-ar','48000','-ac','1','-c:a','pcm_s16le',str(decoded))

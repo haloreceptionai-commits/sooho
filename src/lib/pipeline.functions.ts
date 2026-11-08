@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { styleAnchor } from "@/lib/styles";
 import { FEW_SHOT } from "@/lib/story-v2";
+import { cartoonDirection } from '@/lib/cartoon-job';
+import { z } from 'zod';
 
 // Server-side calls to Azure OpenAI (through the Lovable connector gateway) and,
 // for narration when no Azure speech deployment exists, Lovable AI speech.
@@ -88,6 +90,21 @@ async function azureJson<T>(deployment: string, system: string, user: string, na
 // ---------------- Fact check ----------------
 
 export interface Claim { claim: string; sources: string[]; date: string; confidence: "high" | "medium" | "low" }
+export const directCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { scenes: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(120), deployment: z.string().min(1).max(64) }).parse(d))
+  .handler(async ({ data }) => {
+    const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes'], properties: {
+      cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: ['sailor', 'worker', 'scholar'] } } } },
+      scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['world', 'light', 'action', 'expression', 'actor', 'wide'], properties: {
+        world: { type: 'string', enum: ['ship', 'town', 'bridge', 'lab', 'landscape'] }, light: { type: 'string', enum: ['day', 'golden', 'night_bright'] }, action: { type: 'string', enum: ['idle', 'walk', 'point', 'lift', 'pour', 'react'] }, expression: { type: 'string', enum: ['neutral', 'grin', 'stern', 'nervous', 'shock'] }, actor: { type: 'string' }, wide: { type: 'boolean' },
+      } } },
+    } };
+    const result = cartoonDirection.parse(await azureJson(data.deployment,
+      'Direct this original story using ONLY the implemented bright outlined cartoon capabilities. One continuous hero, maximum three cast, fixed seeds. For each input scene return exactly one direction in order. The only hand prop is a small pot for lift/pour; never assign those to other objects. Worlds are ship deck/sea, town street, timber bridge, simple lab table, grass landscape. If the central story needs unimplemented physical action/props (machines, flight, battles, underwater, space, animals), return empty scenes instead of pretending these capabilities exist. No generated code. Wide shots for setting/process, closer framing for hand actions. Expressions only from the enum.',
+      data.scenes.map((s, i) => `${i}: ${s}`).join('\n'), 'cartoon_direction', schema, 'Cartoon director'));
+    if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
+    return result;
+  });
 export interface FactSheet { claims: Claim[]; myth: string; reality: string; hedge: string }
 const factSchema = {
   type: "object", additionalProperties: false, required: ["claims", "myth", "reality", "hedge"],

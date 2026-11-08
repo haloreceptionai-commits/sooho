@@ -27,7 +27,7 @@ export const cartoonManifest = z.object({
   if (ids.size !== m.cast.length) issue('Cast IDs must be unique');
   m.words.forEach((w, i) => {
     if (w.end <= w.start || w.end > m.narration.samples / m.narration.rate || (i > 0 && w.start < (m.words[i - 1]?.end ?? 0))) issue('Word timing must be monotonic and inside narration');
-    if (w.confidence < 0.9) issue('Word alignment needs review');
+    // Acoustic confidence is retained as evidence; cloud approval, never a score alone, authorizes rendering.
   });
   m.shots.forEach(s => {
     if (s.start !== end || s.end <= s.start || s.end > total) issue('Shots must cover a continuous half-open frame timeline');

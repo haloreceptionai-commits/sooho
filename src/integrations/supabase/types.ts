@@ -109,6 +109,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      approve_cartoon_render: {
+        Args: {
+          job_id: string
+          next_token_hash: string
+          owner_id: string
+          review_hash: string
+        }
+        Returns: boolean
+      }
       cancel_render_job: {
         Args: { job_id: string; owner_id: string }
         Returns: boolean

@@ -20,7 +20,7 @@ export interface VideoInput {
 }
 
 /** "own" = stills + camera motion (no AI video); "omni" = Gemini Omni AI-animated clips. */
-export type VideoEngine = "own" | "omni" | "seedance";
+export type VideoEngine = "own" | "omni" | "seedance" | "cartoon";
 
 export interface Video {
   id: string;
@@ -43,6 +43,8 @@ export interface Video {
   assemblyCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
   assemblyClips?: { path: string; scenes: number[] }[];
   hostedRender?: { id: string; status: string };
+  cartoonCheckpoint?: import('@/lib/cartoon-job').CartoonStart;
+  cartoonReview?: import('@/lib/cartoon-job').CartoonReview;
   qa?: { score: number; parts: Record<string, number> } | undefined;
   hooks?: { best: string; runnerUp: string } | undefined;
   facts?: { myth: string; reality: string; claims: number; confidence: number } | undefined;

@@ -3,6 +3,7 @@ import { actions, type Video } from "@/lib/store";
 import { runVideo, removeFromQueue } from "@/lib/pipeline";
 import { btnOutline } from "@/components/page";
 import { Button } from "@/components/ui/button";
+import { CartoonReviewPanel } from '@/components/cartoon-review';
 
 const STAGES = [
   { key: "script", label: "Script", icon: FileText },
@@ -56,6 +57,7 @@ export function VideoJob({ v }: { v: Video }) {
           {!v.hostedRender && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> {v.seedanceCheckpoint || v.assemblyCheckpoint ? "Resume" : "Retry"}</Button>}
         </div>
       )}
+      <CartoonReviewPanel video={v} />
     </div>
   );
 }
