@@ -201,8 +201,8 @@ export function validateStory(s: StoryInput): StoryReport {
   const labels = sents.filter((x) => LABEL.test(x));
   const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || (wc(x) <= 4 && !VERBISH.test(x))) && !/\?["']?$/.test(x));
   const budget = s.durationSec * 2.6;
-  const langOk = longS <= 1 && hard.length <= 3 && !labels.length && frags.length <= 2 && words <= budget * 1.15 && words >= budget * 0.8;
-  add("LANG", langOk, langOk ? "Plain short sentences" : [longS > 1 ? `${longS} sentences over 12 words` : "", hard.length > 3 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
+  const langOk = longS <= 1 && hard.length <= 2 && !labels.length && frags.length <= 2 && words <= budget * 1.15 && words >= budget * 0.8;
+  add("LANG", langOk, langOk ? "Plain short sentences" : [longS > 1 ? `${longS} sentences over 12 words` : "", hard.length > 2 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.15 ? `too long: ${words} words (max ${Math.round(budget * 1.15)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
 
   const ri = s.scenes.findIndex((x) => x.beat === "reveal");
   return { checks, failed: checks.filter((c) => !c.pass), words, revealSec: ri >= 0 ? starts[ri]! : 0, shotMix };
