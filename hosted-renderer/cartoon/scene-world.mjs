@@ -235,11 +235,15 @@ const LIBRARY=new Map();
     const box=new THREE.Box3().setFromObject(obj,!!g.animations?.length),size=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
     const k=e.h/Math.max(size.y,1e-3*Math.max(size.x,size.z),1e-4); obj.position.set(-c.x*k,-box.min.y*k,-c.z*k); obj.scale.setScalar(k);
     LIBRARY.set(e.id,{e,obj,clips:g.animations||[]}); } }
+// Ink/depth pass for rigged meshes: same output as ndMat, but skinned so outlines follow the animated pose.
+const SKIN_ND=new THREE.ShaderMaterial({side:THREE.DoubleSide,
+  vertexShader:`#include <common>\n#include <skinning_pars_vertex>\nvarying vec3 vN; varying float vD; void main(){\n#include <skinbase_vertex>\n#include <beginnormal_vertex>\n#include <skinnormal_vertex>\n#include <begin_vertex>\n#include <skinning_vertex>\n vN=normalize(normalMatrix*objectNormal); vec4 mv=modelViewMatrix*vec4(transformed,1.); vD=-mv.z; gl_Position=projectionMatrix*mv; }`,
+  fragmentShader:`varying vec3 vN; varying float vD; void main(){ vec3 n=normalize(vN); if(!gl_FrontFacing) n=-n; gl_FragColor=vec4(n*.5+.5,vD); }`});
 function libraryModel(id){ const L=LIBRARY.get(id); if(!L)throw Error('Library object not prepared'); const g=new THREE.Group();
   if(L.map){ const h=L.e.h,m=new THREE.Mesh(new THREE.PlaneGeometry(h*L.aspect,h),new THREE.MeshBasicMaterial({map:L.map,alphaTest:.5,side:THREE.DoubleSide}));
     m.position.y=h/2; m.userData.nd=cardNd(L.map); m.userData.billboard=true; g.add(m); }
   else if(L.clips.length){ // rigged characters/animals: skeleton-safe clone with a mixer seeked per frame (deterministic)
-    const o=globalThis.__SKEL.clone(L.obj); g.add(o); const mixer=new THREE.AnimationMixer(o);
+    const o=globalThis.__SKEL.clone(L.obj); g.add(o); o.traverse(m=>{if(m.isSkinnedMesh)m.userData.nd=SKIN_ND;}); const mixer=new THREE.AnimationMixer(o);
     const pick=re=>L.clips.find(c=>re.test(c.name)); g.userData.clips={mixer,acts:{}};
     for(const [k,re] of [['idle',/idle|standing|breath/i],['walk',/walk/i],['run',/run|gallop|swim|fly/i],['cheer',/clap|wave|yes|victory|jump/i]]){const c=pick(re);if(c)g.userData.clips.acts[k]=mixer.clipAction(c);}
     if(!g.userData.clips.acts.idle)g.userData.clips.acts.idle=mixer.clipAction(L.clips[0]); }
