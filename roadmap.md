@@ -25,3 +25,5 @@
 
 - [x] Finish Kevlar cartoon
 - [x] Long-form resume after page close (script + media saved as made)
+- [ ] Route all new narration through the owner's Azure OpenAI connection, without another-provider fallback
+- [ ] Verify and save a test video using Azure narration
