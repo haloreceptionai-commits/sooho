@@ -1,10 +1,12 @@
 # Roadmap — Cartoon Engine v2
 
-- [ ] Stage 1: Visual Director (per-sentence props/actors/shot/camera/cues) + manifest v2
-- [ ] Stage 2: Performance (lip sync, expressions, more actions, multi-actor)
-- [ ] Stage 3: Props & set pieces library
-- [ ] Stage 4: Cinematography (shot types, moves, subject framing)
-- [ ] Stage 5: Worlds & effects
-- [ ] Stage 6: Captions & sound cues
-- [ ] Stage 7: Quality gates (per-sentence review frames)
-- [ ] Azure test render after each stage
+- [x] Stage 1: Visual Director (per-sentence props/actors/shot/camera/cues) + manifest v2
+- [x] Stage 2: Performance (lip sync on dialogue, 11 expressions, 20 actions, up to 3 actors)
+- [x] Stage 3: Props library (42 props, moving set pieces)
+- [x] Stage 4: Cinematography (8 shot types, 8 moves, group framing, ~3 s second angles)
+- [x] Stage 5: Worlds & effects (9 worlds, animated sea, rain/smoke/fire/sparkle/wind/lightning, moods)
+- [x] Stage 6: Captions (white + yellow key word) & 12 sound cue types
+- [x] Stage 7: Review sheets labelled with sentence + direction
+- [x] Azure end-to-end test (34 s Storm Oil, real Visual Director)
+- [ ] Follow-up: preview stage takes ~7 min on one machine; split review frames across machines
+- [ ] Follow-up: a real-hand "grab shoulder" contact pose and side-view walking
