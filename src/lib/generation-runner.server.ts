@@ -62,7 +62,8 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
     return path;
   }
   const script = await writeBackgroundScript(input, settings, { call }, up, record['scriptCheckpoint'] as unknown as ScriptCheckpoint | undefined);
-  if (!script.gate.ready || !script.judgeOk) throw Error(`Story needs review: ${script.gate.blockers.join('; ')}`);
+  if (!script.plan.scenes.length) throw Error('The script came back empty');
+  if (!script.gate.ready || !script.judgeOk) await up({ checks: script.gate.blockers });
   const plan = script.plan;
   await up({ title: plan.title, description: plan.description, sceneCount: plan.scenes.length, status: 'running', stage: 'voice', progress: 12 });
   const context = { supabase: db, userId: job.user_id };
