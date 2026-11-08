@@ -41,6 +41,7 @@ export interface Video {
   seedanceCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
   seedanceClips?: Record<string, { id?: string; path?: string; error?: string }>;
   assemblyCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
+  assemblyClips?: { path: string; scenes: number[] }[];
   hostedRender?: { id: string; status: string };
   qa?: { score: number; parts: Record<string, number> } | undefined;
   hooks?: { best: string; runnerUp: string } | undefined;

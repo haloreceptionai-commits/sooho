@@ -52,7 +52,7 @@ export const submitHostedRender = createServerFn({ method: "POST" })
       const { data: upload, error: uploadError } = await bucket.createSignedUploadUrl(outputPath, { upsert: true });
       if (uploadError || !upload) throw new Error("Could not prepare cloud video save");
       const origin = new URL(getRequest().url).origin;
-      const base = origin.includes("localhost") ? "https://id-preview--2217d7bc-796a-4378-a377-45a65c909798.lovable.app" : origin;
+      const base = origin.includes("localhost") || origin.includes("id-preview") ? "https://sooho.lovable.app" : origin;
       const callbackUrl = `${base}/api/public/render-callback`;
       const response = await fetch(`https://connector-gateway.lovable.dev/apify/acts/${RENDER_ACTOR}/runs?memory=4096&timeout=1200`, {
         method: "POST", headers: { Authorization: `Bearer ${key}`, "X-Connection-Api-Key": connection, "Content-Type": "application/json" },
@@ -84,9 +84,7 @@ export const cancelHostedRender = createServerFn({ method: "POST" }).middleware(
     const { data: job } = await context.supabase.from("render_jobs").select("id,status,run_id").eq("video_id", data.videoId).maybeSingle();
     if (!job || job.status === "done") return { cancelled: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("render_jobs").update({ status: "cancelled", error: "Removed from queue" }).eq("id", job.id).eq("user_id", context.userId).neq("status", "done");
+    const { data: cancelled, error } = await supabaseAdmin.rpc("cancel_render_job", { job_id: job.id, owner_id: context.userId });
     if (error) throw new Error("Could not stop hosted assembly");
-    const { data: row } = await context.supabase.from("videos").select("data").eq("id", data.videoId).single();
-    if (row) await supabaseAdmin.from("videos").update({ data: { ...(row.data as Record<string, Json>), status: "failed", removed: true, detail: "Removed from queue", error: "Removed from queue", hostedRender: { id: job.id, status: "cancelled" } } as Json }).eq("id", data.videoId).eq("user_id", context.userId);
-    return { cancelled: true };
+    return { cancelled };
   });
