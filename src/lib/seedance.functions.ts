@@ -27,7 +27,7 @@ export const submitSeedance = createServerFn({ method: "POST" }).middleware([req
     const record = row.data as unknown as Record<string, unknown> & { seedanceClips?: Record<string, Run> };
     const manifest = `${context.userId}/${data.videoId}/seedance-${data.index}.json`;
     const { data: saved } = await context.supabase.storage.from("videos").download(manifest);
-    const existing = saved ? await saved.json() as Run : record.seedanceClips?.[data.index];
+    const existing = saved ? JSON.parse(await saved.text()) as Run : record.seedanceClips?.[data.index];
     if (existing?.id) return { id: existing.id }; // explicit resume never creates another job
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) throw new Error("AI is not configured");
@@ -49,7 +49,7 @@ export const checkSeedance = createServerFn({ method: "POST" }).middleware([requ
     const record = row.data as unknown as Record<string, unknown> & { seedanceClips?: Record<string, Run> };
     const manifest = `${context.userId}/${data.videoId}/seedance-${data.index}.json`;
     const { data: saved } = await context.supabase.storage.from("videos").download(manifest);
-    const run = saved ? await saved.json() as Run : record.seedanceClips?.[data.index];
+    const run = saved ? JSON.parse(await saved.text()) as Run : record.seedanceClips?.[data.index];
     if (!run?.id) throw new Error("Seedance job not found");
     if (run.path) return { status: "completed", progress: 100, path: run.path };
     if (run.error) return { status: "failed", progress: 0, error: run.error };
