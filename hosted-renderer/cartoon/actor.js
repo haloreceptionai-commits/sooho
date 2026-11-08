@@ -121,7 +121,13 @@ try {
       for(let f=first;f<=last;f++){const bytes=await store.getValue(`frame-${f}`);if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);merged.frames[String(f)]=part.frames[String(f)];}
     }
     await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged));
-    await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);
+    try {
+      await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);
+    } catch(e) {
+      const report=await readFile(path.join(work,'render/output.qa.json'),'utf8').catch(()=>null);
+      if(report){await store.setValue('QA-REPORT',JSON.parse(report)).catch(()=>{});console.error('QA report',report);}
+      throw e;
+    }
     await guard(95);
     for(const n of ['output.mp4','output.qa.json','mix-report.json'])await writeFile(path.join(work,n),await readFile(path.join(work,'render',n)));
     const qa=JSON.parse(await readFile(path.join(work,'output.qa.json'),'utf8'));
