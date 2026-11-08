@@ -186,7 +186,7 @@ const MODEL_BUILD={merchant_ship:()=>shipModel(false),pirate_ship:()=>shipModel(
 const modelPool=new Map();
 function props3dState(list){for(const m of modelPool.values())m.visible=false;
   for(const p of list||[]){const key=p.kind+':'+p.i;let m=modelPool.get(key);if(!m){m=MODEL_BUILD[p.kind]();scene.add(m);modelPool.set(key,m);}
-    m.visible=true;m.position.set(p.x,p.y,p.z);m.rotation.set(0,p.kind.includes('ship')||p.kind==='rowboat'?.5:0,p.roll||0);m.scale.setScalar((p.s||1)*(p.kind==='wave'?.5:p.kind.includes('ship')?1.4:.6));}}
+    m.visible=true;m.position.set(p.x,p.y,p.z);m.rotation.set(0,p.kind.includes('ship')||p.kind==='rowboat'?.5:0,p.roll||0);m.scale.setScalar((p.s||1)*(p.kind==='wave'?.5:p.kind.includes('ship')?.45:.6));}}
 const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFrame still calls this hook
 function worldState(state,f) {
   for(const [kind,root]of worldGroups)root.visible=kind===state.world;
