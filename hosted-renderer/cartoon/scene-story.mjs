@@ -67,6 +67,8 @@ const NEAR_SEA = new Set(['wave', 'fish']);
 function propPose(prop, f, shot, index) {
   let [x0, y0, z0, s0] = PLACE[prop.place];
   if (prop.place !== 'ground_left' && prop.place !== 'ground_right') x0 += camAt(f).look[0];
+  // Library objects stand beside the cast, a step behind, so they never hide a performer.
+  if (prop.kind === 'asset' && prop.place.startsWith('ground')) { x0 = camAt(f).look[0] + Math.sign(x0) * .8; z0 = -.6; }
   if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -13; s0 = 5; y0 = -1.6; x0 -= .3; }
   if (prop.place === 'sea' && MODEL3D.has(prop.kind) && !NEAR_SEA.has(prop.kind)) { y0 = .4; z0 = -20; s0 = 7; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
@@ -81,8 +83,8 @@ function propPose(prop, f, shot, index) {
   return { x, y, z, s, roll };
 }
 // Story objects with a real 3D model render in the world (lit, inked, shadowed); the rest stay painted cards.
-export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat']);
-const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind)).map(([p, i]) => ({ kind: p.kind, i, ...propPose(p, f, shot, i) }));
+export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat', 'asset']);
+const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind)).map(([p, i]) => { const pose = propPose(p, f, shot, i); return { kind: p.kind, asset: p.asset, place: p.place, i, ...pose, k: pose.s / PLACE[p.place][3] }; });
 const q = (v, k = 20) => Math.round(v * k) / k;
 export const actorsAt = (f, T) => {
   const shot = shotAt(f), local = (f - shot.start) / 30;

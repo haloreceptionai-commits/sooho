@@ -17,4 +17,5 @@
 - [x] Real 3D story objects (ships, wave, barrel, cannon, lantern, chest, anchor, wheel)
 - [x] Same density for town/market/castle/camp/lab/landscape
 - [ ] Galley interior world
-- [ ] Large CC0 model library, more outfits/animals, one-word captions, reference-scored quality gate
+- [x] CC0 object library (~3,000 objects, 31 packs) searchable by the Visual Director
+- [ ] More outfits, one-word captions, reference-scored quality gate

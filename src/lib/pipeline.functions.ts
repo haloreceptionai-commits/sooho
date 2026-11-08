@@ -94,21 +94,24 @@ export const directCartoon = createServerFn({ method: 'POST' }).middleware([requ
   .inputValidator((d: { scenes: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(120), deployment: z.string().min(1).max(64) }).parse(d))
   .handler(async ({ data }) => {
     const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
+    // Searchable CC0 library: the Director sees only objects matching this story's words.
+    const { shortlist } = await import('./object-library');
+    const objects = shortlist(data.scenes);
     const performer = { type: 'object', additionalProperties: false, required: ['actor', 'action', 'expression', 'slot', 'facing'], properties: { actor: { type: 'string' }, action: en('actions'), expression: en('expressions'), slot: en('slots'), facing: { type: 'integer', enum: [-1, 0, 1] } } };
     const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes'], properties: {
       cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: [...OUTFITS] } } } },
       scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['world', 'light', 'action', 'expression', 'actor', 'wide', 'shot', 'move', 'mood', 'actors', 'speaker', 'props', 'fx', 'cues', 'keyword'], properties: {
         world: en('worlds'), light: en('lights'), action: en('actions'), expression: en('expressions'), actor: { type: 'string' }, wide: { type: 'boolean' },
         shot: en('shots'), move: en('moves'), mood: en('moods'), actors: { type: 'array', items: performer }, speaker: { type: 'string' },
-        props: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['kind', 'place', 'motion'], properties: { kind: en('props'), place: en('places'), motion: en('prop_motions') } } },
+        props: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['kind', 'place', 'motion', 'asset'], properties: { kind: en('props'), place: en('places'), motion: en('prop_motions'), asset: { type: 'string', enum: ['', ...objects.map(o => o.id)] } } } },
         fx: { type: 'array', items: en('fx') }, cues: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['word', 'kind'], properties: { word: { type: 'integer' }, kind: en('sounds') } } }, keyword: { type: 'string' },
       } } },
     } };
     const raw = await azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(data.deployment, VISUAL_DIRECTOR,
-      data.scenes.map((s, i) => `${i}: ${s}`).join('\n'), 'cartoon_direction', schema, 'Visual director');
+      data.scenes.map((s, i) => `${i}: ${s}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director');
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
     const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
-      actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? s['props'].slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
+      actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? (s['props'] as Record<string, unknown>[]).map((p): Record<string, unknown> => ({ ...p, asset: p['asset'] || undefined })).filter(p => (p['kind'] === 'asset') === !!p['asset']).slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
     const result = cartoonDirection.parse({ cast: raw.cast, scenes });
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
@@ -120,13 +123,14 @@ Per sentence:
 - actors: 1-3 performers on screen with distinct slots (left/center/right) and facing (-1 faces left, 1 faces right, 0 camera). If two characters interact, put both on screen facing each other. "actor"/"action"/"expression" repeat the main subject.
 - action and expression must act out the verb and emotion of the sentence (grab, point, cower, cheer, shout, look_back, think, carry, pour...). Do not leave everyone idle.
 - props: the concrete nouns the sentence names (pirate_ship approaching on the sea, wave rising, coins in hand, map, cannon). place=hand for something held (max one), sea for ships/waves, sky for clouds/sun/moon/gulls, background for buildings/towers, ground_left/right for objects. motion animates them (approach, rise, fall, bob, spin, grow).
+- library objects: when a listed library object shows a noun better than the built-in props (animals, vehicles, food, furniture, buildings, space, graveyard, trees), use kind=asset with its exact id; never on place=hand. Use asset="" for built-in props. Buildings, trees, vehicles and ships go to background or sea; small items to ground_left/right.
 - shot + move: vary them like an editor. Establish with wide, show hands/objects with insert or close, reactions with close or extreme_close, threats with low; push_in on tension, shake on impact, whip on surprises, pull_back to reveal scale. Avoid the same shot twice in a row.
 - mood: calm, tense (danger/mystery) or reveal (the twist/payoff sentence).
 - fx: weather and moments (rain, lightning in storms, splash, smoke, fire, sparkle/burst on the reveal, dust on impacts).
 - speaker: the actor id ONLY if the sentence is that character's spoken line (quoted dialogue); otherwise empty string.
 - cues: up to 4 sound hits; word is the 0-based word index inside that sentence where the sound lands.
 - keyword: the single most important word of the sentence for the yellow caption highlight, copied exactly as written.
-If the core story truly cannot be shown with this vocabulary (space, underwater, animals as main characters, machines), return empty scenes.
+If the core story truly cannot be shown with this vocabulary and the listed library objects, return empty scenes.
 Vocabulary: ${JSON.stringify(VOCAB)}`;
 export interface FactSheet { claims: Claim[]; myth: string; reality: string; hedge: string }
 const factSchema = {

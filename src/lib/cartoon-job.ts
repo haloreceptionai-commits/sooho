@@ -12,7 +12,9 @@ export const cartoonScene = z.object({
   // v2 Visual Director fields; optional so earlier saved jobs still parse unchanged.
   shot: z.enum(VOCAB.shots).optional(), move: z.enum(VOCAB.moves).optional(), mood: z.enum(VOCAB.moods).optional(),
   actors: z.array(performer).min(1).max(3).optional(), speaker: id.optional(),
-  props: z.array(z.object({ kind: z.enum(VOCAB.props), place: z.enum(VOCAB.places), motion: z.enum(VOCAB.prop_motions) })).max(4).optional(),
+  props: z.array(z.object({ kind: z.enum(VOCAB.props), place: z.enum(VOCAB.places), motion: z.enum(VOCAB.prop_motions),
+    // kind 'asset' names one object from the bundled CC0 library; the worker rejects unknown ids.
+    asset: z.string().regex(/^[a-z0-9-]+\/[A-Za-z0-9_.-]{1,80}$/).optional() })).max(4).optional(),
   fx: z.array(z.enum(VOCAB.fx)).max(3).optional(),
   cues: z.array(z.object({ word: z.number().int().min(0).max(200), kind: z.enum(VOCAB.sounds) })).max(4).optional(),
   keyword: z.string().max(40).optional(),
@@ -22,6 +24,7 @@ export const cartoonScene = z.object({
   if (new Set((s.actors ?? []).map(a => a.slot)).size !== ids.length) ctx.addIssue({ code: 'custom', message: 'Two actors cannot share a slot' });
   if (s.speaker && s.actors && !ids.includes(s.speaker)) ctx.addIssue({ code: 'custom', message: 'Speaker must be on screen' });
   if ((s.props ?? []).filter(p => p.place === 'hand').length > 1) ctx.addIssue({ code: 'custom', message: 'Only one hand prop per scene' });
+  if ((s.props ?? []).some(p => (p.kind === 'asset') !== !!p.asset || (p.kind === 'asset' && p.place === 'hand'))) ctx.addIssue({ code: 'custom', message: 'Library objects need an id and cannot be held' });
 });
 export const cartoonDirection = z.object({
   cast: z.array(z.object({ id, seed: z.number().int().min(1).max(100000), outfit: z.enum(OUTFITS) })).min(1).max(3),

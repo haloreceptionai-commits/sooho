@@ -2,7 +2,8 @@ import { readFile,writeFile,cp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { validateManifest } from './validate-manifest.mjs';
+import { validateManifest, LIBRARY } from './validate-manifest.mjs';
+import { mkdir } from 'node:fs/promises';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const [input,destination]=process.argv.slice(2);
 if(!input||!destination)throw Error('Manifest and scratch destination required');
@@ -27,6 +28,13 @@ cast=cast.replace(reach,'const lf = (opts.lift || 0) * 0.15 * HH; return { pts: 
 await writeFile(path.join(web,'toon.js'),cast+'\n'+await readFile(path.join(root,'prop-cast.js'),'utf8')+'\n'+await readFile(path.join(root,'prop-art.js'),'utf8'));
 await cp(path.join(root,'scene-story.mjs'),path.join(web,'story.js'));
 await writeFile(path.join(web,'manifest.json'),JSON.stringify(m));
+// Copy only the library objects this story uses (plus each pack's shared texture and licence).
+const used=[...new Set(m.shots.flatMap(s=>(s.props||[]).filter(p=>p.kind==='asset').map(p=>p.asset)))].map(id=>LIBRARY.get(id));
+for(const e of used){const dir=path.join(web,'assets',e.pack);await mkdir(dir,{recursive:true});const src=path.join(root,'assets/library',e.pack);
+  await cp(path.join(src,e.type==='sprite'?e.id.split('/')[1]+'.png':e.id.split('/')[1]+'.glb'),path.join(dir,e.id.split('/')[1]+(e.type==='sprite'?'.png':'.glb')));
+  await cp(path.join(src,'License.txt'),path.join(dir,'License.txt'));
+  if(e.type==='model'){try{await cp(path.join(src,'Textures'),path.join(dir,'Textures'),{recursive:true});}catch{}}}
+await writeFile(path.join(web,'library.json'),JSON.stringify(used));
 let engine=await readFile(path.join(web,'main.js'),'utf8');
 const worldStart=engine.indexOf('// ---------- world ----------');
 const cardStart=engine.indexOf('// ---------- cards ----------');
