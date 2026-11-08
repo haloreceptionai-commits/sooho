@@ -11,6 +11,9 @@ def align_ctc(log_probs, tokens, blank=0):
     p = np.asarray(log_probs, dtype=np.float64)
     if p.ndim != 2 or not p.size or not np.isfinite(p).all() or not tokens:
         raise ValueError('Invalid acoustic emissions or empty transcript')
+    normalizer=np.logaddexp.reduce(p,axis=1)
+    if np.max(np.abs(normalizer))>.002:
+        raise ValueError('Acoustic emissions must be normalized log probabilities')
     if any(not isinstance(t,int) or t == blank or t < 0 or t >= p.shape[1] for t in tokens):
         raise ValueError('Unsupported transcript token')
     states = [blank]
@@ -40,7 +43,7 @@ def align_ctc(log_probs, tokens, blank=0):
         output.append({'start_frame':frames[0],'end_frame':frames[-1]+1,'confidence':confidence})
     return output
 
-def align_words(emissions, transcript, vocabulary, duration, blank=0, threshold=.9):
+def align_words(emissions, transcript, vocabulary, duration, blank=0, threshold=.9, frame_step=None, frame_offset=0):
     words=transcript.upper().split()
     if not words or not np.isfinite(duration) or duration<=0: raise ValueError('Empty or silent input')
     # Spoken numbers are mandatory; punctuation is stripped, never guessed.
@@ -57,10 +60,10 @@ def align_words(emissions, transcript, vocabulary, duration, blank=0, threshold=
             if c not in vocabulary: raise ValueError('Unsupported transcript character')
             tokens.append(vocabulary[c])
         ranges.append((start,len(tokens)))
-    aligned=align_ctc(emissions,tokens,blank); seconds=duration/len(emissions); result=[]
+    aligned=align_ctc(emissions,tokens,blank); seconds=frame_step or duration/len(emissions); result=[]
     for text,(a,b) in zip(clean,ranges):
         segment=aligned[a:b]; confidence=min(t['confidence'] for t in segment)
-        result.append({'text':text.lower(),'start':segment[0]['start_frame']*seconds,'end':segment[-1]['end_frame']*seconds,'confidence':confidence})
+        result.append({'text':text.lower(),'start':min(duration,frame_offset+segment[0]['start_frame']*seconds),'end':min(duration,frame_offset+segment[-1]['end_frame']*seconds),'confidence':confidence})
     return {'words':result,'review_required':any(w['confidence']<threshold for w in result),'source':'script-conditioned-ctc','duration':duration}
 
 if __name__ == '__main__':

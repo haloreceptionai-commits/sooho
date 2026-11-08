@@ -1,0 +1,11 @@
+{
+  "bundle": "WAV2VEC2_ASR_BASE_960H",
+  "torch": "2.7.1+cpu",
+  "torchaudio": "2.7.1+cpu",
+  "url": "https://download.pytorch.org/torchaudio/models/wav2vec2_fairseq_base_ls960_asr_ls960.pth",
+  "sha256": "488fd4f16de84438ffc945334278c1b9fb9b7159a806c1080b16111a958c945d",
+  "sample_rate": 16000,
+  "stride_samples": 320,
+  "receptive_field_samples": 400,
+  "license_source": "https://docs.pytorch.org/audio/2.7.0/generated/torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H.html"
+}

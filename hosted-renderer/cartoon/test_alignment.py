@@ -26,4 +26,8 @@ class AlignmentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'spoken'):
             align_words(np.zeros((3,2)),'30',{'A':1},.3)
 
+    def test_raw_logits_rejected(self):
+        with self.assertRaisesRegex(ValueError,'normalized'):
+            align_ctc(np.array([[2.,3.],[3.,2.]]),[1])
+
 if __name__ == '__main__': unittest.main()
