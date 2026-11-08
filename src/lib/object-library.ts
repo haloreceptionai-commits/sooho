@@ -2,7 +2,7 @@
 // The Visual Director only ever sees a per-story shortlist, so it can pick from thousands of objects without inventing ids.
 import catalog from '../../hosted-renderer/cartoon/assets/library/catalog.json';
 
-export interface LibraryObject { id: string; pack: string; name: string; tags: string[]; h: number; type: 'model' | 'sprite' }
+export interface LibraryObject { id: string; pack: string; name: string; tags: string[]; h: number; type: 'model' | 'sprite'; clips?: string[] }
 export const LIBRARY = catalog as LibraryObject[];
 const STOP = new Set(['the', 'a', 'an', 'and', 'of', 'to', 'in', 'on', 'it', 'was', 'were', 'is', 'they', 'he', 'she', 'his', 'her', 'their', 'with', 'for', 'that', 'this', 'but', 'from', 'at', 'by', 'as', 'or', 'be', 'had', 'has', 'have', 'into', 'why', 'how', 'what', 'who']);
 const stem = (w: string) => w.replace(/(ies)$/, 'y').replace(/(es|s)$/, '');

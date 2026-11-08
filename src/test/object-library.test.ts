@@ -21,3 +21,16 @@ describe('object library', () => {
     expect(cartoonScene.safeParse({ ...base, props: [{ kind: 'asset', place: 'hand', motion: 'none', asset: 'animal-pack/elephant' }] }).success).toBe(false);
   });
 });
+
+describe('Quaternius additions', () => {
+  it('adds over 2,000 Quaternius objects with hundreds of animated ones', async () => {
+    const { LIBRARY } = await import('@/lib/object-library');
+    const q = LIBRARY.filter(o => o.pack.startsWith('q-'));
+    expect(q.length).toBeGreaterThan(2000);
+    expect(q.filter(o => o.clips?.length).length).toBeGreaterThan(100);
+  });
+  it('finds a moving dinosaur for a dinosaur sentence', async () => {
+    const { searchLibrary } = await import('@/lib/object-library');
+    expect(searchLibrary('The velociraptor hunted at night').some(o => o.clips?.length)).toBe(true);
+  });
+});

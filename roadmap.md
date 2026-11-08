@@ -18,4 +18,7 @@
 - [x] Same density for town/market/castle/camp/lab/landscape
 - [ ] Galley interior world
 - [x] CC0 object library (~3,000 objects, 31 packs) searchable by the Visual Director
-- [ ] More outfits, one-word captions, reference-scored quality gate
+- [x] 30 cast outfits + director casts 2-3 distinct characters
+- [x] Quaternius CC0 library: ~2,400 objects, ~230 animated (Poly Pizza skipped: needs account key)
+- [ ] Re-try Quaternius packs still blocked by Google Drive limits (animatedguns, modulartrain etc.)
+- [ ] One-word captions, reference-scored quality gate

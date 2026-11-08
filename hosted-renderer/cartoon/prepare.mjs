@@ -18,7 +18,7 @@ await mkdir(path.join(out, 'web/lib'), { recursive: true });
 await cp(path.join(root, 'reference/engine'), path.join(out, 'web'), { recursive: true });
 await cp(path.join(root, 'vendor/three.module.js'), path.join(out, 'web/lib/three.module.js'));
 // Pinned glTF loader for the CC0 object library, rewired to the vendored three module.
-for (const name of ['GLTFLoader.js', 'BufferGeometryUtils.js']) {
+for (const name of ['GLTFLoader.js', 'BufferGeometryUtils.js', 'SkeletonUtils.js']) {
   const text = (await readFile(path.join(root, 'vendor', name), 'utf8')).replaceAll("from 'three'", "from './three.module.js'").replace("'../utils/BufferGeometryUtils.js'", "'./BufferGeometryUtils.js'");
   await writeFile(path.join(out, 'web/lib', name), text);
 }
