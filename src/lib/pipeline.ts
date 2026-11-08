@@ -19,11 +19,15 @@ const b64ToBuf = (b64: string) => {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Retry only rate limits / transient server errors, with backoff. */
+export const STEP_TIMEOUT_MS = 6 * 60_000;
 async function withRetry<T>(fn: () => Promise<T>, tries = 4, cap = 16000): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
     try {
-      return await fn();
+      // a call that never answers would freeze the video forever: give up after 6 min and retry
+      let t: ReturnType<typeof setTimeout> | undefined;
+      const timeout = new Promise<never>((_, rej) => { t = setTimeout(() => rej(new Error("[504] The AI took too long to answer")), STEP_TIMEOUT_MS); });
+      try { return await Promise.race([fn(), timeout]); } finally { clearTimeout(t); }
     } catch (e) {
       last = e;
       const m = e instanceof Error ? e.message : String(e);
@@ -373,6 +377,15 @@ function keepAlive() {
     window.removeEventListener("beforeunload", onLeave);
     void wake?.release().catch(() => undefined); wake = null;
   }
+}
+
+/** Watchdog: a "running" video that no job in this tab is working on is stuck (lost after a reload or crash) — restart it. */
+if (typeof window !== "undefined") {
+  setInterval(() => {
+    for (const v of getState().videos) {
+      if (v.status === "running" && !v.removed && !running.has(v.id)) void runVideo(v.id, v.input);
+    }
+  }, 60_000);
 }
 
 /** Restarts videos that were cut off because the page was closed or reloaded mid-generation. */
