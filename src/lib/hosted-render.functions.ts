@@ -37,7 +37,7 @@ export const submitHostedRender = createServerFn({ method: "POST" })
       throw new Error("Could not reserve hosted assembly");
     }
     const update = async (status: string, detail: string) => {
-      const { error: e } = await supabaseAdmin.rpc("apply_render_event", { job_id: job.id, job_token: tokenHash, next_status: status, video_patch: { hostedRender: { id: job.id, status }, status: status === "failed" ? "failed" : "running", stage: "render", progress: 72, detail, ...(status === "failed" ? { error: detail } : {}) }, saved_path: null });
+      const { error: e } = await supabaseAdmin.rpc("apply_render_event", { job_id: job.id, job_token: tokenHash, next_status: status, video_patch: { hostedRender: { id: job.id, status }, status: status === "failed" ? "failed" : "running", stage: "render", progress: 72, detail, ...(status === "failed" ? { error: detail } : {}) }, saved_path: "" });
       if (e) throw new Error("Could not save hosted assembly state");
     };
     try {
