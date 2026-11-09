@@ -50,15 +50,19 @@ const timings={};const timing=(name,start)=>{timings[name]=Math.round((Date.now(
 try {
   await guard(0);
   if(input.mode==='preflight') {
+    let stageStart=Date.now();
     const url=new URL(input.voiceUrl);if(url.protocol!=='https:'||!url.pathname.includes('/storage/v1/object/sign/videos/'))throw Error('Invalid voice grant');
     const response=await netFetch(url);if(!response.ok)throw Error('Locked narration could not load');
     await writeFile(path.join(work,'original-voice'),Buffer.from(await response.arrayBuffer()));
     await run('ffmpeg',['-v','error','-y','-i',path.join(work,'original-voice'),'-ar','48000','-ac','1','-c:a','pcm_s16le',path.join(work,'voice.wav')]);
     await writeFile(path.join(work,'script.txt'),input.manifest.script);
     await writeFile(path.join(work,'request.json'),JSON.stringify(input.manifest));
+    timing('voice-fetch-decode',stageStart);stageStart=Date.now();
     await run(python,[path.join(root,'acoustic.py'),'--audio',path.join(work,'voice.wav'),'--weights',process.env.CARTOON_WEIGHTS || '/opt/cartoon/weights.pth','--script',path.join(work,'script.txt'),'--out',work]);
+    timing('alignment',stageStart);stageStart=Date.now();
     await run(python,[path.join(root,'build-manifest.py'),'--request',path.join(work,'request.json'),'--alignment',path.join(work,'alignment.json'),'--voice',path.join(work,'voice.wav'),'--out',path.join(work,'manifest.json')]);
     await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','preflight','--twist-frame','0']);
+    timing('manifest-preview',stageStart);stageStart=Date.now();
     const sheets=(await readdir(path.join(work,'render/sheets'))).filter(n=>n.endsWith('.jpg'));
     for(const n of sheets)await writeFile(path.join(work,n),await readFile(path.join(work,'render/sheets',n)));
     const reviewRequest=JSON.parse(await readFile(path.join(work,'render/review-request.json'),'utf8'));
@@ -67,6 +71,7 @@ try {
     await store.setValue('LOCK',locked);
     for(const n of ['voice.wav','manifest.json','alignment.json'])await store.setValue(n.replaceAll('.','-'),await readFile(path.join(work,n)),{contentType:'application/octet-stream'});
     const paths=await uploadFiles([...sheets,'voice.wav','alignment.json','manifest.json']);
+    timing('review-storage',stageStart);await store.setValue('PREFLIGHT-TIMINGS',timings);
     const m=JSON.parse(await readFile(path.join(work,'manifest.json'),'utf8'));
     const accepted=await notify({type:'review',hash:approvedHash,storeId:store.id,sheets:sheets.map(n=>paths[n]),voicePath:paths['voice.wav'],alignmentPath:paths['alignment.json'],duration:m.narration.samples/48000});
     if(!accepted.accepted)throw Error('Review was not accepted');
@@ -114,7 +119,8 @@ try {
     await Promise.all(Array.from({length:Math.min(lanes,batches.length)},lane));
     timing('draw-share',tDraw);
     // One replica assembles; the rest stop once their share is done.
-    if(!(await store.claim('assemble'))){await platform.output({status:'rendered-share'});await platform.exit();process.exit(0);}
+    // Each explicit retry elects a fresh assembler; the previous attempt's permanent claim must not block recovery.
+    if(!(await store.claim(`assemble-${hash(Buffer.from(input.callbackToken))}`))){await platform.output({status:'rendered-share'});await platform.exit();process.exit(0);}
     const deadline=Date.now()+90*60*1000;
     for(;;){
       const missing=[];for(const b of batches)if(!(await hasPart(b[0])))missing.push(b);
@@ -136,7 +142,7 @@ try {
       const local=path.join(framesDir,`batch-${batches.find(([a,b])=>f>=a&&f<=b)[0]}`,`f${String(f).padStart(6,'0')}.jpg`);
       let bytes=await readFile(local).catch(()=>null);
       if(!bytes||hash(bytes)!==merged.frames[String(f)]?.sha256)bytes=await store.getValue(`frame-${f}`);
-      if(!Buffer.isBuffer(bytes))throw Error(`Frame ${f} missing`);
+      if(!Buffer.isBuffer(bytes)||hash(bytes)!==merged.frames[String(f)]?.sha256)throw Error(`Frame ${f} missing or checksum changed`);
       await writeFile(path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),bytes);
     });
     timing('join-fetch',tFetch);

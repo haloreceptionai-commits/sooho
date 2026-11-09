@@ -6,6 +6,8 @@ import hashlib
 import json
 import subprocess
 import sys
+import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import numpy as np
 from capture import atomic_json, fingerprint
@@ -54,7 +56,17 @@ def main():
         sheet_tool=importlib.util.module_from_spec(spec);spec.loader.exec_module(sheet_tool)
         stage('preflight')
         selected=sheet_tool.preflight_frames(m['shots'],m['words'],total)
-        run(sys.executable,str(ROOT/'capture.py'),'--web',str(prepared/'web'),'--out',str(frames),'--first','0','--last',str(total-1),'--selected',','.join(map(str,selected)))
+        lanes=max(1,min(2,int(os.environ.get('CARTOON_PARALLEL','1'))))
+        def capture_lane(lane):
+            subset=selected[lane::lanes]
+            if not subset: return
+            folder=work/f'preview-{lane}'
+            run(sys.executable,str(ROOT/'capture.py'),'--web',str(prepared/'web'),'--out',str(folder),'--first','0','--last',str(total-1),'--selected',','.join(map(str,subset)))
+            frames.mkdir(parents=True,exist_ok=True)
+            for f in subset:
+                (folder/f'f{f:06d}.jpg').replace(frames/f'f{f:06d}.jpg')
+        with ThreadPoolExecutor(max_workers=lanes) as executor:
+            list(executor.map(capture_lane,range(lanes)))
         run(sys.executable,str(ROOT/'contact-sheet.py'),'--frames',str(frames),'--manifest',str(manifest),'--out',str(work/'sheets'))
         stage('review_required')
         atomic_json(work/'review-request.json',{'input_hash':signature,'engine_hash':state['stages']['prepared'],'sheets':sorted(p.name for p in (work/'sheets').glob('*.jpg'))})

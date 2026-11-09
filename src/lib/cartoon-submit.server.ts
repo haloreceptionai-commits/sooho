@@ -9,6 +9,7 @@ export const submitCartoonOperation = async ({ data, context }: { data: CartoonS
     const { data: video } = await context.supabase.from('videos').select('data,user_id').eq('id', data.videoId).single();
     if (!video || video.user_id !== context.userId) throw Error('Video not found');
     const record = video.data as Record<string, Json>;
+    if ((record['cartoonReview'] as Record<string, Json> | undefined)?.['approved'] === true && record['status'] === 'failed') throw Error('Use Resume render to reuse the approved preview; no new preview was started');
     if ((record['input'] as Record<string, Json>)?.['format'] !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
     if (!validRenderAssets(context.userId, data.videoId, [data.voicePath])) throw Error('Invalid narration asset');
     const { data: existing } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();

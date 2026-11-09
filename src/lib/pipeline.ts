@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { seedanceRuns } from "@/lib/seedance";
 import { submitSeedance, checkSeedance } from "@/lib/seedance.functions";
 import { checkContinuity, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
-import { submitCartoon } from '@/lib/cartoon.functions';
+import { submitCartoon, resumeApprovedCartoon } from '@/lib/cartoon.functions';
+import { canResumeApprovedCartoon } from './cartoon-resume';
 import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
 import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
@@ -134,6 +135,11 @@ export async function runVideo(id: string, input: VideoInput) {
     }
   }
   // Owner's explicit Resume: a failed/cancelled cartoon run restarts from its saved voice + direction (no new script or voice spend).
+  if (input.engine === 'cartoon' && canResumeApprovedCartoon(prior?.hostedRender?.status ?? '', prior?.cartoonReview)) {
+    try { await resumeApprovedCartoon({ data: { videoId: id } }); }
+    catch (e) { actions.updateVideo(id, { error: e instanceof Error ? e.message : 'Could not resume approved render' }); }
+    return;
+  }
   const resumable = !!prior?.cartoonCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '');
   if (prior?.hostedRender && !resumable) return;
   if (resumable) actions.updateVideo(id, { hostedRender: undefined, status: 'running', error: undefined, detail: 'Resuming saved cartoon…' });

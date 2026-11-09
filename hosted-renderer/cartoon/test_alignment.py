@@ -30,4 +30,31 @@ class AlignmentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'normalized'):
             align_ctc(np.array([[2.,3.],[3.,2.]]),[1])
 
+    def test_vectorized_matches_scalar_paths_and_ties(self):
+        def scalar(p,tokens):
+            states=[0]
+            for t in tokens: states.extend([t,0])
+            previous=np.full(len(states),-np.inf);previous[0]=p[0,0];previous[1]=p[0,tokens[0]]
+            back=np.full((len(p),len(states)),-1,dtype=int)
+            for f in range(1,len(p)):
+                current=np.full(len(states),-np.inf)
+                for s,t in enumerate(states):
+                    choices=[s]+([s-1] if s else [])+([s-2] if s>1 and t!=0 and t!=states[s-2] else [])
+                    best=max(choices,key=lambda x:previous[x]);current[s]=previous[best]+p[f,t];back[f,s]=best
+                previous=current
+            s=max([len(states)-1,len(states)-2],key=lambda x:previous[x]);path=[]
+            for f in range(len(p)-1,-1,-1):
+                path.append(s)
+                if f:s=int(back[f,s])
+            path=path[::-1];out=[]
+            for i,t in enumerate(tokens):
+                fs=[f for f,s in enumerate(path) if s==2*i+1]
+                out.append({'start_frame':fs[0],'end_frame':fs[-1]+1,'confidence':float(np.exp(np.mean(p[fs,t])))})
+            return out
+        rng=np.random.default_rng(42)
+        for trial in range(25):
+            raw=rng.random((60,4)) if trial else np.ones((60,4))
+            p=np.log(raw/raw.sum(axis=1,keepdims=True));tokens=[1,1,2,3,2]
+            self.assertEqual(align_ctc(p,tokens),scalar(p,tokens))
+
 if __name__ == '__main__': unittest.main()

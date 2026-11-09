@@ -1,5 +1,8 @@
 # Roadmap — Cartoon Engine v2
 
+- [x] Deploy preflight optimizations: exact vectorized CTC (0.8s vs ~18.5s scalar estimate for 71s audio), two review capture lanes, all review frames checked on saved 67s story. Full Azure acoustic/cold-start speed still needs measurement; no overall speed multiplier claimed.
+- [x] Resume failed approved Azure cartoons with the same locked store, rotated callback/output paths and per-attempt assembler. Signed-in Resume test completed an 8.64s output after browser closure, reused saved frames (draw-all 1s, final encode/QA 23.4s), and playback verified; 143 app tests and 32 Python tests passed.
+
 - [x] Background foundation: owner-readable jobs/steps, atomic Start, fenced ownership/checkpoints, individually checkpointed judges, shared server operations, generation coordinator and Azure on-demand job; rollout disabled.
 - [ ] Enable full background generation after real closed-browser completion and fault-injection checks. Published worker endpoint now responds correctly (unauthorized calls rejected); rollout remains disabled. Bounded recovery handler is implemented but not scheduled; isolated final-output paths, cancellation-aware callbacks and worker completion checkpoints added. Deploy updated assembly/cartoon workers, implement owner-authorized uncertain-step recovery, and verify real worker/paid-asset failures before rollout.
 
