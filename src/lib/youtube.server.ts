@@ -4,7 +4,65 @@ export const YT_SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
   "https://www.googleapis.com/auth/youtube",
   "https://www.googleapis.com/auth/youtube.readonly",
+  "https://www.googleapis.com/auth/youtube.force-ssl",
 ];
+
+async function ytGet<T>(access: string, path: string): Promise<T> {
+  const res = await fetch(`https://www.googleapis.com/youtube/v3/${path}`, { headers: { Authorization: `Bearer ${access}` } });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`YouTube request failed [${res.status}]: ${text.slice(0, 300)}`);
+  return JSON.parse(text) as T;
+}
+
+export type YtVideo = { id: string; title: string; thumb: string; published: string; views: number; likes: number; comments: number; duration: string };
+
+/** Channel totals plus the latest 50 uploads with their public stats. */
+export async function channelAnalytics(access: string) {
+  const ch = await ytGet<{ items?: { id: string; snippet: { title: string; thumbnails?: { default?: { url: string } } }; statistics: Record<string, string>; contentDetails: { relatedPlaylists: { uploads: string } } }[] }>(
+    access, "channels?part=snippet,statistics,contentDetails&mine=true");
+  const c = ch.items?.[0];
+  if (!c) throw new Error("No YouTube channel found on this account");
+  const pl = await ytGet<{ items?: { contentDetails: { videoId: string } }[] }>(access, `playlistItems?part=contentDetails&maxResults=50&playlistId=${c.contentDetails.relatedPlaylists.uploads}`);
+  const ids = (pl.items ?? []).map((i) => i.contentDetails.videoId);
+  let videos: YtVideo[] = [];
+  if (ids.length) {
+    const v = await ytGet<{ items?: { id: string; snippet: { title: string; publishedAt: string; thumbnails?: { medium?: { url: string } } }; statistics: Record<string, string>; contentDetails: { duration: string } }[] }>(
+      access, `videos?part=snippet,statistics,contentDetails&id=${ids.join(",")}`);
+    videos = (v.items ?? []).map((x) => ({
+      id: x.id, title: x.snippet.title, thumb: x.snippet.thumbnails?.medium?.url ?? "", published: x.snippet.publishedAt,
+      views: Number(x.statistics["viewCount"] ?? 0), likes: Number(x.statistics["likeCount"] ?? 0), comments: Number(x.statistics["commentCount"] ?? 0),
+      duration: x.contentDetails.duration,
+    }));
+  }
+  return {
+    channel: { id: c.id, title: c.snippet.title, thumb: c.snippet.thumbnails?.default?.url ?? "",
+      subscribers: Number(c.statistics["subscriberCount"] ?? 0), views: Number(c.statistics["viewCount"] ?? 0), videos: Number(c.statistics["videoCount"] ?? 0) },
+    videos,
+  };
+}
+
+export type YtComment = { id: string; videoId: string; author: string; authorThumb: string; text: string; published: string; likes: number; replied: boolean };
+
+/** Recent top-level comments across the channel; `replied` = channel owner already answered. */
+export async function recentComments(access: string, channelId: string): Promise<YtComment[]> {
+  const r = await ytGet<{ items?: { id: string; snippet: { videoId: string; topLevelComment: { snippet: { authorDisplayName: string; authorProfileImageUrl: string; textOriginal: string; publishedAt: string; likeCount: number; authorChannelId?: { value: string } } } }; replies?: { comments: { snippet: { authorChannelId?: { value: string } } }[] } }[] }>(
+    access, `commentThreads?part=snippet,replies&allThreadsRelatedToChannelId=${channelId}&maxResults=100&order=time`);
+  return (r.items ?? [])
+    .filter((t) => t.snippet.topLevelComment.snippet.authorChannelId?.value !== channelId)
+    .map((t) => {
+      const s = t.snippet.topLevelComment.snippet;
+      return { id: t.id, videoId: t.snippet.videoId, author: s.authorDisplayName, authorThumb: s.authorProfileImageUrl, text: s.textOriginal,
+        published: s.publishedAt, likes: s.likeCount, replied: !!t.replies?.comments.some((c) => c.snippet.authorChannelId?.value === channelId) };
+    });
+}
+
+export async function postReply(access: string, parentId: string, text: string) {
+  const res = await fetch("https://www.googleapis.com/youtube/v3/comments?part=snippet", {
+    method: "POST", headers: { Authorization: `Bearer ${access}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ snippet: { parentId, textOriginal: text } }),
+  });
+  if (!res.ok) throw new Error(`YouTube reply failed [${res.status}]: ${(await res.text()).slice(0, 300)}`);
+}
 
 function env(name: string) {
   const v = process.env[name];

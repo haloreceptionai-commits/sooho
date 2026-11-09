@@ -1,0 +1,1 @@
+ALTER TABLE public.youtube_connections ADD COLUMN IF NOT EXISTS last_auto_reply_at timestamptz;

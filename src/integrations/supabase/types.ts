@@ -205,6 +205,7 @@ export type Database = {
           auto_reply: boolean
           channel_id: string | null
           channel_title: string | null
+          last_auto_reply_at: string | null
           refresh_token: string
           updated_at: string
           user_id: string
@@ -213,6 +214,7 @@ export type Database = {
           auto_reply?: boolean
           channel_id?: string | null
           channel_title?: string | null
+          last_auto_reply_at?: string | null
           refresh_token: string
           updated_at?: string
           user_id: string
@@ -221,6 +223,7 @@ export type Database = {
           auto_reply?: boolean
           channel_id?: string | null
           channel_title?: string | null
+          last_auto_reply_at?: string | null
           refresh_token?: string
           updated_at?: string
           user_id?: string
