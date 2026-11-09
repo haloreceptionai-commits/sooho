@@ -90,7 +90,7 @@ async function azureJson<T>(deployment: string, system: string, user: string, na
 
 export interface Claim { claim: string; sources: string[]; date: string; confidence: "high" | "medium" | "low" }
 export const directCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { scenes: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(120), deployment: z.string().min(1).max(64) }).parse(d))
+  .inputValidator((d: { scenes: string[]; deployment: string; format?: 'short' | 'long' }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), deployment: z.string().min(1).max(64), format: z.enum(['short', 'long']).optional() }).parse(d))
   .handler(async ({ data }) => { const { directCartoonOperation } = await import('./pipeline-operations.server'); return directCartoonOperation({ data }); });
 type CastMember = { id: string; seed: number; outfit: string };
 // Distinct looks per cast member: duplicate outfits/seeds are swapped for unused ones so characters never read as clones.
