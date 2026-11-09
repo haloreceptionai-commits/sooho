@@ -5,7 +5,7 @@ import type { ScriptCheckpoint, SeedanceCheckpoint } from './pipeline';
 import { writeBackgroundScript } from './generation-script.server';
 import { checkContinuityOperation, directCartoonOperation, generateImageOperation, generateVoiceOperation } from './pipeline-operations.server';
 import { cartoonStart } from './cartoon-job';
-import { spellNumbers } from './story-v2';
+import { speakable } from './story-v2';
 import { submitCartoonOperation } from './cartoon-submit.server';
 import { submitHostedRenderOperation } from './assembly-submit.server';
 import { renderRequest } from './hosted-render';
@@ -69,7 +69,7 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
   const context = { supabase: db, userId: job.user_id };
   if (input.engine === 'cartoon') {
     const direction = await step('director', JSON.stringify(plan.scenes), () => directCartoonOperation({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: settings.scriptDeployment } }));
-    const narration = plan.scenes.map(sc => spellNumbers(sc.narration.trim()));
+    const narration = plan.scenes.map(sc => speakable(sc.narration.trim()));
     const text = narration.join(' ');
     const voicePath = await step('voice/cartoon', text, async () => {
       const take = await generateVoiceOperation({ data: { text, voice: input.voice, deployment: settings.ttsDeployment, style: 'short' } });

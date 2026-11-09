@@ -13,7 +13,7 @@ import { composeInkCard, pickInkCards, type InkCard } from "@/lib/ink-card";
 import { planInkBeats, planInkCards } from "@/lib/ink.functions";
 import { splitInkBeats } from "@/lib/ink-beats";
 import { INK_HERO } from "@/lib/styles";
-import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
+import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, speakable, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
 import { saveVideoFile } from "@/lib/video-db";
@@ -277,7 +277,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
       if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft; check the preview before approving` });
       const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short' } }));
-      const narration = plan.scenes.map(sc => spellNumbers(sc.narration.trim()));
+      const narration = plan.scenes.map(sc => speakable(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
       const { data: user } = await supabase.auth.getUser();
