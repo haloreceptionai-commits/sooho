@@ -91,7 +91,8 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
     const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
     const { shortlist, searchLibrary } = await import('./object-library');
-    const objects = shortlist(data.scenes);
+    const narration = data.scenes.map(s => s.split(/\s+Visual:/i)[0] ?? s);
+    const objects = shortlist(narration);
     const performer = { type: 'object', additionalProperties: false, required: ['actor', 'action', 'expression', 'slot', 'facing'], properties: { actor: { type: 'string' }, action: en('actions'), expression: en('expressions'), slot: en('slots'), facing: { type: 'integer', enum: [-1, 0, 1] } } };
     const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes'], properties: {
       cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: [...OUTFITS] } } } },
@@ -111,8 +112,8 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
     const { groundLibraryScenes } = await import('./library-direction');
     const { sanitizeDirection } = await import('./cartoon-job');
     const cast = diversifyCast(raw.cast as CastMember[]);
-    const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], data.scenes, objects);
-    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded) } as unknown as Parameters<typeof sanitizeDirection>[0], data.scenes));
+    const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], narration, objects);
+    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   };

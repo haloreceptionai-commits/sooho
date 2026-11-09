@@ -8,7 +8,7 @@ describe('object library', () => {
     expect(new Set(LIBRARY.map(o => o.id)).size).toBe(LIBRARY.length);
   });
   it('finds the named noun for a sentence', () => {
-    expect(searchLibrary('An elephant walked into the town').map(o => o.id)).toContain('animal-pack/elephant');
+    expect(searchLibrary('An elephant walked into the town').map(o => o.id)).toContain('cube-pets/animal-elephant');
     expect(searchLibrary('The rocket landed').some(o => o.name.includes('rocket'))).toBe(true);
   });
   it('caps the shortlist size', () => {

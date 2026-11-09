@@ -7,11 +7,12 @@ export const LIBRARY = catalog as LibraryObject[];
 const STOP = new Set(['the', 'a', 'an', 'and', 'of', 'to', 'in', 'on', 'it', 'was', 'were', 'is', 'they', 'he', 'she', 'his', 'her', 'their', 'with', 'for', 'that', 'this', 'but', 'from', 'at', 'by', 'as', 'or', 'be', 'had', 'has', 'have', 'into', 'why', 'how', 'what', 'who']);
 const stem = (w: string) => w.endsWith('ies') ? w.slice(0, -3) + 'y' : w.endsWith('s') && !/(ss|us|is)$/.test(w) ? w.slice(0, -1) : w;
 export const words = (text: string) => text.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Za-z])\d+/g, '$1 ').toLowerCase().split(/[^a-z]+/).filter(w => w.length > 2 && !STOP.has(w)).map(stem);
-const indexed = LIBRARY.map(object => ({ object, name: words(object.name), tags: words(object.tags.join(' ')) }));
-const VARIANT = new Set(['large', 'small', 'medium', 'big', 'low', 'poly', 'base', 'animated', 'rigged']);
+const objectWords = (object: LibraryObject) => words(object.id.split('/')[1] ?? object.name);
+const indexed = LIBRARY.map(object => ({ object, name: objectWords(object), tags: words(object.tags.join(' ')) }));
+const VARIANT = new Set(['large', 'small', 'medium', 'big', 'low', 'poly', 'base', 'animated', 'rigged', 'animal']);
 export function nameMatch(object: LibraryObject, text: string) {
   const query = new Set(words(text));
-  const names = words(object.name).filter(w => !VARIANT.has(w));
+  const names = objectWords(object).filter(w => !VARIANT.has(w));
   return names.length > 0 && names.every(w => query.has(w));
 }
 
@@ -29,7 +30,7 @@ export function searchLibrary(text: string, limit = 10): LibraryObject[] {
   const ranked = scored.sort((a, b) => b[0] - a[0] || a[1].id.localeCompare(b[1].id));
   const out: LibraryObject[] = [], families = new Map<string, number>();
   for (const [, o] of ranked) {
-    const family = words(o.name).filter(w => !VARIANT.has(w)).join(' ');
+    const family = objectWords(o).filter(w => !VARIANT.has(w)).join(' ');
     if ((families.get(family) ?? 0) >= 2) continue;
     families.set(family, (families.get(family) ?? 0) + 1); out.push(o);
     if (out.length >= Math.max(0, limit)) break;
