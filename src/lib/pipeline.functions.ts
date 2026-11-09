@@ -238,7 +238,7 @@ export interface PlanInput {
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
 }
-export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit";
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
 export interface PlanScene {
   beat: string; narration: string; image_prompt: string; characters: string[];
