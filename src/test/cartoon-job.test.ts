@@ -40,3 +40,8 @@ it('repairs director slips so the job passes the strict start check', () => {
   expect(direction.scenes[0]!.props![0]!.place).toBe('ground_right');
   expect(cartoonStart.safeParse({ ...f, direction }).success).toBe(true);
 });
+it('turns an object close-up with no nearby drawn object into an actor close-up', () => {
+  const f = fixture();
+  const d = sanitizeDirection({ ...f.direction, scenes: [{ ...f.direction.scenes[0]!, shot: 'insert' as never, props: [] }] } as never, f.narration);
+  expect(d.scenes[0]!.shot).toBe('close');
+});

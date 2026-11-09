@@ -84,6 +84,8 @@ export function sanitizeDirection(direction: Direction, narration: string[]): Di
         return q;
       });
     }
+    // Object close-ups need a drawn object near the actors; otherwise the camera frames bare floor, so frame the actor instead.
+    if ((s.shot === 'insert' || s.shot === 'extreme_close') && !(s.props ?? []).some(p => p.kind !== 'asset' && ['hand', 'ground_left', 'ground_right'].includes(p.place))) s.shot = 'close';
     const n = (narration[i] ?? '').split(/\s+/).filter(Boolean).length;
     if (s.cues) s.cues = s.cues.filter(c => n > 0 && c.word >= 0).map(c => ({ ...c, word: Math.min(c.word, n - 1) }));
     return s;
