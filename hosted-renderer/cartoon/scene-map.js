@@ -67,7 +67,7 @@ async function buildMap(root){
           float nb=(texture2D(terr,vUv+vec2(texel.x*2.,0.)).r+texture2D(terr,vUv-vec2(texel.x*2.,0.)).r+texture2D(terr,vUv+vec2(0.,texel.y*2.)).r+texture2D(terr,vUv-vec2(0.,texel.y*2.)).r)*.25;
           vec2 d=(vUv-center)*vec2(aspect,1.); float rev=smoothstep(radius,radius-.012,length(d));
           float lum=dot(base,vec3(.3,.59,.11));
-          vec3 red=vec3(.92,.05,.04)*(.78+.42*lum)*pulse;
+          vec3 red=vec3(.92,.05,.04)*(.55+.8*lum)*pulse;
           col=mix(col,red,fill*rev*.94);
           col+=vec3(.9,.05,.03)*glow*(1.-fill)*rev*.55*pulse;
           col=mix(col,vec3(1.),clamp(abs(fill-nb)*3.5,0.,1.)*rev); }
@@ -98,7 +98,7 @@ function mapState(state,f){
   const p=state.mapProgress;
   // The sweep grows outward from the focus point so borders visibly spread over the years.
   U.center.value.set((m.focus[0]-B.w)/(B.e-B.w),(m.focus[1]-B.s)/(B.n-B.s));
-  const full=1.6,grow=mapEase(p/.7);
+  const full=.9,grow=mapEase(p/.75);
   U.radius.value=m.reveal==='grow'?.02+grow*full:m.reveal==='shrink'?full-(full-.12)*mapEase(p):full;
   U.pulse.value=.9+.1*Math.sin(f*.12);
   const span=60/m.focus[2],unit=span*MAP_S*.022;
