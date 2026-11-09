@@ -1,6 +1,8 @@
 // Worker-side validation before preparing trusted renderer code.
 import V from './vocabulary.json' with { type: 'json' };
 import CATALOG from './assets/library/catalog.json' with { type: 'json' };
+import REGION_IDS from './assets/map/region-ids.json' with { type: 'json' };
+export const REGIONS = new Set(REGION_IDS);
 export const LIBRARY = new Map(CATALOG.map(c => [c.id, c]));
 
 export const OUTFITS = V.outfits;
@@ -8,9 +10,12 @@ export const OUTFITS = V.outfits;
 export function validateManifest(m) {
   const fail=message=>{throw Error(message);};
   const v2=m.version==='cartoon-v2';
-  if(!['cartoon-v1','cartoon-v2'].includes(m.version)||m.fps!==30||m.width!==1080||m.height!==1920)fail('Invalid cartoon frame contract');
+  const wide=m.width===1920&&m.height===1080;
+  if(!['cartoon-v1','cartoon-v2'].includes(m.version)||m.fps!==30||!(wide||(m.width===1080&&m.height===1920))||(wide&&!v2))fail('Invalid cartoon frame contract');
+  // 16:9 long-form allows a 45-minute chapter clock; Shorts keep their 90 s bound.
+  const LIM=wide?{secs:45*60,words:9000,shots:2500}:{secs:90,words:600,shots:120};
   if(m.captions&&!v2)fail('Captions require the v2 overlay');
-  if(!Number.isSafeInteger(m.narration?.samples)||m.narration.samples<1||m.narration.samples>48000*90||m.narration.rate!==48000)fail('Invalid narration clock');
+  if(!Number.isSafeInteger(m.narration?.samples)||m.narration.samples<1||m.narration.samples>48000*LIM.secs||m.narration.rate!==48000)fail('Invalid narration clock');
   if(!/^[a-f0-9]{64}$/.test(m.narration.sha256))fail('Invalid narration checksum');
   const total=Math.round(m.narration.samples/48000*30);
   if(!Array.isArray(m.cast)||m.cast.length<1||m.cast.length>3)fail('Invalid cast');
@@ -19,7 +24,7 @@ export function validateManifest(m) {
     if(!/^[a-z0-9_-]{1,30}$/.test(c.id)||ids.has(c.id)||!OUTFITS.includes(c.outfit)||!Number.isInteger(c.seed))fail('Unsupported or duplicate cast');
     ids.add(c.id);
   }
-  if(!Array.isArray(m.words)||m.words.length<1||m.words.length>600)fail('Invalid alignment');
+  if(!Array.isArray(m.words)||m.words.length<1||m.words.length>LIM.words)fail('Invalid alignment');
   let wordEnd=0;
   for(const w of m.words){
     if(!Number.isFinite(w.start)||!Number.isFinite(w.end)||w.start<wordEnd||w.end<=w.start||w.end>m.narration.samples/48000)fail('Invalid word timing');
@@ -28,7 +33,7 @@ export function validateManifest(m) {
     wordEnd=w.end;
   }
   if(m.captions&&(!Array.isArray(m.caption_words)||m.caption_words.length!==m.words.length||m.caption_words.some(t=>typeof t!=='string'||!t||t.length>40)))fail('Caption words must match the aligned narration');
-  if(!Array.isArray(m.shots)||m.shots.length<1||m.shots.length>120)fail('Invalid shots');
+  if(!Array.isArray(m.shots)||m.shots.length<1||m.shots.length>LIM.shots)fail('Invalid shots');
   const vector=p=>Array.isArray(p)&&p.length===3&&p.every(v=>Number.isFinite(v)&&Math.abs(v)<1000);
   const worlds=v2?V.worlds:['ship','town','bridge','lab','landscape'];
   const actions=v2?V.actions:['idle','walk','point','react','lift','pour'];
@@ -51,6 +56,7 @@ export function validateManifest(m) {
       // Library objects must exist in the bundled CC0 catalog and are never hand-held cards.
       if(s.props.some(p=>p.kind==='asset'?(p.place==='hand'||!LIBRARY.has(p.asset)):p.asset!==undefined))fail('Unknown library object');
       if(!Array.isArray(s.fx)||s.fx.length>3||s.fx.some(x=>!V.fx.includes(x)))fail('Unsupported effect');
+      if(s.world==='map')validateMap(s,fail); else if(s.map!==undefined&&s.map!==null)fail('Map data outside the map world');
     }
     if(!Array.isArray(s.camera)||s.camera.length<1||s.camera.length>20)fail('Invalid camera');
     let previous=s.start-1;
@@ -68,4 +74,18 @@ export function validateManifest(m) {
   }
   if(end!==total)fail('Shots do not cover final voice samples');
   return m;
+}
+
+const lonlat=p=>Array.isArray(p)&&p.length===2&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=180&&p[1]>=-65&&p[1]<=85;
+const label=(t,n)=>typeof t==='string'&&t.length<=n&&/^[\p{L}\p{N} .,'&()\-–]*$/u.test(t);
+export function validateMap(s,fail){
+  const m=s.map,M=V.map;
+  if(!m||typeof m!=='object')fail('Map shot needs map data');
+  if(s.actors.length||s.props.length)fail('Map shots draw armies and cities, not cast cards or props');
+  if(!Array.isArray(m.regions)||m.regions.length>M.max_regions||m.regions.some(r=>!REGIONS.has(r)))fail('Unknown map region');
+  if(!Array.isArray(m.focus)||m.focus.length!==3||!lonlat(m.focus.slice(0,2))||!Number.isFinite(m.focus[2])||m.focus[2]<.5||m.focus[2]>8)fail('Invalid map focus');
+  if(!M.reveal.includes(m.reveal))fail('Invalid map reveal');
+  if(!label(m.label??'',24)||!label(m.years??'',24))fail('Invalid map label');
+  if(!Array.isArray(m.cities??[])||(m.cities??[]).length>M.max_cities||(m.cities??[]).some(c=>!label(c.name,22)||!c.name||!lonlat(c.at)))fail('Invalid map city');
+  if(!Array.isArray(m.armies??[])||(m.armies??[]).length>M.max_armies||(m.armies??[]).some(a=>!lonlat(a.from)||!lonlat(a.to)||!M.sides.includes(a.side)))fail('Invalid map army');
 }
