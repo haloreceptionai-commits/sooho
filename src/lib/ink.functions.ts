@@ -6,7 +6,7 @@ const deployment = z.string().regex(/^[A-Za-z0-9._-]{1,64}$/);
 
 /** Picks which narration sentences become white idea cards (exact text is drawn later in the browser). */
 export const planInkCards = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { scenes: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().max(2000)).min(1).max(800), deployment }).parse(d))
+  .inputValidator((d: { scenes: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().max(2000)).min(1).max(3000), deployment }).parse(d))
   .handler(async ({ data }) => { const { inkCardsOperation } = await import('./pipeline-operations.server'); return inkCardsOperation(data); });
 
 export const generateInkThumbnail = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])

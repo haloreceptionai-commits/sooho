@@ -45,6 +45,7 @@ function wordSoundCues(words, gap = 1.2) {
   return out;
 }
 var FANCY = new Set("thus hence whereby albeit amid notion vast mere sheer devise deploy vessel endeavor endeavour subsequent ensure utilize utilise obtain commence conceal ingenious crucial enormous strategy tactic illusion massive genuine renowned ancient tactics mission objective scheme disguise peculiar bizarre".split(" "));
+var EVERYDAY = new Set("actually carefully everybody everyone everything anything somebody something everywhere already really usually suddenly finally probably together underneath another television helicopter elevator watermelon caterpillar spaghetti alligator".split(" "));
 
 // src/lib/quality.ts
 var STOP = new Set("the a an and but so then with into onto from that this they them their there his her him he she it its was were is are be been for of to in on at by as or not just even very really what when where which while who whom why how your you our out up down over".split(" "));
@@ -354,6 +355,10 @@ function buildShots(scenes, tl) {
   scenes.forEach((sc, i) => {
     const t = tl[i];
     const dur = Math.max(0.6, t.end - t.start);
+    if (sc.camera === "hold") {
+      shots.push({ scene: i, start: t.start, end: t.start + dur, z0: 1, z1: 1, x0: 0, x1: 0, y0: 0, y1: 0, punch: false, hold: true });
+      return;
+    }
     const n = Math.max(1, Math.round(dur / 3));
     for (let k = 0;k < n; k++) {
       const s = t.start + dur * k / n, e = t.start + dur * (k + 1) / n;
@@ -418,6 +423,8 @@ function drawImage(ctx, img, w, h, zoom, panX, panY, ox = 0, oy = 0) {
   const dw = iw * scale, dh = ih * scale;
   const x = (w - dw) / 2 + Math.max(-1, Math.min(1, panX)) * (dw - w) / 2 + ox;
   const y = (h - dh) / 2 + Math.max(-1, Math.min(1, panY)) * (dh - h) / 2 + oy;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, x, y, dw, dh);
 }
 function drawCaption(ctx, text, w, h, vertical, pop) {
@@ -647,7 +654,7 @@ async function renderVideo(scenes, voice, o) {
   musicBus.connect(musicLift);
   const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
   const mime = pickMime();
-  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 9000000 : 6000000 });
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 14000000 : 6000000 });
   const parts = [];
   rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
   const stopped = new Promise((r) => rec.onstop = () => r());
@@ -700,9 +707,9 @@ async function renderVideo(scenes, voice, o) {
     const p = Math.min(1, local / Math.max(0.1, sh.end - sh.start));
     const pe = sh.punch ? local < 0.28 ? easeOut(local / 0.28) * 0.8 : 0.8 + 0.2 * p : ease(p);
     let zoom = sh.z0 + (sh.z1 - sh.z0) * pe + (sh.punch ? Math.max(0, 1 - local / 0.22) * 0.06 : 0);
-    let ox = Math.sin(el * 1.1) * o.width * 0.003, oy = Math.cos(el * 0.9) * o.height * 0.002;
+    let ox = sh.hold ? 0 : Math.sin(el * 1.1) * o.width * 0.003, oy = sh.hold ? 0 : Math.cos(el * 0.9) * o.height * 0.002;
     const sceneLocal = el - tl[sh.scene].start;
-    if (["boom", "thunder", "clang", "snap", "splash", "crash", "wave"].includes(sc.sfx) && sceneLocal < 0.5) {
+    if (!sh.hold && ["boom", "thunder", "clang", "snap", "splash", "crash", "wave"].includes(sc.sfx) && sceneLocal < 0.5) {
       const a = (1 - sceneLocal / 0.5) * o.width * 0.014;
       ox += (Math.random() - 0.5) * a;
       oy += (Math.random() - 0.5) * a;
@@ -759,16 +766,18 @@ async function renderVideo(scenes, voice, o) {
       ctx.fillRect(0, 0, o.width, o.height);
       const local = el - sh.start;
       const prev = si > 0 ? shots[si - 1] : undefined;
-      if (prev && !sh.punch && local < DISSOLVE) {
+      if (prev && !sh.punch && !sh.hold && local < DISSOLVE) {
         drawShot(prev, el, 1);
         drawShot(sh, el, easeOut(local / DISSOLVE));
       } else
         drawShot(sh, el, 1);
-      const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
-      g.addColorStop(0, "rgba(0,0,0,0)");
-      g.addColorStop(1, "rgba(0,0,0,0.3)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, o.width, o.height);
+      if (!sh.hold) {
+        const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
+        g.addColorStop(0, "rgba(0,0,0,0)");
+        g.addColorStop(1, "rgba(0,0,0,0.3)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, o.width, o.height);
+      }
       if (o.hookText && el < 3)
         drawHook(ctx, o.hookText, o.width, o.height, vertical, el);
       if (o.captions) {
