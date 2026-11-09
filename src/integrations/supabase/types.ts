@@ -330,6 +330,16 @@ export type Database = {
         Args: { p_job: string; p_new_hash: string }
         Returns: boolean
       }
+      resume_cartoon_render: {
+        Args: {
+          job_id: string
+          next_output_path: string
+          next_token_hash: string
+          owner_id: string
+          review_hash: string
+        }
+        Returns: boolean
+      }
       start_generation_job: {
         Args: {
           p_hash: string
