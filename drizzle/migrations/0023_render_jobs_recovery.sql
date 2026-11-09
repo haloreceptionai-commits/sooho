@@ -1,0 +1,1 @@
+ALTER TABLE public.render_jobs ADD COLUMN IF NOT EXISTS recovery jsonb NOT NULL DEFAULT '{}'::jsonb;

@@ -24,12 +24,13 @@ export function VideoJob({ v }: { v: Video }) {
   const resume = useServerFn(resumeApprovedCartoon);
   const [resuming, setResuming] = useState(false);
   const restartDead = useServerFn(restartDeadPreflight);
-  // A preview whose Azure machine never started is restarted safely (the server checks nothing was spent).
-  const waitingPreview = v.input.engine === 'cartoon' && v.hostedRender?.status === 'running' && !v.cartoonReview;
+  // While a cartoon renders, the server's watchdog checks Azure: dropped or never-started machines continue
+  // from saved work, finished-but-unreported videos complete, and hopeless runs fail with a clear next step.
+  const waitingPreview = v.input.engine === 'cartoon' && ['running', 'submitting', 'saving'].includes(v.hostedRender?.status ?? '') && v.status !== 'done';
   useEffect(() => {
     if (!waitingPreview) return;
-    const check = () => void restartDead({ data: { videoId: v.id } }).then((r) => { if (r.restarted || ('failed' in r && r.failed)) void syncFromCloud(); }).catch(() => undefined);
-    const first = setTimeout(check, 20_000), every = setInterval(check, 120_000);
+    const check = () => void restartDead({ data: { videoId: v.id } }).then((r) => { if (r.restarted || ('action' in r && r.action !== 'wait')) void syncFromCloud(); }).catch(() => undefined);
+    const first = setTimeout(check, 20_000), every = setInterval(check, 90_000);
     return () => { clearTimeout(first); clearInterval(every); };
   }, [waitingPreview, v.id, restartDead]);
   const approvedFailed = v.input.engine === 'cartoon' && canResumeApprovedCartoon(v.hostedRender?.status ?? '', v.cartoonReview);

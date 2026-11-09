@@ -397,7 +397,7 @@ export interface ShortImport { transcript: string; topic: string; summary: strin
 export const importShort = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { url: string; deployment: string }) => {
     const url = d.url?.trim() ?? "";
-    if (!YT_URL.test(url) || url.length > 200) throw new Error("Paste a YouTube Short link, like https://www.youtube.com/shorts/abc123");
+    if (!YT_URL.test(url) || url.length > 200) throw new Error("Paste a YouTube link, like https://www.youtube.com/shorts/abc123 or https://www.youtube.com/watch?v=abc123");
     return { url, deployment: d.deployment };
   })
   .handler(async ({ data }) => { const { importShortOperation } = await import('./pipeline-operations.server'); return importShortOperation({ data }); });

@@ -180,7 +180,7 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ detail: "Fact-checking the story…" });
     const facts = await withRetry(() => factCheck({ data: { topic: input.topic, deployment: s.scriptDeployment } }));
     const factText = [
-      ...(input.reference ? [`Inspiration video (${input.reference.url}) transcript — use ONLY as research for the same true topic. Write a brand-new original story: never copy its lines, hook or wording, and verify every claim: "${input.reference.transcript.slice(0, 4000)}"`] : []),
+      ...(input.reference ? [`Inspiration video (${input.reference.url}) transcript — use ONLY as research for the same true topic. Write a brand-new original story: never copy its lines, hook or wording, and verify every claim: "${input.reference.transcript.slice(0, input.format === "long" ? 12000 : 4000)}"`] : []),
       ...(input.topicSource ? [`Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify this claim independently; do not treat the title as proof.`] : []),
       ...facts.claims.map((c) => `- ${c.claim} (${c.date}) [${c.confidence}; ${c.sources.join("; ")}]`),
       `Myth: ${facts.myth}`, `Reality: ${facts.reality}`, facts.hedge ? `Hedge line to include: ${facts.hedge}` : "",

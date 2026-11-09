@@ -10,7 +10,8 @@ await platform.init();
 const input = await platform.input();
 if (!input?.jobId || !input.callbackToken || input.manifest?.kind !== 'cartoon') throw Error('Invalid cartoon job');
 const address = new URL(input.callbackUrl);
-if (address.protocol !== 'https:' || address.hostname !== 'sooho.lovable.app' || address.pathname !== '/api/public/render-callback') throw Error('Invalid completion address');
+// The app is reachable at its published address and its custom domain; anything else is rejected.
+if (address.protocol !== 'https:' || !['sooho.lovable.app', 'sooha.io'].includes(address.hostname) || address.pathname !== '/api/public/render-callback') throw Error('Invalid completion address');
 const work = path.join(os.tmpdir(), 'cartoon-job');
 await mkdir(work, { recursive: true });
 const python = process.env.CARTOON_PYTHON || 'python3';
@@ -95,6 +96,8 @@ try {
     const lanes=Math.max(1,Number(process.env.CARTOON_PARALLEL)||10);
     const STALE=15*60*1000;
     const hasPart=async first=>Boolean(await store.getValue(`part-${first}`));
+    // Claims are scoped to this attempt (each restart rotates the token), so a crashed attempt's claims never block recovery.
+    const attempt=hash(Buffer.from(input.callbackToken)).slice(0,12);
     async function renderBatch([first,last]){
       const dir=path.join(framesDir,`batch-${first}`);await mkdir(dir,{recursive:true});
       await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
@@ -109,7 +112,7 @@ try {
       while(cursor<batches.length){
         const batch=batches[cursor++];
         if(await hasPart(batch[0]))continue;
-        if(!(await store.claim(`claim-${batch[0]}`,STALE)))continue;
+        if(!(await store.claim(`claim-${attempt}-${batch[0]}`,STALE)))continue;
         await guard(15+cursor/batches.length*75);
         await renderBatch(batch);
       }
@@ -126,7 +129,7 @@ try {
       const missing=[];for(const b of batches)if(!(await hasPart(b[0])))missing.push(b);
       if(!missing.length)break;
       if(Date.now()>deadline)throw Error('Parallel frame batches did not finish');
-      for(const b of missing)if(await store.claim(`claim-${b[0]}`,STALE)){await guard(85);await renderBatch(b);}
+      for(const b of missing)if(await store.claim(`claim-${attempt}-${b[0]}`,STALE)){await guard(85);await renderBatch(b);}
       await guard(88);await new Promise(r=>setTimeout(r,5000));
     }
     const merged={input_hash:null,frames:{}};

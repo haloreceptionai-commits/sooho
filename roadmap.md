@@ -1,5 +1,12 @@
 # Roadmap — Cartoon Engine v2
 
+## Cartoon reliability + long-form remix (Nov 9)
+- [x] Root cause of stuck renders: workers rejected the sooha.io completion address and exited before reporting; 40 machines also exceeded the 100-core Azure quota
+- [x] Canonical callback address, worker accepts both addresses, per-attempt batch claims (images rebuilt), render fleet 23 machines
+- [x] Render watchdog every 4 minutes + from the owner's page: adopt/restart/stop/complete/fail with bounded attempts
+- [x] Remix page: Short or long links, long-form 3-15 min, all models
+- [x] Published; live watchdog runs every 4 minutes (200). Stuck "Measured Earth" Short auto-restarted and finished (61.7s, QA 85)
+
 - [x] Ink matching: deployed hash-pinned acoustic alignment for saved continuous takes, measured onset cuts without stretching, contextual literal storyboard association checks, energetic Charon mystery delivery. Real 23.72s narration through offline renderer verified 17 onset-matched cuts; 170 tests pass. A complete new AI-picture video and subjective audio/picture quality review remain unverified.
 
 - [x] Fix library ranking: normalized compound IDs, real/rigged models before sprites, exact narration nouns before pack tags, scene-balanced shortlist and conservative grounding before sanitization. Live director selected elephant, Velociraptor and YellowDragon; all loaded in local frame capture; 149 app and 32 Python tests passed. No new full video generated. Asset prominence/framing remains limited by existing cast-first cameras.
