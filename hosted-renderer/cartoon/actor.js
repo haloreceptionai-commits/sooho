@@ -1,4 +1,4 @@
-import { platform } from './platform.mjs';
+import { platform, netFetch } from './platform.mjs';
 import { spawn } from 'node:child_process';
 import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -16,20 +16,22 @@ await mkdir(work, { recursive: true });
 const python = process.env.CARTOON_PYTHON || 'python3';
 const root = path.dirname(new URL(import.meta.url).pathname);
 async function notify(event) {
-  for (let i=0;i<4;i++) {
-    const r=await fetch(input.callbackUrl,{method:'POST',headers:{'x-render-job':input.jobId,'x-render-token':input.callbackToken,'Content-Type':'application/json'},body:JSON.stringify(event)});
+  for (let i=0;i<6;i++) {
+    const r=await netFetch(input.callbackUrl,{method:'POST',headers:{'x-render-job':input.jobId,'x-render-token':input.callbackToken,'Content-Type':'application/json'},body:JSON.stringify(event)});
     if(r.ok)return r.json();
     if(r.status<500&&r.status!==429)throw Error(`Cloud callback rejected [${r.status}]`);
     await new Promise(r=>setTimeout(r,2000*2**i));
   }
   throw Error('Cloud callback unavailable');
 }
-async function guard(progress) { const state=await notify({type:'progress',progress});if(!state.accepted)throw Error('Cartoon cancelled or expired'); }
+class Cancelled extends Error {}
+async function guard(progress) { const state=await notify({type:'progress',progress});if(!state.accepted)throw new Cancelled('Cartoon cancelled or expired'); }
 async function run(command,args) {
   const child=spawn(command,args,{stdio:['ignore','pipe','pipe']});
   let errors='';child.stdout.on('data',v=>process.stdout.write(v));child.stderr.on('data',v=>{errors=(errors+v).slice(-2000);process.stderr.write(v);});
   let stopped=false;
-  const heartbeat=setInterval(()=>{guard(0).catch(()=>{stopped=true;child.kill('SIGTERM');});},60000);
+  // Only a real cancel/expiry stops the stage; a missed heartbeat (network blip) is ignored and retried next minute.
+  const heartbeat=setInterval(()=>{guard(0).catch(e=>{if(e instanceof Cancelled||/rejected \[4/.test(String(e?.message))){stopped=true;child.kill('SIGTERM');}else console.warn('heartbeat missed',e?.message);});},60000);
   try { await new Promise((resolve,reject)=>{child.on('error',reject);child.on('exit',code=>code===0&&!stopped?resolve():reject(Error(stopped?'Cartoon cancelled':`Worker stage failed: ${errors}`)));}); }
   finally { clearInterval(heartbeat); }
 }
@@ -37,7 +39,7 @@ async function uploadFiles(files) {
   const grants=await notify({type:'assets',files:files.map(name=>({name}))});
   if(!grants.accepted)throw Error('Upload cancelled');
   const paths={};
-  for(const name of files){const grant=grants.uploads[name];const bytes=await readFile(path.join(work,name));const r=await fetch(grant.url,{method:'PUT',headers:{'Content-Type':name.endsWith('.jpg')?'image/jpeg':name.endsWith('.wav')?'audio/wav':name.endsWith('.mp4')?'video/mp4':'application/json','x-upsert':'true'},body:bytes});if(!r.ok)throw Error(`Private upload failed [${r.status}]`);paths[name]=grant.path;}
+  for(const name of files){const grant=grants.uploads[name];const bytes=await readFile(path.join(work,name));const r=await netFetch(grant.url,{method:'PUT',headers:{'Content-Type':name.endsWith('.jpg')?'image/jpeg':name.endsWith('.wav')?'audio/wav':name.endsWith('.mp4')?'video/mp4':'application/json','x-upsert':'true'},body:bytes});if(!r.ok)throw Error(`Private upload failed [${r.status}]`);paths[name]=grant.path;}
   return paths;
 }
 const store= await platform.open(input.mode==='finish' ? input.storeId : `cartoon-${input.jobId}`);
@@ -49,7 +51,7 @@ try {
   await guard(0);
   if(input.mode==='preflight') {
     const url=new URL(input.voiceUrl);if(url.protocol!=='https:'||!url.pathname.includes('/storage/v1/object/sign/videos/'))throw Error('Invalid voice grant');
-    const response=await fetch(url);if(!response.ok)throw Error('Locked narration could not load');
+    const response=await netFetch(url);if(!response.ok)throw Error('Locked narration could not load');
     await writeFile(path.join(work,'original-voice'),Buffer.from(await response.arrayBuffer()));
     await run('ffmpeg',['-v','error','-y','-i',path.join(work,'original-voice'),'-ar','48000','-ac','1','-c:a','pcm_s16le',path.join(work,'voice.wav')]);
     await writeFile(path.join(work,'script.txt'),input.manifest.script);

@@ -1,9 +1,10 @@
 import { expect, it } from 'vitest';
 import { cartoonStart, reviewMatches } from '@/lib/cartoon-job';
 const fixture = () => ({ videoId: 'test', voicePath: 'owner/test/voice.wav', script: 'A sailor pours oil.', narration: ['A sailor pours oil.'], direction: { cast: [{ id: 'hero', seed: 3, outfit: 'sailor' }], scenes: [{ world: 'ship', light: 'day', action: 'pour', expression: 'neutral', actor: 'hero', wide: false }] }, gate: { score: 85, ready: true, parts: {}, blockers: [] }, hookType: 'action', report: { revealSec: 1, shotMix: {} }, captions: false, sfx: true });
-it('blocks cartoon work below the approved 85-point story gate', () => {
-  const f = fixture(); f.gate.score = 84; expect(cartoonStart.safeParse(f).success).toBe(false);
-  f.gate.score = 85; expect(cartoonStart.safeParse(f).success).toBe(true);
+it('lets a below-85 story continue to the owner preview review', () => {
+  const f = fixture(); (f.gate as { score: number; ready: boolean }).score = 69; (f.gate as { ready: boolean }).ready = false;
+  expect(cartoonStart.safeParse(f).success).toBe(true);
+  f.gate.score = 101; expect(cartoonStart.safeParse(f).success).toBe(false);
 });
 it('requires matching immutable owner review and rejects duplicate approvals', () => {
   const review = { hash: 'a'.repeat(64), storeId: 'store', sheets: ['sheet'], alignmentPath: 'words', voicePath: 'voice', duration: 34 };
@@ -26,4 +27,21 @@ it('accepts Visual Director scenes and rejects things the engine cannot draw', (
   expect(bad({ cues: [{ word: 4, kind: 'splash' }] })).toBe(false); // sentence has 4 words, index 4 is past it
   expect(bad({ speaker: 'stranger' })).toBe(false);
   expect(bad({ actors: [{ actor: 'hero', action: 'idle', expression: 'neutral', slot: 'left', facing: 0 }, { actor: 'captain', action: 'idle', expression: 'neutral', slot: 'left', facing: 0 }] })).toBe(false);
+});
+import { sanitizeDirection } from '@/lib/cartoon-job';
+it('repairs director slips so the job passes the strict start check', () => {
+  const f = fixture();
+  const scene = { ...f.direction.scenes[0]!, actor: 'ghost', cues: [{ word: 9, kind: 'splash' as never }], props: [{ kind: 'asset' as never, place: 'hand' as never, motion: 'none' as never, asset: 'kenney/barrel' }, { kind: 'asset' as never, place: 'ground_left' as never, motion: 'none' as never }] };
+  const direction = sanitizeDirection({ ...f.direction, scenes: [scene, scene] } as never, f.narration);
+  expect(direction.scenes).toHaveLength(1);
+  expect(direction.scenes[0]!.actor).toBe('hero');
+  expect(direction.scenes[0]!.cues![0]!.word).toBe(3);
+  expect(direction.scenes[0]!.props).toHaveLength(1);
+  expect(direction.scenes[0]!.props![0]!.place).toBe('ground_right');
+  expect(cartoonStart.safeParse({ ...f, direction }).success).toBe(true);
+});
+it('turns an object close-up with no nearby drawn object into an actor close-up', () => {
+  const f = fixture();
+  const d = sanitizeDirection({ ...f.direction, scenes: [{ ...f.direction.scenes[0]!, shot: 'insert' as never, props: [] }] } as never, f.narration);
+  expect(d.scenes[0]!.shot).toBe('close');
 });

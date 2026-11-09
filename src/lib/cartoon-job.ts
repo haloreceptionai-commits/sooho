@@ -33,7 +33,7 @@ export const cartoonDirection = z.object({
 export const cartoonStart = z.object({
   videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), voicePath: z.string().min(1).max(500),
   script: z.string().min(1).max(4000), narration: z.array(z.string().min(1).max(4000)).min(1).max(120), direction: cartoonDirection,
-  gate: z.object({ score: z.number().min(85).max(100), ready: z.literal(true), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),
+  gate: z.object({ score: z.number().min(0).max(100), ready: z.boolean(), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),
   hookType: z.string().max(100), report: z.object({ revealSec: z.number(), shotMix: z.record(z.number()) }), captions: z.boolean(), sfx: z.boolean(),
 }).superRefine((d, ctx) => {
   if (d.narration.join(' ') !== d.script) ctx.addIssue({ code: 'custom', message: 'Scene text must match the locked narration' });
@@ -50,3 +50,44 @@ export const cartoonReviewEvent = z.object({
 });
 export interface CartoonReview { hash: string; storeId: string; sheets: string[]; alignmentPath: string; voicePath: string; duration: number; approved?: boolean }
 export function reviewMatches(review: CartoonReview | undefined, hash: string) { return Boolean(review && !review.approved && review.hash === hash); }
+type Direction = z.infer<typeof cartoonDirection>;
+/**
+ * Repairs the small, mechanical slips the Visual Director makes (stray sound positions, duplicate actors or slots,
+ * held library objects, scene count drift) so they never fail a paid job. Never adds new vocabulary.
+ */
+export function sanitizeDirection(direction: Direction, narration: string[]): Direction {
+  if (!direction.scenes.length || !direction.cast.length) throw Error('Cartoon direction came back empty. No rendering was started.');
+  const scenes = direction.scenes.slice(0, narration.length);
+  while (scenes.length < narration.length) scenes.push({ ...scenes[scenes.length - 1]! });
+  const castIds = new Set(direction.cast.map(c => c.id)), lead = direction.cast[0]!.id;
+  return { ...direction, scenes: scenes.map((raw, i) => {
+    const s = { ...raw };
+    if (!castIds.has(s.actor)) s.actor = lead;
+    if (s.actors) {
+      const seen = new Set<string>(), used = new Set<string>();
+      const free = () => VOCAB.slots.find(x => !used.has(x));
+      const actors = s.actors.filter(a => castIds.has(a.actor) && !seen.has(a.actor) && seen.add(a.actor)).flatMap(a => {
+        const slot = used.has(a.slot) ? free() : a.slot;
+        if (!slot) return [];
+        used.add(slot); return [{ ...a, slot: slot as typeof a.slot }];
+      });
+      s.actors = actors.length ? actors : undefined;
+    }
+    if (s.speaker && s.actors && !s.actors.some(a => a.actor === s.speaker)) s.speaker = undefined;
+    if (s.props) {
+      let hand = false;
+      s.props = s.props.filter(p => p.kind !== 'asset' || !!p.asset).map(p => {
+        const q = { ...p };
+        if (q.kind !== 'asset') delete q.asset;
+        if (q.place === 'hand' && (q.kind === 'asset' || hand)) q.place = 'ground_right';
+        if (q.place === 'hand') hand = true;
+        return q;
+      });
+    }
+    // Object close-ups need a drawn object near the actors; otherwise the camera frames bare floor, so frame the actor instead.
+    if ((s.shot === 'insert' || s.shot === 'extreme_close') && !(s.props ?? []).some(p => p.kind !== 'asset' && ['hand', 'ground_left', 'ground_right'].includes(p.place))) s.shot = 'close';
+    const n = (narration[i] ?? '').split(/\s+/).filter(Boolean).length;
+    if (s.cues) s.cues = s.cues.filter(c => n > 0 && c.word >= 0).map(c => ({ ...c, word: Math.min(c.word, n - 1) }));
+    return s;
+  }) };
+}
