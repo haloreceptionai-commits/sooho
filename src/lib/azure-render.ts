@@ -21,6 +21,13 @@ async function putInput(key: string, input: unknown) {
   if (!r.ok) throw Error(`Cartoon input could not be saved [${r.status}]`);
 }
 
+export async function readAzureCartoonLock(storeId: string) {
+  if (!/^cartoon-[0-9a-f-]{36}$/.test(storeId)) throw Error('Invalid saved cartoon store');
+  const r = await fetch(`${env('AZURE_BLOB_BASE')}/${storeId}/LOCK?${env('AZURE_BLOB_SAS').replace(/^\?/, '')}`);
+  if (!r.ok) throw Error('Saved approved cartoon inputs are unavailable; no new render was started');
+  return r.json() as Promise<{ jobId?: string; hash?: string; requestHash?: string }>;
+}
+
 // Finish fans out to `replicas` machines (set on the Azure job as parallelism); frames are split evenly.
 // Each 4-vCPU machine runs 2 browsers on the Mesa lavapipe Vulkan driver (about 3x SwiftShader).
 export const AZURE_JOBS = { preflight: { name: 'cartoon-preflight', lanes: 2, replicas: 1 }, finish: { name: 'cartoon-render', lanes: 2, replicas: 40 } } as const;

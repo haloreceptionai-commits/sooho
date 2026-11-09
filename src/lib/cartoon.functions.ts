@@ -4,7 +4,9 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { CARTOON_LIFETIME_MS, cartoonStart, reviewApproval, reviewMatches, type CartoonStart, type CartoonReview } from '@/lib/cartoon-job';
 import { validRenderAssets } from '@/lib/hosted-render';
 import type { Json } from '@/integrations/supabase/types';
-import { startAzureCartoon } from '@/lib/azure-render';
+import { startAzureCartoon, readAzureCartoonLock } from '@/lib/azure-render';
+import { canResumeApprovedCartoon, verifiedCartoonLock } from './cartoon-resume';
+import { canonical } from '../../hosted-renderer/cartoon/canonical.mjs';
 
 export const CARTOON_ACTOR = 'nifty_remnant~chronicle-cartoon-renderer';
 
@@ -55,6 +57,35 @@ export const recoverCartoonReview = createServerFn({ method: 'POST' }).middlewar
 export const submitCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((input: CartoonStart) => cartoonStart.parse(input))
   .handler(async ({ data, context }) => { const { submitCartoonOperation } = await import('./cartoon-submit.server'); return submitCartoonOperation({ data, context }); });
+
+export const resumeApprovedCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { videoId: string }) => ({ videoId: reviewApproval.shape.videoId.parse(data.videoId) }))
+  .handler(async ({ data, context }) => {
+    const { data: row } = await context.supabase.from('videos').select('data').eq('id', data.videoId).single();
+    const { data: job } = await context.supabase.from('render_jobs').select('*').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    const review = row ? (row.data as Record<string, Json>)['cartoonReview'] as unknown as CartoonReview | undefined : undefined;
+    if (!job || job.user_id !== context.userId || !review || !canResumeApprovedCartoon(job.status, review)) throw Error('No failed approved cartoon can be resumed');
+    // Uncertain dispatch must be reconciled, not submitted a second time.
+    if (/unconfirmed|not confirmed|tracking could not|Submission/i.test(job.error ?? '')) throw Error('The previous start is unconfirmed; it must be checked before another render starts');
+    const legacy = !/^cartoon-[0-9a-f-]{36}$/.test(review.storeId);
+    if (legacy) throw Error('This older saved render needs recovery before it can resume');
+    const lock = await readAzureCartoonLock(review.storeId);
+    if (!verifiedCartoonLock(lock, job.id, review.hash, await digest(canonical(job.manifest)))) throw Error('Saved inputs do not match the approved preview');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const token = crypto.randomUUID() + crypto.randomUUID(), tokenHash = await digest(token);
+    const { data: claimed, error } = await supabaseAdmin.rpc('resume_cartoon_render', { job_id: job.id, owner_id: context.userId, review_hash: review.hash, next_token_hash: tokenHash, next_output_path: `${context.userId}/${data.videoId}/generation-output/${crypto.randomUUID()}.mp4` });
+    if (error || !claimed) throw Error('This render was already resumed or its saved preview changed');
+    try {
+      const run = await startAzureCartoon(job.id, 'finish', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: review.hash });
+      const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('token_hash', tokenHash).not('status', 'in', '(done,failed,cancelled)');
+      if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
+      return { accepted: true };
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Cartoon start unconfirmed';
+      await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'failed', video_patch: { status: 'failed', error: `Submission unconfirmed: ${message}`, detail: 'Saved approved preview is safe', hostedRender: { id: job.id, status: 'failed' } }, saved_path: '' });
+      throw Error(message);
+    }
+  });
 
 export const approveCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { videoId: string; hash: string }) => reviewApproval.parse(data))

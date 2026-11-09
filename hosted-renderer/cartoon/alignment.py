@@ -19,16 +19,17 @@ def align_ctc(log_probs, tokens, blank=0):
     states = [blank]
     for t in tokens: states.extend([t,blank])
     count=len(states); back=np.full((len(p),count),-1,dtype=np.int32)
+    states_array=np.asarray(states); indices=np.arange(count)
+    skip=np.zeros(count,dtype=bool)
+    skip[2:]=(states_array[2:]!=blank)&(states_array[2:]!=states_array[:-2])
     previous=np.full(count,-np.inf); previous[0]=p[0,blank]; previous[1]=p[0,tokens[0]]
     for frame in range(1,len(p)):
-        current=np.full(count,-np.inf)
-        for s,token in enumerate(states):
-            choices=[s]
-            if s>0: choices.append(s-1)
-            if s>1 and token != blank and token != states[s-2]: choices.append(s-2)
-            best=max(choices,key=lambda x:previous[x])
-            current[s]=previous[best]+p[frame,token]; back[frame,s]=best
-        previous=current
+        # Same legal transitions and stay/step/skip tie order as the scalar Viterbi.
+        choices=np.stack((previous,np.r_[-np.inf,previous[:-1]],np.r_[-np.inf,-np.inf,previous[:-2]]))
+        choices[2,~skip]=-np.inf
+        best=np.argmax(choices,axis=0)
+        back[frame]=indices-best
+        previous=choices[best,indices]+p[frame,states_array]
     state=max([count-1,count-2],key=lambda s:previous[s])
     if not np.isfinite(previous[state]): raise ValueError('Transcript cannot fit acoustic timeline')
     path=[]

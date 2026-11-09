@@ -4,7 +4,9 @@ import { runVideo, removeFromQueue } from "@/lib/pipeline";
 import { btnOutline } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { CartoonReviewPanel } from '@/components/cartoon-review';
-import { recoverCartoonReview } from '@/lib/cartoon.functions';
+import { recoverCartoonReview, resumeApprovedCartoon } from '@/lib/cartoon.functions';
+import { canResumeApprovedCartoon } from '@/lib/cartoon-resume';
+import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { syncFromCloud } from '@/lib/store';
 import { toast } from 'sonner';
@@ -19,6 +21,9 @@ const ORDER = ["script", "voice", "images", "render", "saving", "done"];
 
 export function VideoJob({ v }: { v: Video }) {
   const recover = useServerFn(recoverCartoonReview);
+  const resume = useServerFn(resumeApprovedCartoon);
+  const [resuming, setResuming] = useState(false);
+  const approvedFailed = v.input.engine === 'cartoon' && canResumeApprovedCartoon(v.hostedRender?.status ?? '', v.cartoonReview);
   const cur = ORDER.indexOf(v.stage);
   const failed = v.status === "failed";
   return (
@@ -59,7 +64,8 @@ export function VideoJob({ v }: { v: Video }) {
         <div className="mt-3 flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-xs text-destructive">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <p className="flex-1 break-words">{v.error}</p>
-          {!v.generationJob && (!v.hostedRender || (v.cartoonCheckpoint && ["failed", "cancelled"].includes(v.hostedRender.status))) && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> {v.seedanceCheckpoint || v.assemblyCheckpoint || v.cartoonCheckpoint || v.scriptCheckpoint ? "Resume" : "Retry"}</Button>}
+          {approvedFailed && <Button disabled={resuming} className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { setResuming(true); void resume({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not resume render')).finally(() => setResuming(false)); }}><RotateCcw className="h-3 w-3" /> Resume render</Button>}
+          {!approvedFailed && !v.generationJob && (!v.hostedRender || (v.cartoonCheckpoint && ["failed", "cancelled"].includes(v.hostedRender.status))) && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> {v.seedanceCheckpoint || v.assemblyCheckpoint || v.cartoonCheckpoint || v.scriptCheckpoint ? "Resume" : "Retry"}</Button>}
           {v.input.engine === 'cartoon' && ['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(v.error ?? '') && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { void recover({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not recover preview')); }}><RotateCcw className="h-3 w-3" /> Recover preview</Button>}
         </div>
       )}
