@@ -1,5 +1,8 @@
 # Roadmap — Cartoon Engine v2
 
+- [ ] Fix slow cartoon preflight without dropping review frames or speech accuracy; deploy and measure.
+- [ ] Resume failed approved cartoons using the existing locked preview and verified frame checkpoints; test atomic ownership and callback fencing.
+
 - [x] Background foundation: owner-readable jobs/steps, atomic Start, fenced ownership/checkpoints, individually checkpointed judges, shared server operations, generation coordinator and Azure on-demand job; rollout disabled.
 - [ ] Enable full background generation after real closed-browser completion and fault-injection checks. Published worker endpoint now responds correctly (unauthorized calls rejected); rollout remains disabled. Bounded recovery handler is implemented but not scheduled; isolated final-output paths, cancellation-aware callbacks and worker completion checkpoints added. Deploy updated assembly/cartoon workers, implement owner-authorized uncertain-step recovery, and verify real worker/paid-asset failures before rollout.
 
