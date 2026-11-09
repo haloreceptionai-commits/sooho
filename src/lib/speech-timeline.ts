@@ -2,7 +2,7 @@ export interface AlignedWord { text: string; start: number; end: number }
 export interface AlignedScene { scene: number; words: AlignedWord[] }
 
 /** Scene cuts follow measured first-word onsets, not spelling length or assumed speaking speed. */
-export function alignedTimeline(chunks: { scenes: number[]; dur: number; start: number; from: number; alignment?: AlignedScene[] }[], texts: string[]) {
+export function alignedTimeline(chunks: { scenes: number[]; dur: number; start: number; from: number; alignment?: AlignedScene[] | undefined }[], texts: string[]) {
   const out = texts.map(() => ({ start: 0, end: 0, words: [] as { text: string; t0: number; t1: number }[] }));
   const covered = new Set<number>();
   for (const c of chunks) {
