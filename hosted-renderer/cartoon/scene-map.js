@@ -31,19 +31,19 @@ async function buildMap(root){
   const GW=1024,GH=Math.max(64,Math.round(GW*TH/TW)),H=new Float32Array(GW*GH);
   for(let j=0;j<GH;j++)for(let i=0;i<GW;i++){const lon=w+(i+.5)/GW*(e-w),lat=n-(j+.5)/GH*(n-s);
     const k=((Math.floor(j/GH*TH))*TW+Math.floor(i/GW*TW))*4,l=land[k]/255,cst=coast[k]/255;
-    const base=fbm(lon*.18,lat*.18),mount=Math.pow(Math.max(0,ridge(lon*.09+7,lat*.09+3)-.45)*1.9,1.6);
-    H[j*GW+i]=l*(.08+.35*base*cst+mount*cst)-(1-l)*.05;}
+    const base=fbm(lon*.22,lat*.22),mount=Math.pow(Math.max(0,ridge(lon*.07+7,lat*.07+3)-.55)*2.2,1.8);
+    H[j*GW+i]=l*(.08+.22*base*cst+.5*mount*cst)-(1-l)*.05;}
   const hAt=(lon,lat)=>{const i=Math.max(0,Math.min(GW-1,Math.floor((lon-w)/(e-w)*GW))),j=Math.max(0,Math.min(GH-1,Math.floor((n-lat)/(n-s)*GH)));return H[j*GW+i];};
   // Bake colour: earth-tone relief ramp + hillshade, blue sea with bright shallows, white borders.
   const [cc,cg]=canvas(TW,TH),img=cg.createImageData(TW,TH),o=img.data;
-  const ramp=[[0,[63,150,58]],[.18,[110,168,62]],[.32,[205,178,74]],[.5,[178,122,58]],[.72,[132,92,54]],[1,[236,226,204]]];
+  const ramp=[[0,[58,150,52]],[.2,[104,166,56]],[.36,[212,182,70]],[.55,[184,128,60]],[.8,[138,94,52]],[1,[196,170,140]]];
   const rampAt=h=>{h=Math.max(0,Math.min(1,h));for(let q=1;q<ramp.length;q++)if(h<=ramp[q][0]){const [a,ca]=ramp[q-1],[b,cb]=ramp[q],t=(h-a)/(b-a);return ca.map((v,z)=>v+(cb[z]-v)*t);}return ramp[ramp.length-1][1];};
   for(let y=0;y<TH;y++){const gj=Math.min(GH-1,Math.floor(y/TH*GH));for(let x=0;x<TW;x++){const gi=Math.min(GW-1,Math.floor(x/TW*GW)),k=(y*TW+x)*4;
     const h=H[gj*GW+gi],hx=H[gj*GW+Math.min(GW-1,gi+1)]-H[gj*GW+Math.max(0,gi-1)],hy=H[Math.min(GH-1,gj+1)*GW+gi]-H[Math.max(0,gj-1)*GW+gi];
     const lonD=(e-w)/GW,fine=hash(x*.37,y*.53)*.06;
-    const shade=Math.max(.35,Math.min(1.45,1+(-hx+hy)*6/Math.max(.05,lonD*4)));
+    const shade=Math.max(.55,Math.min(1.3,1+(-hx+hy)*3/Math.max(.05,lonD*4)));
     let c;
-    if(land[k]>127){const hh=(h-.08)/.6;c=rampAt(hh+fine*.4).map(v=>v*(shade*.82+.18));}
+    if(land[k]>127){const lat=n-y/TH*(n-s),dry=Math.max(0,1-Math.abs(Math.abs(lat)-25)/14)*(.6+.4*vnoise(x*.004,y*.004));const hh=(h-.08)/.55+dry*.32;c=rampAt(hh+fine*.4).map(v=>v*(shade*.7+.3));}
     else{const sh=coast[k]/255,wave=.94+.06*vnoise(x*.02,y*.03);c=[22+60*sh,84+86*sh,182+46*sh].map(v=>v*wave);}
     const b=border[k+3]/255;o[k]=c[0]+(255-c[0])*b*.8;o[k+1]=c[1]+(255-c[1])*b*.8;o[k+2]=c[2]+(255-c[2])*b*.8;o[k+3]=255;}}
   cg.putImageData(img,0,0);
@@ -67,13 +67,13 @@ async function buildMap(root){
           float nb=(texture2D(terr,vUv+vec2(texel.x*2.,0.)).r+texture2D(terr,vUv-vec2(texel.x*2.,0.)).r+texture2D(terr,vUv+vec2(0.,texel.y*2.)).r+texture2D(terr,vUv-vec2(0.,texel.y*2.)).r)*.25;
           vec2 d=(vUv-center)*vec2(aspect,1.); float rev=smoothstep(radius,radius-.012,length(d));
           float lum=dot(base,vec3(.3,.59,.11));
-          vec3 red=vec3(.93,.08,.06)*(.55+.75*lum)*pulse;
-          col=mix(col,red,fill*rev*.9);
+          vec3 red=vec3(.92,.05,.04)*(.78+.42*lum)*pulse;
+          col=mix(col,red,fill*rev*.94);
           col+=vec3(.9,.05,.03)*glow*(1.-fill)*rev*.55*pulse;
           col=mix(col,vec3(1.),clamp(abs(fill-nb)*3.5,0.,1.)*rev); }
         gl_FragColor=vec4(col,1.); }`});
   const SEG=512,geo=new THREE.PlaneGeometry(mapX(e)-mapX(w),mapZ(s)-mapZ(n),SEG,Math.max(32,Math.round(SEG*(n-s)/(e-w))));geo.rotateX(-Math.PI/2);
-  const pos=geo.attributes.position,relief=(e-w)*MAP_S*.012;
+  const pos=geo.attributes.position,relief=(e-w)*MAP_S*.006;
   for(let i=0;i<pos.count;i++){const lon=mapLon(pos.getX(i)+(mapX(w)+mapX(e))/2),lat=-(pos.getZ(i)+(mapZ(n)+mapZ(s))/2)/MAP_S;pos.setY(i,Math.max(0,hAt(lon,lat))*relief);}
   pos.needsUpdate=true;geo.computeVertexNormals();
   const mesh=new THREE.Mesh(geo,mat);mesh.position.set((mapX(w)+mapX(e))/2,0,(mapZ(n)+mapZ(s))/2);mesh.receiveShadow=false;root.add(mesh);
@@ -101,7 +101,7 @@ function mapState(state,f){
   const full=1.6,grow=mapEase(p/.7);
   U.radius.value=m.reveal==='grow'?.02+grow*full:m.reveal==='shrink'?full-(full-.12)*mapEase(p):full;
   U.pulse.value=.9+.1*Math.sin(f*.12);
-  const span=60/m.focus[2],unit=span*MAP_S*.012;
+  const span=60/m.focus[2],unit=span*MAP_S*.022;
   MAP.armies.forEach((a,i)=>{const ar=(m.armies||[])[i];a.g.visible=!!ar;if(!ar)return;
     const t=mapEase(p*1.15),lon=ar.from[0]+(ar.to[0]-ar.from[0])*t,lat=ar.from[1]+(ar.to[1]-ar.from[1])*t;
     a.g.position.set(mapX(lon),Math.max(0,MAP.hAt(lon,lat))*MAP.relief,mapZ(lat));a.g.scale.setScalar(unit);

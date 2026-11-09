@@ -93,7 +93,7 @@ def camera_keys(kind,move,subject,others,start,end,props):
 def map_camera(m,move,start,end,battle):
     """Macro events: high orbiting view. Battles: low dramatic dolly toward the front line."""
     lon,lat,zoom=m['focus']; span=60/zoom*.5; x,z=lon*.5,-lat*.5
-    h=span*(.55 if battle else 1.0); back=span*(1.05 if battle else .7); fov=38 if battle else 40
+    h=span*(.95 if battle else 1.35); back=span*(.75 if battle else .42); fov=38 if battle else 40
     def at(k=1.,dx=0.):return {'pos':[round(x+dx,3),round(h*k,3),round(z+back*k,3)],'look':[round(x+dx*.4,3),0,round(z-span*.08,3)],'fov':fov,'roll':0}
     if move=='pull_back':a,b=at(.82),at(1.08)
     elif move in('pan_left','orbit'):a,b=at(1,span*.12),at(.95,-span*.12)
