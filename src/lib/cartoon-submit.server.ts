@@ -10,7 +10,9 @@ export const submitCartoonOperation = async ({ data, context }: { data: CartoonS
     if (!video || video.user_id !== context.userId) throw Error('Video not found');
     const record = video.data as Record<string, Json>;
     if ((record['cartoonReview'] as Record<string, Json> | undefined)?.['approved'] === true && record['status'] === 'failed') throw Error('Use Resume render to reuse the approved preview; no new preview was started');
-    if ((record['input'] as Record<string, Json>)?.['format'] !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
+    // The saved video's format must match the job: Shorts render 9:16, long-form 16:9 with map scenes.
+    const long = (record['input'] as Record<string, Json>)?.['format'] !== 'short';
+    if (long !== (data.format === 'long')) throw Error('Cartoon format does not match this video');
     if (!validRenderAssets(context.userId, data.videoId, [data.voicePath])) throw Error('Invalid narration asset');
     const { data: existing } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
     // A failed/cancelled run may be resumed by the owner's explicit click; active runs are never duplicated.
@@ -18,7 +20,7 @@ export const submitCartoonOperation = async ({ data, context }: { data: CartoonS
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const token = crypto.randomUUID() + crypto.randomUUID();
     const tokenHash = await digest(token);
-    const manifest = { ...data, kind: 'cartoon', width: 1080, height: 1920, checkpoint: { gate: data.gate, hookType: data.hookType, report: data.report, continuity: 1, plan: { characters: data.direction.cast } } };
+    const manifest = { ...data, kind: 'cartoon', width: long ? 1920 : 1080, height: long ? 1080 : 1920, checkpoint: { gate: data.gate, hookType: data.hookType, report: data.report, continuity: 1, plan: { characters: data.direction.cast } } };
     const { data: job, error } = await supabaseAdmin.from('render_jobs').insert({ video_id: data.videoId, user_id: context.userId, token_hash: tokenHash, expires_at: new Date(Date.now() + CARTOON_LIFETIME_MS).toISOString(), manifest: manifest as unknown as Json, output_path: `${context.userId}/${data.videoId}/generation-output/${crypto.randomUUID()}.mp4` }).select('id').single();
     if (error || !job) {
       const { data: claimed } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
