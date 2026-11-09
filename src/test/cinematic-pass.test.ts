@@ -21,4 +21,9 @@ describe('cinematic pass', () => {
     const out = cinematicPass([{ ...base, world: 'storm_sea', mood: 'reveal', fx: ['smoke', 'fire'] }]);
     expect(out[0]!.fx).toEqual(['smoke', 'fire', 'burst']);
   });
+  it('does not carry unrelated props across subjects or worlds', () => {
+    const out = cinematicPass([{ ...base, props: [flask] }, { ...base, props: [] }, { ...base, world: 'ship', props: [] }], ['A flask breaks.', 'The king smiles.', 'It sails away.']);
+    expect(out[1]?.props).toHaveLength(0);
+    expect(out[2]?.props).toHaveLength(0);
+  });
 });
