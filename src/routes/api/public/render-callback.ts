@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { renderCallback } from "@/lib/hosted-render";
-import { finalScore } from "@/lib/story-v2";
+import { donePatch } from "@/lib/render-complete";
 import type { Json } from "@/integrations/supabase/types";
 import { cartoonReviewEvent } from '@/lib/cartoon-job';
 import { validRenderAssets } from '@/lib/hosted-render';
@@ -67,7 +67,6 @@ export const Route = createFileRoute("/api/public/render-callback")({
     const { data: row } = await supabaseAdmin.from("videos").select("data").eq("id", job.video_id).eq("user_id", job.user_id).single();
     if (!row) return new Response("Not found", { status: 404 });
     const record = row.data as Record<string, Json>;
-    const manifest = job.manifest as unknown as { checkpoint: { gate: Parameters<typeof finalScore>[0]; hookType: string; report: { revealSec: number; shotMix: Record<string, number> }; continuity: number; plan: { characters: unknown[] } }; width: number; height: number; captions: boolean };
     let patch: Record<string, Json>, status = job.status;
     if (event.type === "progress") {
       patch = { progress: Math.max(Number(record["progress"] ?? 72), 72 + Math.round(event.progress * 0.26)), detail: "Hosted assembly · safe to close your browser" };
