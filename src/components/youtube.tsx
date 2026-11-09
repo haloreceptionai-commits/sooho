@@ -95,7 +95,7 @@ function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
 
   return (
     <Dialog open onOpenChange={(o) => !o && pct === null && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader><DialogTitle>Publish to YouTube{short ? " Shorts" : ""}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <label className="block"><span className={label}>Title ({title.length}/100)</span><input className={input} maxLength={100} value={title} onChange={(e) => setTitle(e.target.value)} /></label>
