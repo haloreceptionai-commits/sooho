@@ -3,7 +3,8 @@ import vocab from '../../hosted-renderer/cartoon/vocabulary.json';
 
 export const CARTOON_LIFETIME_MS = 48 * 60 * 60_000;
 // One vocabulary shared with the hosted worker, so the director can only ask for what the engine draws.
-export const VOCAB = vocab as { [K in keyof typeof vocab]: [string, ...string[]] };
+type Lists = Omit<typeof vocab, 'map'>;
+export const VOCAB = vocab as unknown as { [K in keyof Lists]: [string, ...string[]] };
 export const OUTFITS = VOCAB.outfits;
 const id = z.string().regex(/^[a-z0-9_-]{1,30}$/);
 const lonlat = z.tuple([z.number().min(-180).max(180), z.number().min(-65).max(85)]);

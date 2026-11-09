@@ -129,18 +129,18 @@ export function toMapSpec(b: { regions: string[]; focus: number[]; reveal: 'grow
     armies: b.armies.flatMap(a => { const from = clampLL(a.from), to = clampLL(a.to); return from && to ? [{ from, to, side: a.side }] : []; }).slice(0, 4) };
 }
 
-export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string; format?: 'short' | 'long' } }) => {
+export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string; format?: 'short' | 'long' | undefined } }) => {
   if (data.format !== 'long') return directCartoonChunk(data);
   // Long-form: character direction in chunks (one shared cast), then the map pass decides which blocks become map scenes.
   let cast: z.infer<typeof cartoonDirection>['cast'] | null = null;
   const scenes: z.infer<typeof cartoonDirection>['scenes'] = [];
   for (let i = 0; i < data.scenes.length; i += 40) {
     const part = await directCartoonChunk({ scenes: data.scenes.slice(i, i + 40), deployment: data.deployment });
-    if (!cast) cast = part.cast;
+    const first: z.infer<typeof cartoonDirection>['cast'] = cast ?? part.cast; cast = first;
     // Later chunks reuse the first cast by position so the same people carry the whole documentary.
-    const remap = new Map(part.cast.map((c, k) => [c.id, (cast[k] ?? cast[0]!).id]));
-    scenes.push(...part.scenes.map(s => ({ ...s, actor: remap.get(s.actor) ?? cast![0]!.id, speaker: s.speaker ? remap.get(s.speaker) : undefined,
-      actors: s.actors?.map(a => ({ ...a, actor: remap.get(a.actor) ?? cast![0]!.id })) })));
+    const remap = new Map(part.cast.map((c, k) => [c.id, (first[k] ?? first[0]!).id]));
+    scenes.push(...part.scenes.map(s => ({ ...s, actor: remap.get(s.actor) ?? first[0]!.id, speaker: s.speaker ? remap.get(s.speaker) : undefined,
+      actors: s.actors?.map(a => ({ ...a, actor: remap.get(a.actor) ?? first[0]!.id })) })));
   }
   const ids = new Set((await import('../../hosted-renderer/cartoon/assets/map/region-ids.json')).default as string[]);
   const blocks = await directMapOperation(data.scenes, data.deployment);
