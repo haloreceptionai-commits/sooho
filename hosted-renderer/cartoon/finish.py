@@ -17,6 +17,11 @@ def validate_frames(folder, total):
         file = folder / f'f{frame:06d}.jpg'
         if not valid_frame(file, saved['frames'].get(str(frame))):
             raise ValueError(f'Missing or corrupt frame {frame}')
+    from PIL import Image
+    with Image.open(folder / 'f000000.jpg') as first: size = first.size
+    for frame in (total // 2, total - 1):
+        with Image.open(folder / f'f{frame:06d}.jpg') as im:
+            if im.size != size: raise ValueError('Mixed frame sizes')
     if any(int(k) >= total for k in saved['frames']):
         raise ValueError('Unexpected trailing frames')
 
@@ -62,7 +67,7 @@ def main():
                  '-af', audio_filter, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', str(tmp)])
             probe = json.loads(run(['ffprobe', '-v', 'error', '-count_frames', '-show_streams', '-show_format', '-of', 'json', str(tmp)]))
             video = next(s for s in probe['streams'] if s['codec_type'] == 'video')
-            if (video['width'], video['height'], video['r_frame_rate'], int(video['nb_read_frames'])) != (1080, 1920, '30/1', total):
+            if (video['width'], video['height']) not in ((1080, 1920), (1920, 1080)) or (video['r_frame_rate'], int(video['nb_read_frames'])) != ('30/1', total):
                 raise ValueError('Encoded frame contract failed')
             audio = next(s for s in probe['streams'] if s['codec_type'] == 'audio')
             if float(audio.get('duration', 0)) + 0.03 < duration: raise ValueError('Narration was truncated')

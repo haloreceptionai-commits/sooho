@@ -8,7 +8,8 @@
     "storm_sea",
     "castle",
     "market",
-    "night_camp"
+    "night_camp",
+    "map"
   ],
   "lights": [
     "day",
@@ -198,5 +199,20 @@
     "priest",
     "pharaoh",
     "cowboy"
-  ]
+  ],
+  "map": {
+    "reveal": [
+      "grow",
+      "hold",
+      "shrink"
+    ],
+    "sides": [
+      "red",
+      "blue",
+      "gold"
+    ],
+    "max_regions": 40,
+    "max_cities": 6,
+    "max_armies": 4
+  }
 }

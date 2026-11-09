@@ -87,7 +87,73 @@ export async function azureJson<T>(deployment: string, system: string, user: str
 // ---------------- Fact check ----------------
 
 export interface Claim { claim: string; sources: string[]; date: string; confidence: "high" | "medium" | "low" }
-export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string } }) => {
+const MAP_DIRECTOR = `You are the map art director for a long-form history documentary in the style of animated 3D relief-map channels.
+For each numbered narration block decide if it is best shown on the animated map (empires, borders, conquests, migrations, trade routes, battles, treaties, where-and-when context) or by cartoon characters acting out a human moment.
+Aim for about 60% map blocks; never more than 3 character blocks in a row; the first block is always a map.
+For map blocks: regions = the territory the narration is about at that moment, using ONLY ids from the allowed list (prefer a preset like ottoman_empire when it fits, else modern country ids);
+focus = [longitude, latitude, zoom] centred on the action (zoom 1 = continent, 2-3 = region, 4-6 = a city or battlefield);
+reveal = grow when territory expands, shrink when it is lost, hold otherwise; label = short UPPERCASE-friendly subject (max 20 chars, e.g. OTTOMAN); years = the period shown (e.g. 1299 - 1453);
+cities = up to 3 key places named in the narration with accurate coordinates; armies = up to 2 marching forces for battles/campaigns (from -> to coordinates, side red for the subject, blue for opponents).
+For character blocks set map to false and leave the other fields empty. Be geographically accurate.`;
+
+/** Long-form: decides map vs character blocks and fills the map data, in bounded chunks. */
+async function directMapOperation(scenes: string[], deployment: string) {
+  const ids = (await import('../../hosted-renderer/cartoon/assets/map/region-ids.json')).default as string[];
+  const pt = { type: 'array', items: { type: 'number' } };
+  const schema = { type: 'object', additionalProperties: false, required: ['blocks'], properties: { blocks: { type: 'array', items: { type: 'object', additionalProperties: false,
+    required: ['index', 'map', 'regions', 'focus', 'reveal', 'label', 'years', 'cities', 'armies'], properties: {
+      index: { type: 'integer' }, map: { type: 'boolean' }, regions: { type: 'array', items: { type: 'string', enum: ids } }, focus: pt,
+      reveal: { type: 'string', enum: ['grow', 'hold', 'shrink'] }, label: { type: 'string' }, years: { type: 'string' },
+      cities: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['name', 'at'], properties: { name: { type: 'string' }, at: pt } } },
+      armies: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['from', 'to', 'side'], properties: { from: pt, to: pt, side: { type: 'string', enum: ['red', 'blue', 'gold'] } } } },
+    } } } } };
+  type Block = { index: number; map: boolean; regions: string[]; focus: number[]; reveal: 'grow' | 'hold' | 'shrink'; label: string; years: string; cities: { name: string; at: number[] }[]; armies: { from: number[]; to: number[]; side: 'red' | 'blue' | 'gold' }[] };
+  const out: (Block | null)[] = scenes.map(() => null);
+  for (let start = 0; start < scenes.length; start += 40) {
+    const part = scenes.slice(start, start + 40);
+    const r = await azureJson<{ blocks: Block[] }>(deployment, MAP_DIRECTOR, `Allowed region presets: ${ids.filter(i => i.includes('_')).join(', ')}\n\n` + part.map((t, i) => `${start + i}: ${t.split(/\s+Visual:/i)[0]}`).join('\n'), 'map_direction', schema, 'Map director');
+    for (const b of r.blocks) if (b.index >= start && b.index < start + part.length) out[b.index] = b;
+  }
+  if (out[0]) out[0].map = true;
+  return out;
+}
+const clampLL = (p: number[] | undefined): [number, number] | null => p && p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1]) ? [Math.max(-180, Math.min(180, p[0]!)), Math.max(-65, Math.min(85, p[1]!))] : null;
+const mapText = (t: string, n: number) => t.replace(/[^\p{L}\p{N} .,'&()\-–]/gu, '').slice(0, n).trim();
+/** Turns a map-director block into an engine-safe map spec (clamped coordinates, trimmed labels), or null if unusable. */
+export function toMapSpec(b: { regions: string[]; focus: number[]; reveal: 'grow' | 'hold' | 'shrink'; label: string; years: string; cities: { name: string; at: number[] }[]; armies: { from: number[]; to: number[]; side: 'red' | 'blue' | 'gold' }[] }, valid: Set<string>) {
+  const f = clampLL(b.focus); if (!f) return null;
+  const zoom = Math.max(.5, Math.min(8, Number(b.focus[2]) || 2));
+  return { regions: [...new Set(b.regions.filter(r => valid.has(r)))].slice(0, 40), focus: [f[0], f[1], zoom] as [number, number, number], reveal: b.reveal,
+    label: mapText(b.label, 20) || undefined, years: mapText(b.years, 20) || undefined,
+    cities: b.cities.flatMap(c => { const at = clampLL(c.at), name = mapText(c.name, 22); return at && name ? [{ name, at }] : []; }).slice(0, 6),
+    armies: b.armies.flatMap(a => { const from = clampLL(a.from), to = clampLL(a.to); return from && to ? [{ from, to, side: a.side }] : []; }).slice(0, 4) };
+}
+
+export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string; format?: 'short' | 'long' | undefined } }) => {
+  if (data.format !== 'long') return directCartoonChunk(data);
+  // Long-form: character direction in chunks (one shared cast), then the map pass decides which blocks become map scenes.
+  let cast: z.infer<typeof cartoonDirection>['cast'] | null = null;
+  const scenes: z.infer<typeof cartoonDirection>['scenes'] = [];
+  for (let i = 0; i < data.scenes.length; i += 40) {
+    const part = await directCartoonChunk({ scenes: data.scenes.slice(i, i + 40), deployment: data.deployment });
+    const first: z.infer<typeof cartoonDirection>['cast'] = cast ?? part.cast; cast = first;
+    // Later chunks reuse the first cast by position so the same people carry the whole documentary.
+    const remap = new Map(part.cast.map((c, k) => [c.id, (first[k] ?? first[0]!).id]));
+    scenes.push(...part.scenes.map(s => ({ ...s, actor: remap.get(s.actor) ?? first[0]!.id, speaker: s.speaker ? remap.get(s.speaker) : undefined,
+      actors: s.actors?.map(a => ({ ...a, actor: remap.get(a.actor) ?? first[0]!.id })) })));
+  }
+  const ids = new Set((await import('../../hosted-renderer/cartoon/assets/map/region-ids.json')).default as string[]);
+  const blocks = await directMapOperation(data.scenes, data.deployment);
+  const merged = scenes.map((s, i) => {
+    const b = blocks[i]; const spec = b?.map ? toMapSpec(b, ids) : null;
+    return spec ? { ...s, world: 'map' as const, light: 'day' as const, actors: undefined, speaker: undefined, props: [], fx: [], map: spec } : s;
+  });
+  const { sanitizeDirection } = await import('./cartoon-job');
+  const narration = data.scenes.map(s => s.split(/\s+Visual:/i)[0] ?? s);
+  return cartoonDirection.parse(sanitizeDirection({ cast: cast!, scenes: merged }, narration));
+};
+
+const directCartoonChunk = async (data: { scenes: string[]; deployment: string }) => {
     const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
     const { shortlist, searchLibrary } = await import('./object-library');
@@ -97,7 +163,7 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
     const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes'], properties: {
       cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: [...OUTFITS] } } } },
       scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['world', 'light', 'action', 'expression', 'actor', 'wide', 'shot', 'move', 'mood', 'actors', 'speaker', 'props', 'fx', 'cues', 'keyword'], properties: {
-        world: en('worlds'), light: en('lights'), action: en('actions'), expression: en('expressions'), actor: { type: 'string' }, wide: { type: 'boolean' },
+        world: { type: 'string', enum: VOCAB.worlds.filter(w => w !== 'map') }, light: en('lights'), action: en('actions'), expression: en('expressions'), actor: { type: 'string' }, wide: { type: 'boolean' },
         shot: en('shots'), move: en('moves'), mood: en('moods'), actors: { type: 'array', items: performer }, speaker: { type: 'string' },
         props: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['kind', 'place', 'motion', 'asset'], properties: { kind: en('props'), place: en('places'), motion: en('prop_motions'), asset: { type: 'string', enum: ['', ...objects.map(o => o.id)] } } } },
         fx: { type: 'array', items: en('fx') }, cues: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['word', 'kind'], properties: { word: { type: 'integer' }, kind: en('sounds') } } }, keyword: { type: 'string' },
@@ -585,3 +651,20 @@ export const importShortOperation = async ({ data }: { data: { url: string; depl
       "Topic reader");
     return { transcript, ...out };
   };
+
+// ---------------- Thumbnails ----------------
+
+/** One clean 16:9 thumbnail picture (no text: the exact title is drawn by the browser so spelling is guaranteed). */
+export async function thumbnailImageOperation(data: { subject: string; region: string; figure: string; deployment: string; variant: number }) {
+  const looks = [
+    'The figure stands on the right third, three-quarter view, confident expression, warm golden rim light.',
+    'The figure stands on the right third, facing the viewer, intense stare, dramatic cool side light.',
+  ];
+  const prompt = `Viral YouTube history documentary thumbnail, 16:9, ultra crisp and saturated. Background: a bright 3D relief map of ${data.region} seen from above at a slight angle, vivid green lowlands, yellow-ochre plains and brown mountains with strong hillshade, deep glossy blue sea, thin white country borders. The territory of ${data.subject} glows bright red with a thick white outline and a soft red glow, covering the left and middle of the frame. Foreground: a bold stylised digital painting (illustration, not a photograph) of ${data.figure}, chest-up, highly detailed costume. ${looks[data.variant % looks.length]} Keep the top-left quarter free of important detail for a title. Absolutely no text, letters, numbers, logos or watermarks.`;
+  const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt, size: '1536x1024', quality: 'medium', output_format: 'jpeg', output_compression: 90, n: 1 });
+  if (!res.ok) await fail(res, 'Thumbnail');
+  const j = await res.json() as { data?: { b64_json?: string }[] };
+  const image = j.data?.[0]?.b64_json;
+  if (!image) throw Error('Thumbnail came back empty');
+  return { image };
+}

@@ -6,7 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Panel, btnDark, btnOutline, btnPrimary, input, label } from "@/components/page";
 import { youtubeConnectUrl, youtubeDisconnect, youtubeStartUpload, youtubeStatus } from "@/lib/youtube.functions";
 import { getVideoFile } from "@/lib/video-db";
-import { actions, type Video } from "@/lib/store";
+import { actions, useStore, type Video } from "@/lib/store";
+import { generateThumbnail, youtubeSetThumbnail } from "@/lib/thumbnail.functions";
+import { badgeLayout } from "@/lib/thumbnail-text";
+import { supabase } from "@/integrations/supabase/client";
 
 const MESSAGES: Record<string, string> = {
   connected: "YouTube channel connected", cancelled: "YouTube connection cancelled", expired: "Connection link expired — try again",
@@ -52,12 +55,14 @@ export function PublishButton({ v, className }: { v: Video; className?: string }
 
 function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
   const start = useServerFn(youtubeStartUpload);
+  const setThumb_ = useServerFn(youtubeSetThumbnail);
   const short = v.input.format === "short";
   const [title, setTitle] = useState(v.title);
   const [description, setDescription] = useState(v.description ?? "");
   const [tags, setTags] = useState(() => [v.input.topic, short ? "shorts" : "history", "history facts"].filter(Boolean).join(", "));
   const [privacy, setPrivacy] = useState<"private" | "unlisted" | "public">("private");
   const [pct, setPct] = useState<number | null>(null);
+  const [thumb, setThumb] = useState<string | null>(null);
 
   async function publish() {
     try {
@@ -76,6 +81,10 @@ function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
         x.send(blob);
       });
       actions.updateVideo(v.id, { youtubeId: id });
+      if (thumb) {
+        try { await setThumb_({ data: { videoId: id, jpeg: thumb.split(",")[1] ?? "" } }); }
+        catch (e) { toast.error(e instanceof Error ? e.message : "Thumbnail upload failed"); }
+      }
       toast.success("Published to YouTube", { action: { label: "Open", onClick: () => window.open(short ? `https://youtube.com/shorts/${id}` : `https://youtu.be/${id}`, "_blank") } });
       onClose();
     } catch (e) {
@@ -86,7 +95,7 @@ function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
 
   return (
     <Dialog open onOpenChange={(o) => !o && pct === null && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader><DialogTitle>Publish to YouTube{short ? " Shorts" : ""}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <label className="block"><span className={label}>Title ({title.length}/100)</span><input className={input} maxLength={100} value={title} onChange={(e) => setTitle(e.target.value)} /></label>
@@ -98,11 +107,65 @@ function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
             </select>
           </label>
           {short && <p className="text-xs text-muted-foreground">#Shorts is added automatically.</p>}
+          {!short && <ThumbnailPicker v={v} chosen={thumb} onChoose={setThumb} />}
           <button className={`${btnPrimary} w-full`} disabled={pct !== null || !title.trim()} onClick={() => void publish()}>
             {pct !== null ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading {pct}%</> : "Publish"}
           </button>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Draws the clean AI picture at 1280x720 and burns in the exact title + years badges (reference style). */
+export async function composeThumbnail(b64: string, labelText: string, years: string): Promise<string> {
+  const img = new Image(); img.src = `data:image/jpeg;base64,${b64}`; await img.decode();
+  const W = 1280, H = 720, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const g = c.getContext("2d")!; const k = Math.max(W / img.width, H / img.height);
+  g.drawImage(img, (W - img.width * k) / 2, (H - img.height * k) / 2, img.width * k, img.height * k);
+  const font = (size: number) => `900 ${Math.round(size)}px "Arial Black", "Helvetica Neue", Arial, sans-serif`;
+  const measure = (t: string, size: number) => { g.font = font(size); return g.measureText(t).width; };
+  for (const b of badgeLayout(labelText, years, W, measure)) {
+    g.fillStyle = "#000"; g.fillRect(b.x, b.y, b.w, b.h);
+    g.font = font(b.size); g.fillStyle = "#fff"; g.textBaseline = "middle"; g.fillText(b.text, b.x + (b.w - measure(b.text, b.size)) / 2, b.y + b.h / 2 + b.size * 0.04);
+  }
+  return c.toDataURL("image/jpeg", 0.9);
+}
+
+function ThumbnailPicker({ v, chosen, onChoose }: { v: Video; chosen: string | null; onChoose: (d: string) => void }) {
+  const gen = useServerFn(generateThumbnail);
+  const deployment = useStore((s) => s.settings.imageDeployment);
+  const [subject, setSubject] = useState(v.input.topic.slice(0, 80));
+  const [labelText, setLabel] = useState(v.input.topic.split(/\s+/).slice(0, 2).join(" ").slice(0, 20));
+  const [years, setYears] = useState("");
+  const [figure, setFigure] = useState(`the most famous ruler or figure of ${v.input.topic}`.slice(0, 160));
+  const [options, setOptions] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  async function make() {
+    setBusy(true);
+    try {
+      const pics = await Promise.all([0, 1].map((variant) => gen({ data: { subject, region: subject, figure, deployment, variant } })));
+      const out = await Promise.all(pics.map((p) => composeThumbnail(p.image, labelText, years)));
+      setOptions(out); onChoose(out[0]!);
+      const { data: u } = await supabase.auth.getUser();
+      if (u.user) await Promise.all(out.map((d, i) => fetch(d).then((r) => r.blob()).then((b) => supabase.storage.from("videos").upload(`${u.user!.id}/${v.id}/thumbs/${Date.now()}-${i}.jpg`, b, { contentType: "image/jpeg" }))));
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Thumbnail failed"); } finally { setBusy(false); }
+  }
+  return (
+    <div className="space-y-2 rounded-md border p-3">
+      <p className="text-sm font-semibold">Thumbnail</p>
+      <div className="grid grid-cols-2 gap-2">
+        <label className="block"><span className={label}>Title badge</span><input className={input} maxLength={24} value={labelText} onChange={(e) => setLabel(e.target.value)} placeholder="OTTOMAN" /></label>
+        <label className="block"><span className={label}>Years</span><input className={input} maxLength={24} value={years} onChange={(e) => setYears(e.target.value)} placeholder="1299 - 1923" /></label>
+      </div>
+      <label className="block"><span className={label}>Map territory</span><input className={input} maxLength={80} value={subject} onChange={(e) => setSubject(e.target.value)} /></label>
+      <label className="block"><span className={label}>Main figure</span><input className={input} maxLength={160} value={figure} onChange={(e) => setFigure(e.target.value)} /></label>
+      <button type="button" className={`${btnOutline} w-full`} disabled={busy || !subject.trim() || !figure.trim()} onClick={() => void make()}>
+        {busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Painting 2 options…</> : options.length ? "Make 2 new options" : "Make 2 thumbnail options"}
+      </button>
+      {!!options.length && <div className="grid grid-cols-2 gap-2">{options.map((d, i) => (
+        <button key={i} type="button" onClick={() => onChoose(d)} className={`overflow-hidden rounded-md border-2 ${chosen === d ? "border-primary" : "border-transparent"}`}><img src={d} alt={`Thumbnail option ${i + 1}`} className="w-full" /></button>
+      ))}</div>}
+    </div>
   );
 }

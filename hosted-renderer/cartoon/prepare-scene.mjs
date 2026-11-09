@@ -9,7 +9,7 @@ const [input,destination]=process.argv.slice(2);
 if(!input||!destination)throw Error('Manifest and scratch destination required');
 const m=JSON.parse(await readFile(input,'utf8'));
 validateManifest(m);
-if(!['cartoon-v1','cartoon-v2'].includes(m.version)||m.fps!==30||m.width!==1080||m.height!==1920||!m.shots?.length)throw Error('Invalid manifest');
+if(!['cartoon-v1','cartoon-v2'].includes(m.version)||m.fps!==30||!((m.width===1080&&m.height===1920)||(m.width===1920&&m.height===1080))||!m.shots?.length)throw Error('Invalid manifest');
 const result=spawnSync(process.execPath,[path.join(root,'prepare.mjs'),destination],{stdio:'inherit'});
 if(result.status!==0)throw Error('Pinned preparation failed');
 const web=path.join(path.resolve(destination),'web');
@@ -46,13 +46,17 @@ if([worldStart,cardStart,stateStart,drawStart,helmetStart,swapStart].some(i=>i<0
 // Reverse-order range replacements preserve the exact post-process shaders.
 engine=engine.slice(0,helmetStart)+engine.slice(swapStart);
 engine=engine.slice(0,stateStart)+engine.slice(drawStart);
-engine=engine.slice(0,worldStart)+await readFile(path.join(root,'scene-world.mjs'),'utf8')+'\n'+engine.slice(cardStart);
+engine=engine.slice(0,worldStart)+await readFile(path.join(root,'scene-map.js'),'utf8')+'\n'+await readFile(path.join(root,'scene-world.mjs'),'utf8')+'\n'+engine.slice(cardStart);
+// Landscape (16:9 long-form) or portrait (9:16 Shorts) frame contract.
+const dims='const W = 1080, H = 1920;';if(!engine.includes(dims))throw Error('Frame size contract changed');engine=engine.replace(dims,`const W = ${m.width}, H = ${m.height};`);
 // Camera-space eye focus, rather than a spherical distance approximation.
 engine=engine.replace('dofU.focus.value = D.focus;', 'tmpV.set(...C.look).applyMatrix4(camera.matrixWorldInverse); dofU.focus.value = Math.max(.08, -tmpV.z);');
 const storyImport="import { SHOTS, TOTAL, shotAt, camAt, dofAt, LIGHTS, lightFor, actorsAt, worldAt, fxAt } from './story.js';";
 if(!engine.includes(storyImport))throw Error('Story import contract changed');
-engine=engine.replace(storyImport,storyImport.replace('fxAt }','fxAt, captionAt }'));
+engine=engine.replace(storyImport,storyImport.replace('fxAt }','fxAt, captionAt, mapAt }'));
 // Captions are burned into the captured canvas; v1 manifests keep captions off.
 engine+='\n'+await readFile(path.join(root,'caption-overlay.js'),'utf8');
+engine+='\n'+await readFile(path.join(root,'map-overlay.js'),'utf8');
+if(m.shots.some(s=>s.world==='map')){await mkdir(path.join(web,'map'),{recursive:true});await cp(path.join(root,'assets/map/regions.json'),path.join(web,'map/regions.json'));}
 await writeFile(path.join(web,'main.js'),engine);
 console.log('Prepared declarative cartoon scene; unsupported features fail closed');
