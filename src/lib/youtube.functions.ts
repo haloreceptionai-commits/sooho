@@ -39,3 +39,39 @@ export const youtubeStartUpload = createServerFn({ method: "POST" }).middleware(
     const access = await yt.refreshAccess(conn.refresh_token);
     return { uploadUrl: await yt.startUpload(access, data) };
   });
+
+async function conn(userId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("youtube_connections").select("refresh_token,channel_id,auto_reply,last_auto_reply_at").eq("user_id", userId).maybeSingle();
+  if (!data) throw new Error("Connect your YouTube channel in Settings first");
+  return data;
+}
+
+export const youtubeAnalytics = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const c = await conn(context.userId);
+    const yt = await import("./youtube.server");
+    const access = await yt.refreshAccess(c.refresh_token);
+    const a = await yt.channelAnalytics(access);
+    let comments: Awaited<ReturnType<typeof yt.recentComments>> = [], commentError: string | null = null;
+    try { comments = await yt.recentComments(access, a.channel.id); }
+    catch (e) { commentError = /403|insufficient/i.test(String(e)) ? "Reconnect YouTube in Settings to allow comment access." : String(e).slice(0, 200); }
+    const { data: replies } = await context.supabase.from("youtube_replies").select("comment_id,reply,author,comment,created_at,video_id").order("created_at", { ascending: false }).limit(50);
+    return { ...a, comments, commentError, replies: replies ?? [], autoReply: c.auto_reply, lastAutoReply: c.last_auto_reply_at };
+  });
+
+export const youtubeSetAutoReply = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { on: boolean }) => z.object({ on: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("youtube_connections").update({ auto_reply: data.on }).eq("user_id", context.userId);
+    return { ok: true };
+  });
+
+export const youtubeReplyNow = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const c = await conn(context.userId);
+    if (!c.channel_id) throw new Error("Channel not found — reconnect YouTube");
+    const { replyToPending } = await import("./youtube-replies.server");
+    return replyToPending(context.userId, c.refresh_token, c.channel_id);
+  });

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedRemixRouteImport } from './routes/_authenticated/remix'
 import { Route as AuthenticatedScriptWriterRouteImport } from './routes/_authenticated/script-writer'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -19,6 +20,7 @@ import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated
 import { Route as ApiPublicGenerationRecoveryRouteImport } from './routes/api/public/generation-recovery'
 import { Route as ApiPublicGenerationWorkerRouteImport } from './routes/api/public/generation-worker'
 import { Route as ApiPublicRenderCallbackRouteImport } from './routes/api/public/render-callback'
+import { Route as ApiPublicYoutubeAutoReplyRouteImport } from './routes/api/public/youtube/auto-reply'
 import { Route as ApiPublicYoutubeCallbackRouteImport } from './routes/api/public/youtube/callback'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -33,6 +35,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRemixRoute = AuthenticatedRemixRouteImport.update({
@@ -73,6 +80,12 @@ const ApiPublicRenderCallbackRoute = ApiPublicRenderCallbackRouteImport.update({
   path: '/api/public/render-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicYoutubeAutoReplyRoute =
+  ApiPublicYoutubeAutoReplyRouteImport.update({
+    id: '/api/public/youtube/auto-reply',
+    path: '/api/public/youtube/auto-reply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicYoutubeCallbackRoute =
   ApiPublicYoutubeCallbackRouteImport.update({
     id: '/api/public/youtube/callback',
@@ -83,6 +96,7 @@ const ApiPublicYoutubeCallbackRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/remix': typeof AuthenticatedRemixRoute
   '/script-writer': typeof AuthenticatedScriptWriterRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -90,10 +104,12 @@ export interface FileRoutesByFullPath {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/remix': typeof AuthenticatedRemixRoute
   '/script-writer': typeof AuthenticatedScriptWriterRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -102,12 +118,14 @@ export interface FileRoutesByTo {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/remix': typeof AuthenticatedRemixRoute
   '/_authenticated/script-writer': typeof AuthenticatedScriptWriterRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -116,6 +134,7 @@ export interface FileRoutesById {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRouteTypes {
@@ -123,6 +142,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/analytics'
     | '/remix'
     | '/script-writer'
     | '/settings'
@@ -130,10 +150,12 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/analytics'
     | '/remix'
     | '/script-writer'
     | '/settings'
@@ -142,11 +164,13 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/analytics'
     | '/_authenticated/remix'
     | '/_authenticated/script-writer'
     | '/_authenticated/settings'
@@ -155,6 +179,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   fileRoutesById: FileRoutesById
 }
@@ -164,6 +189,7 @@ export interface RootRouteChildren {
   ApiPublicGenerationRecoveryRoute: typeof ApiPublicGenerationRecoveryRoute
   ApiPublicGenerationWorkerRoute: typeof ApiPublicGenerationWorkerRoute
   ApiPublicRenderCallbackRoute: typeof ApiPublicRenderCallbackRoute
+  ApiPublicYoutubeAutoReplyRoute: typeof ApiPublicYoutubeAutoReplyRoute
   ApiPublicYoutubeCallbackRoute: typeof ApiPublicYoutubeCallbackRoute
 }
 
@@ -188,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/remix': {
@@ -239,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRenderCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/youtube/auto-reply': {
+      id: '/api/public/youtube/auto-reply'
+      path: '/api/public/youtube/auto-reply'
+      fullPath: '/api/public/youtube/auto-reply'
+      preLoaderRoute: typeof ApiPublicYoutubeAutoReplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/youtube/callback': {
       id: '/api/public/youtube/callback'
       path: '/api/public/youtube/callback'
@@ -250,6 +290,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedRemixRoute: typeof AuthenticatedRemixRoute
   AuthenticatedScriptWriterRoute: typeof AuthenticatedScriptWriterRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -258,6 +299,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedRemixRoute: AuthenticatedRemixRoute,
   AuthenticatedScriptWriterRoute: AuthenticatedScriptWriterRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -274,6 +316,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGenerationRecoveryRoute: ApiPublicGenerationRecoveryRoute,
   ApiPublicGenerationWorkerRoute: ApiPublicGenerationWorkerRoute,
   ApiPublicRenderCallbackRoute: ApiPublicRenderCallbackRoute,
+  ApiPublicYoutubeAutoReplyRoute: ApiPublicYoutubeAutoReplyRoute,
   ApiPublicYoutubeCallbackRoute: ApiPublicYoutubeCallbackRoute,
 }
 export const routeTree = rootRouteImport

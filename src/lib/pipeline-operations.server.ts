@@ -50,7 +50,7 @@ function toBase64(buf: ArrayBuffer) {
 
 
 /** Streams a strict-JSON chat completion from Azure (streaming keeps the gateway alive on long calls). */
-async function azureJson<T>(deployment: string, system: string, user: string, name: string, schema: unknown, what: string): Promise<T> {
+export async function azureJson<T>(deployment: string, system: string, user: string, name: string, schema: unknown, what: string): Promise<T> {
   const res = await azure(`${safeName(deployment)}/chat/completions`, {
     messages: [{ role: "system", content: system }, { role: "user", content: user }],
     max_completion_tokens: 32000,
