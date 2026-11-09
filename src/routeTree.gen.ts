@@ -19,6 +19,7 @@ import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated
 import { Route as ApiPublicGenerationRecoveryRouteImport } from './routes/api/public/generation-recovery'
 import { Route as ApiPublicGenerationWorkerRouteImport } from './routes/api/public/generation-worker'
 import { Route as ApiPublicRenderCallbackRouteImport } from './routes/api/public/render-callback'
+import { Route as ApiPublicYoutubeAutoReplyRouteImport } from './routes/api/public/youtube/auto-reply'
 import { Route as ApiPublicYoutubeCallbackRouteImport } from './routes/api/public/youtube/callback'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -73,6 +74,12 @@ const ApiPublicRenderCallbackRoute = ApiPublicRenderCallbackRouteImport.update({
   path: '/api/public/render-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicYoutubeAutoReplyRoute =
+  ApiPublicYoutubeAutoReplyRouteImport.update({
+    id: '/api/public/youtube/auto-reply',
+    path: '/api/public/youtube/auto-reply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicYoutubeCallbackRoute =
   ApiPublicYoutubeCallbackRouteImport.update({
     id: '/api/public/youtube/callback',
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -102,6 +110,7 @@ export interface FileRoutesByTo {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRoutesById {
@@ -116,6 +125,7 @@ export interface FileRoutesById {
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
+  '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
 export interface FileRouteTypes {
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   id:
     | '__root__'
@@ -155,6 +167,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
+    | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   fileRoutesById: FileRoutesById
 }
@@ -164,6 +177,7 @@ export interface RootRouteChildren {
   ApiPublicGenerationRecoveryRoute: typeof ApiPublicGenerationRecoveryRoute
   ApiPublicGenerationWorkerRoute: typeof ApiPublicGenerationWorkerRoute
   ApiPublicRenderCallbackRoute: typeof ApiPublicRenderCallbackRoute
+  ApiPublicYoutubeAutoReplyRoute: typeof ApiPublicYoutubeAutoReplyRoute
   ApiPublicYoutubeCallbackRoute: typeof ApiPublicYoutubeCallbackRoute
 }
 
@@ -239,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRenderCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/youtube/auto-reply': {
+      id: '/api/public/youtube/auto-reply'
+      path: '/api/public/youtube/auto-reply'
+      fullPath: '/api/public/youtube/auto-reply'
+      preLoaderRoute: typeof ApiPublicYoutubeAutoReplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/youtube/callback': {
       id: '/api/public/youtube/callback'
       path: '/api/public/youtube/callback'
@@ -274,6 +295,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGenerationRecoveryRoute: ApiPublicGenerationRecoveryRoute,
   ApiPublicGenerationWorkerRoute: ApiPublicGenerationWorkerRoute,
   ApiPublicRenderCallbackRoute: ApiPublicRenderCallbackRoute,
+  ApiPublicYoutubeAutoReplyRoute: ApiPublicYoutubeAutoReplyRoute,
   ApiPublicYoutubeCallbackRoute: ApiPublicYoutubeCallbackRoute,
 }
 export const routeTree = rootRouteImport

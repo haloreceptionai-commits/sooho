@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Sparkles, Clapperboard, Settings, ChevronsLeft, ChevronsRight, Menu, X, Cpu, PlaySquare, LogOut, Youtube, FilePenLine } from "lucide-react";
+import { Sparkles, Clapperboard, Settings, ChevronsLeft, ChevronsRight, Menu, X, Cpu, PlaySquare, LogOut, Youtube, FilePenLine, BarChart3 } from "lucide-react";
 import { useStore } from "@/lib/store";
 
-type To = "/" | "/remix" | "/videos" | "/settings" | "/script-writer";
+type To = "/" | "/remix" | "/videos" | "/settings" | "/script-writer" | "/analytics";
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -21,6 +21,7 @@ export function AppSidebar() {
     { to: "/remix", icon: Youtube, label: "Remix a Short" },
     { to: "/script-writer", icon: FilePenLine, label: "Script Writer" },
     { to: "/videos", icon: PlaySquare, label: "My videos", badge: done },
+    { to: "/analytics", icon: BarChart3, label: "Analytics" },
     { to: "/settings", icon: Settings, label: "Settings" },
   ];
 
