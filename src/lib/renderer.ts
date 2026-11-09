@@ -4,7 +4,7 @@ import { wordSoundCues } from "@/lib/sound-words";
 // camera moves, punch-ins, shake and whip transitions; flowing narration, synthesized music
 // bed + foley, and kinetic one-word captions. Records with MediaRecorder.
 
-export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit";
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 
 export interface RenderScene {
   image: ImageBitmap;
@@ -261,13 +261,15 @@ export function timeline(chunks: { scenes: number[]; dur: number; start: number 
 const ease = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
 const easeOut = (x: number) => 1 - (1 - x) ** 3;
 
-interface Shot { scene: number; start: number; end: number; z0: number; z1: number; x0: number; x1: number; y0: number; y1: number; punch: boolean }
+interface Shot { scene: number; start: number; end: number; z0: number; z1: number; x0: number; x1: number; y0: number; y1: number; punch: boolean; hold?: boolean }
 
 function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
   const shots: Shot[] = [];
   scenes.forEach((sc, i) => {
     const t = tl[i]!;
     const dur = Math.max(0.6, t.end - t.start);
+    // "hold": a sticky full-frame still with a hard cut in and out (Ink explainer); never re-framed, so it stays pin-sharp
+    if (sc.camera === "hold") { shots.push({ scene: i, start: t.start, end: t.start + dur, z0: 1, z1: 1, x0: 0, x1: 0, y0: 0, y1: 0, punch: false, hold: true }); return; }
     const n = Math.max(1, Math.round(dur / 3));
     for (let k = 0; k < n; k++) {
       const s = t.start + (dur * k) / n, e = t.start + (dur * (k + 1)) / n;
@@ -488,7 +490,7 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
 
   const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
   const mime = pickMime();
-  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 9_000_000 : 6_000_000 });
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 14_000_000 : 6_000_000 });
   const parts: Blob[] = [];
   rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
   const stopped = new Promise<void>((r) => (rec.onstop = () => r()));
@@ -589,13 +591,15 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, o.width, o.height);
       const local = el - sh.start;
       const prev = si > 0 ? shots[si - 1] : undefined;
-      if (prev && !sh.punch && local < DISSOLVE) {
+      if (prev && !sh.punch && !sh.hold && local < DISSOLVE) {
         drawShot(prev, el, 1);
         drawShot(sh, el, easeOut(local / DISSOLVE));
       } else drawShot(sh, el, 1);
-      const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
-      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.3)");
-      ctx.fillStyle = g; ctx.fillRect(0, 0, o.width, o.height);
+      if (!sh.hold) {
+        const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
+        g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.3)");
+        ctx.fillStyle = g; ctx.fillRect(0, 0, o.width, o.height);
+      }
       if (o.hookText && el < 3) drawHook(ctx, o.hookText, o.width, o.height, vertical, el);
       if (o.captions) {
         while (ci < caps.length - 1 && el >= caps[ci]!.t1) ci++;

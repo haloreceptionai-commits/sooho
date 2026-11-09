@@ -423,7 +423,7 @@ export async function runVideo(id: string, input: VideoInput) {
             tick("Painting scenes");
             return;
           }
-          const people = sc.shot === "action" || sc.shot === "face";
+          const people = ink ? /\bhero\b/i.test(sc.image_prompt) : sc.shot === "action" || sc.shot === "face";
           const castAll = (ink && people ? "The Hero: the recurring stick-figure hero from the reference; " : "") + sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
           const cast = people ? castAll : "";
           const shot = [
@@ -434,7 +434,7 @@ export async function runVideo(id: string, input: VideoInput) {
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
           // continuity gate: compare the cast to the character sheet; redraw once if it drifted
-          if (r.image && sheet && cast) {
+          if (r.image && sheet && cast && !ink) {
             const c = await withRetry(() => checkContinuity({ data: { sheet, shot: r!.image!, cast, deployment: s.scriptDeployment } })).catch(() => null);
             if (c) contScores.push(c.score);
             if (c && c.score < 6) {
