@@ -85,7 +85,7 @@ function Create() {
                 ["short", Smartphone, "Short / Reel", "9:16 vertical · 30–90 sec · viral hook formula"],
                 ["long", Film, "Long-form", "16:9 YouTube · 3–15 min documentary"],
               ] as const).map(([f, Icon, name, sub]) => (
-                <button key={f} onClick={() => setFormat(f)}
+                <button key={f} onClick={() => { setFormat(f); if (f === "long") setStyle("Ink explainer"); }}
                   className={`flex items-center gap-4 rounded-lg border-2 p-4 text-left transition-colors ${format === f ? "border-primary bg-primary/5" : "border-border hover:bg-muted"}`}>
                   <div className={`grid h-12 place-items-center rounded-md ${format === f ? "bg-primary text-primary-foreground" : "bg-muted"} ${f === "short" ? "w-8" : "w-16"}`}><Icon className="h-5 w-5" /></div>
                   <div><p className="font-bold">{name}</p><p className="text-xs text-muted-foreground">{sub}</p></div>

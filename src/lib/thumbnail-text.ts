@@ -27,3 +27,15 @@ export function badgeLayout(label: string, years: string, width: number, measure
   }
   return out;
 }
+
+/** Ink explainer thumbnail: 1-3 huge words on the right side, wrapped one or two words per line. */
+export function inkTitleLayout(text: string, width: number, height: number, measure: (t: string, size: number) => number): Badge[] {
+  const words = text.trim().toUpperCase().split(/\s+/).filter(Boolean).slice(0, 4);
+  if (!words.length) return [];
+  const lines = words.length <= 2 && measure(words.join(' '), height * 0.2) < width * 0.55 ? [words.join(' ')] : words.length === 4 ? [words.slice(0, 2).join(' '), words.slice(2).join(' ')] : words;
+  const areaW = width * 0.56, areaH = height * 0.86;
+  let size = height * 0.26;
+  while (size > height * 0.08 && (Math.max(...lines.map(l => measure(l, size))) > areaW || lines.length * size * 1.05 > areaH)) size *= 0.94;
+  const total = lines.length * size * 1.05, x0 = width * 0.97;
+  return lines.map((l, i) => { const w = measure(l, size); return { text: l, x: x0 - w, y: (height - total) / 2 + i * size * 1.05, w, h: size * 1.05, size }; });
+}

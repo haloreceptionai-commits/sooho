@@ -668,3 +668,29 @@ export async function thumbnailImageOperation(data: { subject: string; region: s
   if (!image) throw Error('Thumbnail came back empty');
   return { image };
 }
+
+// ---------------- Ink explainer: white idea cards + hero thumbnails ----------------
+
+const INK_CARDS = `You are the editor of a hand-drawn stick-figure explainer channel. Between full illustrated scenes the video cuts to plain white "idea cards": one short hand-lettered phrase plus one tiny doodle (e.g. "3 BILLION YEARS AGO" + timeline, "2 MINUTES LEFT" + hourglass, "NIGHT OWL?" + owl, "BACK / FORWARD" + arrows).
+Pick the sentences that work best as cards: numbers, dates, durations, choices, comparisons, short rhetorical questions, countdowns, a single striking word. Choose about one in five sentences, never two neighbours, never the first sentence.
+For each, give: index, text (1-4 words, ALL CAPS, exactly matching the sentence's meaning, spelled correctly, may end with "?"), icon (a single simple object to doodle, 1-4 words, no text in it).`;
+
+export async function inkCardsOperation(data: { scenes: string[]; deployment: string }) {
+  const schema = { type: 'object', additionalProperties: false, required: ['cards'], properties: { cards: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['index', 'text', 'icon'], properties: { index: { type: 'integer' }, text: { type: 'string' }, icon: { type: 'string' } } } } } };
+  const r = await azureJson<{ cards: { index: number; text: string; icon: string }[] }>(data.deployment, INK_CARDS, data.scenes.map((s, i) => `${i}: ${s}`).join('\n'), 'ink_cards', schema, 'Idea cards');
+  return r.cards;
+}
+
+export async function inkThumbnailOperation(data: { subject: string; figure: string; deployment: string; variant: number }) {
+  const looks = [
+    'Extreme close-up of the hero on the left half, head and shoulders filling the frame, huge exaggerated expression (wide eyes, raised brows, open mouth), bright saturated sky-blue background with a simple scene hint behind.',
+    'The hero big in the foreground on the left, smug or shocked expression, reacting to the subject on the right side, bright sunny colourful scene, strong contrast.',
+  ];
+  const prompt = `Viral YouTube explainer thumbnail, 16:9, hand-drawn 2D cartoon with bold black ink outlines and flat bright saturated colours. ${looks[data.variant % looks.length]} Hero: ${data.figure}. Subject: ${data.subject}. Keep the right third and top area simple and uncluttered for big title text added later. No text, no letters, no logos.`;
+  const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: prompt.slice(0, 3900), size: '1536x1024', quality: 'medium', output_format: 'jpeg', output_compression: 90, n: 1 });
+  if (!res.ok) await fail(res, 'Thumbnail');
+  const j = await res.json() as { data?: { b64_json?: string }[] };
+  const image = j.data?.[0]?.b64_json;
+  if (!image) throw Error('Thumbnail came back empty');
+  return { image };
+}

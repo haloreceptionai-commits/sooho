@@ -8,7 +8,9 @@ import { youtubeConnectUrl, youtubeDisconnect, youtubeStartUpload, youtubeStatus
 import { getVideoFile } from "@/lib/video-db";
 import { actions, useStore, type Video } from "@/lib/store";
 import { generateThumbnail, youtubeSetThumbnail } from "@/lib/thumbnail.functions";
-import { badgeLayout } from "@/lib/thumbnail-text";
+import { badgeLayout, inkTitleLayout } from "@/lib/thumbnail-text";
+import { generateInkThumbnail } from "@/lib/ink.functions";
+import { INK_HERO } from "@/lib/styles";
 import { supabase } from "@/integrations/supabase/client";
 
 const MESSAGES: Record<string, string> = {
@@ -132,8 +134,27 @@ export async function composeThumbnail(b64: string, labelText: string, years: st
   return c.toDataURL("image/jpeg", 0.9);
 }
 
+/** Ink explainer look: huge yellow words with a thick black outline on the right side. */
+export async function composeInkThumbnail(b64: string, text: string): Promise<string> {
+  await document.fonts.load('120px "Luckiest Guy"').catch(() => undefined);
+  const img = new Image(); img.src = `data:image/jpeg;base64,${b64}`; await img.decode();
+  const W = 1280, H = 720, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const g = c.getContext("2d")!; const k = Math.max(W / img.width, H / img.height);
+  g.drawImage(img, (W - img.width * k) / 2, (H - img.height * k) / 2, img.width * k, img.height * k);
+  const font = (size: number) => `${Math.round(size)}px "Luckiest Guy", "Arial Black", sans-serif`;
+  const measure = (t: string, size: number) => { g.font = font(size); return g.measureText(t).width; };
+  for (const b of inkTitleLayout(text, W, H, measure)) {
+    g.font = font(b.size); g.textBaseline = "top"; g.lineJoin = "round";
+    g.lineWidth = b.size * 0.16; g.strokeStyle = "#000"; g.strokeText(b.text, b.x, b.y);
+    g.fillStyle = "#ffe31a"; g.fillText(b.text, b.x, b.y);
+  }
+  return c.toDataURL("image/jpeg", 0.9);
+}
+
 function ThumbnailPicker({ v, chosen, onChoose }: { v: Video; chosen: string | null; onChoose: (d: string) => void }) {
   const gen = useServerFn(generateThumbnail);
+  const genInk = useServerFn(generateInkThumbnail);
+  const ink = v.input.style === "Ink explainer";
   const deployment = useStore((s) => s.settings.imageDeployment);
   const [subject, setSubject] = useState(v.input.topic.slice(0, 80));
   const [labelText, setLabel] = useState(v.input.topic.split(/\s+/).slice(0, 2).join(" ").slice(0, 20));
@@ -144,8 +165,8 @@ function ThumbnailPicker({ v, chosen, onChoose }: { v: Video; chosen: string | n
   async function make() {
     setBusy(true);
     try {
-      const pics = await Promise.all([0, 1].map((variant) => gen({ data: { subject, region: subject, figure, deployment, variant } })));
-      const out = await Promise.all(pics.map((p) => composeThumbnail(p.image, labelText, years)));
+      const pics = await Promise.all([0, 1].map((variant) => ink ? genInk({ data: { subject, figure: INK_HERO, deployment, variant } }) : gen({ data: { subject, region: subject, figure, deployment, variant } })));
+      const out = await Promise.all(pics.map((p) => ink ? composeInkThumbnail(p.image, labelText) : composeThumbnail(p.image, labelText, years)));
       setOptions(out); onChoose(out[0]!);
       const { data: u } = await supabase.auth.getUser();
       if (u.user) await Promise.all(out.map((d, i) => fetch(d).then((r) => r.blob()).then((b) => supabase.storage.from("videos").upload(`${u.user!.id}/${v.id}/thumbs/${Date.now()}-${i}.jpg`, b, { contentType: "image/jpeg" }))));
@@ -155,11 +176,11 @@ function ThumbnailPicker({ v, chosen, onChoose }: { v: Video; chosen: string | n
     <div className="space-y-2 rounded-md border p-3">
       <p className="text-sm font-semibold">Thumbnail</p>
       <div className="grid grid-cols-2 gap-2">
-        <label className="block"><span className={label}>Title badge</span><input className={input} maxLength={24} value={labelText} onChange={(e) => setLabel(e.target.value)} placeholder="OTTOMAN" /></label>
-        <label className="block"><span className={label}>Years</span><input className={input} maxLength={24} value={years} onChange={(e) => setYears(e.target.value)} placeholder="1299 - 1923" /></label>
+        <label className="block"><span className={label}>{ink ? "Big words (1-3)" : "Title badge"}</span><input className={input} maxLength={24} value={labelText} onChange={(e) => setLabel(e.target.value)} placeholder="OTTOMAN" /></label>
+        {!ink && <label className="block"><span className={label}>Years</span><input className={input} maxLength={24} value={years} onChange={(e) => setYears(e.target.value)} placeholder="1299 - 1923" /></label>}
       </div>
-      <label className="block"><span className={label}>Map territory</span><input className={input} maxLength={80} value={subject} onChange={(e) => setSubject(e.target.value)} /></label>
-      <label className="block"><span className={label}>Main figure</span><input className={input} maxLength={160} value={figure} onChange={(e) => setFigure(e.target.value)} /></label>
+      <label className="block"><span className={label}>{ink ? "What the picture shows" : "Map territory"}</span><input className={input} maxLength={80} value={subject} onChange={(e) => setSubject(e.target.value)} /></label>
+      {!ink && <label className="block"><span className={label}>Main figure</span><input className={input} maxLength={160} value={figure} onChange={(e) => setFigure(e.target.value)} /></label>}
       <button type="button" className={`${btnOutline} w-full`} disabled={busy || !subject.trim() || !figure.trim()} onClick={() => void make()}>
         {busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Painting 2 options…</> : options.length ? "Make 2 new options" : "Make 2 thumbnail options"}
       </button>
