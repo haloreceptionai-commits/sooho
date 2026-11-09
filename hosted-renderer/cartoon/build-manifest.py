@@ -13,8 +13,10 @@ def build(request, alignment, voice):
         if w.getframerate()!=48000 or w.getsampwidth()!=2: raise ValueError('Expected locked PCM48k')
         samples=w.getnframes()
     total=jsround(samples/48000*30)
+    global ASPECT
+    ASPECT=16/9 if request.get('format')=='long' else 9/16
     words=alignment['words']
-    if not words or len(words)>600:raise ValueError('Invalid alignment size')
+    if not words or len(words)>(9000 if request.get('format')=='long' else 600):raise ValueError('Invalid alignment size')
     previous=0
     for word in words:
         if not all(math.isfinite(word[k]) for k in ['start','end','confidence']) or word['start']<previous or word['end']<=word['start'] or word['end']>samples/48000 or not 0<=word['confidence']<=1:raise ValueError('Invalid acoustic word timing')
@@ -32,10 +34,12 @@ def build(request, alignment, voice):
         shots.extend(sentence_shots(d,words,index,end_index,start,end,request['sfx'],shots[-1]['shot'] if shots else None))
         index=end_index;start=end
     if index!=len(words):raise ValueError('Scenes must cover every aligned word')
-    return {'version':'cartoon-v2','videoId':request['videoId'],'fps':30,'width':1080,'height':1920,'captions':bool(request.get('captions')),
+    width,height=(1920,1080) if request.get('format')=='long' else (1080,1920)
+    return {'version':'cartoon-v2','videoId':request['videoId'],'fps':30,'width':width,'height':height,'captions':bool(request.get('captions')),
       'narration':{'path':'voice.wav','sha256':hashlib.sha256(voice.read_bytes()).hexdigest(),'samples':samples,'rate':48000},
       'words':words,'caption_words':[t[:40] for t in tokens],'cast':request['direction']['cast'],'shots':shots}
 
+ASPECT=9/16
 SLOT_X={'left':-1.15,'center':0.0,'right':1.15}
 # distance, camera height, look height, field of view (metres / degrees) for a 2.25 m character card.
 SHOT={'wide':(7.5,1.8,1.2,42),'medium':(4.2,1.5,1.25,38),'close':(2.5,1.75,1.65,34),'extreme_close':(1.55,1.85,1.8,30),
@@ -47,7 +51,7 @@ def performers(d):
     cast=d.get('actors') or [{'actor':d['actor'],'action':d['action'],'expression':d['expression'],'slot':'center','facing':0}]
     if len(cast)==1 and not d.get('actors'): cast=[{**cast[0],'slot':'center'}]
     # Two performers stand closer so both fit the narrow 9:16 frame.
-    spread={1:0,2:.72,3:1.05}[len(cast)]
+    spread={1:0,2:.72,3:1.05}[len(cast)]*(1.8 if ASPECT>1 else 1)
     xs={'left':-spread,'center':0.0,'right':spread} if len(cast)>1 else {'left':0.0,'center':0.0,'right':0.0}
     return [{'id':a['actor'],'pos':[xs[a['slot']],0,0],'expression':a['expression'],'action':a['action'],'facing':a.get('facing',0)} for a in cast]
 
@@ -57,7 +61,7 @@ def camera_keys(kind,move,subject,others,start,end,props):
     # Group framing: aim between performers and back off until all fit the horizontal field of view.
     if others and kind in('wide','medium','low','high'):
         xs=[subject['pos'][0]]+[o['pos'][0] for o in others]; sx=(min(xs)+max(xs))/2
-        half=(max(xs)-min(xs))/2+.55; hfov=2*math.atan(math.tan(math.radians(fov)/2)*9/16)
+        half=(max(xs)-min(xs))/2+.55; hfov=2*math.atan(math.tan(math.radians(fov)/2)*ASPECT)
         dist=max(dist,half/math.tan(hfov/2))
     look=[sx,look_y,0]
     if kind=='insert':
@@ -86,7 +90,32 @@ def camera_keys(kind,move,subject,others,start,end,props):
         keys=[{'frame':start,**swing},{'frame':start+6,**at(dist*1.05)},{'frame':end-1,**at(dist*.9)}]
     return keys
 
+def map_camera(m,move,start,end,battle):
+    """Macro events: high orbiting view. Battles: low dramatic dolly toward the front line."""
+    lon,lat,zoom=m['focus']; span=60/zoom*.5; x,z=lon*.5,-lat*.5
+    h=span*(.55 if battle else 1.0); back=span*(1.05 if battle else .7); fov=38 if battle else 40
+    def at(k=1.,dx=0.):return {'pos':[round(x+dx,3),round(h*k,3),round(z+back*k,3)],'look':[round(x+dx*.4,3),0,round(z-span*.08,3)],'fov':fov,'roll':0}
+    if move=='pull_back':a,b=at(.82),at(1.08)
+    elif move in('pan_left','orbit'):a,b=at(1,span*.12),at(.95,-span*.12)
+    elif move=='pan_right':a,b=at(1,-span*.12),at(.95,span*.12)
+    else:a,b=at(1.08),at(.84)  # slow push-in by default
+    return [{'frame':start,**a},{'frame':max(start+1,end-1),**b}] if end-start>1 else [{'frame':start,**a}]
+
+def map_shots(d,words,first,last,start,end,sfx):
+    m=d['map']; battle=bool(m.get('armies'))
+    move=d.get('move') or ('push_in' if battle else 'orbit'); mood=d.get('mood') or ('tense' if battle else 'calm')
+    events=[]
+    if sfx:
+        for wi in range(first,last):
+            kind_s=next((k for stem,k in AUTO_SOUNDS if words[wi]['text'].startswith(stem)),None)
+            if kind_s and len(events)<30: events.append({'word':wi,'lead':0,'kind':kind_s})
+        if m.get('reveal')=='grow' and not any(e['word']==first for e in events): events.insert(0,{'word':first,'lead':0,'kind':'reveal'})
+    shot={'world':'map','light':'day','shot':'high' if not battle else 'low','move':move,'mood':mood,'shake':0,'speaker':None,'keyword':None,
+      'props':[],'fx':[],'actors':[],'map':{k:m[k] for k in ('regions','focus','reveal','label','years','cities','armies') if k in m}}
+    return [{'start':start,'end':end,**shot,'camera':map_camera(m,move,start,end,battle),'events':events[:30]}]
+
 def sentence_shots(d,words,first,last,start,end,sfx,previous):
+    if d.get('world')=='map': return map_shots(d,words,first,last,start,end,sfx)
     actors=performers(d); props=d.get('props') or []
     speaker=d.get('speaker'); ids=[a['id'] for a in actors]
     subject=next((a for a in actors if a['id']==speaker),None) or next((a for a in actors if a['id']==d['actor']),actors[0])
