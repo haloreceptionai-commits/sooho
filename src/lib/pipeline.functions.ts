@@ -319,8 +319,9 @@ export interface ImageInput {
   prompt: string;
   aspect: "portrait" | "landscape";
   deployment: string;
-  quality: "low" | "medium";
+  quality: "low" | "medium" | "high";
   style: string;
+  crisp?: boolean;
   palette?: string;
   cast?: string; // "Name: look; Name: look" for characters in this shot
   reference?: string; // base64 jpeg character sheet for consistency
