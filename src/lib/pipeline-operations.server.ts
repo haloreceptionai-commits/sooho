@@ -163,7 +163,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string }
     const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes'], properties: {
       cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: [...OUTFITS] } } } },
       scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['world', 'light', 'action', 'expression', 'actor', 'wide', 'shot', 'move', 'mood', 'actors', 'speaker', 'props', 'fx', 'cues', 'keyword'], properties: {
-        world: en('worlds'), light: en('lights'), action: en('actions'), expression: en('expressions'), actor: { type: 'string' }, wide: { type: 'boolean' },
+        world: { type: 'string', enum: VOCAB.worlds.filter(w => w !== 'map') }, light: en('lights'), action: en('actions'), expression: en('expressions'), actor: { type: 'string' }, wide: { type: 'boolean' },
         shot: en('shots'), move: en('moves'), mood: en('moods'), actors: { type: 'array', items: performer }, speaker: { type: 'string' },
         props: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['kind', 'place', 'motion', 'asset'], properties: { kind: en('props'), place: en('places'), motion: en('prop_motions'), asset: { type: 'string', enum: ['', ...objects.map(o => o.id)] } } } },
         fx: { type: 'array', items: en('fx') }, cues: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['word', 'kind'], properties: { word: { type: 'integer' }, kind: en('sounds') } } }, keyword: { type: 'string' },

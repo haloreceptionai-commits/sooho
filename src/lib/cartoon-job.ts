@@ -77,6 +77,9 @@ export function sanitizeDirection(direction: Direction, narration: string[]): Di
   const castIds = new Set(direction.cast.map(c => c.id)), lead = direction.cast[0]!.id;
   return { ...direction, scenes: scenes.map((raw, i) => {
     const s = { ...raw };
+    // Only the map director may place map scenes; a stray map world without data falls back to open landscape.
+    if (s.world === 'map' && !s.map) s.world = 'landscape';
+    if (s.world === 'map') { s.actors = undefined; s.speaker = undefined; s.props = []; s.fx = []; return s; }
     if (!castIds.has(s.actor)) s.actor = lead;
     if (s.actors) {
       const seen = new Set<string>(), used = new Set<string>();

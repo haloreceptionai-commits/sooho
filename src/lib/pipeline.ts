@@ -8,6 +8,7 @@ import { checkContinuity, directCartoon, factCheck, generateHooks, generateImage
 import { submitCartoon, resumeApprovedCartoon } from '@/lib/cartoon.functions';
 import { canResumeApprovedCartoon } from './cartoon-resume';
 import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
+import { groupTakes, joinWavs } from './wav';
 import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { clipChunk, pollClip, startClip } from "@/lib/clips.functions";
@@ -264,11 +265,11 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${gate.score}/100 · ${n} scenes` });
 
     if (input.engine === 'cartoon') {
-      if (input.format !== 'short') throw Error('Cartoon rendering currently supports Shorts only');
+      const long = input.format !== 'short';
       // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
       if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
       if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft; check the preview before approving` });
-      const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment } }));
+      const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short' } }));
       const narration = plan.scenes.map(sc => spellNumbers(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
@@ -281,12 +282,21 @@ export async function runVideo(id: string, input: VideoInput) {
         up({ progress: 30, detail: 'Reusing the saved Atlas take…' });
       } else {
         up({ progress: 30, detail: 'Recording one locked Atlas take…' });
-        const take = await withRetry(() => generateVoice({ data: { text: script, voice: 'onyx', deployment: s.ttsDeployment, style: 'short' } }));
-        const { error } = await supabase.storage.from('videos').upload(voicePath, b64ToBuf(take.audio), { contentType: 'audio/wav', upsert: false });
+        let audio: ArrayBuffer;
+        if (long) {
+          // Long-form: calm documentary takes of whole sentences, joined into one locked narration track.
+          const takes = groupTakes(narration, 140), parts: ArrayBuffer[] = [];
+          for (const [k, text] of takes.entries()) {
+            up({ detail: `Recording documentary narration · take ${k + 1}/${takes.length}` });
+            parts.push(b64ToBuf((await withRetry(() => generateVoice({ data: { text, voice: 'onyx', deployment: s.ttsDeployment, style: 'long' } }))).audio));
+          }
+          audio = joinWavs(parts);
+        } else audio = b64ToBuf((await withRetry(() => generateVoice({ data: { text: script, voice: 'onyx', deployment: s.ttsDeployment, style: 'short' } }))).audio);
+        const { error } = await supabase.storage.from('videos').upload(voicePath, audio, { contentType: 'audio/wav', upsert: false });
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }
       const safeDirection = sanitizeDirection(direction, narration);
-      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: true, sfx: s.soundEffects });
+      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: !long, sfx: s.soundEffects, format: long ? 'long' : 'short' });
       up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
       const job = await submitCartoon({ data: cp });
