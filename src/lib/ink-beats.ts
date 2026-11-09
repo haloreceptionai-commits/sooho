@@ -6,7 +6,7 @@ import type { PlanScene } from "@/lib/pipeline-operations.server";
 const GLUE = new Set(["a", "an", "the", "of", "to", "in", "on", "at", "for", "and", "or", "but", "with", "by", "from", "as", "into", "his", "her", "their", "its", "my", "our", "your", "this", "that", "these", "those", "is", "was", "were", "are", "be", "not", "no", "so", "than", "very", "just", "who", "which", "what", "when", "where", "how", "if", "then", "had", "has", "have", "will", "would", "could", "can", "it's", "there"]);
 
 /** Splits narration into phrases of about 3-5 words (~1.3-2s at the long-form pace), cutting at punctuation when possible. */
-export function inkPhrases(text: string, min = 3, max = 5): string[] {
+export function inkPhrases(text: string, min = 2, max = 4): string[] {
   const words = text.trim().split(/\s+/).filter(Boolean);
   const out: string[][] = [];
   let cur: string[] = [];

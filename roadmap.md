@@ -59,4 +59,4 @@
 - [x] Real test video made (3:35, 31 scenes, ~12 min end to end)
 - [ ] Final assembly on parallel Azure machines (chapters) — current browser-recorder assembly stretched the video (narration ~1:53, file 3:35)
 - [ ] Script length overshoot check for very short long-forms
-- [ ] Investigate stuck cartoon Short 'He Measured Earth by Walking and Shadows' (72% preview)
+- [x] Stuck cartoon Short: Azure start failure, auto-restart added
