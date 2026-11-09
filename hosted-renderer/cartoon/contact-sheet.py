@@ -12,6 +12,10 @@ def jsround(x):
 
 def preflight_frames(shots, words, total):
     frames = {0, total-1}
+    if len(shots) > 120:
+        # Long-form: one middle frame per shot keeps the owner review to minutes, not hours.
+        frames.update((s['start']+s['end']-1)//2 for s in shots)
+        return sorted(f for f in frames if 0 <= f < total)
     for shot in shots:
         frames.update([shot['start'], shot['end']-1, (shot['start']+shot['end']-1)//2])
         for event in shot.get('events',[]):

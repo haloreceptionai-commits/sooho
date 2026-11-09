@@ -121,7 +121,7 @@ try {
     // One replica assembles; the rest stop once their share is done.
     // Each explicit retry elects a fresh assembler; the previous attempt's permanent claim must not block recovery.
     if(!(await store.claim(`assemble-${hash(Buffer.from(input.callbackToken))}`))){await platform.output({status:'rendered-share'});await platform.exit();process.exit(0);}
-    const deadline=Date.now()+90*60*1000;
+    const deadline=Date.now()+Math.max(90,Math.ceil(m.narration.samples/48000/60)*6)*60*1000; // long-form: ~6 min of budget per narrated minute
     for(;;){
       const missing=[];for(const b of batches)if(!(await hasPart(b[0])))missing.push(b);
       if(!missing.length)break;
