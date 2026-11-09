@@ -1,4 +1,4 @@
-import { nameMatch, searchLibrary, type LibraryObject } from './object-library';
+import { nameMatch, searchLibrary, words, type LibraryObject } from './object-library';
 import type { DirectedScene } from './cinematic-pass';
 
 /** Conservative scene grounding: only exact named models from the approved shortlist.
@@ -12,7 +12,7 @@ export function groundLibraryScenes<T extends DirectedScene>(scenes: T[], narrat
     const candidates = searchLibrary(text, 12).filter(o => allowed.has(o.id) && nameMatch(o, text));
     const candidate = candidates.find(o => props.some(p => p.asset === o.id)) ?? candidates[0];
     // Existing exact representation is preferable to arbitrary variety.
-    const represented = candidate && props.some(p => p.asset === candidate.id || nameMatch({ ...candidate, name: p.kind.replace(/_/g, ' ') }, text) && p.kind !== 'asset');
+    const represented = candidate && props.some(p => p.asset === candidate.id || p.kind !== 'asset' && words(p.kind).some(w => words(candidate.name).includes(w)));
     if (candidate && !represented && (selected.has(candidate.id) || selected.size < 12)) {
       selected.add(candidate.id);
       const motion = candidate.clips?.length && /\b(walk\w*|run\w*|chase\w*|hunt\w*)\b/i.test(text) ? 'approach' : 'none';
