@@ -1,6 +1,6 @@
 # Roadmap — Cartoon Engine v2
 
-- [ ] Fix repetitive library ranking and scene model selection with safe fallback, verify new scene choices and renderer compatibility.
+- [x] Fix library ranking: normalized compound IDs, real/rigged models before sprites, exact narration nouns before pack tags, scene-balanced shortlist and conservative grounding before sanitization. Live director selected elephant, Velociraptor and YellowDragon; all loaded in local frame capture; 149 app and 32 Python tests passed. No new full video generated. Asset prominence/framing remains limited by existing cast-first cameras.
 
 - [x] Deploy preflight optimizations: exact vectorized CTC (0.8s vs ~18.5s scalar estimate for 71s audio), two review capture lanes, all review frames checked on saved 67s story. Full Azure acoustic/cold-start speed still needs measurement; no overall speed multiplier claimed.
 - [x] Resume failed approved Azure cartoons with the same locked store, rotated callback/output paths and per-attempt assembler. Signed-in Resume test completed an 8.64s output after browser closure, reused saved frames (draw-all 1s, final encode/QA 23.4s), and playback verified; 143 app tests and 32 Python tests passed.
