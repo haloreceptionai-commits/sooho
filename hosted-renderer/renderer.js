@@ -569,9 +569,7 @@ var narrationWpm = (width, height) => width > height ? LONG_WPM : ATLAS_WPM;
 function paceRate(actual, target) {
   return Math.max(0.8, Math.min(1.45, actual / Math.max(0.5, target)));
 }
-async function renderVideo(scenes, voice, o) {
-  const actx = new AudioContext;
-  await actx.resume();
+async function prepareTimeline(actx, scenes, voice, o) {
   let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
   const wpm = o.wpm ?? narrationWpm(o.width, o.height);
   buffers = buffers.map((b, i) => {
@@ -607,19 +605,12 @@ async function renderVideo(scenes, voice, o) {
   for (let i = 1;i < tl.length; i++)
     tl[i].start = tl[i - 1].end;
   const shots = buildShots(scenes, tl);
-  const caps = tl.map((x) => captionWords(x.words)).flat();
-  const clipOf = new Map;
-  for (const c of o.clips ?? []) {
-    const e = { ...c };
-    c.scenes.forEach((i) => clipOf.set(i, e));
-  }
   const revealAt = tl[scenes.findIndex((s) => s.mood === "reveal")]?.start ?? Infinity;
   const payoffIdx = scenes.findIndex((s) => s.beat === "payoff");
-  const canvas = document.createElement("canvas");
-  canvas.width = o.width;
-  canvas.height = o.height;
-  const ctx = canvas.getContext("2d");
-  const dest = actx.createMediaStreamDestination();
+  return { chunks, voiceGain, total, tl, shots, revealAt, payoffIdx };
+}
+function buildMix(actx, out, t0, scenes, T, sfx) {
+  const { chunks, voiceGain, total, tl, shots, revealAt, payoffIdx } = T;
   const master = actx.createDynamicsCompressor();
   master.threshold.value = -10;
   master.knee.value = 6;
@@ -629,10 +620,7 @@ async function renderVideo(scenes, voice, o) {
   const makeup = actx.createGain();
   makeup.gain.value = 1;
   master.connect(makeup);
-  makeup.connect(dest);
-  const meter = actx.createAnalyser();
-  meter.fftSize = 2048;
-  makeup.connect(meter);
+  makeup.connect(out);
   const voiceBus = actx.createGain();
   voiceBus.gain.value = 0.9 * voiceGain;
   voiceBus.connect(master);
@@ -650,28 +638,19 @@ async function renderVideo(scenes, voice, o) {
   musicLift.gain.value = 1;
   musicLift.connect(musicLp);
   const musicBus = actx.createGain();
-  musicBus.gain.value = o.sfx ? 0.13 : 0;
+  musicBus.gain.value = sfx ? 0.13 : 0;
   musicBus.connect(musicLift);
-  const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
-  const mime = pickMime();
-  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 14000000 : 6000000 });
-  const parts = [];
-  rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
-  const stopped = new Promise((r) => rec.onstop = () => r());
-  const vertical = o.height > o.width;
-  rec.start(1000);
-  const t0 = actx.currentTime + 0.15;
   chunks.forEach((c) => {
     const src = actx.createBufferSource();
     src.buffer = c.buf;
     src.connect(voiceBus);
     src.start(t0 + c.start, c.from, c.dur);
-    if (o.sfx) {
+    if (sfx) {
       musicBus.gain.setTargetAtTime(0.06, t0 + c.start - 0.05, 0.08);
       musicBus.gain.setTargetAtTime(0.13, t0 + c.start + c.dur, 0.15);
     }
   });
-  if (o.sfx) {
+  if (sfx) {
     if (Number.isFinite(revealAt)) {
       musicLp.frequency.setValueAtTime(18000, t0 + Math.max(0, revealAt - 1.6));
       musicLp.frequency.exponentialRampToValueAtTime(350, t0 + revealAt - 0.1);
@@ -697,6 +676,95 @@ async function renderVideo(scenes, voice, o) {
     }
     playSfx(actx, sfxBus, "boom", t0 + Math.max(0, total - 1.2));
   }
+  return { musicBus, makeup };
+}
+function allHeld(scenes, clips) {
+  return scenes.length > 0 && scenes.every((s) => s.camera === "hold") && !clips?.length;
+}
+async function renderStillCuts(scenes, voice, o) {
+  const rs = scenes;
+  const SR = 48000;
+  const probe = new OfflineAudioContext(1, 1, SR);
+  const T = await prepareTimeline(probe, rs, voice, o);
+  const off = new OfflineAudioContext(2, Math.ceil((T.total + 0.05) * SR), SR);
+  const { musicBus } = buildMix(off, off.destination, 0, rs, T, o.sfx);
+  const stepLen = 60 / 128 / 2;
+  if (o.sfx)
+    for (let k = 0;k * stepLen < T.total - 1; k++)
+      scheduleMusic(off, musicBus, k * stepLen, k, k * stepLen >= T.revealAt ? "reveal" : "tension");
+  const mix = await off.startRendering();
+  const blocks = [];
+  const L = mix.getChannelData(0), R = mix.getChannelData(1), win = Math.round(0.4 * SR);
+  for (let b = 0;b + win <= L.length; b += win) {
+    let a = 0;
+    for (let k = b;k < b + win; k += 2)
+      a += (L[k] * L[k] + R[k] * R[k]) / 2;
+    blocks.push(10 * Math.log10(a / (win / 2) + 0.000000000001) - 0.691 + 3);
+  }
+  const gated = blocks.filter((x) => x > -50);
+  const lufs = gated.length ? 10 * Math.log10(gated.reduce((a, x) => a + 10 ** (x / 10), 0) / gated.length) : -60;
+  const cuts = T.tl.map((x, i) => ({ scene: i, start: x.start, end: x.end }));
+  const words = rs.reduce((a, s) => a + s.text.split(/\s+/).filter(Boolean).length, 0);
+  return { wav: encodeWav(mix), cuts, duration: T.total, stats: { lufs, lra: 0, avgShotSec: T.total / cuts.length, wordsPerSec: words / T.total } };
+}
+function encodeWav(b) {
+  const { numberOfChannels: ch, length: n } = b, out = new DataView(new ArrayBuffer(44 + n * ch * 2));
+  const str = (o, t) => {
+    for (let i = 0;i < t.length; i++)
+      out.setUint8(o + i, t.charCodeAt(i));
+  };
+  str(0, "RIFF");
+  out.setUint32(4, 36 + n * ch * 2, true);
+  str(8, "WAVE");
+  str(12, "fmt ");
+  out.setUint32(16, 16, true);
+  out.setUint16(20, 1, true);
+  out.setUint16(22, ch, true);
+  out.setUint32(24, b.sampleRate, true);
+  out.setUint32(28, b.sampleRate * ch * 2, true);
+  out.setUint16(32, ch * 2, true);
+  out.setUint16(34, 16, true);
+  str(36, "data");
+  out.setUint32(40, n * ch * 2, true);
+  const data = Array.from({ length: ch }, (_, c) => b.getChannelData(c));
+  let p = 44;
+  for (let i = 0;i < n; i++)
+    for (let c = 0;c < ch; c++) {
+      const v = Math.max(-1, Math.min(1, data[c][i]));
+      out.setInt16(p, v < 0 ? v * 32768 : v * 32767, true);
+      p += 2;
+    }
+  return new Blob([out.buffer], { type: "audio/wav" });
+}
+async function renderVideo(scenes, voice, o) {
+  const actx = new AudioContext;
+  await actx.resume();
+  const T = await prepareTimeline(actx, scenes, voice, o);
+  const { total, tl, shots, revealAt } = T;
+  const caps = tl.map((x) => captionWords(x.words)).flat();
+  const clipOf = new Map;
+  for (const c of o.clips ?? []) {
+    const e = { ...c };
+    c.scenes.forEach((i) => clipOf.set(i, e));
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = o.width;
+  canvas.height = o.height;
+  const ctx = canvas.getContext("2d");
+  const dest = actx.createMediaStreamDestination();
+  const t0 = actx.currentTime + 0.15;
+  const { musicBus, makeup } = buildMix(actx, dest, t0, scenes, T, o.sfx);
+  const meter = actx.createAnalyser();
+  meter.fftSize = 2048;
+  makeup.connect(meter);
+  const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+  const mime = pickMime();
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 14000000 : 6000000 });
+  const parts = [];
+  rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
+  const stopped = new Promise((r) => rec.onstop = () => r());
+  const vertical = o.height > o.width;
+  rec.start(1000);
   const stepLen = 60 / 128 / 2;
   let nextStep = 0;
   const loud = [];
@@ -853,12 +921,14 @@ export {
   ATLAS_WPM,
   LONG_WPM,
   PRE_REVEAL_PAUSE,
+  allHeld,
   backgroundTicker,
   beatRate,
   clipRate,
   narrationWpm,
   paceRate,
   pickMime,
+  renderStillCuts,
   renderVideo,
   tightenPauses,
   timeStretch,

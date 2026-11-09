@@ -32,7 +32,7 @@ async function encodeStills(input, r) {
     while (next < paths.length) {
       const i = next++;
       for (let attempt = 0; ; attempt++) {
-        try { const res = await fetch(input.signed[paths[i]]); if (!res.ok) throw new Error(String(res.status)); files[i] = `/tmp/still-${i}.img`; await writeFile(files[i], Buffer.from(await res.arrayBuffer())); break; }
+        try { const res = await fetch(input.signed[paths[i]]); if (!res.ok) throw new Error(String(res.status)); files[i] = `/tmp/still-${i}.jpg`; await writeFile(files[i], Buffer.from(await res.arrayBuffer())); break; }
         catch (e) { if (attempt >= 4) throw new Error('Saved picture could not load'); await new Promise(z => setTimeout(z, 1500 * 2 ** attempt)); }
       }
     }
