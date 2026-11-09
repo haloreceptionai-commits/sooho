@@ -117,3 +117,14 @@ export async function readCartoonPending(jobId: string) {
   const r = await fetch(`${env('AZURE_BLOB_BASE')}/cartoon-${jobId}/PENDING-COMPLETION?${env('AZURE_BLOB_SAS').replace(/^\?/, '')}`);
   return r.ok ? r.json() as Promise<unknown> : null;
 }
+
+/** One execution by its tracked run id; null when Azure no longer knows it. */
+export async function cartoonExecution(runId: string) {
+  const m = /^azure:(cartoon-preflight|cartoon-render)-[a-z0-9]+$/.exec(runId);
+  if (!m) return null;
+  const r = await fetch(`${mgmt()}/${m[1]}/executions/${runId.slice(6)}?api-version=${API}`, { headers: { Authorization: `Bearer ${await armToken()}` } });
+  if (r.status === 404) return null;
+  if (!r.ok) throw Error(`Azure execution unavailable [${r.status}]`);
+  const p = ((await r.json()) as { properties?: { status?: string; startTime?: string } }).properties;
+  return { status: p?.status ?? 'Unknown', startMs: Date.parse(p?.startTime ?? '') || 0 };
+}
