@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createServerFn } from '@tanstack/react-start';
-import { getRequest } from '@tanstack/react-start/server';
+import { RENDER_CALLBACK_URL } from '@/lib/render-complete';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { CARTOON_LIFETIME_MS, cartoonStart, reviewApproval, reviewMatches, type CartoonStart, type CartoonReview } from '@/lib/cartoon-job';
 import { validRenderAssets } from '@/lib/hosted-render';
@@ -122,10 +122,7 @@ function apifyKeys(): [string, string] {
   return [key, connection];
 }
 async function digest(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), x => x.toString(16).padStart(2, '0')).join(''); }
-function callbackAddress() {
-  const origin = new URL(getRequest().url).origin;
-  return `${origin.includes('localhost') || origin.includes('id-preview') ? 'https://sooho.lovable.app' : origin}/api/public/render-callback`;
-}
+function callbackAddress() { return RENDER_CALLBACK_URL; }
 async function startActor(key: string, connection: string, input: unknown) {
   const response = await fetch(`https://connector-gateway.lovable.dev/apify/acts/${CARTOON_ACTOR}/runs?memory=32768&timeout=21600`, { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'X-Connection-Api-Key': connection, 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
   if (!response.ok) { const body = await response.text(); console.error('Cartoon start', response.status, body); throw Error(`Cartoon rendering could not start [${response.status}]`); }
