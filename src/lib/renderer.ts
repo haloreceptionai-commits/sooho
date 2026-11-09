@@ -434,7 +434,7 @@ export function paceRate(actual: number, target: number) {
 }
 
 /** Voice pacing + timeline shared by the live recorder and the offline still-cut renderer. */
-async function prepareTimeline(actx: BaseAudioContext, scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions) {
+async function prepareTimeline(actx: BaseAudioContext, scenes: RenderScene[], voice: VoiceChunk[], o: Pick<RenderOptions, "width" | "height" | "wpm">) {
   let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
   // Fit every take to the approved Atlas pace (~153 wpm), a touch faster in action and slower at the reveal.
   const wpm = o.wpm ?? narrationWpm(o.width, o.height);

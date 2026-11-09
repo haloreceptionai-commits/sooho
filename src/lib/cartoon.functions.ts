@@ -132,3 +132,7 @@ async function startActor(key: string, connection: string, input: unknown) {
   if (!result.data?.id) throw Error('Cartoon start was not confirmed; do not resubmit');
   return result.data.id;
 }
+/** Owner's page asks this when a preview has shown no progress for a few minutes. */
+export const restartDeadPreflight = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { videoId: string }) => z.object({ videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/) }).parse(d))
+  .handler(async ({ data, context }) => { const { restartDeadPreflightOperation } = await import('./cartoon-submit.server'); return restartDeadPreflightOperation({ data, context }); });
