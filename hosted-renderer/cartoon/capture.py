@@ -28,7 +28,7 @@ def valid_frame(path, metadata):
     try:
         with Image.open(path) as image:
             image.load()
-            if image.size != (1080, 1920): return False
+            if image.size not in ((1080, 1920), (1920, 1080)) or (metadata.get('size') and tuple(metadata['size']) != image.size): return False
         return hashlib.sha256(path.read_bytes()).hexdigest() == metadata.get('sha256')
     except Exception:
         return False
