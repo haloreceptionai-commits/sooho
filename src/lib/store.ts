@@ -72,7 +72,7 @@ export interface Settings {
   defaultStyle: string;
   burnCaptions: boolean;
   soundEffects: boolean;
-  imageQuality: "low" | "medium";
+  imageQuality: "low" | "medium" | "high";
   styleV?: number;
 }
 

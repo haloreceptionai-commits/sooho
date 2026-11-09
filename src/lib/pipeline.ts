@@ -10,7 +10,8 @@ import { canResumeApprovedCartoon } from './cartoon-resume';
 import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
 import { groupTakes, joinWavs } from './wav';
 import { composeInkCard, pickInkCards, type InkCard } from "@/lib/ink-card";
-import { planInkCards } from "@/lib/ink.functions";
+import { planInkBeats, planInkCards } from "@/lib/ink.functions";
+import { splitInkBeats } from "@/lib/ink-beats";
 import { INK_HERO } from "@/lib/styles";
 import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
@@ -263,7 +264,10 @@ export async function runVideo(id: string, input: VideoInput) {
     };
     const savedScript = getState().videos.find(v => v.id === id)?.scriptCheckpoint;
     if (savedScript) up({ status: 'running', stage: 'images', progress: 12, error: undefined, detail: 'Resuming from the saved script…' });
-    const { plan, gate, report, judgeOk, hookType, moneyShot } = savedScript ?? await writeScript();
+    const { plan: scriptPlan, gate, report, judgeOk, hookType, moneyShot } = savedScript ?? await writeScript();
+    // Ink explainer cuts to a new literal picture every 1-2 seconds: one still per spoken phrase, no camera moves.
+    const ink = input.format !== "short" && input.style === "Ink explainer" && (input.engine ?? "own") === "own";
+    const plan = ink ? { ...scriptPlan, scenes: splitInkBeats(scriptPlan.scenes) } : scriptPlan;
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${gate.score}/100 · ${n} scenes` });
 
@@ -308,7 +312,6 @@ export async function runVideo(id: string, input: VideoInput) {
     }
 
     const portrait = input.format === "short";
-    const ink = !portrait && input.style === "Ink explainer";
     const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
     // narration is recorded in chunks of a few scenes so the delivery flows like one take
     const groups: number[][] = [];
@@ -340,7 +343,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const contScores: number[] = [];
     const looks = new Map(plan.characters.map((c) => [c.name.toLowerCase(), c]));
     const img = (extra: Partial<Parameters<typeof generateImage>[0]["data"]>, prompt: string) =>
-      withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: s.imageQuality, style: input.style, palette: plan.palette, ...extra } }), 9, 30000);
+      withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: ink && s.imageQuality === "low" ? "medium" : s.imageQuality, style: input.style, palette: plan.palette, ...(ink ? { crisp: true } : {}), ...extra } }), 9, 30000);
 
     const media = await mediaCache(id);
     await Promise.all([
@@ -362,7 +365,7 @@ export async function runVideo(id: string, input: VideoInput) {
             const kept = await media.get("sheet.jpg");
             if (kept) sheet = bufToB64(kept);
             else {
-              const r = await img({ sheet: true }, [...(ink ? [`The Hero: ${INK_HERO}`] : []), ...plan.characters.map((c) => `${c.name}: ${c.look}`)].join("; "));
+              const r = await img({ sheet: true }, ink ? `The Hero: ${INK_HERO}. Draw only him, front view and side view, thin black stick arms and legs.` : plan.characters.map((c) => `${c.name}: ${c.look}`).join("; "));
               sheet = r.image ?? undefined;
               if (sheet) await media.put("sheet.jpg", b64ToBuf(sheet), "image/jpeg");
             }
@@ -371,6 +374,7 @@ export async function runVideo(id: string, input: VideoInput) {
         tick("Designing characters");
         // Ink explainer: about one sentence in five becomes a white idea card with exact hand-lettered text.
         let cards = new Map<number, InkCard>();
+        const beatVisual = new Map<number, string>();
         if (ink) {
           const kept = await media.get("ink-cards.json");
           let picked: InkCard[] | null = kept ? JSON.parse(new TextDecoder().decode(kept)) as InkCard[] : null;
@@ -379,8 +383,22 @@ export async function runVideo(id: string, input: VideoInput) {
             await media.put("ink-cards.json", new TextEncoder().encode(JSON.stringify(picked)).buffer as ArrayBuffer, "application/json");
           }
           cards = new Map(picked.map((c) => [c.index, c]));
+          // one literal picture per phrase: what the narrator says is what the viewer sees
+          const keptBeats = await media.get("ink-beats-v1.json");
+          let shots: { i: number; visual: string }[] | null = keptBeats ? JSON.parse(new TextDecoder().decode(keptBeats)) as { i: number; visual: string }[] : null;
+          if (!shots) {
+            const items = plan.scenes.map((sc, i) => ({ i, text: sc.narration, scene: sc.image_prompt })).filter((b) => !cards.has(b.i));
+            const batches: typeof items[] = [];
+            for (let k = 0; k < items.length; k += 60) batches.push(items.slice(k, k + 60));
+            const got: { i: number; visual: string }[][] = [];
+            await pool(batches, 4, async (b, bi) => { got[bi] = await withRetry(() => planInkBeats({ data: { beats: b, topic: plan.title, deployment: s.scriptDeployment } })).catch(() => []); });
+            shots = got.flat().filter((x) => x && typeof x.visual === "string" && x.visual.trim());
+            await media.put("ink-beats-v1.json", new TextEncoder().encode(JSON.stringify(shots)).buffer as ArrayBuffer, "application/json");
+          }
+          for (const sh of shots) if (plan.scenes[sh.i]) beatVisual.set(sh.i, sh.visual.trim());
         }
-        await pool(plan.scenes, ink ? 6 : 2, async (sc, i) => {
+        await pool(plan.scenes, ink ? 10 : 2, async (sc0, i) => {
+          const sc = ink ? { ...sc0, image_prompt: beatVisual.get(i) ?? `${sc0.image_prompt} The picture shows exactly: ${sc0.narration}` } : sc0;
           const card = cards.get(i);
           if (card) {
             const ckey = `card-${i}-${textKey(card.text + card.icon)}.jpg`;
@@ -405,8 +423,17 @@ export async function runVideo(id: string, input: VideoInput) {
             tick("Painting scenes");
             return;
           }
-          const people = sc.shot === "action" || sc.shot === "face";
-          const castAll = (ink && people ? "The Hero: the recurring stick-figure hero from the reference; " : "") + sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
+          const people = ink ? /\bhero\b/i.test(sc.image_prompt) : sc.shot === "action" || sc.shot === "face";
+          if (ink) {
+            // Ink explainer: one literal subject per picture, the stick-figure hero only when the phrase is about him
+            const inkShot = `${sc.image_prompt} ${people ? `The hero is drawn exactly like the reference: ${INK_HERO}.` : "No hero in this picture."} Any other people are minimal stick figures (round heads, thin black stick limbs) in period clothing. Simple clean background, one clear subject.`;
+            let r = await img(people && sheet ? { cast: "The Hero", reference: sheet } : {}, inkShot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
+            if (!r) r = await img({}, inkShot);
+            if (r.image) { rawImg[i] = r.image; await media.put(`scene-${i}-${textKey(sc.image_prompt)}.jpg`, b64ToBuf(r.image), "image/jpeg"); scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" })); }
+            tick("Painting scenes");
+            return;
+          }
+          const castAll = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
           const cast = people ? castAll : "";
           const shot = [
             SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
@@ -416,7 +443,7 @@ export async function runVideo(id: string, input: VideoInput) {
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
           // continuity gate: compare the cast to the character sheet; redraw once if it drifted
-          if (r.image && sheet && cast) {
+          if (r.image && sheet && cast && !ink) {
             const c = await withRetry(() => checkContinuity({ data: { sheet, shot: r!.image!, cast, deployment: s.scriptDeployment } })).catch(() => null);
             if (c) contScores.push(c.score);
             if (c && c.score < 6) {
@@ -608,7 +635,7 @@ async function saveAssemblyAssets(id: string, plan: Plan, scenes: RenderScene[],
   if (!user.user) throw new Error("Not signed in");
   const root = `${user.user.id}/${id}/assets`, bucket = supabase.storage.from("videos");
   const images: string[] = [], takes: SeedanceCheckpoint["voice"] = [];
-  for (let i = 0; i < scenes.length; i++) {
+  await pool(scenes.map((_, i) => i), 8, async (i) => {
     const scene = scenes[i];
     if (!scene) throw new Error("Scene missing");
     const canvas = document.createElement("canvas");
@@ -616,12 +643,12 @@ async function saveAssemblyAssets(id: string, plan: Plan, scenes: RenderScene[],
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not save scene image");
     ctx.drawImage(scene.image, 0, 0);
-    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error("Could not save scene")), "image/png"));
-    const path = `${root}/render-image-${i}.png`;
-    const { error } = await bucket.upload(path, blob, { upsert: true, contentType: "image/png" });
+    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error("Could not save scene")), "image/jpeg", 0.96));
+    const path = `${root}/render-image-${i}.jpg`;
+    const { error } = await bucket.upload(path, blob, { upsert: true, contentType: "image/jpeg" });
     if (error) throw new Error(`Could not save scene ${i + 1}`);
-    images.push(path);
-  }
+    images[i] = path;
+  });
   for (let i = 0; i < voice.length; i++) {
     const take = voice[i];
     if (!take) continue;

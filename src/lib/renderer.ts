@@ -4,7 +4,7 @@ import { wordSoundCues } from "@/lib/sound-words";
 // camera moves, punch-ins, shake and whip transitions; flowing narration, synthesized music
 // bed + foley, and kinetic one-word captions. Records with MediaRecorder.
 
-export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit";
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 
 export interface RenderScene {
   image: ImageBitmap;
@@ -52,7 +52,7 @@ function noiseBuffer(ctx: BaseAudioContext, seconds: number) {
 }
 
 /** Synthesized foley so videos have impacts without stock libraries. */
-function playSfx(ctx: AudioContext, out: AudioNode, kind: string, at: number) {
+function playSfx(ctx: BaseAudioContext, out: AudioNode, kind: string, at: number) {
   const g = ctx.createGain();
   g.connect(out);
   const env = (peak: number, attack: number, decay: number) => {
@@ -261,13 +261,15 @@ export function timeline(chunks: { scenes: number[]; dur: number; start: number 
 const ease = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
 const easeOut = (x: number) => 1 - (1 - x) ** 3;
 
-interface Shot { scene: number; start: number; end: number; z0: number; z1: number; x0: number; x1: number; y0: number; y1: number; punch: boolean }
+interface Shot { scene: number; start: number; end: number; z0: number; z1: number; x0: number; x1: number; y0: number; y1: number; punch: boolean; hold?: boolean }
 
 function buildShots(scenes: RenderScene[], tl: SceneTiming[]): Shot[] {
   const shots: Shot[] = [];
   scenes.forEach((sc, i) => {
     const t = tl[i]!;
     const dur = Math.max(0.6, t.end - t.start);
+    // "hold": a sticky full-frame still with a hard cut in and out (Ink explainer); never re-framed, so it stays pin-sharp
+    if (sc.camera === "hold") { shots.push({ scene: i, start: t.start, end: t.start + dur, z0: 1, z1: 1, x0: 0, x1: 0, y0: 0, y1: 0, punch: false, hold: true }); return; }
     const n = Math.max(1, Math.round(dur / 3));
     for (let k = 0; k < n; k++) {
       const s = t.start + (dur * k) / n, e = t.start + (dur * (k + 1)) / n;
@@ -306,6 +308,7 @@ function drawImage(ctx: CanvasRenderingContext2D, img: ImageBitmap | HTMLVideoEl
   const dw = iw * scale, dh = ih * scale;
   const x = (w - dw) / 2 + Math.max(-1, Math.min(1, panX)) * (dw - w) / 2 + ox;
   const y = (h - dh) / 2 + Math.max(-1, Math.min(1, panY)) * (dh - h) / 2 + oy;
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, x, y, dw, dh);
 }
 
@@ -380,7 +383,7 @@ const NOTE = (m: number) => 440 * 2 ** ((m - 69) / 12);
 const TENSION = [[45, 48, 52], [41, 45, 48], [43, 47, 50], [40, 44, 47]]; // Am F G E
 const REVEAL = [[48, 52, 55], [43, 47, 50], [45, 48, 52], [41, 45, 48]]; // C G Am F
 
-function scheduleMusic(ctx: AudioContext, out: AudioNode, at: number, step: number, mood: "tension" | "reveal") {
+function scheduleMusic(ctx: BaseAudioContext, out: AudioNode, at: number, step: number, mood: "tension" | "reveal") {
   const bar = Math.floor(step / 8) % 4;
   const chord = (mood === "tension" ? TENSION : REVEAL)[bar]!;
   const dur = 60 / 128 / 2;
@@ -430,9 +433,8 @@ export function paceRate(actual: number, target: number) {
   return Math.max(0.8, Math.min(1.45, actual / Math.max(0.5, target)));
 }
 
-export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number; stats: RenderStats }> {
-  const actx = new AudioContext();
-  await actx.resume();
+/** Voice pacing + timeline shared by the live recorder and the offline still-cut renderer. */
+async function prepareTimeline(actx: BaseAudioContext, scenes: RenderScene[], voice: VoiceChunk[], o: Pick<RenderOptions, "width" | "height" | "wpm">) {
   let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
   // Fit every take to the approved Atlas pace (~153 wpm), a touch faster in action and slower at the reveal.
   const wpm = o.wpm ?? narrationWpm(o.width, o.height);
@@ -464,48 +466,36 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
   tl[0]!.start = 0; tl[tl.length - 1]!.end = total;
   for (let i = 1; i < tl.length; i++) tl[i]!.start = tl[i - 1]!.end;
   const shots = buildShots(scenes, tl);
-  const caps = tl.map((x) => captionWords(x.words)).flat();
-  const clipOf = new Map<number, { scenes: number[]; video: HTMLVideoElement; started?: boolean }>();
-  for (const c of o.clips ?? []) { const e = { ...c }; c.scenes.forEach((i) => clipOf.set(i, e)); }
   const revealAt = tl[scenes.findIndex((s) => s.mood === "reveal")]?.start ?? Infinity;
   const payoffIdx = scenes.findIndex((s) => s.beat === "payoff");
+  return { chunks, voiceGain, total, tl, shots, revealAt, payoffIdx };
+}
 
-  const canvas = document.createElement("canvas");
-  canvas.width = o.width; canvas.height = o.height;
-  const ctx = canvas.getContext("2d")!;
-  const dest = actx.createMediaStreamDestination();
+type Timeline = Awaited<ReturnType<typeof prepareTimeline>>;
+
+/** Narration, ducked music bed and foley on any audio context (live or offline). Returns the music bus for step scheduling. */
+function buildMix(actx: BaseAudioContext, out: AudioNode, t0: number, scenes: RenderScene[], T: Timeline, sfx: boolean) {
+  const { chunks, voiceGain, total, tl, shots, revealAt, payoffIdx } = T;
   const master = actx.createDynamicsCompressor();
   master.threshold.value = -10; master.knee.value = 6; master.ratio.value = 12; master.attack.value = 0.003; master.release.value = 0.15;
   const makeup = actx.createGain(); makeup.gain.value = 1;
-  master.connect(makeup); makeup.connect(dest);
-  const meter = actx.createAnalyser(); meter.fftSize = 2048; makeup.connect(meter);
+  master.connect(makeup); makeup.connect(out);
   const voiceBus = actx.createGain(); voiceBus.gain.value = 0.9 * voiceGain; voiceBus.connect(master);
   const sfxBus = actx.createGain(); sfxBus.gain.value = 0.45; sfxBus.connect(master);
   const wordSfx = actx.createGain(); wordSfx.gain.value = 0.32; wordSfx.connect(master);
   const musicLp = actx.createBiquadFilter(); musicLp.type = "lowpass"; musicLp.frequency.value = 18000; musicLp.connect(master);
   const musicLift = actx.createGain(); musicLift.gain.value = 1; musicLift.connect(musicLp);
-  const musicBus = actx.createGain(); musicBus.gain.value = o.sfx ? 0.13 : 0; musicBus.connect(musicLift);
-
-  const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
-  const mime = pickMime();
-  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 9_000_000 : 6_000_000 });
-  const parts: Blob[] = [];
-  rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
-  const stopped = new Promise<void>((r) => (rec.onstop = () => r()));
-  const vertical = o.height > o.width;
-
-  rec.start(1000);
-  const t0 = actx.currentTime + 0.15;
+  const musicBus = actx.createGain(); musicBus.gain.value = sfx ? 0.13 : 0; musicBus.connect(musicLift);
   chunks.forEach((c) => {
     const src = actx.createBufferSource(); src.buffer = c.buf; src.connect(voiceBus);
     src.start(t0 + c.start, c.from, c.dur);
     // duck music under the voice
-    if (o.sfx) {
+    if (sfx) {
       musicBus.gain.setTargetAtTime(0.06, t0 + c.start - 0.05, 0.08);
       musicBus.gain.setTargetAtTime(0.13, t0 + c.start + c.dur, 0.15);
     }
   });
-  if (o.sfx) {
+  if (sfx) {
     if (Number.isFinite(revealAt)) {
       // muffled dip into the reveal, then open up
       musicLp.frequency.setValueAtTime(18000, t0 + Math.max(0, revealAt - 1.6));
@@ -530,6 +520,78 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
     }
     playSfx(actx, sfxBus, "boom", t0 + Math.max(0, total - 1.2));
   }
+  return { musicBus, makeup };
+}
+
+/** True when every scene is a sticky hard-cut still: the video can be cut frame-exact offline instead of recorded live. */
+export function allHeld(scenes: { camera: string }[], clips?: unknown[]) {
+  return scenes.length > 0 && scenes.every((s) => s.camera === "hold") && !(clips?.length);
+}
+
+/**
+ * Offline renderer for hard-cut stills (Ink explainer): mixes the full soundtrack faster than real time and returns
+ * an exact cut list, so the encoder places each original image for its precise spoken span (no recorder drift, no
+ * canvas recompression, pin-sharp pictures).
+ */
+export async function renderStillCuts(scenes: { text: string; sfx: string; camera: Camera; mood: "tension" | "reveal"; beat?: string }[], voice: VoiceChunk[], o: Omit<RenderOptions, "clips" | "onProgress">) {
+  const rs = scenes as RenderScene[];
+  const SR = 48000;
+  const probe = new OfflineAudioContext(1, 1, SR);
+  const T = await prepareTimeline(probe, rs, voice, o);
+  const off = new OfflineAudioContext(2, Math.ceil((T.total + 0.05) * SR), SR);
+  const { musicBus } = buildMix(off, off.destination, 0, rs, T, o.sfx);
+  const stepLen = 60 / 128 / 2;
+  if (o.sfx) for (let k = 0; k * stepLen < T.total - 1; k++) scheduleMusic(off, musicBus, k * stepLen, k, k * stepLen >= T.revealAt ? "reveal" : "tension");
+  const mix = await off.startRendering();
+  // integrated loudness estimate over 400ms blocks (same gating as the live meter)
+  const blocks: number[] = [];
+  const L = mix.getChannelData(0), R = mix.getChannelData(1), win = Math.round(0.4 * SR);
+  for (let b = 0; b + win <= L.length; b += win) { let a = 0; for (let k = b; k < b + win; k += 2) a += (L[k]! * L[k]! + R[k]! * R[k]!) / 2; blocks.push(10 * Math.log10(a / (win / 2) + 1e-12) - 0.691 + 3); }
+  const gated = blocks.filter((x) => x > -50);
+  const lufs = gated.length ? 10 * Math.log10(gated.reduce((a, x) => a + 10 ** (x / 10), 0) / gated.length) : -60;
+  const cuts = T.tl.map((x, i) => ({ scene: i, start: x.start, end: x.end }));
+  const words = rs.reduce((a, s) => a + s.text.split(/\s+/).filter(Boolean).length, 0);
+  return { wav: encodeWav(mix), cuts, duration: T.total, stats: { lufs, lra: 0, avgShotSec: T.total / cuts.length, wordsPerSec: words / T.total } };
+}
+
+function encodeWav(b: AudioBuffer): Blob {
+  const ch = b.numberOfChannels, n = b.length, out = new DataView(new ArrayBuffer(44 + n * ch * 2));
+  const str = (o: number, t: string) => { for (let i = 0; i < t.length; i++) out.setUint8(o + i, t.charCodeAt(i)); };
+  str(0, "RIFF"); out.setUint32(4, 36 + n * ch * 2, true); str(8, "WAVE"); str(12, "fmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true);
+  out.setUint16(22, ch, true); out.setUint32(24, b.sampleRate, true); out.setUint32(28, b.sampleRate * ch * 2, true); out.setUint16(32, ch * 2, true); out.setUint16(34, 16, true);
+  str(36, "data"); out.setUint32(40, n * ch * 2, true);
+  const data = Array.from({ length: ch }, (_, c) => b.getChannelData(c));
+  let p = 44;
+  for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { const v = Math.max(-1, Math.min(1, data[c]![i]!)); out.setInt16(p, v < 0 ? v * 0x8000 : v * 0x7fff, true); p += 2; }
+  return new Blob([out.buffer], { type: "audio/wav" });
+}
+
+export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o: RenderOptions): Promise<{ blob: Blob; mime: string; duration: number; stats: RenderStats }> {
+  const actx = new AudioContext();
+  await actx.resume();
+  const T = await prepareTimeline(actx, scenes, voice, o);
+  const { total, tl, shots, revealAt } = T;
+  const caps = tl.map((x) => captionWords(x.words)).flat();
+  const clipOf = new Map<number, { scenes: number[]; video: HTMLVideoElement; started?: boolean }>();
+  for (const c of o.clips ?? []) { const e = { ...c }; c.scenes.forEach((i) => clipOf.set(i, e)); }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = o.width; canvas.height = o.height;
+  const ctx = canvas.getContext("2d")!;
+  const dest = actx.createMediaStreamDestination();
+  const t0 = actx.currentTime + 0.15;
+  const { musicBus, makeup } = buildMix(actx, dest, t0, scenes, T, o.sfx);
+  const meter = actx.createAnalyser(); meter.fftSize = 2048; makeup.connect(meter);
+
+  const stream = new MediaStream([...canvas.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+  const mime = pickMime();
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: o.width > 1500 || o.height > 1500 ? 14_000_000 : 6_000_000 });
+  const parts: Blob[] = [];
+  rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
+  const stopped = new Promise<void>((r) => (rec.onstop = () => r()));
+  const vertical = o.height > o.width;
+
+  rec.start(1000);
   const stepLen = 60 / 128 / 2;
   let nextStep = 0;
   const loud: number[] = [];
@@ -541,9 +603,9 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
     const p = Math.min(1, local / Math.max(0.1, sh.end - sh.start));
     const pe = sh.punch ? (local < 0.28 ? easeOut(local / 0.28) * 0.8 : 0.8 + 0.2 * p) : ease(p);
     let zoom = sh.z0 + (sh.z1 - sh.z0) * pe + (sh.punch ? Math.max(0, 1 - local / 0.22) * 0.06 : 0);
-    let ox = Math.sin(el * 1.1) * o.width * 0.003, oy = Math.cos(el * 0.9) * o.height * 0.002;
+    let ox = sh.hold ? 0 : Math.sin(el * 1.1) * o.width * 0.003, oy = sh.hold ? 0 : Math.cos(el * 0.9) * o.height * 0.002;
     const sceneLocal = el - tl[sh.scene]!.start;
-    if (["boom", "thunder", "clang", "snap", "splash", "crash", "wave"].includes(sc.sfx) && sceneLocal < 0.5) {
+    if (!sh.hold && ["boom", "thunder", "clang", "snap", "splash", "crash", "wave"].includes(sc.sfx) && sceneLocal < 0.5) {
       const a = (1 - sceneLocal / 0.5) * o.width * 0.014;
       ox += (Math.random() - 0.5) * a; oy += (Math.random() - 0.5) * a; zoom += 0.02;
     }
@@ -589,13 +651,15 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, o.width, o.height);
       const local = el - sh.start;
       const prev = si > 0 ? shots[si - 1] : undefined;
-      if (prev && !sh.punch && local < DISSOLVE) {
+      if (prev && !sh.punch && !sh.hold && local < DISSOLVE) {
         drawShot(prev, el, 1);
         drawShot(sh, el, easeOut(local / DISSOLVE));
       } else drawShot(sh, el, 1);
-      const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
-      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.3)");
-      ctx.fillStyle = g; ctx.fillRect(0, 0, o.width, o.height);
+      if (!sh.hold) {
+        const g = ctx.createRadialGradient(o.width / 2, o.height / 2, Math.min(o.width, o.height) * 0.4, o.width / 2, o.height / 2, Math.max(o.width, o.height) * 0.8);
+        g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.3)");
+        ctx.fillStyle = g; ctx.fillRect(0, 0, o.width, o.height);
+      }
       if (o.hookText && el < 3) drawHook(ctx, o.hookText, o.width, o.height, vertical, el);
       if (o.captions) {
         while (ci < caps.length - 1 && el >= caps[ci]!.t1) ci++;

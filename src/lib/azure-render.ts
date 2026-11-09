@@ -60,3 +60,17 @@ export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'fini
   if (!id) throw Error('Azure start was not confirmed; do not resubmit');
   return `azure:${id}`;
 }
+
+/** Azure's own view of one execution, plus whether the worker ever wrote anything for this job. */
+export async function azureStartHealth(jobId: string, runId: string) {
+  const m = /^azure:(cartoon-preflight|cartoon-render)-[a-z0-9]+$/.exec(runId);
+  if (!m) return null;
+  const exec = runId.slice('azure:'.length);
+  const url = `https://management.azure.com/subscriptions/${env('AZURE_SUBSCRIPTION_ID')}/resourceGroups/${env('AZURE_RESOURCE_GROUP')}/providers/Microsoft.App/jobs/${m[1]}/executions/${exec}?api-version=${API}`;
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${await armToken()}` } });
+  if (!r.ok) return null;
+  const status = ((await r.json()) as { properties?: { status?: string } }).properties?.status ?? '';
+  const list = await fetch(`${env('AZURE_BLOB_BASE')}?restype=container&comp=list&prefix=cartoon-${jobId}/&${env('AZURE_BLOB_SAS').replace(/^\?/, '')}`);
+  const names = [...(await list.text()).matchAll(/<Name>([^<]*)<\/Name>/g)].map(x => x[1]!);
+  return { status, mode: m[1] === 'cartoon-preflight' ? 'preflight' as const : 'finish' as const, workerWrote: names.some(n => !/\/INPUT-[a-z]+-[a-z0-9]+$/.test(n)) };
+}

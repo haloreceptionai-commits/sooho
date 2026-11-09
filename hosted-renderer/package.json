@@ -1,1 +1,1 @@
-{"name":"chronicle-hosted-renderer","private":true,"type":"module","scripts":{"start":"node main.js"},"dependencies":{"apify":"^3.4.0","playwright":"*"}}
+{"name":"chronicle-hosted-renderer","private":true,"type":"module","scripts":{"start":"node main.js"},"dependencies":{"apify":"^3.4.0","playwright":"*","ffmpeg-static":"^5.2.0"}}

@@ -78,7 +78,7 @@ function SettingsPage() {
           <h2 className="font-bold">Video output</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field name="Image quality" hint="Medium looks better; low is faster and cheaper.">
-              <select className={input} value={f.imageQuality} onChange={(e) => set("imageQuality", e.target.value as Settings["imageQuality"])}><option value="medium">Medium</option><option value="low">Low</option></select>
+              <select className={input} value={f.imageQuality} onChange={(e) => set("imageQuality", e.target.value as Settings["imageQuality"])}><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
             </Field>
             <Field name="Captions">
               <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">

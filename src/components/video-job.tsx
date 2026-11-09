@@ -4,9 +4,9 @@ import { runVideo, removeFromQueue } from "@/lib/pipeline";
 import { btnOutline } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { CartoonReviewPanel } from '@/components/cartoon-review';
-import { recoverCartoonReview, resumeApprovedCartoon } from '@/lib/cartoon.functions';
+import { recoverCartoonReview, resumeApprovedCartoon, restartDeadPreflight } from '@/lib/cartoon.functions';
 import { canResumeApprovedCartoon } from '@/lib/cartoon-resume';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { syncFromCloud } from '@/lib/store';
 import { toast } from 'sonner';
@@ -23,6 +23,15 @@ export function VideoJob({ v }: { v: Video }) {
   const recover = useServerFn(recoverCartoonReview);
   const resume = useServerFn(resumeApprovedCartoon);
   const [resuming, setResuming] = useState(false);
+  const restartDead = useServerFn(restartDeadPreflight);
+  // A preview whose Azure machine never started is restarted safely (the server checks nothing was spent).
+  const waitingPreview = v.input.engine === 'cartoon' && v.hostedRender?.status === 'running' && !v.cartoonReview;
+  useEffect(() => {
+    if (!waitingPreview) return;
+    const check = () => void restartDead({ data: { videoId: v.id } }).then((r) => { if (r.restarted || ('failed' in r && r.failed)) void syncFromCloud(); }).catch(() => undefined);
+    const first = setTimeout(check, 20_000), every = setInterval(check, 120_000);
+    return () => { clearTimeout(first); clearInterval(every); };
+  }, [waitingPreview, v.id, restartDead]);
   const approvedFailed = v.input.engine === 'cartoon' && canResumeApprovedCartoon(v.hostedRender?.status ?? '', v.cartoonReview);
   const cur = ORDER.indexOf(v.stage);
   const failed = v.status === "failed";

@@ -238,7 +238,7 @@ export interface PlanInput {
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
 }
-export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit";
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
 export interface PlanScene {
   beat: string; narration: string; image_prompt: string; characters: string[];
@@ -319,8 +319,9 @@ export interface ImageInput {
   prompt: string;
   aspect: "portrait" | "landscape";
   deployment: string;
-  quality: "low" | "medium";
+  quality: "low" | "medium" | "high";
   style: string;
+  crisp?: boolean;
   palette?: string;
   cast?: string; // "Name: look; Name: look" for characters in this shot
   reference?: string; // base64 jpeg character sheet for consistency
