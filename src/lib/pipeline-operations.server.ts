@@ -90,8 +90,9 @@ export interface Claim { claim: string; sources: string[]; date: string; confide
 export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string } }) => {
     const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
-    const { shortlist } = await import('./object-library');
-    const objects = shortlist(data.scenes);
+    const { shortlist, searchLibrary } = await import('./object-library');
+    const narration = data.scenes.map(s => s.split(/\s+Visual:/i)[0] ?? s);
+    const objects = shortlist(narration);
     const performer = { type: 'object', additionalProperties: false, required: ['actor', 'action', 'expression', 'slot', 'facing'], properties: { actor: { type: 'string' }, action: en('actions'), expression: en('expressions'), slot: en('slots'), facing: { type: 'integer', enum: [-1, 0, 1] } } };
     const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes'], properties: {
       cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'seed', 'outfit'], properties: { id: { type: 'string' }, seed: { type: 'integer' }, outfit: { type: 'string', enum: [...OUTFITS] } } } },
@@ -103,12 +104,16 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
       } } },
     } };
     const raw = await azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(data.deployment, VISUAL_DIRECTOR,
-      data.scenes.map((s, i) => `${i}: ${s}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : o.clips?.length ? ' (animated: idle/walk/run)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director');
+      data.scenes.map((s, i) => `${i}: ${s}\nScene-matched models: ${searchLibrary(s, 5).filter(o => objects.some(a => a.id === o.id)).map(o => `${o.id}${o.clips?.length ? ' [rigged]' : ''}`).join(', ') || 'use faithful built-in props'}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : o.clips?.length ? ' (animated: idle/walk/run)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director');
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
     const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
       actors: Array.isArray(s['actors']) && s['actors'].length ? s['actors'].slice(0, 3) : undefined, props: Array.isArray(s['props']) ? (s['props'] as Record<string, unknown>[]).map((p): Record<string, unknown> => ({ ...p, asset: p['asset'] || undefined })).filter(p => (p['kind'] === 'asset') === !!p['asset']).slice(0, 4) : [], fx: Array.isArray(s['fx']) ? s['fx'].slice(0, 3) : [], cues: Array.isArray(s['cues']) ? s['cues'].slice(0, 4) : [] }));
     const { cinematicPass } = await import('./cinematic-pass');
-    const result = cartoonDirection.parse({ cast: diversifyCast(raw.cast as CastMember[]), scenes: cinematicPass(scenes as unknown as Parameters<typeof cinematicPass>[0]) });
+    const { groundLibraryScenes } = await import('./library-direction');
+    const { sanitizeDirection } = await import('./cartoon-job');
+    const cast = diversifyCast(raw.cast as CastMember[]);
+    const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], narration, objects);
+    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   };
@@ -138,6 +143,7 @@ Per sentence:
 - main prop: EVERY scene needs at least one prop, listed first, that is the hero object of that sentence (the thing the story is about: the vest, the barrel, the beaker, the ship). Keep the same hero object across sentences about it so viewers follow it. For "how it works" sentences show that object with shot insert or extreme_close (an explainer cutaway).
 - animated library objects (marked animated) are rigged 3D people, animals, dinosaurs and monsters that really move: motion approach = walks/runs in, rise/fall = runs, spin/grow = celebrates, bob/none = idle. Prefer them for crowds, animals and creatures the story names.
 - library objects: when a listed library object shows a noun better than the built-in props (animals, vehicles, food, furniture, buildings, space, graveyard, trees), use kind=asset with its exact id; never on place=hand. Use asset="" for built-in props. Buildings, trees, vehicles and ships go to background or sea; small items to ground_left/right.
+- Choose models from each sentence's scene-matched list, not the first entries of the story-wide catalog. Prefer full 3D and rigged animals over flat art. A named animal or vehicle must be visible as that model, not a map/compass placeholder. Do not add unrelated objects for variety. Keep a recurring object's exact asset id stable. Main speaking cast stays the expressive drawn performers; rigged people are extras, not replacements for their speech/hand mechanics.
 - shot + move: vary them like an editor. Establish with wide, show hands/objects with insert or close, reactions with close or extreme_close, threats with low; push_in on tension, shake on impact, whip on surprises, pull_back to reveal scale. Avoid the same shot twice in a row.
 - mood: calm, tense (danger/mystery) or reveal (the twist/payoff sentence).
 - fx: weather and moments (rain, lightning in storms, splash, smoke, fire, sparkle/burst on the reveal, dust on impacts).
