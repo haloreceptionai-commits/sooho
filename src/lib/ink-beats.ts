@@ -5,13 +5,14 @@ import type { PlanScene } from "@/lib/pipeline-operations.server";
 /** Words that should never end a phrase (the picture would cut mid-idea). */
 const GLUE = new Set(["a", "an", "the", "of", "to", "in", "on", "at", "for", "and", "or", "but", "with", "by", "from", "as", "into", "his", "her", "their", "its", "my", "our", "your", "this", "that", "these", "those", "is", "was", "were", "are", "be", "not", "no", "so", "than", "very", "just", "who", "which", "what", "when", "where", "how", "if", "then", "had", "has", "have", "will", "would", "could", "can", "it's", "there"]);
 
-/** Splits narration into phrases of about 3-5 words (~1.3-2s at the long-form pace), cutting at punctuation when possible. */
+/** Splits narration into 2-4 word phrases, retaining small grammatical tails. */
 export function inkPhrases(text: string, min = 2, max = 4): string[] {
   const words = text.trim().split(/\s+/).filter(Boolean);
   const out: string[][] = [];
   let cur: string[] = [];
   for (let i = 0; i < words.length; i++) {
-    const w = words[i]!;
+    const w = words[i];
+    if (!w) continue;
     cur.push(w);
     const bare = w.toLowerCase().replace(/[^a-z']/g, "");
     const punct = /[.,!?;:—–]$/.test(w);
@@ -23,7 +24,7 @@ export function inkPhrases(text: string, min = 2, max = 4): string[] {
     if (cur.length >= max + 2) { out.push(cur); cur = []; }
   }
   if (cur.length) {
-    if (cur.length < 2 && out.length) out[out.length - 1]!.push(...cur);
+    if (cur.length < 2 && out.length) out.at(-1)?.push(...cur);
     else out.push(cur);
   }
   return out.map((p) => p.join(" "));
@@ -37,6 +38,7 @@ export function splitInkBeats(scenes: PlanScene[]): PlanScene[] {
     parts.forEach((narration, k) => out.push({
       ...sc,
       narration,
+      image_prompt: `Full spoken sentence: ${sc.narration}\nOriginal visual context: ${sc.image_prompt}\nShow only the current phrase: ${narration}`,
       camera: "hold",
       money: sc.money && k === 0,
       loop_opened: k === 0 ? sc.loop_opened : "",

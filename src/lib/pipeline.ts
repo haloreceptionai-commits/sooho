@@ -267,7 +267,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const { plan: scriptPlan, gate, report, judgeOk, hookType, moneyShot } = savedScript ?? await writeScript();
     // Ink explainer cuts to a new literal picture every 1-2 seconds: one still per spoken phrase, no camera moves.
     const ink = input.format !== "short" && input.style === "Ink explainer" && (input.engine ?? "own") === "own";
-    const plan = ink ? { ...scriptPlan, scenes: splitInkBeats(scriptPlan.scenes) } : scriptPlan;
+    const plan = ink ? { ...scriptPlan, scenes: splitInkBeats(scriptPlan.scenes.map(sc => ({ ...sc, narration: spellNumbers(sc.narration) }))) } : scriptPlan;
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${gate.score}/100 · ${n} scenes` });
 
@@ -384,16 +384,16 @@ export async function runVideo(id: string, input: VideoInput) {
           }
           cards = new Map(picked.map((c) => [c.index, c]));
           // one literal picture per phrase: what the narrator says is what the viewer sees
-          const keptBeats = await media.get("ink-beats-v1.json");
+          const keptBeats = await media.get(`ink-beats-v2-${textKey(plan.scenes.map(sc => sc.narration).join(' '))}.json`);
           let shots: { i: number; visual: string }[] | null = keptBeats ? JSON.parse(new TextDecoder().decode(keptBeats)) as { i: number; visual: string }[] : null;
           if (!shots) {
             const items = plan.scenes.map((sc, i) => ({ i, text: sc.narration, scene: sc.image_prompt })).filter((b) => !cards.has(b.i));
             const batches: typeof items[] = [];
             for (let k = 0; k < items.length; k += 60) batches.push(items.slice(k, k + 60));
             const got: { i: number; visual: string }[][] = [];
-            await pool(batches, 4, async (b, bi) => { got[bi] = await withRetry(() => planInkBeats({ data: { beats: b, topic: plan.title, deployment: s.scriptDeployment } })).catch(() => []); });
+            await pool(batches, 4, async (b, bi) => { got[bi] = await withRetry(() => planInkBeats({ data: { beats: b, topic: plan.title, deployment: s.scriptDeployment } })); });
             shots = got.flat().filter((x) => x && typeof x.visual === "string" && x.visual.trim());
-            await media.put("ink-beats-v1.json", new TextEncoder().encode(JSON.stringify(shots)).buffer as ArrayBuffer, "application/json");
+            await media.put(`ink-beats-v2-${textKey(plan.scenes.map(sc => sc.narration).join(' '))}.json`, new TextEncoder().encode(JSON.stringify(shots)).buffer as ArrayBuffer, "application/json");
           }
           for (const sh of shots) if (plan.scenes[sh.i]) beatVisual.set(sh.i, sh.visual.trim());
         }

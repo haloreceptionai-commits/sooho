@@ -507,11 +507,13 @@ ${data.research ? `Research (use these anchors, hero, question, tries, payoff an
 
 export interface VoiceInput { text: string; voice: string; deployment: string; style: string }
 
+import { LONG_NARRATION_DIRECTION } from "@/lib/narration-direction";
+
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
 
 export const generateVoiceOperation = async ({ data }: { data: VoiceInput }): Promise<{ audio: string; engine: "lovable"; deployment: string; voice: string }> => {
     // Atlas narrator: Gemini Charon via Lovable AI (owner's choice; Azure has no cloning and no TTS deployment).
-    const longDirection = "A warm, grounded male documentary narrator telling a true story to a curious friend. Calm, clear and confident at a natural storytelling pace, never rushed; gentle curiosity rising into each question, a small pause before every answer, quiet intensity in tense moments and real wonder at the reveal. Every word crisp and easy to follow. Not shouting, not whispering, not sleepy";
+    const longDirection = LONG_NARRATION_DIRECTION;
     const direction = data.style === "long" ? longDirection : "A light, relaxed, friendly male storyteller, amused, like telling a buddy a wild true story. Fast and nearly non-stop, only tiny breaths between sentences, an easy grin in the voice, quick playful character voices for any quoted lines, a little extra punch on the twist and the reveal. Every word crisp and clear. Not dramatic, not shouting, not whispering";
     const lovable = process.env["LOVABLE_API_KEY"];
     if (!lovable) throw new Error("Lovable AI is not configured");
@@ -700,11 +702,18 @@ export async function inkThumbnailOperation(data: { subject: string; figure: str
 
 const INK_BEATS = `You storyboard a hand-drawn stick-figure explainer video (Ink Explainer style). The picture cuts hard every 1-2 seconds, and EVERY cut shows exactly what the narrator is saying at that moment.
 For each numbered phrase write ONE picture (max 30 words) that literally shows the key noun, number, place or action spoken in that phrase: if the phrase says "a dead tree", draw a dead tree; "a skeleton buried", a skeleton in a soil cross-section; "the hero runs", the hero running.
-Rules: one clear subject, big in frame, simple readable background (sky, ground line, plain room). Alternate between the hero acting, the object alone in close-up, a place/landscape and a simple cross-section/diagram so neighbouring pictures never look alike. Use "the hero" (the recurring stick-figure narrator character) in about one picture in three, only when the phrase is about a person acting or reacting; otherwise show the object, place or diagram alone with no people. Never more than one other person. Never any text, letters, numbers or labels in the picture. Keep the topic's era and place.`;
+Rules: one clear subject, big in frame, simple readable background (sky, ground line, plain room). Literal meaning ALWAYS outranks visual variety: never swap the narrated object to satisfy an alternation or hero quota. The full sentence resolves pronouns and incomplete phrases; show the subject/action of THIS phrase, not the later reveal or a different noun from the scene idea. Keep an ongoing subject for connective phrases; do not invent a new event. Only use "the hero" when the narrated person is actually acting or reacting. Otherwise show the object, place or diagram alone. Never more than one other person. Never any text, letters, numbers or labels in the picture. Keep the topic's era and place.`;
 
 export async function inkBeatsOperation(data: { beats: { i: number; text: string; scene: string }[]; topic: string; deployment: string }) {
   const schema = { type: 'object', additionalProperties: false, required: ['shots'], properties: { shots: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['i', 'visual'], properties: { i: { type: 'integer' }, visual: { type: 'string' } } } } } };
-  const user = `Topic: ${data.topic}\n` + data.beats.map(b => `${b.i}: "${b.text}" (scene idea: ${b.scene.slice(0, 120)})`).join('\n');
+  const user = `Topic: ${data.topic}\nReturn exactly one shot for every supplied index, no duplicates.\n` + data.beats.map(b => `${b.i}: CURRENT SPOKEN PHRASE: "${b.text}"\nContext and subject: ${b.scene}`).join('\n');
   const r = await azureJson<{ shots: { i: number; visual: string }[] }>(data.deployment, INK_BEATS, user, 'ink_beats', schema, 'Picture storyboard');
+  const expected = new Set(data.beats.map(b => b.i));
+  const seen = new Set<number>();
+  for (const shot of r.shots) {
+    if (!expected.has(shot.i) || seen.has(shot.i) || !shot.visual.trim()) throw new Error('Picture storyboard returned invalid scene associations');
+    seen.add(shot.i);
+  }
+  if (seen.size !== expected.size) throw new Error('Picture storyboard omitted a spoken phrase');
   return r.shots;
 }
