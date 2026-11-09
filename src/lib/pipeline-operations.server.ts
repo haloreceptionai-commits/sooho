@@ -645,11 +645,11 @@ export const importShortOperation = async ({ data }: { data: { url: string; depl
     });
     if (!res.ok) await fail(res, "Transcript reader");
     const items = (await res.json()) as { data?: { text?: string }[] }[];
-    const transcript = (items[0]?.data ?? []).map((x) => x.text ?? "").join(" ").replace(/\[(music|applause|laughter)\]/gi, "").replace(/\s+/g, " ").trim().slice(0, 8000);
-    if (transcript.split(" ").length < 15) throw new Error("This Short has no readable spoken words (no captions found). Try another link.");
+    const transcript = (items[0]?.data ?? []).map((x) => x.text ?? "").join(" ").replace(/\[(music|applause|laughter)\]/gi, "").replace(/\s+/g, " ").trim().slice(0, 30000);
+    if (transcript.split(" ").length < 15) throw new Error("This video has no readable spoken words (no captions found). Try another link.");
     const out = await azureJson<Omit<ShortImport, "transcript">>(data.deployment,
-      "You analyse a viral YouTube Short's transcript so a channel can make its OWN new video on the same true topic. topic: a short catchy video title (max 10 words) naming the real-world subject, e.g. 'Why Sailors Carried Storm Oil'. summary: 1-2 plain sentences on the true story/fact behind it. facts: 3-6 checkable real-world facts the video relies on. Never copy lines.",
-      `Transcript:\n${transcript}`, "short_import",
+      "You analyse a viral YouTube video's (Short or long-form) transcript so a channel can make its OWN new video on the same true topic. topic: a short catchy video title (max 10 words) naming the real-world subject, e.g. 'Why Sailors Carried Storm Oil'. summary: 1-2 plain sentences on the true story/fact behind it. facts: 3-6 checkable real-world facts the video relies on. Never copy lines.",
+      `Transcript:\n${transcript.slice(0, 12000)}`, "short_import",
       { type: "object", additionalProperties: false, required: ["topic", "summary", "facts"], properties: { topic: { type: "string" }, summary: { type: "string" }, facts: { type: "array", items: { type: "string" } } } },
       "Topic reader");
     return { transcript, ...out };
