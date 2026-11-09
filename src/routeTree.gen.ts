@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedRemixRouteImport } from './routes/_authenticated/remix'
 import { Route as AuthenticatedScriptWriterRouteImport } from './routes/_authenticated/script-writer'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -34,6 +35,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRemixRoute = AuthenticatedRemixRouteImport.update({
@@ -90,6 +96,7 @@ const ApiPublicYoutubeCallbackRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/remix': typeof AuthenticatedRemixRoute
   '/script-writer': typeof AuthenticatedScriptWriterRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/remix': typeof AuthenticatedRemixRoute
   '/script-writer': typeof AuthenticatedScriptWriterRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/remix': typeof AuthenticatedRemixRoute
   '/_authenticated/script-writer': typeof AuthenticatedScriptWriterRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/analytics'
     | '/remix'
     | '/script-writer'
     | '/settings'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/analytics'
     | '/remix'
     | '/script-writer'
     | '/settings'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/analytics'
     | '/_authenticated/remix'
     | '/_authenticated/script-writer'
     | '/_authenticated/settings'
@@ -202,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/remix': {
@@ -271,6 +290,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedRemixRoute: typeof AuthenticatedRemixRoute
   AuthenticatedScriptWriterRoute: typeof AuthenticatedScriptWriterRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -279,6 +299,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedRemixRoute: AuthenticatedRemixRoute,
   AuthenticatedScriptWriterRoute: AuthenticatedScriptWriterRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
