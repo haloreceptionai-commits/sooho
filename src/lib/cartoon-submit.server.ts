@@ -1,7 +1,7 @@
 import { CARTOON_LIFETIME_MS, cartoonStart, reviewApproval, reviewMatches, type CartoonStart, type CartoonReview } from '@/lib/cartoon-job';
 import { validRenderAssets } from '@/lib/hosted-render';
 import type { Json } from '@/integrations/supabase/types';
-import { startAzureCartoon } from '@/lib/azure-render';
+import { startAzureCartoon, cartoonInputKey } from '@/lib/azure-render';
 import { RENDER_CALLBACK_URL } from '@/lib/render-complete';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
@@ -30,9 +30,15 @@ export const submitCartoonOperation = async ({ data, context }: { data: CartoonS
     try {
       const { data: signed, error: signError } = await context.supabase.storage.from('videos').createSignedUrl(data.voicePath, 86400);
       if (signError || !signed) throw Error('Could not open the saved Atlas narration');
-      const run = await startAzureCartoon(job.id, 'preflight', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, mode: 'preflight' });
-      const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
-      if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
+      const key = cartoonInputKey(job.id, 'preflight');
+      await supabaseAdmin.from('render_jobs').update({ recovery: { claimedAt: Date.now(), inputKey: key } }).eq('id', job.id);
+      try {
+        const run = await startAzureCartoon(job.id, 'preflight', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, mode: 'preflight' }, key);
+        await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
+      } catch (e) {
+        // Uncertain starts are reconciled by the render watchdog against Azure (and restarted if none exists).
+        console.error('Cartoon preview start unconfirmed', e instanceof Error ? e.message : e);
+      }
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { hostedRender: { id: job.id, status: 'running' }, status: 'running', progress: 72, stage: 'render', detail: 'Cartoon preview · safe to close your browser' }, saved_path: '' });
       return { id: job.id, status: 'running' };
     } catch (e) {

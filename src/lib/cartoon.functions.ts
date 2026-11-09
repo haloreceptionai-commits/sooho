@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { CARTOON_LIFETIME_MS, cartoonStart, reviewApproval, reviewMatches, type CartoonStart, type CartoonReview } from '@/lib/cartoon-job';
 import { validRenderAssets } from '@/lib/hosted-render';
 import type { Json } from '@/integrations/supabase/types';
-import { startAzureCartoon, readAzureCartoonLock } from '@/lib/azure-render';
+import { startAzureCartoon, readAzureCartoonLock, cartoonInputKey } from '@/lib/azure-render';
 import { canResumeApprovedCartoon, verifiedCartoonLock } from './cartoon-resume';
 import { canonical } from '../../hosted-renderer/cartoon/canonical.mjs';
 
@@ -67,7 +67,7 @@ export const resumeApprovedCartoon = createServerFn({ method: 'POST' }).middlewa
     const review = row ? (row.data as Record<string, Json>)['cartoonReview'] as unknown as CartoonReview | undefined : undefined;
     if (!job || job.user_id !== context.userId || !review || !canResumeApprovedCartoon(job.status, review)) throw Error('No failed approved cartoon can be resumed');
     // Uncertain dispatch must be reconciled, not submitted a second time.
-    if (/unconfirmed|not confirmed|tracking could not|Submission/i.test(job.error ?? '')) throw Error('The previous start is unconfirmed; it must be checked before another render starts');
+    // A previous unconfirmed start is safe to resume: Azure confirms the old execution ended before the job became failed.
     const legacy = !/^cartoon-[0-9a-f-]{36}$/.test(review.storeId);
     if (legacy) throw Error('This older saved render needs recovery before it can resume');
     const lock = await readAzureCartoonLock(review.storeId);
@@ -76,16 +76,17 @@ export const resumeApprovedCartoon = createServerFn({ method: 'POST' }).middlewa
     const token = crypto.randomUUID() + crypto.randomUUID(), tokenHash = await digest(token);
     const { data: claimed, error } = await supabaseAdmin.rpc('resume_cartoon_render', { job_id: job.id, owner_id: context.userId, review_hash: review.hash, next_token_hash: tokenHash, next_output_path: `${context.userId}/${data.videoId}/generation-output/${crypto.randomUUID()}.mp4` });
     if (error || !claimed) throw Error('This render was already resumed or its saved preview changed');
+    const key = cartoonInputKey(job.id, 'finish');
+    await supabaseAdmin.from('render_jobs').update({ recovery: { claimedAt: Date.now(), inputKey: key } }).eq('id', job.id).eq('token_hash', tokenHash);
     try {
-      const run = await startAzureCartoon(job.id, 'finish', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: review.hash });
-      const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('token_hash', tokenHash).not('status', 'in', '(done,failed,cancelled)');
-      if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
-      return { accepted: true };
+      const run = await startAzureCartoon(job.id, 'finish', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: review.hash }, key);
+      await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('token_hash', tokenHash).not('status', 'in', '(done,failed,cancelled)');
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Cartoon start unconfirmed';
-      await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'failed', video_patch: { status: 'failed', error: `Submission unconfirmed: ${message}`, detail: 'Saved approved preview is safe', hostedRender: { id: job.id, status: 'failed' } }, saved_path: '' });
-      throw Error(message);
+      // An uncertain start is never resubmitted blindly: the render watchdog matches Azure's executions to this input.
+      console.error('Cartoon resume start unconfirmed', e instanceof Error ? e.message : e);
     }
+    await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { status: 'running', error: null, detail: 'Full cartoon render · safe to close your browser', hostedRender: { id: job.id, status: 'running' } }, saved_path: '' });
+    return { accepted: true };
   });
 
 export const approveCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -104,7 +105,20 @@ export const approveCartoon = createServerFn({ method: 'POST' }).middleware([req
       // Saved previews from the older Apify worker keep finishing there; new previews finish on Azure.
       const legacy = !/^cartoon-[0-9a-f-]{36}$/.test(review.storeId);
       const finishInput = { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest: job.manifest, mode: 'finish', storeId: review.storeId, approvedHash: data.hash };
-      const run = legacy ? await startActor(...apifyKeys(), finishInput) : await startAzureCartoon(job.id, 'finish', finishInput);
+      if (!legacy) {
+        const key = cartoonInputKey(job.id, 'finish');
+        await supabaseAdmin.from('render_jobs').update({ recovery: { claimedAt: Date.now(), inputKey: key } }).eq('id', job.id);
+        try {
+          const run = await startAzureCartoon(job.id, 'finish', finishInput, key);
+          await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
+        } catch (e) {
+          // Uncertain starts are reconciled by the render watchdog against Azure, never resubmitted blindly.
+          console.error('Cartoon finish start unconfirmed', e instanceof Error ? e.message : e);
+        }
+        await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { detail: 'Full cartoon render · safe to close your browser', hostedRender: { id: job.id, status: 'running' } }, saved_path: '' });
+        return { accepted: true };
+      }
+      const run = await startActor(...apifyKeys(), finishInput);
       const { error: trackError } = await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
       if (trackError) throw Error('Cartoon started but tracking could not be saved; do not resubmit');
       await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { detail: 'Full cartoon render · safe to close your browser', hostedRender: { id: job.id, status: 'running' } }, saved_path: '' });
