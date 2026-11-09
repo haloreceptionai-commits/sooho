@@ -28,6 +28,8 @@ export const Route = createFileRoute("/api/public/render-callback")({
     try { body = JSON.parse(new TextDecoder().decode(payload)); } catch { return new Response('Invalid callback', { status: 400 }); }
     const kind = (job.manifest as Record<string, Json>)['kind'];
     if (kind === 'cartoon') {
+      const { data: cartoonVideo } = await supabaseAdmin.from('videos').select('data').eq('id', job.video_id).single();
+      const storedReview = (cartoonVideo?.data as Record<string, Json> | undefined)?.['cartoonReview'] as Record<string, Json> | undefined;
       const grants = z.object({ type: z.literal('assets'), files: z.array(z.object({ name: z.string().regex(/^(sheet-\d{2}\.jpg|alignment\.json|voice\.wav|manifest\.json|output\.mp4|output\.qa\.json|mix-report\.json|checkpoint\.json)$/) })).min(1).max(40) }).safeParse(body);
       if (grants.success) {
         const uploads: Record<string, { path: string; url: string }> = {};
@@ -36,7 +38,7 @@ export const Route = createFileRoute("/api/public/render-callback")({
           if (finalAsset && !(job.manifest as Record<string, Json>)['kind']) return new Response('Invalid stage', { status: 409 });
           const { data: ownerVideo } = await supabaseAdmin.from('videos').select('data').eq('id', job.video_id).single();
           const approved = (ownerVideo?.data as Record<string, Json>)?.['cartoonReview'] as Record<string, Json> | undefined;
-          if ((finalAsset && approved?.['approved'] !== true) || (!finalAsset && job.status === 'review')) return new Response('Invalid upload stage', { status: 409 });
+          if ((finalAsset && approved?.['approved'] !== true) || (!finalAsset && (job.status === 'review' || storedReview?.['approved'] === true))) return new Response('Invalid upload stage', { status: 409 });
           const path = file.name === 'output.mp4' ? job.output_path : `${job.user_id}/${job.video_id}/cartoon/${file.name}`;
           const { data: grant, error } = await supabaseAdmin.storage.from('videos').createSignedUploadUrl(path, { upsert: true });
           if (error || !grant) return new Response('Could not grant upload', { status: 500 });
@@ -46,6 +48,7 @@ export const Route = createFileRoute("/api/public/render-callback")({
       }
       const review = cartoonReviewEvent.safeParse(body);
       if (review.success) {
+        if (storedReview?.['approved'] === true) return new Response('Preview is already approved', { status: 409 });
         const { type: _type, ...value } = review.data;
         if (!validRenderAssets(job.user_id, job.video_id, [...value.sheets, value.alignmentPath, value.voicePath])) return new Response('Invalid review paths', { status: 400 });
         for (const path of [...value.sheets, value.alignmentPath, value.voicePath]) {
