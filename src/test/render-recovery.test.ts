@@ -10,7 +10,7 @@ describe('cartoon render watchdog', () => {
     expect(decideRecovery(base).action).toBe('wait');
   });
   it('stops a machine with no heartbeat for over 20 minutes', () => {
-    expect(decideRecovery({ ...base, heartbeatMs: now - 21 * min }).action).toBe('stop');
+    expect(decideRecovery({ ...base, exec: { status: 'Running', startMs: now - 40 * min }, heartbeatMs: now - 21 * min }).action).toBe('stop');
   });
   it('restarts a machine that failed before doing any work (the stuck "Measured Earth" case)', () => {
     expect(decideRecovery({ ...base, exec: { status: 'Failed', startMs: now - 15 * min }, heartbeatMs: now - 15 * min, wroteSinceStart: false }).action).toBe('restart');
