@@ -5,7 +5,7 @@ import type { ScriptCheckpoint, SeedanceCheckpoint } from './pipeline';
 import { writeBackgroundScript } from './generation-script.server';
 import { checkContinuityOperation, directCartoonOperation, generateImageOperation, generateVoiceOperation } from './pipeline-operations.server';
 import { cartoonStart } from './cartoon-job';
-import { spellNumbers } from './story-v2';
+import { speakable } from './story-v2';
 import { submitCartoonOperation } from './cartoon-submit.server';
 import { submitHostedRenderOperation } from './assembly-submit.server';
 import { renderRequest } from './hosted-render';
