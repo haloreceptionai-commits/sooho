@@ -38,5 +38,5 @@ export function validRenderAssets(userId: string, videoId: string, paths: string
 export const renderCallback = z.discriminatedUnion("type", [
   z.object({ type: z.literal("progress"), progress: z.number().min(0).max(100) }),
   z.object({ type: z.literal("failed"), error: z.string().min(1).max(1000) }),
-  z.object({ type: z.literal("done"), duration: z.number().positive().max(1200), mime: z.enum(["video/mp4", "video/webm"]), size: z.number().int().positive().max(1_000_000_000), stats: z.object({ lufs: z.number().finite(), lra: z.number().finite(), avgShotSec: z.number().positive(), wordsPerSec: z.number().nonnegative() }) }),
+  z.object({ type: z.literal("done"), duration: z.number().positive().max(3600), mime: z.enum(["video/mp4", "video/webm"]), size: z.number().int().positive().max(1_000_000_000), stats: z.object({ lufs: z.number().finite(), lra: z.number().finite(), avgShotSec: z.number().positive(), wordsPerSec: z.number().nonnegative() }) }),
 ]);
