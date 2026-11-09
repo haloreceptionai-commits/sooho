@@ -308,6 +308,7 @@ function drawImage(ctx: CanvasRenderingContext2D, img: ImageBitmap | HTMLVideoEl
   const dw = iw * scale, dh = ih * scale;
   const x = (w - dw) / 2 + Math.max(-1, Math.min(1, panX)) * (dw - w) / 2 + ox;
   const y = (h - dh) / 2 + Math.max(-1, Math.min(1, panY)) * (dh - h) / 2 + oy;
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, x, y, dw, dh);
 }
 
@@ -543,9 +544,9 @@ export async function renderVideo(scenes: RenderScene[], voice: VoiceChunk[], o:
     const p = Math.min(1, local / Math.max(0.1, sh.end - sh.start));
     const pe = sh.punch ? (local < 0.28 ? easeOut(local / 0.28) * 0.8 : 0.8 + 0.2 * p) : ease(p);
     let zoom = sh.z0 + (sh.z1 - sh.z0) * pe + (sh.punch ? Math.max(0, 1 - local / 0.22) * 0.06 : 0);
-    let ox = Math.sin(el * 1.1) * o.width * 0.003, oy = Math.cos(el * 0.9) * o.height * 0.002;
+    let ox = sh.hold ? 0 : Math.sin(el * 1.1) * o.width * 0.003, oy = sh.hold ? 0 : Math.cos(el * 0.9) * o.height * 0.002;
     const sceneLocal = el - tl[sh.scene]!.start;
-    if (["boom", "thunder", "clang", "snap", "splash", "crash", "wave"].includes(sc.sfx) && sceneLocal < 0.5) {
+    if (!sh.hold && ["boom", "thunder", "clang", "snap", "splash", "crash", "wave"].includes(sc.sfx) && sceneLocal < 0.5) {
       const a = (1 - sceneLocal / 0.5) * o.width * 0.014;
       ox += (Math.random() - 0.5) * a; oy += (Math.random() - 0.5) * a; zoom += 0.02;
     }
