@@ -5,7 +5,7 @@
 - [x] Canonical callback address, worker accepts both addresses, per-attempt batch claims (images rebuilt), render fleet 23 machines
 - [x] Render watchdog every 4 minutes + from the owner's page: adopt/restart/stop/complete/fail with bounded attempts
 - [x] Remix page: Short or long links, long-form 3-15 min, all models
-- [ ] Publish so sooha.io uses the fix and the watchdog schedule reaches the live app
+- [x] Published; live watchdog runs every 4 minutes (200). Stuck "Measured Earth" Short auto-restarted and finished (61.7s, QA 85)
 
 - [x] Ink matching: deployed hash-pinned acoustic alignment for saved continuous takes, measured onset cuts without stretching, contextual literal storyboard association checks, energetic Charon mystery delivery. Real 23.72s narration through offline renderer verified 17 onset-matched cuts; 170 tests pass. A complete new AI-picture video and subjective audio/picture quality review remain unverified.
 
