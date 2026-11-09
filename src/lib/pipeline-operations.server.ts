@@ -362,7 +362,7 @@ export interface PlanInput {
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
 }
-export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit";
+export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
 export interface PlanScene {
   beat: string; narration: string; image_prompt: string; characters: string[];
@@ -536,8 +536,9 @@ export interface ImageInput {
   prompt: string;
   aspect: "portrait" | "landscape";
   deployment: string;
-  quality: "low" | "medium";
+  quality: "low" | "medium" | "high";
   style: string;
+  crisp?: boolean; // sharp flat line art at max compression quality (Ink explainer)
   palette?: string;
   cast?: string; // "Name: look; Name: look" for characters in this shot
   reference?: string; // base64 jpeg character sheet for consistency
@@ -561,7 +562,7 @@ async function imageCall(data: ImageInput, prompt: string) {
     fd.append("size", size);
     fd.append("quality", data.quality);
     fd.append("output_format", "jpeg");
-    fd.append("output_compression", "82");
+    fd.append("output_compression", data.crisp ? "96" : "82");
     fd.append("n", "1");
     return fetch(`${AZURE_GATEWAY}/openai/deployments/${safeName(data.deployment)}/images/edits?api-version=${API_VERSION}`, {
       method: "POST",
@@ -570,7 +571,7 @@ async function imageCall(data: ImageInput, prompt: string) {
     });
   }
   return azure(`${safeName(data.deployment)}/images/generations`, {
-    prompt, size, quality: data.quality, output_format: "jpeg", output_compression: 82, n: 1,
+    prompt, size, quality: data.quality, output_format: "jpeg", output_compression: data.crisp ? 96 : 82, n: 1,
   });
 }
 
@@ -693,4 +694,17 @@ export async function inkThumbnailOperation(data: { subject: string; figure: str
   const image = j.data?.[0]?.b64_json;
   if (!image) throw Error('Thumbnail came back empty');
   return { image };
+}
+
+// ---------------- Ink explainer: one literal picture per spoken phrase ----------------
+
+const INK_BEATS = `You storyboard a hand-drawn stick-figure explainer video (Ink Explainer style). The picture cuts hard every 1-2 seconds, and EVERY cut shows exactly what the narrator is saying at that moment.
+For each numbered phrase write ONE picture (max 30 words) that literally shows the key noun, number, place or action spoken in that phrase: if the phrase says "a dead tree", draw a dead tree; "a skeleton buried", a skeleton in a soil cross-section; "the hero runs", the hero running.
+Rules: one clear subject, big in frame, simple readable background (sky, ground line, plain room). Alternate between the hero acting, the object alone in close-up, a place/landscape and a simple cross-section/diagram so neighbouring pictures never look alike. When the hero appears, write "the hero" (round white head, messy hair, simple clothes from the reference). Never any text, letters, numbers or labels in the picture. Keep the topic's era and place.`;
+
+export async function inkBeatsOperation(data: { beats: { i: number; text: string; scene: string }[]; topic: string; deployment: string }) {
+  const schema = { type: 'object', additionalProperties: false, required: ['shots'], properties: { shots: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['i', 'visual'], properties: { i: { type: 'integer' }, visual: { type: 'string' } } } } } };
+  const user = `Topic: ${data.topic}\n` + data.beats.map(b => `${b.i}: "${b.text}" (scene idea: ${b.scene.slice(0, 120)})`).join('\n');
+  const r = await azureJson<{ shots: { i: number; visual: string }[] }>(data.deployment, INK_BEATS, user, 'ink_beats', schema, 'Picture storyboard');
+  return r.shots;
 }
