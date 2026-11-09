@@ -1,6 +1,6 @@
 # Roadmap — Cartoon Engine v2
 
-- [ ] Fix Ink picture/narration matching using measured speech boundaries, literal contextual pictures, and energetic mystery delivery; verify with real audio.
+- [x] Ink matching: deployed hash-pinned acoustic alignment for saved continuous takes, measured onset cuts without stretching, contextual literal storyboard association checks, energetic Charon mystery delivery. Real 23.72s narration through offline renderer verified 17 onset-matched cuts; 170 tests pass. A complete new AI-picture video and subjective audio/picture quality review remain unverified.
 
 - [x] Fix library ranking: normalized compound IDs, real/rigged models before sprites, exact narration nouns before pack tags, scene-balanced shortlist and conservative grounding before sanitization. Live director selected elephant, Velociraptor and YellowDragon; all loaded in local frame capture; 149 app and 32 Python tests passed. No new full video generated. Asset prominence/framing remains limited by existing cast-first cameras.
 
