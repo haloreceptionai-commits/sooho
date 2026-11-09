@@ -365,7 +365,7 @@ export async function runVideo(id: string, input: VideoInput) {
             const kept = await media.get("sheet.jpg");
             if (kept) sheet = bufToB64(kept);
             else {
-              const r = await img({ sheet: true }, [...(ink ? [`The Hero: ${INK_HERO}`] : []), ...plan.characters.map((c) => `${c.name}: ${c.look}`)].join("; "));
+              const r = await img({ sheet: true }, ink ? `The Hero: ${INK_HERO}. Draw only him, front view and side view, thin black stick arms and legs.` : plan.characters.map((c) => `${c.name}: ${c.look}`).join("; "));
               sheet = r.image ?? undefined;
               if (sheet) await media.put("sheet.jpg", b64ToBuf(sheet), "image/jpeg");
             }
@@ -424,7 +424,16 @@ export async function runVideo(id: string, input: VideoInput) {
             return;
           }
           const people = ink ? /\bhero\b/i.test(sc.image_prompt) : sc.shot === "action" || sc.shot === "face";
-          const castAll = (ink && people ? "The Hero: the recurring stick-figure hero from the reference; " : "") + sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
+          if (ink) {
+            // Ink explainer: one literal subject per picture, the stick-figure hero only when the phrase is about him
+            const inkShot = `${sc.image_prompt} ${people ? `The hero is drawn exactly like the reference: ${INK_HERO}.` : "No hero in this picture."} Any other people are minimal stick figures (round heads, thin black stick limbs) in period clothing. Simple clean background, one clear subject.`;
+            let r = await img(people && sheet ? { cast: "The Hero", reference: sheet } : {}, inkShot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
+            if (!r) r = await img({}, inkShot);
+            if (r.image) { rawImg[i] = r.image; await media.put(`scene-${i}-${textKey(sc.image_prompt)}.jpg`, b64ToBuf(r.image), "image/jpeg"); scenes[i]!.image = await createImageBitmap(new Blob([b64ToBuf(r.image)], { type: "image/jpeg" })); }
+            tick("Painting scenes");
+            return;
+          }
+          const castAll = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
           const cast = people ? castAll : "";
           const shot = [
             SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
