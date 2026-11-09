@@ -651,3 +651,20 @@ export const importShortOperation = async ({ data }: { data: { url: string; depl
       "Topic reader");
     return { transcript, ...out };
   };
+
+// ---------------- Thumbnails ----------------
+
+/** One clean 16:9 thumbnail picture (no text: the exact title is drawn by the browser so spelling is guaranteed). */
+export async function thumbnailImageOperation(data: { subject: string; region: string; figure: string; deployment: string; variant: number }) {
+  const looks = [
+    'The figure stands on the right third, three-quarter view, confident expression, warm golden rim light.',
+    'The figure stands on the right third, facing the viewer, intense stare, dramatic cool side light.',
+  ];
+  const prompt = `Viral YouTube history documentary thumbnail, 16:9, ultra crisp and saturated. Background: a bright 3D relief map of ${data.region} seen from above at a slight angle, vivid green lowlands, yellow-ochre plains and brown mountains with strong hillshade, deep glossy blue sea, thin white country borders. The territory of ${data.subject} glows bright red with a thick white outline and a soft red glow, covering the left and middle of the frame. Foreground: a bold stylised digital painting (illustration, not a photograph) of ${data.figure}, chest-up, highly detailed costume. ${looks[data.variant % looks.length]} Keep the top-left quarter free of important detail for a title. Absolutely no text, letters, numbers, logos or watermarks.`;
+  const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt, size: '1536x1024', quality: 'medium', output_format: 'jpeg', output_compression: 90, n: 1 });
+  if (!res.ok) await fail(res, 'Thumbnail');
+  const j = await res.json() as { data?: { b64_json?: string }[] };
+  const image = j.data?.[0]?.b64_json;
+  if (!image) throw Error('Thumbnail came back empty');
+  return { image };
+}
