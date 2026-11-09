@@ -69,6 +69,40 @@ function emphasisIndex(words) {
   return best;
 }
 
+// src/lib/speech-timeline.ts
+function alignedTimeline(chunks, texts) {
+  const out = texts.map(() => ({ start: 0, end: 0, words: [] }));
+  const covered = new Set;
+  for (const c of chunks) {
+    if (!c.alignment || c.alignment.length !== c.scenes.length)
+      throw new Error("Measured speech timing is missing");
+    for (const [k, si] of c.scenes.entries()) {
+      const item = c.alignment[k];
+      const text = texts[si];
+      const sc = out[si];
+      if (!item || item.scene !== si || !text || !sc || covered.has(si))
+        throw new Error("Speech timing scene association is invalid");
+      const expected = text.trim().split(/\s+/);
+      if (item.words.length !== expected.length)
+        throw new Error("Speech timing differs from narration");
+      let previous = -Infinity;
+      sc.words = item.words.map((w, wi) => {
+        if (!Number.isFinite(w.start) || !Number.isFinite(w.end) || w.start < previous || w.end <= w.start || w.end > c.from + c.dur + 0.1)
+          throw new Error("Speech timing contains invalid intervals");
+        previous = w.end;
+        return { text: expected[wi] ?? w.text, t0: c.start + w.start - c.from, t1: c.start + w.end - c.from };
+      });
+      sc.start = k === 0 ? c.start : sc.words[0]?.t0 ?? c.start;
+      const next = c.alignment[k + 1]?.words[0];
+      sc.end = next ? c.start + next.start - c.from : c.start + c.dur;
+      covered.add(si);
+    }
+  }
+  if (covered.size !== texts.length)
+    throw new Error("Speech timing omitted a picture");
+  return out;
+}
+
 // src/lib/renderer.ts
 function pickMime() {
   const candidates = [
@@ -573,6 +607,8 @@ async function prepareTimeline(actx, scenes, voice, o) {
   let buffers = await Promise.all(voice.map((v) => actx.decodeAudioData(v.audio.slice(0))));
   const wpm = o.wpm ?? narrationWpm(o.width, o.height);
   buffers = buffers.map((b, i) => {
+    if (voice[i]?.alignment)
+      return b;
     const tb = tightenPauses(actx, b, 0.35, 0.25);
     const words = voice[i].scenes.reduce((a, si) => a + scenes[si].text.split(/\s+/).filter(Boolean).length, 0);
     const bd = speechBounds(tb);
@@ -587,7 +623,7 @@ async function prepareTimeline(actx, scenes, voice, o) {
     const first = scenes[voice[i].scenes[0]];
     if (i > 0 && first?.beat === "reveal")
       t += PRE_REVEAL_PAUSE;
-    const c = { scenes: voice[i].scenes, dur: bd.to - bd.from, start: t, from: bd.from, buf: b };
+    const c = { scenes: voice[i].scenes, dur: bd.to - bd.from, start: t, from: bd.from, buf: b, alignment: voice[i]?.alignment };
     const d = b.getChannelData(0);
     for (let k = Math.floor(bd.from * b.sampleRate);k < bd.to * b.sampleRate; k += 4) {
       voiceRms += d[k] * d[k];
@@ -599,7 +635,7 @@ async function prepareTimeline(actx, scenes, voice, o) {
   const rmsDb = 10 * Math.log10(voiceRms / Math.max(1, voiceN) + 0.000000000001);
   const voiceGain = Math.min(4, Math.max(0.3, 10 ** ((-19 - rmsDb) / 20)));
   const total = t + 0.3;
-  const tl = timeline(chunks, scenes.map((s) => s.text));
+  const tl = voice.some((v) => v.alignment) ? alignedTimeline(chunks, scenes.map((s) => s.text)) : timeline(chunks, scenes.map((s) => s.text));
   tl[0].start = 0;
   tl[tl.length - 1].end = total;
   for (let i = 1;i < tl.length; i++)
@@ -682,6 +718,8 @@ function allHeld(scenes, clips) {
   return scenes.length > 0 && scenes.every((s) => s.camera === "hold") && !clips?.length;
 }
 async function renderStillCuts(scenes, voice, o) {
+  if (voice.some((v) => !v.alignment))
+    throw new Error("Sticky still cuts require measured speech timing");
   const rs = scenes;
   const SR = 48000;
   const probe = new OfflineAudioContext(1, 1, SR);

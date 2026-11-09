@@ -1,5 +1,6 @@
 import { emphasisIndex } from "@/lib/quality";
 import { wordSoundCues } from "@/lib/sound-words";
+import { alignedTimeline, type AlignedScene } from "@/lib/speech-timeline";
 // Browser video editor: turns stills into a fast-cut "animated" Short — 1.5–2.5s shots with
 // camera moves, punch-ins, shake and whip transitions; flowing narration, synthesized music
 // bed + foley, and kinetic one-word captions. Records with MediaRecorder.
@@ -16,7 +17,7 @@ export interface RenderScene {
 }
 
 /** One narration recording covering several consecutive scenes. */
-export interface VoiceChunk { audio: ArrayBuffer; scenes: number[] }
+export interface VoiceChunk { audio: ArrayBuffer; scenes: number[]; alignment?: AlignedScene[] }
 
 export interface RenderOptions {
   width: number;
@@ -439,6 +440,8 @@ async function prepareTimeline(actx: BaseAudioContext, scenes: RenderScene[], vo
   // Fit every take to the approved Atlas pace (~153 wpm), a touch faster in action and slower at the reveal.
   const wpm = o.wpm ?? narrationWpm(o.width, o.height);
   buffers = buffers.map((b, i) => {
+    // Measured Ink timing is bound to this exact waveform. Preserve its expressive pauses and pace.
+    if (voice[i]?.alignment) return b;
     const tb = tightenPauses(actx, b, 0.35, 0.25);
     const words = voice[i]!.scenes.reduce((a, si) => a + scenes[si]!.text.split(/\s+/).filter(Boolean).length, 0);
     const bd = speechBounds(tb);
@@ -452,7 +455,7 @@ async function prepareTimeline(actx: BaseAudioContext, scenes: RenderScene[], vo
     const bd = speechBounds(b);
     const first = scenes[voice[i]!.scenes[0]!];
     if (i > 0 && first?.beat === "reveal") t += PRE_REVEAL_PAUSE; // silent beat before the answer
-    const c = { scenes: voice[i]!.scenes, dur: bd.to - bd.from, start: t, from: bd.from, buf: b };
+    const c = { scenes: voice[i]!.scenes, dur: bd.to - bd.from, start: t, from: bd.from, buf: b, alignment: voice[i]?.alignment };
     const d = b.getChannelData(0);
     for (let k = Math.floor(bd.from * b.sampleRate); k < bd.to * b.sampleRate; k += 4) { voiceRms += d[k]! * d[k]!; voiceN++; }
     t += c.dur + JOIN;
@@ -462,7 +465,7 @@ async function prepareTimeline(actx: BaseAudioContext, scenes: RenderScene[], vo
   const rmsDb = 10 * Math.log10(voiceRms / Math.max(1, voiceN) + 1e-12);
   const voiceGain = Math.min(4, Math.max(0.3, 10 ** ((-19 - rmsDb) / 20)));
   const total = t + 0.3; // final silence never longer than 0.3s
-  const tl = timeline(chunks, scenes.map((s) => s.text));
+  const tl = voice.some(v => v.alignment) ? alignedTimeline(chunks, scenes.map(s => s.text)) : timeline(chunks, scenes.map((s) => s.text));
   tl[0]!.start = 0; tl[tl.length - 1]!.end = total;
   for (let i = 1; i < tl.length; i++) tl[i]!.start = tl[i - 1]!.end;
   const shots = buildShots(scenes, tl);
@@ -534,6 +537,7 @@ export function allHeld(scenes: { camera: string }[], clips?: unknown[]) {
  * canvas recompression, pin-sharp pictures).
  */
 export async function renderStillCuts(scenes: { text: string; sfx: string; camera: Camera; mood: "tension" | "reveal"; beat?: string }[], voice: VoiceChunk[], o: Omit<RenderOptions, "clips" | "onProgress">) {
+  if (voice.some(v => !v.alignment)) throw new Error('Sticky still cuts require measured speech timing');
   const rs = scenes as RenderScene[];
   const SR = 48000;
   const probe = new OfflineAudioContext(1, 1, SR);
