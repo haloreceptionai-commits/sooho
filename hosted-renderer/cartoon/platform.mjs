@@ -9,9 +9,18 @@ function blobUrl(name) {
 }
 const H = { 'x-ms-version': '2021-08-06' };
 
+// A dropped connection ("fetch failed") is retried with backoff instead of failing the whole render.
+export async function netFetch(url, init, tries = 7) {
+  for (let i = 0; ; i++) {
+    try { return await fetch(url, { ...init, signal: AbortSignal.timeout(120000) }); }
+    catch (e) { if (i >= tries - 1) throw Error(`Network unavailable after ${tries} tries: ${e?.cause?.code || e?.message || e}`); }
+    await new Promise(res => setTimeout(res, Math.min(30000, 1000 * 2 ** i) + Math.random() * 1000));
+  }
+}
+
 async function blobPut(name, body, contentType, extra = {}) {
-  for (let i = 0; i < 4; i++) {
-    const r = await fetch(blobUrl(name), { method: 'PUT', headers: { ...H, 'x-ms-blob-type': 'BlockBlob', 'Content-Type': contentType, ...extra }, body });
+  for (let i = 0; i < 6; i++) {
+    const r = await netFetch(blobUrl(name), { method: 'PUT', headers: { ...H, 'x-ms-blob-type': 'BlockBlob', 'Content-Type': contentType, ...extra }, body });
     if (r.ok) return { ok: true, etag: r.headers.get('etag') };
     if (r.status === 409 || r.status === 412) return { ok: false, status: r.status };
     if (r.status < 500 && r.status !== 429) throw Error(`Private blob write failed [${r.status}]`);
@@ -20,8 +29,8 @@ async function blobPut(name, body, contentType, extra = {}) {
   throw Error('Private blob storage unavailable');
 }
 async function blobGet(name) {
-  for (let i = 0; i < 4; i++) {
-    const r = await fetch(blobUrl(name), { headers: H });
+  for (let i = 0; i < 6; i++) {
+    const r = await netFetch(blobUrl(name), { headers: H });
     if (r.status === 404) return null;
     if (r.ok) return r;
     if (r.status < 500 && r.status !== 429) throw Error(`Private blob read failed [${r.status}]`);
@@ -51,7 +60,7 @@ class BlobStore {
     const created = await blobPut(name, owner, 'text/plain', { 'If-None-Match': '*' });
     if (created.ok) return true;
     if (!staleMs) return false;
-    const head = await fetch(blobUrl(name), { method: 'HEAD', headers: H });
+    const head = await netFetch(blobUrl(name), { method: 'HEAD', headers: H });
     if (!head.ok) return false;
     if (Date.now() - new Date(head.headers.get('last-modified')).getTime() < staleMs) return false;
     return (await blobPut(name, owner, 'text/plain', { 'If-Match': head.headers.get('etag') })).ok;
