@@ -202,6 +202,7 @@ export type Database = {
       }
       youtube_connections: {
         Row: {
+          auto_reply: boolean
           channel_id: string | null
           channel_title: string | null
           refresh_token: string
@@ -209,6 +210,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_reply?: boolean
           channel_id?: string | null
           channel_title?: string | null
           refresh_token: string
@@ -216,11 +218,42 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_reply?: boolean
           channel_id?: string | null
           channel_title?: string | null
           refresh_token?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      youtube_replies: {
+        Row: {
+          author: string | null
+          comment: string | null
+          comment_id: string
+          created_at: string
+          reply: string
+          user_id: string
+          video_id: string | null
+        }
+        Insert: {
+          author?: string | null
+          comment?: string | null
+          comment_id: string
+          created_at?: string
+          reply: string
+          user_id: string
+          video_id?: string | null
+        }
+        Update: {
+          author?: string | null
+          comment?: string | null
+          comment_id?: string
+          created_at?: string
+          reply?: string
+          user_id?: string
+          video_id?: string | null
         }
         Relationships: []
       }
