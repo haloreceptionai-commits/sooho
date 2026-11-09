@@ -142,6 +142,7 @@ function dress(kind,root){
 }
 for (const kind of new Set(SHOTS.map(s=>s.world))) {
   const root=new THREE.Group(); scene.add(root); worldGroups.set(kind,root);
+  if(kind==='map'){await buildMap(root);continue;}
   const floor=add(new THREE.PlaneGeometry(160,160),kind==='lab'||kind==='castle'?M.marble:M.grass,0,-.03,0,root,{cast:false}); floor.rotation.x=-Math.PI/2;
   if(kind==='ship'||kind==='storm_sea') {
     floor.visible=false;
@@ -261,6 +262,7 @@ const helmetState=()=>{}; // the reference 3D helmet prop is removed; renderFram
 function worldState(state,f) {
   for(const [kind,root]of worldGroups)root.visible=kind===state.world;
   props3dState(state.props3d,f);
+  mapState(state,f);
   for(const st of STERNS)st.visible=!state.open;
   // Open views furl the lower sails so the horizon, ships and waves read.
   SAILS.forEach((sl,i)=>{sl.visible=!state.open||i>0;});
