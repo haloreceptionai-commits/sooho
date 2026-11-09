@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
