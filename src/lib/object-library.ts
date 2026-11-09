@@ -5,6 +5,7 @@ import catalog from '../../hosted-renderer/cartoon/assets/library/catalog.json';
 export interface LibraryObject { id: string; pack: string; name: string; tags: string[]; h: number; type: 'model' | 'sprite'; clips?: string[] }
 export const LIBRARY = catalog as LibraryObject[];
 const STOP = new Set(['the', 'a', 'an', 'and', 'of', 'to', 'in', 'on', 'it', 'was', 'were', 'is', 'they', 'he', 'she', 'his', 'her', 'their', 'with', 'for', 'that', 'this', 'but', 'from', 'at', 'by', 'as', 'or', 'be', 'had', 'has', 'have', 'into', 'why', 'how', 'what', 'who']);
+for (const context of ['night', 'overhead', 'old', 'new', 'tiny', 'heavy', 'light']) STOP.add(context);
 const stem = (w: string) => w.endsWith('ies') ? w.slice(0, -3) + 'y' : w.endsWith('s') && !/(ss|us|is)$/.test(w) ? w.slice(0, -1) : w;
 export const words = (text: string) => text.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Za-z])\d+/g, '$1 ').toLowerCase().split(/[^a-z]+/).filter(w => w.length > 2 && !STOP.has(w)).map(stem);
 const objectWords = (object: LibraryObject) => words(object.id.split('/')[1] ?? object.name);
@@ -41,7 +42,7 @@ export function searchLibrary(text: string, limit = 10): LibraryObject[] {
 /** Union of per-sentence matches, bounded so the Director's JSON schema stays small. */
 export function shortlist(sentences: string[], cap = 120): LibraryObject[] {
   const out = new Map<string, LibraryObject>();
-  const perScene = sentences.map(s => searchLibrary(s));
+  const perScene = sentences.map(s => searchLibrary(s).filter(o => nameMatch(o, s)));
   // Round-robin prevents the opening scene consuming all available choices.
   for (let rank = 0; rank < 10 && out.size < cap; rank++) for (const choices of perScene) {
     const o = choices[rank]; if (o && out.size < cap) out.set(o.id, o);

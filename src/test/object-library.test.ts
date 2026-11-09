@@ -24,6 +24,7 @@ describe('object library', () => {
     const result = shortlist(['A tree grows', 'An elephant walks', 'The velociraptor hunts'], 3);
     expect(result.some(o => /elephant/i.test(o.name))).toBe(true);
     expect(result.some(o => /velociraptor/i.test(o.name))).toBe(true);
+    expect(shortlist(['The velociraptor hunted at night.', 'A yellow dragon flew overhead.']).some(o => /nightstand|overhead/i.test(o.id))).toBe(false);
   });
   it('requires an id for library objects and forbids holding them', () => {
     const base = { world: 'town', light: 'day', action: 'idle', expression: 'neutral', actor: 'hero', wide: false } as const;
