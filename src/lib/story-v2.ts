@@ -20,8 +20,25 @@ export function numberToWords(n: number, year = false): string {
   return under1000(n);
 }
 /** Replaces digits in narration with spoken words (1965 -> nineteen sixty-five, 3,000 -> three thousand, 40% -> forty percent). */
+const ORD: Record<string, string> = { one: "first", two: "second", three: "third", five: "fifth", eight: "eighth", nine: "ninth", twelve: "twelfth" };
+const ordinal = (w: string) => { const m = w.match(/^(.*?)([a-z]+)$/)!; const last = m[2]!; return m[1] + (ORD[last] ?? (last.endsWith("y") ? `${last.slice(0, -1)}ieth` : `${last}th`)); };
+/**
+ * Makes narration safe for the speech-timing worker: every space-separated token must contain letters
+ * (stray quotes/dashes are glued to the previous word) and no digits remain.
+ */
+export function speakable(text: string): string {
+  const out: string[] = [];
+  for (const t of spellNumbers(text).replace(/\d/g, "").split(/\s+/).filter(Boolean)) {
+    if (/[A-Za-z]/.test(t) || !out.length) out.push(t); else out[out.length - 1] += t;
+  }
+  if (out.length && !/[A-Za-z]/.test(out[0]!)) out.shift();
+  return out.join(" ");
+}
 export function spellNumbers(text: string): string {
   return text
+    .replace(/[$£€]\s?(\d+)/g, (_, d: string) => `${d} ${text.match(/£/) ? "pounds" : text.match(/€/) ? "euros" : "dollars"}`)
+    .replace(/(\d+)\.(\d+)/g, (_, a: string, b: string) => `${numberToWords(+a)} point ${b.split("").map(x => ONES[+x]).join(" ")}`)
+    .replace(/\b(\d+)(st|nd|rd|th)\b/g, (_, d: string) => ordinal(numberToWords(+d)))
     .replace(/(\d+)\s?%/g, (_, d: string) => `${numberToWords(+d)} percent`)
     .replace(/\b(\d{1,3}(?:,\d{3})+|\d+)(s)?\b/g, (_, d: string, plural?: string) => {
       const n = +d.replace(/,/g, "");
