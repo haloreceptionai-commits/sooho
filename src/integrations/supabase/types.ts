@@ -128,6 +128,7 @@ export type Database = {
           id: string
           manifest: Json
           output_path: string
+          recovery: Json
           run_id: string | null
           status: string
           token_hash: string
@@ -142,6 +143,7 @@ export type Database = {
           id?: string
           manifest: Json
           output_path: string
+          recovery?: Json
           run_id?: string | null
           status?: string
           token_hash: string
@@ -156,6 +158,7 @@ export type Database = {
           id?: string
           manifest?: Json
           output_path?: string
+          recovery?: Json
           run_id?: string | null
           status?: string
           token_hash?: string
