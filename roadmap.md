@@ -50,3 +50,12 @@
 - [x] Thumbnail generator (2 options, exact-text badges) + YouTube thumbnail upload on publish
 - [ ] 5-second Azure long-form test
 - [ ] Chapter-level split for 30-45 min renders (single-manifest render tested only at short lengths)
+
+## Ink explainer long-form (Nov 9)
+- [x] Ink explainer style + recurring stick-figure hero, default for long-form
+- [x] White idea cards with exact hand-lettered text (~1 in 4-5 scenes)
+- [x] 6 pictures drawn at once (was 2); voice already records in parallel
+- [x] Yellow-word Ink thumbnails in the publish dialog
+- [x] Real test video made (3:35, 31 scenes, ~12 min end to end)
+- [ ] Final assembly on parallel Azure machines (chapters) — current browser-recorder assembly stretched the video (narration ~1:53, file 3:35)
+- [ ] Script length overshoot check for very short long-forms
