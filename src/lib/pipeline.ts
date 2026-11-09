@@ -305,6 +305,7 @@ export async function runVideo(id: string, input: VideoInput) {
     }
 
     const portrait = input.format === "short";
+    const ink = !portrait && input.style === "Ink explainer";
     const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
     // narration is recorded in chunks of a few scenes so the delivery flows like one take
     const groups: number[][] = [];
@@ -358,14 +359,40 @@ export async function runVideo(id: string, input: VideoInput) {
             const kept = await media.get("sheet.jpg");
             if (kept) sheet = bufToB64(kept);
             else {
-              const r = await img({ sheet: true }, plan.characters.map((c) => `${c.name}: ${c.look}`).join("; "));
+              const r = await img({ sheet: true }, [...(ink ? [`The Hero: ${INK_HERO}`] : []), ...plan.characters.map((c) => `${c.name}: ${c.look}`)].join("; "));
               sheet = r.image ?? undefined;
               if (sheet) await media.put("sheet.jpg", b64ToBuf(sheet), "image/jpeg");
             }
           } catch { /* continue without reference */ }
         }
         tick("Designing characters");
-        await pool(plan.scenes, 2, async (sc, i) => {
+        // Ink explainer: about one sentence in five becomes a white idea card with exact hand-lettered text.
+        let cards = new Map<number, InkCard>();
+        if (ink) {
+          const kept = await media.get("ink-cards.json");
+          let picked: InkCard[] | null = kept ? JSON.parse(new TextDecoder().decode(kept)) as InkCard[] : null;
+          if (!picked) {
+            picked = await withRetry(() => planInkCards({ data: { scenes: plan.scenes.map((x) => x.narration), deployment: s.scriptDeployment } })).then((r) => pickInkCards(r, n)).catch(() => []);
+            await media.put("ink-cards.json", new TextEncoder().encode(JSON.stringify(picked)).buffer as ArrayBuffer, "application/json");
+          }
+          cards = new Map(picked.map((c) => [c.index, c]));
+        }
+        await pool(plan.scenes, ink ? 6 : 2, async (sc, i) => {
+          const card = cards.get(i);
+          if (card) {
+            const ckey = `card-${i}-${textKey(card.text + card.icon)}.jpg`;
+            let buf = await media.get(ckey);
+            if (!buf) {
+              const icon = card.icon ? await img({}, `A single small simple hand-drawn ink doodle of ${card.icon}, centered on a pure white background, nothing else in the picture, lots of empty white space around it.`).catch(() => null) : null;
+              const b64 = await composeInkCard(icon?.image ?? null, card.text, /\?$/.test(card.text) === false && /\d/.test(card.text));
+              buf = b64ToBuf(b64);
+              await media.put(ckey, buf.slice(0), "image/jpeg");
+            }
+            rawImg[i] = bufToB64(buf);
+            scenes[i]!.image = await createImageBitmap(new Blob([buf], { type: "image/jpeg" }));
+            tick("Drawing idea cards");
+            return;
+          }
           // Characters only lead action/face shots; wide, aerial and macro shots show the world, the process or the money shot,
           // and skip the sheet reference (it pulls every frame back to a posed line-up).
           const keptImg = await media.get(`scene-${i}-${textKey(sc.image_prompt)}.jpg`);
@@ -376,7 +403,7 @@ export async function runVideo(id: string, input: VideoInput) {
             return;
           }
           const people = sc.shot === "action" || sc.shot === "face";
-          const castAll = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
+          const castAll = (ink && people ? "The Hero: the recurring stick-figure hero from the reference; " : "") + sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
           const cast = people ? castAll : "";
           const shot = [
             SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
