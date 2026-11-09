@@ -12,7 +12,7 @@
     g.drawImage(gl, 0, 0, out.width, out.height);
     const words = captionAt(f);
     if (words && words.length) {
-      const W = out.width, size = Math.round(W * .085), y = Math.round(out.height * .7);
+      const W = out.width, size = Math.round(Math.min(W, out.height) * .085), y = Math.round(out.height * (W > out.height ? .82 : .7));
       g.font = `900 ${size}px "DejaVu Sans", Arial, sans-serif`; g.textBaseline = 'middle'; g.lineJoin = 'round';
       const shown = words.filter(w => w.shown);
       const widths = shown.map(w => g.measureText(w.text.toUpperCase()).width), gap = size * .42;
