@@ -637,7 +637,7 @@ async function handoffAssembly(id: string, cp: SeedanceCheckpoint, clips: { path
   await flushVideo(id);
   const settings = getState().settings;
   // Single submission: never retry an ambiguous start and create a duplicate paid render.
-  const job = await submitHostedRender({ data: { videoId: id, checkpoint: cp, clips, captions: settings.burnCaptions, sfx: settings.soundEffects } });
+  const job = await submitHostedRender({ data: { videoId: id, checkpoint: cp, clips, captions: settings.burnCaptions && getState().videos.find((v) => v.id === id)?.input.style !== "Ink explainer", sfx: settings.soundEffects } });
   up({ hostedRender: { id: job.id, status: job.status }, stage: "render", progress: 72, detail: "Hosted assembly · safe to close your browser" });
 }
 

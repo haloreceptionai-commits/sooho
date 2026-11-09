@@ -27,3 +27,10 @@ describe('ink thumbnail title', () => {
     for (const x of b) { expect(x.x).toBeGreaterThan(1280 * 0.38); expect(x.x + x.w).toBeLessThanOrEqual(1280); }
   });
 });
+
+import { liftWhite } from '@/lib/ink-card';
+describe('card paper', () => {
+  it('turns off-white paper pure white and keeps black ink', () => {
+    expect(liftWhite(225)).toBe(255); expect(liftWhite(0)).toBe(0);
+  });
+});

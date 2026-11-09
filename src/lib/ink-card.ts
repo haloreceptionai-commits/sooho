@@ -45,8 +45,15 @@ export async function composeInkCard(iconB64: string | null, text: string, red =
   if (iconB64) {
     const img = new Image(); img.src = `data:image/jpeg;base64,${iconB64}`; await img.decode();
     const box = 380, k = Math.min(box / img.width, box / img.height);
-    g.globalCompositeOperation = 'multiply'; // the doodle's white paper melts into the card
-    g.drawImage(img, (W - img.width * k) / 2, H * 0.12, img.width * k, img.height * k);
+    const iw = Math.round(img.width * k), ih = Math.round(img.height * k);
+    const o = document.createElement('canvas'); o.width = iw; o.height = ih;
+    const og = o.getContext('2d')!; og.drawImage(img, 0, 0, iw, ih);
+    // The doodle comes back on off-white paper; lift near-white to pure white so no grey box shows.
+    const px = og.getImageData(0, 0, iw, ih);
+    for (let q = 0; q < px.data.length; q += 4) px.data[q] = liftWhite(px.data[q]!), px.data[q + 1] = liftWhite(px.data[q + 1]!), px.data[q + 2] = liftWhite(px.data[q + 2]!);
+    og.putImageData(px, 0, 0);
+    g.globalCompositeOperation = 'multiply';
+    g.drawImage(o, (W - iw) / 2, H * 0.12);
     g.globalCompositeOperation = 'source-over';
   }
   let size = 150;
@@ -59,3 +66,6 @@ export async function composeInkCard(iconB64: string | null, text: string, red =
   lines.forEach((l, i) => g.fillText(l, W / 2, top + i * size * 1.1));
   return c.toDataURL('image/jpeg', 0.9).split(',')[1]!;
 }
+
+/** Maps 205..255 to 255 and stretches the rest, so paper texture disappears but ink keeps its colour. */
+export function liftWhite(v: number): number { return v >= 205 ? 255 : Math.round((v / 205) * 255); }
