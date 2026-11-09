@@ -57,6 +57,29 @@ async function encodeStills(input, r) {
 try {
   const initial = await notify({ type: 'progress', progress: 0 });
   if (!initial.accepted) throw new Error('Assembly cancelled');
+  // Align the exact saved takes before mixing. No extra TTS spend, no weighted-word timing guesses.
+  const held = input.manifest.checkpoint.plan.scenes.every(sc => sc.camera === 'hold') && !input.manifest.clips?.length;
+  if (held) {
+    const cp = input.manifest.checkpoint;
+    const takes = [];
+    for (const [i, chunk] of cp.voice.entries()) {
+      const response = await fetch(input.signed[chunk.path]);
+      if (!response.ok) throw new Error(`Saved narration could not load [${response.status}]`);
+      const file = `/tmp/ink-voice-${i}.wav`;
+      await writeFile(file, Buffer.from(await response.arrayBuffer()));
+      takes.push({ file, scenes: chunk.scenes });
+    }
+    await writeFile('/tmp/ink-align-input.json', JSON.stringify({ texts: cp.plan.scenes.map(sc => sc.narration), takes }));
+    await new Promise((ok, bad) => {
+      const p = spawn('/opt/ink/venv/bin/python', ['align-ink.py', '/tmp/ink-align-input.json', '/tmp/ink-aligned.json'], { stdio: ['ignore', 'inherit', 'pipe'] });
+      let err = ''; p.stderr.on('data', d => { err = (err + d).slice(-2000); });
+      p.on('error', bad);
+      p.on('close', code => code === 0 ? ok() : bad(new Error(`Speech alignment failed; saved inputs are safe: ${err.slice(-300)}`)));
+    });
+    input.inkAlignment = JSON.parse(await readFile('/tmp/ink-aligned.json', 'utf8'));
+    await Actor.setValue('INK-ALIGNMENT', input.inkAlignment);
+    await notify({ type: 'progress', progress: 20 });
+  }
   const bundle = await readFile(new URL('./renderer.js', import.meta.url));
   server = createServer((req, res) => {
     if (req.url === '/audio' && req.method === 'POST') { const f = createWriteStream('/tmp/mix.wav'); req.pipe(f); f.on('finish', () => res.end('ok')); return; }
@@ -75,14 +98,14 @@ try {
     if (!state.accepted) throw new Error('Assembly cancelled');
   });
   await page.goto('http://127.0.0.1:3000');
-  const result = await page.evaluate(async ({ manifest: m, signed, uploadUrl }) => {
+  const result = await page.evaluate(async ({ manifest: m, signed, uploadUrl, inkAlignment }) => {
     const { renderVideo, renderStillCuts, allHeld } = await import('/renderer.js');
     await document.fonts.ready;
     const media = async path => { const r = await fetch(signed[path]); if (!r.ok) throw new Error('Saved media could not load'); return r.blob(); };
     if (allHeld(m.checkpoint.plan.scenes, m.clips)) {
       // Hard-cut stills: mix the soundtrack offline; the encoder places the original pictures frame-exact.
       const voice = [];
-      for (const chunk of m.checkpoint.voice) voice.push({ scenes: chunk.scenes, audio: await (await media(chunk.path)).arrayBuffer() });
+      for (const [i, chunk] of m.checkpoint.voice.entries()) voice.push({ scenes: chunk.scenes, audio: await (await media(chunk.path)).arrayBuffer(), alignment: inkAlignment?.[i] });
       const plan = m.checkpoint.plan.scenes.map(sc => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
       const out = await renderStillCuts(plan, voice, { width: m.width, height: m.height, captions: false, sfx: m.sfx });
       const posted = await fetch('/audio', { method: 'POST', body: out.wav });
