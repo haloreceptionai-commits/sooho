@@ -31,7 +31,9 @@ describe('Advanced connected explanation rather than invented drama', () => {
     expect(r.failed.filter(c => ['V1', 'V2', 'V6', 'V7', 'V9', 'CLOCK', 'LANG'].includes(c.id))).toEqual([]);
   });
   it('still rejects an incomplete spoken sentence', () => {
-    const r = validateStory({ ...input, scenes: [{ ...input.scenes[0], narration: 'North. Gold. Compass. Rock.' }] });
+    const first = input.scenes[0];
+    if (!first) throw Error('Missing story fixture');
+    const r = validateStory({ ...input, scenes: [{ ...first, narration: 'North. Gold. Compass. Rock.' }] });
     expect(r.failed.some(c => c.id === 'LANG')).toBe(true);
   });
 });

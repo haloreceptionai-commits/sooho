@@ -158,7 +158,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
         k=kind if n==0 else REACTION[kind]; mv=move if n==0 else ('push_in' if move!='push_in' else 'static')
         mine=[e for e in unique if a<=jsround(words[e['word']]['start']*30)-e['lead']<b]
         camera=camera_keys(k,mv,subject,others,a,b,props)
-        if ADVANCED and k!='insert':
+        if ADVANCED:
             targets=actors if k in ('wide','medium','low','high') else [subject]
             swept=[]
             for actor in targets:
@@ -166,7 +166,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
                 if actor['action'] in ('walk','run'):
                     travel=(b-a)/30*(.9 if actor['action']=='run' else .35)*(actor.get('facing') or 1)
                     swept.append({**actor,'pos':[actor['pos'][0]+travel,actor['pos'][1],actor['pos'][2]]})
-            camera=fit_camera_keys(camera,swept,ASPECT,full_body=k in ('wide','medium','low','high'))
+            camera=fit_camera_keys(camera,swept,ASPECT,full_body=True)
         out.append({'start':a,'end':b,'world':d['world'],'light':d['light'],'shot':k,'move':mv,'mood':mood,
           'shake':.6 if mv=='shake' else (.25 if 'lightning' in (d.get('fx') or []) else 0),
           'speaker':speaker if speaker in ids else None,'keyword':keyword,'props':props,'fx':d.get('fx') or [],
