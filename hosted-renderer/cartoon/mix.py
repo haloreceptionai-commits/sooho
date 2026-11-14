@@ -48,7 +48,7 @@ def mix_stems(voice, music, sfx, rate, advanced=False):
         music = music * envelope[:, None]
     result = voice + music * mg + sfx * sg
     report = {"voice_rms": vr, "music_gain": mg, "sfx_gain": sg,
-              "music_rms_ratio": mr * mg / vr, "sfx_rms_ratio": sr * sg / vr,
+              "music_rms_ratio": gated_rms(music,rate) * mg / vr, "sfx_rms_ratio": sr * sg / vr,
               "sfx_peak_ratio": sp * sg / vp, "samples": len(voice), "sample_rate": rate,
               "speech_ducking": advanced}
     return result, report

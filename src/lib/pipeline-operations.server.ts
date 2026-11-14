@@ -4,6 +4,7 @@ import { cartoonDirection, OUTFITS, VOCAB } from '@/lib/cartoon-job';
 import { z } from 'zod';
 
 import { azureOpenAIRequest } from './azure-openai.server';
+import { generateSpeech } from '@lovable.dev/ai-gateway';
 
 // Scripts and images use the owner's Azure resource; narration remains Gemini.
 
@@ -140,7 +141,8 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
 };
 
 const directCartoonChunk = async (data: { scenes: string[]; deployment: string; advanced?: boolean | undefined }) => {
-    const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
+    const prototypeActions=new Set(['aim','fire','load','place','inspect','strike','tap','throw']);
+    const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: k==='actions' ? VOCAB.actions.filter(a=>!prototypeActions.has(a)) : VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
     const { shortlist, searchLibrary } = await import('./object-library');
     const narration = data.scenes.map(s => s.split(/\s+Visual:/i)[0] ?? s);
@@ -415,12 +417,14 @@ const KID_RULES = (words: number) => `
 KID-LEVEL WORDS (Advanced Video AI; these override the language rules above where stricter):
 - An 8-year-old must understand EVERY word. Use words a second-grader says every day. Names of people and places are fine; explain them in kid words the first time ("San Juan, a small island").
 - Banned adult words and their swaps: boundary -> line between two lands; dispute/conflict -> fight; escalate -> get worse; crisis -> big problem; treaty -> deal; territory -> land; military/troops -> army/soldiers; government/officials -> leaders; vessel -> ship; massive -> huge; ancient -> very old; incident -> thing that happened; negotiate -> talk it out; commander -> boss; eventually -> in the end.
-- Sentences of 4-12 words, one idea each, like a fun big sister telling a story. Use sound words (oink! boom! splash!) and short funny quotes from the characters.
+- Natural complete sentences, usually 6-16 words, connected by so/but/because. Do not chop a sentence just to fit one shot. The voice is for everyone, with words a child understands, not baby talk.
 - Every sentence must make a kid want the next one: a surprise, a danger, a funny moment or a new fact. Never two calm lines in a row.
 - Talk like a real storyteller, not a headline: full natural sentences with little joiners (so, but, then, uh-oh), never clipped telegraph lines like "Calm heads win." or "Hudson's Bay Company wants pay." Say WHO does WHAT and WHY it is funny or scary.
 - Prefer a person or animal doing something ("The pig squeezes under the fence and munches Lyman's potatoes!") over a fact about organisations.
 - Exactly ${words} words (±10%). Count them; a machine checks.
 - If an animal or object causes the story (a pig, a cannon, a jar), name it in the first sentence and keep it on screen: it is a character.`;
+const EXPLAINER_RULES = `
+ADVANCED EXPLAINER OVERRIDE: When the topic explains a device, natural process or mechanism rather than a documented event, REPLACE mandatory hero-want, rival, organisation/year/place anchors, try-fail cycles and invented dialogue with: concrete strange hook -> one clear question -> sequential physical steps -> visible proof -> plain answer. Use the real object as the subject; do not give clocks, chips, signals or GPS human feelings. A user is optional, not a quota. Never fabricate failed attempts, historical dates or danger. Explain technical words accurately on first use (a satellite is a machine moving around Earth; GPS uses radio travel times from satellites to find position). Never call a signal a voice or an intersection a shout. Write connected, accurate everyday sentences that make sense aloud. Keep cause and effect and qualifications. History topics keep factual motives and chronology without inventing people or quotes. This overrides the supplied story examples where they conflict.`;
 const MICRO_RULES = (D: number, words: number, scenes: number) => `
 LOOP SHORT (${D} seconds; these rules REPLACE the skeleton, word clock, myth, analogy, escalation and long payoff rules above):
 - Exactly ${scenes} scenes and ${words} words in total (±10%). No more: the voice must fit in ${D} seconds.
@@ -487,7 +491,7 @@ VISUALS (one scene ≈ 3s, one clear moment):
 - sfx: the sound of the visual event (knock, rustle, plane, siren, impact, pour, wave, crash...).
 - hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook words.
 
-${data.kid ? KID_RULES(words) : ""}${micro ? MICRO_RULES(D, words, scenes) : ""}
+${data.kid ? KID_RULES(words) + EXPLAINER_RULES : ""}${micro ? MICRO_RULES(D, words, scenes) : ""}
 Write the WHOLE narration first in "script" (read it aloud in your head; fix anything that doesn't parse), THEN split that exact text, word for word, into the scenes' "narration" fields.
 
 ${short ? "" : `
@@ -526,22 +530,14 @@ const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
 export const generateVoiceOperation = async ({ data }: { data: VoiceInput }): Promise<{ audio: string; engine: "lovable"; deployment: string; voice: string }> => {
     // Atlas narrator: Gemini Charon via Lovable AI (owner's choice; Azure has no cloning and no TTS deployment).
     const longDirection = LONG_NARRATION_DIRECTION;
-    const direction = data.style === "long" ? longDirection : "A light, relaxed, friendly male storyteller, amused, like telling a buddy a wild true story. Fast and nearly non-stop, only tiny breaths between sentences, an easy grin in the voice, quick playful character voices for any quoted lines, a little extra punch on the twist and the reveal. Every word crisp and clear. Not dramatic, not shouting, not whispering";
-    const lovable = process.env["LOVABLE_API_KEY"];
-    if (!lovable) throw new Error("Lovable AI is not configured");
-    const res = await fetch(`https://ai.gateway.lovable.dev/v1/audio/speech`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${lovable}`, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
-      body: JSON.stringify({
+    const direction = data.style === "long" ? longDirection : data.style==='advanced' ? "The same light, friendly, amused male storyteller speaking to a buddy. Curious hook with emphasis on the strange real object; flow naturally through cause and effect, build interest in the middle, then a clear satisfying answer. Aim for a lively 200-215 words per minute only if every word stays clear. Tiny contrast pauses before but and the answer, not between every short sentence. Calm confidence, no shouting, whispering, baby talk or sing-song reading. Speak each full sentence as one connected thought. Distinguish quoted dialogue briefly without inventing words. Never hurry a technical name or number. Read exactly the supplied words, with an easy grin, not exaggerated drama" : "A light, relaxed, friendly male storyteller, amused, like telling a buddy a wild true story. Fast and nearly non-stop, only tiny breaths between sentences, an easy grin in the voice, quick playful character voices for any quoted lines, a little extra punch on the twist and the reveal. Every word crisp and clear. Not dramatic, not shouting, not whispering";
+    const res = await generateSpeech({
         model: "google/gemini-3.1-flash-tts-preview",
         contents: [{ role: "user", parts: [{ text: `${direction}: Read the following narration aloud, word for word. Narration: ${data.text}` }] }],
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.style === "long" ? "Charon" : "Puck" } } } },
-        stream_format: "audio",
-      }),
     });
-    if (!res.ok) { console.error(`Voice text was: ${data.text.slice(0, 600)}`); await fail(res, "Voice"); }
     const v = data.style === "long" ? "Charon" : "Puck";
-    return { audio: toBase64(await res.arrayBuffer()), engine: "lovable", deployment: `gemini-${v.toLowerCase()}`, voice: v };
+    return { audio: toBase64(await (await res.blob()).arrayBuffer()), engine: "lovable", deployment: `gemini-${v.toLowerCase()}`, voice: v };
   };
 
 // ---------------- Images ----------------
@@ -763,14 +759,15 @@ const POSE_TEXT: Record<'reach' | 'shock' | 'happy', string> = {
   happy: 'now laughing and cheering: big open smile, eyes squeezed happy, arms (or front legs) up in joy',
 };
 /** Paints a transparent card: a standing character, an object, or (with a reference) the same character in another pose. */
-export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | undefined; pose?: 'reach' | 'shock' | 'happy' | undefined; reference?: string | undefined } }) => {
+export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | undefined; pose?: 'reach' | 'shock' | 'happy' | 'rig' | undefined; reference?: string | undefined } }) => {
   const style = data.kind === 'object' ? ADVANCED_OBJECT_STYLE : ADVANCED_CARD_STYLE;
   if (data.pose && data.reference) {
     // Same design in a new pose: the standing card is the reference so face, colours and outfit stay identical.
     for (let i = 0; i < 2; i++) {
       const fd = new FormData();
       fd.append('image[]', new Blob([b64ToBytes(data.reference)], { type: 'image/png' }), 'card.png');
-      fd.append('prompt', `${style} Keep EXACTLY the same character as the reference image: same face, species, colours, clothes, proportions and line style. Character: ${i ? softenPrompt(data.look) : data.look} The character is ${POSE_TEXT[data.pose]}. Full body, head to feet, centered.`.slice(0, 3900));
+      const posePrompt=data.pose==='rig' ? `Create a CLEAN transparent puppet sprite sheet, NOT a whole character. Same face and clothing identity as reference. Exact canvas 1024x1536, 2 columns by 4 rows of equal 512x384 cells, NO grid lines, NO text. Draw ONE isolated part centered in each cell with generous transparent padding, each part wholly inside its cell, no background and no other parts: row 1 left HEAD including face/hair, right TORSO shirt only without head/arms/legs; row 2 left UPPER ARM vertical sleeve, right FOREARM vertical wrist without hand; row 3 left THIGH vertical trouser, right SHIN vertical trouser; row 4 left HAND palm, right FOOT shoe side view. Each limb is straight and vertical. Never draw a complete figure. Face mouth closed. Consistent colours and ink. Character: ${data.look}` : `${style} Keep EXACTLY the same character as the reference image: same face, species, colours, clothes, proportions and line style. Character: ${i ? softenPrompt(data.look) : data.look} The character is ${POSE_TEXT[data.pose]}. Full body, head to feet, centered.`;
+      fd.append('prompt', posePrompt.slice(0,3900));
       fd.append('size', '1024x1536'); fd.append('quality', 'medium'); fd.append('background', 'transparent'); fd.append('output_format', 'png'); fd.append('n', '1');
       const res = await azureOpenAIRequest(`${safeName(data.deployment)}/images/edits`, fd, true);
       if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }

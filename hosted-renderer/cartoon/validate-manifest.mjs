@@ -18,6 +18,7 @@ export function validateManifest(m) {
   if(!Number.isSafeInteger(m.narration?.samples)||m.narration.samples<1||m.narration.samples>48000*LIM.secs||m.narration.rate!==48000)fail('Invalid narration clock');
   if(!/^[a-f0-9]{64}$/.test(m.narration.sha256))fail('Invalid narration checksum');
   const total=Math.round(m.narration.samples/48000*30);
+  if(m.advancedPerformance!==undefined&&![0,1].includes(m.advancedPerformance))fail('Unsupported Advanced performance version');
   if(!Array.isArray(m.cast)||m.cast.length<1||m.cast.length>4)fail('Invalid cast');
   const ids=new Set();
   for(const c of m.cast){

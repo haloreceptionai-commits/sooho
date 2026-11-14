@@ -40,7 +40,8 @@ def build(request, alignment, voice):
     return {'version':'cartoon-v2','videoId':request['videoId'],'fps':30,'width':width,'height':height,'captions':bool(request.get('captions')),
       'narration':{'path':'voice.wav','sha256':hashlib.sha256(voice.read_bytes()).hexdigest(),'samples':samples,'rate':48000},
       'words':words,'caption_words':[t[:40] for t in tokens],'cast':request['direction']['cast'],'shots':shots,
-      'advancedEdit':1 if ADVANCED else 0}
+      'advancedEdit':1 if ADVANCED else 0,
+      'advancedPerformance':1 if ADVANCED and all(any(k['id']==c['id']+'-rig' for k in request.get('cards',[])) for c in request['direction']['cast'] if c.get('card')) else 0}
 
 ASPECT=9/16
 ADVANCED=False
@@ -129,7 +130,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
     move=d.get('move') or 'push_in'; mood=d.get('mood') or 'calm'
     # Long sentences get a second angle on a word boundary, keeping the ~3 s cutting rhythm.
     cuts=[start]
-    if end-start>132 and last-first>=4:
+    if end-start>132 and last-first>=4 and not ADVANCED:
         mid=start+(end-start)//2
         wi=min(range(first+1,last),key=lambda k:abs(jsround(words[k]['start']*30)-mid))
         f=jsround(words[wi]['start']*30)
@@ -146,7 +147,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
         for wi in range(first,last):
             kind_s=next((k for stem,k in AUTO_SOUNDS if words[wi]['text'].startswith(stem) and not (ADVANCED and stem in ('gold','coin','storm','crowd'))),None)
             if kind_s: events.append({'word':wi,'lead':0,'kind':kind_s})
-        if mood=='reveal': events.append({'word':first,'lead':0,'kind':'reveal'})
+        if mood=='reveal' and not ADVANCED: events.append({'word':first,'lead':0,'kind':'reveal'})
         if move=='whip': events.append({'word':first,'lead':0,'kind':'whoosh'})
         if move=='shake': events.append({'word':first,'lead':0,'kind':'impact'})
     seen=set(); unique=[]
@@ -159,7 +160,13 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
         camera=camera_keys(k,mv,subject,others,a,b,props)
         if ADVANCED and k!='insert':
             targets=actors if k in ('wide','medium','low','high') else [subject]
-            camera=fit_camera_keys(camera,targets,ASPECT,full_body=k in ('wide','medium','low','high'))
+            swept=[]
+            for actor in targets:
+                swept.append(actor)
+                if actor['action'] in ('walk','run'):
+                    travel=(b-a)/30*(.9 if actor['action']=='run' else .35)*(actor.get('facing') or 1)
+                    swept.append({**actor,'pos':[actor['pos'][0]+travel,actor['pos'][1],actor['pos'][2]]})
+            camera=fit_camera_keys(camera,swept,ASPECT,full_body=k in ('wide','medium','low','high'))
         out.append({'start':a,'end':b,'world':d['world'],'light':d['light'],'shot':k,'move':mv,'mood':mood,
           'shake':.6 if mv=='shake' else (.25 if 'lightning' in (d.get('fx') or []) else 0),
           'speaker':speaker if speaker in ids else None,'keyword':keyword,'props':props,'fx':d.get('fx') or [],

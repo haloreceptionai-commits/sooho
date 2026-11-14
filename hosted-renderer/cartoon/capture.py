@@ -61,6 +61,16 @@ async def capture(args):
     checkpoint = out / 'checkpoint.json'
     saved = json.loads(checkpoint.read_text()) if checkpoint.exists() else {'input_hash': signature, 'frames': {}}
     if saved['input_hash'] != signature: raise ValueError('Inputs changed; stale frames cannot resume')
+    # Joined, checksum-verified frame caches need no extra Chromium startup or scene upload.
+    selected=getattr(args,'selected',None)
+    indices=sorted(set(int(f) for f in selected.split(','))) if selected else range(args.first,args.last+1)
+    manifest=json.loads((root/'manifest.json').read_text())
+    total=round(manifest['narration']['samples']/48000*30)
+    if args.first<0 or args.last<args.first or args.last>=total or any(f<args.first or f>args.last for f in indices):raise ValueError('Invalid frame range')
+    if (out/'CANCEL').exists():raise ValueError('Cancelled')
+    if all(valid_frame(out/f'f{f:06d}.jpg',saved['frames'].get(str(f))) for f in indices):
+        print(json.dumps({'cached_frames':len(indices),'browser_skipped':True}),flush=True)
+        return
     class Assets(SimpleHTTPRequestHandler):
         def log_message(self, *unused): pass
         def do_GET(self):

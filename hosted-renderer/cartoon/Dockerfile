@@ -12,5 +12,6 @@ WORKDIR /usr/src/app
 COPY package.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 COPY . ./
+RUN /opt/cartoon/venv/bin/python tools/fetch-sounds.py
 RUN if [ "$ALIGN" = 1 ]; then curl -fsSL https://download.pytorch.org/torchaudio/models/wav2vec2_fairseq_base_ls960_asr_ls960.pth -o /opt/cartoon/weights.pth && echo '488fd4f16de84438ffc945334278c1b9fb9b7159a806c1080b16111a958c945d  /opt/cartoon/weights.pth' | sha256sum -c -; fi
 CMD ["node", "actor.js"]

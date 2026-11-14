@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from PIL import Image
-from capture import fingerprint, valid_frame
+from capture import fingerprint, valid_frame, capture
 from finish import validate_frames
 
 class CheckpointTests(unittest.TestCase):
@@ -30,6 +30,18 @@ class CheckpointTests(unittest.TestCase):
             root = Path(d); p = root / 'story.js'; p.write_text('one')
             before = fingerprint(root); p.write_text('two')
             self.assertNotEqual(before, fingerprint(root))
+
+    def test_valid_joined_cache_skips_browser_startup(self):
+        import asyncio
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)/'web';out=Path(d)/'frames';root.mkdir();out.mkdir()
+            (root/'manifest.json').write_text(json.dumps({'narration':{'samples':1600}}))
+            image=out/'f000000.jpg';Image.new('RGB',(1080,1920),'green').save(image)
+            (out/'checkpoint.json').write_text(json.dumps({'input_hash':fingerprint(root),'frames':{'0':{'sha256':hashlib.sha256(image.read_bytes()).hexdigest()}}}))
+            with patch('capture.async_playwright',side_effect=AssertionError('Must not launch browser')):
+                asyncio.run(capture(SimpleNamespace(web=str(root),out=str(out),first=0,last=0,selected=None)))
 
 if __name__ == '__main__': unittest.main()
 

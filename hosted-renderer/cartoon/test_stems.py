@@ -26,4 +26,17 @@ class StemTests(unittest.TestCase):
     def test_outside_clock_cues_rejected(self):
         with self.assertRaises(ValueError): synthesize(48000,15,[{'frame':30,'kind':'impact'}])
 
+    def test_advanced_foley_starts_at_contact_without_a_forced_twist_hit(self):
+        import os,tempfile,wave
+        from pathlib import Path
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            with wave.open(str(Path(d)/'impact.wav'),'wb') as w:
+                w.setnchannels(1);w.setsampwidth(2);w.setframerate(48000);w.writeframes(np.full(4800,1000,dtype='<i2').tobytes())
+            with patch.dict(os.environ,{'CARTOON_SOUND_DIR':d}):
+                _,sfx=synthesize(96000,40,[{'frame':15,'kind':'impact'}],advanced=True)
+                self.assertEqual(np.count_nonzero(sfx[:24000]),0)
+                self.assertGreater(np.count_nonzero(sfx[24000:28800]),0)
+                self.assertEqual(np.count_nonzero(sfx[64000:]),0)
+
 if __name__ == '__main__': unittest.main()

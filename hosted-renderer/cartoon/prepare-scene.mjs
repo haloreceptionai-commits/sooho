@@ -20,6 +20,7 @@ const lights=referenceStory.slice(lightStart,lightEnd)+`\nLIGHTS.night_bright={.
 await writeFile(path.join(web,'lights.js'),lights);
 await cp(path.join(root,'motion.mjs'),path.join(web,'motion.js'));
 await cp(path.join(root,'action.mjs'),path.join(web,'action.js'));
+await cp(path.join(root,'performance.mjs'),path.join(web,'performance.js'));
 let cast=await readFile(path.join(web,'toon.js'),'utf8');
 // Shorten the supplied exaggerated reach to keep hand-held props inside cards.
 const reach='const lf = (opts.lift || 0) * 0.62 * HH; return { pts: [s, [X(42), s[1] - 0.12 * HH - lf * 0.6], [X(82), s[1] - 0.5 * HH - lf]], front: false };';
@@ -36,7 +37,7 @@ if(carded.length){await mkdir(path.join(web,'cards'),{recursive:true});const pre
   const copy=async(key,required)=>{let bytes;try{bytes=await readFile(path.join(path.dirname(path.resolve(input)),'cards',`${key}.png`));}catch(e){if(required)throw Error('Missing painted card');return;}
     if(bytes.length<200||bytes.length>12e6||bytes.readUInt32BE(0)!==0x89504e47)throw Error('Invalid character card');
     await writeFile(path.join(web,'cards',`${key}.png`),bytes);present.push(key);};
-  for(const id of carded){await copy(id,true);for(const pose of ['reach','shock','happy'])await copy(`${id}-${pose}`,false);}
+  for(const id of carded){await copy(id,true);for(const pose of ['reach','shock','happy','rig'])await copy(`${id}-${pose}`,pose==='rig'&&m.advancedPerformance===1);}
   for(const key of objectCards)await copy(key,true);
   await writeFile(path.join(web,'cards','index.json'),JSON.stringify(present.sort()));}
 else if(objectCards.length)throw Error('Painted objects need Advanced Video AI cards');
