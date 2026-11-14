@@ -222,7 +222,7 @@ def main():
     sc = bpy.context.scene
     if not sc.world: sc.world = bpy.data.worlds.new('w')
     sc.world.use_nodes = True
-    engine = shot.get('engine') or os.environ.get('SHOT_ENGINE', 'eevee')
+    engine = os.environ.get('SHOT_ENGINE') or shot.get('engine', 'eevee')
     if engine == 'eevee':
         sc.render.engine = 'BLENDER_EEVEE_NEXT'; ee = sc.eevee
         ee.taa_render_samples = shot.get('samples', 16)
@@ -246,10 +246,9 @@ def main():
             print('CYCLES_DEVICES', prefs.compute_device_type, [(d.name, d.type, d.use) for d in prefs.devices], flush=True)
             if not any(d.use for d in prefs.devices): raise RuntimeError('no GPU device for Cycles')
         cy.use_light_tree = True
-        try: cy.denoiser = 'OPTIX' if prefs.compute_device_type == 'OPTIX' else 'OPENIMAGEDENOISE'
-        except TypeError: pass
+        cy.denoising_use_gpu = True  # OpenImageDenoise on the card (OptiX denoiser libraries are not injected)
         cy.samples = shot.get('samples', 32); cy.use_adaptive_sampling = True
-        cy.adaptive_threshold = 0.03; cy.use_denoising = True
+        cy.adaptive_threshold = 0.03; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
         cy.max_bounces = 4; cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2
         cy.volume_bounces = 0; cy.transparent_max_bounces = 8; cy.volume_step_rate = 4
     sc.render.use_persistent_data = True

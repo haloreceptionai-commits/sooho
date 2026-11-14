@@ -18,7 +18,6 @@ if [ -z "$NVJSON" ] && ls /usr/lib/x86_64-linux-gnu/libEGL_nvidia.so.0 >/dev/nul
   printf '{"file_format_version":"1.0.0","ICD":{"library_path":"libEGL_nvidia.so.0"}}' > $NVJSON
 fi
 [ -n "$NVJSON" ] && export __EGL_VENDOR_LIBRARY_FILENAMES=$NVJSON && echo "egl forced: $NVJSON" >> $REPORT
-$B --python-expr "import bpy, gpu; print('GLINFO', gpu.platform.vendor_get(), '|', gpu.platform.renderer_get(), '|', gpu.platform.version_get())" 2>&1 | grep GLINFO >> $REPORT
 put $REPORT report.txt text/plain
 for ENG in ${ENGINES:-eevee cycles}; do
   if [ "$ENG" = cycles ]; then DEV=GPU; else DEV=CPU; fi
