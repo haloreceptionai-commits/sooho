@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evidenceSupported, freshSix, type DiscoveredTopic } from '@/lib/topic-discovery';
+import { evidenceSupported, exactEvidenceQuote, freshSix, type DiscoveredTopic } from '@/lib/topic-discovery';
 const sample = (n: number): DiscoveredTopic => ({ id: `live-${n}`, factKey: `mechanism-${n}`, title: `Why object number ${n} works`, archetype: 'object', fact: 'A documented mechanism with a clear factual explanation.', source: 'https://museum.org/a', hook: 'This object works without power.', whyWatch: 'A clear visible surprise with a satisfying explanation.', payoff: 'The mechanism explains the surprising opening.', caveat: '', scores: { curiosity: 15, clarity: 15, visual: 15, payoff: 15, surprise: 15 }, sources: [{ url: 'https://museum.org/a', title: 'Museum', quote: 'This documented mechanism works without power.' }, { url: 'https://university.edu/b', title: 'University', quote: 'This documented mechanism works without power.' }] });
 describe('live topic rules', () => {
   it('returns exactly six new topics from a larger researched pool', () => expect(freshSix(Array.from({ length: 10 }, (_, i) => sample(i)), [], [])).toHaveLength(6));
@@ -7,4 +7,9 @@ describe('live topic rules', () => {
   it('excludes already generated topics', () => expect(freshSix([sample(1)], [], [{ topic: sample(1).title, status: 'done' }])).toHaveLength(0));
   it('requires exact quotes from two independently fetched domains', () => { const t = sample(1); expect(evidenceSupported(t, new Map(t.sources.map(s => [s.url, s.quote])))).toBe(true); expect(evidenceSupported(t, new Map([[t.source, t.sources[0]?.quote ?? '']]))).toBe(false); });
   it('rejects fabricated quotes even with real source URLs', () => expect(evidenceSupported(sample(1), new Map(sample(1).sources.map(s => [s.url, 'Unrelated evidence'])))).toBe(false));
+  it('recovers original punctuation but never substitutes invented words', () => {
+    const text = 'The tiny ball—inside this pen—rolls across paper without leaking ink.';
+    expect(exactEvidenceQuote('The tiny ball inside this pen rolls across paper without leaking ink', text)).toBe(text.slice(0, -1));
+    expect(exactEvidenceQuote('The tiny ball inside this pen flies across paper without leaking ink', text)).toBe(null);
+  });
 });
