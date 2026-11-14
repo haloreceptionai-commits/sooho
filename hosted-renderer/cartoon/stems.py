@@ -14,13 +14,15 @@ def jsround(x):
 RATE = 48000
 KINDS = {'whoosh', 'impact', 'creak', 'pour', 'splash', 'reveal', 'thunder', 'bell', 'coin', 'wind', 'crowd', 'pop'}
 
-def synthesize(samples, twist_frame, cues, seed=1):
+def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
     if not isinstance(samples, int) or samples <= 0:
         raise ValueError('Invalid narration samples')
     total = jsround(samples / RATE * 30)
     if not isinstance(twist_frame, int) or not 0 <= twist_frame < total:
         raise ValueError('Twist must be inside the locked timeline')
     rng = np.random.default_rng(seed)
+    if advanced:
+        return sound_design(samples,twist_frame,cues,seed)
     music = np.zeros(samples, dtype=np.float64)
     sfx = np.zeros(samples, dtype=np.float64)
     twist = min(samples, jsround(twist_frame * RATE / 30))
@@ -78,6 +80,32 @@ def synthesize(samples, twist_frame, cues, seed=1):
             sound = .16*(np.sin(2*np.pi*880*ct)+.5*np.sin(2*np.pi*1320*ct))*np.exp(-ct*12)
         sfx[start:start+n] += sound
     return music[:,None], sfx[:,None]
+
+def sound_design(samples,twist_frame,cues,seed=1):
+    """Original staccato score plus licensed CC0 Foley, exactly on the saved voice clock."""
+    from functools import lru_cache
+    music=np.zeros(samples);sfx=np.zeros(samples);t=np.arange(samples)/RATE
+    # Original composition: low pulsed notes, changing harmony at the answer. Not a borrowed soundtrack.
+    for start in range(0,samples,int(RATE*.25)):
+        n=min(int(RATE*.18),samples-start);tt=np.arange(n)/RATE
+        notes=[110,130.8128,164.8138] if start<twist_frame*1600 else [130.8128,164.8138,195.9977]
+        freq=notes[(start//int(RATE*.25))%3]
+        env=np.sin(np.pi*np.arange(n)/max(n,1))**2*np.exp(-tt*12)
+        music[start:start+n]+=.025*(np.sin(2*np.pi*freq*tt)+.15*np.sin(4*np.pi*freq*tt))*env
+    root=Path(__file__).parent/'assets'/'sound'
+    names={'impact':'impact','pour':'splash','splash':'splash','pop':'tap','creak':'handling','coin':'handling','bell':'handling','reveal':'tap','whoosh':'handling','wind':'stone','thunder':'stone','crowd':'footstep'}
+    cache={}
+    for cue in cues:
+        if cue['kind'] not in KINDS or not isinstance(cue['frame'],int) or not 0<=cue['frame']<round(samples/RATE*30):raise ValueError('Invalid sound cue')
+        name=names[cue['kind']]
+        if name not in cache:
+            with wave.open(str(root/(name+'.wav')),'rb') as w:
+                if w.getframerate()!=RATE or w.getnchannels()!=1 or w.getsampwidth()!=2:raise ValueError('Invalid licensed Foley format')
+                cache[name]=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2').astype(float)/32768
+        sound=cache[name];first=cue['frame']*1600;n=min(len(sound),samples-first)
+        sfx[first:first+n]+=.3*sound[:n]
+    edge=min(samples,int(.05*RATE));music[:edge]*=np.linspace(0,1,edge);music[-edge:]*=np.linspace(1,0,edge)
+    return music[:,None],sfx[:,None]
 
 def write_pcm(path, samples):
     if np.max(np.abs(samples)) >= 1: raise ValueError('Unmixed stem exceeds PCM headroom')

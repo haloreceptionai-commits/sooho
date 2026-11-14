@@ -1,0 +1,10 @@
+{
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sources": [
+    { "author": "Jan Schupke / Vehicle", "listing": "https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx", "archive": "https://opengameart.org/sites/default/files/tinysized.zip", "files": ["boots-leather-step-01.wav", "metal-hammer-hit-01.wav", "keyhole-lockbox-insert-01.wav"], "license_evidence": "Archive readme.txt: Distributed under Creative Commons Zero" },
+    { "author": "rubberduck", "listing": "https://opengameart.org/content/100-cc0-sfx-2", "archive": "https://opengameart.org/sites/default/files/sfx_100_v2.zip", "files": ["sfx100v2_switch_01.ogg", "sfx100v2_stones_01.ogg"], "license_evidence": "Original listing marks CC0" },
+    { "author": "rubberduck", "listing": "https://opengameart.org/content/100-cc0-sfx", "archive": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip", "files": ["splash_01.ogg"], "license_evidence": "Original listing marks CC0" }
+  ],
+  "adaptation": "Decoded to mono 48kHz PCM16 for deterministic offline mixing; licensed recordings are not copied from the benchmark."
+}
