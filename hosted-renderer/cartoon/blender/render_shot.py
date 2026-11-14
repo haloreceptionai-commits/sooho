@@ -70,12 +70,17 @@ INK = None
 
 
 def ink(obj, width=0.012):
+    """Separate inverted hull child: slightly inflated copy with flipped normals."""
     global INK
     INK = INK or outline_mat()
-    obj.data.materials.append(INK)
-    s = obj.modifiers.new('ink', 'SOLIDIFY')
-    s.thickness = width; s.offset = 1; s.use_flip_normals = True
-    s.material_offset = len(obj.data.materials) - 1
+    h = obj.copy(); h.data = obj.data.copy(); h.data.materials.clear(); h.data.materials.append(INK)
+    for mo in list(h.modifiers): h.modifiers.remove(mo)
+    bpy.context.collection.objects.link(h)
+    d = h.modifiers.new('grow', 'DISPLACE'); d.strength = width / max(min(obj.scale), 1e-3); d.mid_level = 0
+    for poly in h.data.polygons: poly.flip()
+    h.parent = obj; h.location = (0, 0, 0); h.rotation_euler = (0, 0, 0); h.scale = (1, 1, 1)
+    h.matrix_parent_inverse.identity()
+    h.visible_shadow = False
     return obj
 
 
