@@ -81,13 +81,13 @@ export const paintAdvancedCard = createServerFn({ method: 'POST' }).middleware([
   .inputValidator((d: { look: string; deployment: string }) => z.object({ look: z.string().min(1).max(300), deployment: z.string().min(1).max(64) }).parse(d))
   .handler(async ({ data }) => { const { paintAdvancedCardOperation } = await import('./pipeline-operations.server'); return paintAdvancedCardOperation({ data }); });
 export const directCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { scenes: string[]; deployment: string; format?: 'short' | 'long' }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), deployment: z.string().min(1).max(64), format: z.enum(['short', 'long']).optional() }).parse(d))
+  .inputValidator((d: { scenes: string[]; deployment: string; format?: 'short' | 'long'; advanced?: boolean }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), deployment: z.string().min(1).max(64), format: z.enum(['short', 'long']).optional(), advanced: z.boolean().optional() }).parse(d))
   .handler(async ({ data }) => { const { directCartoonOperation } = await import('./pipeline-operations.server'); return directCartoonOperation({ data }); });
 type CastMember = { id: string; seed: number; outfit: string };
 // Distinct looks per cast member: duplicate outfits/seeds are swapped for unused ones so characters never read as clones.
-export function diversifyCast(cast: CastMember[]): CastMember[] {
+export function diversifyCast(cast: CastMember[], max = 3): CastMember[] {
   const used = new Set<string>(), seeds = new Set<number>();
-  return (cast || []).slice(0, 3).map((c, i) => {
+  return (cast || []).slice(0, max).map((c, i) => {
     let outfit = (OUTFITS as readonly string[]).includes(c.outfit) ? c.outfit : OUTFITS[0];
     if (used.has(outfit)) outfit = OUTFITS.find(o => !used.has(o)) ?? outfit;
     used.add(outfit);

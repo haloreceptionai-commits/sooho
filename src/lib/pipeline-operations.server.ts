@@ -115,13 +115,13 @@ export function toMapSpec(b: { regions: string[]; focus: number[]; reveal: 'grow
     armies: b.armies.flatMap(a => { const from = clampLL(a.from), to = clampLL(a.to); return from && to ? [{ from, to, side: a.side }] : []; }).slice(0, 4) };
 }
 
-export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string; format?: 'short' | 'long' | undefined } }) => {
+export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string; format?: 'short' | 'long' | undefined; advanced?: boolean | undefined } }) => {
   if (data.format !== 'long') return directCartoonChunk(data);
   // Long-form: character direction in chunks (one shared cast), then the map pass decides which blocks become map scenes.
   let cast: z.infer<typeof cartoonDirection>['cast'] | null = null;
   const scenes: z.infer<typeof cartoonDirection>['scenes'] = [];
   for (let i = 0; i < data.scenes.length; i += 40) {
-    const part = await directCartoonChunk({ scenes: data.scenes.slice(i, i + 40), deployment: data.deployment });
+    const part = await directCartoonChunk({ scenes: data.scenes.slice(i, i + 40), deployment: data.deployment, advanced: data.advanced });
     const first: z.infer<typeof cartoonDirection>['cast'] = cast ?? part.cast; cast = first;
     // Later chunks reuse the first cast by position so the same people carry the whole documentary.
     const remap = new Map(part.cast.map((c, k) => [c.id, (first[k] ?? first[0]!).id]));
@@ -139,7 +139,7 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
   return cartoonDirection.parse(sanitizeDirection({ cast: cast!, scenes: merged }, narration));
 };
 
-const directCartoonChunk = async (data: { scenes: string[]; deployment: string }) => {
+const directCartoonChunk = async (data: { scenes: string[]; deployment: string; advanced?: boolean | undefined }) => {
     const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
     const { shortlist, searchLibrary } = await import('./object-library');
@@ -155,7 +155,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string }
         fx: { type: 'array', items: en('fx') }, cues: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['word', 'kind'], properties: { word: { type: 'integer' }, kind: en('sounds') } } }, keyword: { type: 'string' },
       } } },
     } };
-    const raw = await azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(data.deployment, VISUAL_DIRECTOR,
+    const raw = await azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(data.deployment, data.advanced ? VISUAL_DIRECTOR + ADVANCED_DIRECTION : VISUAL_DIRECTOR,
       data.scenes.map((s, i) => `${i}: ${s}\nScene-matched models: ${searchLibrary(s, 5).filter(o => objects.some(a => a.id === o.id)).map(o => `${o.id}${o.clips?.length ? ' [rigged]' : ''}`).join(', ') || 'use faithful built-in props'}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : o.clips?.length ? ' (animated: idle/walk/run)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director');
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
     const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
@@ -163,7 +163,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string }
     const { cinematicPass } = await import('./cinematic-pass');
     const { groundLibraryScenes } = await import('./library-direction');
     const { sanitizeDirection } = await import('./cartoon-job');
-    const cast = diversifyCast(raw.cast as CastMember[]);
+    const cast = diversifyCast(raw.cast as CastMember[], data.advanced ? 4 : 3);
     const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], narration, objects);
     const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
@@ -171,9 +171,9 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string }
   };
 type CastMember = { id: string; seed: number; outfit: string };
 // Distinct looks per cast member: duplicate outfits/seeds are swapped for unused ones so characters never read as clones.
-export function diversifyCast(cast: CastMember[]): CastMember[] {
+export function diversifyCast(cast: CastMember[], max = 3): CastMember[] {
   const used = new Set<string>(), seeds = new Set<number>();
-  return (cast || []).slice(0, 3).map((c, i) => {
+  return (cast || []).slice(0, max).map((c, i) => {
     let outfit = (OUTFITS as readonly string[]).includes(c.outfit) ? c.outfit : OUTFITS[0];
     if (used.has(outfit)) outfit = OUTFITS.find(o => !used.has(o)) ?? outfit;
     used.add(outfit);
@@ -183,6 +183,11 @@ export function diversifyCast(cast: CastMember[]): CastMember[] {
     return { id: c.id, seed, outfit };
   });
 }
+// Advanced Video AI: every cast id becomes a painted card, so animals and creatures can act like people.
+const ADVANCED_DIRECTION = `
+ADVANCED VIDEO AI CAST (overrides the cast limits above): up to 4 cast ids, each drawn from a painted card of exactly what the narration says, so the outfit is only a placeholder.
+- Every person AND every animal or creature that acts or is named as a character in the narration (a pig, a dog, a horse) is its own cast id (e.g. "pig") and appears as an actor in every scene where it is mentioned or acts.
+- The hero is in at least 60% of scenes. Pick actions and expressions that match each line (point when someone shows, shock when something goes wrong, cheer or grin on wins, walk/run when someone moves).`;
 const VISUAL_DIRECTOR = `You are the Visual Director of a bright outlined 3D cartoon Shorts studio. Every sentence must SHOW what the narrator says, using ONLY the listed vocabulary (the engine cannot draw anything else; never invent items, never write code).
 Return a cast and exactly one direction per input sentence, in order.
 Cast (2-3 members whenever the story involves more than one person or group; 1 only for a true solo story): stable ids that name the role (hero, captain, rival, queen, doctor...), different seeds 1-999, and an outfit from the outfits list that matches each person's job, era and place (soldier/knight/veteran for armies, queen/noble/king for royalty, doctor/nurse for medicine, pharaoh for ancient Egypt, cowboy for the Wild West, chef for food, monk/priest for religion, woman/maid/peasant for townsfolk). Every cast member gets a DIFFERENT outfit so viewers can tell them apart.

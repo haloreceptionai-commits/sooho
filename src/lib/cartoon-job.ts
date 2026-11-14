@@ -7,6 +7,8 @@ type Lists = Omit<typeof vocab, 'map'>;
 export const VOCAB = vocab as unknown as { [K in keyof Lists]: [string, ...string[]] };
 export const OUTFITS = VOCAB.outfits;
 const id = z.string().regex(/^[a-z0-9_-]{1,30}$/);
+export const CARD_POSES = ['reach', 'shock', 'happy'] as const;
+const cardKey = z.string().regex(/^(obj-[a-z0-9_]{1,30}|[a-z0-9_-]{1,30}(-(reach|shock|happy))?)$/);
 const lonlat = z.tuple([z.number().min(-180).max(180), z.number().min(-65).max(85)]);
 const mapLabel = z.string().max(24).regex(/^[\p{L}\p{N} .,'&()\-–]*$/u);
 // Map world (long-form documentaries): ids come from the bundled Natural Earth region list; the worker re-checks them.
@@ -24,6 +26,7 @@ export const cartoonScene = z.object({
   actors: z.array(performer).min(1).max(3).optional(), speaker: id.optional(),
   props: z.array(z.object({ kind: z.enum(VOCAB.props), place: z.enum(VOCAB.places), motion: z.enum(VOCAB.prop_motions),
     // kind 'asset' names one object from the bundled CC0 library; the worker rejects unknown ids.
+    // 'card/<name>' is an Advanced Video AI painted story object (its PNG travels with the job).
     asset: z.string().regex(/^[a-z0-9-]+\/[A-Za-z0-9_.-]{1,80}$/).optional() })).max(4).optional(),
   fx: z.array(z.enum(VOCAB.fx)).max(3).optional(),
   cues: z.array(z.object({ word: z.number().int().min(0).max(200), kind: z.enum(VOCAB.sounds) })).max(4).optional(),
@@ -39,7 +42,7 @@ export const cartoonScene = z.object({
   if ((s.props ?? []).some(p => (p.kind === 'asset') !== !!p.asset || (p.kind === 'asset' && p.place === 'hand'))) ctx.addIssue({ code: 'custom', message: 'Library objects need an id and cannot be held' });
 });
 export const cartoonDirection = z.object({
-  cast: z.array(z.object({ id, seed: z.number().int().min(1).max(100000), outfit: z.enum(OUTFITS), card: z.boolean().optional() })).min(1).max(3),
+  cast: z.array(z.object({ id, seed: z.number().int().min(1).max(100000), outfit: z.enum(OUTFITS), card: z.boolean().optional() })).min(1).max(4),
   scenes: z.array(cartoonScene).min(1).max(600),
 });
 export const cartoonStart = z.object({
@@ -49,7 +52,8 @@ export const cartoonStart = z.object({
   format: z.enum(['short', 'long']).optional(),
   gate: z.object({ score: z.number().min(0).max(100), ready: z.boolean(), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),
   // Advanced Video AI: painted image-model character cards replace the drawn outfits for cast marked card=true.
-  advanced: z.boolean().optional(), cards: z.array(z.object({ id, path: z.string().min(1).max(500) })).max(3).optional(),
+  // Card files: '<castId>' (standing), '<castId>-<pose>' (reach/shock/happy) and 'obj-<name>' painted story objects.
+  advanced: z.boolean().optional(), cards: z.array(z.object({ id: cardKey, path: z.string().min(1).max(500) })).max(24).optional(),
   hookType: z.string().max(100), report: z.object({ revealSec: z.number(), shotMix: z.record(z.number()) }), captions: z.boolean(), sfx: z.boolean(),
 }).superRefine((d, ctx) => {
   if (d.format !== 'long' && (d.script.length > 4000 || d.narration.length > 120)) ctx.addIssue({ code: 'custom', message: 'Shorts are limited to 120 scenes' });
@@ -57,8 +61,11 @@ export const cartoonStart = z.object({
   if (d.narration.join(' ') !== d.script) ctx.addIssue({ code: 'custom', message: 'Scene text must match the locked narration' });
   if (d.narration.length !== d.direction.scenes.length) ctx.addIssue({ code: 'custom', message: 'Every scene needs supported cartoon direction' });
   const cast = new Set(d.direction.cast.map(c => c.id));
-  const carded = d.direction.cast.filter(c => c.card).map(c => c.id).sort().join(',');
-  if (carded !== (d.cards ?? []).map(c => c.id).sort().join(',') || (carded && !d.advanced)) ctx.addIssue({ code: 'custom', message: 'Character cards must match the cast' });
+  const carded = d.direction.cast.filter(c => c.card).map(c => c.id);
+  const keys = new Set((d.cards ?? []).map(c => c.id));
+  const objectCards = new Set(d.direction.scenes.flatMap(s => (s.props ?? []).filter(p => p.asset?.startsWith('card/')).map(p => `obj-${p.asset!.slice(5)}`)));
+  const allowed = new Set([...carded.flatMap(c => [c, ...CARD_POSES.map(p => `${c}-${p}`)]), ...objectCards]);
+  if (carded.some(c => !keys.has(c)) || [...objectCards].some(k => !keys.has(k)) || [...keys].some(k => !allowed.has(k)) || (keys.size && !d.advanced)) ctx.addIssue({ code: 'custom', message: 'Character cards must match the cast' });
   if (d.direction.scenes.some(s => !cast.has(s.actor) || (s.actors ?? []).some(a => !cast.has(a.actor)))) ctx.addIssue({ code: 'custom', message: 'Unknown cartoon actor' });
   if (d.direction.scenes.some((s, i) => (s.cues ?? []).some(c => c.word >= (d.narration[i] ?? '').split(/\s+/).filter(Boolean).length))) ctx.addIssue({ code: 'custom', message: 'Sound cue points past its sentence' });
 });
