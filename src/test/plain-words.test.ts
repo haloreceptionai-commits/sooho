@@ -20,3 +20,8 @@ describe("kid-level words", () => {
     expect(wordBudget(60)).toBe(156);
   });
 });
+describe("kid-level words: punctuation", () => {
+  it("reads contractions and dashes as normal words", () => {
+    expect(rareWords("It wasn’t a war—just a big mess. He’ll run.")).toEqual([]);
+  });
+});
