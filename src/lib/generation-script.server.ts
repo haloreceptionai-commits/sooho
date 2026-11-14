@@ -96,14 +96,14 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       return { report, judge, gate };
     };
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
-    let plan = autoFixPlan(await api.call(() => generatePlan({ data: base })));
+    let plan = autoFixPlan(await api.call(() => generatePlan({ data: base })), advanced);
     let ev = await evaluate(plan);
     let draft = plan, draftEv = ev;
     const tries = (input.engine === "cartoon" || advanced) ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       await up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
       const repairedRaw = await api.call(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors, { advanced }) } }));
-      const repaired = repairedRaw ? autoFixPlan(repairedRaw) : repairedRaw;
+      const repaired = repairedRaw ? autoFixPlan(repairedRaw, advanced) : repairedRaw;
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
