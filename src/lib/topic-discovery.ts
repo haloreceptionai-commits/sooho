@@ -13,6 +13,20 @@ export type DiscoveredTopic = z.infer<typeof discoveredTopicSchema> & FactTopic;
 export interface DiscoveryLibrary { latest: DiscoveredTopic[]; saved: DiscoveredTopic[] }
 export const potential = (t: DiscoveredTopic) => Object.values(t.scores).reduce((sum, n) => sum + n, 0);
 const normalized = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+/** Recover an exact evidence passage when the editor changed only quote punctuation/markup. */
+export function exactEvidenceQuote(quote: string, text: string) {
+  if (normalized(text).includes(normalized(quote))) return quote;
+  const words = [...text.matchAll(/[\p{L}\p{N}]+/gu)];
+  const wanted = quote.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  if (wanted.length < 8) return null;
+  for (let start = 0; start <= words.length - wanted.length; start++) {
+    if (!wanted.every((word, j) => words[start + j]?.[0].toLowerCase() === word)) continue;
+    const first = words[start], last = words[start + wanted.length - 1];
+    if (first?.index === undefined || last?.index === undefined) continue;
+    return text.slice(first.index, last.index + last[0].length);
+  }
+  return null;
+}
 export function evidenceSupported(t: DiscoveredTopic, fetched: Map<string, string>) {
   const domains = new Set(t.sources.filter(s => {
     const text = fetched.get(s.url);
