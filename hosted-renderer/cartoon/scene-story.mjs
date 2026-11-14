@@ -1,6 +1,6 @@
 import { cameraAt, actorIdle } from './motion.js';
 import { actionState } from './action.js';
-import { performanceAt, drawRig, wristWorld } from './performance.js';
+import { performanceAt, drawRig, wristWorld, prepareRig } from './performance.js';
 import { LIGHTS } from './lights.js';
 import manifest from './manifest.json' with { type: 'json' };
 
@@ -30,7 +30,7 @@ const RIGS = {};
 if(manifest.advancedPerformance===1) for(const c of manifest.cast.filter(c=>c.card)) {
   const img=new Image();img.src=`./cards/${c.id}-rig.png`;await img.decode();
   if(img.width!==1024||img.height!==1536)throw Error('Invalid rig atlas dimensions');
-  RIGS[c.id]=img;
+  RIGS[c.id]=prepareRig(img);
 }
 export const ADVANCED = CARD_KEYS.length > 0;
 const REACH = new Set(['point', 'lift', 'pour', 'wave', 'grab', 'shout', 'thumbs_up', 'carry', 'hold']);

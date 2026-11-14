@@ -39,14 +39,28 @@ export function wristWorld(actor, wrist, flip=false) {
 
 // Atlas layout: 2 columns x 4 rows, 512x384 cells. Each independently drawn part has transparent padding.
 export const RIG_PARTS=['head','torso','upper','fore','thigh','shin','hand','foot'];
+export function prepareRig(atlas, makeCanvas=()=>document.createElement('canvas')) {
+  // Texture padding is not a joint: trim each part's alpha bounds once, before drawing.
+  return RIG_PARTS.map((name,index)=>{
+    const cell=makeCanvas();cell.width=512;cell.height=384;const ctx=cell.getContext('2d');
+    ctx.drawImage(atlas,(index%2)*512,Math.floor(index/2)*384,512,384,0,0,512,384);
+    const pixels=ctx.getImageData(0,0,512,384).data;
+    let left=512,top=384,right=0,bottom=0;
+    for(let y=0;y<384;y++)for(let x=0;x<512;x++)if(pixels[(y*512+x)*4+3]>100){left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x);bottom=Math.max(bottom,y);}
+    if(right<=left||bottom<=top)throw Error(`Missing rig part: ${name}`);
+    const part=makeCanvas();part.width=right-left+1;part.height=bottom-top+1;
+    part.getContext('2d').drawImage(cell,left,top,part.width,part.height,0,0,part.width,part.height);
+    return part;
+  });
+}
 export function drawRig(g, atlas, pose, mouth=0) {
-  const part=(index,x,y,w,h,angle=0)=>{const col=index%2,row=Math.floor(index/2);g.save();g.translate(x,y);g.rotate(angle);g.drawImage(atlas,col*512,row*384,512,384,-w/2,-h/2,w,h);g.restore();};
+  const part=(index,x,y,w,h,angle=0)=>{g.save();g.translate(x,y);g.rotate(angle);g.drawImage(atlas[index],-w/2,-h/2,w,h);g.restore();};
   const segment=(index,a,b,width)=>part(index,(a[0]+b[0])/2,(a[1]+b[1])/2,width,Math.hypot(b[0]-a[0],b[1]-a[1])+18,Math.atan2(b[0]-a[0],b[1]-a[1]));
   for(const side of [-1,1]){
     const hip=[300+side*42,680],knee=[hip[0]+side*pose.stride*35,810],ankle=[hip[0]-side*pose.stride*55,940-Math.max(0,side*pose.stride)*20];
     segment(4,hip,knee,78);segment(5,knee,ankle,68);part(7,ankle[0]+side*8,ankle[1]+18,98,58);
   }
-  part(1,300,560,220,275);
+  part(1,300,560,240,285);
   for(const arm of [pose.left,pose.right]){segment(2,arm.shoulder,arm.elbow,68);segment(3,arm.elbow,arm.wrist,60);part(6,...arm.wrist,64,64);}
   part(0,300,330,280,270);
   // Dialogue only; never bounce a narrator's body. Atlas head retains identity and expression.
