@@ -9,7 +9,10 @@
     "castle",
     "market",
     "night_camp",
-    "map"
+    "map",
+    "mine",
+    "modern_street",
+    "device_cutaway"
   ],
   "lights": [
     "day",
@@ -36,7 +39,15 @@
     "look_back",
     "cower",
     "carry",
-    "hold"
+    "hold",
+    "aim",
+    "fire",
+    "load",
+    "place",
+    "inspect",
+    "strike",
+    "tap",
+    "throw"
   ],
   "expressions": [
     "neutral",
@@ -119,7 +130,12 @@
     "bread",
     "bottle",
     "skull_sign",
-    "asset"
+    "asset",
+    "phone",
+    "pan",
+    "pickaxe",
+    "gold_piece",
+    "magnifier"
   ],
   "places": [
     "hand",
