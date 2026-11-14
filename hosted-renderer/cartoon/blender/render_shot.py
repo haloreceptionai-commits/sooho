@@ -112,6 +112,39 @@ def lantern(loc, red, glass):
     L = bpy.context.active_object.data; L.energy = 55; L.color = (1.0, 0.58, 0.26); L.shadow_soft_size = 0.05
 
 
+def rock_chunk(loc, size, m, seed):
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, location=loc)
+    o = bpy.context.active_object
+    o.scale = (size * (0.8 + 0.4 * ((seed * 7) % 5) / 4), size * (0.7 + 0.5 * ((seed * 3) % 4) / 3), size * 0.55)
+    o.rotation_euler = (0, 0, seed * 1.7)
+    tx = bpy.data.textures.new(f'chunk{seed}', 'CLOUDS'); tx.noise_scale = 0.4
+    d = o.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = size * 0.6
+    o.data.materials.append(m); bpy.ops.object.shade_flat()
+    return o
+
+
+def crate(loc, size, m, yaw=0.0):
+    o = add('cube', (loc[0], loc[1], loc[2] + size / 2), (size * 0.6, size / 2, size / 2), rot=(0, 0, yaw), m=m, smooth=False)
+    bev = o.modifiers.new('b', 'BEVEL'); bev.width = size * 0.04; bev.segments = 2
+    return o
+
+
+def dress_mine(length, wood):
+    """Scattered stones, crate stack, barrel and a blurred foreground boulder for depth."""
+    stone = noise_mat('stone', (0.42, 0.40, 0.38), (0.72, 0.70, 0.66), scale=3, bump=0.5, speckle=0.3)
+    plank = noise_mat('plank', (0.55, 0.40, 0.22), (0.86, 0.70, 0.45), scale=1.5, bump=0.2, wave=True)
+    seed = 1
+    for y in [i * 1.3 for i in range(-2, int(length / 1.3) - 3)]:
+        for side in (-1, 1):
+            seed += 1
+            rock_chunk((side * (1.1 + 0.25 * (seed % 3)), y + 0.4 * (seed % 2), 0.05), 0.12 + 0.06 * (seed % 3), stone, seed)
+    crate((-1.05, 2.2, 0), 0.6, plank, 0.15); crate((-1.0, 2.9, 0), 0.55, plank, -0.1); crate((-1.05, 2.5, 0.6), 0.5, plank, 0.3)
+    barrel = add('cylinder', (1.05, 3.4, 0.4), (0.3, 0.3, 0.4), m=wood, vertices=32)
+    for z in (0.12, 0.68):
+        add('torus', (1.05, 3.4, z), (0.305, 0.305, 0.6), m=mat('hoop', (0.15, 0.15, 0.16), rough=0.4, metal=0.8), major_radius=1, minor_radius=0.04)
+    rock_chunk((-0.95, -1.4, 0.15), 0.38, stone, 99)  # near the lens: falls out of focus
+
+
 def set_mine_tunnel(length=24.0):
     rock = noise_mat('rock', (0.30, 0.19, 0.11), (0.66, 0.47, 0.30), scale=0.45, bump=0.15, speckle=0.35)
     dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6)
@@ -136,6 +169,7 @@ def set_mine_tunnel(length=24.0):
         add('cube', (x, length / 2 - 4, 0.09), (0.035, length / 2, 0.045), m=steel, smooth=False)
     for y in [i * 0.55 for i in range(-6, int(length / 0.55) - 6)]:
         add('cube', (0, y, 0.03), (0.7, 0.09, 0.03), m=wood, smooth=False)
+    dress_mine(length, wood)
     bpy.ops.object.light_add(type='AREA', location=(-1.2, -1.0, 2.0), rotation=(math.radians(62), 0, math.radians(-38)))
     K = bpy.context.active_object.data; K.energy = 70; K.size = 0.7; K.color = (1.0, 0.72, 0.45)  # warm key on the cast
     bpy.ops.object.light_add(type='AREA', location=(1.4, 1.8, 2.0), rotation=(math.radians(-60), 0, math.radians(150)))
@@ -220,17 +254,31 @@ def look(scene, shot):
             try: scene.view_settings.look = cand; break
             except TypeError: pass
     haze = shot.get('haze', 0)
-    if haze > 0:  # depth haze from the mist pass in the compositor: no volume ray-marching cost
-        scene.view_layers[0].use_pass_mist = True
-        ms = scene.world.mist_settings; ms.start = 3; ms.depth = 18; ms.falloff = 'QUADRATIC'
-        scene.use_nodes = True; nt = scene.node_tree
-        for nd in list(nt.nodes): nt.nodes.remove(nd)
-        rl = nt.nodes.new('CompositorNodeRLayers'); comp = nt.nodes.new('CompositorNodeComposite')
+    sc = scene; sc.use_nodes = True; nt = sc.node_tree
+    for nd in list(nt.nodes): nt.nodes.remove(nd)
+    rl = nt.nodes.new('CompositorNodeRLayers'); comp = nt.nodes.new('CompositorNodeComposite')
+    img = rl.outputs['Image']
+    if haze > 0:  # depth haze from the mist pass: no volume ray-marching cost
+        sc.view_layers[0].use_pass_mist = True
+        ms = sc.world.mist_settings; ms.start = 3; ms.depth = 18; ms.falloff = 'QUADRATIC'
         mul = nt.nodes.new('CompositorNodeMath'); mul.operation = 'MULTIPLY'; mul.use_clamp = True
         mul.inputs[1].default_value = min(1.0, haze * 40)
         mix = nt.nodes.new('CompositorNodeMixRGB'); mix.inputs[2].default_value = (*shot.get('haze_color', [0.12, 0.07, 0.035]), 1)
         nt.links.new(rl.outputs['Mist'], mul.inputs[0]); nt.links.new(mul.outputs[0], mix.inputs[0])
-        nt.links.new(rl.outputs['Image'], mix.inputs[1]); nt.links.new(mix.outputs[0], comp.inputs['Image'])
+        nt.links.new(img, mix.inputs[1]); img = mix.outputs[0]
+    glare = nt.nodes.new('CompositorNodeGlare'); glare.glare_type = 'FOG_GLOW'; glare.quality = 'MEDIUM'
+    glare.threshold = 0.9; glare.size = 7; glare.mix = -0.75  # soft bloom around lamps and highlights
+    nt.links.new(img, glare.inputs['Image']); img = glare.outputs['Image']
+    mask = nt.nodes.new('CompositorNodeEllipseMask'); mask.width = 0.95; mask.height = 0.92
+    blur = nt.nodes.new('CompositorNodeBlur'); blur.filter_type = 'FAST_GAUSS'; blur.use_relative = True
+    blur.factor_x = 0.25; blur.factor_y = 0.25; nt.links.new(mask.outputs[0], blur.inputs[0])
+    vig = nt.nodes.new('CompositorNodeMixRGB'); vig.blend_type = 'MULTIPLY'
+    inv = nt.nodes.new('CompositorNodeMath'); inv.operation = 'MULTIPLY_ADD'
+    inv.inputs[1].default_value = 0.28; inv.inputs[2].default_value = 0.72  # edges at 72% brightness
+    nt.links.new(blur.outputs[0], inv.inputs[0])
+    nt.links.new(img, vig.inputs[1]); nt.links.new(inv.outputs[0], vig.inputs[2]); vig.inputs[0].default_value = 1
+    img = vig.outputs[0]
+    nt.links.new(img, comp.inputs['Image'])
 
 
 def main():
