@@ -3,7 +3,7 @@ import { rareWords, kidReadability, wordBudget } from "@/lib/plain-words";
 
 describe("kid-level words", () => {
   it("flags adult words from the Pig War test", () => {
-    expect(rareWords("A pig topples a boundary and the dispute starts to escalate.")).toEqual(["boundary", "dispute", "escalate"]);
+    expect(rareWords("A pig knocks down a boundary and the dispute starts to escalate.")).toEqual(["boundary", "dispute", "escalate"]);
   });
   it("keeps everyday words and their forms", () => {
     expect(rareWords("The farmer's pig digs up his potatoes, so he grabs his rifle and runs.")).toEqual([]);

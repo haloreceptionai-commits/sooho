@@ -34,7 +34,7 @@ export function rareWords(text: string, allow: string[] = []): string[] {
     if (w.includes("-")) { out.push(...rareWords(w.replace(/-/g, " "), allow)); continue; }
     const f = forms(w);
     const adult = f.some(x => ADULT.has(x)), known = f.some(x => COMMON.has(x));
-    if (adult || fancy.has(w) || (!known && w.length >= 5)) out.push(w);
+    if (adult || (!known && (fancy.has(w) || w.length >= 5))) out.push(w);
   }
   return [...new Set(out)];
 }
