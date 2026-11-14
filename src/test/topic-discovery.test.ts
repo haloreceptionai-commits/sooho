@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { evidenceSupported, exactEvidenceQuote, freshSix, type DiscoveredTopic } from '@/lib/topic-discovery';
+import { sourcePassages } from '@/lib/topic-passages';
 const sample = (n: number): DiscoveredTopic => ({ id: `live-${n}`, factKey: `mechanism-${n}`, title: `Why object number ${n} works`, archetype: 'object', fact: 'A documented mechanism with a clear factual explanation.', source: 'https://museum.org/a', hook: 'This object works without power.', whyWatch: 'A clear visible surprise with a satisfying explanation.', payoff: 'The mechanism explains the surprising opening.', caveat: '', scores: { curiosity: 15, clarity: 15, visual: 15, payoff: 15, surprise: 15 }, sources: [{ url: 'https://museum.org/a', title: 'Museum', quote: 'This documented mechanism works without power.' }, { url: 'https://university.edu/b', title: 'University', quote: 'This documented mechanism works without power.' }] });
 describe('live topic rules', () => {
+  it('retains only exact fetched passages with unique selectable IDs', () => {
+    const text = 'This real museum passage explains how the mechanism works without electricity.';
+    const passages = sourcePassages([{ url: 'https://museum.org/a', title: 'Museum', excerpts: [text] }]);
+    expect(passages).toEqual([{ url: 'https://museum.org/a', title: 'Museum', quote: text, id: 0 }]);
+    expect(sourcePassages([{ url: 'https://museum.org/a', title: 'Museum', excerpts: undefined }])).toEqual([]);
+  });
   it('returns exactly six new topics from a larger researched pool', () => expect(freshSix(Array.from({ length: 10 }, (_, i) => sample(i)), [], [])).toHaveLength(6));
   it('does not offer previous suggestions under renamed titles', () => expect(freshSix([{ ...sample(1), title: 'A completely new title' }], [sample(1)], [])).toHaveLength(0));
   it('excludes already generated topics', () => expect(freshSix([sample(1)], [], [{ topic: sample(1).title, status: 'done' }])).toHaveLength(0));
