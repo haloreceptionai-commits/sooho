@@ -37,7 +37,7 @@ def noise_mat(name, c1, c2, scale=3.0, bump=0.4, rough=0.85, wave=False, speckle
     tex.inputs['Detail'].default_value = 8.0
     if wave:
         tex.wave_type = 'BANDS'; tex.bands_direction = 'Z'
-        tex.inputs['Distortion'].default_value = 1.5; tex.inputs['Detail Scale'].default_value = 2.0
+        tex.inputs['Distortion'].default_value = 3.0; tex.inputs['Detail Scale'].default_value = 1.5
     nt.links.new(co.outputs['Position'], tex.inputs['Vector'])
     ramp = nt.nodes.new('ShaderNodeValToRGB')
     ramp.color_ramp.elements[0].color = (*c1, 1); ramp.color_ramp.elements[1].color = (*c2, 1)
@@ -112,6 +112,23 @@ def lantern(loc, red, glass):
     L = bpy.context.active_object.data; L.energy = 55; L.color = (1.0, 0.58, 0.26); L.shadow_soft_size = 0.05
 
 
+def rock_mat():
+    """Tan rock: broad two-tone colour, dark crack lines (Voronoi edges), fine grit bump."""
+    m = noise_mat('rock', (0.30, 0.19, 0.11), (0.70, 0.50, 0.32), scale=1.1, bump=0.35, speckle=0.3)
+    nt = m.node_tree; b = nt.nodes['Principled BSDF']; geo = nt.nodes['Geometry']
+    vo = nt.nodes.new('ShaderNodeTexVoronoi'); vo.feature = 'DISTANCE_TO_EDGE'; vo.inputs['Scale'].default_value = 0.9
+    nt.links.new(geo.outputs['Position'], vo.inputs['Vector'])
+    edge = nt.nodes.new('ShaderNodeMapRange'); edge.inputs['From Min'].default_value = 0.0; edge.inputs['From Max'].default_value = 0.025
+    edge.inputs['To Min'].default_value = 0.35; edge.inputs['To Max'].default_value = 1.0
+    nt.links.new(vo.outputs['Distance'], edge.inputs['Value'])
+    mul = nt.nodes.new('ShaderNodeMix'); mul.data_type = 'RGBA'; mul.blend_type = 'MULTIPLY'; mul.inputs['Factor'].default_value = 1
+    col_link = [l for l in nt.links if l.to_socket == b.inputs['Base Color']][0]; src = col_link.from_socket
+    nt.links.remove(col_link)
+    nt.links.new(src, mul.inputs['A']); nt.links.new(edge.outputs['Result'], mul.inputs['B'])
+    nt.links.new(mul.outputs['Result'], b.inputs['Base Color'])
+    return m
+
+
 def rock_chunk(loc, size, m, seed):
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, location=loc)
     o = bpy.context.active_object
@@ -132,7 +149,7 @@ def crate(loc, size, m, yaw=0.0):
 def dress_mine(length, wood):
     """Scattered stones, crate stack, barrel and a blurred foreground boulder for depth."""
     stone = noise_mat('stone', (0.42, 0.40, 0.38), (0.72, 0.70, 0.66), scale=3, bump=0.5, speckle=0.3)
-    plank = noise_mat('plank', (0.55, 0.40, 0.22), (0.86, 0.70, 0.45), scale=1.5, bump=0.2, wave=True)
+    plank = noise_mat('plank', (0.70, 0.55, 0.33), (0.88, 0.74, 0.50), scale=11.0, bump=0.1, wave=True)
     seed = 1
     for y in [i * 1.3 for i in range(-2, int(length / 1.3) - 3)]:
         for side in (-1, 1):
@@ -142,21 +159,21 @@ def dress_mine(length, wood):
     barrel = add('cylinder', (1.05, 3.4, 0.4), (0.3, 0.3, 0.4), m=wood, vertices=32)
     for z in (0.12, 0.68):
         add('torus', (1.05, 3.4, z), (0.305, 0.305, 0.6), m=mat('hoop', (0.15, 0.15, 0.16), rough=0.4, metal=0.8), major_radius=1, minor_radius=0.04)
-    rock_chunk((-0.95, -1.4, 0.15), 0.38, stone, 99)  # near the lens: falls out of focus
+    rock_chunk((0.62, -1.75, 0.12), 0.32, stone, 99)  # near the lens: falls out of focus
 
 
 def set_mine_tunnel(length=24.0):
-    rock = noise_mat('rock', (0.30, 0.19, 0.11), (0.66, 0.47, 0.30), scale=0.45, bump=0.15, speckle=0.35)
+    rock = rock_mat()
     dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6)
-    wood = noise_mat('wood', (0.35, 0.22, 0.10), (0.72, 0.52, 0.30), scale=2.0, bump=0.25, wave=True)
+    wood = noise_mat('wood', (0.48, 0.32, 0.16), (0.70, 0.51, 0.30), scale=9.0, bump=0.12, wave=True)
     steel = mat('steel', (0.55, 0.56, 0.6), rough=0.3, metal=1.0)
     red = mat('lanternred', (0.45, 0.04, 0.03), rough=0.35, metal=0.4)
     glass = mat('lampglass', (1, 0.7, 0.4), emit=(1.0, 0.62, 0.28), strength=25)
     t = add('cylinder', (0, length / 2 - 4, 1.4), (2.3, 2.3, length / 2), rot=(math.pi / 2, 0, 0),
             m=rock, vertices=96, depth=2, end_fill_type='NOTHING')
-    bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.subdivide(number_cuts=18); bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.ops.object.shade_flat()  # large flat facets like carved rock
-    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.9; tx.noise_depth = 2
+    bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.subdivide(number_cuts=30); bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.shade_flat()  # flat facets like carved rock
+    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.5; tx.noise_depth = 3
     d = t.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = -0.75; d.texture_coords = 'GLOBAL'
     add('plane', (0, length / 2 - 4, 0), (2.6, length / 2, 1), m=dirt, smooth=False)
     for i, y in enumerate(range(-2, int(length) - 4, 3)):         # timber frames; a lantern on every other one
