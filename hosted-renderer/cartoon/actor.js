@@ -60,7 +60,7 @@ try {
     // Advanced Video AI: fetch each painted character card once and keep it with the durable inputs.
     // Keys: cast id (standing), '<id>-<pose>' and 'obj-<name>'; the app validated them against the cast and props.
     const cardKeys=(input.manifest.cards||[]).map(c=>c.id);
-    if(cardKeys.some(k=>!/^(obj-[a-z0-9_]{1,30}|[a-z0-9_-]{1,30}(-(reach|shock|happy))?)$/.test(k))||input.manifest.direction.cast.some(c=>c.card&&!cardKeys.includes(c.id)))throw Error('Invalid card list');
+    if(cardKeys.some(k=>!/^(obj-[a-z0-9_]{1,30}|[a-z0-9_-]{1,30}(-(reach|shock|happy|rig))?)$/.test(k))||input.manifest.direction.cast.some(c=>c.card&&!cardKeys.includes(c.id)))throw Error('Invalid card list');
     for(const c of cardKeys.map(id=>({id}))){
       const u=new URL(input.cardUrls?.[c.id]||'');if(u.protocol!=='https:'||!u.pathname.includes('/storage/v1/object/sign/videos/'))throw Error('Invalid card grant');
       const r=await netFetch(u);if(!r.ok)throw Error('Character card could not load');

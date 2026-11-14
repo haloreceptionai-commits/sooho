@@ -8,7 +8,7 @@ export const VOCAB = vocab as unknown as { [K in keyof Lists]: [string, ...strin
 export const OUTFITS = VOCAB.outfits;
 const id = z.string().regex(/^[a-z0-9_-]{1,30}$/);
 export const CARD_POSES = ['reach', 'shock', 'happy'] as const;
-const cardKey = z.string().regex(/^(obj-[a-z0-9_]{1,30}|[a-z0-9_-]{1,30}(-(reach|shock|happy))?)$/);
+const cardKey = z.string().regex(/^(obj-[a-z0-9_]{1,30}|[a-z0-9_-]{1,30}(-(reach|shock|happy|rig))?)$/);
 const lonlat = z.tuple([z.number().min(-180).max(180), z.number().min(-65).max(85)]);
 const mapLabel = z.string().max(24).regex(/^[\p{L}\p{N} .,'&()\-–]*$/u);
 // Map world (long-form documentaries): ids come from the bundled Natural Earth region list; the worker re-checks them.
@@ -64,7 +64,7 @@ export const cartoonStart = z.object({
   const carded = d.direction.cast.filter(c => c.card).map(c => c.id);
   const keys = new Set((d.cards ?? []).map(c => c.id));
   const objectCards = new Set(d.direction.scenes.flatMap(s => (s.props ?? []).filter(p => p.asset?.startsWith('card/')).map(p => `obj-${p.asset!.slice(5)}`)));
-  const allowed = new Set([...carded.flatMap(c => [c, ...CARD_POSES.map(p => `${c}-${p}`)]), ...objectCards]);
+  const allowed = new Set([...carded.flatMap(c => [c, `${c}-rig`, ...CARD_POSES.map(p => `${c}-${p}`)]), ...objectCards]);
   if (carded.some(c => !keys.has(c)) || [...objectCards].some(k => !keys.has(k)) || [...keys].some(k => !allowed.has(k)) || (keys.size && !d.advanced)) ctx.addIssue({ code: 'custom', message: 'Character cards must match the cast' });
   if (d.direction.scenes.some(s => !cast.has(s.actor) || (s.actors ?? []).some(a => !cast.has(a.actor)))) ctx.addIssue({ code: 'custom', message: 'Unknown cartoon actor' });
   if (d.direction.scenes.some((s, i) => (s.cues ?? []).some(c => c.word >= (d.narration[i] ?? '').split(/\s+/).filter(Boolean).length))) ctx.addIssue({ code: 'custom', message: 'Sound cue points past its sentence' });
