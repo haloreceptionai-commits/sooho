@@ -2,7 +2,7 @@
 // while the user moves around the app.
 import { actions, flushVideo, getState, setVideoActive, type VideoInput } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
-import { checkContinuity, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { checkContinuity, designAdvancedCards, paintAdvancedCard, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
 import { submitCartoon, resumeApprovedCartoon } from '@/lib/cartoon.functions';
 import { canResumeApprovedCartoon } from './cartoon-resume';
 import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
@@ -20,7 +20,7 @@ import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.func
 import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
-import { assertVideoEngine } from "./video-engines";
+import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -143,7 +143,7 @@ export async function runVideo(id: string, input: VideoInput) {
     }
   }
   // Owner's explicit Resume: a failed/cancelled cartoon run restarts from its saved voice + direction (no new script or voice spend).
-  if (input.engine === 'cartoon' && canResumeApprovedCartoon(prior?.hostedRender?.status ?? '', prior?.cartoonReview)) {
+  if (usesCartoonWorker(input.engine) && canResumeApprovedCartoon(prior?.hostedRender?.status ?? '', prior?.cartoonReview)) {
     try { await resumeApprovedCartoon({ data: { videoId: id } }); }
     catch (e) { actions.updateVideo(id, { error: e instanceof Error ? e.message : 'Could not resume approved render' }); }
     return;
@@ -161,7 +161,7 @@ export async function runVideo(id: string, input: VideoInput) {
   try {
     const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
     const cartoon = getState().videos.find(v => v.id === id)?.cartoonCheckpoint;
-    if (input.engine === 'cartoon' && cartoon) {
+    if (usesCartoonWorker(input.engine) && cartoon) {
       await flushVideo(id);
       const job = await submitCartoon({ data: cartoon });
       up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
@@ -244,7 +244,7 @@ export async function runVideo(id: string, input: VideoInput) {
     let plan = autoFixPlan(await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait));
     let ev = await evaluate(plan);
     let draft = plan, draftEv = ev;
-    const tries = input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
+    const tries = input.engine === "advanced" ? 1 : input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
       const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
@@ -269,7 +269,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${gate.score}/100 · ${n} scenes` });
 
-    if (input.engine === 'cartoon') {
+    if (usesCartoonWorker(input.engine)) {
       const long = input.format !== 'short';
       // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
       if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
@@ -281,6 +281,24 @@ export async function runVideo(id: string, input: VideoInput) {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw Error('Not signed in');
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
+      // Advanced Video AI: paint one character card per cast member while the voice records (saved, so Resume never repays).
+      const advanced = input.engine === 'advanced';
+      const cardsP = advanced ? (async () => {
+        const ids = direction.cast.map(c => c.id), root = `${user.user!.id}/${id}/media`;
+        const { data: have } = await supabase.storage.from('videos').list(root, { search: 'card-' });
+        const missing = ids.filter(cid => !have?.some(f => f.name === `card-${cid}.png`));
+        if (missing.length) {
+          up({ detail: `Painting ${missing.length} character card${missing.length > 1 ? 's' : ''} while the voice records…` });
+          const looks = await withRetry(() => designAdvancedCards({ data: { scenes: plan.scenes.map((sc, i) => `${sc.narration} [actor: ${direction.scenes[i]?.actor ?? ids[0]}]`), ids: missing, deployment: s.scriptDeployment } }));
+          await Promise.all(looks.map(async l => {
+            const { image } = await withRetry(() => paintAdvancedCard({ data: { look: l.look, deployment: s.imageDeployment } }));
+            const { error } = await supabase.storage.from('videos').upload(`${root}/card-${l.id}.png`, b64ToBuf(image), { contentType: 'image/png', upsert: false });
+            if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save character card: ${error.message}`);
+          }));
+        }
+        return ids.map(cid => ({ id: cid, path: `${root}/card-${cid}.png` }));
+      })() : Promise.resolve(undefined);
+      cardsP.catch(() => {});
       // Resume: the locked take for this same saved script is already stored, so reuse it instead of paying again.
       const { data: existing } = await supabase.storage.from('videos').list(`${user.user.id}/${id}/cartoon`, { search: 'original-voice.wav' });
       if (existing?.some(f => f.name === 'original-voice.wav')) {
@@ -300,9 +318,11 @@ export async function runVideo(id: string, input: VideoInput) {
         const { error } = await supabase.storage.from('videos').upload(voicePath, audio, { contentType: 'audio/wav', upsert: false });
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }
-      const safeDirection = sanitizeDirection(direction, narration);
-      const cp = cartoonStart.parse({ videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: !long, sfx: s.soundEffects, format: long ? 'long' : 'short' });
-      up({ cartoonCheckpoint: cp, progress: 70, detail: 'Sending cartoon to hosted preview…' });
+      const cards = await cardsP;
+      const sanitized = sanitizeDirection(direction, narration);
+      const safeDirection = cards ? { ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) } : sanitized;
+      const cp = cartoonStart.parse({ ...(cards ? { advanced: true, cards } : {}), videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: !long, sfx: s.soundEffects, format: long ? 'long' : 'short' });
+      up({ cartoonCheckpoint: cp, progress: 70, detail: advanced ? 'Sending to Advanced Video AI render…' : 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
       const job = await submitCartoon({ data: cp });
       up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
