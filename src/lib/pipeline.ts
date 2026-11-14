@@ -277,7 +277,18 @@ export async function runVideo(id: string, input: VideoInput) {
         const cut = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(plan, ev.gate, rs.anchors, { loop: advanced && micro }) + fitNote + `\nThe last draft had ${count(plan)} words: CUT it to at most ${budget} words, keeping the hook, question and twist.` } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
         if (cut && count(cut) <= budget * 1.25) { plan = cut; ev = await evaluate(cut); }
       }
-      if (count(plan) > budget * 1.25) throw Error(`The script came back ${count(plan)} words, too long for ${input.durationSec} seconds (max ${Math.round(budget * 1.25)}). No voice or pictures were paid for — try again or pick a longer length.`);
+      if (count(plan) > budget * 1.25) {
+        // Second shortening path: the line-by-line editor keeps every scene and picture plan but trims the words.
+        up({ detail: `Script is ${count(plan)} words; trimming each line to fit ${input.durationSec} seconds…` });
+        const names = [plan.hero?.name, ...plan.characters.map((c) => c.name), rs.anchors.place].filter((x): x is string => !!x);
+        const trimmed = await withRetry(() => polishKidScript({ data: { scenes: plan.scenes.map((sc) => sc.narration), problems: [`Too long: ${count(plan)} words. The whole script MUST be at most ${budget} words — shorten every line.`], words: Math.min(400, Math.max(10, Math.round(budget * 0.9))), names: names.slice(0, 20), deployment: s.scriptDeployment } })).catch(() => null);
+        if (trimmed) {
+          const tp: Plan = { ...plan, script: trimmed.scenes.join(" "), scenes: plan.scenes.map((sc, i) => ({ ...sc, narration: trimmed.scenes[i]! })) };
+          if (count(tp) < count(plan)) { plan = tp; ev = await evaluate(tp); }
+        }
+      }
+      // Never fail the video for length: a slightly long script just makes a slightly longer Short.
+      if (count(plan) > budget * 1.25) ev = { ...ev, gate: { ...ev.gate, blockers: [...ev.gate.blockers, `Length: ${count(plan)} words for ${input.durationSec}s (aim ${budget}) — the Short will run a little long`] } };
     }
     up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
