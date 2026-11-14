@@ -1,11 +1,13 @@
 // Builds the cartoon renderer images in Azure Container Registry (ACR Tasks), with no local Docker:
 // uploads this folder as a tarball and schedules two Docker builds, the full image (:v1, with the
-// speech-alignment model) and the slim render image (:slim). Usage: node tools/azure-build.mjs
+// speech-alignment model) and the slim render image (:slim). Usage: node tools/azure-build.mjs [tags] [dir] [image]
+// e.g. node tools/azure-build.mjs gpu1 blender blender-renderer builds the Blender shot renderer image.
 import { execFileSync } from 'node:child_process';
 import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 const need = n => { const v = process.env[n]; if (!v) throw Error(`${n} missing`); return v; };
-const root = path.resolve(import.meta.dirname, '..');
+const root = path.resolve(import.meta.dirname, '..', process.argv[3] || '.');
+const imageName = process.argv[4] || 'cartoon-renderer';
 const registry = need('AZURE_REGISTRY_LOGIN_SERVER').split('.')[0];
 const base = `https://management.azure.com/subscriptions/${need('AZURE_SUBSCRIPTION_ID')}/resourceGroups/${need('AZURE_RESOURCE_GROUP')}/providers/Microsoft.ContainerRegistry/registries/${registry}`;
 const token = (await (await fetch(`https://login.microsoftonline.com/${need('AZURE_TENANT_ID')}/oauth2/v2.0/token`, { method: 'POST',
@@ -22,7 +24,7 @@ const tags = (process.argv[2] || 'v1,slim').split(',');
 const runs = [];
 for (const tag of tags) {
   const run = await arm('POST', `${base}/scheduleRun?api-version=2019-06-01-preview`, { type: 'DockerBuildRequest', isPushEnabled: true, sourceLocation: up.relativePath,
-    dockerFilePath: 'Dockerfile', imageNames: [`cartoon-renderer:${tag}`], platform: { os: 'Linux', architecture: 'amd64' }, timeout: 3600, agentConfiguration: { cpu: 2 },
+    dockerFilePath: 'Dockerfile', imageNames: [`${imageName}:${tag}`], platform: { os: 'Linux', architecture: 'amd64' }, timeout: 3600, agentConfiguration: { cpu: 2 },
     arguments: [{ name: 'ALIGN', value: tag === 'slim' ? '0' : '1', isSecret: false }] });
   runs.push([tag, run.properties?.runId ?? run.name]); console.log('scheduled', tag, runs.at(-1)[1]);
 }
