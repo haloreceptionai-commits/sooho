@@ -24,6 +24,7 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
   const snapshot = job.request as unknown as { input: VideoInput; settings: Settings };
   const { input, settings } = snapshot;
   assertVideoEngine(input.engine);
+  if (input.engine === 'advanced') throw Error('Advanced Video AI runs from the app page; background generation does not support it yet');
   const auth = { p_job: job.id, p_hash: job.token_hash, p_owner: owner, p_fence: fence };
   const { data: row, error: readError } = await db.from('videos').select('data').eq('id', job.video_id).single();
   if (readError || !row) throw Error('Saved video is unavailable');
