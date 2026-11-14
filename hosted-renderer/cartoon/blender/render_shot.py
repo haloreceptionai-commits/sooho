@@ -51,6 +51,14 @@ def noise_mat(name, c1, c2, scale=3.0, bump=0.4, rough=0.85, wave=False, speckle
         b2 = nt.nodes.new('ShaderNodeBump'); b2.inputs['Strength'].default_value = speckle
         nt.links.new(sp.outputs['Fac'], b2.inputs['Height']); nt.links.new(bp.outputs['Normal'], b2.inputs['Normal'])
         nt.links.new(b2.outputs['Normal'], b.inputs['Normal'])
+        dots = nt.nodes.new('ShaderNodeTexVoronoi'); dots.inputs['Scale'].default_value = 55
+        nt.links.new(co.outputs['Position'], dots.inputs['Vector'])
+        pit = nt.nodes.new('ShaderNodeMapRange'); pit.inputs['From Min'].default_value = 0.08; pit.inputs['From Max'].default_value = 0.16
+        pit.inputs['To Min'].default_value = 0.45; pit.inputs['To Max'].default_value = 1.0
+        nt.links.new(dots.outputs['Distance'], pit.inputs['Value'])
+        dm = nt.nodes.new('ShaderNodeMix'); dm.data_type = 'RGBA'; dm.blend_type = 'MULTIPLY'; dm.inputs['Factor'].default_value = 1
+        nt.links.new(ramp.outputs['Color'], dm.inputs['A']); nt.links.new(pit.outputs['Result'], dm.inputs['B'])
+        nt.links.new(dm.outputs['Result'], b.inputs['Base Color'])
     nt.links.new(bp.outputs['Normal'], b.inputs['Normal'])
     b.inputs['Roughness'].default_value = rough
     return m
@@ -143,7 +151,7 @@ def rock_chunk(loc, size, m, seed):
 def crate(loc, size, m, yaw=0.0):
     o = add('cube', (loc[0], loc[1], loc[2] + size / 2), (size * 0.6, size / 2, size / 2), rot=(0, 0, yaw), m=m, smooth=False)
     bev = o.modifiers.new('b', 'BEVEL'); bev.width = size * 0.04; bev.segments = 2
-    return o
+    return ink(o, 0.012)
 
 
 def dress_mine(length, wood):
@@ -156,7 +164,7 @@ def dress_mine(length, wood):
             seed += 1
             rock_chunk((side * (1.1 + 0.25 * (seed % 3)), y + 0.4 * (seed % 2), 0.05), 0.12 + 0.06 * (seed % 3), stone, seed)
     crate((-1.05, 2.2, 0), 0.6, plank, 0.15); crate((-1.0, 2.9, 0), 0.55, plank, -0.1); crate((-1.05, 2.5, 0.6), 0.5, plank, 0.3)
-    barrel = add('cylinder', (1.05, 3.4, 0.4), (0.3, 0.3, 0.4), m=wood, vertices=32)
+    barrel = ink(add('cylinder', (1.05, 3.4, 0.4), (0.3, 0.3, 0.4), m=wood, vertices=32), 0.012)
     for z in (0.12, 0.68):
         add('torus', (1.05, 3.4, z), (0.305, 0.305, 0.6), m=mat('hoop', (0.15, 0.15, 0.16), rough=0.4, metal=0.8), major_radius=1, minor_radius=0.04)
 
@@ -183,7 +191,7 @@ def tube(length, m, radius=2.3, ring=96, step=0.1, y0=-4.0, zc=1.4):
 
 def set_mine_tunnel(length=24.0):
     rock = rock_mat()
-    dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6)
+    dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6, speckle=0.3)
     wood = noise_mat('wood', (0.48, 0.32, 0.16), (0.70, 0.51, 0.30), scale=9.0, bump=0.12, wave=True)
     steel = mat('steel', (0.55, 0.56, 0.6), rough=0.3, metal=1.0)
     red = mat('lanternred', (0.45, 0.04, 0.03), rough=0.35, metal=0.4)
@@ -192,8 +200,8 @@ def set_mine_tunnel(length=24.0):
     add('plane', (0, length / 2 - 4, 0), (2.6, length / 2, 1), m=dirt, smooth=False)
     for i, y in enumerate(range(-2, int(length) - 4, 3)):         # timber frames; a lantern on every other one
         for x in (-1.55, 1.55):
-            add('cube', (x, y, 1.15), (0.11, 0.11, 1.15), m=wood, smooth=False)
-        add('cube', (0, y, 2.35), (1.7, 0.13, 0.12), m=wood, smooth=False)
+            ink(add('cube', (x, y, 1.15), (0.11, 0.11, 1.15), m=wood, smooth=False), 0.012)
+        ink(add('cube', (0, y, 2.35), (1.7, 0.13, 0.12), m=wood, smooth=False), 0.012)
         if i % 2 == 0:
             lantern((1.3 if i % 4 == 0 else -1.3, y - 0.2, 1.95), red, glass)
     for x in (-0.45, 0.45):
