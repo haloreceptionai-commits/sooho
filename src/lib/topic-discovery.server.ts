@@ -16,7 +16,7 @@ async function research(path: string, body: unknown) {
   }
   return response.json();
 }
-const resultSchema = z.object({ results: z.array(z.object({ url: z.string().url(), title: z.string(), excerpts: z.array(z.string()).default([]) })).default([]), warnings: z.array(z.unknown()).optional(), errors: z.array(z.unknown()).optional() });
+const resultSchema = z.object({ results: z.array(z.object({ url: z.string().url(), title: z.string(), excerpts: z.array(z.string()).nullish(), full_content: z.string().nullish() })).default([]), warnings: z.array(z.unknown()).nullish(), errors: z.array(z.unknown()).nullish() });
 const candidateJson = {
   type: 'object', additionalProperties: false, required: ['topics'], properties: { topics: { type: 'array', items: {
     type: 'object', additionalProperties: false,
@@ -50,9 +50,9 @@ export async function discoverFacts(input: { focus: string; format: string; depl
     const candidates = draft.topics.flatMap(raw => { const parsed = discoveredTopicSchema.safeParse(raw); return parsed.success ? [parsed.data] : []; });
     const urls = [...new Set(candidates.flatMap(t => t.sources.map(s => s.url)))].filter(url => results.some(r => r.url === url)).slice(0, 20);
     if (!urls.length) continue;
-    const extracted = resultSchema.parse(await research('extract', { urls, objective: 'Evidence for the specific history/science facts, qualifications, dates and mechanisms. Return enough surrounding text to verify quotes.', advanced_settings: { excerpt_settings: { max_chars_per_result: 5000 } } }));
+    const extracted = resultSchema.parse(await research('extract', { urls, objective: 'Evidence for the specific history/science facts, qualifications, dates and mechanisms. Return enough surrounding text to verify quotes.', advanced_settings: { full_content: true, excerpt_settings: { max_chars_per_result: 5000 } } }));
     if (extracted.errors?.length) console.warn('Topic evidence could not be fetched', extracted.errors);
-    const texts = new Map(extracted.results.map(r => [r.url, r.excerpts.join('\n')]));
+    const texts = new Map(extracted.results.map(r => [r.url, [r.full_content ?? '', ...(r.excerpts ?? [])].join('\n')]));
     const supported = candidates.filter(t => evidenceSupported(t, texts));
     if (!supported.length) continue;
     const checked = await azureJson<{ topics: unknown[] }>(input.deployment,
