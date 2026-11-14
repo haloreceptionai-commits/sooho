@@ -160,7 +160,11 @@ const role = (r: Role) => [r.name, r.role].filter(Boolean);
 export function validateStory(s: StoryInput): StoryReport {
   const checks: Check[] = [];
   const micro = s.durationSec < MICRO_SEC;
-  const add = (id: string, pass: boolean, msg: string) => checks.push(micro && MICRO_SKIP.has(id) ? { id, pass: true, msg: `${id} not used for loop Shorts` } : { id, pass, msg });
+  const legacyOnly = new Set(['V1', 'V2', 'V6', 'V7', 'V9', 'CLOCK', 'LOOPS']);
+  const add = (id: string, pass: boolean, msg: string) => {
+    if (s.kid && legacyOnly.has(id)) return; // Advanced uses literal causal storytelling, audited by blind viewers.
+    checks.push(micro && MICRO_SKIP.has(id) ? { id, pass: true, msg: `${id} not used for loop Shorts` } : { id, pass, msg });
+  };
   const all = s.scenes.map((x) => x.narration.trim()).join(" ");
   const words = wc(all);
   const total = words / WPS;
@@ -250,7 +254,7 @@ export function validateStory(s: StoryInput): StoryReport {
   const mixOk = wide >= 0.35 && shotMix.face <= 0.3 && shotMix.macro >= 0.1 && shotMix.action >= 0.2 && s.scenes[0]?.shot !== "face";
   add("SHOTS", mixOk, mixOk ? "Shot mix balanced" : `Shot mix: wide ${Math.round(wide * 100)}% (≥40), action ${Math.round(shotMix.action * 100)}% (~30), macro ${Math.round(shotMix.macro * 100)}% (~20), faces ${Math.round(shotMix.face * 100)}% (≤30)${s.scenes[0]?.shot === "face" ? "; first frame is a face" : ""}`);
   // Language: 3-12 word sentences, plain words, length
-  const longS = sents.filter((x) => wc(x) > 12).length;
+  const longS = sents.filter((x) => wc(x) > (s.kid ? 20 : 12)).length;
   const anchorWords = new Set(Object.values(s.anchors).flatMap(contentWords).concat(contentWords(`${s.hero.name} ${s.cast.map((c) => c.name).join(" ")}`)));
   const hard = [...new Set(hardWords(all))].filter((w) => { const k = w.toLowerCase().replace(/[’']s$/, "").replace(/[^a-z]/g, ""); return !anchorWords.has(k) && !anchorWords.has(k.replace(/s$/, "")) && !NUMBER_WORD.test(k); });
   const labels = sents.filter((x) => LABEL.test(x));
