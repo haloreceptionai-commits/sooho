@@ -83,8 +83,7 @@ def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
 
 def sound_design(samples,twist_frame,cues,seed=1):
     """Original staccato score plus licensed CC0 Foley, exactly on the saved voice clock."""
-    from functools import lru_cache
-    music=np.zeros(samples);sfx=np.zeros(samples);t=np.arange(samples)/RATE
+    music=np.zeros(samples);sfx=np.zeros(samples)
     # Original composition: low pulsed notes, changing harmony at the answer. Not a borrowed soundtrack.
     for start in range(0,samples,int(RATE*.25)):
         n=min(int(RATE*.18),samples-start);tt=np.arange(n)/RATE
@@ -94,11 +93,14 @@ def sound_design(samples,twist_frame,cues,seed=1):
         music[start:start+n]+=.025*(np.sin(2*np.pi*freq*tt)+.15*np.sin(4*np.pi*freq*tt))*env
     import os
     root=Path(os.environ.get('CARTOON_SOUND_DIR',str(Path(__file__).parent/'assets'/'sound')))
-    names={'impact':'impact','pour':'splash','splash':'splash','pop':'tap','creak':'handling','coin':'handling','bell':'handling','reveal':'tap','whoosh':'handling','wind':'stone','thunder':'stone','crowd':'footstep'}
+    names={'impact':'impact','pour':'splash','splash':'splash','pop':'tap','creak':'handling','coin':'handling'}
     cache={}
     for cue in cues:
         if cue['kind'] not in KINDS or not isinstance(cue['frame'],int) or not 0<=cue['frame']<round(samples/RATE*30):raise ValueError('Invalid sound cue')
-        name=names[cue['kind']]
+        # No recording is better than a semantically false sound (stones are not wind,
+        # one footstep is not a crowd, and handling is not a bell). Unsupported categories stay silent.
+        name=names.get(cue['kind'])
+        if name is None:continue
         if name not in cache:
             with wave.open(str(root/(name+'.wav')),'rb') as w:
                 if w.getframerate()!=RATE or w.getnchannels()!=1 or w.getsampwidth()!=2:raise ValueError('Invalid licensed Foley format')
