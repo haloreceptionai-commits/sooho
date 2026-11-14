@@ -141,7 +141,8 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
 };
 
 const directCartoonChunk = async (data: { scenes: string[]; deployment: string; advanced?: boolean | undefined }) => {
-    const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
+    const prototypeActions=new Set(['aim','fire','load','place','inspect','strike','tap','throw']);
+    const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: k==='actions' ? VOCAB.actions.filter(a=>!prototypeActions.has(a)) : VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
     const { shortlist, searchLibrary } = await import('./object-library');
     const narration = data.scenes.map(s => s.split(/\s+Visual:/i)[0] ?? s);

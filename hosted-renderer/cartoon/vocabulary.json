@@ -39,7 +39,15 @@
     "look_back",
     "cower",
     "carry",
-    "hold"
+    "hold",
+    "aim",
+    "fire",
+    "load",
+    "place",
+    "inspect",
+    "strike",
+    "tap",
+    "throw"
   ],
   "expressions": [
     "neutral",
