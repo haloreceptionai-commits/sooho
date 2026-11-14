@@ -14,7 +14,7 @@ const secrets = (await arm('POST', `${rg}/jobs/cartoon-render/listSecrets?${V}`)
 const gpu = profile !== 'Consumption';
 const name = gpu ? 'blender-shot-gpu' : 'blender-shot-cpu';
 const job = { location: ref.location, properties: { environmentId: ref.properties.environmentId, workloadProfileName: profile,
-  configuration: { triggerType: 'Manual', replicaTimeout: 3600, replicaRetryLimit: 0, manualTriggerConfig: { replicaCompletionCount: 1, parallelism: 1 },
+  configuration: { triggerType: 'Manual', replicaTimeout: 3600, replicaRetryLimit: 0, manualTriggerConfig: { replicaCompletionCount: Number(process.env.PARALLEL || 1), parallelism: Number(process.env.PARALLEL || 1) },
     secrets, registries: ref.properties.configuration.registries },
   template: { containers: [{ name: 'shot', image: `${need('AZURE_REGISTRY_LOGIN_SERVER')}/blender-renderer:${tag}`,
     resources: gpu ? { cpu: 8, memory: '56Gi' } : { cpu: 4, memory: '8Gi' },
