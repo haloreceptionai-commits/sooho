@@ -59,9 +59,10 @@ export async function discoverFacts(input: { focus: string; format: string; depl
       search_queries: [t.factKey.replace(/[-_]/g, ' ').slice(0, 200)], mode: 'advanced', advanced_settings: { max_results: 3, excerpt_settings: { max_chars_per_result: 3000 } },
     })));
     const extra = corroboration.flatMap(raw => resultSchema.parse(raw).results);
-    const urls = [...new Set([...candidates.flatMap(t => t.sources.map(s => s.url)), ...extra.map(s => s.url)])].filter(url => [...results, ...extra].some(r => r.url === url)).slice(0, 20);
+    const urls = [...new Set(candidates.flatMap((t, i) => [...t.sources.map(s => s.url), ...resultSchema.parse(corroboration[i]).results.slice(0, 2).map(s => s.url)]))].filter(url => [...results, ...extra].some(r => r.url === url));
     if (!urls.length) continue;
-    const extracted = resultSchema.parse(await research('extract', { urls, objective: 'Evidence for the specific history/science facts, qualifications, dates and mechanisms. Return enough surrounding text to verify quotes.', advanced_settings: { full_content: true, excerpt_settings: { max_chars_per_result: 5000 } } }));
+    const chunks = await Promise.all([urls.slice(0, 20), urls.slice(20, 40)].filter(u => u.length).map(u => research('extract', { urls: u, objective: 'Evidence for the specific history/science facts, qualifications, dates and mechanisms. Return enough surrounding text to verify quotes.', advanced_settings: { full_content: true, excerpt_settings: { max_chars_per_result: 5000 } } })));
+    const extracted = { results: chunks.flatMap(c => resultSchema.parse(c).results), errors: chunks.flatMap(c => resultSchema.parse(c).errors ?? []) };
     if (extracted.errors?.length) console.warn('Topic evidence could not be fetched', extracted.errors);
     const texts = new Map(extracted.results.map(r => [r.url, [r.full_content ?? '', ...(r.excerpts ?? [])].join('\n')]));
     const supported = candidates.filter(t => t.sources.some(s => texts.has(s.url)));
