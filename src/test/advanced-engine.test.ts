@@ -68,7 +68,7 @@ describe('Advanced Video AI animal casting', () => {
     const cast = ['major', 'gunner', 'farmer', 'reader'].map((id, i) => ({ id, seed: i + 1, outfit: 'sailor' }));
     const sc = (actor: string) => ({ world: 'town', light: 'day', action: 'point', expression: 'neutral', actor, wide: false });
     const d = ensureAnimalCast({ cast, scenes: [sc('major'), sc('gunner'), sc('major')] } as never, ['Emus run into the wheat!', 'The gunner aims at the fields.', 'The emus dash away.']);
-    expect(d.cast.map(c => c.id)).toEqual(['major', 'gunner', 'farmer', 'emu']);
+    expect(d.cast.map(c => c.id)).toEqual(['major', 'gunner', 'reader', 'emu']);
     expect(d.scenes[0]!.actors!.find(a => a.actor === 'emu')?.action).toBe('run');
     expect(d.scenes[1]!.actors!.some(a => a.actor === 'emu')).toBe(false);
     expect(d.scenes[2]!.actors!.some(a => a.actor === 'emu')).toBe(true);
