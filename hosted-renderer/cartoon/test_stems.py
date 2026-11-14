@@ -39,4 +39,8 @@ class StemTests(unittest.TestCase):
                 self.assertGreater(np.count_nonzero(sfx[24000:28800]),0)
                 self.assertEqual(np.count_nonzero(sfx[64000:]),0)
 
+    def test_unrecorded_ambience_is_not_replaced_with_unrelated_foley(self):
+        _,sfx=synthesize(48000,15,[{'frame':0,'kind':'wind'},{'frame':3,'kind':'crowd'},{'frame':6,'kind':'bell'}],advanced=True)
+        self.assertEqual(np.count_nonzero(sfx),0)
+
 if __name__ == '__main__': unittest.main()
