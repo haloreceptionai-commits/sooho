@@ -13,7 +13,8 @@ export const submitCartoonOperation = async ({ data, context }: { data: CartoonS
     // The saved video's format must match the job: Shorts render 9:16, long-form 16:9 with map scenes.
     const long = (record['input'] as Record<string, Json>)?.['format'] !== 'short';
     if (long !== (data.format === 'long')) throw Error('Cartoon format does not match this video');
-    if (!validRenderAssets(context.userId, data.videoId, [data.voicePath])) throw Error('Invalid narration asset');
+    if (!validRenderAssets(context.userId, data.videoId, [data.voicePath, ...(data.cards ?? []).map(c => c.path)])) throw Error('Invalid narration asset');
+    if ((data.cards ?? []).some(c => c.path !== `${context.userId}/${data.videoId}/media/card-${c.id}.png`)) throw Error('Invalid character card');
     const { data: existing } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
     // A failed/cancelled run may be resumed by the owner's explicit click; active runs are never duplicated.
     if (existing && !['failed', 'cancelled'].includes(existing.status)) return { id: existing.id, status: existing.status };
@@ -30,10 +31,16 @@ export const submitCartoonOperation = async ({ data, context }: { data: CartoonS
     try {
       const { data: signed, error: signError } = await context.supabase.storage.from('videos').createSignedUrl(data.voicePath, 86400);
       if (signError || !signed) throw Error('Could not open the saved Atlas narration');
+      const cardUrls: Record<string, string> = {};
+      for (const c of data.cards ?? []) {
+        const { data: card, error: cardError } = await context.supabase.storage.from('videos').createSignedUrl(c.path, 86400);
+        if (cardError || !card) throw Error('Could not open a saved character card');
+        cardUrls[c.id] = card.signedUrl;
+      }
       const key = cartoonInputKey(job.id, 'preflight');
       await supabaseAdmin.from('render_jobs').update({ recovery: { claimedAt: Date.now(), inputKey: key } }).eq('id', job.id);
       try {
-        const run = await startAzureCartoon(job.id, 'preflight', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, mode: 'preflight' }, key);
+        const run = await startAzureCartoon(job.id, 'preflight', { jobId: job.id, callbackToken: token, callbackUrl: callbackAddress(), manifest, voiceUrl: signed.signedUrl, cardUrls, mode: 'preflight' }, key);
         await supabaseAdmin.from('render_jobs').update({ run_id: run }).eq('id', job.id).not('status', 'in', '(done,failed,cancelled)');
       } catch (e) {
         // Uncertain starts are reconciled by the render watchdog against Azure (and restarted if none exists).

@@ -28,6 +28,12 @@ cast=cast.replace(reach,'const lf = (opts.lift || 0) * 0.15 * HH; return { pts: 
 await writeFile(path.join(web,'toon.js'),cast+'\n'+await readFile(path.join(root,'prop-cast.js'),'utf8')+'\n'+await readFile(path.join(root,'prop-art.js'),'utf8'));
 await cp(path.join(root,'scene-story.mjs'),path.join(web,'story.js'));
 await writeFile(path.join(web,'manifest.json'),JSON.stringify(m));
+// Advanced Video AI cards sit next to the manifest; only validated PNGs for carded cast are copied in.
+const carded=m.cast.filter(c=>c.card).map(c=>c.id);
+if(carded.length){await mkdir(path.join(web,'cards'),{recursive:true});
+  for(const id of carded){const bytes=await readFile(path.join(path.dirname(path.resolve(input)),'cards',`${id}.png`));
+    if(bytes.length<200||bytes.length>12e6||bytes.readUInt32BE(0)!==0x89504e47)throw Error('Invalid character card');
+    await writeFile(path.join(web,'cards',`${id}.png`),bytes);}}
 // Copy only the library objects this story uses (plus each pack's shared texture and licence).
 const used=[...new Set(m.shots.flatMap(s=>(s.props||[]).filter(p=>p.kind==='asset').map(p=>p.asset)))].map(id=>LIBRARY.get(id));
 for(const e of used){const dir=path.join(web,'assets',e.pack);await mkdir(dir,{recursive:true});const src=path.join(root,'assets/library',e.pack);

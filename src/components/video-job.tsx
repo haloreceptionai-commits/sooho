@@ -1,3 +1,4 @@
+import { usesCartoonWorker } from '@/lib/video-engines';
 import { FileText, Mic, ImageIcon, Clapperboard, Check, RotateCcw, AlertTriangle, X } from "lucide-react";
 import { actions, type Video } from "@/lib/store";
 import { runVideo, removeFromQueue } from "@/lib/pipeline";
@@ -26,14 +27,14 @@ export function VideoJob({ v }: { v: Video }) {
   const restartDead = useServerFn(restartDeadPreflight);
   // While a cartoon renders, the server's watchdog checks Azure: dropped or never-started machines continue
   // from saved work, finished-but-unreported videos complete, and hopeless runs fail with a clear next step.
-  const waitingPreview = v.input.engine === 'cartoon' && ['running', 'submitting', 'saving'].includes(v.hostedRender?.status ?? '') && v.status !== 'done';
+  const waitingPreview = usesCartoonWorker(v.input.engine) && ['running', 'submitting', 'saving'].includes(v.hostedRender?.status ?? '') && v.status !== 'done';
   useEffect(() => {
     if (!waitingPreview) return;
     const check = () => void restartDead({ data: { videoId: v.id } }).then((r) => { if (r.restarted || ('action' in r && r.action !== 'wait')) void syncFromCloud(); }).catch(() => undefined);
     const first = setTimeout(check, 20_000), every = setInterval(check, 90_000);
     return () => { clearTimeout(first); clearInterval(every); };
   }, [waitingPreview, v.id, restartDead]);
-  const approvedFailed = v.input.engine === 'cartoon' && canResumeApprovedCartoon(v.hostedRender?.status ?? '', v.cartoonReview);
+  const approvedFailed = usesCartoonWorker(v.input.engine) && canResumeApprovedCartoon(v.hostedRender?.status ?? '', v.cartoonReview);
   const cur = ORDER.indexOf(v.stage);
   const failed = v.status === "failed";
   return (
@@ -76,7 +77,7 @@ export function VideoJob({ v }: { v: Video }) {
           <p className="flex-1 break-words">{v.error}</p>
           {approvedFailed && <Button disabled={resuming} className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { setResuming(true); void resume({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not resume render')).finally(() => setResuming(false)); }}><RotateCcw className="h-3 w-3" /> Resume render</Button>}
           {!approvedFailed && !v.generationJob && (!v.hostedRender || (v.cartoonCheckpoint && ["failed", "cancelled"].includes(v.hostedRender.status))) && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => void runVideo(v.id, v.input)}><RotateCcw className="h-3 w-3" /> {v.seedanceCheckpoint || v.assemblyCheckpoint || v.cartoonCheckpoint || v.scriptCheckpoint ? "Resume" : "Retry"}</Button>}
-          {v.input.engine === 'cartoon' && ['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(v.error ?? '') && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { void recover({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not recover preview')); }}><RotateCcw className="h-3 w-3" /> Recover preview</Button>}
+          {usesCartoonWorker(v.input.engine) && ['Cloud callback unavailable', 'Owner review does not match locked inputs'].includes(v.error ?? '') && <Button className={`${btnOutline} px-2 py-1 text-xs`} onClick={() => { void recover({ data: { videoId: v.id } }).then(() => syncFromCloud()).catch(e => toast.error(e instanceof Error ? e.message : 'Could not recover preview')); }}><RotateCcw className="h-3 w-3" /> Recover preview</Button>}
         </div>
       )}
       <CartoonReviewPanel video={v} />

@@ -95,7 +95,7 @@ function Create() {
               <div className="flex justify-between text-sm"><span className="font-semibold">Length</span>
                 <span className="font-mono">{format === "short" ? `${shortSec}s` : `${longMin} min`}</span></div>
               {format === "short"
-                ? <input type="range" min={30} max={90} step={5} value={shortSec} onChange={(e) => setShortSec(+e.target.value)} className="mt-2 w-full accent-primary" />
+                ? <input aria-label="Short length in seconds" type="range" min={engine === "advanced" ? 10 : 30} max={90} step={engine === "advanced" ? 1 : 5} value={shortSec} onChange={(e) => setShortSec(+e.target.value)} className="mt-2 w-full accent-primary" />
                 : <input type="range" min={3} max={15} step={1} value={longMin} onChange={(e) => setLongMin(+e.target.value)} className="mt-2 w-full accent-primary" />}
             </div>
           </Panel>
@@ -130,7 +130,9 @@ function Create() {
             <select id="engine" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
               <option value="own">Own model — AI images with camera motion</option>
               <option value="cartoon">Own cartoon — 3D cartoon + animated maps on Azure</option>
+              <option value="advanced">Advanced Video AI — painted characters in 3D sets, fastest</option>
             </select>
+            {engine === "advanced" && <p className="mt-2 text-xs text-muted-foreground">Advanced Video AI: story-matched painted characters standing in inked 3D sets, with depth of field, word-pop captions and music. Renders straight through on Azure — no preview step — and keeps going if you close your browser.</p>}
             {engine === "cartoon" && format !== "short" && <p className="mt-2 text-xs text-muted-foreground">Long-form cartoon: 16:9 documentary with animated relief maps, glowing territory and marching armies, plus cartoon scenes. You approve a preview before the full render.</p>}
           </Panel>
 

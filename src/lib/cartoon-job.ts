@@ -39,7 +39,7 @@ export const cartoonScene = z.object({
   if ((s.props ?? []).some(p => (p.kind === 'asset') !== !!p.asset || (p.kind === 'asset' && p.place === 'hand'))) ctx.addIssue({ code: 'custom', message: 'Library objects need an id and cannot be held' });
 });
 export const cartoonDirection = z.object({
-  cast: z.array(z.object({ id, seed: z.number().int().min(1).max(100000), outfit: z.enum(OUTFITS) })).min(1).max(3),
+  cast: z.array(z.object({ id, seed: z.number().int().min(1).max(100000), outfit: z.enum(OUTFITS), card: z.boolean().optional() })).min(1).max(3),
   scenes: z.array(cartoonScene).min(1).max(600),
 });
 export const cartoonStart = z.object({
@@ -48,6 +48,8 @@ export const cartoonStart = z.object({
   // 'long' renders a 16:9 1920x1080 documentary with map scenes; omitted means a 9:16 Short (older saved jobs).
   format: z.enum(['short', 'long']).optional(),
   gate: z.object({ score: z.number().min(0).max(100), ready: z.boolean(), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),
+  // Advanced Video AI: painted image-model character cards replace the drawn outfits for cast marked card=true.
+  advanced: z.boolean().optional(), cards: z.array(z.object({ id, path: z.string().min(1).max(500) })).max(3).optional(),
   hookType: z.string().max(100), report: z.object({ revealSec: z.number(), shotMix: z.record(z.number()) }), captions: z.boolean(), sfx: z.boolean(),
 }).superRefine((d, ctx) => {
   if (d.format !== 'long' && (d.script.length > 4000 || d.narration.length > 120)) ctx.addIssue({ code: 'custom', message: 'Shorts are limited to 120 scenes' });
@@ -55,6 +57,8 @@ export const cartoonStart = z.object({
   if (d.narration.join(' ') !== d.script) ctx.addIssue({ code: 'custom', message: 'Scene text must match the locked narration' });
   if (d.narration.length !== d.direction.scenes.length) ctx.addIssue({ code: 'custom', message: 'Every scene needs supported cartoon direction' });
   const cast = new Set(d.direction.cast.map(c => c.id));
+  const carded = d.direction.cast.filter(c => c.card).map(c => c.id).sort().join(',');
+  if (carded !== (d.cards ?? []).map(c => c.id).sort().join(',') || (carded && !d.advanced)) ctx.addIssue({ code: 'custom', message: 'Character cards must match the cast' });
   if (d.direction.scenes.some(s => !cast.has(s.actor) || (s.actors ?? []).some(a => !cast.has(a.actor)))) ctx.addIssue({ code: 'custom', message: 'Unknown cartoon actor' });
   if (d.direction.scenes.some((s, i) => (s.cues ?? []).some(c => c.word >= (d.narration[i] ?? '').split(/\s+/).filter(Boolean).length))) ctx.addIssue({ code: 'custom', message: 'Sound cue points past its sentence' });
 });

@@ -698,3 +698,23 @@ export async function inkBeatsOperation(data: { beats: { i: number; text: string
   if (seen.size !== expected.size) throw new Error('Picture storyboard omitted a spoken phrase');
   return r.shots;
 }
+
+// ---------------- Advanced Video AI: painted character cards ----------------
+export const ADVANCED_CARD_STYLE = 'Bold 2D cartoon character for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, big expressive eyes, friendly rounded proportions, slightly exaggerated features, full body standing upright facing the viewer, whole figure visible head to feet, centered, nothing else in the picture, transparent background, no ground, no shadow, no text.';
+const CARD_DESIGNER = `You design the on-screen characters for a 3D cartoon Short where each character is one flat painted card standing in a 3D set.
+For every cast id, read the narration and decide who or what that role should actually look like so the picture matches the story literally (it may be an animal, an object-mascot or a person of the right era, place and job).
+Return one short visual description per id (max 40 words): species or person, era-accurate clothes/colours, one signature item, expression. Distinct silhouettes and colours between ids. Never real living people's likeness, never gore, never text.`;
+export const designAdvancedCardsOperation = async ({ data }: { data: { scenes: string[]; ids: string[]; deployment: string } }) => {
+  const schema = { type: 'object', additionalProperties: false, required: ['cards'], properties: { cards: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'look'], properties: { id: { type: 'string', enum: data.ids }, look: { type: 'string' } } } } } };
+  const r = await azureJson<{ cards: { id: string; look: string }[] }>(data.deployment, CARD_DESIGNER, `Cast ids: ${data.ids.join(', ')}\n\nNarration with each scene's acting role:\n${data.scenes.map((t, i) => `${i + 1}. ${t}`).join('\n')}`, 'card_design', schema, 'Card designer');
+  return data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) }));
+};
+export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string } }) => {
+  const tries = [data.look, softenPrompt(data.look), 'a friendly cartoon storyteller in simple period clothes'];
+  for (const look of tries) {
+    const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: `${ADVANCED_CARD_STYLE} Character: ${look}`.slice(0, 3900), size: '1024x1536', quality: 'medium', background: 'transparent', output_format: 'png', n: 1 });
+    if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
+    else if (res.status !== 400) await fail(res, 'Character card');
+  }
+  throw Error('Character card could not be painted');
+};
