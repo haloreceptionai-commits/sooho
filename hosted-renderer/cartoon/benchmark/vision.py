@@ -36,7 +36,7 @@ SHOT = {
         'lighting': {'type': 'string', 'enum': ['day_sun', 'sunset', 'night', 'interior_lamps', 'rain_storm', 'flat']},
         'depth': {'type': 'integer', 'description': '0-10: shadows, background blur, layered depth.'},
         'environment_richness': {'type': 'integer', 'description': '0-10: built 3D place with textured ground, walls, props, foliage.'},
-        'character_quality': {'type': 'integer', 'description': '0-10: real 3D bodies posed with the action, expressive faces; flat cut-outs score low. 0 if no characters.'},
+        'character_quality': {'type': 'integer', 'description': '0-10: characters are solid 3D models (shaded volume, contact shadows, feet planted, consistent from every camera angle) posed doing the action. Simple designs such as egg-head stick figures score high when they are real posed 3D models; flat painted 2D cut-outs or billboards score at most 3. 0 if no characters.'},
         'render_quality': {'type': 'integer', 'description': '0-10 overall cinematic quality of a 3D-animated YouTube Short.'},
         'note': {'type': 'string'},
     },
@@ -51,9 +51,9 @@ spoken_visible: "yes" when the thing or action the words name is clearly shown, 
 loosely related, "no" when not shown. Scale anchors for 0-10 scores: 10 = polished studio 3D short
 (real lit 3D sets, soft shadows, depth of field, posed 3D characters); 5 = clean but simple 3D;
 2 = flat cut-out cards or plain backdrops. Two fixed reference images come first: REFERENCE HIGH
-scores environment_richness 9, render_quality 9, character_quality 8, depth 8, distinct_framings 3;
+scores environment_richness 9, render_quality 9, character_quality 9, depth 8, distinct_framings 3;
 REFERENCE LOW scores 1 on all four and distinct_framings 1. Flat painted 2D cut-out figures standing
-in a 3D set score at most 3 for character_quality. Place every shot on that scale. Do not label the
+in a 3D set score at most 3 for character_quality, however detailed the painting is. Place every shot on that scale. Do not label the
 reference images."""
 
 

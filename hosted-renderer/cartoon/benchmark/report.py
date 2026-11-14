@@ -37,6 +37,7 @@ def main(outdir: Path, bench: list[str], ours: list[str], dest: Path):
           '| **Overall score** | 100 | ' + ' | '.join(f"**{scores[n]['overall']}**" for n in names) + ' |']
     for k, _, _ in scorecard.WEIGHTS:
         md.append(f"| {LABELS[k]} | {tgt[k]} | " + ' | '.join(str(vids[n]['metrics'][k]) for n in names) + ' |')
+    md.append('| Sound hits per minute (info only, speech included) | — | ' + ' | '.join(str(vids[n]['metrics']['transients_per_min']) for n in names) + ' |')
     md.append('| Loudness (LUFS) | -14 | ' + ' | '.join(str(vids[n]['metrics']['lufs']) for n in names) + ' |')
     md.append('| Speaking rate (wpm) | — | ' + ' | '.join(str(vids[n]['measure'].get('wpm')) for n in names) + ' |')
     for n in names:

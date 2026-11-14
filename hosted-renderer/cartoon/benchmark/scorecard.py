@@ -1,7 +1,9 @@
 """Benchmark scorecard: turns measure.py + vision.py output into comparable numbers.
 
 Targets are the average of the benchmark videos, so a render scores 100 only
-when it matches them on every dimension.  Weights favour what viewers notice
+when it matches them on every dimension.  Sound-hit density is reported but not scored: without separated stems speech
+consonants count as hits, so step 8 measures sound sync from our own stems.
+Weights favour what viewers notice
 first: built sets, real objects that match the words, and changing views.
 """
 from __future__ import annotations
@@ -27,8 +29,7 @@ WEIGHTS: list[tuple[str, float, str]] = [
     ('effects_per_min', 4, 'up'),
     ('moving_camera_share', 3, 'up'),
     ('lighting_variety', 2, 'up'),
-    ('sharpness', 1, 'up'),
-    ('transients_per_min', 1, 'up'),
+    ('sharpness', 2, 'up'),
 ]
 
 
