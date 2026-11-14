@@ -58,7 +58,13 @@ export const Route = createFileRoute("/api/public/render-callback")({
           if (!files?.some(f => f.name === name && Number(f.metadata?.size) > 0)) return new Response('Review not saved', { status: 409 });
         }
         const { data: accepted, error } = await supabaseAdmin.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'review', video_patch: { cartoonReview: { ...value, approved: false }, progress: 75, detail: 'Review cartoon preview and narration timing', hostedRender: { id: job.id, status: 'review' } } as Json, saved_path: '' });
-        return error ? new Response('Could not save review', { status: 500 }) : Response.json({ accepted });
+        if (error) return new Response('Could not save review', { status: 500 });
+        // Advanced Video AI has no preview gate: the saved review is approved at once and the full render starts.
+        if (accepted && (job.manifest as { advanced?: boolean } | null)?.advanced === true) {
+          try { const { approveCartoonOperation } = await import('@/lib/cartoon-approve.server'); await approveCartoonOperation({ videoId: job.video_id, hash: value.hash }, job.user_id, supabaseAdmin); }
+          catch (e) { console.error('Advanced auto-approve failed', e instanceof Error ? e.message : e); }
+        }
+        return Response.json({ accepted });
       }
     }
     const parsed = renderCallback.safeParse(body);

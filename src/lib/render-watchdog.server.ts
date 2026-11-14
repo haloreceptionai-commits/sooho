@@ -75,7 +75,13 @@ async function restart(db: Db, job: Job, mode: RenderMode, recovery: Recovery, p
     const voicePath = (job.manifest as { voicePath?: string }).voicePath;
     const { data: signed } = voicePath ? await db.storage.from('videos').createSignedUrl(voicePath, 86400) : { data: null };
     if (!signed) throw Error('Saved narration could not be opened');
-    input = { jobId: job.id, callbackToken: token, callbackUrl: RENDER_CALLBACK_URL, manifest: job.manifest, voiceUrl: signed.signedUrl, mode };
+    const cardUrls: Record<string, string> = {};
+    for (const c of (job.manifest as { cards?: { id: string; path: string }[] }).cards ?? []) {
+      const { data: card } = await db.storage.from('videos').createSignedUrl(c.path, 86400);
+      if (!card) throw Error('Saved character card could not be opened');
+      cardUrls[c.id] = card.signedUrl;
+    }
+    input = { jobId: job.id, callbackToken: token, callbackUrl: RENDER_CALLBACK_URL, manifest: job.manifest, voiceUrl: signed.signedUrl, cardUrls, mode };
   }
   const detail = mode === 'finish' ? `Render machine stopped — continuing automatically from saved frames (attempt ${next.attempts! + 1})` : `Preview machine stopped — restarting it automatically (attempt ${next.attempts! + 1})`;
   await db.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { detail, hostedRender: { id: job.id, status: 'running' } } as Json, saved_path: '' });
