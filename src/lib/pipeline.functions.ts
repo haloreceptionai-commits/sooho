@@ -286,7 +286,7 @@ const planSchema = {
 export const generatePlan = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: PlanInput) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required (max 300 chars)");
-    return { ...d, durationSec: Math.max(20, Math.min(1200, Math.round(d.durationSec))) };
+    return { ...d, durationSec: Math.max(10, Math.min(1200, Math.round(d.durationSec))) };
   })
   .handler(async ({ data }) => { const { generatePlanOperation } = await import('./pipeline-operations.server'); return generatePlanOperation({ data }); });
 

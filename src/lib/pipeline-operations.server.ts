@@ -347,6 +347,7 @@ export interface PlanInput {
   research?: string; // anchors, premise, question, hero, payoff, money shot
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
+  kid?: boolean; // Advanced Video AI: words an 8-year-old knows, stricter story shape
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
@@ -402,11 +403,25 @@ const planSchema = {
   },
 };
 
+const KID_RULES = (words: number) => `
+KID-LEVEL WORDS (Advanced Video AI; these override the language rules above where stricter):
+- An 8-year-old must understand EVERY word. Use words a second-grader says every day. Names of people and places are fine; explain them in kid words the first time ("San Juan, a small island").
+- Banned adult words and their swaps: boundary -> line between two lands; dispute/conflict -> fight; escalate -> get worse; crisis -> big problem; treaty -> deal; territory -> land; military/troops -> army/soldiers; government/officials -> leaders; vessel -> ship; massive -> huge; ancient -> very old; incident -> thing that happened; negotiate -> talk it out; commander -> boss; eventually -> in the end.
+- Sentences of 4-12 words, one idea each, like a fun big sister telling a story. Use sound words (oink! boom! splash!) and short funny quotes from the characters.
+- Every sentence must make a kid want the next one: a surprise, a danger, a funny moment or a new fact. Never two calm lines in a row.
+- Exactly ${words} words (±10%). Count them; a machine checks.
+- If an animal or object causes the story (a pig, a cannon, a jar), name it in the first sentence and keep it on screen: it is a character.`;
+const MICRO_RULES = (D: number, words: number, scenes: number) => `
+LOOP SHORT (${D} seconds; these rules REPLACE the skeleton, word clock, myth, analogy, escalation and long payoff rules above):
+- Exactly ${scenes} scenes and ${words} words in total (±10%). No more: the voice must fit in ${D} seconds.
+- Scene 1 (0-2s): the hook, max 8 words, the strangest true fact with the subject word. Scene 2 (by 5s): one short question ending "?" (loop_opened "main"). Middle scenes: one new surprise each, the hero acting. Last scene: the answer as a twist (loop_closed "main"), written so it flows straight back into the first line when the video loops.
+- The hero (person or animal) is in at least 60% of scenes. No myth line, no "Ever ...?" analogy, no dates in the first line.`;
 export const generatePlanOperation = async ({ data }: { data: PlanInput }): Promise<Plan> => {
     const short = data.format === "short";
     const D = data.durationSec;
     const words = Math.round(D * (short ? 2.6 : 2.37)); // Atlas Shorts pace ~153 wpm; long-form narrator ~142 wpm
-    const scenes = short ? Math.max(8, Math.round(D / 3)) : Math.min(90, Math.max(14, Math.round(D / 6)));
+    const micro = short && D < 25; // seamless loop Short (the guide's 12-second format)
+    const scenes = short ? (micro ? Math.max(3, Math.round(D / 2.5)) : Math.max(8, Math.round(D / 3))) : Math.min(90, Math.max(14, Math.round(D / 6)));
     const perScene = Math.round(words / scenes);
     const at = (f: number) => Math.round(D * f);
     const system = `You write ${D}-second ${short ? "vertical story Shorts" : "story documentaries"} for a viral history & science channel. You write a STORY with a hero, not a lecture.
@@ -462,6 +477,7 @@ VISUALS (one scene ≈ 3s, one clear moment):
 - sfx: the sound of the visual event (knock, rustle, plane, siren, impact, pour, wave, crash...).
 - hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook words.
 
+${data.kid ? KID_RULES(words) : ""}${micro ? MICRO_RULES(D, words, scenes) : ""}
 Write the WHOLE narration first in "script" (read it aloud in your head; fix anything that doesn't parse), THEN split that exact text, word for word, into the scenes' "narration" fields.
 
 ${short ? "" : `
