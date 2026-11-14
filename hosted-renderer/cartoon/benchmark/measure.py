@@ -77,6 +77,43 @@ def merge_caption_words(caps: list[dict]) -> list[str]:
     return words
 
 
+def _norm(w: str) -> str:
+    return re.sub(r"[^a-z0-9]", '', w.lower().replace('’', "'"))
+
+
+def time_transcript(transcript: str, caps: list[dict], duration: float) -> list[dict]:
+    """Give every transcript word a time by matching OCR caption tokens in order.
+
+    OCR is noisy, so it only anchors times; the words themselves always come
+    from the transcript.  Unanchored words are interpolated between anchors."""
+    from difflib import SequenceMatcher
+    words = transcript.split()
+    keys = [_norm(w) for w in words]
+    times: list[float | None] = [None] * len(words)
+    p = 0
+    for c in caps:
+        for tok in c['text'].split():
+            t = _norm(tok)
+            if len(t) < 2:
+                continue
+            for j in range(p, min(len(words), p + 10)):
+                if keys[j] == t or (len(t) > 3 and SequenceMatcher(None, keys[j], t).ratio() > 0.8):
+                    if times[j] is None:
+                        times[j] = c['t']
+                    p = j + 1
+                    break
+    anchors = [(i, t) for i, t in enumerate(times) if t is not None]
+    if not anchors:
+        anchors = [(0, 0.0)]
+    anchors = [(-1, 0.0)] + anchors + [(len(words), duration)]
+    out = []
+    for (i0, t0), (i1, t1) in zip(anchors, anchors[1:]):
+        for i in range(max(0, i0), min(len(words), i1)):
+            t = t0 if i == i0 else t0 + (t1 - t0) * (i - i0) / (i1 - i0)
+            out.append({'w': words[i], 't': round(t, 2), 'anchored': i == i0})
+    return out
+
+
 def laplacian_var(gray: np.ndarray) -> float:
     g = gray.astype(float)
     lap = -4 * g[1:-1, 1:-1] + g[:-2, 1:-1] + g[2:, 1:-1] + g[1:-1, :-2] + g[1:-1, 2:]
@@ -143,13 +180,14 @@ def audio_metrics(path: str) -> dict:
             'transients_per_min': round(len(peaks) / (len(pcm) / sr) * 60, 1)}
 
 
-def measure(path: str, name: str, work: Path) -> dict:
+def measure(path: str, name: str, work: Path, transcript: str | None = None) -> dict:
     work.mkdir(parents=True, exist_ok=True)
     info = probe(path)
     frames = low_frames(path)
     cuts = detect_cuts(frames)
     bounds = cuts + [len(frames)]
     caps = caption_words(path, info['duration'])
+    timed = time_transcript(transcript, caps, info['duration']) if transcript else []
     mask = picture_mask(LOW_H)
     shots = []
     for k in range(len(cuts)):
@@ -163,19 +201,23 @@ def measure(path: str, name: str, work: Path) -> dict:
         gray = pic.mean(2)
         seg = frames[a:b, mask].astype(np.int16)
         motion = float(np.abs(np.diff(seg, axis=0)).mean() / 255) if len(seg) > 1 else 0.0
-        words = ' '.join(c['text'] for c in caps if t0 <= c['t'] < t1)
+        words = ' '.join(w['w'] for w in timed if t0 <= w['t'] < t1) if timed else ' '.join(c['text'] for c in caps if t0 <= c['t'] < t1)
         shots.append({'i': k, 'start': round(t0, 2), 'end': round(t1, 2), 'len': round(t1 - t0, 2),
                       'sharpness': round(laplacian_var(gray), 1), 'colorfulness': round(colorfulness(pic), 1),
                       'contrast': round(float(gray.std()), 1), 'motion': round(motion, 4), 'words': words,
                       'keyframe': str(work / f'{name}-shot{k:02d}.jpg')})
     word_count = len(merge_caption_words(caps))
-    return {'name': name, 'source': path, **info, 'shots': shots, 'captions': caps,
+    spoken = len(timed)
+    return {'name': name, 'source': path, **info, 'shots': shots, 'captions': caps, 'words': timed,
+            'wpm': round(spoken / info['duration'] * 60, 1) if spoken else None,
+            'anchored_words': sum(1 for w in timed if w['anchored']),
             'caption_words_ocr': word_count,
             'audio': audio_metrics(path) if info['audio'] else None}
 
 
 if __name__ == '__main__':
     src, name, outdir = sys.argv[1], sys.argv[2], Path(sys.argv[3])
-    res = measure(src, name, outdir / 'frames')
+    tr = Path(__file__).with_name('transcripts') / f'{name}.txt'
+    res = measure(src, name, outdir / 'frames', tr.read_text() if tr.exists() else None)
     (outdir / f'{name}.measure.json').write_text(json.dumps(res, indent=1))
-    print(name, 'shots', len(res['shots']),  'median len', np.median([s['len'] for s in res['shots']]), res['audio'] and res['audio']['transients_per_min'])
+    print(name, 'shots', len(res['shots']), 'wpm', res['wpm'], 'anchored', res['anchored_words'], '/', len(res['words']),  'median len', np.median([s['len'] for s in res['shots']]), res['audio'] and res['audio']['transients_per_min'])
