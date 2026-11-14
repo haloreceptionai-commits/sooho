@@ -6,3 +6,4 @@
 - [x] Tests, local frames, Azure rebuild, publish, 12s + 60s test videos
 - [ ] 60s Short in 2–3 min: currently ~12 min (script ~3, painting ~2.5, drawing ~6.5, encode ~3); needs faster drawing/encoding
 - [ ] Odd plain orange closing shot and a white blocky 3D model seen in the emu test
+- [ ] Mine Salting benchmark: compare latest completed video, document verified gaps, and present the detailed upgrade plan for approval
