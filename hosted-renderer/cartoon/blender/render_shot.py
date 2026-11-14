@@ -159,7 +159,6 @@ def dress_mine(length, wood):
     barrel = add('cylinder', (1.05, 3.4, 0.4), (0.3, 0.3, 0.4), m=wood, vertices=32)
     for z in (0.12, 0.68):
         add('torus', (1.05, 3.4, z), (0.305, 0.305, 0.6), m=mat('hoop', (0.15, 0.15, 0.16), rough=0.4, metal=0.8), major_radius=1, minor_radius=0.04)
-    rock_chunk((0.62, -1.75, 0.12), 0.32, stone, 99)  # near the lens: falls out of focus
 
 
 def tube(length, m, radius=2.3, ring=96, step=0.1, y0=-4.0, zc=1.4):
@@ -202,6 +201,8 @@ def set_mine_tunnel(length=24.0):
     for y in [i * 0.55 for i in range(-6, int(length / 0.55) - 6)]:
         add('cube', (0, y, 0.03), (0.7, 0.09, 0.03), m=wood, smooth=False)
     dress_mine(length, wood)
+    add('cube', (0.62, -0.9, 2.3), (0.08, 0.08, 0.35), m=wood, smooth=False)   # near-lens beam end and lantern:
+    lantern((0.6, -0.95, 1.85), red, glass)                                     # out of focus foreground depth
     bpy.ops.object.light_add(type='AREA', location=(-1.2, -1.0, 2.0), rotation=(math.radians(62), 0, math.radians(-38)))
     K = bpy.context.active_object.data; K.energy = 70; K.size = 0.7; K.color = (1.0, 0.72, 0.45)  # warm key on the cast
     bpy.ops.object.light_add(type='AREA', location=(1.4, 1.8, 2.0), rotation=(math.radians(-60), 0, math.radians(150)))
