@@ -2,7 +2,7 @@ import { advancedOpeningIssues } from './advanced-story';
 import { ARCHETYPES } from './viral-brain';
 import { factCheckOperation as factCheck, researchStoryOperation as researchStory, generateHooksOperation as generateHooks, generatePlanOperation as generatePlan, judgeScriptOperation as judgeScript, type Plan, type Hook } from './pipeline-operations.server';
 import { hookIssues, hookTextIssues, sceneStarts, splitSentences, spokenBy, storyScore, validateStory } from './story-v2';
-import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from './script-repair';
+import { autoFixPlan, eligibleHooks, preferRepair, preferAdvancedRepair, repairBrief } from './script-repair';
 import type { VideoInput, Settings } from './store';
 import type { ScriptCheckpoint } from './pipeline';
 export interface ScriptAPI { call<T>(fn: () => Promise<T>): Promise<T> }
@@ -54,11 +54,11 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
     let hooks = await api.call(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment, advanced } }));
     let valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced);
     if (!valid.length) {
-      hooks = await api.call(() => generateHooks({ data: { topic: input.topic, facts: factText, research: `${researchText}\nPrevious hooks failed. Use the EXACT subject "${rs.anchors.subject}" in the first few words, plus a checked place/year. Do not substitute dragon or jar for seismoscope unless that is the subject anchor.`, prefer: prefer.join(', '), deployment: s.scriptDeployment, advanced } }));
+      hooks = await api.call(() => generateHooks({ data: { topic: input.topic, facts: factText, research: `${researchText}\nPrevious hooks failed. Use the EXACT subject "${rs.anchors.subject}" in the first few words, ${advanced ? "with a concrete odd fact; no mandatory year/place" : "plus a checked place/year"}. Do not substitute dragon or jar for seismoscope unless that is the subject anchor.`, prefer: prefer.join(', '), deployment: s.scriptDeployment, advanced } }));
       valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced);
     }
     const rate = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability
-      - hookIssues(h.line, rs.anchors, factText).length * 8 - hookTextIssues(h.text, h.line).length * 4 + (prefer[0] === h.type ? 3 : 0);
+      - (advanced ? advancedOpeningIssues(h.line, rs.anchors.subject) : hookIssues(h.line, rs.anchors, factText)).length * 8 - hookTextIssues(h.text, h.line).length * 4 + (prefer[0] === h.type ? 3 : 0);
     const ranked = valid.sort((x, y) => rate(y) - rate(x));
     const hb = ranked[0];
     if (!hb) throw Error('No opening passed the story checks after a second hook draft. No voice or rendering was started.');
@@ -107,7 +107,7 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
-      if (preferRepair(ev.gate, ev2.gate)) { plan = repaired; ev = ev2; }
+      if ((advanced ? preferAdvancedRepair : preferRepair)(ev.gate, ev2.gate)) { plan = repaired; ev = ev2; }
     }
     await up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
