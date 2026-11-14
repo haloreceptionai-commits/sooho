@@ -53,9 +53,11 @@ def detect_cuts(frames: np.ndarray, min_shot: float = 0.4) -> list[int]:
     px = np.r_[0, np.abs(np.diff(frames[:, mask].astype(np.int16), axis=0)).mean((1, 2, 3)) / 255]
     cuts, last = [0], 0
     for i in range(1, len(d)):
-        local = np.median(d[max(1, i - 15):i + 15]) if i > 1 else 0
-        is_cut = (d[i] > 0.28 and d[i] > 3 * local and px[i] > 0.06) or d[i] > 0.5
-        if is_cut and (i - last) / FPS >= min_shot:
+        win = slice(max(1, i - 15), i + 15)
+        ld, lp = np.median(d[win]), np.median(px[win])
+        hist_jump = d[i] > 0.18 and d[i] > 2.5 * ld and px[i] > 0.05
+        pixel_jump = px[i] > 0.09 and px[i] > 3.5 * lp and px[i] >= px[max(0, i - 1)] and px[i] >= px[min(len(px) - 1, i + 1)]
+        if (hist_jump or pixel_jump or d[i] > 0.5) and (i - last) / FPS >= min_shot:
             cuts.append(i); last = i
     return cuts
 
@@ -139,7 +141,7 @@ def measure(path: str, name: str, work: Path) -> dict:
         a, b = bounds[k], bounds[k + 1]
         t0, t1 = a / FPS, min(b / FPS, info['duration'])
         kf = keyframe(path, (t0 + t1) / 2, work / f'{name}-shot{k:02d}.jpg')
-        pic = kf[np.repeat(picture_mask(960)[:, None], 540, 1)].reshape(-1, 540, 3) if False else kf
+        pic = kf[picture_mask(960)]
         gray = pic.mean(2)
         seg = frames[a:b, mask].astype(np.int16)
         motion = float(np.abs(np.diff(seg, axis=0)).mean() / 255) if len(seg) > 1 else 0.0
