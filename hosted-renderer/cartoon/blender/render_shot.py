@@ -162,6 +162,26 @@ def dress_mine(length, wood):
     rock_chunk((0.62, -1.75, 0.12), 0.32, stone, 99)  # near the lens: falls out of focus
 
 
+def tube(length, m, radius=2.3, ring=96, step=0.1, y0=-4.0, zc=1.4):
+    """Evenly spaced tunnel shell (no stretched quads), displaced in world space and flat shaded."""
+    verts, faces = [], []
+    rows = int(length / step) + 1
+    for r in range(rows):
+        for k in range(ring):
+            a = 2 * math.pi * k / ring
+            verts.append((radius * math.cos(a), y0 + r * step, zc + radius * math.sin(a)))
+    for r in range(rows - 1):
+        for k in range(ring):
+            i, j = r * ring + k, r * ring + (k + 1) % ring
+            faces.append((i, j, j + ring, i + ring))
+    me = bpy.data.meshes.new('tunnel'); me.from_pydata(verts, [], faces); me.update()
+    o = bpy.data.objects.new('tunnel', me); bpy.context.collection.objects.link(o)
+    me.materials.append(m)
+    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.55; tx.noise_depth = 3
+    d = o.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = 0.7; d.mid_level = 0.5; d.texture_coords = 'GLOBAL'
+    return o
+
+
 def set_mine_tunnel(length=24.0):
     rock = rock_mat()
     dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6)
@@ -169,12 +189,7 @@ def set_mine_tunnel(length=24.0):
     steel = mat('steel', (0.55, 0.56, 0.6), rough=0.3, metal=1.0)
     red = mat('lanternred', (0.45, 0.04, 0.03), rough=0.35, metal=0.4)
     glass = mat('lampglass', (1, 0.7, 0.4), emit=(1.0, 0.62, 0.28), strength=25)
-    t = add('cylinder', (0, length / 2 - 4, 1.4), (2.3, 2.3, length / 2), rot=(math.pi / 2, 0, 0),
-            m=rock, vertices=96, depth=2, end_fill_type='NOTHING')
-    bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.subdivide(number_cuts=30); bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.ops.object.shade_flat()  # flat facets like carved rock
-    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.5; tx.noise_depth = 3
-    d = t.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = -0.75; d.texture_coords = 'GLOBAL'
+    t = tube(length, rock)
     add('plane', (0, length / 2 - 4, 0), (2.6, length / 2, 1), m=dirt, smooth=False)
     for i, y in enumerate(range(-2, int(length) - 4, 3)):         # timber frames; a lantern on every other one
         for x in (-1.55, 1.55):
