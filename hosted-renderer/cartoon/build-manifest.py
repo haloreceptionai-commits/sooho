@@ -39,7 +39,8 @@ def build(request, alignment, voice):
     width,height=(1920,1080) if request.get('format')=='long' else (1080,1920)
     return {'version':'cartoon-v2','videoId':request['videoId'],'fps':30,'width':width,'height':height,'captions':bool(request.get('captions')),
       'narration':{'path':'voice.wav','sha256':hashlib.sha256(voice.read_bytes()).hexdigest(),'samples':samples,'rate':48000},
-      'words':words,'caption_words':[t[:40] for t in tokens],'cast':request['direction']['cast'],'shots':shots}
+      'words':words,'caption_words':[t[:40] for t in tokens],'cast':request['direction']['cast'],'shots':shots,
+      'advancedEdit':1 if ADVANCED else 0}
 
 ASPECT=9/16
 ADVANCED=False

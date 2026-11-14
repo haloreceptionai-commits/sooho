@@ -6,4 +6,6 @@
 - [x] Tests, local frames, Azure rebuild, publish, 12s + 60s test videos
 - [ ] 60s Short in 2–3 min: currently ~12 min (script ~3, painting ~2.5, drawing ~6.5, encode ~3); needs faster drawing/encoding
 - [ ] Odd plain orange closing shot and a white blocky 3D model seen in the emu test
-- [ ] Mine Salting benchmark: compare latest completed video, document verified gaps, and present the detailed upgrade plan for approval
+- [x] Mine Salting benchmark: compared latest completed video, documented verified gaps, and obtained plan approval
+- [x] First quality pass: Advanced-only deliberate editing, card-bound camera-key fitting, speech music ducking; 36 worker tests and saved-card frame checked
+- [ ] Full articulated-action upgrade, literal mechanism worlds, licensed sound library, voice audition and full production repeat/recovery tests
