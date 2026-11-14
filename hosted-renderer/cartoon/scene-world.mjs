@@ -216,6 +216,11 @@ function shipModel(pirate){const g=new THREE.Group();const hull=pirate?toon({col
 function waveModel(){const g=new THREE.Group();const w=add(new THREE.CylinderGeometry(.5,.62,3,24,1,true,0,Math.PI*1.2),toon({color:'#2a62b8',side:THREE.DoubleSide}),0,.5,0,g,{cast:false});w.rotation.z=Math.PI/2;
   const c=add(new THREE.TorusGeometry(.55,.07,8,24,Math.PI*.7),toon({color:'#e6f4ff'}),0,.55,0,g,{cast:false});c.rotation.y=Math.PI/2;c.scale.z=3;return g;}
 const MODEL_BUILD={merchant_ship:()=>shipModel(false),pirate_ship:()=>shipModel(true),wave:waveModel,rowboat:()=>{const g=shipModel(false);g.children.slice(4).forEach(c=>c.visible=false);return g;},
+  phone:()=>{const g=new THREE.Group();add(tbox(.5,.9,.06),PAINT.dark,0,.45,0,g);add(tbox(.43,.76,.015),PAINT.glass,0,.46,.04,g);return g;},
+  pan:()=>{const g=new THREE.Group();add(new THREE.CylinderGeometry(.42,.3,.1,24),PAINT.iron,0,.06,0,g);return g;},
+  pickaxe:()=>{const g=new THREE.Group();add(tbox(.05,.95,.05),M.wood,0,.48,0,g);add(tbox(.65,.07,.07),PAINT.iron,0,.85,0,g);return g;},
+  gold_piece:()=>{const g=new THREE.Group();add(new THREE.IcosahedronGeometry(.2,0),PAINT.gold,0,.2,0,g);return g;},
+  magnifier:()=>{const g=new THREE.Group();add(new THREE.TorusGeometry(.23,.035,8,24),PAINT.iron,0,.55,0,g);add(tbox(.05,.35,.05),M.wood,0,.18,0,g);return g;},
   barrel:()=>{const g=new THREE.Group();barrel(g,0,0,1.1);return g;},cannon:()=>{const g=new THREE.Group();cannon(g,0,0,Math.PI/2);g.scale.setScalar(1.3);return g;},
   lantern:()=>{const g=new THREE.Group();lantern(g,0,.3,0);return g;},helm_wheel:()=>{const g=new THREE.Group();wheel(g,0,1.2,0);g.scale.setScalar(.8);return g;},
   chest:()=>{const g=new THREE.Group();add(tbox(.9,.5,.55),M.wood,0,.25,0,g);const lid=add(new THREE.CylinderGeometry(.28,.28,.9,12,1,false,0,Math.PI),M.wood,0,.5,0,g);lid.rotation.z=Math.PI/2;

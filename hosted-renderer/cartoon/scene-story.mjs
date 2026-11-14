@@ -1,5 +1,6 @@
 import { cameraAt, actorIdle } from './motion.js';
 import { actionState } from './action.js';
+import { performanceAt, drawRig, wristWorld } from './performance.js';
 import { LIGHTS } from './lights.js';
 import manifest from './manifest.json' with { type: 'json' };
 
@@ -25,6 +26,12 @@ async function inkCard(key) {
 }
 const CARD_KEYS = manifest.cast.some(c => c.card) ? await (await fetch('./cards/index.json')).json() : [];
 const CARDS = Object.fromEntries(await Promise.all(CARD_KEYS.map(async k => [k, await inkCard(k)])));
+const RIGS = {};
+if(manifest.advancedPerformance===1) for(const c of manifest.cast.filter(c=>c.card)) {
+  const img=new Image();img.src=`./cards/${c.id}-rig.png`;await img.decode();
+  if(img.width!==1024||img.height!==1536)throw Error('Invalid rig atlas dimensions');
+  RIGS[c.id]=img;
+}
 export const ADVANCED = CARD_KEYS.length > 0;
 const REACH = new Set(['point', 'lift', 'pour', 'wave', 'grab', 'shout', 'thumbs_up', 'carry', 'hold']);
 const SHOCKED = new Set(['shock', 'nervous', 'dazed', 'pained']), HAPPY = new Set(['grin', 'laugh', 'relief', 'smile', 'whistle']);
@@ -78,7 +85,7 @@ export const camAt = f => {
   const local = f - shot.start, shake = (shot.shake || 0) * Math.exp(-local / 18);
   if (shake > .001) { c.pos = c.pos.map((v, i) => v + (hash(f * 3 + i) - .5) * .12 * shake); c.roll = (c.roll || 0) + (hash(f * 7) - .5) * 3 * shake; }
   let flash = 0;
-  if (shot.mood === 'reveal') flash = Math.max(flash, .5 * Math.exp(-local / 4));
+  if (shot.mood === 'reveal' && !manifest.advancedEdit) flash = Math.max(flash, .5 * Math.exp(-local / 4));
   if ((shot.fx || []).includes('lightning') && (f % 71 < 3)) flash = Math.max(flash, .7 - (f % 71) * .2);
   c.flash = flash;
   c.shadowAt = c.look;
@@ -120,8 +127,21 @@ function propPose(prop, f, shot, index) {
   return { x, y, z, s, roll };
 }
 // Story objects with a real 3D model render in the world (lit, inked, shadowed); the rest stay painted cards.
-export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat', 'asset']);
-const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind) && !isCardProp(p)).map(([p, i]) => { const pose = propPose(p, f, shot, i); return { kind: p.kind, asset: p.asset, place: p.place, i, ...pose, k: pose.s / PLACE[p.place][3] }; });
+export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat', 'phone', 'pan', 'pickaxe', 'gold_piece', 'magnifier', 'asset']);
+const contactAt=(shot,a)=>{
+  const stems={grab:['grab','pick'],lift:['lift'],pour:['pour'],fire:['fire','shot','shoot'],load:['load'],place:['place','put'],strike:['hit','strike'],tap:['tap','press'],throw:['throw'],inspect:['look','check'],aim:['aim']};
+  const word=WORDS.find(w=>w.start*30>=shot.start&&w.start*30<shot.end&&(stems[a.action]||[]).some(stem=>w.text.startsWith(stem)));
+  return word?Math.round(word.start*30):undefined;
+};
+const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => (p.place !== 'hand'||manifest.advancedPerformance===1) && MODEL3D.has(p.kind) && !isCardProp(p)).map(([p, i]) => {
+  if(p.place==='hand'){
+    const a=shot.actors.find(a=>a.id===shot.speaker)||shot.actors[0],pose=performanceAt(a.action,f,shot.start,shot.end,contactAt(shot,a));
+    const travel=['walk','run'].includes(a.action)?(f-shot.start)/30*(a.action==='run'?.9:.35)*(a.facing||1):0;
+    const [x,y,z]=wristWorld([a.pos[0]+travel,a.pos[1],a.pos[2]],pose.object,a.facing<0);
+    return {kind:p.kind,asset:p.asset,place:p.place,i,x,y,z,s:.6,k:.65,roll:pose.roll};
+  }
+  const pose = propPose(p, f, shot, i); return { kind: p.kind, asset: p.asset, place: p.place, i, ...pose, k: pose.s / PLACE[p.place][3] };
+});
 const q = (v, k = 20) => Math.round(v * k) / k;
 export const actorsAt = (f, T) => {
   const shot = shotAt(f), local = (f - shot.start) / 30;
@@ -148,7 +168,13 @@ export const actorsAt = (f, T) => {
     const rounded = Object.fromEntries(Object.entries(opts).map(([k, v]) => [k, typeof v === 'number' ? Math.round(v * (k === 'bob' ? 1000 : 20)) / (k === 'bob' ? 1000 : 20) : v]));
     const travel = moving ? local * (a.action === 'run' ? .9 : .35) * ((a.facing || 1) >= 0 ? 1 : -1) : 0;
     return { x: a.pos[0] + travel, y: a.pos[1] + (shot.world === 'storm_sea' ? .03 * Math.sin(f * .06) : 0), z: a.pos[2], flip: facing < 0,
-      key: JSON.stringify([design.id, rounded]), draw: art ? p => drawCard(p, art, rounded) : p => T.propCharacter(p, outfits[design.outfit], rounded) };
+      key: JSON.stringify([design.id, rounded]), draw: RIGS[design.id] ? p => {
+        const pose=performanceAt(a.action,f,shot.start,shot.end,contactAt(shot,a));
+        drawRig(p.g,RIGS[design.id],pose,rounded.talk||0);
+        if(held&&a.id===subjectId&&!MODEL3D.has(held.kind)){
+          p.g.save();p.g.translate(...pose.object);p.g.rotate(pose.roll);T.drawProp(p,held.kind,f);p.g.restore();
+        }
+      } : art ? p => drawCard(p, art, rounded) : p => T.propCharacter(p, outfits[design.outfit], rounded) };
   });
   return out;
 };
