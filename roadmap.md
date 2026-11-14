@@ -10,3 +10,4 @@
 - [x] First quality pass: Advanced-only deliberate editing, card-bound camera-key fitting, speech music ducking; 36 worker tests and saved-card frame checked
 - [ ] Full articulated-action upgrade, literal mechanism worlds, licensed sound library, voice audition and full production repeat/recovery tests
 - [ ] Complete the approved remaining upgrade and create a motion-and-sound test requested November 14
+- [ ] Finish interrupted motion test, repair disconnected puppet joints, and verify saved production test recovery
