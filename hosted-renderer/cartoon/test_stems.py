@@ -43,4 +43,19 @@ class StemTests(unittest.TestCase):
         _,sfx=synthesize(48000,15,[{'frame':0,'kind':'wind'},{'frame':3,'kind':'crowd'},{'frame':6,'kind':'bell'}],advanced=True)
         self.assertEqual(np.count_nonzero(sfx),0)
 
+    def test_advanced_editorial_and_metal_effects_are_word_timed(self):
+        for kind in ('whoosh','reveal','coin','thunder'):
+            with self.subTest(kind=kind):
+                _,sfx=synthesize(96000,40,[{'frame':15,'kind':kind}],advanced=True)
+                self.assertEqual(np.count_nonzero(sfx[:24000]),0)
+                self.assertGreater(np.count_nonzero(sfx[24000:45600]),0)
+                self.assertEqual(np.count_nonzero(sfx[45600:]),0)
+
+    def test_advanced_score_varies_and_remains_deterministic(self):
+        a,_=synthesize(48000*12,240,[],seed=7,advanced=True)
+        b,_=synthesize(48000*12,240,[],seed=7,advanced=True)
+        np.testing.assert_array_equal(a,b)
+        self.assertLess(float(np.max(np.abs(a))),.1)
+        self.assertFalse(np.array_equal(a[48000:96000],a[96000:144000]))
+
 if __name__ == '__main__': unittest.main()
