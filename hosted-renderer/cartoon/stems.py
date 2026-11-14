@@ -12,7 +12,6 @@ def jsround(x):
 
 
 RATE = 48000
-KINDS = {'whoosh', 'impact', 'creak', 'pour', 'splash', 'reveal', 'thunder', 'bell', 'coin', 'wind', 'crowd', 'pop'}
 
 def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
     if not isinstance(samples, int) or samples <= 0:

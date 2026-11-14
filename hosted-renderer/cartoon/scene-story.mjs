@@ -172,7 +172,7 @@ export const actorsAt = (f, T) => {
         const pose=performanceAt(a.action,f,shot.start,shot.end,contactAt(shot,a));
         drawRig(p.g,RIGS[design.id],pose,rounded.talk||0);
         if(held&&a.id===subjectId&&!MODEL3D.has(held.kind)){
-          p.g.save();p.g.translate(...pose.object);p.g.rotate(pose.roll);T.drawProp(p,held.kind,f);p.g.restore();
+          p.g.save();p.g.translate(...pose.object);p.g.rotate(pose.roll);p.g.scale(.28,.28);p.g.translate(-300,-900);T.drawProp(p,held.kind,f);p.g.restore();
         }
       } : art ? p => drawCard(p, art, rounded) : p => T.propCharacter(p, outfits[design.outfit], rounded) };
   });

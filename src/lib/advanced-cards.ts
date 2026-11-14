@@ -66,16 +66,15 @@ export async function paintAdvancedCards(direction: Direction, narration: string
         await save(`card-${cid}.png`, toBytes(base), "image/png"); tick();
       }
       cards.push({ id: cid, path: `${root}/card-${cid}.png` });
-      // One joint atlas replaces three whole-body poses for human performers. Historical jobs keep their takes.
-      const animal=ANIMALS.some(name=>new RegExp(`\\b${name}\\b`,'i').test(look));
-      const poses=animal?CARD_POSES:['rig'] as const;
+      // Atlas prototype remains opt-in until all eight part identities pass rendered review.
+      // Do not make normal paid generation fail on an unverified generated mask.
+      const poses=CARD_POSES;
       await Promise.all(poses.map(async pose => {
         const key = `${cid}-${pose}`;
         if (!have.has(`card-${key}.png`)) {
           // A pose that fails is skipped: the renderer falls back to the standing card.
           const r = await limit(() => retry(() => paintAdvancedCard({ data: { look, pose, reference: base, deployment: settings.imageDeployment } }))).catch((e: unknown) => { console.warn("Pose skipped:", key, e); return null; });
           if (!r) return;
-          if(pose==='rig')await validateRigAtlas(r.image);
           await save(`card-${key}.png`, toBytes(r.image), "image/png"); tick();
         }
         cards.push({ id: key, path: `${root}/card-${key}.png` });
