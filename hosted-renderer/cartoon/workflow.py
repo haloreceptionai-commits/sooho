@@ -56,6 +56,8 @@ def main():
         sheet_tool=importlib.util.module_from_spec(spec);spec.loader.exec_module(sheet_tool)
         stage('preflight')
         selected=sheet_tool.preflight_frames(m['shots'],m['words'],total)
+        # Advanced Video AI has no owner review: one real frame proves the scene loads, then the full render starts.
+        if any(c.get('card') for c in m['cast']): selected=selected[len(selected)//2:len(selected)//2+1]
         lanes=max(1,min(2,int(os.environ.get('CARTOON_PARALLEL','1'))))
         def capture_lane(lane):
             subset=selected[lane::lanes]
