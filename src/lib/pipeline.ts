@@ -327,7 +327,7 @@ export async function runVideo(id: string, input: VideoInput) {
       up({ cartoonCheckpoint: cp, progress: 70, detail: advanced ? 'Sending to Advanced Video AI render…' : 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
       const job = await submitCartoon({ data: cp });
-      up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
+      up({ hostedRender: job, stage: 'render', progress: 72, detail: advanced ? 'Advanced Video AI render · safe to close your browser' : 'Cartoon preview · safe to close your browser' });
       return;
     }
 
