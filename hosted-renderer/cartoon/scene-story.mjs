@@ -3,6 +3,26 @@ import { actionState } from './action.js';
 import { LIGHTS } from './lights.js';
 import manifest from './manifest.json' with { type: 'json' };
 
+// Advanced Video AI: painted character cards (image-model art) with one shared code-drawn ink outline.
+async function inkCard(id) {
+  const img = new Image(); img.src = `./cards/${id}.png`; await img.decode();
+  // 600x1000 design canvas (the card's aspect), feet at bottom centre, 9 px ink rim at 1500 px tall.
+  const W = 600, H = 1000, pad = 22, k = Math.min((W - pad * 2) / img.width, (H - pad * 2) / img.height);
+  const w = img.width * k, h = img.height * k, x = (W - w) / 2, y = H - pad - h;
+  const sil = document.createElement('canvas'); sil.width = W; sil.height = H; const g = sil.getContext('2d');
+  g.drawImage(img, x, y, w, h); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#17131c'; g.fillRect(0, 0, W, H);
+  const out = document.createElement('canvas'); out.width = W; out.height = H; const o = out.getContext('2d');
+  const r = 6; for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; o.drawImage(sil, Math.cos(a) * r, Math.sin(a) * r); }
+  o.drawImage(img, x, y, w, h);
+  return out;
+}
+const CARDS = Object.fromEntries(await Promise.all(manifest.cast.filter(c => c.card).map(async c => [c.id, await inkCard(c.id)])));
+export const ADVANCED = Object.keys(CARDS).length > 0;
+const drawCard = (p, art, o) => {
+  // Alive without new art: idle squash/stretch, breathing and a hop on cheer/run, lean on walk.
+  const g = p.g, sq = 1 + (o.bob || 0) * .6, lean = (o.tilt || 0) * .02 + (o.step || 0) * .03;
+  g.save(); g.translate(300, 1000); g.rotate(lean); g.scale(1 / Math.sqrt(sq), sq); g.drawImage(art, -300, -1000); g.restore();
+};
 export const TOTAL = Math.round(manifest.narration.samples / 48000 * 30);
 export const SHOTS = manifest.shots;
 export const WORDS = manifest.words;
@@ -21,6 +41,8 @@ export const lightFor = s => {
   const out = { ...light, ...(MOOD[s.mood || 'calm'] || {}) };
   // Rich, saturated grade like the reference: warm sunny day, deep blue storm night lit by lanterns.
   out.sat = (out.sat || 1.1) * 1.18;
+  // Guide grade for painted cards: violet shadow lift so blacks never crush, gentle highlight shoulder.
+  if (ADVANCED) Object.assign(out, { lift: '#0b0714', gain: out.gain || '#f6f2ea', sat: Math.min(out.sat, 1.3) });
   if (s.world === 'storm_sea') Object.assign(out, { skyTop: '#0f1d4a', skyHor: '#34508f', sky: '#5a78c8', ground: '#1c2440', sun: '#9fb8ff', sunI: 1.1, hemi: .85,
     fog: '#2a3f78', fogNear: 30, fogFar: 260, waterDeep: '#0e2a5c', waterShal: '#2f5fa8', glint: '#9fd0ff', vig: .42, gain: '#c8d6ff', sat: 1.25 });
   // Map views sit far above the ground: no haze, slightly cooler documentary grade.
@@ -89,6 +111,7 @@ export const actorsAt = (f, T) => {
   const out = shot.actors.map(a => {
     const design = manifest.cast.find(c => c.id === a.id);
     if (!design || !outfits[design.outfit]) throw Error('Unsupported cast design');
+    const art = CARDS[design.id];
     const idle = actorIdle(f, design.seed);
     const moving = a.action === 'walk' || a.action === 'run';
     const step = moving ? Math.sin(local * (a.action === 'run' ? 14 : 8)) : 0;
@@ -103,7 +126,7 @@ export const actorsAt = (f, T) => {
     const rounded = Object.fromEntries(Object.entries(opts).map(([k, v]) => [k, typeof v === 'number' ? Math.round(v * (k === 'bob' ? 1000 : 20)) / (k === 'bob' ? 1000 : 20) : v]));
     const travel = moving ? local * (a.action === 'run' ? .9 : .35) * ((a.facing || 1) >= 0 ? 1 : -1) : 0;
     return { x: a.pos[0] + travel, y: a.pos[1] + (shot.world === 'storm_sea' ? .03 * Math.sin(f * .06) : 0), z: a.pos[2], flip: facing < 0,
-      key: JSON.stringify([design.id, rounded]), draw: p => T.propCharacter(p, outfits[design.outfit], rounded) };
+      key: JSON.stringify([design.id, rounded]), draw: art ? p => drawCard(p, art, rounded) : p => T.propCharacter(p, outfits[design.outfit], rounded) };
   });
   return out;
 };

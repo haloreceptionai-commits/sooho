@@ -21,7 +21,7 @@ export function validateManifest(m) {
   if(!Array.isArray(m.cast)||m.cast.length<1||m.cast.length>3)fail('Invalid cast');
   const ids=new Set();
   for(const c of m.cast){
-    if(!/^[a-z0-9_-]{1,30}$/.test(c.id)||ids.has(c.id)||!OUTFITS.includes(c.outfit)||!Number.isInteger(c.seed))fail('Unsupported or duplicate cast');
+    if(!/^[a-z0-9_-]{1,30}$/.test(c.id)||ids.has(c.id)||!OUTFITS.includes(c.outfit)||!Number.isInteger(c.seed)||(c.card!==undefined&&typeof c.card!=='boolean'))fail('Unsupported or duplicate cast');
     ids.add(c.id);
   }
   if(!Array.isArray(m.words)||m.words.length<1||m.words.length>LIM.words)fail('Invalid alignment');
