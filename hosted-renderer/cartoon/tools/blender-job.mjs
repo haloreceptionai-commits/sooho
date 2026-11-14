@@ -24,8 +24,9 @@ for (let i = 0; i < 60 && !['Succeeded', 'Failed'].includes(res.properties?.prov
 console.log('job', name, res.properties.provisioningState);
 if (cmd === 'run') {
   const c = job.properties.template.containers[0];
-  const exec = await arm('POST', `${rg}/jobs/${name}/start?${V}`, { containers: [{ ...c, env: [...c.env, { name: 'OUT_PREFIX', value: outPrefix }, { name: 'ENGINES', value: engines }, { name: 'SHOT', value: shot }] }] });
+  const exec = await arm('POST', `${rg}/jobs/${name}/start?${V}`, { containers: [{ ...c, env: [...c.env, { name: 'OUT_PREFIX', value: outPrefix }, { name: 'ENGINES', value: engines }, { name: 'SHOT', value: shot }, { name: 'PROBE_ONLY', value: process.env.PROBE_ONLY || '0' }] }] });
   console.log('execution', exec.name ?? exec.id);
+  if (process.env.NO_WAIT) process.exit(0);
   for (;;) { await new Promise(r => setTimeout(r, 20000)); const e = await arm('GET', `${rg}/jobs/${name}/executions/${exec.name}?${V}`); const st = e.properties.status;
     if (!['Running', 'Processing'].includes(st)) { console.log('status', st); break; } }
 }
