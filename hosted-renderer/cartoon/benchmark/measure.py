@@ -62,6 +62,43 @@ def detect_cuts(frames: np.ndarray, min_shot: float = 0.4) -> list[int]:
     return cuts
 
 
+def framing_changes(frames: np.ndarray, step: float = 0.5, thresh: float = 0.45) -> list[float]:
+    """Times where the picture shows a new framing, by cut OR by camera travel.
+
+    The benchmarks often move the camera continuously from one subject to the
+    next instead of cutting, so cuts alone undercount how often the view
+    changes.  Compares each frame with the one a second earlier on a coarse
+    grey grid (1 - correlation) and keeps one event per change."""
+    mask = picture_mask(frames.shape[1])
+    g = frames[:, mask].mean(3)
+    g = g.reshape(len(g), -1, 4, g.shape[2] // 4, 4).mean((2, 4)).reshape(len(g), -1)
+    g = (g - g.mean(1, keepdims=True)) / (g.std(1, keepdims=True) + 1e-6)
+    lag, hop = FPS, int(step * FPS)
+    events, armed = [], True
+    for i in range(lag, len(g), hop):
+        change = 1 - float((g[i] * g[i - lag]).mean())
+        if change > thresh and armed:
+            events.append(round(i / FPS, 2)); armed = False
+        elif change < thresh * 0.6:
+            armed = True
+    return events
+
+
+def merge_caption_words(caps: list[dict]) -> list[str]:
+    """Caption chunks repeat words while the highlight moves; keep each spoken word once."""
+    words: list[str] = []
+    for c in caps:
+        new = c['text'].split()
+        low = [w.lower().strip('.,!?') for w in new]
+        tail = [w.lower().strip('.,!?') for w in words[-len(new):]] if new else []
+        k = 0
+        for n in range(min(len(low), len(tail)), 0, -1):
+            if tail[-n:] == low[:n]:
+                k = n; break
+        words.extend(new[k:])
+    return words
+
+
 def laplacian_var(gray: np.ndarray) -> float:
     g = gray.astype(float)
     lap = -4 * g[1:-1, 1:-1] + g[:-2, 1:-1] + g[2:, 1:-1] + g[1:-1, :-2] + g[1:-1, 2:]
@@ -150,9 +187,11 @@ def measure(path: str, name: str, work: Path) -> dict:
                       'sharpness': round(laplacian_var(gray), 1), 'colorfulness': round(colorfulness(pic), 1),
                       'contrast': round(float(gray.std()), 1), 'motion': round(motion, 4), 'words': words,
                       'keyframe': str(work / f'{name}-shot{k:02d}.jpg')})
-    word_count = sum(len(c['text'].split()) for c in caps)
+    word_count = len(merge_caption_words(caps))
+    framing = framing_changes(frames)
     return {'name': name, 'source': path, **info, 'shots': shots, 'captions': caps,
-            'caption_wpm': round(word_count / info['duration'] * 60, 1),
+            'caption_words': word_count, 'caption_wpm': round(word_count / info['duration'] * 60, 1),
+            'framing_changes': framing, 'framing_per_min': round(len(framing) / info['duration'] * 60, 1),
             'audio': audio_metrics(path) if info['audio'] else None}
 
 
@@ -160,4 +199,4 @@ if __name__ == '__main__':
     src, name, outdir = sys.argv[1], sys.argv[2], Path(sys.argv[3])
     res = measure(src, name, outdir / 'frames')
     (outdir / f'{name}.measure.json').write_text(json.dumps(res, indent=1))
-    print(name, 'shots', len(res['shots']), 'median len', np.median([s['len'] for s in res['shots']]), 'wpm', res['caption_wpm'], res['audio'] and res['audio']['transients_per_min'])
+    print(name, 'shots', len(res['shots']), 'framing/min', res['framing_per_min'], 'median len', np.median([s['len'] for s in res['shots']]), 'wpm', res['caption_wpm'], res['audio'] and res['audio']['transients_per_min'])
