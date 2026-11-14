@@ -59,6 +59,13 @@ export function preferRepair(current: GateResult, next: GateResult): boolean {
   return next.score >= current.score;
 }
 
+/** A shorter draft must not replace an understandable story with a broken opening/mechanism. */
+export function preferAdvancedRepair(current: GateResult, next: GateResult): boolean {
+  const protectedFailures = (g: GateResult) => g.blockers.filter(b => /opening|first three|real subject|confusing|read-aloud|swipe away|not answered|cause|physical step/i.test(b)).length;
+  if (protectedFailures(next) !== protectedFailures(current)) return protectedFailures(next) < protectedFailures(current);
+  return preferRepair(current, next);
+}
+
 /** Preserve the actual scene/cast/loop state, not just narration, for actionable repairs. */
 export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors, opts: { loop?: boolean; advanced?: boolean } = {}): string {
   const starts = sceneStarts(plan.scenes);

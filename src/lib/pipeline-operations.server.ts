@@ -437,7 +437,7 @@ export const generatePlanOperation = async ({ data }: { data: PlanInput }): Prom
     const D = data.durationSec;
     const words = Math.round(D * (short ? 2.6 : 2.37)); // Atlas Shorts pace ~153 wpm; long-form narrator ~142 wpm
     const micro = short && D < 25; // seamless loop Short (the guide's 12-second format)
-    const scenes = short ? (micro ? Math.max(3, Math.round(D / 2.5)) : Math.max(8, Math.round(D / 3))) : Math.min(90, Math.max(14, Math.round(D / 6)));
+    const scenes = short ? (micro ? Math.max(3, Math.round(D / (data.kid ? 4 : 2.5))) : Math.max(8, Math.round(D / 3))) : Math.min(90, Math.max(14, Math.round(D / 6)));
     const perScene = Math.round(words / scenes);
     const at = (f: number) => Math.round(D * f);
     const system = `You write ${D}-second ${short ? "vertical story Shorts" : "story documentaries"} for a viral history & science channel. You write a STORY with a hero, not a lecture.
@@ -509,7 +509,7 @@ LONG-FORM RETENTION (this is a ${Math.round(D / 60)}-minute video; these rules o
 - Last 20 seconds: answer the main question plainly, then a closing line that makes the payoff stick.`}
 EXAMPLES (learn the structure, never reuse content):
 ${FEW_SHOT}`;
-    const user = `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube story documentary, 16:9 (same structure, more tries and more detail)"}.
+    const user = data.kid ? `Topic: ${data.topic}\n${short ? 'Short 9:16' : 'Documentary 16:9'}, ${D} seconds, target ${words} words. About ${scenes} scenes, not a words-per-scene quota. Write natural sentences first, then split only at useful literal visual moments.\nCHECKED FACTS:\n${data.facts ?? ''}\nRESEARCH (facts not mandatory beat quotas):\n${data.research ?? ''}\nPreferred opening: ${data.hook ?? 'choose the clearest concrete fact'}; rewrite if it is vague or names the wrong subject.\n${data.repair ? `Previous draft and failures:\n${data.repair}` : ''}\nReturn an original complete plan, with no image text, no mathematical labels, no invented people for object narration. Use loop id main for the actual puzzle and answer. Read every sentence as one connected thought. An example of plain mechanism language (not content to copy): "Your compass works without a battery. Its needle is a tiny magnet, and Earth is a giant one. That pull turns the needle until it points north." Do not compress the answer into "often off true" or leave a technical term unexplained.` : `Format: ${short ? "YouTube Short / Reel, vertical 9:16" : "long-form YouTube story documentary, 16:9 (same structure, more tries and more detail)"}.
 Topic: ${data.topic}
 Viral archetype: ${data.archetype}
 Target: ${D} seconds ≈ ${words} words of narration total (±8%). About ${scenes} scenes of ~${perScene} words each.
