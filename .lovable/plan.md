@@ -1,7 +1,7 @@
 # Advanced Video AI — benchmark-led movement, visuals and sound upgrade
 
 ## Goal and scope
-Make each spoken action visibly happen with the right actor and object, in a believable story location, with clear Short-form narration and purposeful sound. Improve **Advanced Video AI only**; protect Own images, Own cartoon, long-form narration, saved work, and safe render recovery.
+Improve **Advanced Video AI only**: literal actions, accurate actors/objects, believable places, clear speech and purposeful sound. Protect other engines, long-form and saved/recoverable work.
 
 The reference uses simple articulated flat characters in detailed 3D scenery—not realistic human models. Match physical clarity and staging. “10/10” remains an ambition, not a guaranteed score.
 
@@ -9,8 +9,8 @@ The reference uses simple articulated flat characters in detailed 3D scenery—n
 
 - Uploaded **How Mine Salting Worked** video and separate audio: 1080×1920, 30 fps, **61.115 seconds**. Audio transcribed after converting the M4A because the document reader rejected that container.
 - Latest completed Advanced video in the cloud: **How Your Phone Finds You From Space**, **40.44 seconds**, requested 40 seconds. Downloaded privately for inspection; not confused with an earlier test.
-- Earlier **Emu War** revision checked as a second regression example.
-- Full-story frame sheets, plus 4 frames/second action sequences from the benchmark opening and arrival sequence, and our latest video's 10–13 second sequence; renderer, direction, camera, speech and sound code inspected.
+- Also checked the saved Emu revision.
+- Inspected full-story sheets, 4 fps action sequences and movement/camera/speech/sound code.
 - Approximate transcript pace: reference **231 words / 227 wpm**; latest **119 words / 177 wpm**. Transcription can mishear a word, so these are approximate, not word-exact alignment measurements.
 - Final-mix loudness: reference **−14.55 LUFS**, latest **−14.43 LUFS**, Emu **−14.47 LUFS**. True peaks: **−2.16**, **−2.77**, **−2.40 dBTP** respectively. Loudness range: **2.3**, **1.5**, **2.6 LU**. Our sound is not simply too quiet.
 - No isolated reference voice/music stems were supplied. These measurements do **not** establish its voice identity, music-to-voice ratio, exact EQ or perceived voice quality. Those require listening comparisons; no invented claims about those properties.
@@ -58,7 +58,7 @@ For each scene record **who does what, to which object, where, what changes, and
 
 - Use real 3D assets for manipulated/rotating objects; cards for non-interacting detail.
 - Render model turntables to check scale/materials/orientation/bounds; diagnose white/blocky models rather than guess a tint.
-- Add reusable story-appropriate modules starting with mine interior/exterior and modern street/device cutaway. Match real context, readable materials, contact shadows and depth; do not add random clutter to hide empty shots.
+- Add mine interior/exterior and modern street/device cutaway modules with appropriate context, materials, shadows and depth—not random clutter.
 - Share coordinates and lighting for actors, objects and contact anchors; keep the mechanism readable.
 
 ### 5. Make script and voice follow the same action beats
@@ -67,30 +67,26 @@ For each scene record **who does what, to which object, where, what changes, and
 - Separate narrative-history and mechanism-explainer outlines. Explainers do not need an invented hero, rival and two failed attempts; history Shorts keep motives and cause/effect without inventing events.
 - Check complete everyday sentences and comprehension, not only rare words; preserve factual qualifiers and label illustrative fiction.
 - Repair hook/transitions/repetition and length without restoring length-only failures or truncating paid voice.
-- Start a speech-only comparison using a short, approved simple script: current delivery versus beat-aware curious delivery with brief contrast pauses, dialogue distinction and payoff emphasis. Treat roughly **200–225 wpm** as an audition range informed by this reference, not a required speed for every topic or age group.
+- Audition current versus beat-aware curious delivery with contrast pauses, dialogue and payoff emphasis. Try **200–225 wpm**, not a mandatory speed for every topic/age.
 - Measure duration, words, pauses and pace; align the continuous take once; preserve it during recovery.
 
 ### 6. Replace the placeholder sound bed with event-based sound design
 
-- Add licensed/CC0 reusable Foley and music with attribution/provenance: footsteps by surface, handling/clicks, pan/metal, vehicle, rock, device taps and appropriate impacts. Do not copy the reference soundtrack or assume reuse rights.
-- Separate ambience, music, physical contact and transition sounds. Trigger physical Foley at the same contact frame as the visual action, tied back to its aligned spoken cue where appropriate. Remove noun-only triggers such as gold automatically making a coin sound.
+- Add licensed/CC0 Foley/music with provenance: surface footsteps, handling, pan/metal, vehicles, rock and device taps. Do not copy the reference soundtrack.
+- Separate ambience/music/contact/transitions. Sync Foley to visible contact and aligned speech where appropriate; remove noun-only triggers such as gold → coin.
 - Use tension/discovery/payoff/silence, speech ducking and event gain/pan envelopes—not louder global mixing.
 - Preserve the speech clock and final loudness/peak QA. Compare matched-loudness mixes on speakers/headphones; reference stem balance is unknown.
 
 ### 7. Quality and speed must survive normal user runs
 
 - Preserve checkpoints, paid-step idempotency, cancellation, recovery and old manifests. Automatic QA adds no manual preview stop.
-- Cache reusable rigs, environments and licensed sounds. Paint only story-specific art and layers actually used, with bounded image concurrency. Preserve 23-way frame rendering and measure the slowest batch, startup, assembly and encoding separately.
+- Cache rigs/sets/sounds; paint only used layers with bounded concurrency. Retain 23-way rendering; measure startup, slowest batch, assembly and encoding.
 - Do not enable the unverified durable coordinator or replace the renderer.
-- The existing **2–3 minute 60-second** target remains open. Record cold/warm generation time from click to saved playable MP4; do not promise it until measured. Do not save time by skipping alignment, reducing resolution or disguising failures.
+- **60 s in 2–3 minutes remains unproven.** Measure cold/warm click-to-playable time; retain alignment/resolution and report failures honestly.
 
-## Technical work areas
+## Technical work
 
-- Direction/contracts: `pipeline-operations.server.ts`, `story-v2.ts`, `cartoon-job.ts`, `cinematic-pass.ts`, shared `vocabulary.json` and worker validators.
-- Art/identity: `advanced-cards.ts`, object-library retrieval, library normalization and new Advanced rig preparation.
-- Frame rendering: `scene-story.mjs`, `scene-world.mjs`, `build-manifest.py`, camera/action helpers and frame QA.
-- Sound: narration instructions, `stems.py`, `mix.py`, `workflow.py`, `finish.py`; version new behavior so saved manifests remain valid.
-- Add focused tests for concrete action states, attachments, noun-to-asset mapping, framing bounds, cue timing, mix headroom, legacy manifests and recovery. Run both project and worker tests; rebuild Azure images only after local checks pass.
+Version Advanced-only changes across direction/schema/vocabulary, rig preparation, action/camera/frame rendering and audio mixing. Keep worker validation and app schemas synchronized. Add concrete tests for attachments, action states, noun mapping, framing, cue timing, headroom, legacy manifests and recovery. Run app/worker tests before rebuilding Azure images.
 
 ## Verification and acceptance
 
