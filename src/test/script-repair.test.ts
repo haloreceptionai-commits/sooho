@@ -33,6 +33,18 @@ describe('Dragon Jar script repairs', () => {
 });
 import { autoFixPlan } from "@/lib/script-repair";
 import { storyScore } from "@/lib/story-v2";
+import { preferAdvancedRepair } from '@/lib/script-repair';
+describe('Advanced comprehension survives shortening', () => {
+  it('rejects a shorter high-scoring draft with a broken opening', () => {
+    expect(preferAdvancedRepair(gate(84, ['Length: 144 words']), gate(96, ['Opening must name the real subject']))).toBe(false);
+  });
+  it('keeps the actual final answer location in an Advanced micro story', () => {
+    const scenes = Array.from({ length: 5 }, (_, i) => ({ narration: `The compass turns around again ${i}.`, characters: [], loop_opened: i === 0 ? 'main' : '', loop_closed: i === 4 ? 'main' : '' }));
+    const p = autoFixPlan({ hero: { name: 'compass' }, characters: [], scenes } as never, true);
+    expect(p.scenes[4]?.loop_closed).toBe('main');
+    expect(p.scenes[3]?.loop_closed).toBe('');
+  });
+});
 describe("autoFixPlan", () => {
   const sc = (narration: string, extra: Record<string, unknown> = {}) => ({ beat: "try", narration, image_prompt: "", characters: [], shot: "wide", money: false, loop_opened: "", loop_closed: "", purpose: "", ...extra });
   const mk = (scenes: ReturnType<typeof sc>[]) => ({ hero: { name: "Zhang Heng", role: "inventor" }, characters: [{ name: "Zhang Heng", role: "hero" }], scenes, script: "" }) as never;

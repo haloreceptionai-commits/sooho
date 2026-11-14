@@ -5,6 +5,14 @@ const base = { world: 'lab', shot: 'wide', move: 'static', mood: 'calm' };
 const flask = { kind: 'flask', place: 'ground_left', motion: 'none' };
 
 describe('cinematic pass', () => {
+  it('does not celebrate or wave through a literal mechanism explanation', () => {
+    const out = cinematicPass([{ ...base, action: 'cheer', expression: 'grin', actors: [{ actor: 'user', action: 'wave', expression: 'shock' }], fx: ['sparkle', 'burst'] }], ['Earth pulls the tiny magnet around.'], { literal: true });
+    expect(out[0]?.action).toBe('idle');
+    expect(out[0]?.expression).toBe('neutral');
+    expect(out[0]?.actors[0]?.action).toBe('idle');
+    expect(out[0]?.actors[0]?.expression).toBe('neutral');
+    expect(out[0]?.fx).toEqual([]);
+  });
   it('preserves deliberate Advanced framing without inventing an insert or reveal burst', () => {
     const s = ['wide', 'medium', 'low', 'high'].map(shot => ({ ...base, shot, props: [flask] }));
     const out = cinematicPass(s, undefined, { literal: true });

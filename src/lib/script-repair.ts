@@ -1,9 +1,10 @@
 import type { Hook, Plan } from '@/lib/pipeline.functions';
 import { hookIssues, hookTextIssues, sceneStarts, wc, type Anchors, type GateResult } from '@/lib/story-v2';
+import { advancedOpeningIssues, ADVANCED_STORY_DIRECTION } from './advanced-story';
 
 /** Invalid hooks are ineligible, regardless of the model's self-rated score. */
-export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string): Hook[] {
-  return hooks.filter(h => !hookIssues(h.line, anchors, facts).length && !hookTextIssues(h.text, h.line).length);
+export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string, advanced = false): Hook[] {
+  return hooks.filter(h => !(advanced ? [...hookIssues(h.line, undefined, facts).filter(x => !x.startsWith('Hook is') && !x.includes('unanswerable')), ...advancedOpeningIssues(h.line, anchors.subject)] : hookIssues(h.line, anchors, facts)).length && !hookTextIssues(h.text, h.line).length);
 }
 
 const PRONOUN = /^(["']?)(He|She|They|His|Her|Their)\b/;
@@ -14,7 +15,7 @@ const PRONOUN = /^(["']?)(He|She|They|His|Her|Their)\b/;
  * - Exact duplicate sentences are dropped.
  * - The "main" loop is closed in the reveal (or the scene nearest 70% of the words) when the label is misplaced.
  */
-export function autoFixPlan(plan: Plan): Plan {
+export function autoFixPlan(plan: Plan, advanced = false): Plan {
   const hero = plan.hero?.name?.trim();
   const names = [hero, ...plan.characters.map(c => c.name)].filter((n): n is string => !!n).flatMap(n => n.toLowerCase().split(/\s+/)).filter(w => w.length > 2);
   let prev = '';
@@ -28,8 +29,8 @@ export function autoFixPlan(plan: Plan): Plan {
       if (key.split(' ').length >= 3 && seen.has(key)) continue;
       seen.add(key);
       const m = PRONOUN.exec(s);
-      if (m && hero && !names.some(n => prev.toLowerCase().includes(n))) {
-        const p = m[2]!;
+      if (m && hero && !advanced && !names.some(n => prev.toLowerCase().includes(n))) {
+        const p = m[2] ?? '';
         const rep = /^(His|Her|Their)$/.test(p) ? `${hero}'s` : p === 'They' ? `${hero} and the team` : hero;
         if (p !== 'Her' || !/^\s*(\w+)\s+(is|was|runs|looks)/.test(s.slice(m[0].length))) s = m[1] + rep + s.slice(m[0].length);
       }
@@ -41,7 +42,7 @@ export function autoFixPlan(plan: Plan): Plan {
   for (const s of scenes) { offsets.push(acc); acc += wc(s.narration); }
   const pos = (i: number) => (offsets[i] ?? 0) / Math.max(1, acc);
   const closeAt = scenes.findIndex(s => /\bmain\b/.test(s.loop_closed));
-  if (closeAt < 0 || pos(closeAt) < 0.6 || pos(closeAt) > 0.8) {
+  if (!advanced && (closeAt < 0 || pos(closeAt) < 0.6 || pos(closeAt) > 0.8)) {
     const cand = scenes.map((s, i) => ({ i, d: Math.abs(pos(i) - 0.7) + (s.beat === 'reveal' ? -0.05 : 0) })).filter(c => pos(c.i) >= 0.6 && pos(c.i) <= 0.8).sort((a, b) => a.d - b.d)[0];
     if (cand) scenes.forEach((s, i) => {
       const ids = s.loop_closed.split(/[,\s]+/).filter(x => x && x !== 'main');
@@ -58,11 +59,19 @@ export function preferRepair(current: GateResult, next: GateResult): boolean {
   return next.score >= current.score;
 }
 
+/** A shorter draft must not replace an understandable story with a broken opening/mechanism. */
+export function preferAdvancedRepair(current: GateResult, next: GateResult): boolean {
+  const protectedFailures = (g: GateResult) => g.blockers.filter(b => /opening|first three|real subject|confusing|read-aloud|swipe away|not answered|cause|physical step/i.test(b)).length;
+  if (protectedFailures(next) !== protectedFailures(current)) return protectedFailures(next) < protectedFailures(current);
+  return preferRepair(current, next);
+}
+
 /** Preserve the actual scene/cast/loop state, not just narration, for actionable repairs. */
-export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors, opts: { loop?: boolean } = {}): string {
+export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors, opts: { loop?: boolean; advanced?: boolean } = {}): string {
   const starts = sceneStarts(plan.scenes);
   const words = wc(plan.scenes.map(s => s.narration).join(' '));
   const heroCount = plan.scenes.filter(s => s.characters.includes(plan.hero.name)).length;
+  if (opts.advanced) return `${ADVANCED_STORY_DIRECTION}\nFix the actual failed checks, not legacy hero/date/myth quotas:\n${gate.blockers.join('\n')}\nChecked anchors: ${JSON.stringify(anchors)}\nCurrent words: ${words}. Keep all facts, uncertainty, cast identities and literal visual meaning. Rewrite a confusing paragraph as a whole, not individual word swaps.\nPrevious COMPLETE plan:\n${JSON.stringify(plan)}`;
   return `Fix ALL failures below. Rewrite the opening or rearrange scenes when needed; do not preserve broken lines or a broken hook. Never invent events to satisfy a beat. Keep uncertainty from the checked facts.
 ${gate.blockers.map(b => `- ${b}`).join('\n')}
 Required spoken anchors: ${JSON.stringify(anchors)}.

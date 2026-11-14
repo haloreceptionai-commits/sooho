@@ -11,3 +11,4 @@
 - [ ] Full articulated-action upgrade, literal mechanism worlds, licensed sound library, voice audition and full production repeat/recovery tests
 - [ ] Complete the approved remaining upgrade and create a motion-and-sound test requested November 14
 - [ ] Finish interrupted motion test, repair disconnected puppet joints, and verify saved production test recovery
+- [ ] November 14: strengthen the first three spoken words, connected sentences and cause-and-effect; verify history and mechanism scripts through real generation

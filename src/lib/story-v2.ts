@@ -160,13 +160,25 @@ const role = (r: Role) => [r.name, r.role].filter(Boolean);
 export function validateStory(s: StoryInput): StoryReport {
   const checks: Check[] = [];
   const micro = s.durationSec < MICRO_SEC;
-  const add = (id: string, pass: boolean, msg: string) => checks.push(micro && MICRO_SKIP.has(id) ? { id, pass: true, msg: `${id} not used for loop Shorts` } : { id, pass, msg });
+  const legacyOnly = new Set(['V1', 'V2', 'V6', 'V7', 'V9', 'CLOCK', 'LOOPS']);
+  const add = (id: string, pass: boolean, msg: string) => {
+    if (s.kid && legacyOnly.has(id)) { checks.push({ id, pass: true, msg: `${id}: Advanced uses factual cause and effect instead of an event quota` }); return; }
+    checks.push(micro && MICRO_SKIP.has(id) ? { id, pass: true, msg: `${id} not used for loop Shorts` } : { id, pass, msg });
+  };
   const all = s.scenes.map((x) => x.narration.trim()).join(" ");
   const words = wc(all);
   const total = words / WPS;
   const starts = sceneStarts(s.scenes);
   const by8 = spokenBy(s.scenes, 8), by10 = spokenBy(s.scenes, 10), by15 = spokenBy(s.scenes, 15), by3 = spokenBy(s.scenes, 3.2);
   const sents = splitSentences(all);
+  if (s.kid) {
+    const nonsense = /\b(weak sky|space clocks|lonely gps|one cross shouts|signals? (laughs?|wants?|feels?))\b/i;
+    const named = mentions(sents[0] ?? '', s.anchors.subject);
+    add('CAUSE', named && !nonsense.test(all), !named ? 'Opening must name the real subject, not a vague stand-in' : nonsense.test(all) ? 'Replace the confusing metaphor with the real physical step' : 'Real subject and literal causal language');
+    const opened = s.scenes.findIndex(x => x.loop_opened.split(/[,\s]+/).includes('main'));
+    const closed = s.scenes.findIndex(x => x.loop_closed.split(/[,\s]+/).includes('main'));
+    add('ANSWER', opened >= 0 && closed >= opened && sents.length >= 2, 'Mark where the real opening curiosity is raised and resolved; no fixed percentage');
+  }
 
   // V1 anchors by 8s
   const missing = (micro ? (["subject", "place"] as const) : (["subject", "year", "place", "stakes"] as const)).filter((k) => !mentions(by8, s.anchors[k]) && !(k === "year" && /\b1[0-9]{3}s?\b|\b20[0-9]{2}\b/.test(by8)));
@@ -242,7 +254,8 @@ export function validateStory(s: StoryInput): StoryReport {
   const loopsOk = !open.length && opened.has("main") && mcPos >= 0.6 && mcPos <= 0.8;
   add("LOOPS", loopsOk, open.length ? `Loop registry: loops never closed: ${open.join(", ")}` : !opened.has("main") ? 'Loop registry: no "main" loop' : `Loop registry: main question closes at ${Math.round(mcPos * 100)}% (needs 65-75%)`);
   // Cast limit
-  add("CAST", s.cast.length <= 3, s.cast.length > 3 ? `Cast limit: ${s.cast.length} recurring characters (max 3)` : "Cast within 3 roles");
+  const castLimit = s.kid ? 4 : 3;
+  add("CAST", s.cast.length <= castLimit, s.cast.length > castLimit ? `Cast limit: ${s.cast.length} recurring characters (max ${castLimit})` : `Cast within ${castLimit} roles`);
   // Shot mix
   const shotMix = { wide: 0, aerial: 0, action: 0, macro: 0, face: 0 } as Record<Shot, number>;
   s.scenes.forEach((x) => { shotMix[x.shot] = (shotMix[x.shot] ?? 0) + 1 / s.scenes.length; });
@@ -250,7 +263,7 @@ export function validateStory(s: StoryInput): StoryReport {
   const mixOk = wide >= 0.35 && shotMix.face <= 0.3 && shotMix.macro >= 0.1 && shotMix.action >= 0.2 && s.scenes[0]?.shot !== "face";
   add("SHOTS", mixOk, mixOk ? "Shot mix balanced" : `Shot mix: wide ${Math.round(wide * 100)}% (≥40), action ${Math.round(shotMix.action * 100)}% (~30), macro ${Math.round(shotMix.macro * 100)}% (~20), faces ${Math.round(shotMix.face * 100)}% (≤30)${s.scenes[0]?.shot === "face" ? "; first frame is a face" : ""}`);
   // Language: 3-12 word sentences, plain words, length
-  const longS = sents.filter((x) => wc(x) > 12).length;
+  const longS = sents.filter((x) => wc(x) > (s.kid ? 20 : 12)).length;
   const anchorWords = new Set(Object.values(s.anchors).flatMap(contentWords).concat(contentWords(`${s.hero.name} ${s.cast.map((c) => c.name).join(" ")}`)));
   const hard = [...new Set(hardWords(all))].filter((w) => { const k = w.toLowerCase().replace(/[’']s$/, "").replace(/[^a-z]/g, ""); return !anchorWords.has(k) && !anchorWords.has(k.replace(/s$/, "")) && !NUMBER_WORD.test(k); });
   const labels = sents.filter((x) => LABEL.test(x));
