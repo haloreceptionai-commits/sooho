@@ -1,9 +1,10 @@
 import type { Hook, Plan } from '@/lib/pipeline.functions';
 import { hookIssues, hookTextIssues, sceneStarts, wc, type Anchors, type GateResult } from '@/lib/story-v2';
+import { advancedOpeningIssues, ADVANCED_STORY_DIRECTION } from './advanced-story';
 
 /** Invalid hooks are ineligible, regardless of the model's self-rated score. */
-export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string): Hook[] {
-  return hooks.filter(h => !hookIssues(h.line, anchors, facts).length && !hookTextIssues(h.text, h.line).length);
+export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string, advanced = false): Hook[] {
+  return hooks.filter(h => !(advanced ? [...hookIssues(h.line, undefined, facts).filter(x => !x.startsWith('Hook is') && !x.includes('unanswerable')), ...advancedOpeningIssues(h.line, anchors.subject)] : hookIssues(h.line, anchors, facts)).length && !hookTextIssues(h.text, h.line).length);
 }
 
 const PRONOUN = /^(["']?)(He|She|They|His|Her|Their)\b/;
@@ -59,10 +60,11 @@ export function preferRepair(current: GateResult, next: GateResult): boolean {
 }
 
 /** Preserve the actual scene/cast/loop state, not just narration, for actionable repairs. */
-export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors, opts: { loop?: boolean } = {}): string {
+export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors, opts: { loop?: boolean; advanced?: boolean } = {}): string {
   const starts = sceneStarts(plan.scenes);
   const words = wc(plan.scenes.map(s => s.narration).join(' '));
   const heroCount = plan.scenes.filter(s => s.characters.includes(plan.hero.name)).length;
+  if (opts.advanced) return `${ADVANCED_STORY_DIRECTION}\nFix the actual failed checks, not legacy hero/date/myth quotas:\n${gate.blockers.join('\n')}\nChecked anchors: ${JSON.stringify(anchors)}\nCurrent words: ${words}. Keep all facts, uncertainty, cast identities and literal visual meaning. Rewrite a confusing paragraph as a whole, not individual word swaps.\nPrevious COMPLETE plan:\n${JSON.stringify(plan)}`;
   return `Fix ALL failures below. Rewrite the opening or rearrange scenes when needed; do not preserve broken lines or a broken hook. Never invent events to satisfy a beat. Keep uncertainty from the checked facts.
 ${gate.blockers.map(b => `- ${b}`).join('\n')}
 Required spoken anchors: ${JSON.stringify(anchors)}.
