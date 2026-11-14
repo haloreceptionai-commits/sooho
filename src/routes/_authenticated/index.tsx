@@ -130,7 +130,9 @@ function Create() {
             <select id="engine" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
               <option value="own">Own model — AI images with camera motion</option>
               <option value="cartoon">Own cartoon — 3D cartoon + animated maps on Azure</option>
+              <option value="advanced">Advanced Video AI — painted characters in 3D sets, fastest</option>
             </select>
+            {engine === "advanced" && <p className="mt-2 text-xs text-muted-foreground">Advanced Video AI: story-matched painted characters standing in inked 3D sets, with depth of field, word-pop captions and music. Renders straight through on Azure — no preview step — and keeps going if you close your browser.</p>}
             {engine === "cartoon" && format !== "short" && <p className="mt-2 text-xs text-muted-foreground">Long-form cartoon: 16:9 documentary with animated relief maps, glowing territory and marching armies, plus cartoon scenes. You approve a preview before the full render.</p>}
           </Panel>
 
