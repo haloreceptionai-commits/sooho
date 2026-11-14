@@ -9,8 +9,9 @@ import { scoreTopic5 } from "@/lib/quality";
 import { Page, Panel, btnPrimary, input, label } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
 import { Button } from "@/components/ui/button";
-import { TopicLibrary } from "@/components/topic-library";
-import { FACT_TOPICS } from "@/lib/topic-catalog";
+import { TopicFinder } from "@/components/topic-finder";
+import { discoveryQuery } from "@/lib/topic-discovery-query";
+import type { DiscoveredTopic } from "@/lib/topic-discovery";
 import { topicUnavailable, type TopicUse } from "@/lib/topics";
 import { topicHistoryQuery } from "@/lib/topics-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(topicHistoryQuery),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(topicHistoryQuery), context.queryClient.ensureQueryData(discoveryQuery)]),
   component: Create,
 });
 
@@ -46,6 +47,7 @@ function Create() {
   const checkHistory = useServerFn(getTopicHistory);
   const [checking, setChecking] = useState(false);
   const [topicId, setTopicId] = useState<string | undefined>();
+  const [selectedFact, setSelectedFact] = useState<DiscoveredTopic | undefined>();
   const used: TopicUse[] = [...history, ...videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }))];
   const unavailable = topicUnavailable(topic, topicId, used);
   const score = scoreTopic(topic);
@@ -63,10 +65,10 @@ function Create() {
         toast.error("This topic already has a video or is being made. Pick a new topic.");
         return;
       }
-      const chosen = FACT_TOPICS.find((t) => t.id === topicId);
+      const chosen = selectedFact;
       startVideo({ topic: topic.trim(), topicId, ...(chosen ? { topicSource: { url: chosen.source, fact: chosen.fact } } : {}), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx", engine });
       toast.success("Video generation started — you can keep working.");
-      setTopic(""); setTopicId(undefined);
+      setTopic(""); setTopicId(undefined); setSelectedFact(undefined);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not check your saved topics. Try again.");
     } finally { setChecking(false); }
@@ -102,9 +104,9 @@ function Create() {
 
           {/* 2. Topic */}
           <Panel className="p-5">
-            <TopicLibrary library={FACT_TOPICS} used={used} selected={topic} onSelect={(idea) => { setTopic(idea.title); setTopicId(idea.id); setArch(idea.archetype); }} />
+            <TopicFinder used={used} selected={topic} format={format} deployment={settings.scriptDeployment} onSelect={(idea) => { setTopic(idea.title); setTopicId(idea.id); setArch(idea.archetype); setSelectedFact({ ...idea, fact: `${idea.fact}\nVerified evidence: ${idea.sources.map(s => `${s.url}: ${s.quote}`).join('\n')}\nQualifications: ${idea.caveat}` }); }} />
             <label htmlFor="custom-topic" className={`${label} mt-5 block`}>Selected topic / custom topic</label>
-            <input id="custom-topic" className={`${input} mt-2`} value={topic} onChange={(e) => { setTopic(e.target.value); setTopicId(undefined); }} placeholder="…or type your own topic" />
+            <input id="custom-topic" className={`${input} mt-2`} value={topic} onChange={(e) => { setTopic(e.target.value); setTopicId(undefined); setSelectedFact(undefined); }} placeholder="…or type your own topic" />
             {topic && (
               <div className="mt-2 flex flex-wrap gap-4 font-mono text-[11px] text-muted-foreground">
                 <span>Viral score <b className="text-foreground">{score.overall}</b></span>
