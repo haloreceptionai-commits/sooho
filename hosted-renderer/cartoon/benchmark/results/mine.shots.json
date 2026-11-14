@@ -1,0 +1,2283 @@
+{
+ "shots": [
+  {
+   "i": 0,
+   "start": 0.0,
+   "end": 2.0,
+   "len": 2.0,
+   "sharpness": 134.4,
+   "colorfulness": 28.5,
+   "contrast": 27.8,
+   "motion": 0.0959,
+   "words": "He loaded the shotgun with gold and fired it"
+  },
+  {
+   "i": 1,
+   "start": 2.0,
+   "end": 9.2,
+   "len": 7.2,
+   "sharpness": 718.9,
+   "colorfulness": 61.5,
+   "contrast": 45.7,
+   "motion": 0.0366,
+   "words": "into the walls of the mine. His buddy just watches the gold vanish into the rock. So we're shooting gold into a gold mine? You see,"
+  },
+  {
+   "i": 2,
+   "start": 9.2,
+   "end": 10.7,
+   "len": 1.5,
+   "sharpness": 549.5,
+   "colorfulness": 54.3,
+   "contrast": 41.9,
+   "motion": 0.0305,
+   "words": "it's called salting. He's"
+  },
+  {
+   "i": 3,
+   "start": 10.7,
+   "end": 16.1,
+   "len": 5.4,
+   "sharpness": 1919.0,
+   "colorfulness": 52.8,
+   "contrast": 48.2,
+   "motion": 0.0961,
+   "words": "dug this mine for 10 years and found nothing but rock. And tomorrow, a rich guy is coming to buy it. So"
+  },
+  {
+   "i": 4,
+   "start": 16.1,
+   "end": 17.6,
+   "len": 1.5,
+   "sharpness": 1221.6,
+   "colorfulness": 55.0,
+   "contrast": 53.2,
+   "motion": 0.0419,
+   "words": "he spent his last hundred bucks on"
+  },
+  {
+   "i": 5,
+   "start": 17.6,
+   "end": 18.9,
+   "len": 1.3,
+   "sharpness": 1191.1,
+   "colorfulness": 64.8,
+   "contrast": 40.6,
+   "motion": 0.0563,
+   "words": "gold dust instead. Next morning,"
+  },
+  {
+   "i": 6,
+   "start": 18.9,
+   "end": 20.6,
+   "len": 1.7,
+   "sharpness": 1542.9,
+   "colorfulness": 61.0,
+   "contrast": 46.5,
+   "motion": 0.0595,
+   "words": "the rich guy"
+  },
+  {
+   "i": 7,
+   "start": 20.6,
+   "end": 21.5,
+   "len": 0.9,
+   "sharpness": 1479.3,
+   "colorfulness": 47.3,
+   "contrast": 62.7,
+   "motion": 0.1394,
+   "words": "rolls up"
+  },
+  {
+   "i": 8,
+   "start": 21.5,
+   "end": 24.5,
+   "len": 3.0,
+   "sharpness": 1319.6,
+   "colorfulness": 36.0,
+   "contrast": 56.7,
+   "motion": 0.1121,
+   "words": "in a white suit and bangs his head on"
+  },
+  {
+   "i": 9,
+   "start": 24.5,
+   "end": 27.5,
+   "len": 3.0,
+   "sharpness": 882.0,
+   "colorfulness": 43.6,
+   "contrast": 44.2,
+   "motion": 0.0601,
+   "words": "the first beam. But he's brought an expert. And the expert isn't stupid. He smashes a chunk of wall, swirls"
+  },
+  {
+   "i": 10,
+   "start": 27.5,
+   "end": 28.9,
+   "len": 1.4,
+   "sharpness": 544.1,
+   "colorfulness": 49.2,
+   "contrast": 44.2,
+   "motion": 0.0513,
+   "words": "it in a pan, and gold"
+  },
+  {
+   "i": 11,
+   "start": 28.9,
+   "end": 30.0,
+   "len": 1.1,
+   "sharpness": 1282.0,
+   "colorfulness": 40.1,
+   "contrast": 40.7,
+   "motion": 0.0618,
+   "words": "flakes spin to"
+  },
+  {
+   "i": 12,
+   "start": 30.0,
+   "end": 31.0,
+   "len": 1.0,
+   "sharpness": 604.2,
+   "colorfulness": 39.5,
+   "contrast": 52.3,
+   "motion": 0.0757,
+   "words": "the bottom. But under his"
+  },
+  {
+   "i": 13,
+   "start": 31.0,
+   "end": 31.5,
+   "len": 0.5,
+   "sharpness": 569.3,
+   "colorfulness": 50.5,
+   "contrast": 48.2,
+   "motion": 0.0695,
+   "words": "magnifying"
+  },
+  {
+   "i": 14,
+   "start": 31.5,
+   "end": 33.5,
+   "len": 2.0,
+   "sharpness": 295.8,
+   "colorfulness": 31.4,
+   "contrast": 31.7,
+   "motion": 0.039,
+   "words": "glass, every flake is flat."
+  },
+  {
+   "i": 15,
+   "start": 33.5,
+   "end": 34.0,
+   "len": 0.5,
+   "sharpness": 3071.4,
+   "colorfulness": 49.5,
+   "contrast": 45.5,
+   "motion": 0.0716,
+   "words": "Somebody shot"
+  },
+  {
+   "i": 16,
+   "start": 34.0,
+   "end": 34.6,
+   "len": 0.6,
+   "sharpness": 2010.2,
+   "colorfulness": 58.2,
+   "contrast": 47.3,
+   "motion": 0.045,
+   "words": "this gold"
+  },
+  {
+   "i": 17,
+   "start": 34.6,
+   "end": 35.7,
+   "len": 1.1,
+   "sharpness": 981.1,
+   "colorfulness": 44.2,
+   "contrast": 46.1,
+   "motion": 0.0439,
+   "words": "into the wall. But"
+  },
+  {
+   "i": 18,
+   "start": 35.7,
+   "end": 40.5,
+   "len": 4.8,
+   "sharpness": 1017.6,
+   "colorfulness": 46.4,
+   "contrast": 61.1,
+   "motion": 0.0418,
+   "words": "the rich guy"
+  },
+  {
+   "i": 19,
+   "start": 40.5,
+   "end": 43.2,
+   "len": 2.7,
+   "sharpness": 630.6,
+   "colorfulness": 49.8,
+   "contrast": 44.3,
+   "motion": 0.0449,
+   "words": ""
+  },
+  {
+   "i": 20,
+   "start": 43.2,
+   "end": 45.3,
+   "len": 2.1,
+   "sharpness": 1211.4,
+   "colorfulness": 43.0,
+   "contrast": 53.1,
+   "motion": 0.0395,
+   "words": ""
+  },
+  {
+   "i": 21,
+   "start": 45.3,
+   "end": 45.7,
+   "len": 0.4,
+   "sharpness": 1433.8,
+   "colorfulness": 35.7,
+   "contrast": 49.6,
+   "motion": 0.0826,
+   "words": ""
+  },
+  {
+   "i": 22,
+   "start": 45.7,
+   "end": 46.2,
+   "len": 0.5,
+   "sharpness": 1566.4,
+   "colorfulness": 40.1,
+   "contrast": 55.3,
+   "motion": 0.1239,
+   "words": ""
+  },
+  {
+   "i": 23,
+   "start": 46.2,
+   "end": 48.0,
+   "len": 1.8,
+   "sharpness": 827.9,
+   "colorfulness": 42.5,
+   "contrast": 49.0,
+   "motion": 0.0558,
+   "words": ""
+  },
+  {
+   "i": 24,
+   "start": 48.0,
+   "end": 51.2,
+   "len": 3.2,
+   "sharpness": 788.1,
+   "colorfulness": 41.1,
+   "contrast": 64.7,
+   "motion": 0.0511,
+   "words": ""
+  },
+  {
+   "i": 25,
+   "start": 51.2,
+   "end": 51.8,
+   "len": 0.6,
+   "sharpness": 397.2,
+   "colorfulness": 59.4,
+   "contrast": 34.9,
+   "motion": 0.0929,
+   "words": "just laughs. Why would anyone shoot"
+  },
+  {
+   "i": 26,
+   "start": 51.8,
+   "end": 53.8,
+   "len": 2.0,
+   "sharpness": 269.8,
+   "colorfulness": 38.3,
+   "contrast": 20.4,
+   "motion": 0.1065,
+   "words": "gold into a wall? That's insane! And his buddy nods. Completely insane. So the rich guy pays up."
+  },
+  {
+   "i": 27,
+   "start": 53.8,
+   "end": 54.7,
+   "len": 0.9,
+   "sharpness": 661.1,
+   "colorfulness": 30.2,
+   "contrast": 57.6,
+   "motion": 0.0554,
+   "words": "And while those two bolt with the money, he"
+  },
+  {
+   "i": 28,
+   "start": 54.7,
+   "end": 55.6,
+   "len": 0.9,
+   "sharpness": 844.2,
+   "colorfulness": 40.8,
+   "contrast": 41.3,
+   "motion": 0.1045,
+   "words": "stays behind and pulls a stick of dynamite"
+  },
+  {
+   "i": 29,
+   "start": 55.6,
+   "end": 56.0,
+   "len": 0.4,
+   "sharpness": 1.4,
+   "colorfulness": 35.7,
+   "contrast": 19.3,
+   "motion": 0.071,
+   "words": "out of his suit."
+  },
+  {
+   "i": 30,
+   "start": 56.0,
+   "end": 56.4,
+   "len": 0.4,
+   "sharpness": 155.0,
+   "colorfulness": 42.9,
+   "contrast": 51.5,
+   "motion": 0.0711,
+   "words": "He's never mined a"
+  },
+  {
+   "i": 31,
+   "start": 56.4,
+   "end": 61.1,
+   "len": 4.7,
+   "sharpness": 893.6,
+   "colorfulness": 68.9,
+   "contrast": 58.4,
+   "motion": 0.0659,
+   "words": "day in his life. So he just lights it, tosses it down the tunnel like a firecracker, and runs. And when the dust clears, there's a vein of real gold as thick as your arm, ten feet past where the last guy gave up."
+  }
+ ],
+ "labels": [
+  {
+   "i": 0,
+   "shot_type": "action",
+   "camera": "push_in",
+   "distinct_framings": 2,
+   "set": "mine tunnel",
+   "set_detail": "wood-braced tunnel with rails and lamp spotlight",
+   "objects": [
+    "shotgun",
+    "gold nugget",
+    "rail tracks"
+   ],
+   "spoken_visible": "yes",
+   "action": "miner loads a shotgun with a gold nugget and aims/fires",
+   "effects": [
+    "spotlight",
+    "particles"
+   ],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 8,
+   "note": "2D stickman in detailed 3D mine; clear insert of loading."
+  },
+  {
+   "i": 1,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 2,
+   "set": "mine room",
+   "set_detail": "stone walls with shelves, lanterns and crates",
+   "objects": [
+    "mug",
+    "lantern",
+    "crates",
+    "teapot"
+   ],
+   "spoken_visible": "yes",
+   "action": "gold projectile hits and vanishes into wall while buddy watches",
+   "effects": [
+    "light_beam",
+    "debris"
+   ],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Shows beam hitting wall and cracks forming."
+  },
+  {
+   "i": 2,
+   "shot_type": "medium",
+   "camera": "push_in",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "tracks and hanging lamps",
+   "objects": [
+    "shotgun",
+    "rails"
+   ],
+   "spoken_visible": "partial",
+   "action": "none",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Dialogue explains 'salting'; visual shows miner holding gun."
+  },
+  {
+   "i": 3,
+   "shot_type": "establishing",
+   "camera": "tracking",
+   "distinct_framings": 3,
+   "set": "mine exterior",
+   "set_detail": "daylight yard with cliffside entrance, cart and tracks",
+   "objects": [
+    "mine cart",
+    "newspaper",
+    "rocks",
+    "tracks"
+   ],
+   "spoken_visible": "partial",
+   "action": "none",
+   "effects": [],
+   "characters": 2,
+   "lighting": "day_sun",
+   "depth": 8,
+   "environment_richness": 8,
+   "character_quality": 3,
+   "render_quality": 8,
+   "note": "Shows rocks and newspaper about rich buyer; varied framings."
+  },
+  {
+   "i": 4,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 2,
+   "set": "office/saloon interior",
+   "set_detail": "table with lamp and gold on plates",
+   "objects": [
+    "table",
+    "gold pieces",
+    "lamp",
+    "paper money"
+   ],
+   "spoken_visible": "yes",
+   "action": "miner talks at table showing money and gold",
+   "effects": [],
+   "characters": 3,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Interior scene with props and two other figures."
+  },
+  {
+   "i": 5,
+   "shot_type": "object_insert",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "office table",
+   "set_detail": "wood tabletop with bills and gold dust plates",
+   "objects": [
+    "gold dust plate",
+    "$100 bills"
+   ],
+   "spoken_visible": "yes",
+   "action": "none",
+   "effects": [],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 5,
+   "environment_richness": 6,
+   "character_quality": 0,
+   "render_quality": 7,
+   "note": "Close insert emphasizing money and gold dust."
+  },
+  {
+   "i": 6,
+   "shot_type": "establishing",
+   "camera": "tracking",
+   "distinct_framings": 1,
+   "set": "mine yard by cliffs",
+   "set_detail": "outdoor area with tracks, small building, rocky cliffs and forest",
+   "objects": [
+    "vintage car",
+    "rail tracks",
+    "small building",
+    "rocks",
+    "trees"
+   ],
+   "spoken_visible": "yes",
+   "action": "car drives into yard with people aboard",
+   "effects": [],
+   "characters": 4,
+   "lighting": "day_sun",
+   "depth": 8,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 8,
+   "note": "Wide view of car arriving with rich man visible."
+  },
+  {
+   "i": 7,
+   "shot_type": "character_closeup",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine yard",
+   "set_detail": "close-up of people in vintage car with forest backdrop",
+   "objects": [
+    "vintage car"
+   ],
+   "spoken_visible": "partial",
+   "action": "man in white suit waves while car moves",
+   "effects": [],
+   "characters": 2,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 7,
+   "render_quality": 8,
+   "note": "Closeup emphasizes rich man; motion of car implied rather than clearly shown."
+  },
+  {
+   "i": 8,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "mine entrance",
+   "set_detail": "timbered portal with sign and tracks entering tunnel",
+   "objects": [
+    "mine entrance sign",
+    "rail tracks",
+    "support beam"
+   ],
+   "spoken_visible": "yes",
+   "action": "rich man in white suit walks in and hits head on beam; others stand nearby",
+   "effects": [],
+   "characters": 4,
+   "lighting": "day_sun",
+   "depth": 8,
+   "environment_richness": 8,
+   "character_quality": 8,
+   "render_quality": 9,
+   "note": "Multiple angles around the entrance show the gag clearly."
+  },
+  {
+   "i": 9,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 2,
+   "set": "mine tunnel rock wall",
+   "set_detail": "rock face inside tunnel with tools and lanterns",
+   "objects": [
+    "rock wall",
+    "pickaxe",
+    "lantern",
+    "hat"
+   ],
+   "spoken_visible": "yes",
+   "action": "expert hits wall with pickaxe and breaks chunk",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Clear interior action of expert smashing wall."
+  },
+  {
+   "i": 10,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 2,
+   "set": "mine tunnel",
+   "set_detail": "timbered interior with bucket and lantern",
+   "objects": [
+    "gold pan",
+    "bucket",
+    "lantern"
+   ],
+   "spoken_visible": "yes",
+   "action": "expert swirls material in pan",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Shows panning process at medium distance."
+  },
+  {
+   "i": 11,
+   "shot_type": "object_insert",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "close-up on pan over ground with crates in background",
+   "objects": [
+    "gold pan",
+    "water",
+    "gold flakes",
+    "ground",
+    "crates"
+   ],
+   "spoken_visible": "yes",
+   "action": "flakes spin in pan",
+   "effects": [],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 0,
+   "render_quality": 8,
+   "note": "Insert shot on pan contents demonstrating spinning flakes."
+  },
+  {
+   "i": 12,
+   "shot_type": "object_insert",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "underground cave with crates, barrels and dirt floor",
+   "objects": [
+    "metal pan",
+    "knife",
+    "gold flakes",
+    "crates",
+    "barrel"
+   ],
+   "spoken_visible": "partial",
+   "action": "knife stirring/scraping in pan",
+   "effects": [],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 0,
+   "render_quality": 7,
+   "note": "Close view into a pan; good textures and lighting, no characters."
+  },
+  {
+   "i": 13,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "rock walls, tracks, cart and lantern nearby",
+   "objects": [
+    "magnifying glass",
+    "water pan",
+    "lantern",
+    "mine cart",
+    "tracks"
+   ],
+   "spoken_visible": "yes",
+   "action": "character holds magnifying glass over pan",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "2D-style character in a detailed 3D mine set."
+  },
+  {
+   "i": 14,
+   "shot_type": "action",
+   "camera": "tracking",
+   "distinct_framings": 3,
+   "set": "mine tunnel",
+   "set_detail": "tracks and tunnel interior with lanterns",
+   "objects": [
+    "magnifying glass",
+    "knife",
+    "gold flakes",
+    "tracks",
+    "lantern"
+   ],
+   "spoken_visible": "yes",
+   "action": "inspect with magnifying glass then lift flakes on knife",
+   "effects": [],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 0,
+   "render_quality": 7,
+   "note": "Multiple angles showing inspection and flakes on knife."
+  },
+  {
+   "i": 15,
+   "shot_type": "object_insert",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "close view of rocky wall surface",
+   "objects": [
+    "rock wall",
+    "projectile/impact mark"
+   ],
+   "spoken_visible": "partial",
+   "action": "projectile appears/impact on wall",
+   "effects": [],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 0,
+   "render_quality": 6,
+   "note": "Flat close-up texture of wall; action implied."
+  },
+  {
+   "i": 16,
+   "shot_type": "object_insert",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "close view of rocky wall with gold leaf embedded",
+   "objects": [
+    "rock wall",
+    "gold leaf"
+   ],
+   "spoken_visible": "yes",
+   "action": "none",
+   "effects": [],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 0,
+   "render_quality": 6,
+   "note": "Clear insert of the gold in the wall."
+  },
+  {
+   "i": 17,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "character beside wall with embedded gold, crates nearby",
+   "objects": [
+    "crates",
+    "rock wall",
+    "gold leaf"
+   ],
+   "spoken_visible": "yes",
+   "action": "character gestures toward gold in wall",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Character explains while pointing at gold in the wall."
+  },
+  {
+   "i": 18,
+   "shot_type": "character_closeup",
+   "camera": "push_in",
+   "distinct_framings": 1,
+   "set": "mine interior",
+   "set_detail": "wood-plank wall, rocky ceiling, lanterns, barrel, suitcase",
+   "objects": [
+    "lantern",
+    "barrel",
+    "suitcase",
+    "calendar",
+    "wood wall"
+   ],
+   "spoken_visible": "yes",
+   "action": "none",
+   "effects": [],
+   "characters": 3,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Close on the wealthy man in white suit; others in background."
+  },
+  {
+   "i": 19,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine interior",
+   "set_detail": "wood-plank wall with calendar",
+   "objects": [
+    "calendar",
+    "wood wall"
+   ],
+   "spoken_visible": "no_words",
+   "action": "none",
+   "effects": [],
+   "characters": 2,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 3,
+   "render_quality": 6,
+   "note": "Green-sweater character with mountie beside him."
+  },
+  {
+   "i": 20,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine interior",
+   "set_detail": "wood wall, rocky ceiling; table/suitcase with money",
+   "objects": [
+    "suitcase",
+    "money stacks",
+    "calendar",
+    "lantern"
+   ],
+   "spoken_visible": "no_words",
+   "action": "characters handle suitcase and money; one character moves/falls",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Rich man opens suitcase; money handled/tossed."
+  },
+  {
+   "i": 21,
+   "shot_type": "establishing",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine entrance",
+   "set_detail": "tracks, tools on wall, stone facade, banners",
+   "objects": [
+    "mine entrance sign",
+    "train tracks",
+    "tools",
+    "banners"
+   ],
+   "spoken_visible": "no_words",
+   "action": "characters step out of doorway",
+   "effects": [],
+   "characters": 3,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Exterior wide of mine portal."
+  },
+  {
+   "i": 22,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine entrance",
+   "set_detail": "outside portal with tracks; money flying",
+   "objects": [
+    "money stacks",
+    "tracks",
+    "mine entrance"
+   ],
+   "spoken_visible": "no_words",
+   "action": "money thrown/flies around characters",
+   "effects": [],
+   "characters": 3,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Closer on characters with cash."
+  },
+  {
+   "i": 23,
+   "shot_type": "action",
+   "camera": "push_in",
+   "distinct_framings": 1,
+   "set": "mine interior",
+   "set_detail": "wood wall, scattered bills, suitcase on floor",
+   "objects": [
+    "suitcase",
+    "paper money",
+    "cup",
+    "dynamite bundle"
+   ],
+   "spoken_visible": "no_words",
+   "action": "rich man produces bundle of dynamite",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Single character pulls out explosives prop."
+  },
+  {
+   "i": 24,
+   "shot_type": "character_closeup",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine interior",
+   "set_detail": "timber wall inside tunnel with props",
+   "objects": [
+    "dynamite sticks",
+    "match",
+    "barrel",
+    "top hat"
+   ],
+   "spoken_visible": "no_words",
+   "action": "character reveals and lights a dynamite stick",
+   "effects": [
+    "small flame"
+   ],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Close-up of flat stick-figure character in a detailed mine set."
+  },
+  {
+   "i": 25,
+   "shot_type": "object_insert",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine interior",
+   "set_detail": "close view on wooden post and dynamite fuse",
+   "objects": [
+    "dynamite stick",
+    "flame"
+   ],
+   "spoken_visible": "no",
+   "action": "fuse is lit with sparks",
+   "effects": [
+    "sparks",
+    "small flame"
+   ],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 5,
+   "character_quality": 0,
+   "render_quality": 6,
+   "note": "Tight insert on dynamite fuse being lit."
+  },
+  {
+   "i": 26,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "mine tunnel",
+   "set_detail": "rail tracks with cart and rocks",
+   "objects": [
+    "mine cart",
+    "dynamite",
+    "tracks",
+    "rocks"
+   ],
+   "spoken_visible": "no",
+   "action": "character tosses explosive; views of cart and ground with firecracker",
+   "effects": [
+    "sparks"
+   ],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Multiple angles within the tunnel."
+  },
+  {
+   "i": 27,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "arched supports, lamps in background",
+   "objects": [
+    "tracks",
+    "lamps"
+   ],
+   "spoken_visible": "no",
+   "action": "none",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 3,
+   "render_quality": 6,
+   "note": "Character stands in tunnel; expression changes."
+  },
+  {
+   "i": 28,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "mine entrance",
+   "set_detail": "rocky cliff face with doorway",
+   "objects": [
+    "rocks",
+    "mine sign"
+   ],
+   "spoken_visible": "partial",
+   "action": "explosion at entrance; character blown out and tumbles",
+   "effects": [
+    "explosion",
+    "smoke/dust"
+   ],
+   "characters": 1,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Exterior blast sequence with character."
+  },
+  {
+   "i": 29,
+   "shot_type": "effect",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine interior",
+   "set_detail": "view obscured by dust cloud",
+   "objects": [],
+   "spoken_visible": "no",
+   "action": "none",
+   "effects": [
+    "heavy dust/smoke"
+   ],
+   "characters": 0,
+   "lighting": "flat",
+   "depth": 1,
+   "environment_richness": 2,
+   "character_quality": 0,
+   "render_quality": 2,
+   "note": "Scene mostly obscured by dust; minimal detail visible."
+  },
+  {
+   "i": 30,
+   "shot_type": "establishing",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "mine tunnel",
+   "set_detail": "rocky tunnel interior with lantern and measuring tape on the ground; dust clearing reveals a gold vein",
+   "objects": [
+    "rocks",
+    "measuring tape",
+    "lantern",
+    "gold vein",
+    "dust smoke"
+   ],
+   "spoken_visible": "partial",
+   "action": "dust clears to reveal a gold vein",
+   "effects": [
+    "dust",
+    "light glow"
+   ],
+   "characters": 0,
+   "lighting": "interior_lamps",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 0,
+   "render_quality": 7,
+   "note": "No characters visible; emphasis on tunnel and emerging gold vein."
+  },
+  {
+   "i": 31,
+   "shot_type": "medium",
+   "camera": "push_in",
+   "distinct_framings": 3,
+   "set": "mine tunnel",
+   "set_detail": "gold vein along tunnel wall with tape measure indicating distance",
+   "objects": [
+    "rocks",
+    "measuring tape",
+    "gold vein",
+    "lantern",
+    "hat"
+   ],
+   "spoken_visible": "yes",
+   "action": "character gestures by the gold vein; distance marked ten feet",
+   "effects": [],
+   "characters": 1,
+   "lighting": "interior_lamps",
+   "depth": 8,
+   "environment_richness": 8,
+   "character_quality": 3,
+   "render_quality": 8,
+   "note": "Shows gold vein and 10 ft mark matching narration."
+  }
+ ],
+ "words": [
+  {
+   "w": "He",
+   "t": 0.0,
+   "anchored": true
+  },
+  {
+   "w": "loaded",
+   "t": 0.25,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 0.5,
+   "anchored": false
+  },
+  {
+   "w": "shotgun",
+   "t": 0.75,
+   "anchored": true
+  },
+  {
+   "w": "with",
+   "t": 1.0,
+   "anchored": true
+  },
+  {
+   "w": "gold",
+   "t": 1.25,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 1.5,
+   "anchored": true
+  },
+  {
+   "w": "fired",
+   "t": 1.62,
+   "anchored": false
+  },
+  {
+   "w": "it",
+   "t": 1.75,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 2.38,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 3.0,
+   "anchored": true
+  },
+  {
+   "w": "walls",
+   "t": 3.06,
+   "anchored": false
+  },
+  {
+   "w": "of",
+   "t": 3.12,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 3.19,
+   "anchored": false
+  },
+  {
+   "w": "mine.",
+   "t": 3.25,
+   "anchored": true
+  },
+  {
+   "w": "His",
+   "t": 3.75,
+   "anchored": true
+  },
+  {
+   "w": "buddy",
+   "t": 3.75,
+   "anchored": true
+  },
+  {
+   "w": "just",
+   "t": 4.0,
+   "anchored": false
+  },
+  {
+   "w": "watches",
+   "t": 4.25,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 4.5,
+   "anchored": false
+  },
+  {
+   "w": "gold",
+   "t": 4.75,
+   "anchored": true
+  },
+  {
+   "w": "vanish",
+   "t": 5.0,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 5.38,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 5.75,
+   "anchored": true
+  },
+  {
+   "w": "rock.",
+   "t": 5.75,
+   "anchored": true
+  },
+  {
+   "w": "So",
+   "t": 6.5,
+   "anchored": true
+  },
+  {
+   "w": "we're",
+   "t": 6.75,
+   "anchored": false
+  },
+  {
+   "w": "shooting",
+   "t": 7.0,
+   "anchored": true
+  },
+  {
+   "w": "gold",
+   "t": 8.25,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 8.33,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 8.42,
+   "anchored": false
+  },
+  {
+   "w": "gold",
+   "t": 8.5,
+   "anchored": true
+  },
+  {
+   "w": "mine?",
+   "t": 8.67,
+   "anchored": false
+  },
+  {
+   "w": "You",
+   "t": 8.83,
+   "anchored": false
+  },
+  {
+   "w": "see,",
+   "t": 9.0,
+   "anchored": true
+  },
+  {
+   "w": "it's",
+   "t": 9.5,
+   "anchored": true
+  },
+  {
+   "w": "called",
+   "t": 9.81,
+   "anchored": false
+  },
+  {
+   "w": "salting.",
+   "t": 10.12,
+   "anchored": false
+  },
+  {
+   "w": "He's",
+   "t": 10.44,
+   "anchored": false
+  },
+  {
+   "w": "dug",
+   "t": 10.75,
+   "anchored": true
+  },
+  {
+   "w": "this",
+   "t": 11.0,
+   "anchored": true
+  },
+  {
+   "w": "mine",
+   "t": 11.25,
+   "anchored": true
+  },
+  {
+   "w": "for",
+   "t": 11.5,
+   "anchored": true
+  },
+  {
+   "w": "10",
+   "t": 11.75,
+   "anchored": false
+  },
+  {
+   "w": "years",
+   "t": 12.0,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 12.25,
+   "anchored": false
+  },
+  {
+   "w": "found",
+   "t": 12.5,
+   "anchored": true
+  },
+  {
+   "w": "nothing",
+   "t": 12.75,
+   "anchored": true
+  },
+  {
+   "w": "but",
+   "t": 13.0,
+   "anchored": false
+  },
+  {
+   "w": "rock.",
+   "t": 13.25,
+   "anchored": true
+  },
+  {
+   "w": "And",
+   "t": 13.75,
+   "anchored": true
+  },
+  {
+   "w": "tomorrow,",
+   "t": 14.0,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 14.22,
+   "anchored": false
+  },
+  {
+   "w": "rich",
+   "t": 14.44,
+   "anchored": false
+  },
+  {
+   "w": "guy",
+   "t": 14.67,
+   "anchored": false
+  },
+  {
+   "w": "is",
+   "t": 14.89,
+   "anchored": false
+  },
+  {
+   "w": "coming",
+   "t": 15.11,
+   "anchored": false
+  },
+  {
+   "w": "to",
+   "t": 15.33,
+   "anchored": false
+  },
+  {
+   "w": "buy",
+   "t": 15.56,
+   "anchored": false
+  },
+  {
+   "w": "it.",
+   "t": 15.78,
+   "anchored": false
+  },
+  {
+   "w": "So",
+   "t": 16.0,
+   "anchored": true
+  },
+  {
+   "w": "he",
+   "t": 16.25,
+   "anchored": true
+  },
+  {
+   "w": "spent",
+   "t": 16.25,
+   "anchored": true
+  },
+  {
+   "w": "his",
+   "t": 16.38,
+   "anchored": false
+  },
+  {
+   "w": "last",
+   "t": 16.5,
+   "anchored": true
+  },
+  {
+   "w": "hundred",
+   "t": 16.75,
+   "anchored": true
+  },
+  {
+   "w": "bucks",
+   "t": 17.06,
+   "anchored": false
+  },
+  {
+   "w": "on",
+   "t": 17.36,
+   "anchored": false
+  },
+  {
+   "w": "gold",
+   "t": 17.67,
+   "anchored": false
+  },
+  {
+   "w": "dust",
+   "t": 17.97,
+   "anchored": false
+  },
+  {
+   "w": "instead.",
+   "t": 18.28,
+   "anchored": false
+  },
+  {
+   "w": "Next",
+   "t": 18.58,
+   "anchored": false
+  },
+  {
+   "w": "morning,",
+   "t": 18.89,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 19.19,
+   "anchored": false
+  },
+  {
+   "w": "rich",
+   "t": 19.5,
+   "anchored": true
+  },
+  {
+   "w": "guy",
+   "t": 20.09,
+   "anchored": false
+  },
+  {
+   "w": "rolls",
+   "t": 20.69,
+   "anchored": false
+  },
+  {
+   "w": "up",
+   "t": 21.28,
+   "anchored": false
+  },
+  {
+   "w": "in",
+   "t": 21.88,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 22.47,
+   "anchored": false
+  },
+  {
+   "w": "white",
+   "t": 23.06,
+   "anchored": false
+  },
+  {
+   "w": "suit",
+   "t": 23.66,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 24.25,
+   "anchored": true
+  },
+  {
+   "w": "bangs",
+   "t": 24.3,
+   "anchored": false
+  },
+  {
+   "w": "his",
+   "t": 24.35,
+   "anchored": false
+  },
+  {
+   "w": "head",
+   "t": 24.4,
+   "anchored": false
+  },
+  {
+   "w": "on",
+   "t": 24.45,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 24.5,
+   "anchored": true
+  },
+  {
+   "w": "first",
+   "t": 24.5,
+   "anchored": false
+  },
+  {
+   "w": "beam.",
+   "t": 24.5,
+   "anchored": false
+  },
+  {
+   "w": "But",
+   "t": 24.5,
+   "anchored": false
+  },
+  {
+   "w": "he's",
+   "t": 24.5,
+   "anchored": false
+  },
+  {
+   "w": "brought",
+   "t": 24.5,
+   "anchored": false
+  },
+  {
+   "w": "an",
+   "t": 24.5,
+   "anchored": false
+  },
+  {
+   "w": "expert.",
+   "t": 24.5,
+   "anchored": true
+  },
+  {
+   "w": "And",
+   "t": 24.62,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 24.75,
+   "anchored": false
+  },
+  {
+   "w": "expert",
+   "t": 24.88,
+   "anchored": false
+  },
+  {
+   "w": "isn't",
+   "t": 25.0,
+   "anchored": true
+  },
+  {
+   "w": "stupid.",
+   "t": 25.25,
+   "anchored": true
+  },
+  {
+   "w": "He",
+   "t": 25.62,
+   "anchored": false
+  },
+  {
+   "w": "smashes",
+   "t": 26.0,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 26.25,
+   "anchored": false
+  },
+  {
+   "w": "chunk",
+   "t": 26.5,
+   "anchored": true
+  },
+  {
+   "w": "of",
+   "t": 26.75,
+   "anchored": false
+  },
+  {
+   "w": "wall,",
+   "t": 27.0,
+   "anchored": true
+  },
+  {
+   "w": "swirls",
+   "t": 27.25,
+   "anchored": false
+  },
+  {
+   "w": "it",
+   "t": 27.5,
+   "anchored": false
+  },
+  {
+   "w": "in",
+   "t": 27.75,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 28.0,
+   "anchored": false
+  },
+  {
+   "w": "pan,",
+   "t": 28.25,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 28.5,
+   "anchored": true
+  },
+  {
+   "w": "gold",
+   "t": 28.75,
+   "anchored": false
+  },
+  {
+   "w": "flakes",
+   "t": 29.0,
+   "anchored": true
+  },
+  {
+   "w": "spin",
+   "t": 29.5,
+   "anchored": true
+  },
+  {
+   "w": "to",
+   "t": 29.5,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 30.0,
+   "anchored": true
+  },
+  {
+   "w": "bottom.",
+   "t": 30.0,
+   "anchored": true
+  },
+  {
+   "w": "But",
+   "t": 30.5,
+   "anchored": true
+  },
+  {
+   "w": "under",
+   "t": 30.75,
+   "anchored": true
+  },
+  {
+   "w": "his",
+   "t": 30.88,
+   "anchored": false
+  },
+  {
+   "w": "magnifying",
+   "t": 31.0,
+   "anchored": true
+  },
+  {
+   "w": "glass,",
+   "t": 31.5,
+   "anchored": true
+  },
+  {
+   "w": "every",
+   "t": 32.0,
+   "anchored": true
+  },
+  {
+   "w": "flake",
+   "t": 32.5,
+   "anchored": true
+  },
+  {
+   "w": "is",
+   "t": 32.75,
+   "anchored": true
+  },
+  {
+   "w": "flat.",
+   "t": 33.0,
+   "anchored": true
+  },
+  {
+   "w": "Somebody",
+   "t": 33.5,
+   "anchored": true
+  },
+  {
+   "w": "shot",
+   "t": 33.83,
+   "anchored": false
+  },
+  {
+   "w": "this",
+   "t": 34.17,
+   "anchored": false
+  },
+  {
+   "w": "gold",
+   "t": 34.5,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 34.75,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 34.75,
+   "anchored": false
+  },
+  {
+   "w": "wall.",
+   "t": 34.75,
+   "anchored": true
+  },
+  {
+   "w": "But",
+   "t": 35.25,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 35.75,
+   "anchored": true
+  },
+  {
+   "w": "rich",
+   "t": 35.75,
+   "anchored": false
+  },
+  {
+   "w": "guy",
+   "t": 35.75,
+   "anchored": true
+  },
+  {
+   "w": "just",
+   "t": 51.25,
+   "anchored": true
+  },
+  {
+   "w": "laughs.",
+   "t": 51.36,
+   "anchored": false
+  },
+  {
+   "w": "Why",
+   "t": 51.46,
+   "anchored": false
+  },
+  {
+   "w": "would",
+   "t": 51.57,
+   "anchored": false
+  },
+  {
+   "w": "anyone",
+   "t": 51.67,
+   "anchored": false
+  },
+  {
+   "w": "shoot",
+   "t": 51.78,
+   "anchored": false
+  },
+  {
+   "w": "gold",
+   "t": 51.89,
+   "anchored": false
+  },
+  {
+   "w": "into",
+   "t": 51.99,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 52.1,
+   "anchored": false
+  },
+  {
+   "w": "wall?",
+   "t": 52.2,
+   "anchored": false
+  },
+  {
+   "w": "That's",
+   "t": 52.31,
+   "anchored": false
+  },
+  {
+   "w": "insane!",
+   "t": 52.42,
+   "anchored": false
+  },
+  {
+   "w": "And",
+   "t": 52.52,
+   "anchored": false
+  },
+  {
+   "w": "his",
+   "t": 52.63,
+   "anchored": false
+  },
+  {
+   "w": "buddy",
+   "t": 52.74,
+   "anchored": false
+  },
+  {
+   "w": "nods.",
+   "t": 52.84,
+   "anchored": false
+  },
+  {
+   "w": "Completely",
+   "t": 52.95,
+   "anchored": false
+  },
+  {
+   "w": "insane.",
+   "t": 53.05,
+   "anchored": false
+  },
+  {
+   "w": "So",
+   "t": 53.16,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 53.27,
+   "anchored": false
+  },
+  {
+   "w": "rich",
+   "t": 53.37,
+   "anchored": false
+  },
+  {
+   "w": "guy",
+   "t": 53.48,
+   "anchored": false
+  },
+  {
+   "w": "pays",
+   "t": 53.58,
+   "anchored": false
+  },
+  {
+   "w": "up.",
+   "t": 53.69,
+   "anchored": false
+  },
+  {
+   "w": "And",
+   "t": 53.8,
+   "anchored": false
+  },
+  {
+   "w": "while",
+   "t": 53.9,
+   "anchored": false
+  },
+  {
+   "w": "those",
+   "t": 54.01,
+   "anchored": false
+  },
+  {
+   "w": "two",
+   "t": 54.11,
+   "anchored": false
+  },
+  {
+   "w": "bolt",
+   "t": 54.22,
+   "anchored": false
+  },
+  {
+   "w": "with",
+   "t": 54.33,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 54.43,
+   "anchored": false
+  },
+  {
+   "w": "money,",
+   "t": 54.54,
+   "anchored": false
+  },
+  {
+   "w": "he",
+   "t": 54.64,
+   "anchored": false
+  },
+  {
+   "w": "stays",
+   "t": 54.75,
+   "anchored": false
+  },
+  {
+   "w": "behind",
+   "t": 54.86,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 54.96,
+   "anchored": false
+  },
+  {
+   "w": "pulls",
+   "t": 55.07,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 55.17,
+   "anchored": false
+  },
+  {
+   "w": "stick",
+   "t": 55.28,
+   "anchored": false
+  },
+  {
+   "w": "of",
+   "t": 55.39,
+   "anchored": false
+  },
+  {
+   "w": "dynamite",
+   "t": 55.49,
+   "anchored": false
+  },
+  {
+   "w": "out",
+   "t": 55.6,
+   "anchored": false
+  },
+  {
+   "w": "of",
+   "t": 55.71,
+   "anchored": false
+  },
+  {
+   "w": "his",
+   "t": 55.81,
+   "anchored": false
+  },
+  {
+   "w": "suit.",
+   "t": 55.92,
+   "anchored": false
+  },
+  {
+   "w": "He's",
+   "t": 56.02,
+   "anchored": false
+  },
+  {
+   "w": "never",
+   "t": 56.13,
+   "anchored": false
+  },
+  {
+   "w": "mined",
+   "t": 56.24,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 56.34,
+   "anchored": false
+  },
+  {
+   "w": "day",
+   "t": 56.45,
+   "anchored": false
+  },
+  {
+   "w": "in",
+   "t": 56.55,
+   "anchored": false
+  },
+  {
+   "w": "his",
+   "t": 56.66,
+   "anchored": false
+  },
+  {
+   "w": "life.",
+   "t": 56.77,
+   "anchored": false
+  },
+  {
+   "w": "So",
+   "t": 56.87,
+   "anchored": false
+  },
+  {
+   "w": "he",
+   "t": 56.98,
+   "anchored": false
+  },
+  {
+   "w": "just",
+   "t": 57.08,
+   "anchored": false
+  },
+  {
+   "w": "lights",
+   "t": 57.19,
+   "anchored": false
+  },
+  {
+   "w": "it,",
+   "t": 57.3,
+   "anchored": false
+  },
+  {
+   "w": "tosses",
+   "t": 57.4,
+   "anchored": false
+  },
+  {
+   "w": "it",
+   "t": 57.51,
+   "anchored": false
+  },
+  {
+   "w": "down",
+   "t": 57.61,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 57.72,
+   "anchored": false
+  },
+  {
+   "w": "tunnel",
+   "t": 57.83,
+   "anchored": false
+  },
+  {
+   "w": "like",
+   "t": 57.93,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 58.04,
+   "anchored": false
+  },
+  {
+   "w": "firecracker,",
+   "t": 58.14,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 58.25,
+   "anchored": false
+  },
+  {
+   "w": "runs.",
+   "t": 58.36,
+   "anchored": false
+  },
+  {
+   "w": "And",
+   "t": 58.46,
+   "anchored": false
+  },
+  {
+   "w": "when",
+   "t": 58.57,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 58.68,
+   "anchored": false
+  },
+  {
+   "w": "dust",
+   "t": 58.78,
+   "anchored": false
+  },
+  {
+   "w": "clears,",
+   "t": 58.89,
+   "anchored": false
+  },
+  {
+   "w": "there's",
+   "t": 58.99,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 59.1,
+   "anchored": false
+  },
+  {
+   "w": "vein",
+   "t": 59.21,
+   "anchored": false
+  },
+  {
+   "w": "of",
+   "t": 59.31,
+   "anchored": false
+  },
+  {
+   "w": "real",
+   "t": 59.42,
+   "anchored": false
+  },
+  {
+   "w": "gold",
+   "t": 59.52,
+   "anchored": false
+  },
+  {
+   "w": "as",
+   "t": 59.63,
+   "anchored": false
+  },
+  {
+   "w": "thick",
+   "t": 59.74,
+   "anchored": false
+  },
+  {
+   "w": "as",
+   "t": 59.84,
+   "anchored": false
+  },
+  {
+   "w": "your",
+   "t": 59.95,
+   "anchored": false
+  },
+  {
+   "w": "arm,",
+   "t": 60.05,
+   "anchored": false
+  },
+  {
+   "w": "ten",
+   "t": 60.16,
+   "anchored": false
+  },
+  {
+   "w": "feet",
+   "t": 60.27,
+   "anchored": false
+  },
+  {
+   "w": "past",
+   "t": 60.37,
+   "anchored": false
+  },
+  {
+   "w": "where",
+   "t": 60.48,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 60.58,
+   "anchored": false
+  },
+  {
+   "w": "last",
+   "t": 60.69,
+   "anchored": false
+  },
+  {
+   "w": "guy",
+   "t": 60.8,
+   "anchored": false
+  },
+  {
+   "w": "gave",
+   "t": 60.9,
+   "anchored": false
+  },
+  {
+   "w": "up.",
+   "t": 61.01,
+   "anchored": false
+  }
+ ]
+}
