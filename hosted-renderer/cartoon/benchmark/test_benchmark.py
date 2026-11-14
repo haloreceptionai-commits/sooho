@@ -63,3 +63,17 @@ def test_cut_detector_finds_hard_cut_and_ignores_static():
     b = np.zeros((20, measure.LOW_H, measure.LOW_W, 3), np.uint8); b[..., 0] = 220; b[..., 1] = 180
     cuts = measure.detect_cuts(np.concatenate([a, b]))
     assert cuts == [0, 20]
+
+
+def load_tests(loader, tests, pattern):
+    import unittest
+    suite = unittest.TestSuite()
+    for name, fn in sorted(globals().items()):
+        if name.startswith('test_') and callable(fn):
+            suite.addTest(unittest.FunctionTestCase(fn, description=name))
+    return suite
+
+
+if __name__ == '__main__':
+    import unittest
+    unittest.main()
