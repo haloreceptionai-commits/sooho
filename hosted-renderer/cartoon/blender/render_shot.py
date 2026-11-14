@@ -208,8 +208,8 @@ def look(scene, shot):
         for nd in list(nt.nodes): nt.nodes.remove(nd)
         rl = nt.nodes.new('CompositorNodeRLayers'); comp = nt.nodes.new('CompositorNodeComposite')
         mul = nt.nodes.new('CompositorNodeMath'); mul.operation = 'MULTIPLY'; mul.use_clamp = True
-        mul.inputs[1].default_value = min(1.0, haze * 50)
-        mix = nt.nodes.new('CompositorNodeMixRGB'); mix.inputs[2].default_value = (*shot.get('haze_color', [0.75, 0.48, 0.25]), 1)
+        mul.inputs[1].default_value = min(1.0, haze * 40)
+        mix = nt.nodes.new('CompositorNodeMixRGB'); mix.inputs[2].default_value = (*shot.get('haze_color', [0.32, 0.16, 0.06]), 1)
         nt.links.new(rl.outputs['Mist'], mul.inputs[0]); nt.links.new(mul.outputs[0], mix.inputs[0])
         nt.links.new(rl.outputs['Image'], mix.inputs[1]); nt.links.new(mix.outputs[0], comp.inputs['Image'])
 
