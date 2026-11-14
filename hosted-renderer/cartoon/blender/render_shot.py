@@ -27,7 +27,7 @@ def mat(name, color, rough=0.6, metal=0.0, emit=None, strength=0.0):
     return m
 
 
-def noise_mat(name, c1, c2, scale=3.0, bump=0.4, rough=0.85, wave=False):
+def noise_mat(name, c1, c2, scale=3.0, bump=0.4, rough=0.85, wave=False, speckle=0.0):
     """Two-tone procedural surface (rock, dirt, wood) with bump for real texture."""
     m = bpy.data.materials.new(name); m.use_nodes = True
     nt = m.node_tree; b = nt.nodes['Principled BSDF']
@@ -45,6 +45,12 @@ def noise_mat(name, c1, c2, scale=3.0, bump=0.4, rough=0.85, wave=False):
     nt.links.new(ramp.outputs['Color'], b.inputs['Base Color'])
     bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = bump
     nt.links.new(tex.outputs['Fac'], bp.inputs['Height'])
+    if speckle:  # fine grit on top of the broad colour variation (benchmark rock look)
+        sp = nt.nodes.new('ShaderNodeTexNoise'); sp.inputs['Scale'].default_value = 70; sp.inputs['Detail'].default_value = 2
+        nt.links.new(co.outputs['Position'], sp.inputs['Vector'])
+        b2 = nt.nodes.new('ShaderNodeBump'); b2.inputs['Strength'].default_value = speckle
+        nt.links.new(sp.outputs['Fac'], b2.inputs['Height']); nt.links.new(bp.outputs['Normal'], b2.inputs['Normal'])
+        nt.links.new(b2.outputs['Normal'], b.inputs['Normal'])
     nt.links.new(bp.outputs['Normal'], b.inputs['Normal'])
     b.inputs['Roughness'].default_value = rough
     return m
@@ -107,7 +113,7 @@ def lantern(loc, red, glass):
 
 
 def set_mine_tunnel(length=24.0):
-    rock = noise_mat('rock', (0.20, 0.12, 0.07), (0.66, 0.47, 0.30), scale=1.3, bump=1.4)
+    rock = noise_mat('rock', (0.30, 0.19, 0.11), (0.66, 0.47, 0.30), scale=0.45, bump=0.15, speckle=0.35)
     dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6)
     wood = noise_mat('wood', (0.35, 0.22, 0.10), (0.72, 0.52, 0.30), scale=2.0, bump=0.25, wave=True)
     steel = mat('steel', (0.55, 0.56, 0.6), rough=0.3, metal=1.0)
@@ -115,9 +121,10 @@ def set_mine_tunnel(length=24.0):
     glass = mat('lampglass', (1, 0.7, 0.4), emit=(1.0, 0.62, 0.28), strength=25)
     t = add('cylinder', (0, length / 2 - 4, 1.4), (2.3, 2.3, length / 2), rot=(math.pi / 2, 0, 0),
             m=rock, vertices=96, depth=2, end_fill_type='NOTHING')
-    bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.subdivide(number_cuts=40); bpy.ops.object.mode_set(mode='OBJECT')
-    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.6; tx.noise_depth = 3
-    d = t.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = -0.6; d.texture_coords = 'GLOBAL'
+    bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.subdivide(number_cuts=18); bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.shade_flat()  # large flat facets like carved rock
+    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.9; tx.noise_depth = 2
+    d = t.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = -0.75; d.texture_coords = 'GLOBAL'
     add('plane', (0, length / 2 - 4, 0), (2.6, length / 2, 1), m=dirt, smooth=False)
     for i, y in enumerate(range(-2, int(length) - 4, 3)):         # timber frames; a lantern on every other one
         for x in (-1.55, 1.55):
@@ -130,7 +137,7 @@ def set_mine_tunnel(length=24.0):
     for y in [i * 0.55 for i in range(-6, int(length / 0.55) - 6)]:
         add('cube', (0, y, 0.03), (0.7, 0.09, 0.03), m=wood, smooth=False)
     bpy.ops.object.light_add(type='AREA', location=(-1.2, -1.0, 2.0), rotation=(math.radians(62), 0, math.radians(-38)))
-    K = bpy.context.active_object.data; K.energy = 120; K.size = 0.5; K.color = (1.0, 0.72, 0.45)  # warm key on the cast
+    K = bpy.context.active_object.data; K.energy = 70; K.size = 0.7; K.color = (1.0, 0.72, 0.45)  # warm key on the cast
     bpy.ops.object.light_add(type='AREA', location=(1.4, 1.8, 2.0), rotation=(math.radians(-60), 0, math.radians(150)))
     R = bpy.context.active_object.data; R.energy = 40; R.size = 0.8; R.color = (0.75, 0.82, 1.0)   # cool rim from behind
     w = bpy.context.scene.world.node_tree.nodes['Background']
