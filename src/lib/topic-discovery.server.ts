@@ -32,8 +32,8 @@ const candidateJson = {
 function normalizeCandidate(raw: unknown) {
   if (!raw || typeof raw !== 'object') return raw;
   const t = raw as Record<string, unknown>;
-  const first = Array.isArray(t.sources) ? t.sources[0] as { url?: string } | undefined : undefined;
-  return { ...t, source: first?.url ?? t.source };
+  const first = Array.isArray(t['sources']) ? t['sources'][0] as { url?: string } | undefined : undefined;
+  return { ...t, source: first?.url ?? t['source'] };
 }
 
 export async function discoverFacts(input: { focus: string; format: string; deployment: string }, seen: DiscoveredTopic[], used: TopicUse[]) {
