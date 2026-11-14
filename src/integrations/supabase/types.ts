@@ -176,6 +176,36 @@ export type Database = {
           },
         ]
       }
+      topic_discoveries: {
+        Row: {
+          batch_id: string
+          created_at: string
+          data: Json
+          fact_key: string
+          id: string
+          saved: boolean
+          user_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          data: Json
+          fact_key: string
+          id?: string
+          saved?: boolean
+          user_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          data?: Json
+          fact_key?: string
+          id?: string
+          saved?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           created_at: string
