@@ -71,6 +71,7 @@ def framing_changes(frames: np.ndarray, step: float = 0.5, thresh: float = 0.45)
     grey grid (1 - correlation) and keeps one event per change."""
     mask = picture_mask(frames.shape[1])
     g = frames[:, mask].mean(3)
+    g = g[:, :g.shape[1] // 4 * 4, :g.shape[2] // 4 * 4]
     g = g.reshape(len(g), -1, 4, g.shape[2] // 4, 4).mean((2, 4)).reshape(len(g), -1)
     g = (g - g.mean(1, keepdims=True)) / (g.std(1, keepdims=True) + 1e-6)
     lag, hop = FPS, int(step * FPS)
