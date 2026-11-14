@@ -12,7 +12,7 @@ echo "cpus: $(nproc)" >> $REPORT
 for ENG in ${ENGINES:-eevee cycles}; do
   rm -rf /tmp/f; mkdir -p /tmp/f; START=$(date +%s)
   if [ "$ENG" = cycles ]; then DEV=GPU; else DEV=CPU; fi
-  SHOT_ENGINE=$ENG CYCLES_DEVICE=$DEV timeout 3000 /opt/blender/blender -b --factory-startup --python /opt/shot/render_shot.py -- $SHOT_FILE /tmp/f > /tmp/$ENG.log 2>&1
+  SHOT_ENGINE=$ENG CYCLES_DEVICE=$DEV timeout 3000 /opt/blender/blender -b --factory-startup --python-exit-code 1 --python /opt/shot/render_shot.py -- $SHOT_FILE /tmp/f > /tmp/$ENG.log 2>&1
   CODE=$?; END=$(date +%s)
   N=$(ls /tmp/f | wc -l)
   echo "$ENG exit=$CODE frames=$N wall=$((END-START))s $(grep -o '{"frames.*}' /tmp/$ENG.log | tail -1)" >> $REPORT
