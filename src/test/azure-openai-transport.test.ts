@@ -18,7 +18,7 @@ describe('direct Azure transport', () => {
     vi.stubGlobal('fetch', fetcher);
     const form = new FormData(); form.append('prompt', 'test');
     await azureOpenAIRequest('gpt-image-1-mini/images/edits', form, true);
-    expect(fetcher.mock.calls[0][1]).toEqual({ method: 'POST', headers: { 'api-key': 'test-only-key' }, body: form });
+    expect(fetcher.mock.calls[0]?.[1]).toEqual({ method: 'POST', headers: { 'api-key': 'test-only-key' }, body: form });
   });
   it('fails before a request when the Azure credential is absent', () => {
     vi.stubEnv('AZURE_OPENAI_API_KEY', '');

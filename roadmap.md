@@ -2,7 +2,7 @@
 
 ## Current workspace Azure alternative (Nov 14)
 - [x] Store the owner's Azure OpenAI key securely and switch script/image JSON and reference-image uploads to direct Azure access; keep Apify, narration and Azure rendering unchanged.
-- [ ] Verify Azure authentication and deployed models through the shared transport.
+- [x] Azure authentication and GPT-5 verified live (200); direct transport tests pass. Image-generation output is not tested in this setup.
 
 ## Cartoon reliability + long-form remix (Nov 9)
 - [x] Root cause of stuck renders: workers rejected the sooha.io completion address and exited before reporting; 40 machines also exceeded the 100-core Azure quota
