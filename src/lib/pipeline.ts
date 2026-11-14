@@ -22,7 +22,7 @@ import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/scr
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
 import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
-import { paintAdvancedCards, placeObjectCards } from "./advanced-cards";
+import { paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -297,7 +297,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (!user.user) throw Error('Not signed in');
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
       // Advanced Video AI: paint one character card per cast member while the voice records (saved, so Resume never repays).
-      const cardsP = advanced ? paintAdvancedCards(direction, plan.scenes.map(sc => sc.narration), `${user.user.id}/${id}/media`, s, (detail) => up({ detail })) : Promise.resolve(undefined);
+      const cardsP = advanced ? paintAdvancedCards(direction, plan.scenes.map(sc => sc.narration), `${user.user.id}/${id}/media`, s, (detail) => up({ detail }), (fn) => withRetry(fn)) : Promise.resolve(undefined);
       cardsP.catch(() => {});
       // Resume: the locked take for this same saved script is already stored, so reuse it instead of paying again.
       const { data: existing } = await supabase.storage.from('videos').list(`${user.user.id}/${id}/cartoon`, { search: 'original-voice.wav' });
@@ -319,9 +319,10 @@ export async function runVideo(id: string, input: VideoInput) {
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }
       const painted = await cardsP;
-      const cards = painted?.cards;
       const sanitized = sanitizeDirection(direction, narration);
-      const safeDirection = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) }, painted.objects) : sanitized;
+      const placed = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) }, painted) : null;
+      const cards = placed?.cards;
+      const safeDirection = placed ? placed.direction : sanitized;
       const cp = cartoonStart.parse({ ...(cards ? { advanced: true, cards } : {}), videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: !long, sfx: s.soundEffects, format: long ? 'long' : 'short' });
       up({ cartoonCheckpoint: cp, progress: 70, detail: advanced ? 'Sending to Advanced Video AI render…' : 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
