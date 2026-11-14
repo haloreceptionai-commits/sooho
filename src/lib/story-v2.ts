@@ -169,7 +169,7 @@ export function validateStory(s: StoryInput): StoryReport {
   const sents = splitSentences(all);
 
   // V1 anchors by 8s
-  const missing = (["subject", "year", "place", "stakes"] as const).filter((k) => !mentions(by8, s.anchors[k]) && !(k === "year" && /\b1[0-9]{3}s?\b|\b20[0-9]{2}\b/.test(by8)));
+  const missing = (micro ? (["subject", "place"] as const) : (["subject", "year", "place", "stakes"] as const)).filter((k) => !mentions(by8, s.anchors[k]) && !(k === "year" && /\b1[0-9]{3}s?\b|\b20[0-9]{2}\b/.test(by8)));
   add("V1", !missing.length, missing.length ? `V1 anchors: by 8s the narration never says the ${missing.join(", ")} (${missing.map((k) => `"${s.anchors[k]}"`).join(", ")})` : "V1 anchors named by 8s");
   // V2 one main question by 8s, no other question before 15s
   const qSents = sents.map((x, i) => ({ x, i, t: wc(sents.slice(0, i).join(" ")) / WPS })).filter((q) => /\?["']?$/.test(q.x));
