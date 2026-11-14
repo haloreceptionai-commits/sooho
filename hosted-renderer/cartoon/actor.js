@@ -58,7 +58,10 @@ try {
     await run('ffmpeg',['-v','error','-y','-i',path.join(work,'original-voice'),'-ar','48000','-ac','1','-c:a','pcm_s16le',path.join(work,'voice.wav')]);
     await writeFile(path.join(work,'script.txt'),input.manifest.script);
     // Advanced Video AI: fetch each painted character card once and keep it with the durable inputs.
-    for(const c of input.manifest.direction.cast.filter(c=>c.card)){
+    // Keys: cast id (standing), '<id>-<pose>' and 'obj-<name>'; the app validated them against the cast and props.
+    const cardKeys=(input.manifest.cards||[]).map(c=>c.id);
+    if(cardKeys.some(k=>!/^(obj-[a-z0-9_]{1,30}|[a-z0-9_-]{1,30}(-(reach|shock|happy))?)$/.test(k))||input.manifest.direction.cast.some(c=>c.card&&!cardKeys.includes(c.id)))throw Error('Invalid card list');
+    for(const c of cardKeys.map(id=>({id}))){
       const u=new URL(input.cardUrls?.[c.id]||'');if(u.protocol!=='https:'||!u.pathname.includes('/storage/v1/object/sign/videos/'))throw Error('Invalid card grant');
       const r=await netFetch(u);if(!r.ok)throw Error('Character card could not load');
       const bytes=Buffer.from(await r.arrayBuffer());if(bytes.length<200||bytes.length>12e6||bytes.readUInt32BE(0)!==0x89504e47)throw Error('Invalid character card');
@@ -89,7 +92,7 @@ try {
     const locked=await store.getValue('LOCK');
     if(!locked||locked.jobId!==input.jobId||locked.hash!==input.approvedHash||locked.requestHash!==hash(Buffer.from(canonical(input.manifest))))throw Error('Owner review does not match locked inputs');
     for(const n of ['voice.wav','manifest.json','alignment.json']){const bytes=await store.getValue(n.replaceAll('.','-'));if(!Buffer.isBuffer(bytes))throw Error('Missing durable inputs');await writeFile(path.join(work,n),bytes);}
-    for(const c of locked.request.direction.cast.filter(c=>c.card)){const bytes=await store.getValue(`card-${c.id}`);if(!Buffer.isBuffer(bytes))throw Error('Missing character card');await mkdir(path.join(work,'cards'),{recursive:true});await writeFile(path.join(work,'cards',`${c.id}.png`),bytes);}
+    for(const c of locked.request.cards||[]){const bytes=await store.getValue(`card-${c.id}`);if(!Buffer.isBuffer(bytes))throw Error('Missing character card');await mkdir(path.join(work,'cards'),{recursive:true});await writeFile(path.join(work,'cards',`${c.id}.png`),bytes);}
     await run('node',[path.join(root,'prepare-scene.mjs'),path.join(work,'manifest.json'),path.join(work,'render/prepared')]);
     await mkdir(path.join(work,'render'),{recursive:true});
     await writeFile(path.join(work,'render/review-approved.json'),JSON.stringify({...locked.review,approved:true}));

@@ -29,13 +29,19 @@ await writeFile(path.join(web,'toon.js'),cast+'\n'+await readFile(path.join(root
 await cp(path.join(root,'scene-story.mjs'),path.join(web,'story.js'));
 await writeFile(path.join(web,'manifest.json'),JSON.stringify(m));
 // Advanced Video AI cards sit next to the manifest; only validated PNGs for carded cast are copied in.
+// Standing cards are required; pose cards are optional (the scene falls back to standing); object cards are required when placed.
 const carded=m.cast.filter(c=>c.card).map(c=>c.id);
-if(carded.length){await mkdir(path.join(web,'cards'),{recursive:true});
-  for(const id of carded){const bytes=await readFile(path.join(path.dirname(path.resolve(input)),'cards',`${id}.png`));
+const objectCards=[...new Set(m.shots.flatMap(s=>(s.props||[]).filter(p=>p.kind==='asset'&&p.asset.startsWith('card/')).map(p=>'obj-'+p.asset.slice(5))))];
+if(carded.length){await mkdir(path.join(web,'cards'),{recursive:true});const present=[];
+  const copy=async(key,required)=>{let bytes;try{bytes=await readFile(path.join(path.dirname(path.resolve(input)),'cards',`${key}.png`));}catch(e){if(required)throw Error('Missing painted card');return;}
     if(bytes.length<200||bytes.length>12e6||bytes.readUInt32BE(0)!==0x89504e47)throw Error('Invalid character card');
-    await writeFile(path.join(web,'cards',`${id}.png`),bytes);}}
+    await writeFile(path.join(web,'cards',`${key}.png`),bytes);present.push(key);};
+  for(const id of carded){await copy(id,true);for(const pose of ['reach','shock','happy'])await copy(`${id}-${pose}`,false);}
+  for(const key of objectCards)await copy(key,true);
+  await writeFile(path.join(web,'cards','index.json'),JSON.stringify(present.sort()));}
+else if(objectCards.length)throw Error('Painted objects need Advanced Video AI cards');
 // Copy only the library objects this story uses (plus each pack's shared texture and licence).
-const used=[...new Set(m.shots.flatMap(s=>(s.props||[]).filter(p=>p.kind==='asset').map(p=>p.asset)))].map(id=>LIBRARY.get(id));
+const used=[...new Set(m.shots.flatMap(s=>(s.props||[]).filter(p=>p.kind==='asset'&&!p.asset.startsWith('card/')).map(p=>p.asset)))].map(id=>LIBRARY.get(id));
 for(const e of used){const dir=path.join(web,'assets',e.pack);await mkdir(dir,{recursive:true});const src=path.join(root,'assets/library',e.pack);
   await cp(path.join(src,e.type==='sprite'?e.id.split('/')[1]+'.png':e.id.split('/')[1]+'.glb'),path.join(dir,e.id.split('/')[1]+(e.type==='sprite'?'.png':'.glb')));
   await cp(path.join(src,'License.txt'),path.join(dir,'License.txt'));
