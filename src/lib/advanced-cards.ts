@@ -39,6 +39,13 @@ export async function paintAdvancedCards(direction: Direction, narration: string
     await bucket.upload(`${root}/cards.json`, new Blob([JSON.stringify(design)], { type: "application/json" }), { contentType: "application/json", upsert: true });
   }
   const d = design;
+  // At most 5 paintings at once: the Azure image quota rejects bigger bursts (seen as 429 errors in testing).
+  let active = 0; const queue: (() => void)[] = [];
+  const limit = async <T,>(fn: () => Promise<T>): Promise<T> => {
+    if (active >= 5) await new Promise<void>(r => queue.push(r));
+    active++;
+    try { return await fn(); } finally { active--; queue.shift()?.(); }
+  };
   const total = ids.length * (1 + CARD_POSES.length) + d.objects.length;
   let done = [...have].filter(n => n.startsWith("card-")).length;
   const tick = () => report(`Painting characters, poses and objects · ${Math.min(total, ++done)}/${total} while the voice records…`);
@@ -53,7 +60,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
         if (!data) throw Error("Saved character card could not be opened");
         base = await toB64(data);
       } else {
-        base = (await retry(() => paintAdvancedCard({ data: { look, deployment: settings.imageDeployment } }))).image;
+        base = (await limit(() => retry(() => paintAdvancedCard({ data: { look, deployment: settings.imageDeployment } })))).image;
         await save(`card-${cid}.png`, toBytes(base), "image/png"); tick();
       }
       cards.push({ id: cid, path: `${root}/card-${cid}.png` });
@@ -61,7 +68,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
         const key = `${cid}-${pose}`;
         if (!have.has(`card-${key}.png`)) {
           // A pose that fails is skipped: the renderer falls back to the standing card.
-          const r = await retry(() => paintAdvancedCard({ data: { look, pose, reference: base, deployment: settings.imageDeployment } })).catch((e: unknown) => { console.warn("Pose skipped:", key, e); return null; });
+          const r = await limit(() => retry(() => paintAdvancedCard({ data: { look, pose, reference: base, deployment: settings.imageDeployment } }))).catch((e: unknown) => { console.warn("Pose skipped:", key, e); return null; });
           if (!r) return;
           await save(`card-${key}.png`, toBytes(r.image), "image/png"); tick();
         }
@@ -71,7 +78,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
     ...d.objects.map(async o => {
       const key = `obj-${o.name}`;
       if (!have.has(`card-${key}.png`)) {
-        const r = await retry(() => paintAdvancedCard({ data: { look: o.look, kind: "object", deployment: settings.imageDeployment } })).catch((e: unknown) => { console.warn("Object skipped:", key, e); return null; });
+        const r = await limit(() => retry(() => paintAdvancedCard({ data: { look: o.look, kind: "object", deployment: settings.imageDeployment } }))).catch((e: unknown) => { console.warn("Object skipped:", key, e); return null; });
         if (!r) return;
         await save(`card-${key}.png`, toBytes(r.image), "image/png"); tick();
       }
