@@ -10,7 +10,7 @@ describe('cinematic pass', () => {
     const out = cinematicPass(s, undefined, { literal: true });
     expect(out[3]?.shot).toBe('high');
     expect(out[1]?.move).toBe('static');
-    expect(cinematicPass([{ ...base, mood: 'reveal' }], undefined, { literal: true })[0]?.fx).toEqual([]);
+    expect(cinematicPass([{ ...base, mood: 'reveal', fx: [] }], undefined, { literal: true })[0]?.fx).toEqual([]);
   });
   it('carries the last main prop into an empty scene', () => {
     const out = cinematicPass([{ ...base, props: [flask] }, { ...base, shot: 'close', props: [] }]);

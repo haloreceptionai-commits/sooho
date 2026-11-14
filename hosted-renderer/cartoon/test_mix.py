@@ -3,6 +3,14 @@ import numpy as np
 from mix import mix_stems
 
 class MixerTests(unittest.TestCase):
+    def test_advanced_ducks_music_without_changing_the_voice_clock(self):
+        result, report = mix_stems(self.voice, self.music, np.zeros_like(self.voice), 48000, advanced=True)
+        self.assertTrue(report['speech_ducking'])
+        self.assertEqual(result.shape, self.voice.shape)
+        self.assertLess(float(np.sqrt(np.mean((result-self.voice)**2))), float(np.sqrt(np.mean(self.voice**2))) * .2)
+        silent = np.zeros_like(self.voice)
+        only_voice, _ = mix_stems(self.voice, silent, silent, 48000, advanced=True)
+        np.testing.assert_array_equal(only_voice, self.voice)
     def setUp(self):
         t = np.arange(48000) / 48000
         self.voice = (0.2 * np.sin(2 * np.pi * 220 * t))[:, None]
