@@ -31,14 +31,14 @@ def noise_mat(name, c1, c2, scale=3.0, bump=0.4, rough=0.85, wave=False):
     """Two-tone procedural surface (rock, dirt, wood) with bump for real texture."""
     m = bpy.data.materials.new(name); m.use_nodes = True
     nt = m.node_tree; b = nt.nodes['Principled BSDF']
-    co = nt.nodes.new('ShaderNodeTexCoord')
+    co = nt.nodes.new('ShaderNodeNewGeometry')  # world position: no stretching on scaled objects
     tex = nt.nodes.new('ShaderNodeTexWave' if wave else 'ShaderNodeTexNoise')
     tex.inputs['Scale'].default_value = scale
     tex.inputs['Detail'].default_value = 8.0
     if wave:
         tex.wave_type = 'BANDS'; tex.bands_direction = 'Z'
         tex.inputs['Distortion'].default_value = 1.5; tex.inputs['Detail Scale'].default_value = 2.0
-    nt.links.new(co.outputs['Object'], tex.inputs['Vector'])
+    nt.links.new(co.outputs['Position'], tex.inputs['Vector'])
     ramp = nt.nodes.new('ShaderNodeValToRGB')
     ramp.color_ramp.elements[0].color = (*c1, 1); ramp.color_ramp.elements[1].color = (*c2, 1)
     nt.links.new(tex.outputs['Fac'], ramp.inputs['Fac'])
@@ -76,7 +76,7 @@ def ink(obj, width=0.012):
     h = obj.copy(); h.data = obj.data.copy(); h.data.materials.clear(); h.data.materials.append(INK)
     for mo in list(h.modifiers): h.modifiers.remove(mo)
     bpy.context.collection.objects.link(h)
-    d = h.modifiers.new('grow', 'DISPLACE'); d.strength = width / max(min(obj.scale), 1e-3); d.mid_level = 0
+    d = h.modifiers.new('grow', 'DISPLACE'); d.strength = -width / max(min(obj.scale), 1e-3); d.mid_level = 0  # normals point inward after the flip
     for poly in h.data.polygons: poly.flip()
     h.parent = obj; h.location = (0, 0, 0); h.rotation_euler = (0, 0, 0); h.scale = (1, 1, 1)
     h.matrix_parent_inverse.identity()
@@ -114,13 +114,15 @@ def set_mine_tunnel(length=24.0):
         glass = mat('lampglass', (1, 0.6, 0.25), emit=(1.0, 0.55, 0.18), strength=12)
         add('cylinder', (lamp_x, y + 0.2, 1.9), (0.06, 0.06, 0.09), m=glass, vertices=16)
         bpy.ops.object.light_add(type='POINT', location=(lamp_x * 0.9, y + 0.35, 1.9))
-        L = bpy.context.active_object.data; L.energy = 70; L.color = (1.0, 0.62, 0.30); L.shadow_soft_size = 0.15
+        L = bpy.context.active_object.data; L.energy = 45; L.color = (1.0, 0.62, 0.30); L.shadow_soft_size = 0.15
     for x in (-0.45, 0.45):                                     # rails and sleepers
         add('cube', (x, length / 2 - 4, 0.09), (0.035, length / 2, 0.045), m=steel, smooth=False)
     for y in [i * 0.55 for i in range(-6, int(length / 0.55) - 6)]:
         add('cube', (0, y, 0.03), (0.7, 0.09, 0.03), m=wood, smooth=False)
+    bpy.ops.object.light_add(type='AREA', location=(-1.1, -0.9, 2.1), rotation=(math.radians(60), 0, math.radians(-40)))
+    K = bpy.context.active_object.data; K.energy = 90; K.size = 0.6; K.color = (1.0, 0.70, 0.42)  # warm key on the cast
     w = bpy.context.scene.world.node_tree.nodes['Background']
-    w.inputs['Color'].default_value = (0.02, 0.012, 0.008, 1); w.inputs['Strength'].default_value = 0.3
+    w.inputs['Color'].default_value = (0.02, 0.012, 0.008, 1); w.inputs['Strength'].default_value = 0.15
 
 
 def set_open_day(length=24.0):
@@ -214,13 +216,30 @@ def main():
     sc = bpy.context.scene
     if not sc.world: sc.world = bpy.data.worlds.new('w')
     sc.world.use_nodes = True
-    sc.render.engine = 'CYCLES'; cy = sc.cycles
-    cy.device = 'CPU'; cy.samples = shot.get('samples', 32); cy.use_adaptive_sampling = True
-    cy.adaptive_threshold = 0.03; cy.use_denoising = True
-    try: cy.denoiser = 'OPENIMAGEDENOISE'
-    except TypeError: pass
-    cy.max_bounces = 4; cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2
-    cy.volume_bounces = 0; cy.transparent_max_bounces = 8; cy.volume_step_rate = 4
+    engine = shot.get('engine') or os.environ.get('SHOT_ENGINE', 'eevee')
+    if engine == 'eevee':
+        sc.render.engine = 'BLENDER_EEVEE_NEXT'; ee = sc.eevee
+        ee.taa_render_samples = shot.get('samples', 16)
+        ee.use_shadows = True; ee.shadow_ray_count = 2; ee.shadow_step_count = 8
+        ee.use_raytracing = True; ee.ray_tracing_method = 'SCREEN'
+        ee.use_volumetric_shadows = True; ee.volumetric_tile_size = '8'; ee.volumetric_samples = 48
+        ee.use_gtao = True; ee.fast_gi_method = 'GLOBAL_ILLUMINATION'
+        sc.render.film_transparent = False
+    else:
+        sc.render.engine = 'CYCLES'; cy = sc.cycles
+        cy.device = os.environ.get('CYCLES_DEVICE', 'CPU')
+        if cy.device == 'GPU':
+            prefs = bpy.context.preferences.addons['cycles'].preferences
+            for kind in ('OPTIX', 'CUDA'):
+                try:
+                    prefs.compute_device_type = kind; prefs.get_devices()
+                    if any(d.type == kind for d in prefs.devices): break
+                except TypeError: pass
+            for d in prefs.devices: d.use = d.type != 'CPU'
+        cy.samples = shot.get('samples', 32); cy.use_adaptive_sampling = True
+        cy.adaptive_threshold = 0.03; cy.use_denoising = True
+        cy.max_bounces = 4; cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2
+        cy.volume_bounces = 0; cy.transparent_max_bounces = 8; cy.volume_step_rate = 4
     sc.render.use_persistent_data = True
     W, H = shot.get('size', [1080, 1920]); sc.render.resolution_x = W; sc.render.resolution_y = H
     sc.render.resolution_percentage = 100; fps = shot.get('fps', 30); sc.render.fps = fps
