@@ -253,7 +253,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const tries = usesCartoonWorker(input.engine) ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) + fitNote } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors, { loop: advanced && micro }) + fitNote } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
@@ -263,7 +263,7 @@ export async function runVideo(id: string, input: VideoInput) {
       const count = (x: Plan) => x.scenes.map((sc) => sc.narration).join(" ").split(/\s+/).filter(Boolean).length;
       if (count(plan) > budget * 1.25) {
         up({ detail: `Script is ${count(plan)} words; cutting it to fit ${input.durationSec} seconds…` });
-        const cut = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(plan, ev.gate, rs.anchors) + fitNote + `\nThe last draft had ${count(plan)} words: CUT it to at most ${budget} words, keeping the hook, question and twist.` } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
+        const cut = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(plan, ev.gate, rs.anchors, { loop: advanced && micro }) + fitNote + `\nThe last draft had ${count(plan)} words: CUT it to at most ${budget} words, keeping the hook, question and twist.` } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
         if (cut && count(cut) <= budget * 1.25) { plan = cut; ev = await evaluate(cut); }
       }
       if (count(plan) > budget * 1.25) throw Error(`The script came back ${count(plan)} words, too long for ${input.durationSec} seconds (max ${Math.round(budget * 1.25)}). No voice or pictures were paid for — try again or pick a longer length.`);

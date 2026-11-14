@@ -414,6 +414,8 @@ KID-LEVEL WORDS (Advanced Video AI; these override the language rules above wher
 - Banned adult words and their swaps: boundary -> line between two lands; dispute/conflict -> fight; escalate -> get worse; crisis -> big problem; treaty -> deal; territory -> land; military/troops -> army/soldiers; government/officials -> leaders; vessel -> ship; massive -> huge; ancient -> very old; incident -> thing that happened; negotiate -> talk it out; commander -> boss; eventually -> in the end.
 - Sentences of 4-12 words, one idea each, like a fun big sister telling a story. Use sound words (oink! boom! splash!) and short funny quotes from the characters.
 - Every sentence must make a kid want the next one: a surprise, a danger, a funny moment or a new fact. Never two calm lines in a row.
+- Talk like a real storyteller, not a headline: full natural sentences with little joiners (so, but, then, uh-oh), never clipped telegraph lines like "Calm heads win." or "Hudson's Bay Company wants pay." Say WHO does WHAT and WHY it is funny or scary.
+- Prefer a person or animal doing something ("The pig squeezes under the fence and munches Lyman's potatoes!") over a fact about organisations.
 - Exactly ${words} words (±10%). Count them; a machine checks.
 - If an animal or object causes the story (a pig, a cannon, a jar), name it in the first sentence and keep it on screen: it is a character.`;
 const MICRO_RULES = (D: number, words: number, scenes: number) => `
