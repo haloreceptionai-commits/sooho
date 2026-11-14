@@ -214,12 +214,15 @@ export async function runVideo(id: string, input: VideoInput) {
     const base = {
       topic: input.topic, format: input.format, durationSec: input.durationSec,
       archetype: archetype ? `${archetype.name} — ${archetype.formula}` : "Best fit", style: input.style, deployment: s.scriptDeployment,
-      facts: factText, research: researchText, hook: hb.line,
+      facts: factText, research: researchText, hook: hb.line, ...(advanced ? { kid: true } : {}),
     };
+    // Advanced Video AI: the narration must fit the chosen length before any voice or pictures are paid for.
+    const budget = wordBudget(input.durationSec), micro = input.format === "short" && input.durationSec < MICRO_SEC;
+    const fitNote = advanced ? `\nLENGTH (hard limit): the whole narration must be ${Math.round(budget * 0.9)}-${Math.round(budget * 1.1)} words for ${input.durationSec} seconds.${micro ? " LOOP SHORT: ignore the word-20/26/38 opening rules, myth, analogy and escalation beats; hook, one question by 5s, surprises, a twist that loops back to the first line." : ""} Every word must be one an 8-year-old knows.` : "";
     const evaluate = async (p: Plan) => {
       const story = {
         scenes: p.scenes.map((x) => ({ beat: x.beat, narration: x.narration, characters: x.characters, shot: x.shot, money: x.money, loop_opened: x.loop_opened, loop_closed: x.loop_closed })),
-        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec,
+        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec, kid: advanced,
       };
       const report = validateStory(story);
       const ht = hookTextIssues(p.hookText, p.scenes[0]?.narration ?? "");
@@ -237,21 +240,30 @@ export async function runVideo(id: string, input: VideoInput) {
         deployment: s.scriptDeployment,
       } })).catch((e: unknown) => { console.warn("Judges unavailable:", e); return null; });
       if (judge?.filler.length && judge.filler.length > 2) report.failed.push({ id: "V8j", pass: false, msg: `V8 new info (judge): "${judge.filler.slice(0, 2).join('", "')}" add nothing new` });
-      const gate = storyScore(report, judge, p.scenes.length);
+      const gate = storyScore(report, judge, p.scenes.length, { strict: advanced });
       return { report, judge, gate };
     };
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
     let plan = autoFixPlan(await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait));
     let ev = await evaluate(plan);
     let draft = plan, draftEv = ev;
-    const tries = input.engine === "advanced" ? 1 : input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
+    const tries = usesCartoonWorker(input.engine) ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) + fitNote } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
       if (preferRepair(ev.gate, ev2.gate)) { plan = repaired; ev = ev2; }
+    }
+    if (advanced) {
+      const count = (x: Plan) => x.scenes.map((sc) => sc.narration).join(" ").split(/\s+/).filter(Boolean).length;
+      if (count(plan) > budget * 1.25) {
+        up({ detail: `Script is ${count(plan)} words; cutting it to fit ${input.durationSec} seconds…` });
+        const cut = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(plan, ev.gate, rs.anchors) + fitNote + `\nThe last draft had ${count(plan)} words: CUT it to at most ${budget} words, keeping the hook, question and twist.` } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
+        if (cut && count(cut) <= budget * 1.25) { plan = cut; ev = await evaluate(cut); }
+      }
+      if (count(plan) > budget * 1.25) throw Error(`The script came back ${count(plan)} words, too long for ${input.durationSec} seconds (max ${Math.round(budget * 1.25)}). No voice or pictures were paid for — try again or pick a longer length.`);
     }
     up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
