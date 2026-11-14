@@ -82,8 +82,16 @@ def call(shots: list[dict]) -> list[dict]:
             return json.loads(j['choices'][0]['message']['content'])['shots']
         except Exception as e:  # network/429: retry with backoff, never print secrets
             code = getattr(e, 'code', '')
-            if attempt == 4:
-                raise RuntimeError(f'vision labelling failed: {type(e).__name__} {code}') from None
+            detail = ''
+            if hasattr(e, 'read'):
+                try: detail = json.loads(e.read()).get('error', {}).get('message', '')[:300]
+                except Exception: pass
+            if code == 400 or attempt == 4:
+                if code == 400 and len(shots) > 1:   # one shot can trip a filter: label the rest one by one
+                    return [x for s in shots for x in call([s])]
+                if code == 400:
+                    return [{'i': shots[0]['i'], 'error': detail or 'rejected'}]
+                raise RuntimeError(f'vision labelling failed: {type(e).__name__} {code} {detail}') from None
             time.sleep(20 * (attempt + 1))
     return []
 
