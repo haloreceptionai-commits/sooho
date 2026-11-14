@@ -80,7 +80,8 @@ def ink(obj, width=0.012):
     for poly in h.data.polygons: poly.flip()
     h.parent = obj; h.location = (0, 0, 0); h.rotation_euler = (0, 0, 0); h.scale = (1, 1, 1)
     h.matrix_parent_inverse.identity()
-    h.visible_shadow = False
+    h.visible_shadow = False; h.visible_diffuse = False; h.visible_glossy = False
+    h.visible_transmission = False; h.visible_volume_scatter = False  # camera-only line
     return obj
 
 
@@ -240,10 +241,13 @@ def main():
                     prefs.compute_device_type = kind; prefs.get_devices()
                     if any(d.type == kind for d in prefs.devices): break
                 except TypeError: pass
-            for d in prefs.devices: d.use = d.type != 'CPU'
+            # one device entry per card: enabling both its CUDA and OptiX entries splits it against itself
+            for d in prefs.devices: d.use = d.type == prefs.compute_device_type
             print('CYCLES_DEVICES', prefs.compute_device_type, [(d.name, d.type, d.use) for d in prefs.devices], flush=True)
             if not any(d.use for d in prefs.devices): raise RuntimeError('no GPU device for Cycles')
         cy.use_light_tree = True
+        try: cy.denoiser = 'OPTIX' if prefs.compute_device_type == 'OPTIX' else 'OPENIMAGEDENOISE'
+        except TypeError: pass
         cy.samples = shot.get('samples', 32); cy.use_adaptive_sampling = True
         cy.adaptive_threshold = 0.03; cy.use_denoising = True
         cy.max_bounces = 4; cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2

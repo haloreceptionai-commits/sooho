@@ -11,7 +11,14 @@ B="/opt/blender/blender -b --factory-startup --python-exit-code 1"
 REPORT=/tmp/report.txt; : > $REPORT
 (nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader 2>&1 || echo "no nvidia-smi") | sed 's/^/gpu: /' >> $REPORT
 echo "cpus: $(nproc)" >> $REPORT
-$B --python-expr "import gpu; print('GLINFO', gpu.platform.vendor_get(), '|', gpu.platform.renderer_get(), '|', gpu.platform.version_get())" 2>&1 | grep GLINFO >> $REPORT
+echo "egl vendors: $(ls /usr/share/glvnd/egl_vendor.d /etc/glvnd/egl_vendor.d 2>/dev/null | tr '\n' ' ') nvidia libs: $(ls /usr/lib/x86_64-linux-gnu/ 2>/dev/null | grep -E 'nvidia|libcuda' | tr '\n' ' ' | cut -c1-600)" >> $REPORT
+NVJSON=$(ls /usr/share/glvnd/egl_vendor.d/*nvidia*.json /etc/glvnd/egl_vendor.d/*nvidia*.json 2>/dev/null | head -1)
+if [ -z "$NVJSON" ] && ls /usr/lib/x86_64-linux-gnu/libEGL_nvidia.so.0 >/dev/null 2>&1; then
+  mkdir -p /usr/share/glvnd/egl_vendor.d; NVJSON=/usr/share/glvnd/egl_vendor.d/10_nvidia.json
+  printf '{"file_format_version":"1.0.0","ICD":{"library_path":"libEGL_nvidia.so.0"}}' > $NVJSON
+fi
+[ -n "$NVJSON" ] && export __EGL_VENDOR_LIBRARY_FILENAMES=$NVJSON && echo "egl forced: $NVJSON" >> $REPORT
+$B --python-expr "import bpy, gpu; print('GLINFO', gpu.platform.vendor_get(), '|', gpu.platform.renderer_get(), '|', gpu.platform.version_get())" 2>&1 | grep GLINFO >> $REPORT
 put $REPORT report.txt text/plain
 for ENG in ${ENGINES:-eevee cycles}; do
   if [ "$ENG" = cycles ]; then DEV=GPU; else DEV=CPU; fi
