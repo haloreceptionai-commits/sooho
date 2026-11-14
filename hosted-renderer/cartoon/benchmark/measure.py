@@ -140,7 +140,8 @@ def caption_words(path: str, duration: float, fps: float = 4.0) -> list[dict]:
     raw = _ff(['-i', path, '-vf', f'fps={fps},scale=540:960', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'])
     frames = np.frombuffer(raw, np.uint8).reshape(-1, 960, 540, 3)
     out: list[dict] = []
-    tmp = Path('/tmp/_cap.png')
+    import tempfile
+    tmp = Path(tempfile.mkdtemp(prefix='cap-')) / 'band.png'   # per-run file: parallel runs must not share it
     for i, f in enumerate(frames):
         band = f[int(960 * 0.62):int(960 * 0.76)]
         lum = band.min(axis=2)                       # white and yellow text both have high minimum channel
@@ -149,7 +150,7 @@ def caption_words(path: str, duration: float, fps: float = 4.0) -> list[dict]:
         if text_px.mean() < 0.004:
             continue
         Image.fromarray(np.where(text_px, 0, 255).astype(np.uint8)).save(tmp)
-        txt = subprocess.run(['tesseract', str(tmp), '-', '--psm', '7'], capture_output=True, text=True).stdout
+        txt = subprocess.run(['tesseract', str(tmp), '-', '--psm', '7'], capture_output=True).stdout.decode('utf-8', 'ignore')
         txt = _OCR_CLEAN.sub(' ', txt).strip()
         if len(txt) < 2:
             continue
