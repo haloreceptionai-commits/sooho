@@ -64,7 +64,7 @@ For each scene record **who does what, to which object, where, what changes, and
 ### 5. Make script and voice follow the same action beats
 
 - Keep Puck Shorts and Charon long-form; no cloning or provider change.
-- Separate narrative-history and mechanism-explainer outlines. Explainers do not need an invented hero, rival and two failed attempts; history Shorts keep motives and cause/effect without inventing events.
+- Separate history and explainer outlines; explainers need no invented rival/failures. Preserve motives, cause/effect and facts.
 - Check complete everyday sentences and comprehension, not only rare words; preserve factual qualifiers and label illustrative fiction.
 - Repair hook/transitions/repetition and length without restoring length-only failures or truncating paid voice.
 - Audition current versus beat-aware curious delivery with contrast pauses, dialogue and payoff emphasis. Try **200–225 wpm**, not a mandatory speed for every topic/age.
@@ -96,6 +96,6 @@ Version Advanced-only changes across direction/schema/vocabulary, rig preparatio
 4. **Different-topic repeat and interruption:** another normal Create run, resume after browser closure at supported stages, verify finished MP4 reads back through My videos. A single curated test is not reliability proof.
 5. Publish and verify production before declaring deployment complete.
 
-Report per test: named actor/object coverage, rendered action/contact timestamps, offscreen/obstructed target incidents, sentence clarity notes, word accuracy and wpm, audio levels/peaks, duration, paid calls and wall-clock stage timings. Proposed engineering checks: required action targets visible at start/contact/end, no empty mechanism inserts, contact/cue synchronization within 3 frames where tied to an aligned word, no missing required props, full narration retained, 1080×1920 at 30 fps.
+Report actor/object coverage, contact/cue timing, framing incidents, clarity, word accuracy/wpm, audio levels, duration, paid calls and stage timings. Proposed checks: targets visible at start/contact/end; no empty inserts or missing required props; synchronized contact cues within 3 frames where speech-linked; complete narration; 1080×1920 at 30 fps.
 
-Finally compare side by side at matched sound levels and ask for the owner's assessment of action clarity, visual accuracy and voice. Automated script scores cannot certify viewer engagement or a “10/10” outcome.
+Compare side by side at matched loudness and obtain the owner's assessment. Automated scores cannot certify engagement or “10/10.”
