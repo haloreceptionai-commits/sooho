@@ -193,6 +193,24 @@ for (const kind of new Set(SHOTS.map(s=>s.world))) {
     const glow=new THREE.PointLight('#ffae4a',6,8);glow.position.set(1.6,.9,1);root.add(glow);
     animated.push(f=>{ if(!root.visible)return; const k=1+.18*Math.sin(f*.9)+.1*Math.sin(f*2.3); flame.scale.set(1,k,1); glow.intensity=5+1.5*Math.sin(f*1.7); });
     hills(root);
+  } else if(kind==='mine') {
+    floor.material=M.dirt;
+    add(tbox(14,6,.6),M.stone,0,3,-7,root);
+    for(const x of [-5,5])add(tbox(.6,6,18),M.stone,x,3,-7,root);
+    for(const z of [-2,-5,-8,-11]){for(const x of [-3.5,3.5])add(tbox(.24,4,.24),M.beam,x,2,z,root);add(tbox(7.3,.25,.25),M.beam,0,4,z,root);lantern(root,3.2,3,z);}
+    for(const x of [-.8,.8])add(tbox(.06,.05,16),PAINT.iron,x,.03,-7,root);
+    for(let z=-14;z<1;z+=.8)add(tbox(2,.04,.16),M.wood,0,0,z,root);
+    for(let i=0;i<12;i++)add(new THREE.IcosahedronGeometry(.18+i%3*.06,0),PAINT.gold,-2.8+(i%4)*.25,.8+Math.floor(i/4)*.6,-6.6,root);
+  } else if(kind==='modern_street') {
+    floor.material=PAINT.iron;
+    for(const side of [-1,1]){add(tbox(4,.12,30),M.stone,side*4.5,.01,-9,root);for(let i=0;i<5;i++){add(tbox(3.2,5+i%3,3.2),i%2?M.plaster:M.plaster2,side*6,2.5+i%3/2,-i*5,root);for(let y=1;y<5;y+=1.2)for(const x of [-.7,.7])add(tbox(.6,.6,.05),PAINT.glass,side*6+x,y,-i*5+1.64,root);}}
+    for(let z=-20;z<4;z+=4)add(tbox(.1,.01,1.8),PAINT.white,0,.01,z,root);
+    for(const x of [-3,3]){add(new THREE.CylinderGeometry(.04,.04,4,8),PAINT.iron,x,2,-3,root);add(tbox(.55,.1,.24),PAINT.white,x,4,-3,root);}
+  } else if(kind==='device_cutaway') {
+    floor.material=toon({color:'#bad8de'});
+    add(tbox(6,.18,4),toon({color:'#266b61'}),0,.4,-2,root);
+    for(let i=0;i<8;i++){const x=-2.5+i*.7;add(tbox(.36,.1,.6),PAINT.iron,x,.55,-2,root);add(tbox(.03,.015,2.4),PAINT.gold,x,.51,-2,root);}
+    add(tbox(2,.08,2),PAINT.navy,0,.58,-2,root);
   } else if(kind==='lab') {
     add(tbox(4,.15,1.7),M.plank,0,.9,-2,root);
     for(const x of [-1.8,1.8])add(tbox(.15,.9,.15),M.iron,x,.45,-2,root);
