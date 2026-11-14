@@ -739,6 +739,20 @@ export const designAdvancedCardsOperation = async ({ data }: { data: { scenes: s
     .filter(o => o.name && o.scenes.length && !seen.has(o.name) && (seen.add(o.name), true)).slice(0, 3);
   return { cards: data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) })), objects };
 };
+// Advanced Video AI final editor: same scenes and facts, retold for an 8-year-old in natural storytelling.
+export const polishKidScriptOperation = async ({ data }: { data: { scenes: string[]; problems: string[]; words: number; names: string[]; deployment: string } }) => {
+  const schema = { type: 'object', additionalProperties: false, required: ['scenes'], properties: { scenes: { type: 'array', items: { type: 'string' } } } };
+  const r = await azureJson<{ scenes: string[] }>(data.deployment, `You are the final script editor for a kids-friendly viral history Short. Rewrite the narration so a bored 8-year-old understands every word and cannot stop watching.
+Rules:
+- Return exactly ${data.scenes.length} scene lines, same order, same facts, same events, one line per scene (the pictures are already planned for each line, so each line must still say what its old line showed).
+- Total ${Math.round(data.words * 0.9)}-${Math.round(data.words * 1.05)} words. Each line 1-2 full natural sentences of 4-12 words.
+- Only everyday words a second-grader uses. Keep these names exactly: ${data.names.join(', ') || 'none'}; explain a place once in kid words. Spell numbers and years as words ("nineteen thirty-two").
+- Sound like a fun storyteller talking to one kid: joiners (so, but, then, uh-oh), WHO does WHAT, sound words (boom! splash!), and at most two short funny quotes. Never clipped headline lines ("Shots miss.", "Calm heads win."), never organisation names as subjects, never "Most people picture", never "Here is why".
+- Every line adds a surprise, danger, funny moment or new fact. The first line hooks with the strangest true fact; the last line answers the opening question with a twist.
+- Family friendly: no blood, kill, die, dead.`, `Problems to fix:\n${data.problems.map(x => `- ${x}`).join('\n') || '- none'}\n\nCurrent lines:\n${data.scenes.map((t, i) => `${i}. ${t}`).join('\n')}`, 'kid_script', schema, 'Kid editor');
+  if (!Array.isArray(r.scenes) || r.scenes.length !== data.scenes.length || r.scenes.some(x => typeof x !== 'string' || !x.trim())) throw Error('Kid editor changed the scene count');
+  return { scenes: r.scenes.map(x => x.trim().replace(/\s+/g, ' ')) };
+};
 export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no text, no letters, no people.';
 const POSE_TEXT: Record<'reach' | 'shock' | 'happy', string> = {
   reach: 'now pointing forward with one arm stretched out (or the animal leaning forward with one leg raised), mouth open as if saying something important',

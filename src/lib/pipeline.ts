@@ -2,7 +2,7 @@
 // while the user moves around the app.
 import { actions, flushVideo, getState, setVideoActive, type VideoInput } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
-import { checkContinuity, designAdvancedCards, paintAdvancedCard, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { checkContinuity, designAdvancedCards, paintAdvancedCard, polishKidScript, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
 import { submitCartoon, resumeApprovedCartoon } from '@/lib/cartoon.functions';
 import { canResumeApprovedCartoon } from './cartoon-resume';
 import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
@@ -258,6 +258,17 @@ export async function runVideo(id: string, input: VideoInput) {
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
       if (preferRepair(ev.gate, ev2.gate)) { plan = repaired; ev = ev2; }
+    }
+    if (advanced && !ev.gate.ready) {
+      // Final kid-language editor: same scenes and pictures, simpler words and natural storytelling; kept only if it scores better.
+      up({ detail: "Polishing the words so an 8-year-old understands every line…" });
+      const names = [plan.hero?.name, ...plan.characters.map((c) => c.name), rs.anchors.place].filter((x): x is string => !!x);
+      const polished = await withRetry(() => polishKidScript({ data: { scenes: plan.scenes.map((sc) => sc.narration), problems: ev.gate.blockers.slice(0, 30).map((b) => b.slice(0, 380)), words: Math.min(400, Math.max(10, budget)), names: names.slice(0, 20), deployment: s.scriptDeployment } })).catch((e: unknown) => { console.warn("Kid editor skipped:", e); return null; });
+      if (polished) {
+        const kidPlan: Plan = { ...plan, script: polished.scenes.join(" "), scenes: plan.scenes.map((sc, i) => ({ ...sc, narration: polished.scenes[i]! })) };
+        const kidEv = await evaluate(kidPlan);
+        if (preferRepair(ev.gate, kidEv.gate) || (kidEv.gate.blockers.length <= ev.gate.blockers.length && kidEv.gate.score >= ev.gate.score - 3)) { plan = kidPlan; ev = kidEv; }
+      }
     }
     if (advanced) {
       const count = (x: Plan) => x.scenes.map((sc) => sc.narration).join(" ").split(/\s+/).filter(Boolean).length;

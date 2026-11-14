@@ -80,6 +80,9 @@ export const designAdvancedCards = createServerFn({ method: 'POST' }).middleware
 export const paintAdvancedCard = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: { look: string; deployment: string; kind?: 'character' | 'object'; pose?: 'reach' | 'shock' | 'happy'; reference?: string }) => z.object({ look: z.string().min(1).max(300), deployment: z.string().min(1).max(64), kind: z.enum(['character', 'object']).optional(), pose: z.enum(['reach', 'shock', 'happy']).optional(), reference: z.string().max(12_000_000).optional() }).parse(d))
   .handler(async ({ data }) => { const { paintAdvancedCardOperation } = await import('./pipeline-operations.server'); return paintAdvancedCardOperation({ data }); });
+export const polishKidScript = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { scenes: string[]; problems: string[]; words: number; names: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(2000)).min(1).max(120), problems: z.array(z.string().max(400)).max(40), words: z.number().int().min(10).max(400), names: z.array(z.string().max(80)).max(20), deployment: z.string().min(1).max(64) }).parse(d))
+  .handler(async ({ data }) => { const { polishKidScriptOperation } = await import('./pipeline-operations.server'); return polishKidScriptOperation({ data }); });
 export const directCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: { scenes: string[]; deployment: string; format?: 'short' | 'long'; advanced?: boolean }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), deployment: z.string().min(1).max(64), format: z.enum(['short', 'long']).optional(), advanced: z.boolean().optional() }).parse(d))
   .handler(async ({ data }) => { const { directCartoonOperation } = await import('./pipeline-operations.server'); return directCartoonOperation({ data }); });
