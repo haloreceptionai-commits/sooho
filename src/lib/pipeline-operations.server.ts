@@ -115,13 +115,13 @@ export function toMapSpec(b: { regions: string[]; focus: number[]; reveal: 'grow
     armies: b.armies.flatMap(a => { const from = clampLL(a.from), to = clampLL(a.to); return from && to ? [{ from, to, side: a.side }] : []; }).slice(0, 4) };
 }
 
-export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string; format?: 'short' | 'long' | undefined } }) => {
+export const directCartoonOperation = async ({ data }: { data: { scenes: string[]; deployment: string; format?: 'short' | 'long' | undefined; advanced?: boolean | undefined } }) => {
   if (data.format !== 'long') return directCartoonChunk(data);
   // Long-form: character direction in chunks (one shared cast), then the map pass decides which blocks become map scenes.
   let cast: z.infer<typeof cartoonDirection>['cast'] | null = null;
   const scenes: z.infer<typeof cartoonDirection>['scenes'] = [];
   for (let i = 0; i < data.scenes.length; i += 40) {
-    const part = await directCartoonChunk({ scenes: data.scenes.slice(i, i + 40), deployment: data.deployment });
+    const part = await directCartoonChunk({ scenes: data.scenes.slice(i, i + 40), deployment: data.deployment, advanced: data.advanced });
     const first: z.infer<typeof cartoonDirection>['cast'] = cast ?? part.cast; cast = first;
     // Later chunks reuse the first cast by position so the same people carry the whole documentary.
     const remap = new Map(part.cast.map((c, k) => [c.id, (first[k] ?? first[0]!).id]));
@@ -139,7 +139,7 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
   return cartoonDirection.parse(sanitizeDirection({ cast: cast!, scenes: merged }, narration));
 };
 
-const directCartoonChunk = async (data: { scenes: string[]; deployment: string }) => {
+const directCartoonChunk = async (data: { scenes: string[]; deployment: string; advanced?: boolean | undefined }) => {
     const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
     const { shortlist, searchLibrary } = await import('./object-library');
@@ -155,7 +155,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string }
         fx: { type: 'array', items: en('fx') }, cues: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['word', 'kind'], properties: { word: { type: 'integer' }, kind: en('sounds') } } }, keyword: { type: 'string' },
       } } },
     } };
-    const raw = await azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(data.deployment, VISUAL_DIRECTOR,
+    const raw = await azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(data.deployment, data.advanced ? VISUAL_DIRECTOR + ADVANCED_DIRECTION : VISUAL_DIRECTOR,
       data.scenes.map((s, i) => `${i}: ${s}\nScene-matched models: ${searchLibrary(s, 5).filter(o => objects.some(a => a.id === o.id)).map(o => `${o.id}${o.clips?.length ? ' [rigged]' : ''}`).join(', ') || 'use faithful built-in props'}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : o.clips?.length ? ' (animated: idle/walk/run)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director');
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
     const scenes = raw.scenes.map(s => ({ ...s, speaker: s['speaker'] || undefined, keyword: String(s['keyword'] ?? '').slice(0, 40) || undefined,
@@ -163,7 +163,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string }
     const { cinematicPass } = await import('./cinematic-pass');
     const { groundLibraryScenes } = await import('./library-direction');
     const { sanitizeDirection } = await import('./cartoon-job');
-    const cast = diversifyCast(raw.cast as CastMember[]);
+    const cast = diversifyCast(raw.cast as CastMember[], data.advanced ? 4 : 3);
     const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], narration, objects);
     const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
@@ -171,9 +171,9 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string }
   };
 type CastMember = { id: string; seed: number; outfit: string };
 // Distinct looks per cast member: duplicate outfits/seeds are swapped for unused ones so characters never read as clones.
-export function diversifyCast(cast: CastMember[]): CastMember[] {
+export function diversifyCast(cast: CastMember[], max = 3): CastMember[] {
   const used = new Set<string>(), seeds = new Set<number>();
-  return (cast || []).slice(0, 3).map((c, i) => {
+  return (cast || []).slice(0, max).map((c, i) => {
     let outfit = (OUTFITS as readonly string[]).includes(c.outfit) ? c.outfit : OUTFITS[0];
     if (used.has(outfit)) outfit = OUTFITS.find(o => !used.has(o)) ?? outfit;
     used.add(outfit);
@@ -183,6 +183,11 @@ export function diversifyCast(cast: CastMember[]): CastMember[] {
     return { id: c.id, seed, outfit };
   });
 }
+// Advanced Video AI: every cast id becomes a painted card, so animals and creatures can act like people.
+const ADVANCED_DIRECTION = `
+ADVANCED VIDEO AI CAST (overrides the cast limits above): up to 4 cast ids, each drawn from a painted card of exactly what the narration says, so the outfit is only a placeholder.
+- Every person AND every animal or creature that acts or is named as a character in the narration (a pig, a dog, a horse) is its own cast id (e.g. "pig") and appears as an actor in every scene where it is mentioned or acts.
+- The hero is in at least 60% of scenes. Pick actions and expressions that match each line (point when someone shows, shock when something goes wrong, cheer or grin on wins, walk/run when someone moves).`;
 const VISUAL_DIRECTOR = `You are the Visual Director of a bright outlined 3D cartoon Shorts studio. Every sentence must SHOW what the narrator says, using ONLY the listed vocabulary (the engine cannot draw anything else; never invent items, never write code).
 Return a cast and exactly one direction per input sentence, in order.
 Cast (2-3 members whenever the story involves more than one person or group; 1 only for a true solo story): stable ids that name the role (hero, captain, rival, queen, doctor...), different seeds 1-999, and an outfit from the outfits list that matches each person's job, era and place (soldier/knight/veteran for armies, queen/noble/king for royalty, doctor/nurse for medicine, pharaoh for ancient Egypt, cowboy for the Wild West, chef for food, monk/priest for religion, woman/maid/peasant for townsfolk). Every cast member gets a DIFFERENT outfit so viewers can tell them apart.
@@ -265,10 +270,10 @@ const passASchema = { type: "object", additionalProperties: false, required: ["w
 const passBSchema = { type: "object", additionalProperties: false, required: ["premise", "hero", "want", "question"], properties: { premise: S, hero: S, want: S, question: S } };
 const passCSchema = { type: "object", additionalProperties: false, required: ["answered", "answer", "payoff", "weakest"], properties: { answered: { type: "boolean" }, answer: S, payoff: S, weakest: S } };
 const gradeSchema = {
-  type: "object", additionalProperties: false, required: ["passA", "passB", "readAloud", "literal", "filler"],
+  type: "object", additionalProperties: false, required: ["passA", "passB", "readAloud", "literal", "filler", "swipe"],
   properties: {
     passA: { type: "integer" }, passB: { type: "integer" },
-    readAloud: { type: "array", items: S }, literal: { type: "array", items: { type: "integer" } }, filler: { type: "array", items: S },
+    readAloud: { type: "array", items: S }, literal: { type: "array", items: { type: "integer" } }, filler: { type: "array", items: S }, swipe: { type: "array", items: S },
   },
 };
 
@@ -277,11 +282,11 @@ export const judgeScriptOperation = async ({ data, checkpoint = <T,>(fn: () => P
     const a = await checkpoint(() => azureJson<PassAnswer>(data.deployment, blind, `You saw the first 3 seconds of a Short:\n${data.first3}\nWhat is happening? Where? Why is it odd? What might happen next?`, "pass_a", passASchema, "Judge A"));
     const b = await checkpoint(() => azureJson<{ premise: string; hero: string; want: string; question: string }>(data.deployment, blind, `You saw the first 15 seconds:\n${data.first15}\nState the premise, the hero, what the hero wants and the central question.`, "pass_b", passBSchema, "Judge B"));
     const c = await checkpoint(() => azureJson<{ answered: boolean; answer: string; payoff: string; weakest: string }>(data.deployment, blind, `Full script:\n${data.full}\nWas the opening question answered (quote the answer)? What was the payoff? Which beat was weakest?`, "pass_c", passCSchema, "Judge C"));
-    const g = await checkpoint(() => azureJson<{ passA: number; passB: number; readAloud: string[]; literal: number[]; filler: string[] }>(data.deployment,
+    const g = await checkpoint(() => azureJson<{ passA: number; passB: number; readAloud: string[]; literal: number[]; filler: string[]; swipe: string[] }>(data.deployment,
       "You grade blind viewer answers against the truth, and audit a script. Be strict but fair: an answer is correct if a stranger clearly got the idea. readAloud flags grammatical defects only, never brevity, quoted dialogue, present tense or unfamiliar subject matter. A full subject-verb sentence such as 'Then a dragon clicks.' or 'A bronze ball drops west.' is grammatical. Dialogue with attribution such as '\"That cannot work,\" a minister laughs.' is grammatical. filler must exclude first introductions of a checked year/place and new consequences such as a delayed courier confirming the event. literal audits the visible noun/action, not whether an invisible idea can be photographed.",
-      `TRUTH:\n${data.truth}\n\nPass A answers (what/where/odd/next): ${JSON.stringify(a)}\nPass B answers (premise/hero/want/question): ${JSON.stringify(b)}\n\nFULL SCRIPT:\n${data.full}\n\nSCENES (index: narration => visual):\n${data.shots}\n\nReturn passA = number of the 4 Pass A answers that are correct, passB = number of the 4 Pass B answers that are correct. readAloud = sentences that are fragments, drop words, or don't parse when spoken aloud (quote them; [] if none). literal = scene indexes whose visual does NOT literally show the main noun/action of its narration. filler = sentences that only describe a scene and add no new fact or reversal.`,
+      `TRUTH:\n${data.truth}\n\nPass A answers (what/where/odd/next): ${JSON.stringify(a)}\nPass B answers (premise/hero/want/question): ${JSON.stringify(b)}\n\nFULL SCRIPT:\n${data.full}\n\nSCENES (index: narration => visual):\n${data.shots}\n\nReturn passA = number of the 4 Pass A answers that are correct, passB = number of the 4 Pass B answers that are correct. readAloud = sentences that are fragments, drop words, or don't parse when spoken aloud (quote them; [] if none). literal = scene indexes whose visual does NOT literally show the main noun/action of its narration. filler = sentences that only describe a scene and add no new fact or reversal. swipe = sentences (quote them) where a bored 8-year-old scrolling Shorts would swipe away: no surprise, no danger, no new fact, no funny moment, or a word they don't know ([] if none).`,
       "grade", gradeSchema, "Grader"));
-    return { passA: g.passA, passB: g.passB, passC: !!c.answered, payoff: c.payoff, weakest: c.weakest, readAloud: g.readAloud, literal: g.literal, filler: g.filler, answers: { a, b, c } };
+    return { passA: g.passA, passB: g.passB, passC: !!c.answered, payoff: c.payoff, weakest: c.weakest, readAloud: g.readAloud, literal: g.literal, filler: g.filler, swipe: g.swipe ?? [], answers: { a, b, c } };
   };
 
 // ---------------- Continuity gate (vision) ----------------
@@ -347,6 +352,7 @@ export interface PlanInput {
   research?: string; // anchors, premise, question, hero, payoff, money shot
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
+  kid?: boolean; // Advanced Video AI: words an 8-year-old knows, stricter story shape
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
@@ -402,11 +408,27 @@ const planSchema = {
   },
 };
 
+const KID_RULES = (words: number) => `
+KID-LEVEL WORDS (Advanced Video AI; these override the language rules above where stricter):
+- An 8-year-old must understand EVERY word. Use words a second-grader says every day. Names of people and places are fine; explain them in kid words the first time ("San Juan, a small island").
+- Banned adult words and their swaps: boundary -> line between two lands; dispute/conflict -> fight; escalate -> get worse; crisis -> big problem; treaty -> deal; territory -> land; military/troops -> army/soldiers; government/officials -> leaders; vessel -> ship; massive -> huge; ancient -> very old; incident -> thing that happened; negotiate -> talk it out; commander -> boss; eventually -> in the end.
+- Sentences of 4-12 words, one idea each, like a fun big sister telling a story. Use sound words (oink! boom! splash!) and short funny quotes from the characters.
+- Every sentence must make a kid want the next one: a surprise, a danger, a funny moment or a new fact. Never two calm lines in a row.
+- Talk like a real storyteller, not a headline: full natural sentences with little joiners (so, but, then, uh-oh), never clipped telegraph lines like "Calm heads win." or "Hudson's Bay Company wants pay." Say WHO does WHAT and WHY it is funny or scary.
+- Prefer a person or animal doing something ("The pig squeezes under the fence and munches Lyman's potatoes!") over a fact about organisations.
+- Exactly ${words} words (±10%). Count them; a machine checks.
+- If an animal or object causes the story (a pig, a cannon, a jar), name it in the first sentence and keep it on screen: it is a character.`;
+const MICRO_RULES = (D: number, words: number, scenes: number) => `
+LOOP SHORT (${D} seconds; these rules REPLACE the skeleton, word clock, myth, analogy, escalation and long payoff rules above):
+- Exactly ${scenes} scenes and ${words} words in total (±10%). No more: the voice must fit in ${D} seconds.
+- Scene 1 (0-2s): the hook, max 8 words, the strangest true fact with the subject word. Scene 2 (by 5s): one short question ending "?" (loop_opened "main"). Middle scenes: one new surprise each, the hero acting. Last scene: the answer as a twist (loop_closed "main"), written so it flows straight back into the first line when the video loops.
+- The hero (person or animal) is in at least 60% of scenes. No myth line, no "Ever ...?" analogy, no dates in the first line.`;
 export const generatePlanOperation = async ({ data }: { data: PlanInput }): Promise<Plan> => {
     const short = data.format === "short";
     const D = data.durationSec;
     const words = Math.round(D * (short ? 2.6 : 2.37)); // Atlas Shorts pace ~153 wpm; long-form narrator ~142 wpm
-    const scenes = short ? Math.max(8, Math.round(D / 3)) : Math.min(90, Math.max(14, Math.round(D / 6)));
+    const micro = short && D < 25; // seamless loop Short (the guide's 12-second format)
+    const scenes = short ? (micro ? Math.max(3, Math.round(D / 2.5)) : Math.max(8, Math.round(D / 3))) : Math.min(90, Math.max(14, Math.round(D / 6)));
     const perScene = Math.round(words / scenes);
     const at = (f: number) => Math.round(D * f);
     const system = `You write ${D}-second ${short ? "vertical story Shorts" : "story documentaries"} for a viral history & science channel. You write a STORY with a hero, not a lecture.
@@ -462,6 +484,7 @@ VISUALS (one scene ≈ 3s, one clear moment):
 - sfx: the sound of the visual event (knock, rustle, plane, siren, impact, pour, wave, crash...).
 - hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook words.
 
+${data.kid ? KID_RULES(words) : ""}${micro ? MICRO_RULES(D, words, scenes) : ""}
 Write the WHOLE narration first in "script" (read it aloud in your head; fix anything that doesn't parse), THEN split that exact text, word for word, into the scenes' "narration" fields.
 
 ${short ? "" : `
@@ -701,18 +724,60 @@ export async function inkBeatsOperation(data: { beats: { i: number; text: string
 
 // ---------------- Advanced Video AI: painted character cards ----------------
 export const ADVANCED_CARD_STYLE = 'Bold 2D cartoon character for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, big expressive eyes, friendly rounded proportions, slightly exaggerated features, full body standing upright facing the viewer, whole figure visible head to feet, centered, nothing else in the picture, transparent background, no ground, no shadow, no text.';
-const CARD_DESIGNER = `You design the on-screen characters for a 3D cartoon Short where each character is one flat painted card standing in a 3D set.
-For every cast id, read the narration and decide who or what that role should actually look like so the picture matches the story literally (it may be an animal, an object-mascot or a person of the right era, place and job).
-Return one short visual description per id (max 40 words): species or person, era-accurate clothes/colours, one signature item, expression. Distinct silhouettes and colours between ids. Never real living people's likeness, never gore, never text.`;
+const CARD_DESIGNER = `You design the on-screen characters and key objects for a 3D cartoon Short where each one is a flat painted card standing in a 3D set.
+For every cast id, read the narration and decide who or what that role should actually look like so the picture matches the story literally (it may be an animal, a creature or a person of the right era, place and job).
+Return one short visual description per id (max 40 words): species or person, era-accurate clothes/colours, one signature item, a friendly expressive face. Distinct silhouettes and colours between ids.
+Then list up to 3 key OBJECTS the narrator names that matter to the story and are NOT already shown in that scene's props (e.g. a potato patch, a fence, a letter): a snake_case name, a max-30-word look, and the zero-based scene indexes where it is said.
+Never people or animals in objects, never real living people's likeness, never gore, never text.`;
 export const designAdvancedCardsOperation = async ({ data }: { data: { scenes: string[]; ids: string[]; deployment: string } }) => {
-  const schema = { type: 'object', additionalProperties: false, required: ['cards'], properties: { cards: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'look'], properties: { id: { type: 'string', enum: data.ids }, look: { type: 'string' } } } } } };
-  const r = await azureJson<{ cards: { id: string; look: string }[] }>(data.deployment, CARD_DESIGNER, `Cast ids: ${data.ids.join(', ')}\n\nNarration with each scene's acting role:\n${data.scenes.map((t, i) => `${i + 1}. ${t}`).join('\n')}`, 'card_design', schema, 'Card designer');
-  return data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) }));
+  const schema = { type: 'object', additionalProperties: false, required: ['cards', 'objects'], properties: {
+    cards: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'look'], properties: { id: { type: 'string', enum: data.ids }, look: { type: 'string' } } } },
+    objects: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['name', 'look', 'scenes'], properties: { name: { type: 'string' }, look: { type: 'string' }, scenes: { type: 'array', items: { type: 'integer' } } } } } } };
+  const r = await azureJson<{ cards: { id: string; look: string }[]; objects: { name: string; look: string; scenes: number[] }[] }>(data.deployment, CARD_DESIGNER, `Cast ids: ${data.ids.join(', ')}\n\nNarration with each scene's acting role and props:\n${data.scenes.map((t, i) => `${i}. ${t}`).join('\n')}`, 'card_design', schema, 'Card designer');
+  const seen = new Set<string>();
+  const objects = (r.objects ?? []).map(o => ({ name: o.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 30), look: o.look.slice(0, 300), scenes: [...new Set(o.scenes.filter(i => Number.isInteger(i) && i >= 0 && i < data.scenes.length))] }))
+    .filter(o => o.name && o.scenes.length && !seen.has(o.name) && (seen.add(o.name), true)).slice(0, 3);
+  return { cards: data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) })), objects };
 };
-export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string } }) => {
-  const tries = [data.look, softenPrompt(data.look), 'a friendly cartoon storyteller in simple period clothes'];
+// Advanced Video AI final editor: same scenes and facts, retold for an 8-year-old in natural storytelling.
+export const polishKidScriptOperation = async ({ data }: { data: { scenes: string[]; problems: string[]; words: number; names: string[]; deployment: string } }) => {
+  const schema = { type: 'object', additionalProperties: false, required: ['scenes'], properties: { scenes: { type: 'array', items: { type: 'string' } } } };
+  const r = await azureJson<{ scenes: string[] }>(data.deployment, `You are the final script editor for a kids-friendly viral history Short. Rewrite the narration so a bored 8-year-old understands every word and cannot stop watching.
+Rules:
+- Return exactly ${data.scenes.length} scene lines, same order, same facts, same events, one line per scene (the pictures are already planned for each line, so each line must still say what its old line showed).
+- Total ${Math.round(data.words * 0.9)}-${Math.round(data.words * 1.05)} words. Each line 1-2 full natural sentences of 4-12 words.
+- Only everyday words a second-grader uses. Keep these names exactly: ${data.names.join(', ') || 'none'}; explain a place once in kid words. Spell numbers and years as words ("nineteen thirty-two").
+- Sound like a fun storyteller talking to one kid: joiners (so, but, then, uh-oh), WHO does WHAT, sound words (boom! splash!), and at most two short funny quotes. Never clipped headline lines ("Shots miss.", "Calm heads win."), never organisation names as subjects, never "Here is why". If a line busts a myth, say it as "You might think ... But really ...". If a line compares to home life, keep it starting "Ever ...?". Keep the one question line ending "?" and keep its key words in the last line.
+- Every line adds a surprise, danger, funny moment or new fact. The first line hooks with the strangest true fact; the last line answers the opening question with a twist.
+- Family friendly: no blood, kill, die, dead.`, `Problems to fix:\n${data.problems.map(x => `- ${x}`).join('\n') || '- none'}\n\nCurrent lines:\n${data.scenes.map((t, i) => `${i}. ${t}`).join('\n')}`, 'kid_script', schema, 'Kid editor');
+  if (!Array.isArray(r.scenes) || r.scenes.length !== data.scenes.length || r.scenes.some(x => typeof x !== 'string' || !x.trim())) throw Error('Kid editor changed the scene count');
+  return { scenes: r.scenes.map(x => x.trim().replace(/\s+/g, ' ')) };
+};
+export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no text, no letters, no people.';
+const POSE_TEXT: Record<'reach' | 'shock' | 'happy', string> = {
+  reach: 'now pointing forward with one arm stretched out (or the animal leaning forward with one leg raised), mouth open as if saying something important',
+  shock: 'now shocked: eyes wide, mouth open, eyebrows up, hands (or paws/ears) thrown up in surprise, leaning back a little',
+  happy: 'now laughing and cheering: big open smile, eyes squeezed happy, arms (or front legs) up in joy',
+};
+/** Paints a transparent card: a standing character, an object, or (with a reference) the same character in another pose. */
+export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | undefined; pose?: 'reach' | 'shock' | 'happy' | undefined; reference?: string | undefined } }) => {
+  const style = data.kind === 'object' ? ADVANCED_OBJECT_STYLE : ADVANCED_CARD_STYLE;
+  if (data.pose && data.reference) {
+    // Same design in a new pose: the standing card is the reference so face, colours and outfit stay identical.
+    for (let i = 0; i < 2; i++) {
+      const fd = new FormData();
+      fd.append('image[]', new Blob([b64ToBytes(data.reference)], { type: 'image/png' }), 'card.png');
+      fd.append('prompt', `${style} Keep EXACTLY the same character as the reference image: same face, species, colours, clothes, proportions and line style. Character: ${i ? softenPrompt(data.look) : data.look} The character is ${POSE_TEXT[data.pose]}. Full body, head to feet, centered.`.slice(0, 3900));
+      fd.append('size', '1024x1536'); fd.append('quality', 'medium'); fd.append('background', 'transparent'); fd.append('output_format', 'png'); fd.append('n', '1');
+      const res = await azureOpenAIRequest(`${safeName(data.deployment)}/images/edits`, fd, true);
+      if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
+      else if (res.status !== 400) await fail(res, 'Character pose');
+    }
+    throw Error('Character pose could not be painted');
+  }
+  const tries = data.kind === 'object' ? [data.look, softenPrompt(data.look)] : [data.look, softenPrompt(data.look), 'a friendly cartoon storyteller in simple period clothes'];
   for (const look of tries) {
-    const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: `${ADVANCED_CARD_STYLE} Character: ${look}`.slice(0, 3900), size: '1024x1536', quality: 'medium', background: 'transparent', output_format: 'png', n: 1 });
+    const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: `${style} ${data.kind === 'object' ? 'Object' : 'Character'}: ${look}`.slice(0, 3900), size: '1024x1536', quality: 'medium', background: 'transparent', output_format: 'png', n: 1 });
     if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
     else if (res.status !== 400) await fail(res, 'Character card');
   }

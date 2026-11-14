@@ -54,5 +54,7 @@ if __name__ == '__main__':
     args=parser.parse_args(); m=json.loads(Path(args.manifest).read_text())
     total=jsround(m['narration']['samples']/48000*30)
     selected=preflight_frames(m['shots'],m['words'],total)
+    # Advanced Video AI: same single check frame workflow.py captures (no owner review).
+    if any(c.get('card') for c in m['cast']): selected=selected[len(selected)//2:len(selected)//2+1]
     sheet(Path(args.frames),selected,Path(args.out),shot_labels(m,selected))
     Path(args.out,'frames.json').write_text(json.dumps(selected))

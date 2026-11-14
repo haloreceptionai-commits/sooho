@@ -3,6 +3,7 @@
 // the few-shot benchmark library. Pure functions shared by the pipeline, prompts and tests.
 
 import { hardWords } from "@/lib/sound-words";
+import { rareWords, KID_SWAPS } from "@/lib/plain-words";
 
 export const WPS = 153 / 60;
 /** Spoken numbers ("nineteen sixty-five") are plain speech, never "hard words". */
@@ -67,7 +68,12 @@ export interface StoryInput {
   hero: { name: string; role: string; want: string };
   cast: Role[]; // recurring characters
   durationSec: number;
+  /** Advanced Video AI: every narrated word must be one an 8-year-old knows (names and places excepted). */
+  kid?: boolean;
 }
+/** Loop Shorts under 25 s have no room for escalation, myth, money-shot return or chapter timing. */
+export const MICRO_SEC = 25;
+const MICRO_SKIP = new Set(["V7", "V9", "V10", "CLOCK", "LOOPS", "SHOTS"]);
 export interface Check { id: string; pass: boolean; msg: string }
 export interface StoryReport { checks: Check[]; failed: Check[]; words: number; revealSec: number; shotMix: Record<Shot, number> }
 
@@ -153,7 +159,8 @@ const role = (r: Role) => [r.name, r.role].filter(Boolean);
 
 export function validateStory(s: StoryInput): StoryReport {
   const checks: Check[] = [];
-  const add = (id: string, pass: boolean, msg: string) => checks.push({ id, pass, msg });
+  const micro = s.durationSec < MICRO_SEC;
+  const add = (id: string, pass: boolean, msg: string) => checks.push(micro && MICRO_SKIP.has(id) ? { id, pass: true, msg: `${id} not used for loop Shorts` } : { id, pass, msg });
   const all = s.scenes.map((x) => x.narration.trim()).join(" ");
   const words = wc(all);
   const total = words / WPS;
@@ -162,7 +169,7 @@ export function validateStory(s: StoryInput): StoryReport {
   const sents = splitSentences(all);
 
   // V1 anchors by 8s
-  const missing = (["subject", "year", "place", "stakes"] as const).filter((k) => !mentions(by8, s.anchors[k]) && !(k === "year" && /\b1[0-9]{3}s?\b|\b20[0-9]{2}\b/.test(by8)));
+  const missing = (micro ? (["subject", "place"] as const) : (["subject", "year", "place", "stakes"] as const)).filter((k) => !mentions(by8, s.anchors[k]) && !(k === "year" && /\b1[0-9]{3}s?\b|\b20[0-9]{2}\b/.test(by8)));
   add("V1", !missing.length, missing.length ? `V1 anchors: by 8s the narration never says the ${missing.join(", ")} (${missing.map((k) => `"${s.anchors[k]}"`).join(", ")})` : "V1 anchors named by 8s");
   // V2 one main question by 8s, no other question before 15s
   const qSents = sents.map((x, i) => ({ x, i, t: wc(sents.slice(0, i).join(" ")) / WPS })).filter((q) => /\?["']?$/.test(q.x));
@@ -194,7 +201,8 @@ export function validateStory(s: StoryInput): StoryReport {
   const heroWords = contentWords(`${s.hero.name} ${s.hero.role}`);
   const wantLine = splitSentences(by10).some((x) => WANT.test(x) && heroWords.some((w) => norm(x).includes(w)));
   const heroIn = s.scenes.filter((x) => x.characters.some((c) => heroWords.some((w) => norm(c).includes(w)))).length / Math.max(1, s.scenes.length);
-  add("V6", wantLine && heroIn >= 0.6, !wantLine ? `V6 hero want: ${s.hero.name || "the hero"}'s goal isn't stated by 10s` : heroIn < 0.6 ? `V6 hero is in only ${Math.round(heroIn * 100)}% of scenes (needs 60%)` : "V6 hero with a want");
+  if (micro) add("V6", heroIn >= 0.6, heroIn < 0.6 ? `V6 hero is in only ${Math.round(heroIn * 100)}% of scenes (needs 60%)` : "V6 hero leads the loop");
+  else add("V6", wantLine && heroIn >= 0.6, !wantLine ? `V6 hero want: ${s.hero.name || "the hero"}'s goal isn't stated by 10s` : heroIn < 0.6 ? `V6 hero is in only ${Math.round(heroIn * 100)}% of scenes (needs 60%)` : "V6 hero with a want");
   // V7 stakes by 8s + escalation before 30s
   const esc = s.scenes.findIndex((x) => ["fail", "escalation"].includes(x.beat));
   const stakes = mentions(by8, s.anchors.stakes);
@@ -250,6 +258,12 @@ export function validateStory(s: StoryInput): StoryReport {
   const budget = s.durationSec * 2.6;
   const longOk = longS <= Math.max(1, Math.round(words / 150)); // long-form allows an occasional longer sentence
   const langOk = longOk && hard.length <= 2 && !labels.length && frags.length <= 2 && words <= budget * 1.25 && words >= budget * 0.8;
+  if (s.kid) {
+    const allow = [...Object.values(s.anchors), s.hero.name, ...s.cast.map((c) => c.name)];
+    const rare = rareWords(all, allow);
+    const kidOk = rare.length <= Math.max(1, Math.floor(words / 40));
+    add("KID", kidOk, kidOk ? "Every word is one an 8-year-old knows" : `Words an 8-year-old won't know: ${rare.slice(0, 8).map((w) => KID_SWAPS[w] ? `${w} (say "${KID_SWAPS[w]}")` : w).join(", ")}`);
+  }
   add("LANG", langOk, langOk ? "Plain short sentences" : [!longOk ? `${longS} sentences over 12 words` : "", hard.length > 2 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.25 ? `too long: ${words} words (max ${Math.round(budget * 1.25)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
 
   // RETAIN (long-form only): a fresh open question at least every ~75s so viewers always wait for an answer
@@ -273,13 +287,14 @@ export interface JudgeResult {
   readAloud: string[]; // lines that don't parse when spoken
   literal: number[]; // scene indexes whose visual doesn't show the narrated noun/action
   filler: string[];
+  swipe?: string[]; // lines where a cold viewer would swipe away
 }
 
 const SOFT_CHECKS = new Set(["V8", "V8j"]);
 export interface GateResult { score: number; ready: boolean; parts: Record<string, number>; blockers: string[] }
 
 /** Script score out of 100: validators 56, judges 30, read-aloud + literalness 14. Ready at 85+. */
-export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: number): GateResult {
+export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: number, opts: { strict?: boolean } = {}): GateResult {
   const v = r.checks.filter((c) => c.pass).length / Math.max(1, r.checks.length);
   const parts: Record<string, number> = {
     validators: Math.round(v * 56),
@@ -295,13 +310,16 @@ export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: nu
     if (j.passB < 4) blockers.push(`Pass B: after 15s a viewer gets only ${j.passB}/4 of premise, hero, want, question`);
     if (!j.passC) blockers.push("Pass C: the opening question is not answered");
     j.readAloud.slice(0, 3).forEach((l) => blockers.push(`Read-aloud: "${l}"`));
+    (j.swipe ?? []).slice(0, 3).forEach((l) => blockers.push(`Viewer would swipe away at: "${l}" — make it a surprise, danger or new fact`));
     if (j.literal.length) blockers.push(`Visual literalness: scenes ${j.literal.map((i) => i + 1).join(", ")} don't show what is said`);
   }
   const score = Object.values(parts).reduce((a, b) => a + b, 0);
   const passBHard = !j || j.passB >= 4;
   // Repetition checks only cost points; every structural rule still blocks.
   const hardFails = r.failed.filter((c) => !SOFT_CHECKS.has(c.id));
-  return { score, ready: score >= 85 && hardFails.length === 0 && passBHard && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
+  // Advanced Video AI also needs clean read-aloud lines, literal visuals and no swipe-away line.
+  const strictOk = !opts.strict || !j || (j.readAloud.length === 0 && (j.swipe ?? []).length <= 1 && j.literal.length <= Math.floor(sceneCount * 0.15) && j.filler.length <= 1);
+  return { score, ready: score >= 85 && hardFails.length === 0 && passBHard && strictOk && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
 }
 
 /** Final QA = 90% script gate + 10% production (pacing, audio, resolution, captions). */

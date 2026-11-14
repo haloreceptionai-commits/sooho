@@ -2,7 +2,7 @@
 // while the user moves around the app.
 import { actions, flushVideo, getState, setVideoActive, type VideoInput } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
-import { checkContinuity, designAdvancedCards, paintAdvancedCard, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { checkContinuity, designAdvancedCards, paintAdvancedCard, polishKidScript, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
 import { submitCartoon, resumeApprovedCartoon } from '@/lib/cartoon.functions';
 import { canResumeApprovedCartoon } from './cartoon-resume';
 import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
@@ -11,7 +11,8 @@ import { composeInkCard, pickInkCards, type InkCard } from "@/lib/ink-card";
 import { planInkBeats, planInkCards } from "@/lib/ink.functions";
 import { splitInkBeats } from "@/lib/ink-beats";
 import { INK_HERO } from "@/lib/styles";
-import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, speakable, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
+import { finalScore, hookIssues, hookTextIssues, MICRO_SEC, rankHookTypes, sceneStarts, speakable, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
+import { wordBudget } from "@/lib/plain-words";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
@@ -21,6 +22,7 @@ import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/scr
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
 import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
+import { ensureAnimalCast, paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -158,13 +160,14 @@ export async function runVideo(id: string, input: VideoInput) {
   keepAlive();
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
+  const advanced = input.engine === 'advanced';
   try {
     const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
     const cartoon = getState().videos.find(v => v.id === id)?.cartoonCheckpoint;
     if (usesCartoonWorker(input.engine) && cartoon) {
       await flushVideo(id);
       const job = await submitCartoon({ data: cartoon });
-      up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
+      up({ hostedRender: job, stage: 'render', progress: 72, detail: advanced ? 'Advanced Video AI render · safe to close your browser' : 'Cartoon preview · safe to close your browser' });
       return;
     }
     if (assembly) {
@@ -214,12 +217,15 @@ export async function runVideo(id: string, input: VideoInput) {
     const base = {
       topic: input.topic, format: input.format, durationSec: input.durationSec,
       archetype: archetype ? `${archetype.name} — ${archetype.formula}` : "Best fit", style: input.style, deployment: s.scriptDeployment,
-      facts: factText, research: researchText, hook: hb.line,
+      facts: factText, research: researchText, hook: hb.line, ...(advanced ? { kid: true } : {}),
     };
+    // Advanced Video AI: the narration must fit the chosen length before any voice or pictures are paid for.
+    const budget = wordBudget(input.durationSec), micro = input.format === "short" && input.durationSec < MICRO_SEC;
+    const fitNote = advanced ? `\nLENGTH (hard limit): the whole narration must be ${Math.round(budget * 0.9)}-${Math.round(budget * 1.1)} words for ${input.durationSec} seconds.${micro ? " LOOP SHORT: ignore the word-20/26/38 opening rules, myth, analogy and escalation beats; hook, one question by 5s, surprises, a twist that loops back to the first line." : ""} Every word must be one an 8-year-old knows.` : "";
     const evaluate = async (p: Plan) => {
       const story = {
         scenes: p.scenes.map((x) => ({ beat: x.beat, narration: x.narration, characters: x.characters, shot: x.shot, money: x.money, loop_opened: x.loop_opened, loop_closed: x.loop_closed })),
-        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec,
+        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec, kid: advanced,
       };
       const report = validateStory(story);
       const ht = hookTextIssues(p.hookText, p.scenes[0]?.narration ?? "");
@@ -237,21 +243,41 @@ export async function runVideo(id: string, input: VideoInput) {
         deployment: s.scriptDeployment,
       } })).catch((e: unknown) => { console.warn("Judges unavailable:", e); return null; });
       if (judge?.filler.length && judge.filler.length > 2) report.failed.push({ id: "V8j", pass: false, msg: `V8 new info (judge): "${judge.filler.slice(0, 2).join('", "')}" add nothing new` });
-      const gate = storyScore(report, judge, p.scenes.length);
+      const gate = storyScore(report, judge, p.scenes.length, { strict: advanced });
       return { report, judge, gate };
     };
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
     let plan = autoFixPlan(await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait));
     let ev = await evaluate(plan);
     let draft = plan, draftEv = ev;
-    const tries = input.engine === "advanced" ? 1 : input.engine === "cartoon" ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
+    const tries = usesCartoonWorker(input.engine) ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors) } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors, { loop: advanced && micro }) + fitNote } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
       if (preferRepair(ev.gate, ev2.gate)) { plan = repaired; ev = ev2; }
+    }
+    if (advanced && !ev.gate.ready) {
+      // Final kid-language editor: same scenes and pictures, simpler words and natural storytelling; kept only if it scores better.
+      up({ detail: "Polishing the words so an 8-year-old understands every line…" });
+      const names = [plan.hero?.name, ...plan.characters.map((c) => c.name), rs.anchors.place].filter((x): x is string => !!x);
+      const polished = await withRetry(() => polishKidScript({ data: { scenes: plan.scenes.map((sc) => sc.narration), problems: ev.gate.blockers.slice(0, 30).map((b) => b.slice(0, 380)), words: Math.min(400, Math.max(10, budget)), names: names.slice(0, 20), deployment: s.scriptDeployment } })).catch((e: unknown) => { console.warn("Kid editor skipped:", e); return null; });
+      if (polished) {
+        const kidPlan: Plan = { ...plan, script: polished.scenes.join(" "), scenes: plan.scenes.map((sc, i) => ({ ...sc, narration: polished.scenes[i]! })) };
+        const kidEv = await evaluate(kidPlan);
+        if (preferRepair(ev.gate, kidEv.gate) || (kidEv.gate.blockers.length <= ev.gate.blockers.length && kidEv.gate.score >= ev.gate.score - 3)) { plan = kidPlan; ev = kidEv; }
+      }
+    }
+    if (advanced) {
+      const count = (x: Plan) => x.scenes.map((sc) => sc.narration).join(" ").split(/\s+/).filter(Boolean).length;
+      if (count(plan) > budget * 1.25) {
+        up({ detail: `Script is ${count(plan)} words; cutting it to fit ${input.durationSec} seconds…` });
+        const cut = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(plan, ev.gate, rs.anchors, { loop: advanced && micro }) + fitNote + `\nThe last draft had ${count(plan)} words: CUT it to at most ${budget} words, keeping the hook, question and twist.` } }), 4, 16000, planWait).then(autoFixPlan).catch(() => null);
+        if (cut && count(cut) <= budget * 1.25) { plan = cut; ev = await evaluate(cut); }
+      }
+      if (count(plan) > budget * 1.25) throw Error(`The script came back ${count(plan)} words, too long for ${input.durationSec} seconds (max ${Math.round(budget * 1.25)}). No voice or pictures were paid for — try again or pick a longer length.`);
     }
     up({ checks: ev.gate.blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined });
     plan = { ...plan, scenes: splitLongScenes(plan.scenes) };
@@ -273,8 +299,10 @@ export async function runVideo(id: string, input: VideoInput) {
       const long = input.format !== 'short';
       // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
       if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
-      if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft; check the preview before approving` });
-      const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short' } }));
+      if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft${advanced ? '' : '; check the preview before approving'}` });
+      const directed = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short', ...(advanced ? { advanced: true } : {}) } }));
+      // Advanced Video AI: an animal the story names always acts on screen.
+      const direction = advanced ? ensureAnimalCast(directed, plan.scenes.map(sc => sc.narration)) : directed;
       const narration = plan.scenes.map(sc => speakable(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
@@ -282,22 +310,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (!user.user) throw Error('Not signed in');
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
       // Advanced Video AI: paint one character card per cast member while the voice records (saved, so Resume never repays).
-      const advanced = input.engine === 'advanced';
-      const cardsP = advanced ? (async () => {
-        const ids = direction.cast.map(c => c.id), root = `${user.user!.id}/${id}/media`;
-        const { data: have } = await supabase.storage.from('videos').list(root, { search: 'card-' });
-        const missing = ids.filter(cid => !have?.some(f => f.name === `card-${cid}.png`));
-        if (missing.length) {
-          up({ detail: `Painting ${missing.length} character card${missing.length > 1 ? 's' : ''} while the voice records…` });
-          const looks = await withRetry(() => designAdvancedCards({ data: { scenes: plan.scenes.map((sc, i) => `${sc.narration} [actor: ${direction.scenes[i]?.actor ?? ids[0]}]`), ids: missing, deployment: s.scriptDeployment } }));
-          await Promise.all(looks.map(async l => {
-            const { image } = await withRetry(() => paintAdvancedCard({ data: { look: l.look, deployment: s.imageDeployment } }));
-            const { error } = await supabase.storage.from('videos').upload(`${root}/card-${l.id}.png`, b64ToBuf(image), { contentType: 'image/png', upsert: false });
-            if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save character card: ${error.message}`);
-          }));
-        }
-        return ids.map(cid => ({ id: cid, path: `${root}/card-${cid}.png` }));
-      })() : Promise.resolve(undefined);
+      const cardsP = advanced ? paintAdvancedCards(direction, plan.scenes.map(sc => sc.narration), `${user.user.id}/${id}/media`, s, (detail) => up({ detail }), (fn) => withRetry(fn)) : Promise.resolve(undefined);
       cardsP.catch(() => {});
       // Resume: the locked take for this same saved script is already stored, so reuse it instead of paying again.
       const { data: existing } = await supabase.storage.from('videos').list(`${user.user.id}/${id}/cartoon`, { search: 'original-voice.wav' });
@@ -318,14 +331,16 @@ export async function runVideo(id: string, input: VideoInput) {
         const { error } = await supabase.storage.from('videos').upload(voicePath, audio, { contentType: 'audio/wav', upsert: false });
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }
-      const cards = await cardsP;
+      const painted = await cardsP;
       const sanitized = sanitizeDirection(direction, narration);
-      const safeDirection = cards ? { ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) } : sanitized;
+      const placed = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) }, painted) : null;
+      const cards = placed?.cards;
+      const safeDirection = placed ? placed.direction : sanitized;
       const cp = cartoonStart.parse({ ...(cards ? { advanced: true, cards } : {}), videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: !long, sfx: s.soundEffects, format: long ? 'long' : 'short' });
       up({ cartoonCheckpoint: cp, progress: 70, detail: advanced ? 'Sending to Advanced Video AI render…' : 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
       const job = await submitCartoon({ data: cp });
-      up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
+      up({ hostedRender: job, stage: 'render', progress: 72, detail: advanced ? 'Advanced Video AI render · safe to close your browser' : 'Cartoon preview · safe to close your browser' });
       return;
     }
 

@@ -18,7 +18,7 @@ export function validateManifest(m) {
   if(!Number.isSafeInteger(m.narration?.samples)||m.narration.samples<1||m.narration.samples>48000*LIM.secs||m.narration.rate!==48000)fail('Invalid narration clock');
   if(!/^[a-f0-9]{64}$/.test(m.narration.sha256))fail('Invalid narration checksum');
   const total=Math.round(m.narration.samples/48000*30);
-  if(!Array.isArray(m.cast)||m.cast.length<1||m.cast.length>3)fail('Invalid cast');
+  if(!Array.isArray(m.cast)||m.cast.length<1||m.cast.length>4)fail('Invalid cast');
   const ids=new Set();
   for(const c of m.cast){
     if(!/^[a-z0-9_-]{1,30}$/.test(c.id)||ids.has(c.id)||!OUTFITS.includes(c.outfit)||!Number.isInteger(c.seed)||(c.card!==undefined&&typeof c.card!=='boolean'))fail('Unsupported or duplicate cast');
@@ -54,7 +54,7 @@ export function validateManifest(m) {
       if(!Array.isArray(s.props)||s.props.length>4||s.props.some(p=>!V.props.includes(p.kind)||!V.places.includes(p.place)||!V.prop_motions.includes(p.motion)))fail('Unsupported prop');
       if(s.props.filter(p=>p.place==='hand').length>1)fail('Only one hand prop');
       // Library objects must exist in the bundled CC0 catalog and are never hand-held cards.
-      if(s.props.some(p=>p.kind==='asset'?(p.place==='hand'||!LIBRARY.has(p.asset)):p.asset!==undefined))fail('Unknown library object');
+      if(s.props.some(p=>p.kind==='asset'?(p.place==='hand'||!(LIBRARY.has(p.asset)||(/^card\/[a-z0-9_]{1,30}$/.test(p.asset)&&m.cast.some(c=>c.card)))):p.asset!==undefined))fail('Unknown library object');
       if(!Array.isArray(s.fx)||s.fx.length>3||s.fx.some(x=>!V.fx.includes(x)))fail('Unsupported effect');
       if(s.world==='map')validateMap(s,fail); else if(s.map!==undefined&&s.map!==null)fail('Map data outside the map world');
     }

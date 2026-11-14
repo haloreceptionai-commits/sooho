@@ -75,19 +75,22 @@ async function azureJson<T>(deployment: string, system: string, user: string, na
 
 export interface Claim { claim: string; sources: string[]; date: string; confidence: "high" | "medium" | "low" }
 export const designAdvancedCards = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { scenes: string[]; ids: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), ids: z.array(z.string().regex(/^[a-z0-9_-]{1,30}$/)).min(1).max(3), deployment: z.string().min(1).max(64) }).parse(d))
+  .inputValidator((d: { scenes: string[]; ids: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), ids: z.array(z.string().regex(/^[a-z0-9_-]{1,30}$/)).min(1).max(4), deployment: z.string().min(1).max(64) }).parse(d))
   .handler(async ({ data }) => { const { designAdvancedCardsOperation } = await import('./pipeline-operations.server'); return designAdvancedCardsOperation({ data }); });
 export const paintAdvancedCard = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { look: string; deployment: string }) => z.object({ look: z.string().min(1).max(300), deployment: z.string().min(1).max(64) }).parse(d))
+  .inputValidator((d: { look: string; deployment: string; kind?: 'character' | 'object'; pose?: 'reach' | 'shock' | 'happy'; reference?: string }) => z.object({ look: z.string().min(1).max(300), deployment: z.string().min(1).max(64), kind: z.enum(['character', 'object']).optional(), pose: z.enum(['reach', 'shock', 'happy']).optional(), reference: z.string().max(12_000_000).optional() }).parse(d))
   .handler(async ({ data }) => { const { paintAdvancedCardOperation } = await import('./pipeline-operations.server'); return paintAdvancedCardOperation({ data }); });
+export const polishKidScript = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { scenes: string[]; problems: string[]; words: number; names: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(2000)).min(1).max(120), problems: z.array(z.string().max(400)).max(40), words: z.number().int().min(10).max(400), names: z.array(z.string().max(80)).max(20), deployment: z.string().min(1).max(64) }).parse(d))
+  .handler(async ({ data }) => { const { polishKidScriptOperation } = await import('./pipeline-operations.server'); return polishKidScriptOperation({ data }); });
 export const directCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { scenes: string[]; deployment: string; format?: 'short' | 'long' }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), deployment: z.string().min(1).max(64), format: z.enum(['short', 'long']).optional() }).parse(d))
+  .inputValidator((d: { scenes: string[]; deployment: string; format?: 'short' | 'long'; advanced?: boolean }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), deployment: z.string().min(1).max(64), format: z.enum(['short', 'long']).optional(), advanced: z.boolean().optional() }).parse(d))
   .handler(async ({ data }) => { const { directCartoonOperation } = await import('./pipeline-operations.server'); return directCartoonOperation({ data }); });
 type CastMember = { id: string; seed: number; outfit: string };
 // Distinct looks per cast member: duplicate outfits/seeds are swapped for unused ones so characters never read as clones.
-export function diversifyCast(cast: CastMember[]): CastMember[] {
+export function diversifyCast(cast: CastMember[], max = 3): CastMember[] {
   const used = new Set<string>(), seeds = new Set<number>();
-  return (cast || []).slice(0, 3).map((c, i) => {
+  return (cast || []).slice(0, max).map((c, i) => {
     let outfit = (OUTFITS as readonly string[]).includes(c.outfit) ? c.outfit : OUTFITS[0];
     if (used.has(outfit)) outfit = OUTFITS.find(o => !used.has(o)) ?? outfit;
     used.add(outfit);
@@ -228,6 +231,7 @@ export interface PlanInput {
   research?: string; // anchors, premise, question, hero, payoff, money shot
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
+  kid?: boolean; // Advanced Video AI: words an 8-year-old knows, stricter story shape
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
@@ -286,7 +290,7 @@ const planSchema = {
 export const generatePlan = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: PlanInput) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required (max 300 chars)");
-    return { ...d, durationSec: Math.max(20, Math.min(1200, Math.round(d.durationSec))) };
+    return { ...d, durationSec: Math.max(10, Math.min(1200, Math.round(d.durationSec))) };
   })
   .handler(async ({ data }) => { const { generatePlanOperation } = await import('./pipeline-operations.server'); return generatePlanOperation({ data }); });
 
