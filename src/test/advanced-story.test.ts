@@ -22,7 +22,7 @@ describe('Advanced first three spoken words', () => {
 });
 
 describe('Advanced connected explanation rather than invented drama', () => {
-  const input: StoryInput = { kid: true, durationSec: 12, anchors: { subject: 'compass', year: '', place: '', org: '', stakes: '' }, question: 'Why does a compass point north?', hero: { name: 'compass', role: 'object', want: '' }, cast: [], scenes: [
+  const input: StoryInput = { kid: true, durationSec: 10, anchors: { subject: 'compass', year: '', place: '', org: '', stakes: '' }, question: 'Why does a compass point north?', hero: { name: 'compass', role: 'object', want: '' }, cast: [], scenes: [
     { beat: 'hook', narration: 'Your compass points north without a battery.', shot: 'wide', characters: [], money: true, loop_opened: 'main', loop_closed: '' },
     { beat: 'proof', narration: 'Its needle is a magnet, so Earth pulls it around until it points north.', shot: 'macro', characters: [], money: true, loop_opened: '', loop_closed: 'main' },
   ] };

@@ -15,7 +15,7 @@ const PRONOUN = /^(["']?)(He|She|They|His|Her|Their)\b/;
  * - Exact duplicate sentences are dropped.
  * - The "main" loop is closed in the reveal (or the scene nearest 70% of the words) when the label is misplaced.
  */
-export function autoFixPlan(plan: Plan): Plan {
+export function autoFixPlan(plan: Plan, advanced = false): Plan {
   const hero = plan.hero?.name?.trim();
   const names = [hero, ...plan.characters.map(c => c.name)].filter((n): n is string => !!n).flatMap(n => n.toLowerCase().split(/\s+/)).filter(w => w.length > 2);
   let prev = '';
@@ -29,8 +29,8 @@ export function autoFixPlan(plan: Plan): Plan {
       if (key.split(' ').length >= 3 && seen.has(key)) continue;
       seen.add(key);
       const m = PRONOUN.exec(s);
-      if (m && hero && !names.some(n => prev.toLowerCase().includes(n))) {
-        const p = m[2]!;
+      if (m && hero && !advanced && !names.some(n => prev.toLowerCase().includes(n))) {
+        const p = m[2] ?? '';
         const rep = /^(His|Her|Their)$/.test(p) ? `${hero}'s` : p === 'They' ? `${hero} and the team` : hero;
         if (p !== 'Her' || !/^\s*(\w+)\s+(is|was|runs|looks)/.test(s.slice(m[0].length))) s = m[1] + rep + s.slice(m[0].length);
       }
@@ -42,7 +42,7 @@ export function autoFixPlan(plan: Plan): Plan {
   for (const s of scenes) { offsets.push(acc); acc += wc(s.narration); }
   const pos = (i: number) => (offsets[i] ?? 0) / Math.max(1, acc);
   const closeAt = scenes.findIndex(s => /\bmain\b/.test(s.loop_closed));
-  if (closeAt < 0 || pos(closeAt) < 0.6 || pos(closeAt) > 0.8) {
+  if (!advanced && (closeAt < 0 || pos(closeAt) < 0.6 || pos(closeAt) > 0.8)) {
     const cand = scenes.map((s, i) => ({ i, d: Math.abs(pos(i) - 0.7) + (s.beat === 'reveal' ? -0.05 : 0) })).filter(c => pos(c.i) >= 0.6 && pos(c.i) <= 0.8).sort((a, b) => a.d - b.d)[0];
     if (cand) scenes.forEach((s, i) => {
       const ids = s.loop_closed.split(/[,\s]+/).filter(x => x && x !== 'main');
