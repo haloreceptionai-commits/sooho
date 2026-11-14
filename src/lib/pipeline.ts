@@ -11,7 +11,8 @@ import { composeInkCard, pickInkCards, type InkCard } from "@/lib/ink-card";
 import { planInkBeats, planInkCards } from "@/lib/ink.functions";
 import { splitInkBeats } from "@/lib/ink-beats";
 import { INK_HERO } from "@/lib/styles";
-import { finalScore, hookIssues, hookTextIssues, rankHookTypes, sceneStarts, speakable, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
+import { finalScore, hookIssues, hookTextIssues, MICRO_SEC, rankHookTypes, sceneStarts, speakable, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
+import { wordBudget } from "@/lib/plain-words";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
 import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
@@ -171,6 +172,7 @@ export async function runVideo(id: string, input: VideoInput) {
       await handoffAssembly(id, assembly, getState().videos.find(v => v.id === id)?.assemblyClips ?? [], up);
       return;
     }
+    const advanced = input.engine === 'advanced';
     const writeScript = async () => {
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
@@ -294,7 +296,6 @@ export async function runVideo(id: string, input: VideoInput) {
       if (!user.user) throw Error('Not signed in');
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
       // Advanced Video AI: paint one character card per cast member while the voice records (saved, so Resume never repays).
-      const advanced = input.engine === 'advanced';
       const cardsP = advanced ? (async () => {
         const ids = direction.cast.map(c => c.id), root = `${user.user!.id}/${id}/media`;
         const { data: have } = await supabase.storage.from('videos').list(root, { search: 'card-' });
