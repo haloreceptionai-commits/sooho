@@ -1,5 +1,5 @@
 # Roadmap — Advanced Video AI v2
-- [ ] Topic finder implemented: live research, six-card batches, cloud saves, source transfer and repeat tests. Real searches return too few dual-source verified facts; finish retrieval reliability and verify six-card save/select/reload before calling complete. No weak fillers or video spend.
+- [ ] Test and accelerate topic discovery: replace oversized evidence reviews with parallel, exact-passage verification; verify six fresh facts, save/select/reload and measure real search time without weakening checks.
 - [x] Script: 3 repairs, word budget by length, kid-level word checker, keep-watching judge
 - [x] Cast: people/animals/objects named in script get cards (up to 4)
 - [x] Poses: stand/reach/shock/happy cards, pose switching, talk bounce, card shading
