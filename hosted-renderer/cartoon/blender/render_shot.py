@@ -95,35 +95,46 @@ def add(kind, loc, scale=(1, 1, 1), rot=(0, 0, 0), m=None, smooth=True, **kw):
 
 
 # ---------------------------------------------------------------- sets
+def lantern(loc, red, glass):
+    """Hanging miner's lantern: red cap and base, glowing glass, wire hook, real warm point light."""
+    x, y, z = loc
+    add('cylinder', (x, y, z - 0.11), (0.075, 0.075, 0.025), m=red, vertices=24)
+    add('cylinder', (x, y, z + 0.11), (0.06, 0.06, 0.03), m=red, vertices=24)
+    add('cylinder', (x, y, z), (0.055, 0.055, 0.09), m=glass, vertices=24)
+    add('torus', (x, y, z + 0.17), (0.04, 0.04, 0.04), rot=(math.pi / 2, 0, 0), m=red, major_radius=1, minor_radius=0.12)
+    bpy.ops.object.light_add(type='POINT', location=(x, y - 0.12, z))
+    L = bpy.context.active_object.data; L.energy = 55; L.color = (1.0, 0.58, 0.26); L.shadow_soft_size = 0.05
+
+
 def set_mine_tunnel(length=24.0):
-    rock = noise_mat('rock', (0.28, 0.11, 0.03), (0.85, 0.48, 0.18), scale=1.4, bump=1.2)
-    dirt = noise_mat('dirt', (0.20, 0.12, 0.06), (0.42, 0.28, 0.15), scale=6.0, bump=0.5)
-    wood = noise_mat('wood', (0.20, 0.10, 0.04), (0.45, 0.26, 0.11), scale=2.0, bump=0.3, wave=True)
-    steel = mat('steel', (0.55, 0.55, 0.58), rough=0.35, metal=1.0)
-    # rough rock tube: cylinder seen from inside, displaced with cloud noise
+    rock = noise_mat('rock', (0.20, 0.12, 0.07), (0.66, 0.47, 0.30), scale=1.3, bump=1.4)
+    dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6)
+    wood = noise_mat('wood', (0.35, 0.22, 0.10), (0.72, 0.52, 0.30), scale=2.0, bump=0.25, wave=True)
+    steel = mat('steel', (0.55, 0.56, 0.6), rough=0.3, metal=1.0)
+    red = mat('lanternred', (0.45, 0.04, 0.03), rough=0.35, metal=0.4)
+    glass = mat('lampglass', (1, 0.7, 0.4), emit=(1.0, 0.62, 0.28), strength=25)
     t = add('cylinder', (0, length / 2 - 4, 1.4), (2.3, 2.3, length / 2), rot=(math.pi / 2, 0, 0),
             m=rock, vertices=96, depth=2, end_fill_type='NOTHING')
     bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.subdivide(number_cuts=40); bpy.ops.object.mode_set(mode='OBJECT')
-    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.55; tx.noise_depth = 4
-    d = t.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = -0.55; d.texture_coords = 'GLOBAL'
+    tx = bpy.data.textures.new('rockdisp', 'CLOUDS'); tx.noise_scale = 0.6; tx.noise_depth = 3
+    d = t.modifiers.new('d', 'DISPLACE'); d.texture = tx; d.strength = -0.6; d.texture_coords = 'GLOBAL'
     add('plane', (0, length / 2 - 4, 0), (2.6, length / 2, 1), m=dirt, smooth=False)
-    for y in range(-2, int(length) - 4, 3):                      # timber frames + lanterns
+    for i, y in enumerate(range(-2, int(length) - 4, 3)):         # timber frames; a lantern on every other one
         for x in (-1.55, 1.55):
             add('cube', (x, y, 1.15), (0.11, 0.11, 1.15), m=wood, smooth=False)
         add('cube', (0, y, 2.35), (1.7, 0.13, 0.12), m=wood, smooth=False)
-        lamp_x = 1.35 if (y // 3) % 2 else -1.35
-        glass = mat('lampglass', (1, 0.6, 0.25), emit=(1.0, 0.55, 0.18), strength=12)
-        add('cylinder', (lamp_x, y + 0.2, 1.9), (0.06, 0.06, 0.09), m=glass, vertices=16)
-        bpy.ops.object.light_add(type='POINT', location=(lamp_x * 0.9, y + 0.35, 1.9))
-        L = bpy.context.active_object.data; L.energy = 45; L.color = (1.0, 0.62, 0.30); L.shadow_soft_size = 0.15
-    for x in (-0.45, 0.45):                                     # rails and sleepers
+        if i % 2 == 0:
+            lantern((1.3 if i % 4 == 0 else -1.3, y - 0.2, 1.95), red, glass)
+    for x in (-0.45, 0.45):
         add('cube', (x, length / 2 - 4, 0.09), (0.035, length / 2, 0.045), m=steel, smooth=False)
     for y in [i * 0.55 for i in range(-6, int(length / 0.55) - 6)]:
         add('cube', (0, y, 0.03), (0.7, 0.09, 0.03), m=wood, smooth=False)
-    bpy.ops.object.light_add(type='AREA', location=(-1.1, -0.9, 2.1), rotation=(math.radians(60), 0, math.radians(-40)))
-    K = bpy.context.active_object.data; K.energy = 90; K.size = 0.6; K.color = (1.0, 0.70, 0.42)  # warm key on the cast
+    bpy.ops.object.light_add(type='AREA', location=(-1.2, -1.0, 2.0), rotation=(math.radians(62), 0, math.radians(-38)))
+    K = bpy.context.active_object.data; K.energy = 120; K.size = 0.5; K.color = (1.0, 0.72, 0.45)  # warm key on the cast
+    bpy.ops.object.light_add(type='AREA', location=(1.4, 1.8, 2.0), rotation=(math.radians(-60), 0, math.radians(150)))
+    R = bpy.context.active_object.data; R.energy = 40; R.size = 0.8; R.color = (0.75, 0.82, 1.0)   # cool rim from behind
     w = bpy.context.scene.world.node_tree.nodes['Background']
-    w.inputs['Color'].default_value = (0.02, 0.012, 0.008, 1); w.inputs['Strength'].default_value = 0.15
+    w.inputs['Color'].default_value = (0.01, 0.008, 0.006, 1); w.inputs['Strength'].default_value = 0.05
 
 
 def set_open_day(length=24.0):
@@ -146,7 +157,7 @@ def character(c):
     skin = mat('skin', (0.93, 0.92, 0.88), rough=0.5)
     black = mat('black', (0.01, 0.01, 0.01), rough=0.4)
     shirt = mat('shirt', tuple(c.get('shirt', (0.15, 0.55, 0.45))), rough=0.8)
-    hatc = tuple(c.get('hat_color', (0.85, 0.60, 0.10)))
+    hatc = tuple(c.get('hat_color', (0.78, 0.42, 0.03)))
     hatm = noise_mat('hat', hatc, tuple(x * 0.8 for x in hatc), scale=18, bump=0.25, wave=True)
     x, y = c['pos']; yaw = math.radians(c.get('yaw', 0)); S = c.get('scale', 1.0)
     root = bpy.data.objects.new('char', None); bpy.context.collection.objects.link(root)
@@ -204,13 +215,13 @@ def look(scene, shot):
     haze = shot.get('haze', 0)
     if haze > 0:  # depth haze from the mist pass in the compositor: no volume ray-marching cost
         scene.view_layers[0].use_pass_mist = True
-        ms = scene.world.mist_settings; ms.start = 1.5; ms.depth = 14; ms.falloff = 'QUADRATIC'
+        ms = scene.world.mist_settings; ms.start = 3; ms.depth = 18; ms.falloff = 'QUADRATIC'
         scene.use_nodes = True; nt = scene.node_tree
         for nd in list(nt.nodes): nt.nodes.remove(nd)
         rl = nt.nodes.new('CompositorNodeRLayers'); comp = nt.nodes.new('CompositorNodeComposite')
         mul = nt.nodes.new('CompositorNodeMath'); mul.operation = 'MULTIPLY'; mul.use_clamp = True
         mul.inputs[1].default_value = min(1.0, haze * 40)
-        mix = nt.nodes.new('CompositorNodeMixRGB'); mix.inputs[2].default_value = (*shot.get('haze_color', [0.32, 0.16, 0.06]), 1)
+        mix = nt.nodes.new('CompositorNodeMixRGB'); mix.inputs[2].default_value = (*shot.get('haze_color', [0.12, 0.07, 0.035]), 1)
         nt.links.new(rl.outputs['Mist'], mul.inputs[0]); nt.links.new(mul.outputs[0], mix.inputs[0])
         nt.links.new(rl.outputs['Image'], mix.inputs[1]); nt.links.new(mix.outputs[0], comp.inputs['Image'])
 
