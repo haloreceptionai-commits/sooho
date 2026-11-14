@@ -35,7 +35,9 @@ def noise_mat(name, c1, c2, scale=3.0, bump=0.4, rough=0.85, wave=False):
     tex = nt.nodes.new('ShaderNodeTexWave' if wave else 'ShaderNodeTexNoise')
     tex.inputs['Scale'].default_value = scale
     tex.inputs['Detail'].default_value = 8.0
-    if wave: tex.inputs['Distortion'].default_value = 6.0
+    if wave:
+        tex.wave_type = 'BANDS'; tex.bands_direction = 'Z'
+        tex.inputs['Distortion'].default_value = 1.5; tex.inputs['Detail Scale'].default_value = 2.0
     nt.links.new(co.outputs['Object'], tex.inputs['Vector'])
     ramp = nt.nodes.new('ShaderNodeValToRGB')
     ramp.color_ramp.elements[0].color = (*c1, 1); ramp.color_ramp.elements[1].color = (*c2, 1)
@@ -58,7 +60,8 @@ def outline_mat():
     tr = nt.nodes.new('ShaderNodeBsdfTransparent')
     em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Color'].default_value = (0.01, 0.008, 0.006, 1)
     nt.links.new(geo.outputs['Backfacing'], mix.inputs['Fac'])
-    nt.links.new(tr.outputs[0], mix.inputs[1]); nt.links.new(em.outputs[0], mix.inputs[2])
+    # hull faces nearest the camera are back-facing (flipped) -> transparent; the rim beyond the body -> ink
+    nt.links.new(em.outputs[0], mix.inputs[1]); nt.links.new(tr.outputs[0], mix.inputs[2])
     nt.links.new(mix.outputs[0], out.inputs['Surface'])
     return m
 
@@ -154,8 +157,11 @@ def character(c):
         parts.append(add('cylinder', (lx, 0, 0.42), (0.018, 0.018, 0.42), m=black, vertices=12))
         parts.append(add('uv_sphere', (lx, -0.04, 0.02), (0.05, 0.08, 0.03), m=black))
     for sx in (-1, 1):
-        a = add('cylinder', (sx * 0.27, 0, 1.0), (0.016, 0.016, 0.3), rot=(0, sx * 0.25, 0), m=black, vertices=12); parts.append(a)
-        parts.append(add('uv_sphere', (sx * 0.345, 0, 0.72), (0.035, 0.035, 0.035), m=black))
+        tilt = sx * 0.25; top = Vector((sx * 0.17, 0, 1.28)); half = 0.3
+        mid = top + Vector((sx * math.sin(abs(tilt)) * half, 0, -math.cos(tilt) * half))
+        parts.append(add('cylinder', tuple(mid), (0.016, 0.016, half), rot=(0, -tilt if sx > 0 else abs(tilt), 0), m=black, vertices=12))
+        hand = top + Vector((sx * math.sin(abs(tilt)) * 2 * half, 0, -math.cos(tilt) * 2 * half))
+        parts.append(add('uv_sphere', tuple(hand), (0.035, 0.035, 0.035), m=black))
     for p in parts: p.parent = root
     return root
 
