@@ -95,7 +95,7 @@ def add(kind, loc, scale=(1, 1, 1), rot=(0, 0, 0), m=None, smooth=True, **kw):
 
 # ---------------------------------------------------------------- sets
 def set_mine_tunnel(length=24.0):
-    rock = noise_mat('rock', (0.30, 0.15, 0.06), (0.72, 0.45, 0.22), scale=1.6, bump=0.9)
+    rock = noise_mat('rock', (0.28, 0.11, 0.03), (0.85, 0.48, 0.18), scale=1.4, bump=1.2)
     dirt = noise_mat('dirt', (0.20, 0.12, 0.06), (0.42, 0.28, 0.15), scale=6.0, bump=0.5)
     wood = noise_mat('wood', (0.20, 0.10, 0.04), (0.45, 0.26, 0.11), scale=2.0, bump=0.3, wave=True)
     steel = mat('steel', (0.55, 0.55, 0.58), rough=0.35, metal=1.0)
@@ -145,7 +145,8 @@ def character(c):
     skin = mat('skin', (0.93, 0.92, 0.88), rough=0.5)
     black = mat('black', (0.01, 0.01, 0.01), rough=0.4)
     shirt = mat('shirt', tuple(c.get('shirt', (0.15, 0.55, 0.45))), rough=0.8)
-    hatm = noise_mat('hat', tuple(c.get('hat_color', (0.85, 0.60, 0.10))), tuple(x * 0.7 for x in c.get('hat_color', (0.85, 0.6, 0.1))), scale=40, bump=0.6)
+    hatc = tuple(c.get('hat_color', (0.85, 0.60, 0.10)))
+    hatm = noise_mat('hat', hatc, tuple(x * 0.8 for x in hatc), scale=18, bump=0.25, wave=True)
     x, y = c['pos']; yaw = math.radians(c.get('yaw', 0)); S = c.get('scale', 1.0)
     root = bpy.data.objects.new('char', None); bpy.context.collection.objects.link(root)
     root.location = (x, y, 0); root.rotation_euler = (0, 0, yaw); root.scale = (S, S, S)
@@ -154,11 +155,11 @@ def character(c):
     for ex in (-0.09, 0.09):
         parts.append(add('uv_sphere', (ex, -0.235, 1.64), (0.035, 0.02, 0.045), m=black))
         parts.append(add('cube', (ex, -0.245, 1.72), (0.05, 0.01, 0.008), m=black, smooth=False))  # brows
-    parts.append(add('torus', (0, -0.2, 1.50), (0.07, 0.04, 0.03), rot=(math.pi / 2, 0, 0), m=black,
+    parts.append(add('torus', (0, -0.235, 1.50), (0.06, 0.03, 0.025), rot=(math.pi / 2, 0, 0), m=black,
                      major_radius=1, minor_radius=0.25))  # mouth
     if c.get('hat', 'beanie') == 'beanie':
         parts.append(ink(add('uv_sphere', (0, 0, 1.80), (0.28, 0.27, 0.20), m=hatm, segments=32, ring_count=16)))
-        parts.append(ink(add('cylinder', (0, 0, 1.75), (0.285, 0.275, 0.05), m=hatm, vertices=32)))
+        parts.append(add('cylinder', (0, 0, 1.75), (0.285, 0.275, 0.05), m=hatm, vertices=32))
     body = ink(add('cylinder', (0, 0, 1.08), (0.17, 0.13, 0.26), m=shirt, vertices=32)); parts.append(body)
     for lx in (-0.07, 0.07):  # thin stick legs and arms
         parts.append(add('cylinder', (lx, 0, 0.42), (0.018, 0.018, 0.42), m=black, vertices=12))
@@ -204,7 +205,7 @@ def look(scene, shot):
         m = bpy.data.materials.new('haze'); m.use_nodes = True; nt = m.node_tree
         nt.nodes.remove(nt.nodes['Principled BSDF'])
         v = nt.nodes.new('ShaderNodeVolumePrincipled'); v.inputs['Density'].default_value = shot['haze']
-        v.inputs['Color'].default_value = (1, 0.85, 0.7, 1)
+        v.inputs['Color'].default_value = (1, 0.78, 0.55, 1)
         nt.links.new(v.outputs[0], nt.nodes['Material Output'].inputs['Volume'])
         hz.data.materials.append(m)
 
