@@ -1,6 +1,6 @@
 # Benchmark-quality plan (approved Nov 14, one step per "next")
 - [x] 1. Benchmark measurement kit: shot lists, scorecard, our 2 videos scored
-- [ ] 2. Headless Blender renderer on scale-to-zero Azure render machines
+- [~] 2. Headless Blender renderer on scale-to-zero Azure render machines — renderer live on Azure T4 (Cycles), test shot depth 6/render 6 vs benchmark 6.75/7.17; parity continues in steps 3–4; speed needs more GPUs or lighter frames
 - [ ] 3. CC0 asset library and set kits
 - [ ] 4. Benchmark-style 3D egg-head characters and poses
 - [ ] 5. Story-specific objects from safe parts
