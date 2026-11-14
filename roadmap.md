@@ -1,5 +1,9 @@
 # Roadmap — Cartoon Engine v2
 
+## Current workspace Azure alternative (Nov 14)
+- [x] Store the owner's Azure OpenAI key securely and switch script/image JSON and reference-image uploads to direct Azure access; keep Apify, narration and Azure rendering unchanged.
+- [ ] Verify Azure authentication and deployed models through the shared transport.
+
 ## Cartoon reliability + long-form remix (Nov 9)
 - [x] Root cause of stuck renders: workers rejected the sooha.io completion address and exited before reporting; 40 machines also exceeded the 100-core Azure quota
 - [x] Canonical callback address, worker accepts both addresses, per-attempt batch claims (images rebuilt), render fleet 23 machines

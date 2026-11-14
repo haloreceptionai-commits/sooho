@@ -6,31 +6,16 @@ import { cartoonDirection, OUTFITS, VOCAB } from '@/lib/cartoon-job';
 import { z } from 'zod';
 import { requestAzureVoice } from '@/lib/azure-voice';
 
-// All script, image and narration calls use the owner's Azure connection.
-
-const AZURE_GATEWAY = "https://connector-gateway.lovable.dev/udc_azure_openai";
-const API_VERSION = "2025-04-01-preview";
+// Scripts and images use the owner's Azure resource; narration remains Gemini.
 
 const safeName = (s: string) => {
   if (!/^[A-Za-z0-9._-]{1,64}$/.test(s)) throw new Error("Invalid deployment name");
   return s;
 };
 
-function keys() {
-  const lovable = process.env["LOVABLE_API_KEY"];
-  const azure = process.env["UDC_AZURE_OPENAI_API_KEY"];
-  if (!lovable || !azure) throw new Error("Azure OpenAI is not connected");
-  return { lovable, azure };
-}
-
 async function azure(path: string, body: unknown) {
-  const k = keys();
-  const res = await fetch(`${AZURE_GATEWAY}/openai/deployments/${path}?api-version=${API_VERSION}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${k.lovable}`, "X-Connection-Api-Key": k.azure, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  return res;
+  const { azureOpenAIRequest } = await import('./azure-openai.server');
+  return azureOpenAIRequest(path, body);
 }
 
 async function fail(res: Response, what: string): Promise<never> {
@@ -338,7 +323,7 @@ function b64ToBytes(b64: string) {
 async function imageCall(data: ImageInput, prompt: string) {
   const size = data.sheet ? "1536x1024" : data.aspect === "portrait" ? "1024x1536" : "1536x1024";
   if (data.reference) {
-    const k = keys();
+    const { azureOpenAIRequest } = await import('./azure-openai.server');
     const fd = new FormData();
     fd.append("image[]", new Blob([b64ToBytes(data.reference)], { type: "image/jpeg" }), "cast.jpg");
     fd.append("prompt", prompt);
@@ -347,11 +332,7 @@ async function imageCall(data: ImageInput, prompt: string) {
     fd.append("output_format", "jpeg");
     fd.append("output_compression", "82");
     fd.append("n", "1");
-    return fetch(`${AZURE_GATEWAY}/openai/deployments/${safeName(data.deployment)}/images/edits?api-version=${API_VERSION}`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${k.lovable}`, "X-Connection-Api-Key": k.azure },
-      body: fd,
-    });
+    return azureOpenAIRequest(`${safeName(data.deployment)}/images/edits`, fd, true);
   }
   return azure(`${safeName(data.deployment)}/images/generations`, {
     prompt, size, quality: data.quality, output_format: "jpeg", output_compression: 82, n: 1,
