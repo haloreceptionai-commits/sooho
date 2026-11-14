@@ -20,8 +20,9 @@ export interface VideoInput {
   engine?: VideoEngine;
 }
 
-/** "own" = stills + camera motion (no AI video); "omni" = Gemini Omni AI-animated clips. */
-export type VideoEngine = "own" | "omni" | "seedance" | "cartoon";
+export type { VideoEngine } from './video-engines';
+// Retain removed engine identifiers only for reading historical cloud records.
+type VideoEngine = import('./video-engines').VideoEngine | 'omni' | 'seedance';
 
 export interface Video {
   id: string;
