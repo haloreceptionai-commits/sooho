@@ -526,20 +526,19 @@ ${data.research ? `Research (use these anchors, hero, question, tries, payoff an
 
 export interface VoiceInput { text: string; voice: string; deployment: string; style: string }
 
-import { LONG_NARRATION_DIRECTION } from "@/lib/narration-direction";
+import { narrationSettings } from "@/lib/narration-direction";
 
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
 
 export const generateVoiceOperation = async ({ data }: { data: VoiceInput }): Promise<{ audio: string; engine: "lovable"; deployment: string; voice: string }> => {
     // Atlas narrator: Gemini Charon via Lovable AI (owner's choice; Azure has no cloning and no TTS deployment).
-    const longDirection = LONG_NARRATION_DIRECTION;
-    const direction = data.style === "long" ? longDirection : data.style==='advanced' ? "The same light, friendly, amused male storyteller speaking to a buddy. Curious hook with emphasis on the strange real object; flow naturally through cause and effect, build interest in the middle, then a clear satisfying answer. Aim for a lively 200-215 words per minute only if every word stays clear. Tiny contrast pauses before but and the answer, not between every short sentence. Calm confidence, no shouting, whispering, baby talk or sing-song reading. Speak each full sentence as one connected thought. Distinguish quoted dialogue briefly without inventing words. Never hurry a technical name or number. Read exactly the supplied words, with an easy grin, not exaggerated drama" : "A light, relaxed, friendly male storyteller, amused, like telling a buddy a wild true story. Fast and nearly non-stop, only tiny breaths between sentences, an easy grin in the voice, quick playful character voices for any quoted lines, a little extra punch on the twist and the reveal. Every word crisp and clear. Not dramatic, not shouting, not whispering";
+    const narration = narrationSettings(data.style, data.text);
     const res = await generateSpeech({
         model: "google/gemini-3.1-flash-tts-preview",
-        contents: [{ role: "user", parts: [{ text: `${direction}: Read the following narration aloud, word for word. Narration: ${data.text}` }] }],
-        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.style === "long" ? "Charon" : "Puck" } } } },
+        contents: [{ role: "user", parts: [{ text: narration.text }] }],
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: narration.voice } } } },
     });
-    const v = data.style === "long" ? "Charon" : "Puck";
+    const v = narration.voice;
     return { audio: toBase64(await (await res.blob()).arrayBuffer()), engine: "lovable", deployment: `gemini-${v.toLowerCase()}`, voice: v };
   };
 
