@@ -50,7 +50,11 @@ Ignore the burned-in caption text when judging the picture, but use the spoken w
 spoken_visible: "yes" when the thing or action the words name is clearly shown, "partial" when only
 loosely related, "no" when not shown. Scale anchors for 0-10 scores: 10 = polished studio 3D short
 (real lit 3D sets, soft shadows, depth of field, posed 3D characters); 5 = clean but simple 3D;
-2 = flat cut-out cards or plain backdrops. Be strict and consistent."""
+2 = flat cut-out cards or plain backdrops. Two fixed reference images come first: REFERENCE HIGH
+scores environment_richness 9, render_quality 9, character_quality 8, depth 8, distinct_framings 3;
+REFERENCE LOW scores 1 on all four and distinct_framings 1. Flat painted 2D cut-out figures standing
+in a 3D set score at most 3 for character_quality. Place every shot on that scale. Do not label the
+reference images."""
 
 
 def strip(shot: dict) -> str:
@@ -64,8 +68,15 @@ def strip(shot: dict) -> str:
     return base64.b64encode(buf.getvalue()).decode()
 
 
+def _anchor(kind: str) -> dict:
+    data = (Path(__file__).with_name('anchors') / f'{kind}.jpg').read_bytes()
+    return {'type': 'image_url', 'image_url': {'url': 'data:image/jpeg;base64,' + base64.b64encode(data).decode(), 'detail': 'high'}}
+
+
 def call(shots: list[dict]) -> list[dict]:
-    content: list[dict] = [{'type': 'text', 'text': 'Label every shot below. Return one entry per shot with the same i.'}]
+    content: list[dict] = [{'type': 'text', 'text': 'REFERENCE HIGH:'}, _anchor('high'),
+                           {'type': 'text', 'text': 'REFERENCE LOW:'}, _anchor('low'),
+                           {'type': 'text', 'text': 'Label every shot below. Return one entry per shot with the same i.'}]
     for s in shots:
         content.append({'type': 'text', 'text': f"Shot i={s['i']} ({s['len']}s). Spoken during it: \"{s['words'] or '(none)'}\""})
         content.append({'type': 'image_url', 'image_url': {'url': 'data:image/jpeg;base64,' + strip(s), 'detail': 'high'}})
