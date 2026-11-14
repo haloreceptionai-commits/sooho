@@ -160,6 +160,7 @@ export async function runVideo(id: string, input: VideoInput) {
   keepAlive();
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
+  const advanced = input.engine === 'advanced';
   try {
     const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
     const cartoon = getState().videos.find(v => v.id === id)?.cartoonCheckpoint;
@@ -173,7 +174,6 @@ export async function runVideo(id: string, input: VideoInput) {
       await handoffAssembly(id, assembly, getState().videos.find(v => v.id === id)?.assemblyClips ?? [], up);
       return;
     }
-    const advanced = input.engine === 'advanced';
     const writeScript = async () => {
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
