@@ -1,0 +1,1662 @@
+{
+ "shots": [
+  {
+   "i": 0,
+   "start": 0.0,
+   "end": 3.9,
+   "len": 3.9,
+   "sharpness": 395.3,
+   "colorfulness": 42.2,
+   "contrast": 56.2,
+   "motion": 0.0075,
+   "words": "Rail ends almost touch, yet the gap saves trains. Steel rails get"
+  },
+  {
+   "i": 1,
+   "start": 3.9,
+   "end": 7.4,
+   "len": 3.5,
+   "sharpness": 558.9,
+   "colorfulness": 67.5,
+   "contrast": 63.3,
+   "motion": 0.0088,
+   "words": "longer when hot and shorter when cold."
+  },
+  {
+   "i": 2,
+   "start": 7.4,
+   "end": 11.2,
+   "len": 3.8,
+   "sharpness": 534.8,
+   "colorfulness": 75.9,
+   "contrast": 65.7,
+   "motion": 0.0119,
+   "words": "Over a kilometer, a ten-degree rise adds about a finger\u2019s width."
+  },
+  {
+   "i": 3,
+   "start": 11.2,
+   "end": 14.9,
+   "len": 3.7,
+   "sharpness": 524.3,
+   "colorfulness": 105.7,
+   "contrast": 49.3,
+   "motion": 0.0085,
+   "words": "So why do tracks have gaps, and why do some look gapless?"
+  },
+  {
+   "i": 4,
+   "start": 14.9,
+   "end": 19.5,
+   "len": 4.6,
+   "sharpness": 541.3,
+   "colorfulness": 68.8,
+   "contrast": 62.7,
+   "motion": 0.0076,
+   "words": "Old lines used jointed rails: two ends bolted with bars, leaving a small space. In winter that space grows;"
+  },
+  {
+   "i": 5,
+   "start": 19.5,
+   "end": 23.0,
+   "len": 3.5,
+   "sharpness": 224.0,
+   "colorfulness": 97.0,
+   "contrast": 53.5,
+   "motion": 0.0239,
+   "words": "in summer it nearly closes."
+  },
+  {
+   "i": 6,
+   "start": 23.0,
+   "end": 26.6,
+   "len": 3.6,
+   "sharpness": 448.0,
+   "colorfulness": 44.1,
+   "contrast": 56.0,
+   "motion": 0.0109,
+   "words": "Without room, heat makes rails shove sideways and buckle. The"
+  },
+  {
+   "i": 7,
+   "start": 26.6,
+   "end": 30.2,
+   "len": 3.6,
+   "sharpness": 575.3,
+   "colorfulness": 71.8,
+   "contrast": 55.3,
+   "motion": 0.0104,
+   "words": "clickety-clack noise came from those joints, not as the goal."
+  },
+  {
+   "i": 8,
+   "start": 30.2,
+   "end": 34.3,
+   "len": 4.1,
+   "sharpness": 628.7,
+   "colorfulness": 71.0,
+   "contrast": 58.5,
+   "motion": 0.0068,
+   "words": "Today many mainlines weld rails into long continuous lengths. They set the rail at a"
+  },
+  {
+   "i": 9,
+   "start": 34.3,
+   "end": 37.6,
+   "len": 3.3,
+   "sharpness": 572.8,
+   "colorfulness": 67.7,
+   "contrast": 63.1,
+   "motion": 0.0096,
+   "words": "neutral temperature so forces balance. Clips,"
+  },
+  {
+   "i": 10,
+   "start": 37.6,
+   "end": 41.1,
+   "len": 3.5,
+   "sharpness": 411.5,
+   "colorfulness": 64.1,
+   "contrast": 55.1,
+   "motion": 0.0063,
+   "words": "anchors, and packed stone hold that stress in place. Still,"
+  },
+  {
+   "i": 11,
+   "start": 41.1,
+   "end": 44.6,
+   "len": 3.5,
+   "sharpness": 608.9,
+   "colorfulness": 71.9,
+   "contrast": 57.5,
+   "motion": 0.0092,
+   "words": "insulated joints add small gaps where signals need them."
+  },
+  {
+   "i": 12,
+   "start": 44.6,
+   "end": 50.9,
+   "len": 6.3,
+   "sharpness": 415.5,
+   "colorfulness": 42.8,
+   "contrast": 57.1,
+   "motion": 0.0134,
+   "words": "In deep cold, joints can pull apart and break bolts. In extreme heat, welded rails can kink if not managed."
+  },
+  {
+   "i": 13,
+   "start": 50.9,
+   "end": 53.6,
+   "len": 2.7,
+   "sharpness": 596.1,
+   "colorfulness": 72.0,
+   "contrast": 57.3,
+   "motion": 0.0037,
+   "words": "Standards tell crews how to control these risks. The"
+  },
+  {
+   "i": 14,
+   "start": 53.6,
+   "end": 57.6,
+   "len": 4.0,
+   "sharpness": 320.5,
+   "colorfulness": 75.8,
+   "contrast": 62.6,
+   "motion": 0.0109,
+   "words": "answer: give steel space or controlled grip so it can move safely. Like"
+  },
+  {
+   "i": 15,
+   "start": 57.6,
+   "end": 61.4,
+   "len": 3.8,
+   "sharpness": 455.8,
+   "colorfulness": 64.8,
+   "contrast": 63.9,
+   "motion": 0.0264,
+   "words": "deck boards need gaps, but steel pushes harder, so we plan it."
+  },
+  {
+   "i": 16,
+   "start": 61.4,
+   "end": 65.1,
+   "len": 3.7,
+   "sharpness": 636.9,
+   "colorfulness": 74.7,
+   "contrast": 58.2,
+   "motion": 0.0091,
+   "words": "That prevents buckles and breaks, and explains the old clickety-clack. Modern"
+  },
+  {
+   "i": 17,
+   "start": 65.1,
+   "end": 67.77,
+   "len": 2.67,
+   "sharpness": 594.3,
+   "colorfulness": 72.7,
+   "contrast": 57.4,
+   "motion": 0.0036,
+   "words": "mainlines often have no visible gaps at all."
+  }
+ ],
+ "labels": [
+  {
+   "i": 0,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "workshop classroom",
+   "set_detail": "cartoon workshop with chalkboard, lamp, desk and shelves",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "desk",
+    "wrench",
+    "hammer",
+    "bookshelf"
+   ],
+   "spoken_visible": "no",
+   "action": "characters gesture and talk",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Toon-shaded 3D characters in classroom, no rails shown."
+  },
+  {
+   "i": 1,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "workshop classroom",
+   "set_detail": "same room with chalkboard and desk",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "desk",
+    "wrench",
+    "hammer"
+   ],
+   "spoken_visible": "no",
+   "action": "characters gesture",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Same setup; dialogue about temperature expansion not depicted."
+  },
+  {
+   "i": 2,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "workshop classroom",
+   "set_detail": "chalkboard backdrop, tools",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "desk",
+    "hammer"
+   ],
+   "spoken_visible": "no",
+   "action": "characters gesture",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "No visual of kilometer or finger width; only characters gesturing."
+  },
+  {
+   "i": 3,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "workshop classroom",
+   "set_detail": "wide view with chalkboard and bookshelves; foreground orange panel rises",
+   "objects": [
+    "chalkboard",
+    "bookshelves",
+    "lamp"
+   ],
+   "spoken_visible": "no",
+   "action": "foreground panel rises like a wipe",
+   "effects": [
+    "wipe_panel"
+   ],
+   "characters": 5,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Question about gaps not visually shown."
+  },
+  {
+   "i": 4,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "workshop classroom",
+   "set_detail": "characters in front of chalkboard",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "desk",
+    "wrench"
+   ],
+   "spoken_visible": "no",
+   "action": "characters point and talk",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Description of jointed rails not depicted on screen."
+  },
+  {
+   "i": 5,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "workshop classroom",
+   "set_detail": "similar view; orange foreground panel appears",
+   "objects": [
+    "chalkboard",
+    "bookshelf",
+    "lamp"
+   ],
+   "spoken_visible": "no",
+   "action": "foreground panel rises partially",
+   "effects": [
+    "wipe_panel"
+   ],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Line about winter/summer gaps not shown visually."
+  },
+  {
+   "i": 6,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "indoor training room with chalkboard, lamp, shelves and table",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "bookshelf",
+    "table",
+    "wrench",
+    "clipboard"
+   ],
+   "spoken_visible": "no",
+   "action": "characters gesture and talk",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 5,
+   "environment_richness": 5,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Cel-shaded 3D characters mid-shot."
+  },
+  {
+   "i": 7,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "same room; wider view with shelves and board",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "bookshelf",
+    "table"
+   ],
+   "spoken_visible": "no",
+   "action": "group gestures while talking",
+   "effects": [],
+   "characters": 5,
+   "lighting": "interior_lamps",
+   "depth": 5,
+   "environment_richness": 5,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Stable wide of group."
+  },
+  {
+   "i": 8,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "same interior with chalkboard and shelves",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "bookshelf",
+    "table",
+    "tools"
+   ],
+   "spoken_visible": "no",
+   "action": "characters gesture",
+   "effects": [],
+   "characters": 3,
+   "lighting": "interior_lamps",
+   "depth": 5,
+   "environment_richness": 5,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Simple cel-shaded wide."
+  },
+  {
+   "i": 9,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "same room with chalkboard and table",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "table",
+    "bottle"
+   ],
+   "spoken_visible": "no",
+   "action": "characters gesturing",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 5,
+   "environment_richness": 5,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Mid shot of three workers and conductor."
+  },
+  {
+   "i": 10,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "front table in foreground, chalkboard behind",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "table",
+    "hammer"
+   ],
+   "spoken_visible": "no",
+   "action": "characters talking and gesturing",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 5,
+   "environment_richness": 5,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Foreground table blocks lower frame."
+  },
+  {
+   "i": 11,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "same set; wide view shows more floor and shelves",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "bookshelf",
+    "table",
+    "tools"
+   ],
+   "spoken_visible": "no",
+   "action": "group gestures",
+   "effects": [],
+   "characters": 5,
+   "lighting": "interior_lamps",
+   "depth": 5,
+   "environment_richness": 5,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Wide group shot concluding the section."
+  },
+  {
+   "i": 12,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "indoor training room with chalkboard, shelves, lamp and tools",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "shelves",
+    "bench",
+    "toolbox",
+    "bucket",
+    "wrench",
+    "mallet"
+   ],
+   "spoken_visible": "no",
+   "action": "characters wave and gesture",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "Flat cut-out style characters in simple 3D room."
+  },
+  {
+   "i": 13,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "same indoor room with chalkboard and shelves",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "shelves",
+    "bench",
+    "toolbox",
+    "bucket",
+    "wrench",
+    "mallet"
+   ],
+   "spoken_visible": "partial",
+   "action": "group gestures while standing",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "Speech about standards; only crew shown, not the procedures."
+  },
+  {
+   "i": 14,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "chalkboard wall with shelves and lamp",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "shelves",
+    "bench",
+    "bucket",
+    "wrench",
+    "mallet"
+   ],
+   "spoken_visible": "no",
+   "action": "characters point and gesture",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "No depiction of steel movement or grip mechanisms."
+  },
+  {
+   "i": 15,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "same interior with chalkboard and props",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "shelves",
+    "bench",
+    "bucket",
+    "wrench",
+    "mallet"
+   ],
+   "spoken_visible": "no",
+   "action": "characters gesture",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "Dialogue about deck gaps and steel not visually shown."
+  },
+  {
+   "i": 16,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "interior wall with chalkboard, lamp and bookshelves",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "shelves",
+    "bench",
+    "bucket",
+    "wrench",
+    "mallet"
+   ],
+   "spoken_visible": "no",
+   "action": "group stands and gestures",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "No visuals of buckles or clickety\u2011clack explanation."
+  },
+  {
+   "i": 17,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "classroom",
+   "set_detail": "same indoor setting with chalkboard and shelves",
+   "objects": [
+    "chalkboard",
+    "lamp",
+    "shelves",
+    "bench",
+    "bucket",
+    "wrench",
+    "mallet"
+   ],
+   "spoken_visible": "no",
+   "action": "characters raise hands",
+   "effects": [],
+   "characters": 4,
+   "lighting": "interior_lamps",
+   "depth": 3,
+   "environment_richness": 4,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "Line about gaps not visualized; just group shot."
+  }
+ ],
+ "words": [
+  {
+   "w": "Rail",
+   "t": 0.25,
+   "anchored": true
+  },
+  {
+   "w": "ends",
+   "t": 0.28,
+   "anchored": false
+  },
+  {
+   "w": "almost",
+   "t": 0.3,
+   "anchored": false
+  },
+  {
+   "w": "touch,",
+   "t": 0.33,
+   "anchored": false
+  },
+  {
+   "w": "yet",
+   "t": 0.35,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 0.38,
+   "anchored": false
+  },
+  {
+   "w": "gap",
+   "t": 0.4,
+   "anchored": false
+  },
+  {
+   "w": "saves",
+   "t": 0.42,
+   "anchored": false
+  },
+  {
+   "w": "trains.",
+   "t": 0.45,
+   "anchored": false
+  },
+  {
+   "w": "Steel",
+   "t": 0.47,
+   "anchored": false
+  },
+  {
+   "w": "rails",
+   "t": 0.5,
+   "anchored": true
+  },
+  {
+   "w": "get",
+   "t": 2.62,
+   "anchored": false
+  },
+  {
+   "w": "longer",
+   "t": 4.75,
+   "anchored": true
+  },
+  {
+   "w": "when",
+   "t": 5.25,
+   "anchored": true
+  },
+  {
+   "w": "hot",
+   "t": 5.5,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 5.75,
+   "anchored": true
+  },
+  {
+   "w": "shorter",
+   "t": 6.25,
+   "anchored": true
+  },
+  {
+   "w": "when",
+   "t": 6.38,
+   "anchored": false
+  },
+  {
+   "w": "cold.",
+   "t": 6.5,
+   "anchored": true
+  },
+  {
+   "w": "Over",
+   "t": 7.5,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 7.62,
+   "anchored": false
+  },
+  {
+   "w": "kilometer,",
+   "t": 7.75,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 8.12,
+   "anchored": false
+  },
+  {
+   "w": "ten-degree",
+   "t": 8.5,
+   "anchored": true
+  },
+  {
+   "w": "rise",
+   "t": 9.25,
+   "anchored": true
+  },
+  {
+   "w": "adds",
+   "t": 9.5,
+   "anchored": true
+  },
+  {
+   "w": "about",
+   "t": 9.75,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 9.88,
+   "anchored": false
+  },
+  {
+   "w": "finger\u2019s",
+   "t": 10.0,
+   "anchored": true
+  },
+  {
+   "w": "width.",
+   "t": 10.5,
+   "anchored": true
+  },
+  {
+   "w": "So",
+   "t": 11.25,
+   "anchored": true
+  },
+  {
+   "w": "why",
+   "t": 11.25,
+   "anchored": true
+  },
+  {
+   "w": "do",
+   "t": 11.29,
+   "anchored": false
+  },
+  {
+   "w": "tracks",
+   "t": 11.33,
+   "anchored": false
+  },
+  {
+   "w": "have",
+   "t": 11.38,
+   "anchored": false
+  },
+  {
+   "w": "gaps,",
+   "t": 11.42,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 11.46,
+   "anchored": false
+  },
+  {
+   "w": "why",
+   "t": 11.5,
+   "anchored": true
+  },
+  {
+   "w": "do",
+   "t": 11.5,
+   "anchored": true
+  },
+  {
+   "w": "some",
+   "t": 13.25,
+   "anchored": true
+  },
+  {
+   "w": "look",
+   "t": 13.5,
+   "anchored": true
+  },
+  {
+   "w": "gapless?",
+   "t": 13.75,
+   "anchored": true
+  },
+  {
+   "w": "Old",
+   "t": 15.0,
+   "anchored": true
+  },
+  {
+   "w": "lines",
+   "t": 15.0,
+   "anchored": true
+  },
+  {
+   "w": "used",
+   "t": 15.38,
+   "anchored": false
+  },
+  {
+   "w": "jointed",
+   "t": 15.75,
+   "anchored": true
+  },
+  {
+   "w": "rails:",
+   "t": 16.0,
+   "anchored": true
+  },
+  {
+   "w": "two",
+   "t": 16.38,
+   "anchored": false
+  },
+  {
+   "w": "ends",
+   "t": 16.75,
+   "anchored": true
+  },
+  {
+   "w": "bolted",
+   "t": 17.0,
+   "anchored": true
+  },
+  {
+   "w": "with",
+   "t": 17.25,
+   "anchored": false
+  },
+  {
+   "w": "bars,",
+   "t": 17.5,
+   "anchored": true
+  },
+  {
+   "w": "leaving",
+   "t": 17.75,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 18.0,
+   "anchored": false
+  },
+  {
+   "w": "small",
+   "t": 18.25,
+   "anchored": true
+  },
+  {
+   "w": "space.",
+   "t": 18.75,
+   "anchored": true
+  },
+  {
+   "w": "In",
+   "t": 18.88,
+   "anchored": false
+  },
+  {
+   "w": "winter",
+   "t": 19.0,
+   "anchored": false
+  },
+  {
+   "w": "that",
+   "t": 19.12,
+   "anchored": false
+  },
+  {
+   "w": "space",
+   "t": 19.25,
+   "anchored": true
+  },
+  {
+   "w": "grows;",
+   "t": 19.38,
+   "anchored": false
+  },
+  {
+   "w": "in",
+   "t": 19.5,
+   "anchored": true
+  },
+  {
+   "w": "summer",
+   "t": 21.25,
+   "anchored": true
+  },
+  {
+   "w": "it",
+   "t": 21.5,
+   "anchored": true
+  },
+  {
+   "w": "nearly",
+   "t": 21.75,
+   "anchored": false
+  },
+  {
+   "w": "closes.",
+   "t": 22.0,
+   "anchored": true
+  },
+  {
+   "w": "Without",
+   "t": 23.0,
+   "anchored": true
+  },
+  {
+   "w": "room,",
+   "t": 23.25,
+   "anchored": true
+  },
+  {
+   "w": "heat",
+   "t": 23.75,
+   "anchored": true
+  },
+  {
+   "w": "makes",
+   "t": 24.0,
+   "anchored": true
+  },
+  {
+   "w": "rails",
+   "t": 24.25,
+   "anchored": true
+  },
+  {
+   "w": "shove",
+   "t": 24.5,
+   "anchored": true
+  },
+  {
+   "w": "sideways",
+   "t": 25.0,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 25.5,
+   "anchored": true
+  },
+  {
+   "w": "buckle.",
+   "t": 25.75,
+   "anchored": true
+  },
+  {
+   "w": "The",
+   "t": 26.5,
+   "anchored": true
+  },
+  {
+   "w": "clickety-clack",
+   "t": 26.75,
+   "anchored": true
+  },
+  {
+   "w": "noise",
+   "t": 26.81,
+   "anchored": false
+  },
+  {
+   "w": "came",
+   "t": 26.88,
+   "anchored": false
+  },
+  {
+   "w": "from",
+   "t": 26.94,
+   "anchored": false
+  },
+  {
+   "w": "those",
+   "t": 27.0,
+   "anchored": false
+  },
+  {
+   "w": "joints,",
+   "t": 27.06,
+   "anchored": false
+  },
+  {
+   "w": "not",
+   "t": 27.12,
+   "anchored": false
+  },
+  {
+   "w": "as",
+   "t": 27.19,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 27.25,
+   "anchored": true
+  },
+  {
+   "w": "goal.",
+   "t": 29.25,
+   "anchored": true
+  },
+  {
+   "w": "Today",
+   "t": 30.25,
+   "anchored": true
+  },
+  {
+   "w": "many",
+   "t": 30.5,
+   "anchored": true
+  },
+  {
+   "w": "mainlines",
+   "t": 30.75,
+   "anchored": true
+  },
+  {
+   "w": "weld",
+   "t": 31.25,
+   "anchored": true
+  },
+  {
+   "w": "rails",
+   "t": 31.75,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 31.78,
+   "anchored": false
+  },
+  {
+   "w": "long",
+   "t": 31.81,
+   "anchored": false
+  },
+  {
+   "w": "continuous",
+   "t": 31.84,
+   "anchored": false
+  },
+  {
+   "w": "lengths.",
+   "t": 31.88,
+   "anchored": false
+  },
+  {
+   "w": "They",
+   "t": 31.91,
+   "anchored": false
+  },
+  {
+   "w": "set",
+   "t": 31.94,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 31.97,
+   "anchored": false
+  },
+  {
+   "w": "rail",
+   "t": 32.0,
+   "anchored": true
+  },
+  {
+   "w": "at",
+   "t": 33.08,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 34.17,
+   "anchored": false
+  },
+  {
+   "w": "neutral",
+   "t": 35.25,
+   "anchored": true
+  },
+  {
+   "w": "temperature",
+   "t": 35.58,
+   "anchored": false
+  },
+  {
+   "w": "so",
+   "t": 35.92,
+   "anchored": false
+  },
+  {
+   "w": "forces",
+   "t": 36.25,
+   "anchored": true
+  },
+  {
+   "w": "balance.",
+   "t": 36.88,
+   "anchored": false
+  },
+  {
+   "w": "Clips,",
+   "t": 37.5,
+   "anchored": true
+  },
+  {
+   "w": "anchors,",
+   "t": 37.83,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 38.17,
+   "anchored": false
+  },
+  {
+   "w": "packed",
+   "t": 38.5,
+   "anchored": true
+  },
+  {
+   "w": "stone",
+   "t": 39.0,
+   "anchored": true
+  },
+  {
+   "w": "hold",
+   "t": 39.25,
+   "anchored": false
+  },
+  {
+   "w": "that",
+   "t": 39.5,
+   "anchored": true
+  },
+  {
+   "w": "stress",
+   "t": 39.75,
+   "anchored": true
+  },
+  {
+   "w": "in",
+   "t": 40.0,
+   "anchored": true
+  },
+  {
+   "w": "place.",
+   "t": 40.25,
+   "anchored": true
+  },
+  {
+   "w": "Still,",
+   "t": 41.0,
+   "anchored": true
+  },
+  {
+   "w": "insulated",
+   "t": 41.5,
+   "anchored": true
+  },
+  {
+   "w": "joints",
+   "t": 42.0,
+   "anchored": true
+  },
+  {
+   "w": "add",
+   "t": 42.25,
+   "anchored": true
+  },
+  {
+   "w": "small",
+   "t": 42.5,
+   "anchored": true
+  },
+  {
+   "w": "gaps",
+   "t": 42.88,
+   "anchored": false
+  },
+  {
+   "w": "where",
+   "t": 43.25,
+   "anchored": true
+  },
+  {
+   "w": "signals",
+   "t": 43.5,
+   "anchored": true
+  },
+  {
+   "w": "need",
+   "t": 43.75,
+   "anchored": true
+  },
+  {
+   "w": "them.",
+   "t": 44.0,
+   "anchored": true
+  },
+  {
+   "w": "In",
+   "t": 44.75,
+   "anchored": true
+  },
+  {
+   "w": "deep",
+   "t": 44.75,
+   "anchored": true
+  },
+  {
+   "w": "cold,",
+   "t": 44.78,
+   "anchored": false
+  },
+  {
+   "w": "joints",
+   "t": 44.81,
+   "anchored": false
+  },
+  {
+   "w": "can",
+   "t": 44.83,
+   "anchored": false
+  },
+  {
+   "w": "pull",
+   "t": 44.86,
+   "anchored": false
+  },
+  {
+   "w": "apart",
+   "t": 44.89,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 44.92,
+   "anchored": false
+  },
+  {
+   "w": "break",
+   "t": 44.94,
+   "anchored": false
+  },
+  {
+   "w": "bolts.",
+   "t": 44.97,
+   "anchored": false
+  },
+  {
+   "w": "In",
+   "t": 45.0,
+   "anchored": true
+  },
+  {
+   "w": "extreme",
+   "t": 45.15,
+   "anchored": false
+  },
+  {
+   "w": "heat,",
+   "t": 45.3,
+   "anchored": false
+  },
+  {
+   "w": "welded",
+   "t": 45.45,
+   "anchored": false
+  },
+  {
+   "w": "rails",
+   "t": 45.6,
+   "anchored": false
+  },
+  {
+   "w": "can",
+   "t": 45.75,
+   "anchored": true
+  },
+  {
+   "w": "kink",
+   "t": 49.25,
+   "anchored": true
+  },
+  {
+   "w": "if",
+   "t": 49.5,
+   "anchored": true
+  },
+  {
+   "w": "not",
+   "t": 49.75,
+   "anchored": true
+  },
+  {
+   "w": "managed.",
+   "t": 50.0,
+   "anchored": true
+  },
+  {
+   "w": "Standards",
+   "t": 51.0,
+   "anchored": true
+  },
+  {
+   "w": "tell",
+   "t": 51.25,
+   "anchored": true
+  },
+  {
+   "w": "crews",
+   "t": 51.5,
+   "anchored": true
+  },
+  {
+   "w": "how",
+   "t": 51.75,
+   "anchored": true
+  },
+  {
+   "w": "to",
+   "t": 52.0,
+   "anchored": true
+  },
+  {
+   "w": "control",
+   "t": 52.0,
+   "anchored": true
+  },
+  {
+   "w": "these",
+   "t": 52.25,
+   "anchored": true
+  },
+  {
+   "w": "risks.",
+   "t": 52.5,
+   "anchored": true
+  },
+  {
+   "w": "The",
+   "t": 53.5,
+   "anchored": true
+  },
+  {
+   "w": "answer:",
+   "t": 53.75,
+   "anchored": true
+  },
+  {
+   "w": "give",
+   "t": 54.25,
+   "anchored": true
+  },
+  {
+   "w": "steel",
+   "t": 54.5,
+   "anchored": true
+  },
+  {
+   "w": "space",
+   "t": 54.75,
+   "anchored": true
+  },
+  {
+   "w": "or",
+   "t": 55.25,
+   "anchored": true
+  },
+  {
+   "w": "controlled",
+   "t": 55.5,
+   "anchored": true
+  },
+  {
+   "w": "grip",
+   "t": 55.75,
+   "anchored": true
+  },
+  {
+   "w": "so",
+   "t": 56.12,
+   "anchored": false
+  },
+  {
+   "w": "it",
+   "t": 56.5,
+   "anchored": true
+  },
+  {
+   "w": "can",
+   "t": 56.5,
+   "anchored": true
+  },
+  {
+   "w": "move",
+   "t": 56.5,
+   "anchored": true
+  },
+  {
+   "w": "safely.",
+   "t": 56.75,
+   "anchored": true
+  },
+  {
+   "w": "Like",
+   "t": 57.5,
+   "anchored": true
+  },
+  {
+   "w": "deck",
+   "t": 57.75,
+   "anchored": true
+  },
+  {
+   "w": "boards",
+   "t": 58.0,
+   "anchored": true
+  },
+  {
+   "w": "need",
+   "t": 58.25,
+   "anchored": true
+  },
+  {
+   "w": "gaps,",
+   "t": 58.5,
+   "anchored": true
+  },
+  {
+   "w": "but",
+   "t": 58.75,
+   "anchored": false
+  },
+  {
+   "w": "steel",
+   "t": 59.0,
+   "anchored": true
+  },
+  {
+   "w": "pushes",
+   "t": 59.25,
+   "anchored": true
+  },
+  {
+   "w": "harder,",
+   "t": 59.75,
+   "anchored": true
+  },
+  {
+   "w": "so",
+   "t": 60.25,
+   "anchored": true
+  },
+  {
+   "w": "we",
+   "t": 60.25,
+   "anchored": true
+  },
+  {
+   "w": "plan",
+   "t": 60.5,
+   "anchored": true
+  },
+  {
+   "w": "it.",
+   "t": 61.0,
+   "anchored": false
+  },
+  {
+   "w": "That",
+   "t": 61.5,
+   "anchored": true
+  },
+  {
+   "w": "prevents",
+   "t": 61.5,
+   "anchored": true
+  },
+  {
+   "w": "buckles",
+   "t": 62.0,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 62.25,
+   "anchored": true
+  },
+  {
+   "w": "breaks,",
+   "t": 62.38,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 62.5,
+   "anchored": true
+  },
+  {
+   "w": "explains",
+   "t": 63.0,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 63.5,
+   "anchored": true
+  },
+  {
+   "w": "old",
+   "t": 63.5,
+   "anchored": true
+  },
+  {
+   "w": "clickety-clack.",
+   "t": 63.75,
+   "anchored": true
+  },
+  {
+   "w": "Modern",
+   "t": 65.0,
+   "anchored": true
+  },
+  {
+   "w": "mainlines",
+   "t": 65.5,
+   "anchored": true
+  },
+  {
+   "w": "often",
+   "t": 65.75,
+   "anchored": false
+  },
+  {
+   "w": "have",
+   "t": 66.0,
+   "anchored": true
+  },
+  {
+   "w": "no",
+   "t": 66.25,
+   "anchored": true
+  },
+  {
+   "w": "visible",
+   "t": 66.5,
+   "anchored": true
+  },
+  {
+   "w": "gaps",
+   "t": 66.75,
+   "anchored": true
+  },
+  {
+   "w": "at",
+   "t": 67.25,
+   "anchored": true
+  },
+  {
+   "w": "all.",
+   "t": 67.25,
+   "anchored": true
+  }
+ ]
+}

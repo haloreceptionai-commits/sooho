@@ -1,0 +1,2057 @@
+{
+ "shots": [
+  {
+   "i": 0,
+   "start": 0.0,
+   "end": 1.1,
+   "len": 1.1,
+   "sharpness": 3461.4,
+   "colorfulness": 65.1,
+   "contrast": 49.9,
+   "motion": 0.0548,
+   "words": "He drilled 82"
+  },
+  {
+   "i": 1,
+   "start": 1.1,
+   "end": 2.0,
+   "len": 0.9,
+   "sharpness": 762.9,
+   "colorfulness": 58.0,
+   "contrast": 54.6,
+   "motion": 0.0847,
+   "words": "holes into the wood"
+  },
+  {
+   "i": 2,
+   "start": 2.0,
+   "end": 2.4,
+   "len": 0.4,
+   "sharpness": 1980.3,
+   "colorfulness": 54.9,
+   "contrast": 49.8,
+   "motion": 0.2085,
+   "words": "because down"
+  },
+  {
+   "i": 3,
+   "start": 2.4,
+   "end": 4.7,
+   "len": 2.3,
+   "sharpness": 1770.8,
+   "colorfulness": 74.1,
+   "contrast": 45.6,
+   "motion": 0.0641,
+   "words": "the hill an army is marching straight"
+  },
+  {
+   "i": 4,
+   "start": 4.7,
+   "end": 5.9,
+   "len": 1.2,
+   "sharpness": 2170.9,
+   "colorfulness": 71.3,
+   "contrast": 50.9,
+   "motion": 0.0397,
+   "words": "for his fort and while"
+  },
+  {
+   "i": 5,
+   "start": 5.9,
+   "end": 7.8,
+   "len": 1.9,
+   "sharpness": 2422.3,
+   "colorfulness": 35.2,
+   "contrast": 48.2,
+   "motion": 0.112,
+   "words": "everyone else sharpened swords He's in the corner"
+  },
+  {
+   "i": 6,
+   "start": 7.8,
+   "end": 13.0,
+   "len": 5.2,
+   "sharpness": 2382.3,
+   "colorfulness": 44.5,
+   "contrast": 57.7,
+   "motion": 0.0533,
+   "words": "still drilling his commander asks are we fighting them or grating cheese, but"
+  },
+  {
+   "i": 7,
+   "start": 13.0,
+   "end": 14.1,
+   "len": 1.1,
+   "sharpness": 2522.2,
+   "colorfulness": 56.5,
+   "contrast": 60.6,
+   "motion": 0.0665,
+   "words": "it gets weirder He"
+  },
+  {
+   "i": 8,
+   "start": 14.1,
+   "end": 26.0,
+   "len": 11.9,
+   "sharpness": 1818.7,
+   "colorfulness": 29.1,
+   "contrast": 30.9,
+   "motion": 0.0979,
+   "words": "bolts the wood onto a cart and into every hole goes something long and thin wrapped in paper each with a string Then he twists all the strings into one rope Nobody's allowed to touch one soldier reaches for it and he slaps"
+  },
+  {
+   "i": 9,
+   "start": 26.0,
+   "end": 28.8,
+   "len": 2.8,
+   "sharpness": 3146.6,
+   "colorfulness": 43.2,
+   "contrast": 55.6,
+   "motion": 0.0875,
+   "words": "his hands so hard the whole fort hears it that night"
+  },
+  {
+   "i": 10,
+   "start": 28.8,
+   "end": 29.2,
+   "len": 0.4,
+   "sharpness": 852.1,
+   "colorfulness": 35.5,
+   "contrast": 28.8,
+   "motion": 0.1036,
+   "words": "it"
+  },
+  {
+   "i": 11,
+   "start": 29.2,
+   "end": 36.7,
+   "len": 7.5,
+   "sharpness": 1328.7,
+   "colorfulness": 30.8,
+   "contrast": 40.1,
+   "motion": 0.0493,
+   "words": "pours So he throws his coat over the cart and lies on top of it like a human umbrella One drop gets in there and we're all dead the next"
+  },
+  {
+   "i": 12,
+   "start": 36.7,
+   "end": 39.0,
+   "len": 2.3,
+   "sharpness": 1462.1,
+   "colorfulness": 34.6,
+   "contrast": 68.9,
+   "motion": 0.0286,
+   "words": "morning ladders slam against the walls and the"
+  },
+  {
+   "i": 13,
+   "start": 39.0,
+   "end": 40.4,
+   "len": 1.4,
+   "sharpness": 2258.9,
+   "colorfulness": 54.0,
+   "contrast": 70.4,
+   "motion": 0.0788,
+   "words": "army charges Everyone"
+  },
+  {
+   "i": 14,
+   "start": 40.4,
+   "end": 43.4,
+   "len": 3.0,
+   "sharpness": 1475.2,
+   "colorfulness": 87.7,
+   "contrast": 50.2,
+   "motion": 0.0519,
+   "words": "screams at him to do something But he just watches them get"
+  },
+  {
+   "i": 15,
+   "start": 43.4,
+   "end": 45.1,
+   "len": 1.7,
+   "sharpness": 2386.8,
+   "colorfulness": 65.7,
+   "contrast": 38.8,
+   "motion": 0.0411,
+   "words": ""
+  },
+  {
+   "i": 16,
+   "start": 45.1,
+   "end": 46.8,
+   "len": 1.7,
+   "sharpness": 4250.3,
+   "colorfulness": 66.6,
+   "contrast": 61.0,
+   "motion": 0.1117,
+   "words": "closer and closer until they're packed shoulder-to-shoulder close enough"
+  },
+  {
+   "i": 17,
+   "start": 46.8,
+   "end": 48.3,
+   "len": 1.5,
+   "sharpness": 1700.0,
+   "colorfulness": 62.9,
+   "contrast": 70.4,
+   "motion": 0.0719,
+   "words": "to see their teeth That's when"
+  },
+  {
+   "i": 18,
+   "start": 48.3,
+   "end": 50.7,
+   "len": 2.4,
+   "sharpness": 1214.1,
+   "colorfulness": 101.8,
+   "contrast": 45.6,
+   "motion": 0.0342,
+   "words": "he rips off the coat and lights the rope"
+  },
+  {
+   "i": 19,
+   "start": 50.7,
+   "end": 58.5,
+   "len": 7.8,
+   "sharpness": 1592.5,
+   "colorfulness": 90.9,
+   "contrast": 53.0,
+   "motion": 0.107,
+   "words": "the spark races down it and splits into 82 tiny flames and each one hits a tube of gunpowder Strapped to an"
+  },
+  {
+   "i": 20,
+   "start": 58.5,
+   "end": 60.3,
+   "len": 1.8,
+   "sharpness": 987.8,
+   "colorfulness": 111.2,
+   "contrast": 43.7,
+   "motion": 0.0448,
+   "words": "arrow turning"
+  },
+  {
+   "i": 21,
+   "start": 60.3,
+   "end": 61.1,
+   "len": 0.8,
+   "sharpness": 426.6,
+   "colorfulness": 72.7,
+   "contrast": 48.6,
+   "motion": 0.0806,
+   "words": "every"
+  },
+  {
+   "i": 22,
+   "start": 61.1,
+   "end": 63.6,
+   "len": 2.5,
+   "sharpness": 1150.1,
+   "colorfulness": 61.7,
+   "contrast": 60.4,
+   "motion": 0.0811,
+   "words": "one of them into a rocket all 82 blast off the cart at once"
+  },
+  {
+   "i": 23,
+   "start": 63.6,
+   "end": 65.3,
+   "len": 1.7,
+   "sharpness": 994.9,
+   "colorfulness": 53.7,
+   "contrast": 46.9,
+   "motion": 0.0993,
+   "words": "flying every which way But with the army packed that tight not"
+  },
+  {
+   "i": 24,
+   "start": 65.3,
+   "end": 66.8,
+   "len": 1.5,
+   "sharpness": 461.6,
+   "colorfulness": 94.1,
+   "contrast": 59.9,
+   "motion": 0.0539,
+   "words": "a single one misses"
+  }
+ ],
+ "labels": [
+  {
+   "i": 0,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "castle yard",
+   "set_detail": "grassy area beside stone castle wall with banner",
+   "objects": [
+    "wood block",
+    "hand drill",
+    "banner"
+   ],
+   "spoken_visible": "yes",
+   "action": "character drills into wood",
+   "effects": [],
+   "characters": 1,
+   "lighting": "day_sun",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Stick-figure style character drilling a wooden block near castle wall."
+  },
+  {
+   "i": 1,
+   "shot_type": "object_insert",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "castle yard",
+   "set_detail": "close-up on wooden panel near grass",
+   "objects": [
+    "wood panel",
+    "drill bit",
+    "hose/pipe"
+   ],
+   "spoken_visible": "yes",
+   "action": "drill making holes with wood chips",
+   "effects": [],
+   "characters": 0,
+   "lighting": "day_sun",
+   "depth": 5,
+   "environment_richness": 4,
+   "character_quality": 0,
+   "render_quality": 6,
+   "note": "Tight insert of drill cutting holes and chips flying."
+  },
+  {
+   "i": 2,
+   "shot_type": "establishing",
+   "camera": "pan",
+   "distinct_framings": 2,
+   "set": "castle wall exterior",
+   "set_detail": "stone wall with banners and archway overlooking landscape",
+   "objects": [
+    "banners"
+   ],
+   "spoken_visible": "partial",
+   "action": "none",
+   "effects": [],
+   "characters": 0,
+   "lighting": "day_sun",
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 0,
+   "render_quality": 6,
+   "note": "Scenic pan of wall and landscape; words 'because down' not directly depicted beyond slope."
+  },
+  {
+   "i": 3,
+   "shot_type": "crowd",
+   "camera": "push_in",
+   "distinct_framings": 3,
+   "set": "hillside outside fort",
+   "set_detail": "grassy slope with fields below and marching army",
+   "objects": [
+    "flags",
+    "palanquin",
+    "umbrella"
+   ],
+   "spoken_visible": "yes",
+   "action": "army marches downhill with leader on palanquin",
+   "effects": [],
+   "characters": 20,
+   "lighting": "day_sun",
+   "depth": 8,
+   "environment_richness": 8,
+   "character_quality": 3,
+   "render_quality": 8,
+   "note": "Large army scene with depth and smoke; cutout-style characters."
+  },
+  {
+   "i": 4,
+   "shot_type": "action",
+   "camera": "tracking",
+   "distinct_framings": 1,
+   "set": "hillside by fort wall",
+   "set_detail": "leader carried on palanquin near stone wall",
+   "objects": [
+    "palanquin",
+    "umbrella",
+    "flag"
+   ],
+   "spoken_visible": "yes",
+   "action": "palanquin carried past fort",
+   "effects": [],
+   "characters": 4,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 6,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Shows fort and group moving; ties to narration about fort."
+  },
+  {
+   "i": 5,
+   "shot_type": "action",
+   "camera": "tracking",
+   "distinct_framings": 3,
+   "set": "castle gate interior",
+   "set_detail": "under archway with grinding wheels and soldiers",
+   "objects": [
+    "grindstone wheels",
+    "swords",
+    "bench",
+    "gate door"
+   ],
+   "spoken_visible": "yes",
+   "action": "people sharpen swords; cut to others at gate corner",
+   "effects": [],
+   "characters": 8,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 3,
+   "render_quality": 7,
+   "note": "Multiple groups sharpening; final frame shows two at corner of gate."
+  },
+  {
+   "i": 6,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort courtyard",
+   "set_detail": "stone castle walls with banners, grass, workbench near gate",
+   "objects": [
+    "wooden perforated board",
+    "workbench",
+    "tools",
+    "banner",
+    "stone wall"
+   ],
+   "spoken_visible": "yes",
+   "action": "soldier drills holes in a wooden board while commander comments",
+   "effects": [],
+   "characters": 3,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Clean 3D castle yard; stylized characters, soft shadows and depth."
+  },
+  {
+   "i": 7,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort courtyard",
+   "set_detail": "grass area beside wooden fence and tower",
+   "objects": [
+    "perforated board",
+    "stand",
+    "tower",
+    "fence"
+   ],
+   "spoken_visible": "partial",
+   "action": "soldiers inspect and tilt the holed board",
+   "effects": [],
+   "characters": 2,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Continuation with slight pose changes; vague narration."
+  },
+  {
+   "i": 8,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort courtyard",
+   "set_detail": "cart beside castle wall; close-up of many sticks with strings",
+   "objects": [
+    "cart",
+    "perforated board",
+    "sticks with paper and strings",
+    "rope"
+   ],
+   "spoken_visible": "yes",
+   "action": "board is bolted onto cart; long thin items inserted in holes; strings gathered; soldier gets slapped for reaching",
+   "effects": [],
+   "characters": 4,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Clear close-up shows strings/fuses; staging readable."
+  },
+  {
+   "i": 9,
+   "shot_type": "crowd",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort moat area",
+   "set_detail": "castle wall and gate with many soldiers reacting",
+   "objects": [
+    "stone wall",
+    "banners",
+    "grass bank"
+   ],
+   "spoken_visible": "yes",
+   "action": "crowd reacts to a loud slap; hat flies; characters gather around",
+   "effects": [],
+   "characters": 8,
+   "lighting": "sunset",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Wide view of many characters and fort environment."
+  },
+  {
+   "i": 10,
+   "shot_type": "establishing",
+   "camera": "static",
+   "distinct_framings": 2,
+   "set": "castle wall at night",
+   "set_detail": "transition to night near cart on rampart",
+   "objects": [
+    "cart",
+    "lamp"
+   ],
+   "spoken_visible": "partial",
+   "action": "time shift to night showing cart and character on rampart",
+   "effects": [],
+   "characters": 3,
+   "lighting": "night",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Very brief transition beat to night scene."
+  },
+  {
+   "i": 11,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "castle wall rampart",
+   "set_detail": "rainy night with lamp-lit cart and rooftop nearby",
+   "objects": [
+    "cart",
+    "coat",
+    "rope",
+    "lamp"
+   ],
+   "spoken_visible": "yes",
+   "action": "he throws coat over the cart and lies on top like an umbrella during rain",
+   "effects": [
+    "rain"
+   ],
+   "characters": 4,
+   "lighting": "rain_storm",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 8,
+   "note": "Rain, night lighting and props well rendered; clear action."
+  },
+  {
+   "i": 12,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "castle wall parapet",
+   "set_detail": "stone battlement overlooking landscape with cart",
+   "objects": [
+    "cart",
+    "stone wall",
+    "railing",
+    "distant mountains"
+   ],
+   "spoken_visible": "partial",
+   "action": "character looks over wall beside cart",
+   "effects": [],
+   "characters": 1,
+   "lighting": "sunset",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Line mentions ladders slamming walls; ladders not visible."
+  },
+  {
+   "i": 13,
+   "shot_type": "crowd",
+   "camera": "push_in",
+   "distinct_framings": 2,
+   "set": "battlefield grass",
+   "set_detail": "wide grassy field with army ranks and banners",
+   "objects": [
+    "banners",
+    "shields",
+    "spears",
+    "palanquin"
+   ],
+   "spoken_visible": "yes",
+   "action": "army advances/charges toward camera",
+   "effects": [],
+   "characters": 20,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Large army shown charging."
+  },
+  {
+   "i": 14,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "castle courtyard",
+   "set_detail": "paved courtyard beside parapet and cart",
+   "objects": [
+    "cart",
+    "torch"
+   ],
+   "spoken_visible": "yes",
+   "action": "group confronts central man; they shout/gesture",
+   "effects": [],
+   "characters": 6,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Crowd around him fits narration about screaming to do something."
+  },
+  {
+   "i": 15,
+   "shot_type": "wide",
+   "camera": "pull_out",
+   "distinct_framings": 2,
+   "set": "hillside below wall",
+   "set_detail": "view from wall looking down at approaching army",
+   "objects": [
+    "flags",
+    "shields",
+    "grassy slope",
+    "fields"
+   ],
+   "spoken_visible": "no_words",
+   "action": "enemy crowd approaches; foreground soldier grins",
+   "effects": [],
+   "characters": 20,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "No narration here."
+  },
+  {
+   "i": 16,
+   "shot_type": "crowd",
+   "camera": "pan",
+   "distinct_framings": 2,
+   "set": "battlefield grass",
+   "set_detail": "packed ranks of soldiers with banners",
+   "objects": [
+    "banners",
+    "shields",
+    "spears"
+   ],
+   "spoken_visible": "yes",
+   "action": "crowd bunches tightly shoulder-to-shoulder",
+   "effects": [],
+   "characters": 20,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Matches narration about being packed close."
+  },
+  {
+   "i": 17,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "battlefield grass",
+   "set_detail": "tight row of soldiers near camera",
+   "objects": [
+    "shields"
+   ],
+   "spoken_visible": "yes",
+   "action": "soldiers smile showing teeth",
+   "effects": [],
+   "characters": 8,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 6,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Close lineup of soldiers; teeth visible."
+  },
+  {
+   "i": 18,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "fort parapet",
+   "set_detail": "stone terrace with cart and fuse board overlooking valley",
+   "objects": [
+    "cart",
+    "fuse board",
+    "rope fuse",
+    "torch",
+    "cloth cover",
+    "mountains"
+   ],
+   "spoken_visible": "yes",
+   "action": "character removes cloth and lights fuse",
+   "effects": [
+    "small spark"
+   ],
+   "characters": 2,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Two soldiers beside device; clear lighting of rope/fuse."
+  },
+  {
+   "i": 19,
+   "shot_type": "object_insert",
+   "camera": "push_in",
+   "distinct_framings": 3,
+   "set": "fort parapet",
+   "set_detail": "close views of fuse board and tubes",
+   "objects": [
+    "fuse bundle",
+    "spark",
+    "tubes",
+    "gunpowder cartridges"
+   ],
+   "spoken_visible": "yes",
+   "action": "spark races along fuse and splits to many leads",
+   "effects": [
+    "sparks",
+    "glow"
+   ],
+   "characters": 0,
+   "lighting": "day_sun",
+   "depth": 8,
+   "environment_richness": 6,
+   "character_quality": 0,
+   "render_quality": 8,
+   "note": "Macro perspective of fuses and tubes."
+  },
+  {
+   "i": 20,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "fort parapet",
+   "set_detail": "soldiers in front of fuse board igniting",
+   "objects": [
+    "fuse board",
+    "cart",
+    "torch",
+    "sparks"
+   ],
+   "spoken_visible": "partial",
+   "action": "device ignites",
+   "effects": [
+    "sparks",
+    "glow"
+   ],
+   "characters": 2,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Words mention arrow turning; visuals show ignition/rocket start."
+  },
+  {
+   "i": 21,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "fort parapet",
+   "set_detail": "side of device with valley beyond",
+   "objects": [
+    "fuse board",
+    "smoke plume",
+    "balustrade"
+   ],
+   "spoken_visible": "partial",
+   "action": "rockets blast off from board",
+   "effects": [
+    "smoke",
+    "sparks"
+   ],
+   "characters": 0,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 6,
+   "character_quality": 0,
+   "render_quality": 7,
+   "note": "Focus on blast-off action."
+  },
+  {
+   "i": 22,
+   "shot_type": "establishing",
+   "camera": "pan",
+   "distinct_framings": 3,
+   "set": "valley battlefield",
+   "set_detail": "wide countryside view with rocket trails in sky",
+   "objects": [
+    "rocket trails",
+    "fields",
+    "stone wall",
+    "distant army mass"
+   ],
+   "spoken_visible": "yes",
+   "action": "rockets streak into sky and outward",
+   "effects": [
+    "smoke trails"
+   ],
+   "characters": 0,
+   "lighting": "day_sun",
+   "depth": 9,
+   "environment_richness": 8,
+   "character_quality": 0,
+   "render_quality": 8,
+   "note": "Vast landscape with many smoke trails."
+  },
+  {
+   "i": 23,
+   "shot_type": "effect",
+   "camera": "pan",
+   "distinct_framings": 3,
+   "set": "valley battlefield",
+   "set_detail": "view over army and explosions from terrace",
+   "objects": [
+    "rocket trails",
+    "explosions",
+    "fields",
+    "parapet rail"
+   ],
+   "spoken_visible": "yes",
+   "action": "explosions among army and near camera",
+   "effects": [
+    "explosions",
+    "smoke"
+   ],
+   "characters": 0,
+   "lighting": "day_sun",
+   "depth": 8,
+   "environment_richness": 8,
+   "character_quality": 0,
+   "render_quality": 8,
+   "note": "Multiple detonations visible across the field and foreground."
+  },
+  {
+   "i": 24,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "fort wall overlook",
+   "set_detail": "character standing on a stone parapet with distant hills; large explosion behind",
+   "objects": [
+    "stone parapet",
+    "hills",
+    "sky",
+    "mushroom cloud explosion",
+    "smoke"
+   ],
+   "spoken_visible": "partial",
+   "action": "large explosion rises behind the character",
+   "effects": [
+    "explosion",
+    "fire",
+    "smoke"
+   ],
+   "characters": 1,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Stick-figure style 3D character with explosion background; words about a miss are only loosely related."
+  }
+ ],
+ "words": [
+  {
+   "w": "He",
+   "t": 0.12,
+   "anchored": false
+  },
+  {
+   "w": "drilled",
+   "t": 0.25,
+   "anchored": true
+  },
+  {
+   "w": "82",
+   "t": 0.75,
+   "anchored": false
+  },
+  {
+   "w": "holes",
+   "t": 1.25,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 1.5,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 1.62,
+   "anchored": false
+  },
+  {
+   "w": "wood",
+   "t": 1.75,
+   "anchored": true
+  },
+  {
+   "w": "because",
+   "t": 2.05,
+   "anchored": false
+  },
+  {
+   "w": "down",
+   "t": 2.35,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 2.65,
+   "anchored": false
+  },
+  {
+   "w": "hill",
+   "t": 2.95,
+   "anchored": false
+  },
+  {
+   "w": "an",
+   "t": 3.25,
+   "anchored": true
+  },
+  {
+   "w": "army",
+   "t": 3.6,
+   "anchored": false
+  },
+  {
+   "w": "is",
+   "t": 3.95,
+   "anchored": false
+  },
+  {
+   "w": "marching",
+   "t": 4.3,
+   "anchored": false
+  },
+  {
+   "w": "straight",
+   "t": 4.65,
+   "anchored": false
+  },
+  {
+   "w": "for",
+   "t": 5.0,
+   "anchored": true
+  },
+  {
+   "w": "his",
+   "t": 5.0,
+   "anchored": false
+  },
+  {
+   "w": "fort",
+   "t": 5.0,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 5.33,
+   "anchored": false
+  },
+  {
+   "w": "while",
+   "t": 5.67,
+   "anchored": false
+  },
+  {
+   "w": "everyone",
+   "t": 6.0,
+   "anchored": true
+  },
+  {
+   "w": "else",
+   "t": 6.25,
+   "anchored": true
+  },
+  {
+   "w": "sharpened",
+   "t": 6.75,
+   "anchored": true
+  },
+  {
+   "w": "swords",
+   "t": 7.0,
+   "anchored": true
+  },
+  {
+   "w": "He's",
+   "t": 7.5,
+   "anchored": true
+  },
+  {
+   "w": "in",
+   "t": 7.5,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 7.75,
+   "anchored": true
+  },
+  {
+   "w": "corner",
+   "t": 7.75,
+   "anchored": true
+  },
+  {
+   "w": "still",
+   "t": 8.25,
+   "anchored": false
+  },
+  {
+   "w": "drilling",
+   "t": 8.75,
+   "anchored": true
+  },
+  {
+   "w": "his",
+   "t": 9.25,
+   "anchored": true
+  },
+  {
+   "w": "commander",
+   "t": 9.5,
+   "anchored": true
+  },
+  {
+   "w": "asks",
+   "t": 9.79,
+   "anchored": false
+  },
+  {
+   "w": "are",
+   "t": 10.08,
+   "anchored": false
+  },
+  {
+   "w": "we",
+   "t": 10.38,
+   "anchored": false
+  },
+  {
+   "w": "fighting",
+   "t": 10.67,
+   "anchored": false
+  },
+  {
+   "w": "them",
+   "t": 10.96,
+   "anchored": false
+  },
+  {
+   "w": "or",
+   "t": 11.25,
+   "anchored": true
+  },
+  {
+   "w": "grating",
+   "t": 11.69,
+   "anchored": false
+  },
+  {
+   "w": "cheese,",
+   "t": 12.12,
+   "anchored": false
+  },
+  {
+   "w": "but",
+   "t": 12.56,
+   "anchored": false
+  },
+  {
+   "w": "it",
+   "t": 13.0,
+   "anchored": true
+  },
+  {
+   "w": "gets",
+   "t": 13.0,
+   "anchored": true
+  },
+  {
+   "w": "weirder",
+   "t": 13.25,
+   "anchored": true
+  },
+  {
+   "w": "He",
+   "t": 13.75,
+   "anchored": false
+  },
+  {
+   "w": "bolts",
+   "t": 14.25,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 14.5,
+   "anchored": true
+  },
+  {
+   "w": "wood",
+   "t": 14.5,
+   "anchored": true
+  },
+  {
+   "w": "onto",
+   "t": 14.75,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 14.88,
+   "anchored": false
+  },
+  {
+   "w": "cart",
+   "t": 15.0,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 15.5,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 15.75,
+   "anchored": true
+  },
+  {
+   "w": "every",
+   "t": 16.0,
+   "anchored": false
+  },
+  {
+   "w": "hole",
+   "t": 16.25,
+   "anchored": true
+  },
+  {
+   "w": "goes",
+   "t": 16.59,
+   "anchored": false
+  },
+  {
+   "w": "something",
+   "t": 16.94,
+   "anchored": false
+  },
+  {
+   "w": "long",
+   "t": 17.28,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 17.62,
+   "anchored": false
+  },
+  {
+   "w": "thin",
+   "t": 17.97,
+   "anchored": false
+  },
+  {
+   "w": "wrapped",
+   "t": 18.31,
+   "anchored": false
+  },
+  {
+   "w": "in",
+   "t": 18.66,
+   "anchored": false
+  },
+  {
+   "w": "paper",
+   "t": 19.0,
+   "anchored": true
+  },
+  {
+   "w": "each",
+   "t": 19.25,
+   "anchored": true
+  },
+  {
+   "w": "with",
+   "t": 19.5,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 19.5,
+   "anchored": false
+  },
+  {
+   "w": "string",
+   "t": 19.5,
+   "anchored": true
+  },
+  {
+   "w": "Then",
+   "t": 20.25,
+   "anchored": true
+  },
+  {
+   "w": "he",
+   "t": 20.5,
+   "anchored": true
+  },
+  {
+   "w": "twists",
+   "t": 20.5,
+   "anchored": true
+  },
+  {
+   "w": "all",
+   "t": 20.88,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 21.25,
+   "anchored": true
+  },
+  {
+   "w": "strings",
+   "t": 21.25,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 21.75,
+   "anchored": false
+  },
+  {
+   "w": "one",
+   "t": 22.25,
+   "anchored": true
+  },
+  {
+   "w": "rope",
+   "t": 22.62,
+   "anchored": false
+  },
+  {
+   "w": "Nobody's",
+   "t": 23.0,
+   "anchored": true
+  },
+  {
+   "w": "allowed",
+   "t": 23.25,
+   "anchored": true
+  },
+  {
+   "w": "to",
+   "t": 23.5,
+   "anchored": true
+  },
+  {
+   "w": "touch",
+   "t": 23.75,
+   "anchored": false
+  },
+  {
+   "w": "one",
+   "t": 24.0,
+   "anchored": true
+  },
+  {
+   "w": "soldier",
+   "t": 24.25,
+   "anchored": true
+  },
+  {
+   "w": "reaches",
+   "t": 24.75,
+   "anchored": true
+  },
+  {
+   "w": "for",
+   "t": 25.25,
+   "anchored": true
+  },
+  {
+   "w": "it",
+   "t": 25.25,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 25.5,
+   "anchored": true
+  },
+  {
+   "w": "he",
+   "t": 25.5,
+   "anchored": true
+  },
+  {
+   "w": "slaps",
+   "t": 25.75,
+   "anchored": true
+  },
+  {
+   "w": "his",
+   "t": 26.0,
+   "anchored": true
+  },
+  {
+   "w": "hands",
+   "t": 26.25,
+   "anchored": true
+  },
+  {
+   "w": "so",
+   "t": 26.5,
+   "anchored": true
+  },
+  {
+   "w": "hard",
+   "t": 26.5,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 27.0,
+   "anchored": true
+  },
+  {
+   "w": "whole",
+   "t": 27.0,
+   "anchored": true
+  },
+  {
+   "w": "fort",
+   "t": 27.5,
+   "anchored": true
+  },
+  {
+   "w": "hears",
+   "t": 28.0,
+   "anchored": true
+  },
+  {
+   "w": "it",
+   "t": 28.25,
+   "anchored": true
+  },
+  {
+   "w": "that",
+   "t": 28.5,
+   "anchored": true
+  },
+  {
+   "w": "night",
+   "t": 28.75,
+   "anchored": true
+  },
+  {
+   "w": "it",
+   "t": 29.0,
+   "anchored": true
+  },
+  {
+   "w": "pours",
+   "t": 29.5,
+   "anchored": true
+  },
+  {
+   "w": "So",
+   "t": 29.75,
+   "anchored": false
+  },
+  {
+   "w": "he",
+   "t": 30.0,
+   "anchored": true
+  },
+  {
+   "w": "throws",
+   "t": 30.25,
+   "anchored": false
+  },
+  {
+   "w": "his",
+   "t": 30.5,
+   "anchored": true
+  },
+  {
+   "w": "coat",
+   "t": 30.75,
+   "anchored": true
+  },
+  {
+   "w": "over",
+   "t": 31.0,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 31.25,
+   "anchored": true
+  },
+  {
+   "w": "cart",
+   "t": 31.5,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 31.75,
+   "anchored": true
+  },
+  {
+   "w": "lies",
+   "t": 32.0,
+   "anchored": true
+  },
+  {
+   "w": "on",
+   "t": 32.0,
+   "anchored": true
+  },
+  {
+   "w": "top",
+   "t": 32.5,
+   "anchored": true
+  },
+  {
+   "w": "of",
+   "t": 32.58,
+   "anchored": false
+  },
+  {
+   "w": "it",
+   "t": 32.67,
+   "anchored": false
+  },
+  {
+   "w": "like",
+   "t": 32.75,
+   "anchored": true
+  },
+  {
+   "w": "a",
+   "t": 32.88,
+   "anchored": false
+  },
+  {
+   "w": "human",
+   "t": 33.0,
+   "anchored": true
+  },
+  {
+   "w": "umbrella",
+   "t": 33.5,
+   "anchored": true
+  },
+  {
+   "w": "One",
+   "t": 34.0,
+   "anchored": true
+  },
+  {
+   "w": "drop",
+   "t": 34.25,
+   "anchored": true
+  },
+  {
+   "w": "gets",
+   "t": 34.5,
+   "anchored": true
+  },
+  {
+   "w": "in",
+   "t": 34.62,
+   "anchored": false
+  },
+  {
+   "w": "there",
+   "t": 34.75,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 35.04,
+   "anchored": false
+  },
+  {
+   "w": "we're",
+   "t": 35.32,
+   "anchored": false
+  },
+  {
+   "w": "all",
+   "t": 35.61,
+   "anchored": false
+  },
+  {
+   "w": "dead",
+   "t": 35.89,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 36.18,
+   "anchored": false
+  },
+  {
+   "w": "next",
+   "t": 36.46,
+   "anchored": false
+  },
+  {
+   "w": "morning",
+   "t": 36.75,
+   "anchored": true
+  },
+  {
+   "w": "ladders",
+   "t": 37.25,
+   "anchored": false
+  },
+  {
+   "w": "slam",
+   "t": 37.75,
+   "anchored": true
+  },
+  {
+   "w": "against",
+   "t": 38.25,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 38.5,
+   "anchored": true
+  },
+  {
+   "w": "walls",
+   "t": 38.62,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 38.75,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 38.75,
+   "anchored": true
+  },
+  {
+   "w": "army",
+   "t": 39.19,
+   "anchored": false
+  },
+  {
+   "w": "charges",
+   "t": 39.62,
+   "anchored": false
+  },
+  {
+   "w": "Everyone",
+   "t": 40.06,
+   "anchored": false
+  },
+  {
+   "w": "screams",
+   "t": 40.5,
+   "anchored": true
+  },
+  {
+   "w": "at",
+   "t": 41.0,
+   "anchored": true
+  },
+  {
+   "w": "him",
+   "t": 41.12,
+   "anchored": false
+  },
+  {
+   "w": "to",
+   "t": 41.25,
+   "anchored": true
+  },
+  {
+   "w": "do",
+   "t": 41.5,
+   "anchored": false
+  },
+  {
+   "w": "something",
+   "t": 41.75,
+   "anchored": true
+  },
+  {
+   "w": "But",
+   "t": 42.0,
+   "anchored": false
+  },
+  {
+   "w": "he",
+   "t": 42.25,
+   "anchored": true
+  },
+  {
+   "w": "just",
+   "t": 42.5,
+   "anchored": false
+  },
+  {
+   "w": "watches",
+   "t": 42.75,
+   "anchored": false
+  },
+  {
+   "w": "them",
+   "t": 43.0,
+   "anchored": false
+  },
+  {
+   "w": "get",
+   "t": 43.25,
+   "anchored": true
+  },
+  {
+   "w": "closer",
+   "t": 46.5,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 46.53,
+   "anchored": false
+  },
+  {
+   "w": "closer",
+   "t": 46.56,
+   "anchored": false
+  },
+  {
+   "w": "until",
+   "t": 46.59,
+   "anchored": false
+  },
+  {
+   "w": "they're",
+   "t": 46.62,
+   "anchored": false
+  },
+  {
+   "w": "packed",
+   "t": 46.66,
+   "anchored": false
+  },
+  {
+   "w": "shoulder-to-shoulder",
+   "t": 46.69,
+   "anchored": false
+  },
+  {
+   "w": "close",
+   "t": 46.72,
+   "anchored": false
+  },
+  {
+   "w": "enough",
+   "t": 46.75,
+   "anchored": true
+  },
+  {
+   "w": "to",
+   "t": 47.0,
+   "anchored": false
+  },
+  {
+   "w": "see",
+   "t": 47.25,
+   "anchored": false
+  },
+  {
+   "w": "their",
+   "t": 47.5,
+   "anchored": false
+  },
+  {
+   "w": "teeth",
+   "t": 47.75,
+   "anchored": true
+  },
+  {
+   "w": "That's",
+   "t": 48.0,
+   "anchored": false
+  },
+  {
+   "w": "when",
+   "t": 48.25,
+   "anchored": false
+  },
+  {
+   "w": "he",
+   "t": 48.5,
+   "anchored": true
+  },
+  {
+   "w": "rips",
+   "t": 48.5,
+   "anchored": true
+  },
+  {
+   "w": "off",
+   "t": 48.75,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 49.0,
+   "anchored": false
+  },
+  {
+   "w": "coat",
+   "t": 49.25,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 49.58,
+   "anchored": false
+  },
+  {
+   "w": "lights",
+   "t": 49.92,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 50.25,
+   "anchored": true
+  },
+  {
+   "w": "rope",
+   "t": 50.25,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 50.75,
+   "anchored": true
+  },
+  {
+   "w": "spark",
+   "t": 50.88,
+   "anchored": false
+  },
+  {
+   "w": "races",
+   "t": 51.0,
+   "anchored": true
+  },
+  {
+   "w": "down",
+   "t": 51.5,
+   "anchored": true
+  },
+  {
+   "w": "it",
+   "t": 51.5,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 51.75,
+   "anchored": false
+  },
+  {
+   "w": "splits",
+   "t": 52.0,
+   "anchored": true
+  },
+  {
+   "w": "into",
+   "t": 52.35,
+   "anchored": false
+  },
+  {
+   "w": "82",
+   "t": 52.7,
+   "anchored": false
+  },
+  {
+   "w": "tiny",
+   "t": 53.05,
+   "anchored": false
+  },
+  {
+   "w": "flames",
+   "t": 53.4,
+   "anchored": false
+  },
+  {
+   "w": "and",
+   "t": 53.75,
+   "anchored": false
+  },
+  {
+   "w": "each",
+   "t": 54.1,
+   "anchored": false
+  },
+  {
+   "w": "one",
+   "t": 54.45,
+   "anchored": false
+  },
+  {
+   "w": "hits",
+   "t": 54.8,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 55.15,
+   "anchored": false
+  },
+  {
+   "w": "tube",
+   "t": 55.5,
+   "anchored": true
+  },
+  {
+   "w": "of",
+   "t": 55.62,
+   "anchored": false
+  },
+  {
+   "w": "gunpowder",
+   "t": 55.75,
+   "anchored": true
+  },
+  {
+   "w": "Strapped",
+   "t": 56.57,
+   "anchored": false
+  },
+  {
+   "w": "to",
+   "t": 57.39,
+   "anchored": false
+  },
+  {
+   "w": "an",
+   "t": 58.21,
+   "anchored": false
+  },
+  {
+   "w": "arrow",
+   "t": 59.04,
+   "anchored": false
+  },
+  {
+   "w": "turning",
+   "t": 59.86,
+   "anchored": false
+  },
+  {
+   "w": "every",
+   "t": 60.68,
+   "anchored": false
+  },
+  {
+   "w": "one",
+   "t": 61.5,
+   "anchored": true
+  },
+  {
+   "w": "of",
+   "t": 61.7,
+   "anchored": false
+  },
+  {
+   "w": "them",
+   "t": 61.9,
+   "anchored": false
+  },
+  {
+   "w": "into",
+   "t": 62.1,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 62.3,
+   "anchored": false
+  },
+  {
+   "w": "rocket",
+   "t": 62.5,
+   "anchored": false
+  },
+  {
+   "w": "all",
+   "t": 62.7,
+   "anchored": false
+  },
+  {
+   "w": "82",
+   "t": 62.9,
+   "anchored": false
+  },
+  {
+   "w": "blast",
+   "t": 63.1,
+   "anchored": false
+  },
+  {
+   "w": "off",
+   "t": 63.3,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 63.5,
+   "anchored": true
+  },
+  {
+   "w": "cart",
+   "t": 63.52,
+   "anchored": false
+  },
+  {
+   "w": "at",
+   "t": 63.55,
+   "anchored": false
+  },
+  {
+   "w": "once",
+   "t": 63.58,
+   "anchored": false
+  },
+  {
+   "w": "flying",
+   "t": 63.6,
+   "anchored": false
+  },
+  {
+   "w": "every",
+   "t": 63.62,
+   "anchored": false
+  },
+  {
+   "w": "which",
+   "t": 63.65,
+   "anchored": false
+  },
+  {
+   "w": "way",
+   "t": 63.67,
+   "anchored": false
+  },
+  {
+   "w": "But",
+   "t": 63.7,
+   "anchored": false
+  },
+  {
+   "w": "with",
+   "t": 63.73,
+   "anchored": false
+  },
+  {
+   "w": "the",
+   "t": 63.75,
+   "anchored": true
+  },
+  {
+   "w": "army",
+   "t": 63.75,
+   "anchored": true
+  },
+  {
+   "w": "packed",
+   "t": 64.0,
+   "anchored": true
+  },
+  {
+   "w": "that",
+   "t": 64.25,
+   "anchored": true
+  },
+  {
+   "w": "tight",
+   "t": 64.63,
+   "anchored": false
+  },
+  {
+   "w": "not",
+   "t": 65.01,
+   "anchored": false
+  },
+  {
+   "w": "a",
+   "t": 65.38,
+   "anchored": false
+  },
+  {
+   "w": "single",
+   "t": 65.76,
+   "anchored": false
+  },
+  {
+   "w": "one",
+   "t": 66.14,
+   "anchored": false
+  },
+  {
+   "w": "misses",
+   "t": 66.52,
+   "anchored": false
+  }
+ ]
+}

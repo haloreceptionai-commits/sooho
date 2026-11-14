@@ -1,3 +1,15 @@
+# Benchmark-quality plan (approved Nov 14, one step per "next")
+- [x] 1. Benchmark measurement kit: shot lists, scorecard, our 2 videos scored
+- [ ] 2. Headless Blender renderer on scale-to-zero Azure render machines
+- [ ] 3. CC0 asset library and set kits
+- [ ] 4. Benchmark-style 3D egg-head characters and poses
+- [ ] 5. Story-specific objects from safe parts
+- [ ] 6. Shot director rewrite (Codex shot plans, word-matched shots)
+- [ ] 7. Effects and camera
+- [ ] 8. Sound matched to picture
+- [ ] 9. Script and picture together
+- [ ] 10. Full 3-video test, speed and launch
+
 # Roadmap — Advanced Video AI v2
 - [x] Accelerate and verify topic discovery: Parallel fast searches + two parallel exact-passage reviews replace oversized full-page reviews. Real owner search returned six facts in 48.4 seconds; saving, selection and saved reload verified; 13 tests passed. Instant fresh research is not promised.
 - [x] Script: 3 repairs, word budget by length, kid-level word checker, keep-watching judge

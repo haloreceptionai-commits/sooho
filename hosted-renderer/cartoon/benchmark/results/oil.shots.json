@@ -1,0 +1,275 @@
+{
+ "shots": [
+  {
+   "i": 0,
+   "start": 0.0,
+   "end": 4.4,
+   "len": 4.4,
+   "sharpness": 542.3,
+   "colorfulness": 78.6,
+   "contrast": 47.8,
+   "motion": 0.008,
+   "words": "Sailors pour oil; white tips fade while swells keep moving. A"
+  },
+  {
+   "i": 1,
+   "start": 4.4,
+   "end": 9.1,
+   "len": 4.7,
+   "sharpness": 611.9,
+   "colorfulness": 85.0,
+   "contrast": 32.7,
+   "motion": 0.0036,
+   "words": "thin film lowers surface pull and adds drag, so quick little ripples die. Oil only calms ripples,"
+  },
+  {
+   "i": 2,
+   "start": 9.1,
+   "end": 11.97,
+   "len": 2.87,
+   "sharpness": 527.7,
+   "colorfulness": 120.5,
+   "contrast": 33.8,
+   "motion": 0.0304,
+   "words": "not the big waves."
+  }
+ ],
+ "labels": [
+  {
+   "i": 0,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "ship deck",
+   "set_detail": "wooden deck with masts, ropes, barrels and ocean beyond",
+   "objects": [
+    "barrels",
+    "rope coil",
+    "bucket",
+    "oil puddle",
+    "masts",
+    "sails"
+   ],
+   "spoken_visible": "partial",
+   "action": "one sailor pours oil on deck while others gesture",
+   "effects": [],
+   "characters": 3,
+   "lighting": "day_sun",
+   "depth": 3,
+   "environment_richness": 5,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "Flat 2D-style characters in a simple 3D deck; pouring oil shown but whitecaps/swell motion not depicted."
+  },
+  {
+   "i": 1,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "ship deck",
+   "set_detail": "top-down oblique view across deck with barrels and railing",
+   "objects": [
+    "barrels",
+    "rope coil",
+    "small oil patch",
+    "rail"
+   ],
+   "spoken_visible": "partial",
+   "action": "none",
+   "effects": [],
+   "characters": 3,
+   "lighting": "day_sun",
+   "depth": 3,
+   "environment_richness": 5,
+   "character_quality": 3,
+   "render_quality": 3,
+   "note": "Dialogue about thin film and ripples not literally shown; mostly characters standing."
+  },
+  {
+   "i": 2,
+   "shot_type": "wide",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "ship deck",
+   "set_detail": "deck with masts, boxes and ocean with boats/flags behind",
+   "objects": [
+    "masts",
+    "boxes",
+    "flags",
+    "boats"
+   ],
+   "spoken_visible": "no",
+   "action": "none",
+   "effects": [],
+   "characters": 3,
+   "lighting": "day_sun",
+   "depth": 3,
+   "environment_richness": 5,
+   "character_quality": 3,
+   "render_quality": 3,
+   "note": "No depiction of big waves; same flat cut-out characters on 3D deck."
+  }
+ ],
+ "words": [
+  {
+   "w": "Sailors",
+   "t": 0.25,
+   "anchored": true
+  },
+  {
+   "w": "pour",
+   "t": 0.75,
+   "anchored": true
+  },
+  {
+   "w": "oil;",
+   "t": 1.38,
+   "anchored": false
+  },
+  {
+   "w": "white",
+   "t": 2.0,
+   "anchored": true
+  },
+  {
+   "w": "tips",
+   "t": 2.25,
+   "anchored": true
+  },
+  {
+   "w": "fade",
+   "t": 2.5,
+   "anchored": true
+  },
+  {
+   "w": "while",
+   "t": 3.0,
+   "anchored": true
+  },
+  {
+   "w": "swells",
+   "t": 3.25,
+   "anchored": true
+  },
+  {
+   "w": "keep",
+   "t": 3.5,
+   "anchored": true
+  },
+  {
+   "w": "moving.",
+   "t": 3.75,
+   "anchored": true
+  },
+  {
+   "w": "A",
+   "t": 4.12,
+   "anchored": false
+  },
+  {
+   "w": "thin",
+   "t": 4.5,
+   "anchored": true
+  },
+  {
+   "w": "film",
+   "t": 4.75,
+   "anchored": true
+  },
+  {
+   "w": "lowers",
+   "t": 5.25,
+   "anchored": true
+  },
+  {
+   "w": "surface",
+   "t": 5.5,
+   "anchored": true
+  },
+  {
+   "w": "pull",
+   "t": 6.0,
+   "anchored": true
+  },
+  {
+   "w": "and",
+   "t": 6.25,
+   "anchored": true
+  },
+  {
+   "w": "adds",
+   "t": 6.25,
+   "anchored": true
+  },
+  {
+   "w": "drag,",
+   "t": 6.75,
+   "anchored": true
+  },
+  {
+   "w": "so",
+   "t": 7.25,
+   "anchored": true
+  },
+  {
+   "w": "quick",
+   "t": 7.5,
+   "anchored": true
+  },
+  {
+   "w": "little",
+   "t": 7.75,
+   "anchored": false
+  },
+  {
+   "w": "ripples",
+   "t": 8.0,
+   "anchored": true
+  },
+  {
+   "w": "die.",
+   "t": 8.05,
+   "anchored": false
+  },
+  {
+   "w": "Oil",
+   "t": 8.1,
+   "anchored": false
+  },
+  {
+   "w": "only",
+   "t": 8.15,
+   "anchored": false
+  },
+  {
+   "w": "calms",
+   "t": 8.2,
+   "anchored": false
+  },
+  {
+   "w": "ripples,",
+   "t": 8.25,
+   "anchored": true
+  },
+  {
+   "w": "not",
+   "t": 10.75,
+   "anchored": true
+  },
+  {
+   "w": "the",
+   "t": 10.88,
+   "anchored": false
+  },
+  {
+   "w": "big",
+   "t": 11.0,
+   "anchored": true
+  },
+  {
+   "w": "waves.",
+   "t": 11.25,
+   "anchored": true
+  }
+ ]
+}
