@@ -75,22 +75,23 @@ def call(shots: list[dict]) -> list[dict]:
     req = urllib.request.Request(f'{ENDPOINT}/openai/deployments/{DEPLOYMENT}/chat/completions?api-version=2025-04-01-preview',
                                  data=json.dumps(body).encode(), method='POST',
                                  headers={'api-key': os.environ['AZURE_OPENAI_API_KEY'], 'Content-Type': 'application/json'})
-    for attempt in range(3):
+    for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=240) as r:
                 j = json.load(r)
             return json.loads(j['choices'][0]['message']['content'])['shots']
         except Exception as e:  # network/429: retry with backoff, never print secrets
-            if attempt == 2:
-                raise RuntimeError(f'vision labelling failed: {type(e).__name__}') from None
-            time.sleep(10 * (attempt + 1))
+            code = getattr(e, 'code', '')
+            if attempt == 4:
+                raise RuntimeError(f'vision labelling failed: {type(e).__name__} {code}') from None
+            time.sleep(20 * (attempt + 1))
     return []
 
 
 def label(measure: dict, batch: int = 6) -> list[dict]:
     shots = measure['shots']
     groups = [shots[i:i + batch] for i in range(0, len(shots), batch)]
-    with ThreadPoolExecutor(4) as ex:
+    with ThreadPoolExecutor(2) as ex:
         out = [x for g in ex.map(call, groups) for x in g]
     by = {x['i']: x for x in out}
     missing = [s['i'] for s in shots if s['i'] not in by]
