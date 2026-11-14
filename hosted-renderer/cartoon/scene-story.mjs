@@ -105,7 +105,7 @@ function propPose(prop, f, shot, index) {
   let [x0, y0, z0, s0] = PLACE[prop.place];
   if (prop.place !== 'ground_left' && prop.place !== 'ground_right') x0 += camAt(f).look[0];
   // Library objects stand beside the cast, a step behind, so they never hide a performer.
-  if (prop.kind === 'asset' && prop.place.startsWith('ground')) { x0 = camAt(f).look[0] + Math.sign(x0) * .8; z0 = -.6; }
+  if (prop.kind === 'asset' && prop.place.startsWith('ground')) { x0 = camAt(f).look[0] + Math.sign(x0) * (isCardProp(prop) ? .55 : .8); z0 = -.6; }
   if (prop.place === 'sea' && NEAR_SEA.has(prop.kind)) { z0 = -13; s0 = 5; y0 = -1.6; x0 -= .3; }
   if (prop.place === 'sea' && MODEL3D.has(prop.kind) && !NEAR_SEA.has(prop.kind)) { y0 = .4; z0 = -20; s0 = 7; }
   const t = Math.max(0, Math.min(1, (f - shot.start) / Math.max(1, shot.end - shot.start)));
