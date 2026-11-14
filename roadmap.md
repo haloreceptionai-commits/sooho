@@ -14,4 +14,4 @@
 - [ ] November 14: strengthen the first three spoken words, connected sentences and cause-and-effect; verify history and mechanism scripts through real generation
 - [x] Match Mine Salting sound with the current narrator: owner selected new sample 03 Fast explainer; use its Puck directions for new Shorts, preserve long-form Charon and saved takes. ElevenLabs disconnected; no identical-reference claim.
 - [x] Create five new current-narrator delivery auditions for owner selection; five equally loud, decode-checked Puck MP3s delivered; sample 03 selected.
-- [ ] Improve Advanced music and spoken-action effects, verify a sample-03 mix and deploy the updated worker.
+- [x] Improve Advanced music and spoken-action effects: varied original pizzicato/bass/brushed rhythm, timed editorial sweeps/metal jingles/thunder, existing contact Foley and speech ducking preserved. 17 tests passed; sample-03 mix decoded with no clipping; Azure cc17/cc18 succeeded. Full video listening comparison remains unverified.
