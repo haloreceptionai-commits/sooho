@@ -8,7 +8,7 @@ async function inkCard(id) {
   const img = new Image(); img.src = `./cards/${id}.png`; await img.decode();
   // 600x1000 design canvas (the card's aspect), feet at bottom centre, 9 px ink rim at 1500 px tall.
   const W = 600, H = 1000, pad = 22, k = Math.min((W - pad * 2) / img.width, (H - pad * 2) / img.height);
-  const w = img.width * k, h = img.height * k, x = (W - w) / 2, y = H - pad - h;
+  const w = img.width * k, h = img.height * k, x = (W - w) / 2, y = H - 8 - h;
   const sil = document.createElement('canvas'); sil.width = W; sil.height = H; const g = sil.getContext('2d');
   g.drawImage(img, x, y, w, h); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#17131c'; g.fillRect(0, 0, W, H);
   const out = document.createElement('canvas'); out.width = W; out.height = H; const o = out.getContext('2d');
