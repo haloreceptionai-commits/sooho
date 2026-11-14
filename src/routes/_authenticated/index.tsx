@@ -95,7 +95,7 @@ function Create() {
               <div className="flex justify-between text-sm"><span className="font-semibold">Length</span>
                 <span className="font-mono">{format === "short" ? `${shortSec}s` : `${longMin} min`}</span></div>
               {format === "short"
-                ? <input type="range" min={30} max={90} step={5} value={shortSec} onChange={(e) => setShortSec(+e.target.value)} className="mt-2 w-full accent-primary" />
+                ? <input aria-label="Short length in seconds" type="range" min={engine === "advanced" ? 10 : 30} max={90} step={engine === "advanced" ? 1 : 5} value={shortSec} onChange={(e) => setShortSec(+e.target.value)} className="mt-2 w-full accent-primary" />
                 : <input type="range" min={3} max={15} step={1} value={longMin} onChange={(e) => setLongMin(+e.target.value)} className="mt-2 w-full accent-primary" />}
             </div>
           </Panel>
