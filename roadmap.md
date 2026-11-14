@@ -12,3 +12,4 @@
 - [ ] Complete the approved remaining upgrade and create a motion-and-sound test requested November 14
 - [ ] Finish interrupted motion test, repair disconnected puppet joints, and verify saved production test recovery
 - [ ] November 14: strengthen the first three spoken words, connected sentences and cause-and-effect; verify history and mechanism scripts through real generation
+- [ ] Match the re-uploaded Mine Salting narration through measured voice auditions; exact cloning is unavailable on the connected speech service, so do not claim 99% identity or replace the current voice without audition approval
