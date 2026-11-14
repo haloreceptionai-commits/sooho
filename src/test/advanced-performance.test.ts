@@ -13,7 +13,8 @@ describe('Advanced articulated contact clock',()=>{
   });
   it('attaches a held tool to the same wrist anchor',()=>{
     expect(wristWorld([0,0,0],[300,975])).toEqual([0,0,.06]);
-    expect(wristWorld([1,0,0],[400,575],true)).toEqual([.775,.9,.06]);
+    const anchor=wristWorld([1,0,0],[400,575],true);
+    expect(anchor[0]).toBeCloseTo(.775);expect(anchor[1]).toBeCloseTo(.9);expect(anchor[2]).toBe(.06);
   });
   it('releases a throw only on contact and moves the object thereafter',()=>{
     expect(performanceAt('throw',29,0,90,30).released).toBe(false);

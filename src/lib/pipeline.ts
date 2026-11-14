@@ -338,7 +338,7 @@ export async function runVideo(id: string, input: VideoInput) {
             parts.push(b64ToBuf((await withRetry(() => generateVoice({ data: { text, voice: 'onyx', deployment: s.ttsDeployment, style: 'long' } }))).audio));
           }
           audio = joinWavs(parts);
-        } else audio = b64ToBuf((await withRetry(() => generateVoice({ data: { text: script, voice: 'onyx', deployment: s.ttsDeployment, style: advanced ? 'advanced' : 'short' } }))).audio);
+        } else audio = b64ToBuf((await withRetry(() => generateVoice({ data: { text: script, voice: 'onyx', deployment: s.ttsDeployment, style: 'short' } }))).audio);
         const { error } = await supabase.storage.from('videos').upload(voicePath, audio, { contentType: 'audio/wav', upsert: false });
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }

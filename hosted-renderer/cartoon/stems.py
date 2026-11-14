@@ -92,7 +92,8 @@ def sound_design(samples,twist_frame,cues,seed=1):
         freq=notes[(start//int(RATE*.25))%3]
         env=np.sin(np.pi*np.arange(n)/max(n,1))**2*np.exp(-tt*12)
         music[start:start+n]+=.025*(np.sin(2*np.pi*freq*tt)+.15*np.sin(4*np.pi*freq*tt))*env
-    root=Path(__file__).parent/'assets'/'sound'
+    import os
+    root=Path(os.environ.get('CARTOON_SOUND_DIR',str(Path(__file__).parent/'assets'/'sound')))
     names={'impact':'impact','pour':'splash','splash':'splash','pop':'tap','creak':'handling','coin':'handling','bell':'handling','reveal':'tap','whoosh':'handling','wind':'stone','thunder':'stone','crowd':'footstep'}
     cache={}
     for cue in cues:
