@@ -32,7 +32,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
     const { data } = await bucket.download(`${root}/cards.json`);
     if (data) design = JSON.parse(await data.text()) as Design;
   }
-  if (!design || ids.some(i => !design!.cards.some(c => c.id === i))) {
+  if (!design || ids.some(i => !design?.cards.some(c => c.id === i))) {
     report("Designing the characters and story objects…");
     const scenes = narration.map((t, i) => { const sc = direction.scenes[i]; return `${t} [actors: ${(sc?.actors ?? []).map(a => a.actor).join(", ") || sc?.actor || ids[0]}; props: ${(sc?.props ?? []).map(p => p.asset || p.kind).join(", ") || "none"}]`; });
     design = await retry(() => designAdvancedCards({ data: { scenes, ids, deployment: settings.scriptDeployment } }));
@@ -53,7 +53,9 @@ export async function paintAdvancedCards(direction: Direction, narration: string
   const cards: { id: string; path: string }[] = [];
   await Promise.all([
     ...ids.map(async cid => {
-      const look = d.cards.find(c => c.id === cid)!.look;
+      const cardDesign=d.cards.find(c=>c.id===cid);
+      if(!cardDesign)throw Error('Character design is missing');
+      const look = cardDesign.look;
       let base: string;
       if (have.has(`card-${cid}.png`)) {
         const { data } = await bucket.download(`${root}/card-${cid}.png`);
@@ -64,12 +66,16 @@ export async function paintAdvancedCards(direction: Direction, narration: string
         await save(`card-${cid}.png`, toBytes(base), "image/png"); tick();
       }
       cards.push({ id: cid, path: `${root}/card-${cid}.png` });
-      await Promise.all(CARD_POSES.map(async pose => {
+      // One joint atlas replaces three whole-body poses for human performers. Historical jobs keep their takes.
+      const animal=ANIMALS.some(name=>new RegExp(`\\b${name}\\b`,'i').test(look));
+      const poses=animal?CARD_POSES:['rig'] as const;
+      await Promise.all(poses.map(async pose => {
         const key = `${cid}-${pose}`;
         if (!have.has(`card-${key}.png`)) {
           // A pose that fails is skipped: the renderer falls back to the standing card.
           const r = await limit(() => retry(() => paintAdvancedCard({ data: { look, pose, reference: base, deployment: settings.imageDeployment } }))).catch((e: unknown) => { console.warn("Pose skipped:", key, e); return null; });
           if (!r) return;
+          if(pose==='rig')await validateRigAtlas(r.image);
           await save(`card-${key}.png`, toBytes(r.image), "image/png"); tick();
         }
         cards.push({ id: key, path: `${root}/card-${key}.png` });
@@ -87,6 +93,19 @@ export async function paintAdvancedCards(direction: Direction, narration: string
   ]);
   const painted = new Set(cards.map(c => c.id));
   return { cards: cards.sort((a, b) => a.id.localeCompare(b.id)), objects: d.objects.filter(o => painted.has(`obj-${o.name}`)).map(({ name, scenes }) => ({ name, scenes })) };
+}
+
+async function validateRigAtlas(base64:string){
+  const image=new Image();image.src=`data:image/png;base64,${base64}`;await image.decode();
+  if(image.width!==1024||image.height!==1536)throw Error('Character parts have invalid dimensions');
+  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1536;
+  const ctx=canvas.getContext('2d');if(!ctx)throw Error('Character parts could not be checked');
+  ctx.drawImage(image,0,0);const data=ctx.getImageData(0,0,1024,1536).data;
+  for(let row=0;row<4;row++)for(let col=0;col<2;col++){
+    let solid=0,edge=0;
+    for(let y=0;y<384;y+=3)for(let x=0;x<512;x+=3){const alpha=data[((row*384+y)*1024+col*512+x)*4+3]??0;if(alpha>80){solid++;if(x<12||x>499||y<12||y>371)edge++;}}
+    if(solid<100||edge>100||solid>16000)throw Error('Character parts are missing or overlap their cells');
+  }
 }
 
 /** Puts each painted story object into the scenes where it is said (on the ground beside the cast) and keeps only cards in use. */
