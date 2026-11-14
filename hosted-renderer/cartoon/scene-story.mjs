@@ -3,26 +3,46 @@ import { actionState } from './action.js';
 import { LIGHTS } from './lights.js';
 import manifest from './manifest.json' with { type: 'json' };
 
-// Advanced Video AI: painted character cards (image-model art) with one shared code-drawn ink outline.
-async function inkCard(id) {
-  const img = new Image(); img.src = `./cards/${id}.png`; await img.decode();
+// Advanced Video AI: painted cards (image-model art) with one shared code-drawn ink outline and a soft light pass,
+// so they sit in the scene's light instead of looking pasted on. Keys: '<castId>', '<castId>-<pose>', 'obj-<name>'.
+async function inkCard(key) {
+  const img = new Image(); img.src = `./cards/${key}.png`; await img.decode();
   // 600x1000 design canvas (the card's aspect), feet at bottom centre, 9 px ink rim at 1500 px tall.
   const W = 600, H = 1000, pad = 22, k = Math.min((W - pad * 2) / img.width, (H - pad * 2) / img.height);
   const w = img.width * k, h = img.height * k, x = (W - w) / 2, y = H - 8 - h;
+  const art = document.createElement('canvas'); art.width = W; art.height = H; const a = art.getContext('2d');
+  a.drawImage(img, x, y, w, h);
+  // Key light from the upper left, a cool bounce in the lower right; only on the painted pixels.
+  a.globalCompositeOperation = 'source-atop';
+  const lg = a.createLinearGradient(0, 0, W, H); lg.addColorStop(0, 'rgba(255,236,200,0.16)'); lg.addColorStop(.5, 'rgba(255,236,200,0)'); lg.addColorStop(1, 'rgba(36,20,70,0.22)');
+  a.fillStyle = lg; a.fillRect(0, 0, W, H);
   const sil = document.createElement('canvas'); sil.width = W; sil.height = H; const g = sil.getContext('2d');
   g.drawImage(img, x, y, w, h); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#17131c'; g.fillRect(0, 0, W, H);
   const out = document.createElement('canvas'); out.width = W; out.height = H; const o = out.getContext('2d');
-  const r = 6; for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; o.drawImage(sil, Math.cos(a) * r, Math.sin(a) * r); }
-  o.drawImage(img, x, y, w, h);
+  const r = 6; for (let i = 0; i < 24; i++) { const t = i / 24 * Math.PI * 2; o.drawImage(sil, Math.cos(t) * r, Math.sin(t) * r); }
+  o.drawImage(art, 0, 0);
   return out;
 }
-const CARDS = Object.fromEntries(await Promise.all(manifest.cast.filter(c => c.card).map(async c => [c.id, await inkCard(c.id)])));
-export const ADVANCED = Object.keys(CARDS).length > 0;
+const CARD_KEYS = manifest.cast.some(c => c.card) ? await (await fetch('./cards/index.json')).json() : [];
+const CARDS = Object.fromEntries(await Promise.all(CARD_KEYS.map(async k => [k, await inkCard(k)])));
+export const ADVANCED = CARD_KEYS.length > 0;
+const REACH = new Set(['point', 'lift', 'pour', 'wave', 'grab', 'shout', 'thumbs_up', 'carry', 'hold']);
+const SHOCKED = new Set(['shock', 'nervous', 'dazed', 'pained']), HAPPY = new Set(['grin', 'laugh', 'relief', 'smile', 'whistle']);
+/** Which painted pose a performer shows: faces of shock or joy win, then reaching actions, else standing. */
+export function cardPose(action, expression) {
+  if (SHOCKED.has(expression) || action === 'react' || action === 'cower' || action === 'worried') return 'shock';
+  if (HAPPY.has(expression) || action === 'cheer') return 'happy';
+  if (REACH.has(action)) return 'reach';
+  return 'stand';
+}
+const cardFor = (id, action, expression) => { const pose = cardPose(action, expression); return CARDS[pose === 'stand' ? id : `${id}-${pose}`] || CARDS[id]; };
 const drawCard = (p, art, o) => {
-  // Alive without new art: idle squash/stretch, breathing and a hop on cheer/run, lean on walk.
-  const g = p.g, sq = 1 + (o.bob || 0) * .6, lean = (o.tilt || 0) * .02 + (o.step || 0) * .03;
-  g.save(); g.translate(300, 1000); g.rotate(lean); g.scale(1 / Math.sqrt(sq), sq); g.drawImage(art, -300, -1000); g.restore();
+  // Alive: breathing squash/stretch, a hop on cheer/run, lean into walks, and a talk bounce on each spoken syllable.
+  const g = p.g, talk = o.talk || 0, sq = 1 + (o.bob || 0) * .6 + talk * .035, lean = (o.tilt || 0) * .02 + (o.step || 0) * .05;
+  const hop = (o.action === 'cheer' || o.action === 'run' ? 28 * Math.abs(o.step || Math.sin((o.frame || 0) * .4)) : 0) + talk * 6;
+  g.save(); g.translate(300, 1000 - hop); g.rotate(lean); g.scale(1 / Math.sqrt(sq), sq); g.drawImage(art, -300, -1000); g.restore();
 };
+const isCardProp = p => p.kind === 'asset' && typeof p.asset === 'string' && p.asset.startsWith('card/');
 export const TOTAL = Math.round(manifest.narration.samples / 48000 * 30);
 export const SHOTS = manifest.shots;
 export const WORDS = manifest.words;
@@ -101,7 +121,7 @@ function propPose(prop, f, shot, index) {
 }
 // Story objects with a real 3D model render in the world (lit, inked, shadowed); the rest stay painted cards.
 export const MODEL3D = new Set(['merchant_ship', 'pirate_ship', 'wave', 'barrel', 'cannon', 'lantern', 'chest', 'anchor', 'helm_wheel', 'rowboat', 'asset']);
-const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind)).map(([p, i]) => { const pose = propPose(p, f, shot, i); return { kind: p.kind, asset: p.asset, place: p.place, i, ...pose, k: pose.s / PLACE[p.place][3] }; });
+const props3dAt = (f, shot) => (shot.props || []).map((p, i) => [p, i]).filter(([p]) => p.place !== 'hand' && MODEL3D.has(p.kind) && !isCardProp(p)).map(([p, i]) => { const pose = propPose(p, f, shot, i); return { kind: p.kind, asset: p.asset, place: p.place, i, ...pose, k: pose.s / PLACE[p.place][3] }; });
 const q = (v, k = 20) => Math.round(v * k) / k;
 export const actorsAt = (f, T) => {
   const shot = shotAt(f), local = (f - shot.start) / 30;
@@ -111,7 +131,7 @@ export const actorsAt = (f, T) => {
   const out = shot.actors.map(a => {
     const design = manifest.cast.find(c => c.id === a.id);
     if (!design || !outfits[design.outfit]) throw Error('Unsupported cast design');
-    const art = CARDS[design.id];
+    const art = ADVANCED && design.card ? cardFor(design.id, a.action, a.expression) : null;
     const idle = actorIdle(f, design.seed);
     const moving = a.action === 'walk' || a.action === 'run';
     const step = moving ? Math.sin(local * (a.action === 'run' ? 14 : 8)) : 0;
@@ -122,7 +142,9 @@ export const actorsAt = (f, T) => {
     const opts = { seed: design.seed, expr: a.expression, blink: (f + design.seed * 13) % 113 < 4 ? 1 : 0, facing: facing * .6,
       tilt: idle.tilt, headTilt: idle.headTilt + (a.action === 'think' ? 6 : 0), bob: idle.bob * 5 + (moving ? .04 * Math.abs(step) : 0) + cower + cheer,
       step, action: a.action, progress: action.progress, lift: action.lift, frame: f, viseme,
-      held: a.id === subjectId && held ? held.kind : null };
+      held: a.id === subjectId && held ? held.kind : null,
+      // Card talk bounce: peaks mid-word for the on-screen speaker (or the subject during narration).
+      talk: art && (a.id === (shot.speaker || subjectId)) && wordAt(f, shot) ? Math.sin(Math.PI * wordAt(f, shot).t) : 0 };
     const rounded = Object.fromEntries(Object.entries(opts).map(([k, v]) => [k, typeof v === 'number' ? Math.round(v * (k === 'bob' ? 1000 : 20)) / (k === 'bob' ? 1000 : 20) : v]));
     const travel = moving ? local * (a.action === 'run' ? .9 : .35) * ((a.facing || 1) >= 0 ? 1 : -1) : 0;
     return { x: a.pos[0] + travel, y: a.pos[1] + (shot.world === 'storm_sea' ? .03 * Math.sin(f * .06) : 0), z: a.pos[2], flip: facing < 0,
@@ -133,6 +155,14 @@ export const actorsAt = (f, T) => {
 export const fxAt = (f, T) => {
   const shot = shotAt(f), out = [];
   (shot.props || []).forEach((prop, i) => {
+    if (isCardProp(prop)) {
+      const art = CARDS[`obj-${prop.asset.slice(5)}`];
+      if (!art) throw Error('Painted object card missing');
+      const pose = propPose(prop, f, shot, i);
+      out.push({ x: pose.x, y: pose.y, z: pose.z, s: .6 * (pose.s / .5), roll: pose.roll, order: 1, blob: true,
+        key: JSON.stringify(['card', prop.asset, Math.round(pose.s * 50)]), draw: p => drawCard(p, art, {}) });
+      return;
+    }
     if (prop.place === 'hand' || MODEL3D.has(prop.kind)) return;
     const pose = propPose(prop, f, shot, i), animated = !['rock', 'tower', 'house', 'tree', 'chest', 'barrel', 'books', 'cart', 'crown', 'key', 'letter', 'scroll', 'bread', 'bottle', 'skull_sign', 'map', 'oil_jar', 'pot', 'sword', 'cannon', 'anchor', 'oar', 'moon', 'rowboat'].includes(prop.kind);
     out.push({ x: pose.x, y: pose.y, z: pose.z, s: pose.s, roll: pose.roll, order: 1, blob: prop.place.startsWith('ground'),
