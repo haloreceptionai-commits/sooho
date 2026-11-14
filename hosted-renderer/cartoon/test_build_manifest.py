@@ -19,6 +19,15 @@ class ManifestBuilderTests(unittest.TestCase):
    with wave.open(str(voice),'wb') as w:w.setnchannels(1);w.setsampwidth(2);w.setframerate(48000);w.writeframes(b'\0\0'*48000)
    with self.assertRaisesRegex(ValueError,'differs'):module.build({'script':'pour','narration':['pour'],'direction':{'scenes':[{}]}},{'words':[{'text':'crash','start':.2,'end':.5,'confidence':.9}]},voice)
 class VisualDirectorTests(unittest.TestCase):
+ def test_advanced_insert_fits_full_subject_instead_of_cropping_feet(self):
+  old=module.ADVANCED
+  try:
+   module.ADVANCED=True
+   d={'world':'lab','light':'day','action':'idle','expression':'neutral','actor':'hero','wide':False,'shot':'insert','props':[{'kind':'compass','place':'ground_right','motion':'none'}]}
+   words=[{'text':'compass','start':0,'end':1,'confidence':.9}]
+   shots=module.sentence_shots(d,words,0,1,0,30,False,None)
+   self.assertGreater(shots[0]['camera'][0]['pos'][2],3)
+  finally:module.ADVANCED=old
  def build(self,scene,words,seconds=6):
   d=tempfile.mkdtemp();voice=Path(d)/'voice.wav'
   with wave.open(str(voice),'wb') as w:w.setnchannels(1);w.setsampwidth(2);w.setframerate(48000);w.writeframes(b'\0\0'*48000*seconds)

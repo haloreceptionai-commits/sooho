@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { rareWords, kidReadability, wordBudget } from "@/lib/plain-words";
 
 describe("kid-level words", () => {
+  it('recognizes ordinary physical words without forcing misleading replacements', () => {
+    expect(rareWords('The compass needle twists and swings, then settles.')).toEqual([]);
+    expect(rareWords('The needle rests on a pivot.')).toContain('pivot');
+  });
   it("flags adult words from the Pig War test", () => {
     expect(rareWords("A pig knocks down a boundary and the dispute starts to escalate.")).toEqual(["boundary", "dispute", "escalate"]);
   });

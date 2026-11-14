@@ -15,6 +15,19 @@ export function cinematicPass<T extends DirectedScene>(scenes: T[], narration?: 
   return scenes.map((input, i) => {
     const s = { ...input, props: [...(input.props ?? [])], fx: [...(input.fx ?? [])] } as T & { props: Prop[]; fx: string[] };
     const prev = edited[i - 1];
+    if (options.literal) {
+      const spoken = narration?.[i] ?? '';
+      const celebration = /\b(cheer|celebrat|laugh|smil|happy|joy|dance|won|wins|victory)/i.test(spoken);
+      const surprise = /\b(shock|surpris|scare|fear|panic|afraid|danger|sudden)/i.test(spoken);
+      s.fx = s.fx.filter(f => !['sparkle', 'burst'].includes(f) || celebration);
+      const calm = (a: Record<string, unknown>) => ({ ...a,
+        action: !celebration && ['cheer', 'thumbs_up', 'wave'].includes(String(a['action'])) ? 'idle' : a['action'],
+        expression: (!celebration && ['grin', 'laugh', 'relief', 'smile', 'whistle'].includes(String(a['expression']))) || (!surprise && ['shock', 'nervous', 'dazed', 'pained'].includes(String(a['expression']))) ? 'neutral' : a['expression'] });
+      const main = calm(s);
+      if (s['action'] !== undefined) s['action'] = main['action'];
+      if (s['expression'] !== undefined) s['expression'] = main['expression'];
+      if (Array.isArray(s['actors'])) s['actors'] = s['actors'].map(a => calm(a));
+    }
     // 1. Every scene has a main prop: carry the story's last hero object forward when the director left the frame empty.
     const sameSubject = !narration || /\b(it|its|this|that|they|their)\b/i.test(narration[i] ?? '');
     if (!s.props.length && lastHero && lastHero.place !== 'hand' && (!prev || prev.world === s.world) && sameSubject) s.props.push({ ...lastHero, motion: 'none' });
