@@ -165,7 +165,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
     const { sanitizeDirection } = await import('./cartoon-job');
     const cast = diversifyCast(raw.cast as CastMember[], data.advanced ? 4 : 3);
     const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], narration, objects);
-    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
+    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration, { literal: data.advanced }) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   };
