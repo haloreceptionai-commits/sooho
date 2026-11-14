@@ -75,10 +75,10 @@ async function azureJson<T>(deployment: string, system: string, user: string, na
 
 export interface Claim { claim: string; sources: string[]; date: string; confidence: "high" | "medium" | "low" }
 export const designAdvancedCards = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { scenes: string[]; ids: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), ids: z.array(z.string().regex(/^[a-z0-9_-]{1,30}$/)).min(1).max(3), deployment: z.string().min(1).max(64) }).parse(d))
+  .inputValidator((d: { scenes: string[]; ids: string[]; deployment: string }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), ids: z.array(z.string().regex(/^[a-z0-9_-]{1,30}$/)).min(1).max(4), deployment: z.string().min(1).max(64) }).parse(d))
   .handler(async ({ data }) => { const { designAdvancedCardsOperation } = await import('./pipeline-operations.server'); return designAdvancedCardsOperation({ data }); });
 export const paintAdvancedCard = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { look: string; deployment: string }) => z.object({ look: z.string().min(1).max(300), deployment: z.string().min(1).max(64) }).parse(d))
+  .inputValidator((d: { look: string; deployment: string; kind?: 'character' | 'object'; pose?: 'reach' | 'shock' | 'happy'; reference?: string }) => z.object({ look: z.string().min(1).max(300), deployment: z.string().min(1).max(64), kind: z.enum(['character', 'object']).optional(), pose: z.enum(['reach', 'shock', 'happy']).optional(), reference: z.string().max(12_000_000).optional() }).parse(d))
   .handler(async ({ data }) => { const { paintAdvancedCardOperation } = await import('./pipeline-operations.server'); return paintAdvancedCardOperation({ data }); });
 export const directCartoon = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: { scenes: string[]; deployment: string; format?: 'short' | 'long'; advanced?: boolean }) => z.object({ scenes: z.array(z.string().min(1).max(4000)).min(1).max(600), deployment: z.string().min(1).max(64), format: z.enum(['short', 'long']).optional(), advanced: z.boolean().optional() }).parse(d))

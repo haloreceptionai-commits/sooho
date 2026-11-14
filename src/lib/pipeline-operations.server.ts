@@ -722,18 +722,46 @@ export async function inkBeatsOperation(data: { beats: { i: number; text: string
 
 // ---------------- Advanced Video AI: painted character cards ----------------
 export const ADVANCED_CARD_STYLE = 'Bold 2D cartoon character for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, big expressive eyes, friendly rounded proportions, slightly exaggerated features, full body standing upright facing the viewer, whole figure visible head to feet, centered, nothing else in the picture, transparent background, no ground, no shadow, no text.';
-const CARD_DESIGNER = `You design the on-screen characters for a 3D cartoon Short where each character is one flat painted card standing in a 3D set.
-For every cast id, read the narration and decide who or what that role should actually look like so the picture matches the story literally (it may be an animal, an object-mascot or a person of the right era, place and job).
-Return one short visual description per id (max 40 words): species or person, era-accurate clothes/colours, one signature item, expression. Distinct silhouettes and colours between ids. Never real living people's likeness, never gore, never text.`;
+const CARD_DESIGNER = `You design the on-screen characters and key objects for a 3D cartoon Short where each one is a flat painted card standing in a 3D set.
+For every cast id, read the narration and decide who or what that role should actually look like so the picture matches the story literally (it may be an animal, a creature or a person of the right era, place and job).
+Return one short visual description per id (max 40 words): species or person, era-accurate clothes/colours, one signature item, a friendly expressive face. Distinct silhouettes and colours between ids.
+Then list up to 3 key OBJECTS the narrator names that matter to the story and are NOT already shown in that scene's props (e.g. a potato patch, a fence, a letter): a snake_case name, a max-30-word look, and the zero-based scene indexes where it is said.
+Never people or animals in objects, never real living people's likeness, never gore, never text.`;
 export const designAdvancedCardsOperation = async ({ data }: { data: { scenes: string[]; ids: string[]; deployment: string } }) => {
-  const schema = { type: 'object', additionalProperties: false, required: ['cards'], properties: { cards: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'look'], properties: { id: { type: 'string', enum: data.ids }, look: { type: 'string' } } } } } };
-  const r = await azureJson<{ cards: { id: string; look: string }[] }>(data.deployment, CARD_DESIGNER, `Cast ids: ${data.ids.join(', ')}\n\nNarration with each scene's acting role:\n${data.scenes.map((t, i) => `${i + 1}. ${t}`).join('\n')}`, 'card_design', schema, 'Card designer');
-  return data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) }));
+  const schema = { type: 'object', additionalProperties: false, required: ['cards', 'objects'], properties: {
+    cards: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'look'], properties: { id: { type: 'string', enum: data.ids }, look: { type: 'string' } } } },
+    objects: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['name', 'look', 'scenes'], properties: { name: { type: 'string' }, look: { type: 'string' }, scenes: { type: 'array', items: { type: 'integer' } } } } } } };
+  const r = await azureJson<{ cards: { id: string; look: string }[]; objects: { name: string; look: string; scenes: number[] }[] }>(data.deployment, CARD_DESIGNER, `Cast ids: ${data.ids.join(', ')}\n\nNarration with each scene's acting role and props:\n${data.scenes.map((t, i) => `${i}. ${t}`).join('\n')}`, 'card_design', schema, 'Card designer');
+  const seen = new Set<string>();
+  const objects = (r.objects ?? []).map(o => ({ name: o.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 30), look: o.look.slice(0, 300), scenes: [...new Set(o.scenes.filter(i => Number.isInteger(i) && i >= 0 && i < data.scenes.length))] }))
+    .filter(o => o.name && o.scenes.length && !seen.has(o.name) && (seen.add(o.name), true)).slice(0, 3);
+  return { cards: data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) })), objects };
 };
-export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string } }) => {
-  const tries = [data.look, softenPrompt(data.look), 'a friendly cartoon storyteller in simple period clothes'];
+export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no text, no letters, no people.';
+const POSE_TEXT: Record<'reach' | 'shock' | 'happy', string> = {
+  reach: 'now pointing forward with one arm stretched out (or the animal leaning forward with one leg raised), mouth open as if saying something important',
+  shock: 'now shocked: eyes wide, mouth open, eyebrows up, hands (or paws/ears) thrown up in surprise, leaning back a little',
+  happy: 'now laughing and cheering: big open smile, eyes squeezed happy, arms (or front legs) up in joy',
+};
+/** Paints a transparent card: a standing character, an object, or (with a reference) the same character in another pose. */
+export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | undefined; pose?: 'reach' | 'shock' | 'happy' | undefined; reference?: string | undefined } }) => {
+  const style = data.kind === 'object' ? ADVANCED_OBJECT_STYLE : ADVANCED_CARD_STYLE;
+  if (data.pose && data.reference) {
+    // Same design in a new pose: the standing card is the reference so face, colours and outfit stay identical.
+    for (let i = 0; i < 2; i++) {
+      const fd = new FormData();
+      fd.append('image[]', new Blob([b64ToBytes(data.reference)], { type: 'image/png' }), 'card.png');
+      fd.append('prompt', `${style} Keep EXACTLY the same character as the reference image: same face, species, colours, clothes, proportions and line style. Character: ${i ? softenPrompt(data.look) : data.look} The character is ${POSE_TEXT[data.pose]}. Full body, head to feet, centered.`.slice(0, 3900));
+      fd.append('size', '1024x1536'); fd.append('quality', 'medium'); fd.append('background', 'transparent'); fd.append('output_format', 'png'); fd.append('n', '1');
+      const res = await azureOpenAIRequest(`${safeName(data.deployment)}/images/edits`, fd, true);
+      if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
+      else if (res.status !== 400) await fail(res, 'Character pose');
+    }
+    throw Error('Character pose could not be painted');
+  }
+  const tries = data.kind === 'object' ? [data.look, softenPrompt(data.look)] : [data.look, softenPrompt(data.look), 'a friendly cartoon storyteller in simple period clothes'];
   for (const look of tries) {
-    const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: `${ADVANCED_CARD_STYLE} Character: ${look}`.slice(0, 3900), size: '1024x1536', quality: 'medium', background: 'transparent', output_format: 'png', n: 1 });
+    const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: `${style} ${data.kind === 'object' ? 'Object' : 'Character'}: ${look}`.slice(0, 3900), size: '1024x1536', quality: 'medium', background: 'transparent', output_format: 'png', n: 1 });
     if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
     else if (res.status !== 400) await fail(res, 'Character card');
   }
