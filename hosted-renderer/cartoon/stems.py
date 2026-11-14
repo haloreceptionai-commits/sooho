@@ -84,23 +84,50 @@ def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
 def sound_design(samples,twist_frame,cues,seed=1):
     """Original staccato score plus licensed CC0 Foley, exactly on the saved voice clock."""
     music=np.zeros(samples);sfx=np.zeros(samples)
-    # Original composition: low pulsed notes, changing harmony at the answer. Not a borrowed soundtrack.
-    for start in range(0,samples,int(RATE*.25)):
-        n=min(int(RATE*.18),samples-start);tt=np.arange(n)/RATE
-        notes=[110,130.8128,164.8138] if start<twist_frame*1600 else [130.8128,164.8138,195.9977]
-        freq=notes[(start//int(RATE*.25))%3]
-        env=np.sin(np.pi*np.arange(n)/max(n,1))**2*np.exp(-tt*12)
-        music[start:start+n]+=.025*(np.sin(2*np.pi*freq*tt)+.15*np.sin(4*np.pi*freq*tt))*env
+    # Original 112 BPM score: rounded pizzicato, soft bass and sparse brushed percussion.
+    # Four-bar variation avoids the former three-note metronome; the answer opens the harmony.
+    rng=np.random.default_rng(seed)
+    step=RATE*60/112/2
+    patterns=((0,2,1,4,2,1,3,1),(0,1,3,2,4,2,1,3),(0,3,2,4,1,2,3,4),(0,2,4,3,2,1,4,2))
+    for index in range(int(np.ceil(samples/step))):
+        start=jsround(index*step);n=min(int(RATE*.24),samples-start)
+        if n<=0:continue
+        tt=np.arange(n)/RATE
+        answer=start>=twist_frame*1600
+        notes=[130.8128,164.8138,195.9977,261.6256,293.6648] if answer else [110,130.8128,164.8138,196,220]
+        freq=notes[patterns[(index//8)%4][index%8]]
+        env=(1-np.exp(-tt*350))*np.exp(-tt*17)
+        accent=1 if index%4==0 else .65
+        music[start:start+n]+=.025*accent*(np.sin(2*np.pi*freq*tt)+.25*np.sin(4*np.pi*freq*tt)+.08*np.sin(6*np.pi*freq*tt))*env
+        if index%4==0:
+            music[start:start+n]+=.02*np.sin(2*np.pi*(65.4064 if answer else 55)*tt)*(1-np.exp(-tt*200))*np.exp(-tt*9)
+        if index%8 in (2,6):
+            brushed=np.convolve(rng.standard_normal(n),np.ones(12)/12,'same')
+            music[start:start+n]+=.004*brushed*np.exp(-tt*35)
     import os
     root=Path(os.environ.get('CARTOON_SOUND_DIR',str(Path(__file__).parent/'assets'/'sound')))
-    names={'impact':'impact','pour':'splash','splash':'splash','pop':'tap','creak':'handling','coin':'handling'}
+    names={'impact':'impact','pour':'splash','splash':'splash','pop':'tap','creak':'handling'}
     cache={}
     for cue in cues:
         if cue['kind'] not in KINDS or not isinstance(cue['frame'],int) or not 0<=cue['frame']<round(samples/RATE*30):raise ValueError('Invalid sound cue')
         # No recording is better than a semantically false sound (stones are not wind,
         # one footstep is not a crowd, and handling is not a bell). Unsupported categories stay silent.
         name=names.get(cue['kind'])
-        if name is None:continue
+        if name is None:
+            # Designed editorial sweeps and literal metal jingles, not unrelated Foley substitutes.
+            if cue['kind'] not in ('whoosh','reveal','coin','thunder'):continue
+            first=cue['frame']*1600;n=min(int(RATE*.45),samples-first);tt=np.arange(n)/RATE
+            noise=np.random.default_rng(seed+cue['frame']).standard_normal(n)
+            if cue['kind']=='whoosh':
+                sound=.12*np.convolve(noise,np.ones(16)/16,'same')*np.sin(np.pi*np.arange(n)/max(n,1))**2
+            elif cue['kind']=='coin':
+                sound=.06*(np.sin(2*np.pi*2400*tt)+.4*np.sin(2*np.pi*3617*tt))*np.exp(-tt*24)
+            elif cue['kind']=='thunder':
+                sound=.15*np.convolve(noise,np.ones(180)/180,'same')*np.exp(-tt*5)+.06*np.sin(2*np.pi*42*tt)*np.exp(-tt*9)
+            else:
+                sound=.05*(np.sin(2*np.pi*523.251*tt)+.5*np.sin(2*np.pi*659.255*tt))*np.exp(-tt*13)
+            sfx[first:first+n]+=sound
+            continue
         if name not in cache:
             with wave.open(str(root/(name+'.wav')),'rb') as w:
                 if w.getframerate()!=RATE or w.getnchannels()!=1 or w.getsampwidth()!=2:raise ValueError('Invalid licensed Foley format')
