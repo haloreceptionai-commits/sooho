@@ -1,4 +1,5 @@
 # Roadmap — Advanced Video AI v2
+- [ ] Replace fixed topic suggestions with six fresh researched facts per search, evidence-led ranking, cloud saved-for-later topics, repeat prevention and verified selection.
 - [x] Script: 3 repairs, word budget by length, kid-level word checker, keep-watching judge
 - [x] Cast: people/animals/objects named in script get cards (up to 4)
 - [x] Poses: stand/reach/shock/happy cards, pose switching, talk bounce, card shading
