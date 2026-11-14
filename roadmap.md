@@ -1,5 +1,8 @@
 # Roadmap — Cartoon Engine v2
 
+## Remove unused video modes (Nov 14)
+- [x] Removed Omni and Seedance choices, browser/background generation branches and provider adapters; historical library records and hosted outputs preserved. Signed-in Create checked; Remix opens; 183 tests pass.
+
 ## Current workspace Azure alternative (Nov 14)
 - [x] Store the owner's Azure OpenAI key securely and switch script/image JSON and reference-image uploads to direct Azure access; keep Apify, narration and Azure rendering unchanged.
 - [x] Azure authentication and GPT-5 verified live (200); direct transport tests pass. Image-generation output is not tested in this setup.

@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
 import type { Settings } from './store';
+import { assertVideoEngine } from './video-engines';
 const videoId = z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/);
 export const startBackgroundGeneration = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { videoId: string; settings: Settings }) => ({ ...data, videoId: videoId.parse(data.videoId) }))
@@ -10,6 +11,7 @@ export const startBackgroundGeneration = createServerFn({ method: 'POST' }).midd
     if (process.env['GENERATION_ROLLOUT_ENABLED'] !== 'true') throw Error('Background generation is not enabled yet');
     const { data: video, error } = await context.supabase.from('videos').select('data,user_id').eq('id', data.videoId).single();
     if (error || !video || video.user_id !== context.userId) throw Error('Video not found');
+    assertVideoEngine((video.data as unknown as { input?: { engine?: unknown } }).input?.engine);
     const { digest } = await import('./generation-runner.server');
     const { supabaseAdmin: db } = await import('@/integrations/supabase/client.server');
     const token = crypto.randomUUID() + crypto.randomUUID();

@@ -10,8 +10,7 @@ import { submitCartoonOperation } from './cartoon-submit.server';
 import { submitHostedRenderOperation } from './assembly-submit.server';
 import { renderRequest } from './hosted-render';
 import { generationPath } from './generation-policy';
-import { startClipOperation, pollClipOperation, clipChunkOperation } from './clips-operations.server';
-import { seedanceRuns, seedanceBody } from './seedance';
+import { assertVideoEngine } from './video-engines';
 
 type Client = SupabaseClient<Database>;
 type Job = Database['public']['Tables']['generation_jobs']['Row'];
@@ -24,6 +23,7 @@ function bytes(b64: string) { return Uint8Array.from(atob(b64), c => c.charCodeA
 export async function advanceGeneration(db: Client, job: Job, owner: string, fence: number) {
   const snapshot = job.request as unknown as { input: VideoInput; settings: Settings };
   const { input, settings } = snapshot;
+  assertVideoEngine(input.engine);
   const auth = { p_job: job.id, p_hash: job.token_hash, p_owner: owner, p_fence: fence };
   const { data: row, error: readError } = await db.from('videos').select('data').eq('id', job.video_id).single();
   if (readError || !row) throw Error('Saved video is unavailable');
@@ -141,43 +141,6 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
       await up({ stage: 'images', progress: 27 + Math.round((i + 1) / plan.scenes.length * 43), detail: `Painting scenes · ${i + 1}/${plan.scenes.length}` });
     }
     const clips: { path: string; scenes: number[] }[] = [];
-    if (input.engine === 'omni' || input.engine === 'seedance') {
-      const runs = input.engine === 'seedance' ? seedanceRuns(plan.scenes) : plan.scenes.map((sc, i) => ({ scenes: [i], prompt: `Animate this exact frame as ${input.style}, with lively character movement and dynamic camera motion. ${sc.image_prompt}. No dialogue, speech, music or captions.`, seconds: Math.max(3, Math.min(10, Math.ceil(sc.narration.split(/\s+/).length * 60 / 153))) }));
-      for (let i = 0; i < runs.length; i++) {
-        const run = runs[i]; if (!run) continue;
-        const id = await step(`motion-submit/${i}`, JSON.stringify(run), async () => {
-          const path = images[run.scenes[0] ?? 0]; if (!path) throw Error('Starting frame missing');
-          const { data: file, error } = await db.storage.from('videos').download(path);
-          if (error || !file) throw Error('Saved starting frame could not load');
-          const image = toBase64(await file.arrayBuffer());
-          if (input.engine === 'omni') return (await startClipOperation({ data: { image, prompt: run.prompt.slice(0, 3500), aspect: portrait ? 'portrait' : 'landscape', seconds: run.seconds } })).id;
-          const key = process.env['LOVABLE_API_KEY']; if (!key) throw Error('AI is unavailable');
-          const response = await fetch('https://ai.gateway.lovable.dev/v1/videos', { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(seedanceBody(run.prompt, `data:image/jpeg;base64,${image}`, run.seconds, portrait)) });
-          if (!response.ok) throw Error(`Motion submission unconfirmed [${response.status}]`);
-          const result = await response.json() as { id?: string };
-          if (!result.id) throw Error('Motion submission unconfirmed');
-          return result.id;
-        });
-        const status = await pollClipOperation({ data: { id } });
-        if (status.status === 'failed') throw Error(status.error ?? 'Motion clip failed');
-        if (status.status !== 'completed') return { status: 'waiting', delayMs: 8000 };
-        const path = await step(`motion-save/${i}`, id, async () => {
-          const parts: Uint8Array[] = []; let offset = 0, total = 1;
-          while (offset < total) {
-            const chunk = await clipChunkOperation({ data: { id, offset } });
-            const part = bytes(chunk.data); if (!part.length) throw Error('Motion download incomplete');
-            parts.push(part); offset += part.length; total = chunk.total;
-          }
-          const merged = new Uint8Array(offset); let cursor = 0;
-          for (const part of parts) { merged.set(part, cursor); cursor += part.length; }
-          const path = generationPath(job.user_id, job.video_id, job.id, `clip-${i}.mp4`);
-          const { error } = await db.storage.from('videos').upload(path, merged, { upsert: true, contentType: 'video/mp4' });
-          if (error) throw Error('Motion clip save needs reconciliation');
-          return path;
-        });
-        clips.push({ path, scenes: run.scenes });
-      }
-    }
     const cp: SeedanceCheckpoint = { plan, gate: script.gate, report: script.report, hookType: script.hookType, continuity: continuity.length ? continuity.filter(n => n >= 6).length / continuity.length : 1, images, voice: voices };
     await up({ assemblyCheckpoint: cp });
     const rendered = await step('handoff', JSON.stringify(cp), () => submitHostedRenderOperation({ data: renderRequest.parse({ videoId: job.video_id, checkpoint: cp, clips, captions: settings.burnCaptions, sfx: settings.soundEffects }), context }));
