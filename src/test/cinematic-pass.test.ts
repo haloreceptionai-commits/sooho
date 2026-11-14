@@ -5,6 +5,13 @@ const base = { world: 'lab', shot: 'wide', move: 'static', mood: 'calm' };
 const flask = { kind: 'flask', place: 'ground_left', motion: 'none' };
 
 describe('cinematic pass', () => {
+  it('preserves deliberate Advanced framing without inventing an insert or reveal burst', () => {
+    const s = ['wide', 'medium', 'low', 'high'].map(shot => ({ ...base, shot, props: [flask] }));
+    const out = cinematicPass(s, undefined, { literal: true });
+    expect(out[3]?.shot).toBe('high');
+    expect(out[1]?.move).toBe('static');
+    expect(cinematicPass([{ ...base, mood: 'reveal', fx: [] }], undefined, { literal: true })[0]?.fx).toEqual([]);
+  });
   it('carries the last main prop into an empty scene', () => {
     const out = cinematicPass([{ ...base, props: [flask] }, { ...base, shot: 'close', props: [] }]);
     expect(out[1]!.props?.[0]?.kind).toBe('flask');

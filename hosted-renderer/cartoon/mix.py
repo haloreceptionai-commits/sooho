@@ -19,7 +19,7 @@ def gated_rms(samples, rate):
     active = [p for p in powers if p > 1e-6]
     return float(np.sqrt(np.mean(active))) if active else 0.0
 
-def mix_stems(voice, music, sfx, rate):
+def mix_stems(voice, music, sfx, rate, advanced=False):
     if any(s.ndim != 2 or s.shape[1] not in (1, 2) for s in (voice, music, sfx)):
         raise ValueError("Stems must be mono or stereo sample matrices")
     if voice.shape != music.shape or voice.shape != sfx.shape or not voice.size:
@@ -32,10 +32,25 @@ def mix_stems(voice, music, sfx, rate):
     sp = float(np.max(np.abs(sfx)))
     mg = 0.5 * vr / mr if mr else 0.0
     sg = min(0.5 * vr / sr, 0.7 * vp / sp) if sr and sp else 0.0
+    if advanced:
+        # Bounded 20ms envelopes; never move, stretch or filter the accepted voice.
+        width = max(1, round(rate * .02))
+        envelope = np.zeros(len(voice))
+        level = 1.0
+        for first in range(0, len(voice), width):
+            last = min(len(voice), first + width)
+            active = float(np.sqrt(np.mean(voice[first:last] ** 2))) > vr * .18
+            target = .32 if active else .7
+            alpha = .55 if target < level else .08
+            next_level = level + alpha * (target - level)
+            envelope[first:last] = np.linspace(level, next_level, last-first)
+            level = next_level
+        music = music * envelope[:, None]
     result = voice + music * mg + sfx * sg
     report = {"voice_rms": vr, "music_gain": mg, "sfx_gain": sg,
               "music_rms_ratio": mr * mg / vr, "sfx_rms_ratio": sr * sg / vr,
-              "sfx_peak_ratio": sp * sg / vp, "samples": len(voice), "sample_rate": rate}
+              "sfx_peak_ratio": sp * sg / vp, "samples": len(voice), "sample_rate": rate,
+              "speech_ducking": advanced}
     return result, report
 
 def read_pcm(path):

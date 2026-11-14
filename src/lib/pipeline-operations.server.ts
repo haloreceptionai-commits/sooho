@@ -165,7 +165,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
     const { sanitizeDirection } = await import('./cartoon-job');
     const cast = diversifyCast(raw.cast as CastMember[], data.advanced ? 4 : 3);
     const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], narration, objects);
-    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
+    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration, { literal: Boolean(data.advanced) }) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   };
@@ -187,7 +187,10 @@ export function diversifyCast(cast: CastMember[], max = 3): CastMember[] {
 const ADVANCED_DIRECTION = `
 ADVANCED VIDEO AI CAST (overrides the cast limits above): up to 4 cast ids, each drawn from a painted card of exactly what the narration says, so the outfit is only a placeholder.
 - Every person AND every animal or creature that acts or is named as a character in the narration (a pig, a dog, a horse) is its own cast id (e.g. "pig") and appears as an actor in every scene where it is mentioned or acts.
-- The hero is in at least 60% of scenes. Pick actions and expressions that match each line (point when someone shows, shock when something goes wrong, cheer or grin on wins, walk/run when someone moves).`;
+- Literal staging overrides the generic cast/reaction rules below: cast only actual people or animals in the story. Do not invent a narrator, rival, "Threat", or human mascot for a tool or chip. One real user is enough for a device explainer.
+- The main object is the subject of a mechanism sentence. Keep it visible, choose a useful object detail, and do not crowd it with the whole cast. Reuse exact object identities across cuts.
+- Use expressions only when something happens to that character. No automatic cheering, shocked faces, sparkles or three people waving during an explanation. Repeated stable framing is allowed when it keeps the action clear.
+- A supported gesture is not a replacement for an unsupported mechanism: use only actual supported actions. Avoid unrelated scenery and irrelevant props added just for variety.`;
 const VISUAL_DIRECTOR = `You are the Visual Director of a bright outlined 3D cartoon Shorts studio. Every sentence must SHOW what the narrator says, using ONLY the listed vocabulary (the engine cannot draw anything else; never invent items, never write code).
 Return a cast and exactly one direction per input sentence, in order.
 Cast (2-3 members whenever the story involves more than one person or group; 1 only for a true solo story): stable ids that name the role (hero, captain, rival, queen, doctor...), different seeds 1-999, and an outfit from the outfits list that matches each person's job, era and place (soldier/knight/veteran for armies, queen/noble/king for royalty, doctor/nurse for medicine, pharaoh for ancient Egypt, cowboy for the Wild West, chef for food, monk/priest for religion, woman/maid/peasant for townsfolk). Every cast member gets a DIFFERENT outfit so viewers can tell them apart.

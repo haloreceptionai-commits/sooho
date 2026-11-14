@@ -144,7 +144,7 @@ export const actorsAt = (f, T) => {
       step, action: a.action, progress: action.progress, lift: action.lift, frame: f, viseme,
       held: a.id === subjectId && held ? held.kind : null,
       // Card talk bounce: peaks mid-word for the on-screen speaker (or the subject during narration).
-      talk: art && (a.id === (shot.speaker || subjectId)) && wordAt(f, shot) ? Math.sin(Math.PI * wordAt(f, shot).t) : 0 };
+      talk: art && (manifest.advancedEdit === 1 ? a.id === shot.speaker : a.id === (shot.speaker || subjectId)) && wordAt(f, shot) ? Math.sin(Math.PI * wordAt(f, shot).t) : 0 };
     const rounded = Object.fromEntries(Object.entries(opts).map(([k, v]) => [k, typeof v === 'number' ? Math.round(v * (k === 'bob' ? 1000 : 20)) / (k === 'bob' ? 1000 : 20) : v]));
     const travel = moving ? local * (a.action === 'run' ? .9 : .35) * ((a.facing || 1) >= 0 ? 1 : -1) : 0;
     return { x: a.pos[0] + travel, y: a.pos[1] + (shot.world === 'storm_sea' ? .03 * Math.sin(f * .06) : 0), z: a.pos[2], flip: facing < 0,

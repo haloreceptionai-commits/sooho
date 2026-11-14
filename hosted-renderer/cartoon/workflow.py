@@ -91,7 +91,7 @@ def main():
         for e in shot['events']:
             cues.append({'frame':jsround(m['words'][e['word']]['start']*30)-e['lead'],'kind':e['kind']})
     music,sfx=synthesize(len(narration),a.twist_frame,cues)
-    mixed,report=mix_stems(narration,music,sfx,rate)
+    mixed,report=mix_stems(narration,music,sfx,rate,advanced=m.get('advancedEdit')==1)
     np.save(work/'mix.npy',mixed);atomic_json(work/'mix-report.json',report)
     stage('encode_qa')
     run(sys.executable,str(ROOT/'finish.py'),'--frames',str(frames),'--mix',str(work/'mix.npy'),'--out',str(work/'output.mp4'))

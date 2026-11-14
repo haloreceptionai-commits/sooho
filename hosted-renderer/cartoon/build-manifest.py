@@ -1,6 +1,7 @@
 """Acoustic word clock to bounded, supported declarative scenes; no guessed timing."""
 import argparse, hashlib, json, re, wave, math
 from pathlib import Path
+from camera_fit import fit_camera_keys
 
 def jsround(x):
     # Match JavaScript Math.round so frame counts agree with the scene validator (106.5 -> 107).
@@ -13,8 +14,9 @@ def build(request, alignment, voice):
         if w.getframerate()!=48000 or w.getsampwidth()!=2: raise ValueError('Expected locked PCM48k')
         samples=w.getnframes()
     total=jsround(samples/48000*30)
-    global ASPECT
+    global ASPECT, ADVANCED
     ASPECT=16/9 if request.get('format')=='long' else 9/16
+    ADVANCED=any(c.get('card') for c in request['direction'].get('cast',[]))
     words=alignment['words']
     if not words or len(words)>(9000 if request.get('format')=='long' else 600):raise ValueError('Invalid alignment size')
     previous=0
@@ -37,9 +39,11 @@ def build(request, alignment, voice):
     width,height=(1920,1080) if request.get('format')=='long' else (1080,1920)
     return {'version':'cartoon-v2','videoId':request['videoId'],'fps':30,'width':width,'height':height,'captions':bool(request.get('captions')),
       'narration':{'path':'voice.wav','sha256':hashlib.sha256(voice.read_bytes()).hexdigest(),'samples':samples,'rate':48000},
-      'words':words,'caption_words':[t[:40] for t in tokens],'cast':request['direction']['cast'],'shots':shots}
+      'words':words,'caption_words':[t[:40] for t in tokens],'cast':request['direction']['cast'],'shots':shots,
+      'advancedEdit':1 if ADVANCED else 0}
 
 ASPECT=9/16
+ADVANCED=False
 SLOT_X={'left':-1.15,'center':0.0,'right':1.15}
 # distance, camera height, look height, field of view (metres / degrees) for a 2.25 m character card.
 SHOT={'wide':(7.5,1.8,1.2,42),'medium':(4.2,1.5,1.25,38),'close':(2.5,1.75,1.65,34),'extreme_close':(1.55,1.85,1.8,30),
@@ -121,7 +125,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
     subject=next((a for a in actors if a['id']==speaker),None) or next((a for a in actors if a['id']==d['actor']),actors[0])
     others=[a for a in actors if a is not subject]
     kind=d.get('shot') or ('wide' if d['wide'] else 'medium')
-    if kind==previous: kind=REACTION[kind]  # never cut to the identical framing
+    if kind==previous and not ADVANCED: kind=REACTION[kind]  # legacy edit rhythm
     move=d.get('move') or 'push_in'; mood=d.get('mood') or 'calm'
     # Long sentences get a second angle on a word boundary, keeping the ~3 s cutting rhythm.
     cuts=[start]
@@ -140,7 +144,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
         for c in d.get('cues') or []:
             if first+c['word']<last: events.append({'word':first+c['word'],'lead':0,'kind':c['kind']})
         for wi in range(first,last):
-            kind_s=next((k for stem,k in AUTO_SOUNDS if words[wi]['text'].startswith(stem)),None)
+            kind_s=next((k for stem,k in AUTO_SOUNDS if words[wi]['text'].startswith(stem) and not (ADVANCED and stem in ('gold','coin','storm','crowd'))),None)
             if kind_s: events.append({'word':wi,'lead':0,'kind':kind_s})
         if mood=='reveal': events.append({'word':first,'lead':0,'kind':'reveal'})
         if move=='whip': events.append({'word':first,'lead':0,'kind':'whoosh'})
@@ -152,10 +156,14 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
     for n,(a,b) in enumerate(zip(cuts,cuts[1:])):
         k=kind if n==0 else REACTION[kind]; mv=move if n==0 else ('push_in' if move!='push_in' else 'static')
         mine=[e for e in unique if a<=jsround(words[e['word']]['start']*30)-e['lead']<b]
+        camera=camera_keys(k,mv,subject,others,a,b,props)
+        if ADVANCED and k!='insert':
+            targets=actors if k in ('wide','medium','low','high') else [subject]
+            camera=fit_camera_keys(camera,targets,ASPECT,full_body=k in ('wide','medium','low','high'))
         out.append({'start':a,'end':b,'world':d['world'],'light':d['light'],'shot':k,'move':mv,'mood':mood,
           'shake':.6 if mv=='shake' else (.25 if 'lightning' in (d.get('fx') or []) else 0),
           'speaker':speaker if speaker in ids else None,'keyword':keyword,'props':props,'fx':d.get('fx') or [],
-          'camera':camera_keys(k,mv,subject,others,a,b,props),'actors':actors,'events':mine})
+          'camera':camera,'actors':actors,'events':mine})
     return out
 
 if __name__=='__main__':
