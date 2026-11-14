@@ -61,3 +61,20 @@ describe('Advanced Video AI script rules', () => {
     expect(r.checks.find(c => c.id === 'V7')?.pass).toBe(true);
   });
 });
+
+import { ensureAnimalCast } from '@/lib/advanced-cards';
+describe('Advanced Video AI animal casting', () => {
+  it('adds the emus to the cast and to every scene that names them', () => {
+    const cast = ['major', 'gunner', 'farmer', 'reader'].map((id, i) => ({ id, seed: i + 1, outfit: 'sailor' }));
+    const sc = (actor: string) => ({ world: 'town', light: 'day', action: 'point', expression: 'neutral', actor, wide: false });
+    const d = ensureAnimalCast({ cast, scenes: [sc('major'), sc('gunner'), sc('major')] } as never, ['Emus run into the wheat!', 'The gunner aims at the fields.', 'The emus dash away.']);
+    expect(d.cast.map(c => c.id)).toEqual(['major', 'gunner', 'farmer', 'emu']);
+    expect(d.scenes[0]!.actors!.find(a => a.actor === 'emu')?.action).toBe('run');
+    expect(d.scenes[1]!.actors!.some(a => a.actor === 'emu')).toBe(false);
+    expect(d.scenes[2]!.actors!.some(a => a.actor === 'emu')).toBe(true);
+  });
+  it('leaves the cast alone when the animal is already cast', () => {
+    const d = { cast: [{ id: 'pig', seed: 1, outfit: 'sailor' }], scenes: [{ world: 'town', light: 'day', action: 'idle', expression: 'grin', actor: 'pig', wide: false }] };
+    expect(ensureAnimalCast(d as never, ['The pig eats potatoes.'])).toBe(d);
+  });
+});

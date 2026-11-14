@@ -22,7 +22,7 @@ import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/scr
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
 import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
-import { paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
+import { ensureAnimalCast, paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -300,7 +300,9 @@ export async function runVideo(id: string, input: VideoInput) {
       // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
       if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
       if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft${advanced ? '' : '; check the preview before approving'}` });
-      const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short', ...(advanced ? { advanced: true } : {}) } }));
+      const directed = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short', ...(advanced ? { advanced: true } : {}) } }));
+      // Advanced Video AI: an animal the story names always acts on screen.
+      const direction = advanced ? ensureAnimalCast(directed, plan.scenes.map(sc => sc.narration)) : directed;
       const narration = plan.scenes.map(sc => speakable(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');

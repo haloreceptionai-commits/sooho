@@ -98,3 +98,41 @@ export function placeObjectCards(direction: Direction, painted: PaintedCards): {
   });
   return { direction: { ...direction, scenes }, cards: painted.cards.filter(c => !c.id.startsWith("obj-") || used.has(c.id)) };
 }
+
+const ANIMALS = ("pig cow horse sheep goat duck hen chicken rooster dog cat mouse rat rabbit fox wolf bear lion tiger monkey ape frog fish shark whale dolphin " +
+  "bird owl crow raven eagle hawk parrot penguin pigeon goose swan snake lizard turtle tortoise crocodile alligator deer moose elk camel elephant zebra giraffe " +
+  "donkey mule ox bull buffalo bison emu ostrich kangaroo koala seal walrus crab octopus squid bee ant spider beetle bat hippo rhino llama yak").split(" ");
+const PLURAL: Record<string, string> = { geese: "goose", mice: "mouse", oxen: "ox", sheep: "sheep", fish: "fish", deer: "deer", moose: "moose", wolves: "wolf", calves: "cow" };
+const animalIn = (word: string) => { const w = word.toLowerCase().replace(/[^a-z]/g, ""); const s = PLURAL[w] ?? (ANIMALS.includes(w) ? w : w.replace(/(es|s)$/, "")); return ANIMALS.includes(s) ? s : (ANIMALS.includes(w.replace(/s$/, "")) ? w.replace(/s$/, "") : null); };
+
+/**
+ * The story's animal must act on screen: when the narration names an animal the Visual Director left out of the cast,
+ * it joins the cast (replacing the least-used extra if four are already cast) and appears in every scene that names it.
+ */
+export function ensureAnimalCast(direction: Direction, narration: string[]): Direction {
+  const hits = new Map<string, number[]>();
+  narration.forEach((line, i) => { for (const w of line.split(/\s+/)) { const a = animalIn(w); if (a) hits.set(a, [...new Set([...(hits.get(a) ?? []), i])]); } });
+  const [animal, scenesWith] = [...hits.entries()].sort((a, b) => b[1].length - a[1].length)[0] ?? [];
+  if (!animal || !scenesWith || direction.cast.some(c => c.id.includes(animal))) return direction;
+  const uses = (id: string) => direction.scenes.filter(s => s.actor === id || (s.actors ?? []).some(a => a.actor === id)).length;
+  let cast = [...direction.cast];
+  let dropped: string | null = null;
+  if (cast.length >= 4) { const least = [...cast].sort((a, b) => uses(a.id) - uses(b.id))[0]!; dropped = least.id; cast = cast.filter(c => c.id !== least.id); }
+  const id = animal.replace(/[^a-z0-9_]/g, "").slice(0, 30);
+  cast.push({ id, seed: 9000 + cast.length, outfit: direction.cast[0]!.outfit });
+  const slots = ["left", "center", "right"] as const;
+  const scenes = direction.scenes.map((sc, i) => {
+    let actors = (sc.actors?.length ? sc.actors : [{ actor: sc.actor, action: sc.action, expression: sc.expression, slot: "center" as const, facing: 0 }]).filter(a => a.actor !== dropped);
+    let actor = sc.actor === dropped ? (actors[0]?.actor ?? id) : sc.actor;
+    if (scenesWith.includes(i) && !actors.some(a => a.actor === id)) {
+      if (actors.length >= 3) actors = actors.filter(a => a.actor === actor || a.actor === sc.speaker).slice(0, 2);
+      const free = slots.find(s => !actors.some(a => a.slot === s)) ?? "right";
+      const moving = /\b(run|runs|ran|dash|dashes|bolt|bolts|chase|chases|flee|flees|race|races|charge|charges)\b/i.test(narration[i] ?? "");
+      actors = [...actors, { actor: id, action: moving ? "run" : "idle", expression: "grin", slot: free, facing: 0 }];
+    }
+    if (!actors.length) { actors = [{ actor: id, action: "idle", expression: "grin", slot: "center", facing: 0 }]; actor = id; }
+    const speaker = sc.speaker && actors.some(a => a.actor === sc.speaker) ? sc.speaker : undefined;
+    return { ...sc, actor: actors.some(a => a.actor === actor) ? actor : actors[0]!.actor, actors, speaker };
+  });
+  return { cast, scenes };
+}
