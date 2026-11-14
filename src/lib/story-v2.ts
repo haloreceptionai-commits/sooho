@@ -287,13 +287,14 @@ export interface JudgeResult {
   readAloud: string[]; // lines that don't parse when spoken
   literal: number[]; // scene indexes whose visual doesn't show the narrated noun/action
   filler: string[];
+  swipe?: string[]; // lines where a cold viewer would swipe away
 }
 
 const SOFT_CHECKS = new Set(["V8", "V8j"]);
 export interface GateResult { score: number; ready: boolean; parts: Record<string, number>; blockers: string[] }
 
 /** Script score out of 100: validators 56, judges 30, read-aloud + literalness 14. Ready at 85+. */
-export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: number): GateResult {
+export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: number, opts: { strict?: boolean } = {}): GateResult {
   const v = r.checks.filter((c) => c.pass).length / Math.max(1, r.checks.length);
   const parts: Record<string, number> = {
     validators: Math.round(v * 56),
@@ -309,13 +310,16 @@ export function storyScore(r: StoryReport, j: JudgeResult | null, sceneCount: nu
     if (j.passB < 4) blockers.push(`Pass B: after 15s a viewer gets only ${j.passB}/4 of premise, hero, want, question`);
     if (!j.passC) blockers.push("Pass C: the opening question is not answered");
     j.readAloud.slice(0, 3).forEach((l) => blockers.push(`Read-aloud: "${l}"`));
+    (j.swipe ?? []).slice(0, 3).forEach((l) => blockers.push(`Viewer would swipe away at: "${l}" — make it a surprise, danger or new fact`));
     if (j.literal.length) blockers.push(`Visual literalness: scenes ${j.literal.map((i) => i + 1).join(", ")} don't show what is said`);
   }
   const score = Object.values(parts).reduce((a, b) => a + b, 0);
   const passBHard = !j || j.passB >= 4;
   // Repetition checks only cost points; every structural rule still blocks.
   const hardFails = r.failed.filter((c) => !SOFT_CHECKS.has(c.id));
-  return { score, ready: score >= 85 && hardFails.length === 0 && passBHard && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
+  // Advanced Video AI also needs clean read-aloud lines, literal visuals and no swipe-away line.
+  const strictOk = !opts.strict || !j || (j.readAloud.length === 0 && (j.swipe ?? []).length <= 1 && j.literal.length <= Math.floor(sceneCount * 0.15) && j.filler.length <= 1);
+  return { score, ready: score >= 85 && hardFails.length === 0 && passBHard && strictOk && (!j || (j.passA >= 3 && j.passC)), parts, blockers };
 }
 
 /** Final QA = 90% script gate + 10% production (pacing, audio, resolution, captions). */
