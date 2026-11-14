@@ -22,6 +22,7 @@ import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/scr
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
 import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
+import { paintAdvancedCards, placeObjectCards } from "./advanced-cards";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -165,7 +166,7 @@ export async function runVideo(id: string, input: VideoInput) {
     if (usesCartoonWorker(input.engine) && cartoon) {
       await flushVideo(id);
       const job = await submitCartoon({ data: cartoon });
-      up({ hostedRender: job, stage: 'render', progress: 72, detail: 'Cartoon preview · safe to close your browser' });
+      up({ hostedRender: job, stage: 'render', progress: 72, detail: advanced ? 'Advanced Video AI render · safe to close your browser' : 'Cartoon preview · safe to close your browser' });
       return;
     }
     if (assembly) {
@@ -287,8 +288,8 @@ export async function runVideo(id: string, input: VideoInput) {
       const long = input.format !== 'short';
       // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
       if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
-      if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft; check the preview before approving` });
-      const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short' } }));
+      if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft${advanced ? '' : '; check the preview before approving'}` });
+      const direction = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short', ...(advanced ? { advanced: true } : {}) } }));
       const narration = plan.scenes.map(sc => speakable(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
@@ -296,21 +297,7 @@ export async function runVideo(id: string, input: VideoInput) {
       if (!user.user) throw Error('Not signed in');
       const voicePath = `${user.user.id}/${id}/cartoon/original-voice.wav`;
       // Advanced Video AI: paint one character card per cast member while the voice records (saved, so Resume never repays).
-      const cardsP = advanced ? (async () => {
-        const ids = direction.cast.map(c => c.id), root = `${user.user!.id}/${id}/media`;
-        const { data: have } = await supabase.storage.from('videos').list(root, { search: 'card-' });
-        const missing = ids.filter(cid => !have?.some(f => f.name === `card-${cid}.png`));
-        if (missing.length) {
-          up({ detail: `Painting ${missing.length} character card${missing.length > 1 ? 's' : ''} while the voice records…` });
-          const looks = await withRetry(() => designAdvancedCards({ data: { scenes: plan.scenes.map((sc, i) => `${sc.narration} [actor: ${direction.scenes[i]?.actor ?? ids[0]}]`), ids: missing, deployment: s.scriptDeployment } }));
-          await Promise.all(looks.map(async l => {
-            const { image } = await withRetry(() => paintAdvancedCard({ data: { look: l.look, deployment: s.imageDeployment } }));
-            const { error } = await supabase.storage.from('videos').upload(`${root}/card-${l.id}.png`, b64ToBuf(image), { contentType: 'image/png', upsert: false });
-            if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save character card: ${error.message}`);
-          }));
-        }
-        return ids.map(cid => ({ id: cid, path: `${root}/card-${cid}.png` }));
-      })() : Promise.resolve(undefined);
+      const cardsP = advanced ? paintAdvancedCards(direction, plan.scenes.map(sc => sc.narration), `${user.user.id}/${id}/media`, s, (detail) => up({ detail })) : Promise.resolve(undefined);
       cardsP.catch(() => {});
       // Resume: the locked take for this same saved script is already stored, so reuse it instead of paying again.
       const { data: existing } = await supabase.storage.from('videos').list(`${user.user.id}/${id}/cartoon`, { search: 'original-voice.wav' });
@@ -331,9 +318,10 @@ export async function runVideo(id: string, input: VideoInput) {
         const { error } = await supabase.storage.from('videos').upload(voicePath, audio, { contentType: 'audio/wav', upsert: false });
         if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save locked Atlas narration: ${error.message}`);
       }
-      const cards = await cardsP;
+      const painted = await cardsP;
+      const cards = painted?.cards;
       const sanitized = sanitizeDirection(direction, narration);
-      const safeDirection = cards ? { ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) } : sanitized;
+      const safeDirection = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) }, painted.objects) : sanitized;
       const cp = cartoonStart.parse({ ...(cards ? { advanced: true, cards } : {}), videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: !long, sfx: s.soundEffects, format: long ? 'long' : 'short' });
       up({ cartoonCheckpoint: cp, progress: 70, detail: advanced ? 'Sending to Advanced Video AI render…' : 'Sending cartoon to hosted preview…' });
       await flushVideo(id);
