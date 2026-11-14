@@ -166,7 +166,7 @@
    "views_per_min": 15.0,
    "set_changes_per_min": 0.0,
    "distinct_sets": 1,
-   "shot_type_variety": -0.0,
+   "shot_type_variety": 0.0,
    "object_insert_share": 0.0,
    "spoken_visible_rate": 0.333,
    "action_rate": 0.333,

@@ -45,7 +45,7 @@ def metrics(measure: dict, vision: list[dict]) -> dict:
     sets = [_set_key(v['set']) for v in labs]
     changes = sum(1 for a, b in zip(sets, sets[1:]) if a != b)
     types = Counter(v['shot_type'] for v in labs)
-    entropy = -sum(c / n * math.log(c / n) for c in types.values()) / math.log(len(_types_universe())) if labs else 0.0
+    entropy = 0.0 + -sum(c / n * math.log(c / n) for c in types.values()) / math.log(len(_types_universe())) if labs else 0.0
     worded = [v for v in labs if v['spoken_visible'] != 'no_words']
     vis = sum(1 if v['spoken_visible'] == 'yes' else 0.5 if v['spoken_visible'] == 'partial' else 0 for v in worded)
     return {
@@ -55,7 +55,7 @@ def metrics(measure: dict, vision: list[dict]) -> dict:
         'views_per_min': round(sum(min(3, max(1, v['distinct_framings'])) for v in labs) / dur * 60, 1),
         'set_changes_per_min': round(changes / dur * 60, 1),
         'distinct_sets': len(set(sets)),
-        'shot_type_variety': round(entropy, 3),
+        'shot_type_variety': round(max(0.0, entropy), 3) + 0.0,
         'object_insert_share': round(types.get('object_insert', 0) / n, 3),
         'spoken_visible_rate': round(vis / max(1, len(worded)), 3),
         'action_rate': round(sum(1 for v in labs if v['action'].strip().lower() not in {'none', ''}) / n, 3),

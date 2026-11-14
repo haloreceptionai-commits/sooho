@@ -14,7 +14,7 @@ Benchmarks: mine, cart. Ours: rail, oil. Target = benchmark average; 100 = bench
 | Median shot length (s) | 1.575 | 1.45 | 1.7 | 3.65 | 4.4 |
 | Set changes per minute | 16.05 | 17.7 | 14.4 | 0.9 | 0.0 |
 | Different places shown | 12.5 | 9 | 16 | 2 | 1 |
-| Shot-type variety (0-1) | 0.719 | 0.701 | 0.737 | 0.29 | -0.0 |
+| Shot-type variety (0-1) | 0.719 | 0.701 | 0.737 | 0.29 | 0.0 |
 | Object close-up share | 0.134 | 0.188 | 0.08 | 0.0 | 0.0 |
 | Shots with a real action | 0.871 | 0.781 | 0.96 | 1.0 | 0.333 |
 | Effects per minute | 12.2 | 11.8 | 12.6 | 1.8 | 0.0 |
