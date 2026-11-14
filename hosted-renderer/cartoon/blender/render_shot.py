@@ -200,14 +200,18 @@ def look(scene, shot):
         for cand in (f'AgX - {name}', name):
             try: scene.view_settings.look = cand; break
             except TypeError: pass
-    if shot.get('haze', 0) > 0:  # light shafts and depth haze through a thin volume box
-        hz = add('cube', (0, 8, 1.4), (4, 14, 1.6), smooth=False)
-        m = bpy.data.materials.new('haze'); m.use_nodes = True; nt = m.node_tree
-        nt.nodes.remove(nt.nodes['Principled BSDF'])
-        v = nt.nodes.new('ShaderNodeVolumePrincipled'); v.inputs['Density'].default_value = shot['haze']
-        v.inputs['Color'].default_value = (1, 0.78, 0.55, 1)
-        nt.links.new(v.outputs[0], nt.nodes['Material Output'].inputs['Volume'])
-        hz.data.materials.append(m)
+    haze = shot.get('haze', 0)
+    if haze > 0:  # depth haze from the mist pass in the compositor: no volume ray-marching cost
+        scene.view_layers[0].use_pass_mist = True
+        ms = scene.world.mist_settings; ms.start = 1.5; ms.depth = 14; ms.falloff = 'QUADRATIC'
+        scene.use_nodes = True; nt = scene.node_tree
+        for nd in list(nt.nodes): nt.nodes.remove(nd)
+        rl = nt.nodes.new('CompositorNodeRLayers'); comp = nt.nodes.new('CompositorNodeComposite')
+        mul = nt.nodes.new('CompositorNodeMath'); mul.operation = 'MULTIPLY'; mul.use_clamp = True
+        mul.inputs[1].default_value = min(1.0, haze * 50)
+        mix = nt.nodes.new('CompositorNodeMixRGB'); mix.inputs[2].default_value = (*shot.get('haze_color', [0.75, 0.48, 0.25]), 1)
+        nt.links.new(rl.outputs['Mist'], mul.inputs[0]); nt.links.new(mul.outputs[0], mix.inputs[0])
+        nt.links.new(rl.outputs['Image'], mix.inputs[1]); nt.links.new(mix.outputs[0], comp.inputs['Image'])
 
 
 def main():
@@ -237,6 +241,9 @@ def main():
                     if any(d.type == kind for d in prefs.devices): break
                 except TypeError: pass
             for d in prefs.devices: d.use = d.type != 'CPU'
+            print('CYCLES_DEVICES', prefs.compute_device_type, [(d.name, d.type, d.use) for d in prefs.devices], flush=True)
+            if not any(d.use for d in prefs.devices): raise RuntimeError('no GPU device for Cycles')
+        cy.use_light_tree = True
         cy.samples = shot.get('samples', 32); cy.use_adaptive_sampling = True
         cy.adaptive_threshold = 0.03; cy.use_denoising = True
         cy.max_bounces = 4; cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2

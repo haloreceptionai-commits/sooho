@@ -19,7 +19,7 @@ for ENG in ${ENGINES:-eevee cycles}; do
   rm -rf /tmp/p; START=$(date +%s)
   SHOT_ENGINE=$ENG CYCLES_DEVICE=$DEV timeout 900 $B --python /opt/shot/render_shot.py -- /tmp/probe.json /tmp/p > /tmp/$ENG-probe.log 2>&1
   echo "$ENG probe exit=$? wall=$(( $(date +%s)-START ))s $(grep -o 'Saved.*\|Time: [0-9:.]*' /tmp/$ENG-probe.log | tr '\n' ' ')" >> $REPORT
-  grep -iE 'optix|cuda|device|error|warn' /tmp/$ENG-probe.log | grep -v '^Fra:' | head -12 | sed "s/^/  $ENG: /" >> $REPORT
+  grep -iE 'optix|cuda|CYCLES_DEVICES|error' /tmp/$ENG-probe.log | grep -v '^Fra:' | head -12 | sed "s/^/  $ENG: /" >> $REPORT
   put $REPORT report.txt text/plain
   [ "${PROBE_ONLY:-0}" = 1 ] && continue
   rm -rf /tmp/f; mkdir -p /tmp/f; START=$(date +%s)

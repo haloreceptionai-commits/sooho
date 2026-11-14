@@ -1,7 +1,7 @@
 """Strict validator for one declarative Blender shot. No free code is ever accepted."""
 SETS = {'mine_tunnel', 'open_day'}
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -38,5 +38,6 @@ def validate_shot(s):
     if s.get('fps', 30) not in (24, 25, 30): raise ValueError('fps 24|25|30')
     if 'frames' in s and not (isinstance(s['frames'], list) and all(isinstance(f, int) and f >= 1 for f in s['frames'])):
         raise ValueError('frames must be positive ints')
+    if 'haze_color' in s: _vec(s['haze_color'], 3, 'haze_color', 1)
     if s.get('engine', 'eevee') not in ('eevee', 'cycles'): raise ValueError('engine eevee|cycles')
     return s
