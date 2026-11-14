@@ -53,7 +53,7 @@ describe('Advanced Video AI script rules', () => {
   });
   it('flags a 12-second script that is far too long', () => {
     const long = Array.from({ length: 12 }, () => 'Lyman runs after the pig in the mud.');
-    expect(validateStory(story(long, 12)).failed.find(c => c.id === 'LANG')?.msg).toMatch(/too long: \d+ words \(max 41\)/);
+    expect(validateStory(story(long, 12)).failed.find(c => c.id === 'LANG')?.msg).toMatch(/too long: \d+ words \(max 39\)/);
   });
   it('does not demand escalation or a myth line in a loop Short', () => {
     const r = validateStory(story(['A pig almost starts a war in 1859.', 'How can a pig start a war?', 'Lyman sees it eat his potatoes.'], 12));
