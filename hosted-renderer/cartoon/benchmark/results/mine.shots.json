@@ -357,28 +357,26 @@
   {
    "i": 0,
    "shot_type": "action",
-   "camera": "push_in",
-   "distinct_framings": 2,
+   "camera": "static",
+   "distinct_framings": 3,
    "set": "mine tunnel",
-   "set_detail": "wood-braced tunnel with rails and lamp spotlight",
+   "set_detail": "underground rail tunnel with lamps and rock walls",
    "objects": [
     "shotgun",
     "gold nugget",
-    "rail tracks"
+    "rails",
+    "lamps"
    ],
    "spoken_visible": "yes",
-   "action": "miner loads a shotgun with a gold nugget and aims/fires",
-   "effects": [
-    "spotlight",
-    "particles"
-   ],
+   "action": "character loads shotgun with gold and fires",
+   "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
    "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
+   "environment_richness": 8,
+   "character_quality": 8,
    "render_quality": 8,
-   "note": "2D stickman in detailed 3D mine; clear insert of loading."
+   "note": "Good 3D mine set; middle insert of loading shells; clear action."
   },
   {
    "i": 1,
@@ -386,26 +384,27 @@
    "camera": "static",
    "distinct_framings": 2,
    "set": "mine room",
-   "set_detail": "stone walls with shelves, lanterns and crates",
+   "set_detail": "rock wall with crates, mugs, lanterns; cracks in wall",
    "objects": [
-    "mug",
-    "lantern",
     "crates",
-    "teapot"
+    "cups",
+    "kettle",
+    "lantern",
+    "candles"
    ],
    "spoken_visible": "yes",
-   "action": "gold projectile hits and vanishes into wall while buddy watches",
+   "action": "gold blast hits wall while buddy watches; gold vanishes",
    "effects": [
-    "light_beam",
+    "projectile_beam",
     "debris"
    ],
    "characters": 1,
    "lighting": "interior_lamps",
    "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Shows beam hitting wall and cracks forming."
+   "environment_richness": 8,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Shows gold shot into wall and disappearing; detailed interior props."
   },
   {
    "i": 2,
@@ -413,45 +412,46 @@
    "camera": "push_in",
    "distinct_framings": 1,
    "set": "mine tunnel",
-   "set_detail": "tracks and hanging lamps",
+   "set_detail": "tracks and hanging lanterns",
    "objects": [
-    "shotgun",
-    "rails"
+    "rails",
+    "lanterns",
+    "shotgun"
    ],
    "spoken_visible": "partial",
    "action": "none",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
-   "depth": 6,
-   "environment_richness": 6,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Dialogue explains 'salting'; visual shows miner holding gun."
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Explains salting while holding gun; visual only loosely tied to words."
   },
   {
    "i": 3,
    "shot_type": "establishing",
-   "camera": "tracking",
+   "camera": "static",
    "distinct_framings": 3,
    "set": "mine exterior",
-   "set_detail": "daylight yard with cliffside entrance, cart and tracks",
+   "set_detail": "yard with cliff face, rail cart and entrance",
    "objects": [
-    "mine cart",
+    "rail cart",
     "newspaper",
     "rocks",
     "tracks"
    ],
-   "spoken_visible": "partial",
+   "spoken_visible": "yes",
    "action": "none",
    "effects": [],
    "characters": 2,
    "lighting": "day_sun",
-   "depth": 8,
+   "depth": 7,
    "environment_richness": 8,
-   "character_quality": 3,
+   "character_quality": 8,
    "render_quality": 8,
-   "note": "Shows rocks and newspaper about rich buyer; varied framings."
+   "note": "Varied framings: ground rocks, miner with cart, then duo with newspaper about buyer."
   },
   {
    "i": 4,
@@ -459,34 +459,35 @@
    "camera": "static",
    "distinct_framings": 2,
    "set": "office/saloon interior",
-   "set_detail": "table with lamp and gold on plates",
+   "set_detail": "wood table with lamp, money and gold",
    "objects": [
     "table",
-    "gold pieces",
     "lamp",
-    "paper money"
+    "gold pile",
+    "money"
    ],
    "spoken_visible": "yes",
-   "action": "miner talks at table showing money and gold",
+   "action": "none",
    "effects": [],
    "characters": 3,
    "lighting": "interior_lamps",
    "depth": 6,
    "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Interior scene with props and two other figures."
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Shows money and characters discussing spending last hundred."
   },
   {
    "i": 5,
    "shot_type": "object_insert",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "office table",
-   "set_detail": "wood tabletop with bills and gold dust plates",
+   "set": "tabletop",
+   "set_detail": "wooden table surface with plates of gold dust and $100 bills",
    "objects": [
-    "gold dust plate",
-    "$100 bills"
+    "plate",
+    "gold dust",
+    "$100 bill"
    ],
    "spoken_visible": "yes",
    "action": "none",
@@ -494,126 +495,128 @@
    "characters": 0,
    "lighting": "interior_lamps",
    "depth": 5,
-   "environment_richness": 6,
+   "environment_richness": 5,
    "character_quality": 0,
-   "render_quality": 7,
-   "note": "Close insert emphasizing money and gold dust."
+   "render_quality": 6,
+   "note": "Close-up insert emphasizing gold dust and cash."
   },
   {
    "i": 6,
    "shot_type": "establishing",
-   "camera": "tracking",
+   "camera": "static",
    "distinct_framings": 1,
-   "set": "mine yard by cliffs",
-   "set_detail": "outdoor area with tracks, small building, rocky cliffs and forest",
+   "set": "mine exterior canyon",
+   "set_detail": "rocky canyon with forest backdrop and mine shack by track",
    "objects": [
     "vintage car",
+    "mine shack",
     "rail tracks",
-    "small building",
     "rocks",
     "trees"
    ],
    "spoken_visible": "yes",
-   "action": "car drives into yard with people aboard",
+   "action": "car drives up to mine area",
    "effects": [],
    "characters": 4,
    "lighting": "day_sun",
    "depth": 8,
    "environment_richness": 8,
-   "character_quality": 7,
+   "character_quality": 8,
    "render_quality": 8,
-   "note": "Wide view of car arriving with rich man visible."
+   "note": "Wide view of car arriving with characters."
   },
   {
    "i": 7,
    "shot_type": "character_closeup",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine yard",
-   "set_detail": "close-up of people in vintage car with forest backdrop",
+   "set": "mine exterior by car",
+   "set_detail": "close on car interior with forest background",
    "objects": [
-    "vintage car"
+    "vintage car",
+    "seats"
    ],
-   "spoken_visible": "partial",
-   "action": "man in white suit waves while car moves",
+   "spoken_visible": "yes",
+   "action": "rich man stands in car as it arrives",
    "effects": [],
    "characters": 2,
    "lighting": "day_sun",
    "depth": 7,
    "environment_richness": 7,
-   "character_quality": 7,
+   "character_quality": 8,
    "render_quality": 8,
-   "note": "Closeup emphasizes rich man; motion of car implied rather than clearly shown."
+   "note": "Close on rich character in car."
   },
   {
    "i": 8,
    "shot_type": "action",
-   "camera": "static",
+   "camera": "pull_out",
    "distinct_framings": 3,
    "set": "mine entrance",
-   "set_detail": "timbered portal with sign and tracks entering tunnel",
+   "set_detail": "wooden portal with decorations and tracks leading inside",
    "objects": [
-    "mine entrance sign",
+    "beam",
     "rail tracks",
-    "support beam"
+    "mine doorway",
+    "bunting"
    ],
    "spoken_visible": "yes",
-   "action": "rich man in white suit walks in and hits head on beam; others stand nearby",
+   "action": "rich man in white suit bangs head on doorway beam",
    "effects": [],
    "characters": 4,
    "lighting": "day_sun",
    "depth": 8,
    "environment_richness": 8,
    "character_quality": 8,
-   "render_quality": 9,
-   "note": "Multiple angles around the entrance show the gag clearly."
+   "render_quality": 8,
+   "note": "Begins close then reveals more characters at entrance."
   },
   {
    "i": 9,
    "shot_type": "action",
-   "camera": "static",
+   "camera": "tracking",
    "distinct_framings": 2,
-   "set": "mine tunnel rock wall",
-   "set_detail": "rock face inside tunnel with tools and lanterns",
+   "set": "mine tunnel",
+   "set_detail": "rock wall interior with wooden supports and tools",
    "objects": [
-    "rock wall",
     "pickaxe",
+    "rock wall",
     "lantern",
-    "hat"
+    "fallen hat"
    ],
    "spoken_visible": "yes",
-   "action": "expert hits wall with pickaxe and breaks chunk",
+   "action": "expert smashes wall chunk",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
    "depth": 7,
-   "environment_richness": 8,
+   "environment_richness": 7,
    "character_quality": 8,
    "render_quality": 8,
-   "note": "Clear interior action of expert smashing wall."
+   "note": "Shows expert working the wall."
   },
   {
    "i": 10,
    "shot_type": "action",
    "camera": "static",
-   "distinct_framings": 2,
+   "distinct_framings": 1,
    "set": "mine tunnel",
-   "set_detail": "timbered interior with bucket and lantern",
+   "set_detail": "wood-lined section with bucket and lantern",
    "objects": [
-    "gold pan",
-    "bucket",
+    "pan",
+    "water tub",
     "lantern"
    ],
    "spoken_visible": "yes",
-   "action": "expert swirls material in pan",
+   "action": "expert pans material in water",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
    "depth": 7,
-   "environment_richness": 8,
+   "environment_richness": 7,
    "character_quality": 8,
    "render_quality": 8,
-   "note": "Shows panning process at medium distance."
+   "note": "Panning action clearly shown."
   },
   {
    "i": 11,
@@ -621,191 +624,190 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "mine tunnel",
-   "set_detail": "close-up on pan over ground with crates in background",
+   "set_detail": "close on pan over ground with crates in background",
    "objects": [
     "gold pan",
     "water",
-    "gold flakes",
-    "ground",
-    "crates"
+    "gold flakes"
    ],
    "spoken_visible": "yes",
-   "action": "flakes spin in pan",
+   "action": "flakes spin inside pan",
    "effects": [],
    "characters": 0,
    "lighting": "interior_lamps",
    "depth": 6,
-   "environment_richness": 7,
+   "environment_richness": 6,
    "character_quality": 0,
-   "render_quality": 8,
-   "note": "Insert shot on pan contents demonstrating spinning flakes."
+   "render_quality": 7,
+   "note": "Insert of gold flakes swirling in pan."
   },
   {
    "i": 12,
    "shot_type": "object_insert",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine tunnel",
-   "set_detail": "underground cave with crates, barrels and dirt floor",
+   "set": "mine interior",
+   "set_detail": "work area with crates and barrel near a metal pan/basin",
    "objects": [
     "metal pan",
     "knife",
     "gold flakes",
-    "crates",
+    "wooden crates",
     "barrel"
    ],
    "spoken_visible": "partial",
-   "action": "knife stirring/scraping in pan",
+   "action": "knife scrapes in the pan",
    "effects": [],
    "characters": 0,
    "lighting": "interior_lamps",
-   "depth": 6,
-   "environment_richness": 7,
+   "depth": 7,
+   "environment_richness": 6,
    "character_quality": 0,
    "render_quality": 7,
-   "note": "Close view into a pan; good textures and lighting, no characters."
+   "note": "Close-up of pan bottom with knife and flakes; words are generic ('the bottom... under his')."
   },
   {
    "i": 13,
    "shot_type": "medium",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine tunnel",
-   "set_detail": "rock walls, tracks, cart and lantern nearby",
+   "set": "mine interior",
+   "set_detail": "beside barrel and rails, lantern and cart behind",
    "objects": [
+    "barrel",
+    "pan",
     "magnifying glass",
-    "water pan",
     "lantern",
-    "mine cart",
-    "tracks"
+    "rail cart"
    ],
    "spoken_visible": "yes",
-   "action": "character holds magnifying glass over pan",
+   "action": "character presents magnifying glass over pan",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
-   "depth": 6,
+   "depth": 7,
    "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "2D-style character in a detailed 3D mine set."
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Well-lit 3D set with posed stick-figure model."
   },
   {
    "i": 14,
    "shot_type": "action",
-   "camera": "tracking",
+   "camera": "whip",
    "distinct_framings": 3,
    "set": "mine tunnel",
-   "set_detail": "tracks and tunnel interior with lanterns",
+   "set_detail": "rails and tunnel with lamp lighting",
    "objects": [
     "magnifying glass",
-    "knife",
     "gold flakes",
-    "tracks",
+    "knife",
+    "rail tracks",
     "lantern"
    ],
    "spoken_visible": "yes",
-   "action": "inspect with magnifying glass then lift flakes on knife",
+   "action": "magnifying glass points to gold; knife lifts flakes to show flatness",
    "effects": [],
    "characters": 0,
    "lighting": "interior_lamps",
    "depth": 7,
    "environment_richness": 7,
    "character_quality": 0,
-   "render_quality": 7,
-   "note": "Multiple angles showing inspection and flakes on knife."
+   "render_quality": 8,
+   "note": "Multiple framings within the shot highlight objects."
   },
   {
    "i": 15,
    "shot_type": "object_insert",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine tunnel",
-   "set_detail": "close view of rocky wall surface",
+   "set": "mine wall closeup",
+   "set_detail": "textured rock surface covered with small flakes",
    "objects": [
     "rock wall",
-    "projectile/impact mark"
+    "gold/ore flakes",
+    "projectile"
    ],
    "spoken_visible": "partial",
-   "action": "projectile appears/impact on wall",
+   "action": "projectile approaches/impacts wall",
    "effects": [],
    "characters": 0,
    "lighting": "interior_lamps",
-   "depth": 3,
-   "environment_richness": 4,
+   "depth": 5,
+   "environment_richness": 5,
    "character_quality": 0,
    "render_quality": 6,
-   "note": "Flat close-up texture of wall; action implied."
+   "note": "Shows impact suggesting someone 'shot' but no shooter visible."
   },
   {
    "i": 16,
    "shot_type": "object_insert",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine tunnel",
-   "set_detail": "close view of rocky wall with gold leaf embedded",
+   "set": "mine wall closeup",
+   "set_detail": "same wall with a gold leaf-shaped piece",
    "objects": [
     "rock wall",
-    "gold leaf"
+    "gold leaf piece"
    ],
    "spoken_visible": "yes",
-   "action": "none",
+   "action": "gold flake sticks to wall",
    "effects": [],
    "characters": 0,
    "lighting": "interior_lamps",
-   "depth": 3,
-   "environment_richness": 4,
+   "depth": 5,
+   "environment_richness": 5,
    "character_quality": 0,
    "render_quality": 6,
-   "note": "Clear insert of the gold in the wall."
+   "note": "Close-up of gold on wall."
   },
   {
    "i": 17,
    "shot_type": "medium",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine tunnel",
-   "set_detail": "character beside wall with embedded gold, crates nearby",
+   "set": "mine interior",
+   "set_detail": "character by stacked crates and wall with gold piece",
    "objects": [
     "crates",
-    "rock wall",
-    "gold leaf"
+    "gold piece on wall"
    ],
    "spoken_visible": "yes",
-   "action": "character gestures toward gold in wall",
+   "action": "character talks and gestures toward wall",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
-   "depth": 6,
+   "depth": 7,
    "environment_richness": 6,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Character explains while pointing at gold in the wall."
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Character performance in a detailed 3D mine set."
   },
   {
    "i": 18,
-   "shot_type": "character_closeup",
+   "shot_type": "medium",
    "camera": "push_in",
-   "distinct_framings": 1,
+   "distinct_framings": 2,
    "set": "mine interior",
-   "set_detail": "wood-plank wall, rocky ceiling, lanterns, barrel, suitcase",
+   "set_detail": "wood plank wall with lanterns, bucket and crates in a cave room",
    "objects": [
     "lantern",
-    "barrel",
-    "suitcase",
-    "calendar",
-    "wood wall"
+    "bucket",
+    "crate",
+    "door",
+    "hat",
+    "rail"
    ],
    "spoken_visible": "yes",
-   "action": "none",
+   "action": "characters gesturing and stepping forward",
    "effects": [],
    "characters": 3,
    "lighting": "interior_lamps",
-   "depth": 6,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Close on the wealthy man in white suit; others in background."
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Focus on the rich man in white suit; interior cave room detailed with props and shadows."
   },
   {
    "i": 19,
@@ -813,21 +815,21 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "mine interior",
-   "set_detail": "wood-plank wall with calendar",
+   "set_detail": "wooden slat wall with calendar",
    "objects": [
     "calendar",
-    "wood wall"
+    "wall slats"
    ],
    "spoken_visible": "no_words",
    "action": "none",
    "effects": [],
    "characters": 2,
    "lighting": "interior_lamps",
-   "depth": 6,
-   "environment_richness": 6,
-   "character_quality": 3,
-   "render_quality": 6,
-   "note": "Green-sweater character with mountie beside him."
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Two characters standing; consistent lighting and shadows."
   },
   {
    "i": 20,
@@ -835,7 +837,7 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "mine interior",
-   "set_detail": "wood wall, rocky ceiling; table/suitcase with money",
+   "set_detail": "cave room by wooden wall and calendar",
    "objects": [
     "suitcase",
     "money stacks",
@@ -843,15 +845,15 @@
     "lantern"
    ],
    "spoken_visible": "no_words",
-   "action": "characters handle suitcase and money; one character moves/falls",
+   "action": "money placed and thrown; suitcase opened",
    "effects": [],
-   "characters": 4,
+   "characters": 3,
    "lighting": "interior_lamps",
-   "depth": 6,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Rich man opens suitcase; money handled/tossed."
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Clear props and animated money bundles."
   },
   {
    "i": 21,
@@ -859,215 +861,221 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "mine entrance",
-   "set_detail": "tracks, tools on wall, stone facade, banners",
+   "set_detail": "exterior with rails, tools on wall, bunting and stone facade",
    "objects": [
-    "mine entrance sign",
-    "train tracks",
-    "tools",
-    "banners"
+    "rail tracks",
+    "pickaxes",
+    "sign",
+    "doorway",
+    "bunting"
    ],
    "spoken_visible": "no_words",
-   "action": "characters step out of doorway",
+   "action": "none",
    "effects": [],
    "characters": 3,
    "lighting": "day_sun",
    "depth": 7,
    "environment_richness": 8,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Exterior wide of mine portal."
+   "character_quality": 7,
+   "render_quality": 8,
+   "note": "Wide view of entrance as characters come out."
   },
   {
    "i": 22,
-   "shot_type": "action",
+   "shot_type": "medium",
    "camera": "static",
    "distinct_framings": 1,
    "set": "mine entrance",
-   "set_detail": "outside portal with tracks; money flying",
+   "set_detail": "outside near rails and stone wall",
    "objects": [
     "money stacks",
-    "tracks",
-    "mine entrance"
+    "rail tracks",
+    "doorway"
    ],
    "spoken_visible": "no_words",
-   "action": "money thrown/flies around characters",
-   "effects": [],
-   "characters": 3,
+   "action": "money flying and being held",
+   "effects": [
+    "flying_money"
+   ],
+   "characters": 2,
    "lighting": "day_sun",
    "depth": 7,
    "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Closer on characters with cash."
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Closer on characters with money tossed in air."
   },
   {
    "i": 23,
-   "shot_type": "action",
+   "shot_type": "character_closeup",
    "camera": "push_in",
-   "distinct_framings": 1,
+   "distinct_framings": 2,
    "set": "mine interior",
-   "set_detail": "wood wall, scattered bills, suitcase on floor",
+   "set_detail": "same wooden wall room with scattered money and suitcase",
    "objects": [
     "suitcase",
-    "paper money",
-    "cup",
-    "dynamite bundle"
+    "money stacks",
+    "lantern"
    ],
    "spoken_visible": "no_words",
-   "action": "rich man produces bundle of dynamite",
+   "action": "character pulls out bundle of dynamite",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
-   "depth": 6,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Single character pulls out explosives prop."
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 8,
+   "render_quality": 8,
+   "note": "Solo rich man revealed with explosives; good shading and contact shadows."
   },
   {
    "i": 24,
    "shot_type": "character_closeup",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine interior",
-   "set_detail": "timber wall inside tunnel with props",
+   "set": "mine tunnel interior",
+   "set_detail": "wooden supports and rock walls behind character",
    "objects": [
-    "dynamite sticks",
-    "match",
-    "barrel",
+    "dynamite bundle",
+    "fuse",
     "top hat"
    ],
    "spoken_visible": "no_words",
-   "action": "character reveals and lights a dynamite stick",
+   "action": "character holds dynamite; fuse burning",
    "effects": [
-    "small flame"
+    "sparks"
    ],
    "characters": 1,
    "lighting": "interior_lamps",
    "depth": 6,
    "environment_richness": 6,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Close-up of flat stick-figure character in a detailed mine set."
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Solid 3D character close-up in mine set."
   },
   {
    "i": 25,
    "shot_type": "object_insert",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine interior",
-   "set_detail": "close view on wooden post and dynamite fuse",
+   "set": "mine tunnel interior",
+   "set_detail": "close-up by wooden post",
    "objects": [
     "dynamite stick",
+    "fuse",
     "flame"
    ],
    "spoken_visible": "no",
-   "action": "fuse is lit with sparks",
+   "action": "flame lights fuse; sparks fly",
    "effects": [
     "sparks",
-    "small flame"
+    "ember glow"
    ],
    "characters": 0,
    "lighting": "interior_lamps",
-   "depth": 6,
+   "depth": 5,
    "environment_richness": 5,
    "character_quality": 0,
    "render_quality": 6,
-   "note": "Tight insert on dynamite fuse being lit."
+   "note": "Tight insert on dynamite fuse."
   },
   {
    "i": 26,
    "shot_type": "action",
-   "camera": "static",
+   "camera": "pan",
    "distinct_framings": 3,
-   "set": "mine tunnel",
-   "set_detail": "rail tracks with cart and rocks",
+   "set": "mine tunnel interior",
+   "set_detail": "tracks with cart and crates",
    "objects": [
     "mine cart",
     "dynamite",
-    "tracks",
-    "rocks"
+    "firecracker",
+    "rails"
    ],
    "spoken_visible": "no",
-   "action": "character tosses explosive; views of cart and ground with firecracker",
+   "action": "character tosses dynamite into cart; firecracker ends up on ground sparking",
    "effects": [
     "sparks"
    ],
    "characters": 1,
    "lighting": "interior_lamps",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Multiple angles within the tunnel."
+   "depth": 6,
+   "environment_richness": 6,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Multiple angles in the tunnel; decent depth and lighting."
   },
   {
    "i": 27,
    "shot_type": "medium",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine tunnel",
-   "set_detail": "arched supports, lamps in background",
+   "set": "mine tunnel interior",
+   "set_detail": "standing on tracks near entrance frame",
    "objects": [
     "tracks",
     "lamps"
    ],
-   "spoken_visible": "no",
-   "action": "none",
+   "spoken_visible": "partial",
+   "action": "character reacts; prepares to run",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
    "depth": 6,
    "environment_richness": 6,
-   "character_quality": 3,
+   "character_quality": 6,
    "render_quality": 6,
-   "note": "Character stands in tunnel; expression changes."
+   "note": "Character expression change; story mentions others running not shown."
   },
   {
    "i": 28,
    "shot_type": "action",
    "camera": "static",
    "distinct_framings": 3,
-   "set": "mine entrance",
-   "set_detail": "rocky cliff face with doorway",
+   "set": "mine entrance exterior",
+   "set_detail": "rock cliff facade with sign; explosion bursts from doorway",
    "objects": [
+    "mine sign",
     "rocks",
-    "mine sign"
+    "explosion smoke"
    ],
    "spoken_visible": "partial",
-   "action": "explosion at entrance; character blown out and tumbles",
+   "action": "character runs as explosion blasts him out; dust settles",
    "effects": [
     "explosion",
-    "smoke/dust"
+    "smoke"
    ],
    "characters": 1,
    "lighting": "day_sun",
    "depth": 7,
    "environment_richness": 7,
-   "character_quality": 3,
+   "character_quality": 6,
    "render_quality": 7,
-   "note": "Exterior blast sequence with character."
+   "note": "Wide exterior with explosion; good lighting and depth."
   },
   {
    "i": 29,
    "shot_type": "effect",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "mine interior",
-   "set_detail": "view obscured by dust cloud",
-   "objects": [],
+   "set": "mine tunnel interior",
+   "set_detail": "space filled with dust cloud, faint ground and tape visible",
+   "objects": [
+    "dust",
+    "rocks"
+   ],
    "spoken_visible": "no",
    "action": "none",
    "effects": [
-    "heavy dust/smoke"
+    "smoke/dust"
    ],
    "characters": 0,
    "lighting": "flat",
-   "depth": 1,
-   "environment_richness": 2,
+   "depth": 2,
+   "environment_richness": 3,
    "character_quality": 0,
-   "render_quality": 2,
-   "note": "Scene mostly obscured by dust; minimal detail visible."
+   "render_quality": 3,
+   "note": "Dust-filled frame with minimal visible detail."
   },
   {
    "i": 30,
@@ -1075,52 +1083,52 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "mine tunnel",
-   "set_detail": "rocky tunnel interior with lantern and measuring tape on the ground; dust clearing reveals a gold vein",
+   "set_detail": "rocky tunnel with tape measure on ground; lantern and gold vein becoming visible through dust",
    "objects": [
     "rocks",
-    "measuring tape",
+    "tape measure",
     "lantern",
-    "gold vein",
-    "dust smoke"
+    "gold vein"
    ],
    "spoken_visible": "partial",
-   "action": "dust clears to reveal a gold vein",
+   "action": "dust clears revealing the tunnel wall and gold vein",
    "effects": [
     "dust",
-    "light glow"
+    "particles"
    ],
    "characters": 0,
    "lighting": "interior_lamps",
    "depth": 7,
-   "environment_richness": 8,
+   "environment_richness": 7,
    "character_quality": 0,
    "render_quality": 7,
-   "note": "No characters visible; emphasis on tunnel and emerging gold vein."
+   "note": "No character visible; focus on tunnel as dust dissipates."
   },
   {
    "i": 31,
-   "shot_type": "medium",
+   "shot_type": "action",
    "camera": "push_in",
    "distinct_framings": 3,
    "set": "mine tunnel",
-   "set_detail": "gold vein along tunnel wall with tape measure indicating distance",
+   "set_detail": "same rocky tunnel with bright gold vein on wall; tape measure and '10 FT' mark on ground",
    "objects": [
-    "rocks",
-    "measuring tape",
     "gold vein",
+    "rocks",
+    "tape measure",
     "lantern",
-    "hat"
+    "hat",
+    "10 FT mark"
    ],
    "spoken_visible": "yes",
-   "action": "character gestures by the gold vein; distance marked ten feet",
+   "action": "character gestures by the gold vein; shows thickness and distance marking",
    "effects": [],
    "characters": 1,
    "lighting": "interior_lamps",
-   "depth": 8,
-   "environment_richness": 8,
+   "depth": 7,
+   "environment_richness": 7,
    "character_quality": 3,
-   "render_quality": 8,
-   "note": "Shows gold vein and 10 ft mark matching narration."
+   "render_quality": 7,
+   "note": "Flat cut-out style character in a 3D set; vein and distance mark match narration."
   }
  ],
  "words": [

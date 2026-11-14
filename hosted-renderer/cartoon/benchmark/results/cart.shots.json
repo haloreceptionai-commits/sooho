@@ -283,26 +283,22 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "castle yard",
-   "set_detail": "stone wall with banner and grass beside a wooden drilling jig",
+   "set_detail": "grassy area beside stone castle wall with banner",
    "objects": [
+    "wood block",
     "hand drill",
-    "wooden panel",
-    "grass",
-    "stone wall",
     "banner"
    ],
    "spoken_visible": "yes",
-   "action": "character drills into a wood panel",
-   "effects": [
-    "debris_splinters"
-   ],
+   "action": "character drills into wood",
+   "effects": [],
    "characters": 1,
    "lighting": "day_sun",
-   "depth": 7,
-   "environment_richness": 7,
+   "depth": 6,
+   "environment_richness": 6,
    "character_quality": 3,
    "render_quality": 7,
-   "note": "Stick-figure style character in a 3D castle exterior."
+   "note": "Stick-figure style character drilling a wooden block near castle wall."
   },
   {
    "i": 1,
@@ -310,307 +306,58 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "castle yard",
-   "set_detail": "close-up of wooden panel being drilled",
+   "set_detail": "close-up on wooden panel near grass",
    "objects": [
+    "wood panel",
     "drill bit",
-    "wooden panel",
-    "holes",
-    "shavings"
+    "hose/pipe"
    ],
    "spoken_visible": "yes",
-   "action": "close-up of holes being drilled",
-   "effects": [
-    "debris_splinters"
-   ],
+   "action": "drill making holes with wood chips",
+   "effects": [],
    "characters": 0,
    "lighting": "day_sun",
-   "depth": 6,
-   "environment_richness": 6,
+   "depth": 5,
+   "environment_richness": 4,
    "character_quality": 0,
-   "render_quality": 7,
-   "note": "Tight macro on the drilling work."
+   "render_quality": 6,
+   "note": "Tight insert of drill cutting holes and chips flying."
   },
   {
    "i": 2,
    "shot_type": "establishing",
    "camera": "pan",
-   "distinct_framings": 1,
-   "set": "castle wall",
-   "set_detail": "stone wall with arch and banners, exterior landscape visible",
+   "distinct_framings": 2,
+   "set": "castle wall exterior",
+   "set_detail": "stone wall with banners and archway overlooking landscape",
    "objects": [
-    "stone wall",
-    "archway",
-    "banner",
-    "pavilion roof"
+    "banners"
    ],
-   "spoken_visible": "no",
+   "spoken_visible": "partial",
    "action": "none",
    "effects": [],
    "characters": 0,
    "lighting": "day_sun",
-   "depth": 7,
-   "environment_richness": 7,
+   "depth": 6,
+   "environment_richness": 6,
    "character_quality": 0,
-   "render_quality": 7,
-   "note": "Scenic view of wall and surroundings."
+   "render_quality": 6,
+   "note": "Scenic pan of wall and landscape; words 'because down' not directly depicted beyond slope."
   },
   {
    "i": 3,
    "shot_type": "crowd",
    "camera": "push_in",
-   "distinct_framings": 2,
-   "set": "hillside below fort",
-   "set_detail": "army marching up slope with commander on palanquin",
+   "distinct_framings": 3,
+   "set": "hillside outside fort",
+   "set_detail": "grassy slope with fields below and marching army",
    "objects": [
-    "palanquin",
-    "spears",
     "flags",
-    "hill path"
-   ],
-   "spoken_visible": "yes",
-   "action": "army marches up the hill; commander carried on palanquin",
-   "effects": [
-    "dust_smoke"
-   ],
-   "characters": 15,
-   "lighting": "day_sun",
-   "depth": 8,
-   "environment_richness": 8,
-   "character_quality": 3,
-   "render_quality": 8,
-   "note": "Large group shot with leader and troops moving."
-  },
-  {
-   "i": 4,
-   "shot_type": "action",
-   "camera": "tracking",
-   "distinct_framings": 2,
-   "set": "fort road",
-   "set_detail": "along the fort wall, troops carrying leader pass by",
-   "objects": [
     "palanquin",
-    "spears",
-    "fort wall",
-    "path"
-   ],
-   "spoken_visible": "partial",
-   "action": "troops carry palanquin along wall",
-   "effects": [
-    "dust_smoke"
-   ],
-   "characters": 8,
-   "lighting": "day_sun",
-   "depth": 8,
-   "environment_richness": 8,
-   "character_quality": 3,
-   "render_quality": 8,
-   "note": "Shows fort and moving troops; narration mentions fort."
-  },
-  {
-   "i": 5,
-   "shot_type": "crowd",
-   "camera": "tracking",
-   "distinct_framings": 3,
-   "set": "castle gate courtyard",
-   "set_detail": "under gate arch with multiple grindstones and soldiers",
-   "objects": [
-    "grindstones",
-    "swords",
-    "buckets",
-    "gate arch",
-    "benches"
+    "umbrella"
    ],
    "spoken_visible": "yes",
-   "action": "people sharpen swords; camera moves to another pair in the corner",
-   "effects": [],
-   "characters": 10,
-   "lighting": "day_sun",
-   "depth": 8,
-   "environment_richness": 8,
-   "character_quality": 3,
-   "render_quality": 8,
-   "note": "Busy courtyard activity with multiple groups shown."
-  },
-  {
-   "i": 6,
-   "shot_type": "action",
-   "camera": "static",
-   "distinct_framings": 3,
-   "set": "fort courtyard",
-   "set_detail": "stone wall with banners, grass yard, wooden stand with hole-board",
-   "objects": [
-    "wooden hole board",
-    "drill/auger",
-    "stand",
-    "banners",
-    "grass"
-   ],
-   "spoken_visible": "yes",
-   "action": "soldier drills holes while commander questions him",
-   "effects": [],
-   "characters": 3,
-   "lighting": "day_sun",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "flat stick-figure characters in a detailed 3D fort set."
-  },
-  {
-   "i": 7,
-   "shot_type": "action",
-   "camera": "static",
-   "distinct_framings": 2,
-   "set": "fort courtyard",
-   "set_detail": "same yard with board on stand, towers in background",
-   "objects": [
-    "hole board",
-    "stand"
-   ],
-   "spoken_visible": "no",
-   "action": "two soldiers handle and tilt the board",
-   "effects": [],
-   "characters": 2,
-   "lighting": "day_sun",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Dialogue not depicting a concrete visible action."
-  },
-  {
-   "i": 8,
-   "shot_type": "action",
-   "camera": "static",
-   "distinct_framings": 3,
-   "set": "fort courtyard",
-   "set_detail": "cart near wall; close-up of many thin sticks with strings inserted into holes",
-   "objects": [
-    "cart",
-    "hole board",
-    "long thin sticks with strings",
-    "rope"
-   ],
-   "spoken_visible": "yes",
-   "action": "board is bolted to cart; sticks with strings inserted; strings twisted together; soldier slapped for touching",
-   "effects": [],
-   "characters": 4,
-   "lighting": "day_sun",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Good close-up insert for strings."
-  },
-  {
-   "i": 9,
-   "shot_type": "crowd",
-   "camera": "static",
-   "distinct_framings": 3,
-   "set": "fort courtyard",
-   "set_detail": "many soldiers gathered near wall and moat area",
-   "objects": [
-    "banners",
-    "grass",
-    "moat/ditch"
-   ],
-   "spoken_visible": "yes",
-   "action": "hard slap heard/seen and crowd reacts",
-   "effects": [],
-   "characters": 7,
-   "lighting": "sunset",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Shows wide view of fort with many characters."
-  },
-  {
-   "i": 10,
-   "shot_type": "establishing",
-   "camera": "static",
-   "distinct_framings": 3,
-   "set": "fort wall platform",
-   "set_detail": "cart by lantern as time shifts to night",
-   "objects": [
-    "cart",
-    "lantern",
-    "rope coil"
-   ],
-   "spoken_visible": "no",
-   "action": "none",
-   "effects": [],
-   "characters": 1,
-   "lighting": "night",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Brief transition to night at the cart location."
-  },
-  {
-   "i": 11,
-   "shot_type": "action",
-   "camera": "static",
-   "distinct_framings": 3,
-   "set": "fort wall platform",
-   "set_detail": "raining; cart covered; soldier lies atop as umbrella",
-   "objects": [
-    "cart",
-    "coat/cover",
-    "lantern"
-   ],
-   "spoken_visible": "yes",
-   "action": "rain pours; he throws coat over cart and lies on top to cover it",
-   "effects": [
-    "rain"
-   ],
-   "characters": 3,
-   "lighting": "rain_storm",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Clear depiction of the narrated actions in rain."
-  },
-  {
-   "i": 12,
-   "shot_type": "wide",
-   "camera": "static",
-   "distinct_framings": 1,
-   "set": "castle wall",
-   "set_detail": "stone parapet with cart and sunrise landscape beyond",
-   "objects": [
-    "cart",
-    "stone parapet",
-    "mountains"
-   ],
-   "spoken_visible": "partial",
-   "action": "none",
-   "effects": [],
-   "characters": 1,
-   "lighting": "sunset",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Walls shown but no ladders visibly slamming."
-  },
-  {
-   "i": 13,
-   "shot_type": "crowd",
-   "camera": "push_in",
-   "distinct_framings": 1,
-   "set": "battlefield grass by fort",
-   "set_detail": "green field with army formations, banners and parasol, fort structures behind",
-   "objects": [
-    "banners",
-    "spears",
-    "parasol",
-    "fort buildings"
-   ],
-   "spoken_visible": "yes",
-   "action": "army advances/charges",
+   "action": "army marches downhill with leader on palanquin",
    "effects": [],
    "characters": 20,
    "lighting": "day_sun",
@@ -618,89 +365,46 @@
    "environment_richness": 8,
    "character_quality": 3,
    "render_quality": 8,
-   "note": "Large crowd of soldiers moving forward."
+   "note": "Large army scene with depth and smoke; cutout-style characters."
   },
   {
-   "i": 14,
-   "shot_type": "medium",
-   "camera": "push_in",
-   "distinct_framings": 2,
-   "set": "castle wall",
-   "set_detail": "platform with cart; mountains and sky visible; torch behind soldiers",
-   "objects": [
-    "cart",
-    "torch",
-    "helmets"
-   ],
-   "spoken_visible": "partial",
-   "action": "characters argue/talk",
-   "effects": [],
-   "characters": 6,
-   "lighting": "day_sun",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Speech implied; focus moves closer to main character."
-  },
-  {
-   "i": 15,
-   "shot_type": "character_closeup",
-   "camera": "static",
+   "i": 4,
+   "shot_type": "action",
+   "camera": "tracking",
    "distinct_framings": 1,
-   "set": "castle wall edge",
-   "set_detail": "view down to approaching army in fields; one soldier foreground at parapet",
+   "set": "hillside by fort wall",
+   "set_detail": "leader carried on palanquin near stone wall",
    "objects": [
-    "parapet",
-    "fields",
-    "banners"
-   ],
-   "spoken_visible": "no_words",
-   "action": "none",
-   "effects": [],
-   "characters": 2,
-   "lighting": "day_sun",
-   "depth": 7,
-   "environment_richness": 7,
-   "character_quality": 3,
-   "render_quality": 7,
-   "note": "Foreground soldier with large army in background."
-  },
-  {
-   "i": 16,
-   "shot_type": "crowd",
-   "camera": "pan",
-   "distinct_framings": 1,
-   "set": "battlefield grass",
-   "set_detail": "dense ranks of soldiers with yellow banners; mountains beyond",
-   "objects": [
-    "banners",
-    "spears"
+    "palanquin",
+    "umbrella",
+    "flag"
    ],
    "spoken_visible": "yes",
-   "action": "soldiers bunch up shoulder-to-shoulder",
+   "action": "palanquin carried past fort",
    "effects": [],
-   "characters": 30,
+   "characters": 4,
    "lighting": "day_sun",
    "depth": 7,
-   "environment_richness": 7,
+   "environment_richness": 6,
    "character_quality": 3,
    "render_quality": 7,
-   "note": "Crowd fills frame closely packed."
+   "note": "Shows fort and group moving; ties to narration about fort."
   },
   {
-   "i": 17,
-   "shot_type": "medium",
-   "camera": "static",
-   "distinct_framings": 1,
-   "set": "battlefield grass",
-   "set_detail": "front rank soldiers smiling, shields and helmets; mountains and sky",
+   "i": 5,
+   "shot_type": "action",
+   "camera": "tracking",
+   "distinct_framings": 3,
+   "set": "castle gate interior",
+   "set_detail": "under archway with grinding wheels and soldiers",
    "objects": [
-    "shields",
-    "spears"
+    "grindstone wheels",
+    "swords",
+    "bench",
+    "gate door"
    ],
    "spoken_visible": "yes",
-   "action": "none",
+   "action": "people sharpen swords; cut to others at gate corner",
    "effects": [],
    "characters": 8,
    "lighting": "day_sun",
@@ -708,104 +412,389 @@
    "environment_richness": 7,
    "character_quality": 3,
    "render_quality": 7,
-   "note": "Teeth clearly visible on soldiers in front."
+   "note": "Multiple groups sharpening; final frame shows two at corner of gate."
+  },
+  {
+   "i": 6,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort courtyard",
+   "set_detail": "stone castle walls with banners, grass, workbench near gate",
+   "objects": [
+    "wooden perforated board",
+    "workbench",
+    "tools",
+    "banner",
+    "stone wall"
+   ],
+   "spoken_visible": "yes",
+   "action": "soldier drills holes in a wooden board while commander comments",
+   "effects": [],
+   "characters": 3,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Clean 3D castle yard; stylized characters, soft shadows and depth."
+  },
+  {
+   "i": 7,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort courtyard",
+   "set_detail": "grass area beside wooden fence and tower",
+   "objects": [
+    "perforated board",
+    "stand",
+    "tower",
+    "fence"
+   ],
+   "spoken_visible": "partial",
+   "action": "soldiers inspect and tilt the holed board",
+   "effects": [],
+   "characters": 2,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Continuation with slight pose changes; vague narration."
+  },
+  {
+   "i": 8,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort courtyard",
+   "set_detail": "cart beside castle wall; close-up of many sticks with strings",
+   "objects": [
+    "cart",
+    "perforated board",
+    "sticks with paper and strings",
+    "rope"
+   ],
+   "spoken_visible": "yes",
+   "action": "board is bolted onto cart; long thin items inserted in holes; strings gathered; soldier gets slapped for reaching",
+   "effects": [],
+   "characters": 4,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Clear close-up shows strings/fuses; staging readable."
+  },
+  {
+   "i": 9,
+   "shot_type": "crowd",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "fort moat area",
+   "set_detail": "castle wall and gate with many soldiers reacting",
+   "objects": [
+    "stone wall",
+    "banners",
+    "grass bank"
+   ],
+   "spoken_visible": "yes",
+   "action": "crowd reacts to a loud slap; hat flies; characters gather around",
+   "effects": [],
+   "characters": 8,
+   "lighting": "sunset",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 7,
+   "note": "Wide view of many characters and fort environment."
+  },
+  {
+   "i": 10,
+   "shot_type": "establishing",
+   "camera": "static",
+   "distinct_framings": 2,
+   "set": "castle wall at night",
+   "set_detail": "transition to night near cart on rampart",
+   "objects": [
+    "cart",
+    "lamp"
+   ],
+   "spoken_visible": "partial",
+   "action": "time shift to night showing cart and character on rampart",
+   "effects": [],
+   "characters": 3,
+   "lighting": "night",
+   "depth": 6,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 6,
+   "note": "Very brief transition beat to night scene."
+  },
+  {
+   "i": 11,
+   "shot_type": "action",
+   "camera": "static",
+   "distinct_framings": 3,
+   "set": "castle wall rampart",
+   "set_detail": "rainy night with lamp-lit cart and rooftop nearby",
+   "objects": [
+    "cart",
+    "coat",
+    "rope",
+    "lamp"
+   ],
+   "spoken_visible": "yes",
+   "action": "he throws coat over the cart and lies on top like an umbrella during rain",
+   "effects": [
+    "rain"
+   ],
+   "characters": 4,
+   "lighting": "rain_storm",
+   "depth": 7,
+   "environment_richness": 8,
+   "character_quality": 7,
+   "render_quality": 8,
+   "note": "Rain, night lighting and props well rendered; clear action."
+  },
+  {
+   "i": 12,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "castle wall parapet",
+   "set_detail": "stone battlement overlooking landscape with cart",
+   "objects": [
+    "cart",
+    "stone wall",
+    "railing",
+    "distant mountains"
+   ],
+   "spoken_visible": "partial",
+   "action": "character looks over wall beside cart",
+   "effects": [],
+   "characters": 1,
+   "lighting": "sunset",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Line mentions ladders slamming walls; ladders not visible."
+  },
+  {
+   "i": 13,
+   "shot_type": "crowd",
+   "camera": "push_in",
+   "distinct_framings": 2,
+   "set": "battlefield grass",
+   "set_detail": "wide grassy field with army ranks and banners",
+   "objects": [
+    "banners",
+    "shields",
+    "spears",
+    "palanquin"
+   ],
+   "spoken_visible": "yes",
+   "action": "army advances/charges toward camera",
+   "effects": [],
+   "characters": 20,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Large army shown charging."
+  },
+  {
+   "i": 14,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "castle courtyard",
+   "set_detail": "paved courtyard beside parapet and cart",
+   "objects": [
+    "cart",
+    "torch"
+   ],
+   "spoken_visible": "yes",
+   "action": "group confronts central man; they shout/gesture",
+   "effects": [],
+   "characters": 6,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Crowd around him fits narration about screaming to do something."
+  },
+  {
+   "i": 15,
+   "shot_type": "wide",
+   "camera": "pull_out",
+   "distinct_framings": 2,
+   "set": "hillside below wall",
+   "set_detail": "view from wall looking down at approaching army",
+   "objects": [
+    "flags",
+    "shields",
+    "grassy slope",
+    "fields"
+   ],
+   "spoken_visible": "no_words",
+   "action": "enemy crowd approaches; foreground soldier grins",
+   "effects": [],
+   "characters": 20,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "No narration here."
+  },
+  {
+   "i": 16,
+   "shot_type": "crowd",
+   "camera": "pan",
+   "distinct_framings": 2,
+   "set": "battlefield grass",
+   "set_detail": "packed ranks of soldiers with banners",
+   "objects": [
+    "banners",
+    "shields",
+    "spears"
+   ],
+   "spoken_visible": "yes",
+   "action": "crowd bunches tightly shoulder-to-shoulder",
+   "effects": [],
+   "characters": 20,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 7,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Matches narration about being packed close."
+  },
+  {
+   "i": 17,
+   "shot_type": "medium",
+   "camera": "static",
+   "distinct_framings": 1,
+   "set": "battlefield grass",
+   "set_detail": "tight row of soldiers near camera",
+   "objects": [
+    "shields"
+   ],
+   "spoken_visible": "yes",
+   "action": "soldiers smile showing teeth",
+   "effects": [],
+   "characters": 8,
+   "lighting": "day_sun",
+   "depth": 7,
+   "environment_richness": 6,
+   "character_quality": 6,
+   "render_quality": 7,
+   "note": "Close lineup of soldiers; teeth visible."
   },
   {
    "i": 18,
    "shot_type": "medium",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "fortress terrace",
-   "set_detail": "stone parapet with cart-mounted launch board and mountains in background",
+   "set": "fort parapet",
+   "set_detail": "stone terrace with cart and fuse board overlooking valley",
    "objects": [
     "cart",
-    "launch board with tubes",
+    "fuse board",
     "rope fuse",
-    "torch"
+    "torch",
+    "cloth cover",
+    "mountains"
    ],
-   "spoken_visible": "partial",
-   "action": "small ignition at device",
+   "spoken_visible": "yes",
+   "action": "character removes cloth and lights fuse",
    "effects": [
-    "sparks",
-    "small fire glow"
+    "small spark"
    ],
    "characters": 2,
    "lighting": "day_sun",
    "depth": 7,
    "environment_richness": 7,
-   "character_quality": 3,
+   "character_quality": 7,
    "render_quality": 7,
-   "note": "We see them by the device and ignition, but not clearly ripping off a coat; rope lighting only implied."
+   "note": "Two soldiers beside device; clear lighting of rope/fuse."
   },
   {
    "i": 19,
    "shot_type": "object_insert",
-   "camera": "tracking",
+   "camera": "push_in",
    "distinct_framings": 3,
-   "set": "fortress terrace device",
-   "set_detail": "close views of bundle of fuses leading into many tubes",
+   "set": "fort parapet",
+   "set_detail": "close views of fuse board and tubes",
    "objects": [
-    "fuse rope",
-    "multiple tubes",
-    "sparks"
+    "fuse bundle",
+    "spark",
+    "tubes",
+    "gunpowder cartridges"
    ],
    "spoken_visible": "yes",
-   "action": "spark runs down fuse and splits to many leads",
+   "action": "spark races along fuse and splits to many leads",
    "effects": [
     "sparks",
     "glow"
    ],
    "characters": 0,
    "lighting": "day_sun",
-   "depth": 6,
+   "depth": 8,
    "environment_richness": 6,
    "character_quality": 0,
-   "render_quality": 7,
-   "note": "Clear insert of the mechanism and sparks splitting to many tubes."
+   "render_quality": 8,
+   "note": "Macro perspective of fuses and tubes."
   },
   {
    "i": 20,
    "shot_type": "medium",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "fortress terrace",
-   "set_detail": "two soldiers beside launch board as it ignites",
+   "set": "fort parapet",
+   "set_detail": "soldiers in front of fuse board igniting",
    "objects": [
-    "launch board",
-    "sparks",
-    "torch"
+    "fuse board",
+    "cart",
+    "torch",
+    "sparks"
    ],
    "spoken_visible": "partial",
-   "action": "ignition of board/rockets",
+   "action": "device ignites",
    "effects": [
     "sparks",
-    "smoke"
+    "glow"
    ],
    "characters": 2,
    "lighting": "day_sun",
    "depth": 7,
    "environment_richness": 7,
-   "character_quality": 3,
+   "character_quality": 7,
    "render_quality": 7,
-   "note": "Words mention arrow turning; visuals show ignition/rockets rather than a specific arrow."
+   "note": "Words mention arrow turning; visuals show ignition/rocket start."
   },
   {
    "i": 21,
    "shot_type": "action",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "fortress parapet",
-   "set_detail": "view past parapet as rack fires outward",
+   "set": "fort parapet",
+   "set_detail": "side of device with valley beyond",
    "objects": [
-    "launch rack",
-    "smoke",
-    "rockets"
+    "fuse board",
+    "smoke plume",
+    "balustrade"
    ],
-   "spoken_visible": "no",
-   "action": "rockets blast off",
+   "spoken_visible": "partial",
+   "action": "rockets blast off from board",
    "effects": [
     "smoke",
-    "muzzle flash"
+    "sparks"
    ],
    "characters": 0,
    "lighting": "day_sun",
@@ -813,52 +802,52 @@
    "environment_richness": 6,
    "character_quality": 0,
    "render_quality": 7,
-   "note": "The single word 'every' does not name a visible object/action by itself."
+   "note": "Focus on blast-off action."
   },
   {
    "i": 22,
    "shot_type": "establishing",
-   "camera": "pull_out",
-   "distinct_framings": 2,
+   "camera": "pan",
+   "distinct_framings": 3,
    "set": "valley battlefield",
-   "set_detail": "wide countryside with many rocket trails crisscrossing sky",
+   "set_detail": "wide countryside view with rocket trails in sky",
    "objects": [
     "rocket trails",
     "fields",
-    "hills"
+    "stone wall",
+    "distant army mass"
    ],
    "spoken_visible": "yes",
-   "action": "mass rocket launch with trails",
+   "action": "rockets streak into sky and outward",
    "effects": [
-    "smoke trails",
-    "distant flashes"
+    "smoke trails"
    ],
    "characters": 0,
    "lighting": "day_sun",
-   "depth": 8,
+   "depth": 9,
    "environment_richness": 8,
    "character_quality": 0,
    "render_quality": 8,
-   "note": "Shows all rockets blasting off and streaking across the sky."
+   "note": "Vast landscape with many smoke trails."
   },
   {
    "i": 23,
-   "shot_type": "action",
-   "camera": "static",
+   "shot_type": "effect",
+   "camera": "pan",
    "distinct_framings": 3,
    "set": "valley battlefield",
-   "set_detail": "rockets fall over dense army; multiple explosions",
+   "set_detail": "view over army and explosions from terrace",
    "objects": [
     "rocket trails",
-    "army formation",
-    "explosions"
+    "explosions",
+    "fields",
+    "parapet rail"
    ],
    "spoken_visible": "yes",
-   "action": "rockets detonate among troops; large explosion",
+   "action": "explosions among army and near camera",
    "effects": [
     "explosions",
-    "smoke",
-    "fire"
+    "smoke"
    ],
    "characters": 0,
    "lighting": "day_sun",
@@ -866,36 +855,36 @@
    "environment_richness": 8,
    "character_quality": 0,
    "render_quality": 8,
-   "note": "Rockets fly every which way and explode over the packed army as described."
+   "note": "Multiple detonations visible across the field and foreground."
   },
   {
    "i": 24,
    "shot_type": "medium",
    "camera": "static",
    "distinct_framings": 1,
-   "set": "fortress wall overlook",
-   "set_detail": "character standing by stone parapet with valley and sky behind; large explosion/mushroom cloud rises in distance",
+   "set": "fort wall overlook",
+   "set_detail": "character standing on a stone parapet with distant hills; large explosion behind",
    "objects": [
-    "stone wall",
-    "mountains",
+    "stone parapet",
+    "hills",
     "sky",
-    "explosion cloud"
+    "mushroom cloud explosion",
+    "smoke"
    ],
    "spoken_visible": "partial",
-   "action": "large explosion plume grows behind the character",
+   "action": "large explosion rises behind the character",
    "effects": [
     "explosion",
-    "smoke",
     "fire",
-    "glow"
+    "smoke"
    ],
    "characters": 1,
    "lighting": "day_sun",
    "depth": 7,
-   "environment_richness": 6,
-   "character_quality": 3,
+   "environment_richness": 7,
+   "character_quality": 7,
    "render_quality": 7,
-   "note": "Flat stick-style character in a 3D environment with a detailed explosion; words mention 'a single one misses' which is only loosely indicated by the blast."
+   "note": "Stick-figure style 3D character with explosion background; words about a miss are only loosely related."
   }
  ],
  "words": [

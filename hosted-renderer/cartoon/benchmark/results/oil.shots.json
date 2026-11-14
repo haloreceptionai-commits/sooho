@@ -37,28 +37,29 @@
  "labels": [
   {
    "i": 0,
-   "shot_type": "medium",
+   "shot_type": "wide",
    "camera": "static",
    "distinct_framings": 1,
    "set": "ship deck",
-   "set_detail": "wooden sailing ship deck with windows to sea, barrels and ropes",
+   "set_detail": "wooden deck with masts, ropes, barrels and ocean beyond",
    "objects": [
-    "oil puddle",
-    "bucket",
     "barrels",
     "rope coil",
-    "sails/masts"
+    "bucket",
+    "oil puddle",
+    "masts",
+    "sails"
    ],
    "spoken_visible": "partial",
-   "action": "none",
+   "action": "one sailor pours oil on deck while others gesture",
    "effects": [],
    "characters": 3,
    "lighting": "day_sun",
    "depth": 3,
-   "environment_richness": 4,
-   "character_quality": 2,
-   "render_quality": 3,
-   "note": "Flat 2D characters in a simple 3D deck; oil shown but waves not."
+   "environment_richness": 5,
+   "character_quality": 3,
+   "render_quality": 4,
+   "note": "Flat 2D-style characters in a simple 3D deck; pouring oil shown but whitecaps/swell motion not depicted."
   },
   {
    "i": 1,
@@ -66,12 +67,12 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "ship deck",
-   "set_detail": "overhead-ish view with barrels, mast lines, and deck boards",
+   "set_detail": "top-down oblique view across deck with barrels and railing",
    "objects": [
     "barrels",
-    "bucket",
     "rope coil",
-    "mast/rigging"
+    "small oil patch",
+    "rail"
    ],
    "spoken_visible": "partial",
    "action": "none",
@@ -79,10 +80,10 @@
    "characters": 3,
    "lighting": "day_sun",
    "depth": 3,
-   "environment_richness": 4,
-   "character_quality": 2,
+   "environment_richness": 5,
+   "character_quality": 3,
    "render_quality": 3,
-   "note": "Talk about thin film and ripples; visuals show sailors on deck only."
+   "note": "Dialogue about thin film and ripples not literally shown; mostly characters standing."
   },
   {
    "i": 2,
@@ -90,12 +91,12 @@
    "camera": "static",
    "distinct_framings": 1,
    "set": "ship deck",
-   "set_detail": "deck with masts and flags, other ships visible beyond",
+   "set_detail": "deck with masts, boxes and ocean with boats/flags behind",
    "objects": [
-    "barrels",
-    "crates",
     "masts",
-    "flags"
+    "boxes",
+    "flags",
+    "boats"
    ],
    "spoken_visible": "no",
    "action": "none",
@@ -103,10 +104,10 @@
    "characters": 3,
    "lighting": "day_sun",
    "depth": 3,
-   "environment_richness": 4,
-   "character_quality": 2,
+   "environment_richness": 5,
+   "character_quality": 3,
    "render_quality": 3,
-   "note": "No big waves shown; characters point on deck."
+   "note": "No depiction of big waves; same flat cut-out characters on 3D deck."
   }
  ],
  "words": [
