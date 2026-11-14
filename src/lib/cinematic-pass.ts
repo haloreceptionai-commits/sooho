@@ -24,9 +24,9 @@ export function cinematicPass<T extends DirectedScene>(scenes: T[], narration?: 
         action: !celebration && ['cheer', 'thumbs_up', 'wave'].includes(String(a['action'])) ? 'idle' : a['action'],
         expression: (!celebration && ['grin', 'laugh', 'relief', 'smile', 'whistle'].includes(String(a['expression']))) || (!surprise && ['shock', 'nervous', 'dazed', 'pained'].includes(String(a['expression']))) ? 'neutral' : a['expression'] });
       const main = calm(s);
-      if (s['action'] !== undefined) s['action'] = main['action'];
-      if (s['expression'] !== undefined) s['expression'] = main['expression'];
-      if (Array.isArray(s['actors'])) s['actors'] = s['actors'].map(a => calm(a));
+      if (s['action'] !== undefined) Object.assign(s, { action: main['action'] });
+      if (s['expression'] !== undefined) Object.assign(s, { expression: main['expression'] });
+      if (Array.isArray(s['actors'])) Object.assign(s, { actors: s['actors'].map(a => calm(a)) });
     }
     // 1. Every scene has a main prop: carry the story's last hero object forward when the director left the frame empty.
     const sameSubject = !narration || /\b(it|its|this|that|they|their)\b/i.test(narration[i] ?? '');
