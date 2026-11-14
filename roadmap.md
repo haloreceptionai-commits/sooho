@@ -1,5 +1,5 @@
 # Roadmap — Advanced Video AI v2
-- [ ] Test and accelerate topic discovery: replace oversized evidence reviews with parallel, exact-passage verification; verify six fresh facts, save/select/reload and measure real search time without weakening checks.
+- [x] Accelerate and verify topic discovery: Parallel fast searches + two parallel exact-passage reviews replace oversized full-page reviews. Real owner search returned six facts in 48.4 seconds; saving, selection and saved reload verified; 13 tests passed. Instant fresh research is not promised.
 - [x] Script: 3 repairs, word budget by length, kid-level word checker, keep-watching judge
 - [x] Cast: people/animals/objects named in script get cards (up to 4)
 - [x] Poses: stand/reach/shock/happy cards, pose switching, talk bounce, card shading
