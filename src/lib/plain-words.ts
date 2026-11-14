@@ -2,7 +2,8 @@
 import { COMMON_WORDS } from "./plain-words.data";
 import { hardWords } from "./sound-words";
 
-const COMMON = new Set(COMMON_WORDS.split(" "));
+const KID_EXTRA = "knock bang boom crash smash splash splat thud pop zap whoosh creak rustle munch chew gulp sniff snort oink moo baa woof meow quack stomp sneak tiptoe gasp grin giggle wink frown grumpy cranky sneaky bossy messy muddy shiny sticky spooky yummy tasty topple tumble wobble wiggle chase grab snatch tug yank toss flip roll bounce stuck oops uh-oh hooray yikes";
+const COMMON = new Set([...COMMON_WORDS.split(" "), ...KID_EXTRA.split(" ")]);
 // Frequent on the web but not in a child's vocabulary; each has a plain swap in KID_SWAPS.
 const ADULT = new Set(("incident territory conflict negotiate negotiation diplomat diplomatic sovereignty authority military government " +
   "official officials dispute boundary escalate escalation tension tensions crisis treaty arbitration annex claim claims commander " +
