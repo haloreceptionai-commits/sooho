@@ -12,5 +12,5 @@
 - [ ] Complete the approved remaining upgrade and create a motion-and-sound test requested November 14
 - [ ] Finish interrupted motion test, repair disconnected puppet joints, and verify saved production test recovery
 - [ ] November 14: strengthen the first three spoken words, connected sentences and cause-and-effect; verify history and mechanism scripts through real generation
-- [ ] Match Mine Salting sound with the current narrator: owner cancelled ElevenLabs, which is now disconnected. Keep Puck/Charon; preset auditions were rejected and identical reference reproduction is unavailable with the current speech service. A closer sound remains unverified; no clone or similarity claim.
-- [x] Create five new current-narrator delivery auditions for owner selection; five Puck MP3s generated, equally loud and decode-checked. Production unchanged; awaiting owner selection.
+- [x] Match Mine Salting sound with the current narrator: owner selected new sample 03 Fast explainer; use its Puck directions for new Shorts, preserve long-form Charon and saved takes. ElevenLabs disconnected; no identical-reference claim.
+- [x] Create five new current-narrator delivery auditions for owner selection; five equally loud, decode-checked Puck MP3s delivered; sample 03 selected.
