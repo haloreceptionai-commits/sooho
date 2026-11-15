@@ -1555,7 +1555,7 @@
           0
         ],
         "height": 3.1,
-        "yaw": 0
+        "yaw": 90
       },
       {
         "id": "q-modulartrain/Locomotive_CoalTender",
@@ -1565,7 +1565,7 @@
           0
         ],
         "height": 2.8,
-        "yaw": 0
+        "yaw": 90
       },
       {
         "id": "q-modulartrain/Locomotive_Wagon",
@@ -1575,7 +1575,7 @@
           0
         ],
         "height": 2.8,
-        "yaw": 0
+        "yaw": 90
       },
       {
         "id": "q-medievalvillage/House_1",
