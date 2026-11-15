@@ -52,28 +52,118 @@ def masonry(center,width,height,stone,seed=1):
             left+=w
 
 
+def mesh_object(name,verts,faces,mat):
+    mesh=bpy.data.meshes.new(name);mesh.from_pydata(verts,[],faces);mesh.update()
+    obj=bpy.data.objects.new(name,mesh);bpy.context.collection.objects.link(obj);mesh.materials.append(mat)
+    return obj
+
+
+def rope(name,a,b,radius,mat):
+    curve=bpy.data.curves.new(name,'CURVE');curve.dimensions='3D';curve.bevel_depth=radius;curve.bevel_resolution=2
+    spline=curve.splines.new('POLY');spline.points.add(1)
+    for point,position in zip(spline.points,[a,b]):point.co=(*position,1)
+    obj=bpy.data.objects.new(name,curve);bpy.context.collection.objects.link(obj);curve.materials.append(mat)
+    return obj
+
+
 def castle(surface):
-    stone=surface('stone',1.6);dark=material('gate iron',(.055,.07,.08),.38,.65)
-    # Connect the towers to a central arch; no disconnected floating gate.
+    stone=surface('stone',3.6);dark=material('gate iron',(.055,.07,.08),.38,.65)
+    # Closed gatehouse: spandrels fill the space above the arch and support the parapet.
     for x in [-5.1,5.1]:masonry((x,6,0),6.2,5.5,stone,int(x+20))
-    # Towers return into the scene, giving the wall a true three-dimensional silhouette.
-    for x in [-7.5,7.5]:
-        for row in range(16):
-            for col in range(5):
-                cube('tower side stone',(x,6.1+col*.65,.2+row*.38),(.45,.625,.355),stone,.025)
-    # Arch voussoirs are safe engine-owned architectural geometry.
-    for i in range(19):
-        a=math.pi*i/18; x=1.8*math.cos(a);z=3.0+1.8*math.sin(a)
-        o=cube('arch block',(x,5.75,z),(.43,.55,.43),stone,.025);o.rotation_euler.y=a
-    for x in [-1.85,1.85]:masonry((x,5.8,0),.65,3.0,stone,30)
-    for x in [i*.3 for i in range(-5,6)]:cube('portcullis',(x,6.12,1.8),(.05,.08,3.6),dark,.012)
-    for z in [.4,1.4,2.4,3.4]:cube('gate crossbar',(0,6.08,z),(3.3,.08,.05),dark,.012)
-    for x in [i*.8 for i in range(-11,12)]:cube('battlement',(x,6,5.85),(.48,.6,.7),stone,.03)
-    # Long cloth banners close to the lens-facing masonry.
+    for row in range(7):
+        z=3.1+row*.38
+        for col in range(10):
+            x=-1.98+col*.44
+            if z-0.19 >= 3+math.sqrt(max(0,2.08**2-x*x)):
+                cube('gatehouse spandrel',(x,6,z),(.42,.7,.36),stone,.015)
+    cube('continuous parapet',(0,6,5.47),(16.4,1.1,.3),stone,.025)
+    for i in range(21):
+        a,b=math.pi*i/21+.003,math.pi*(i+1)/21-.003
+        verts=[(r*math.cos(t),y,3+r*math.sin(t)) for y in [5.5,6.4] for r,t in [(1.7,a),(2.1,a),(2.1,b),(1.7,b)]]
+        mesh_object('arch wedge',verts,[(0,1,2,3),(4,7,6,5),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)],stone)
+    for x in [-1.92,1.92]:masonry((x,5.8,0),.55,3.0,stone,30)
+    for x in [i*.28 for i in range(-5,6)]:cube('portcullis',(x,6.12,2.3),(.055,.08,4.6),dark,.012)
+    for z in [.4,1.4,2.4,3.4,4.3]:cube('gate crossbar',(0,6.08,z),(3.3,.08,.06),dark,.012)
+    for x in [i*.8 for i in range(-10,11)]:cube('supported merlon',(x,6,5.92),(.48,.9,.6),stone,.03)
+    # Round corner towers show curved silhouettes, a walkway and thick defensive walls.
+    for tx in [-5.9,5.9]:
+        for row in range(18):
+            for j in range(20):
+                a=(j+(row%2)*.5)*math.tau/20
+                o=cube('tower masonry',(tx+1.65*math.cos(a),7.1+1.65*math.sin(a),.19+row*.38),(.51,.36,.36),stone,.017)
+                o.rotation_euler.z=a+math.pi/2
+        for j in range(12):
+            a=j*math.tau/12
+            o=cube('tower merlon',(tx+1.65*math.cos(a),7.1+1.65*math.sin(a),7.05),(.52,.42,.5),stone,.02);o.rotation_euler.z=a+math.pi/2
+        cube('tower foundation',(tx,7.1,.18),(3.7,3.7,.36),stone,.04)
+    # Receding courtyard architecture prevents a gate opening onto an empty horizon.
+    masonry((0,17,0),14,6.0,stone,92)
+    for z in [1.3,3.5]:
+        for x in [-4,0,4]:cube('keep dark window',(x,16.76,z),(.45,.04,.8),dark,.04)
     cloth=material('royal blue cloth',(.045,.12,.36));gold=material('banner gold',(.8,.61,.17),.4,.1)
     for x in [-3.2,3.2]:
         cube('banner',(x,5.45,3.8),(.6,.035,1.8),cloth,.005)
         cube('banner stripe',(x,5.42,3.8),(.055,.01,1.75),gold,.001)
+
+
+def battlefield(surface):
+    wood=surface('wood',1.5);canvas=material('camp linen',(.58,.57,.44));iron=material('camp iron',(.085,.1,.11),.5,.5)
+    # Distinct siege encampment, not a duplicate close-up of the castle gate.
+    for x,y in [(-4,7),(4.5,11),(-5,16)]:
+        verts=[(x-2,y-2,0),(x+2,y-2,0),(x,y-2,2.7),(x-2,y+2,0),(x+2,y+2,0),(x,y+2,2.7)]
+        mesh_object('campaign tent',verts,[(0,2,5,3),(2,1,4,5),(3,5,4)],canvas)
+        beam((x,y-2,0),(x,y-2,2.85),.09,wood)
+        for side in [-1,1]:rope('tent guy',(x,y-2,2.7),(x+side*2.7,y-2.7,.08),.018,canvas)
+    for y in [4,8,12]:
+        for x in [-7,7]:
+            beam((x-.7,y,0),(x+.7,y,1.4),.12,wood);beam((x+.7,y,0),(x-.7,y,1.4),.12,wood)
+            beam((x,y-.8,.75),(x,y+.8,.75),.12,wood)
+    for i in range(8):
+        x=2.7+(i%4)*.27;y=3+(i//4)*.28
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=16,ring_count=8,radius=.13,location=(x,y,.13));bpy.context.active_object.data.materials.append(iron)
+    for x,y in [(-2.8,6),(5,13)]:
+        beam((x,y,0),(x,y,4),.075,wood)
+        mesh_object('campaign standard',[(x,y,3.8),(x+1,y,3.8),(x+1,y+.12,2.6),(x,y,2.6)],[(0,1,2,3)],material('standard red',(.35,.045,.04)))
+
+
+def ship_details(surface):
+    wood=surface('wood',2.5);rope_mat=material('hemp rope',(.42,.34,.21));canvas=material('sail canvas',(.81,.79,.67))
+    iron=material('ship fittings',(.06,.075,.08),.35,.7)
+    # Raised stern with real stair treads, a cabin door and windows.
+    cube('quarterdeck',(0,11.5,1.35),(7.6,3,.25),wood)
+    cube('stern cabin',(0,12.2,.65),(7,1.8,1.3),wood)
+    cube('cabin door',(0,11.26,.67),(.85,.035,1.2),iron,.02)
+    for x in [-2.2,2.2]:
+        cube('cabin glass',(x,11.25,.8),(1,.035,.65),material('cabin blue glass',(.075,.17,.22),.2),.02)
+        for dx in [-.5,0,.5]:cube('cabin window frame',(x+dx,11.2,.8),(.035,.05,.72),wood)
+    for i in range(7):cube('stern stair',(-2.7,8.55+i*.22,.1+i*.19),(1,.3,.2),wood)
+    for side in [-1,1]:
+        beam((side*3.7,10,1.55),(side*3.7,13,1.55),.13,wood)
+        for y in [10,11,12,13]:beam((side*3.7,y,1.35),(side*3.7,y,2.2),.09,wood)
+        beam((side*3.7,10,2.2),(side*3.7,13,2.2),.13,wood)
+    # Wind-filled rectangular sail: actual cloth surface, seams and rigging.
+    verts=[];faces=[]
+    for row in range(13):
+        for col in range(17):
+            u=col/16;v=row/12
+            verts.append((-3+6*u,7.65-.6*math.sin(math.pi*u)*math.sin(math.pi*v),6.9-3.3*v+.18*math.sin(math.pi*u)))
+    for row in range(12):
+        for col in range(16):
+            j=row*17+col;faces.append((j,j+1,j+18,j+17))
+    sail=mesh_object('wind filled sail',verts,faces,canvas)
+    for p in sail.data.polygons:p.use_smooth=True
+    beam((-3.3,7.7,7),(3.3,7.7,7),.13,wood)
+    for side in [-1,1]:
+        rope('mast stay',(0,8,7.8),(side*3.8,3,.8),.028,rope_mat)
+        rope('sail sheet',(side*3,7.7,3.6),(side*3.8,5,.7),.025,rope_mat)
+        for i in range(5):rope('shroud',(0,8,6.9),(side*3.8,7+i*.32,.8),.018,rope_mat)
+    for col in [2,4,6,8,10,12,14]:
+        for row in range(12):rope('sail seam',verts[row*17+col],verts[(row+1)*17+col],.006,rope_mat)
+    cube('deck hatch',(0,3,.12),(1.7,1.5,.24),wood)
+    for i in range(7):cube('hatch grille',(-.7+i*.23,3,.26),(.065,1.4,.045),iron,.005)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.28,depth=.65,location=(1.6,8.8,.325));bpy.context.active_object.data.materials.append(wood)
+    for a in [0,math.pi/2]:
+        o=cube('capstan handle',(1.6,8.8,.65),(1.5,.08,.08),wood);o.rotation_euler.z=a
 
 
 def house_details(x,y,surface):
@@ -175,8 +265,9 @@ def practical_lights(name,mode):
 
 
 def detail_set(name,surface):
-    if name in ('castle','battlefield'):castle(surface)
+    if name=='castle':castle(surface)
+    if name=='battlefield':battlefield(surface)
     # Complete CC0 buildings replace the earlier partial kit facades.
     if name in ('castle','battlefield','village','street','rail_yard'):ground_detail(name)
     if name in ('office','saloon','workshop','room'):indoor_detail(name,surface)
-    if name=='ship_deck':ocean()
+    if name=='ship_deck':ocean();ship_details(surface)
