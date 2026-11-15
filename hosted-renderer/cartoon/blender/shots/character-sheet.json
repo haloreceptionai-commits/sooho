@@ -1,0 +1,128 @@
+{
+  "set": "open_day",
+  "duration": 0.2,
+  "engine": "cycles",
+  "samples": 24,
+  "size": [
+    1080,
+    1920
+  ],
+  "camera": {
+    "from": [
+      0,
+      -9,
+      3.1
+    ],
+    "look_at": [
+      0,
+      0,
+      1.1
+    ],
+    "lens": 30,
+    "fstop": 8
+  },
+  "cast": [
+    {
+      "id": "cast-0",
+      "pos": [
+        -1.8,
+        0.0
+      ],
+      "outfit": "worker",
+      "hat": "beanie",
+      "expression": "neutral",
+      "action": "stand"
+    },
+    {
+      "id": "cast-1",
+      "pos": [
+        0.0,
+        0.0
+      ],
+      "outfit": "merchant",
+      "hat": "top",
+      "expression": "happy",
+      "action": "stand"
+    },
+    {
+      "id": "cast-2",
+      "pos": [
+        1.8,
+        0.0
+      ],
+      "outfit": "soldier",
+      "hat": "helmet",
+      "expression": "angry",
+      "action": "stand"
+    },
+    {
+      "id": "cast-3",
+      "pos": [
+        -1.8,
+        2.5
+      ],
+      "outfit": "sailor",
+      "hat": "tricorne",
+      "expression": "sad",
+      "action": "stand"
+    },
+    {
+      "id": "cast-4",
+      "pos": [
+        0.0,
+        2.5
+      ],
+      "outfit": "worker",
+      "hat": "beanie",
+      "expression": "shock",
+      "action": "stand"
+    },
+    {
+      "id": "cast-5",
+      "pos": [
+        1.8,
+        2.5
+      ],
+      "outfit": "merchant",
+      "hat": "top",
+      "expression": "worried",
+      "action": "stand"
+    },
+    {
+      "id": "cast-6",
+      "pos": [
+        -1.8,
+        5.0
+      ],
+      "outfit": "soldier",
+      "hat": "helmet",
+      "expression": "smug",
+      "action": "stand"
+    },
+    {
+      "id": "cast-7",
+      "pos": [
+        0.0,
+        5.0
+      ],
+      "outfit": "sailor",
+      "hat": "tricorne",
+      "expression": "determined",
+      "action": "stand"
+    },
+    {
+      "id": "cast-8",
+      "pos": [
+        1.8,
+        5.0
+      ],
+      "outfit": "worker",
+      "hat": "beanie",
+      "expression": "talk",
+      "action": "stand"
+    }
+  ],
+  "frames": [
+    1
+  ]
+}
