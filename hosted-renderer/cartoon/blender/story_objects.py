@@ -249,32 +249,6 @@ def build_object(spec,duration,fps):
                 size=(.05+.03*(i%3),.035+.02*((i+1)%2),.09+.05*(i%2))
                 o=cube('dynamite fragment',(0,0,.38),size,paper if i%3==2 else red);moving.append((o,'fragment',i))
             add_blast(moving,ember,fire_core,blast_smoke)
-    else:
-        rock=material('object rock',(.19,.21,.22),.92)
-        quartz=material('vein quartz',(.73,.74,.68),.85)
-        # Angular outcrop, broad exposed quartz ribbon, branching embedded gold; never an egg silhouette.
-        verts=[(-.7,-.28,0),(.68,-.28,0),(.61,.3,0),(-.55,.32,0),(-.58,-.3,1.04),(.48,-.3,.91),(.43,.29,1.16),(-.47,.3,1.25),(-.22,-.39,.55),(.29,-.36,.48)]
-        mesh=bpy.data.meshes.new('angular mineral outcrop');mesh.from_pydata(verts,[],[(0,1,9),(0,9,8),(0,8,4),(4,8,5),(8,9,5),(9,1,5),(1,2,6,5),(2,3,7,6),(3,0,4,7),(4,5,6),(4,6,7),(0,3,2,1)]);mesh.materials.append(rock)
-        outcrop=bpy.data.objects.new('gold bearing rock outcrop',mesh);bpy.context.collection.objects.link(outcrop)
-        # Flat jagged mineral patches embedded in the rock, no tubular branches or connector-like knobs.
-        ribbon=[(-.57,.14),(-.38,.33),(-.16,.43),(.02,.63),(.24,.74),(.39,.94)]
-        for mat,width,depth,label in [(quartz,.12,-.407,'quartz fracture'),(gold,.043,-.414,'gold mineral seam')]:
-            v=[];f=[]
-            for i,(x,z) in enumerate(ribbon):
-                w=width*(.7+.35*math.sin(i*2.1)**2);v.extend([(x-w,depth,z+.025*math.sin(i*3)),(x+w,depth,z-.02*math.cos(i*2))])
-            for i in range(len(ribbon)-1):a=i*2;f.extend([(a,a+1,a+2),(a+1,a+3,a+2)])
-            me=bpy.data.meshes.new(label);me.from_pydata(v,[],f);me.materials.append(mat);o=bpy.data.objects.new(label,me);bpy.context.collection.objects.link(o)
-        for i in range(26):
-            j=i%5;x,z=ribbon[j];x+=.075*math.sin(i*2.3);z+=.065*math.cos(i*1.7)
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1,location=(x,-.425,z));o=bpy.context.active_object;o.name='rough embedded mineral fleck';o.scale=(.016+i%3*.006,.012,.02);o.data.materials.append(gold)
-        if action=='open':
-            for side in (-1,1):
-                lid=cube('cracked rock crust',(side*.3,-.45,.55),(.59,.07,1.03),rock);moving.append((lid,'crust',Vector((side*.3,-.45,.04))))
-        if action=='explode':
-            intact=list(set(bpy.data.objects)-created)
-            for i in range(8):
-                bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.17,location=(0,0,.38));o=bpy.context.active_object;o.name='ore rock fragment';o.data.materials.append(rock if i%2 else gold);moving.append((o,'fragment',i))
-            add_blast(moving,ember,fire_core,blast_smoke)
     elif kind=='rail_joint':
         # Two rails on timber sleepers and grey stone ballast; jointed rails have fishplates, bolts,
         # spring clips and a signal post; 'buckle' uses continuous welded rails that bow sideways.
@@ -323,6 +297,32 @@ def build_object(spec,duration,fps):
             cube('signal head',(.75,.85,1.25),(.14,.1,.26),plate,.01)
             sphere('signal lamp',(.75,.79,1.3),(.04,.02,.04),glow('signal lamp green',(.1,1,.2),3))
             sphere('signal lamp',(.75,.79,1.2),(.04,.02,.04),glow('signal lamp red',(1,.05,.02),1.2))
+    else:
+        rock=material('object rock',(.19,.21,.22),.92)
+        quartz=material('vein quartz',(.73,.74,.68),.85)
+        # Angular outcrop, broad exposed quartz ribbon, branching embedded gold; never an egg silhouette.
+        verts=[(-.7,-.28,0),(.68,-.28,0),(.61,.3,0),(-.55,.32,0),(-.58,-.3,1.04),(.48,-.3,.91),(.43,.29,1.16),(-.47,.3,1.25),(-.22,-.39,.55),(.29,-.36,.48)]
+        mesh=bpy.data.meshes.new('angular mineral outcrop');mesh.from_pydata(verts,[],[(0,1,9),(0,9,8),(0,8,4),(4,8,5),(8,9,5),(9,1,5),(1,2,6,5),(2,3,7,6),(3,0,4,7),(4,5,6),(4,6,7),(0,3,2,1)]);mesh.materials.append(rock)
+        outcrop=bpy.data.objects.new('gold bearing rock outcrop',mesh);bpy.context.collection.objects.link(outcrop)
+        # Flat jagged mineral patches embedded in the rock, no tubular branches or connector-like knobs.
+        ribbon=[(-.57,.14),(-.38,.33),(-.16,.43),(.02,.63),(.24,.74),(.39,.94)]
+        for mat,width,depth,label in [(quartz,.12,-.407,'quartz fracture'),(gold,.043,-.414,'gold mineral seam')]:
+            v=[];f=[]
+            for i,(x,z) in enumerate(ribbon):
+                w=width*(.7+.35*math.sin(i*2.1)**2);v.extend([(x-w,depth,z+.025*math.sin(i*3)),(x+w,depth,z-.02*math.cos(i*2))])
+            for i in range(len(ribbon)-1):a=i*2;f.extend([(a,a+1,a+2),(a+1,a+3,a+2)])
+            me=bpy.data.meshes.new(label);me.from_pydata(v,[],f);me.materials.append(mat);o=bpy.data.objects.new(label,me);bpy.context.collection.objects.link(o)
+        for i in range(26):
+            j=i%5;x,z=ribbon[j];x+=.075*math.sin(i*2.3);z+=.065*math.cos(i*1.7)
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1,location=(x,-.425,z));o=bpy.context.active_object;o.name='rough embedded mineral fleck';o.scale=(.016+i%3*.006,.012,.02);o.data.materials.append(gold)
+        if action=='open':
+            for side in (-1,1):
+                lid=cube('cracked rock crust',(side*.3,-.45,.55),(.59,.07,1.03),rock);moving.append((lid,'crust',Vector((side*.3,-.45,.04))))
+        if action=='explode':
+            intact=list(set(bpy.data.objects)-created)
+            for i in range(8):
+                bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.17,location=(0,0,.38));o=bpy.context.active_object;o.name='ore rock fragment';o.data.materials.append(rock if i%2 else gold);moving.append((o,'fragment',i))
+            add_blast(moving,ember,fire_core,blast_smoke)
     for obj in set(bpy.data.objects)-created:
         if obj.parent is None:obj.parent=root
     base=tuple(spec['pos']);s=spec.get('scale',1);root.scale=(s,)*3
