@@ -78,7 +78,8 @@ def model(spec):
                 o.data.materials[i] = replacement
         if spec.get('ink'):
             wire = o.modifiers.new('masonry edges', 'BEVEL'); wire.width = 0.007; wire.segments = 1
-        for poly in o.data.polygons: poly.use_smooth = False
+        # Preserve the source model's smooth/flat shading rather than forcing
+        # every detailed surface into coarse flat-shaded facets.
     return root
 
 
@@ -86,6 +87,7 @@ def box(name, pos, size, material):
     bpy.ops.mesh.primitive_cube_add(size=1, location=pos)
     o = bpy.context.active_object; o.name = name; o.scale = size
     o.data.materials.append(surface(material))
+    bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
     mod = o.modifiers.new('soft edges', 'BEVEL'); mod.width = 0.025; mod.segments = 2
     return o
 

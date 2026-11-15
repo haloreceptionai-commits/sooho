@@ -176,10 +176,7 @@ def practical_lights(name,mode):
 
 def detail_set(name,surface):
     if name in ('castle','battlefield'):castle(surface)
-    if name in ('village','street','rail_yard'):
-        locations=[(-4,7),(4,9)] if name!='rail_yard' else [(-6,8)]
-        if name=='street':locations +=[(-4,13),(4,15)]
-        for x,y in locations:house_details(x,y,surface)
+    # Complete CC0 buildings replace the earlier partial kit facades.
     if name in ('castle','battlefield','village','street','rail_yard'):ground_detail(name)
     if name in ('office','saloon','workshop','room'):indoor_detail(name,surface)
     if name=='ship_deck':ocean()

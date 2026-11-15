@@ -6,7 +6,10 @@
     "pirate-kit/barrel", "pirate-kit/crate", "pirate-kit/crate-bottles", "pirate-kit/bottle", "pirate-kit/chest", "pirate-kit/cannon", "pirate-kit/ship-large", "pirate-kit/mast-ropes", "pirate-kit/structure-fence", "pirate-kit/tool-shovel",
     "train-kit/railroad-straight", "train-kit/train-locomotive-a", "train-kit/train-carriage-coal",
     "furniture-kit/table", "furniture-kit/chair", "furniture-kit/desk", "furniture-kit/bookcaseOpen", "furniture-kit/books", "furniture-kit/lampRoundTable", "furniture-kit/sideTable", "furniture-kit/loungeSofa", "furniture-kit/pottedPlant", "furniture-kit/rugRectangle",
-    "factory-kit/cog-a", "factory-kit/machine", "factory-kit/pipe-large-valve", "factory-kit/box-small", "factory-kit/lever-single"
+    "factory-kit/cog-a", "factory-kit/machine", "factory-kit/pipe-large-valve", "factory-kit/box-small", "factory-kit/lever-single",
+    "q-medievalvillage/House_1", "q-medievalvillage/House_2", "q-medievalvillage/Inn", "q-medievalvillage/Blacksmith", "q-medievalvillage/MarketStand_1", "q-medievalvillage/Cart", "q-medievalvillage/Well", "q-medievalvillage/Hay",
+    "q-stylizednaturemegakit/CommonTree_1", "q-stylizednaturemegakit/CommonTree_3", "q-stylizednaturemegakit/Bush_Common", "q-stylizednaturemegakit/Rock_Medium_1",
+    "q-modulartrain/Locomotive_Front", "q-modulartrain/Locomotive_CoalTender", "q-modulartrain/Locomotive_Wagon", "q-modulartrain/RailwayTrack_Straight"
   ],
   "textures": {"wood": "wood_planks", "rock": "rock_boulder_cracked", "grass": "aerial_grass_rock", "dirt": "brown_mud_leaves_01", "stone": "castle_brick_01"},
   "skies": {"day": "kloofendal_48d_partly_cloudy_puresky", "sunset": "qwantani_sunset_puresky", "overcast": "kloofendal_overcast_puresky"}

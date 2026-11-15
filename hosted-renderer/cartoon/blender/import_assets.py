@@ -39,6 +39,9 @@ def build(spec):
         page = license_file.read_text()
         if 'CC0' not in page:
             raise RuntimeError(f'{pack}: CC0 could not be verified')
+        if pack.startswith('q-'):
+            publisher_page = fetch(f'https://quaternius.com/packs/{pack[2:]}.html').decode()
+            if 'CC0' not in publisher_page: raise RuntimeError(f'{pack}: publisher license unavailable')
         dest = OUT / 'licenses' / f'{pack}.txt'; dest.parent.mkdir(exist_ok=True)
         shutil.copyfile(license_file, dest)
     for model in spec['models']:
@@ -48,8 +51,10 @@ def build(spec):
         target = OUT / 'models' / f'{model}.glb'
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
+        pack = model.split('/')[0]
+        source_url = f'https://quaternius.com/packs/{pack[2:]}.html' if pack.startswith('q-') else f'https://kenney.nl/assets/{pack}'
         entries.append({'id': model, 'kind': 'model', 'path': str(target.relative_to(OUT)),
-                        'sha256': digest(target), 'source': f'https://kenney.nl/assets/{model.split("/")[0]}', 'license': 'CC0-1.0'})
+                        'sha256': digest(target), 'source': source_url, 'license': 'CC0-1.0'})
         data = source.read_bytes()
         gltf = json.loads(data[20:20 + struct.unpack_from('<I', data, 12)[0]])
         for image in gltf.get('images', []):
@@ -61,7 +66,7 @@ def build(spec):
             shutil.copyfile(src_image, dst_image)
             if not any(e['path'] == str(dst_image.relative_to(OUT)) for e in entries):
                 entries.append({'id': model.split('/')[0] + '/' + uri, 'kind': 'model-texture', 'path': str(dst_image.relative_to(OUT)),
-                                'sha256': digest(dst_image), 'source': f'https://kenney.nl/assets/{model.split("/")[0]}', 'license': 'CC0-1.0'})
+                                'sha256': digest(dst_image), 'source': source_url, 'license': 'CC0-1.0'})
     with tempfile.TemporaryDirectory(prefix='blender-cc0-') as temp:
         for name, asset in spec['textures'].items():
             files = json.loads(fetch(f'https://api.polyhaven.com/files/{asset}'))
