@@ -1,0 +1,42 @@
+{
+  "set": "open_day",
+  "duration": 2,
+  "engine": "cycles",
+  "samples": 24,
+  "size": [
+    800,
+    800
+  ],
+  "camera": {
+    "from": [
+      1.1,
+      -2.3,
+      1.4
+    ],
+    "look_at": [
+      0,
+      0,
+      0.6
+    ],
+    "lens": 55,
+    "fstop": 8
+  },
+  "objects": [
+    {
+      "kind": "gold_shotgun",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "action": "load"
+    }
+  ],
+  "frames": [
+    1,
+    13,
+    21,
+    36,
+    60
+  ]
+}

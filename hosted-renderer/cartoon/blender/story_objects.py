@@ -5,6 +5,7 @@ from mathutils import Vector
 from set_detail import material,cube,rope
 from characters import sphere
 from object_specs import validate_object,holes,mechanism
+from object_motion import fuse_position,pour_position,burst_position,exploded,spin_angle,progress
 
 
 def cylinder(name,pos,radius,depth,mat,rotation=(0,0,0)):
@@ -28,13 +29,18 @@ def build_object(spec,duration,fps):
     wood=material('object timber',(.34,.18,.065),.78);steel=material('object steel',(.11,.13,.14),.3,.8)
     paper=material('object paper',(.78,.75,.64),.85);gold=material('object gold',(.9,.57,.065),.25,.8)
     red=material('object dynamite',(.58,.06,.035));cloth=material('object cover',(.16,.25,.3),.95)
-    created=set(bpy.data.objects);moving=[];kind=spec['kind'];action=spec.get('action','hold')
+    created=set(bpy.data.objects);moving=[];intact=[];kind=spec['kind'];action=spec.get('action','hold')
     ember=material('object fuse ember',(1,.18,.015),.4,emission=4)
     if kind in ('perforated_cart','covered_cart'):
         cube('cart chassis',(0,0,.45),(1.3,.8,.16),wood)
         for x in [-.48,.48]:
             for y in [-.47,.47]:
-                w=cylinder('cart wheel',(x,y,.3),.3,.1,steel,(math.pi/2,0,0));moving.append((w,'wheel',w.location.copy()))
+                w=cylinder('cart wheel',(x,y,.3),.3,.1,steel,(math.pi/2,0,0))
+                pivot=bpy.data.objects.new('wheel axle',None);bpy.context.collection.objects.link(pivot);pivot.location=w.location.copy()
+                w.location=(0,0,0);w.parent=pivot
+                for a in [i*math.tau/8 for i in range(8)]:
+                    spoke=rope('visible wheel spoke',(0,-.06,0),(.26*math.cos(a),-.06,.26*math.sin(a)),.015,wood);spoke.parent=pivot
+                moving.append((pivot,'wheel',pivot.location.copy()))
         rope('pull handle',(0,.3,.5),(0,1.35,.65),.05,wood)
         # Each aperture is an actual through-hole in a wooden launch board.
         board=cube('82 aperture board',(0,0,1.03),(1.3,.16,.99),wood,.005)
@@ -58,9 +64,9 @@ def build_object(spec,duration,fps):
     elif kind=='hand_drill':
         # Familiar eggbeater hand drill: large toothed gear, offset crank, chuck and spiral bit.
         cube('drilled timber',(0,0,.09),(1,.7,.18),wood)
-        cylinder('drill bit',(0,0,.32),.028,.46,steel)
-        path('spiral cutting flute',[(.031*math.cos(i*.45),.031*math.sin(i*.45),.13+i*.006) for i in range(64)],.009,steel)
-        cylinder('tapered drill chuck',(0,0,.61),.075,.16,steel)
+        spindle=bpy.data.objects.new('drill spindle',None);bpy.context.collection.objects.link(spindle)
+        for obj in [cylinder('drill bit',(0,0,.32),.028,.46,steel),path('spiral cutting flute',[(.031*math.cos(i*.45),.031*math.sin(i*.45),.13+i*.006) for i in range(64)],.009,steel),cylinder('tapered drill chuck',(0,0,.61),.075,.16,steel)]:obj.parent=spindle
+        moving.append((spindle,'spin',spindle.location.copy()))
         rope('drill frame',(0,0,.68),(0,0,1.18),.045,steel)
         cylinder('top wooden drill handle',(0,0,1.35),.085,.3,wood)
         center=(.12,-.075,.94)
@@ -75,6 +81,9 @@ def build_object(spec,duration,fps):
         crank=bpy.data.objects.new('drill crank pivot',None);bpy.context.collection.objects.link(crank);crank.location=center
         arm=rope('offset crank arm',(0,-.08,0),(.18,-.08,.12),.024,steel);arm.parent=crank
         grip=cylinder('wooden crank grip',(.18,-.19,.12),.065,.22,wood,(math.pi/2,0,0));grip.parent=crank
+        for obj in set(bpy.data.objects)-created:
+            if obj.name.startswith(('large hand drill gear','gear tooth','gear spoke')):
+                obj.location-=Vector(center);obj.parent=crank
         moving.append((crank,'crank',crank.location.copy()))
     elif kind=='rocket_arrow':
         rope('arrow shaft',(0,0,.12),(0,0,1.5),.025,wood)
@@ -89,9 +98,11 @@ def build_object(spec,duration,fps):
         for i in range(76):
             x=.06*math.sin(i*.13);y=-.7+i*.007
             path('woven fuse strand',[(x+.016*math.cos(i*1.9+j),y+j*.001,.04+.016*math.sin(i*1.9+j)) for j in range(7)],.003,paper)
-        sphere('glowing ignition tip',(0,-.7,.045),(.03,.025,.025),ember)
+        tip=sphere('glowing ignition tip',(0,-.7,.045),(.03,.025,.025),ember)
+        if action=='fire':moving.append((tip,'fuse',tip.location.copy()))
         for i in range(6):
-            rope('fuse tip spark',(0,-.7,.045),(.07*math.cos(i*2),-.7+.07*math.sin(i*2),.085+i*.006),.003,ember)
+            spark=rope('fuse tip spark',(0,0,0),(.07*math.cos(i*2),.07*math.sin(i*2),.04+i*.006),.003,ember);spark.location=(0,-.7,.045)
+            if action=='fire':moving.append((spark,'fuse',spark.location.copy()))
         for i,(x,y,a) in enumerate([(-.47,.22,-.45),(0,.37,.1),(.46,.17,.6)]):
             # Charges lie on the ground with dark fuses entering their camera-facing ends.
             charge=cylinder('fused powder charge',(x,y,.13),.12,.52,red,(math.pi/2,0,a))
@@ -104,18 +115,19 @@ def build_object(spec,duration,fps):
             for j in range(41):
                 u=j/40;p=(1-u)**2*start+2*(1-u)*u*control+u*u*finish;points.append(tuple(p))
             path('curving branch fuse',points,.015,fusemat)
-        if action=='fire':
-            o=sphere('travelling fuse ember',(.32,-.7,.07),(.045,)*3,ember);moving.append((o,'fuse',o.location.copy()))
     elif kind=='gold_shotgun':
         stock=cube('shaped wooden stock',(0,0,.26),(.26,.17,.43),wood,.06);stock.rotation_euler.y=-.16
         cube('stock neck',(0,0,.5),(.11,.13,.22),wood,.025)
         cube('wooden fore-end',(0,.06,.75),(.17,.15,.26),wood,.025)
         for x in [-.065,.065]:cylinder('barrel',(x,0,.85),.05,.85,steel)
         cube('breech',(0,0,.52),(.19,.18,.18),steel)
-        nugget=sphere('gold load',(0,-.16,.57),(.06,.04,.055),gold);moving.append((nugget,'load',nugget.location.copy()))
+        nugget=sphere('gold load',(0,-.48,.58),(.075,.055,.065),gold);moving.append((nugget,'load',nugget.location.copy()))
+        if action=='load':
+            cylinder('open loading chamber',(0,-.09,.58),.095,.05,steel,(math.pi/2,0,0))
         bpy.ops.mesh.primitive_torus_add(major_radius=.075,minor_radius=.012,location=(0,-.1,.47),rotation=(math.pi/2,0,0));bpy.context.active_object.data.materials.append(steel)
         if action=='fire':
             o=sphere('fired gold payload',(0,0,1.3),(.035,)*3,gold);moving.append((o,'projectile',o.location.copy()))
+            o=sphere('muzzle flash',(0,0,1.34),(.12,.1,.2),ember);moving.append((o,'flash',o.location.copy()))
     elif kind=='gold_pan':
         # Shallow prospecting pan with concentric recovery riffles and angular gold in black sediment.
         verts=[];faces=[]
@@ -142,15 +154,17 @@ def build_object(spec,duration,fps):
         sphere('convex glass lens',(0,0,.5),(.285,.018,.285),lens)
         sphere('inspection flake',(0,-.03,.5),(.085,.012,.055),gold)
     elif kind=='dynamite':
-        cylinder('dynamite stick',(0,0,.38),.12,.7,red)
+        stick=cylinder('dynamite stick',(0,0,.38),.12,.7,red)
         for z in [.14,.62]:cylinder('paper band',(0,0,z),.124,.025,paper)
         rope('curved fuse',(0,0,.73),(.07,0,.81),.012,wood)
         rope('bent fuse',(.07,0,.81),(.16,.03,.8),.012,wood)
         if action=='fire':
             o=sphere('burning fuse',(0,0,.73),(.035,)*3,ember);moving.append((o,'dynamite_fuse',o.location.copy()))
         if action=='explode':
+            intact=list(set(bpy.data.objects)-created)
             for i in range(8):
-                o=cube('dynamite fragment',(0,0,.38),(.09,.09,.15),red);moving.append((o,'fragment',Vector((math.cos(i*math.tau/8),math.sin(i*math.tau/8),.5))))
+                o=cube('dynamite fragment',(0,0,.38),(.09,.09,.15),red);moving.append((o,'fragment',i))
+            o=sphere('explosion flash',(0,0,.4),(.3,)*3,ember);moving.append((o,'burst_flash',o.location.copy()))
     else:
         rock=material('object rock',(.19,.21,.22),.92)
         quartz=material('vein quartz',(.73,.74,.68),.85)
@@ -169,27 +183,51 @@ def build_object(spec,duration,fps):
         for i in range(26):
             j=i%5;x,z=ribbon[j];x+=.075*math.sin(i*2.3);z+=.065*math.cos(i*1.7)
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1,location=(x,-.425,z));o=bpy.context.active_object;o.name='rough embedded mineral fleck';o.scale=(.016+i%3*.006,.012,.02);o.data.materials.append(gold)
-        if action in ('open','explode'):
+        if action=='open':
             lid=cube('rock crust',(0,-.43,.55),(1.18,.07,1.03),rock);moving.append((lid,'cover',lid.location.copy()))
+        if action=='explode':
+            intact=list(set(bpy.data.objects)-created)
+            for i in range(8):
+                bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.17,location=(0,0,.38));o=bpy.context.active_object;o.name='ore rock fragment';o.data.materials.append(rock if i%2 else gold);moving.append((o,'fragment',i))
+            o=sphere('ore break flash',(0,0,.4),(.25,)*3,ember);moving.append((o,'burst_flash',o.location.copy()))
     for obj in set(bpy.data.objects)-created:
         if obj.parent is None:obj.parent=root
     base=tuple(spec['pos']);s=spec.get('scale',1);root.scale=(s,)*3
+    root['story_kind']=kind;root['story_action']=action
     for frame in range(round(duration*fps)):
-        m=mechanism(action,frame/fps);root.location=base;root.rotation_euler=(m['tilt'],m['swing'],math.radians(spec.get('yaw',0)))
+        t=frame/fps;m=mechanism(action,t);root.location=base;root.rotation_euler=(m['tilt'],m['swing'],math.radians(spec.get('yaw',0)))
+        if action=='pour':root.location=(base[0],base[1],base[2]+.48);root.rotation_euler.x=-progress(t,0,.65)*.9
         if kind=='rocket_arrow':root.location=(base[0],base[1],base[2]+m['travel'])
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
-        for obj,role,rest in moving:
-            obj.location=rest;obj.rotation_euler=(0,0,0)
-            if role=='spin':obj.rotation_euler.z=m['spin']
-            if role=='crank':obj.rotation_euler.y=m['spin']
-            if role=='wheel':obj.rotation_euler=(math.pi/2,m['travel']/.3,0)
-            if role=='cover':obj.location=(rest.x,rest.y-m['open']*.5,rest.z+m['open']*.5+m['burst'])
-            if role=='load':obj.location=(rest.x,rest.y+m['load'],rest.z)
-            if role=='projectile':obj.location=(rest.x,rest.y,rest.z+m['travel'])
-            if role=='fuse':obj.location=(.32*(1-m['ignition']),-.7+.53*m['ignition'],rest.z)
-            if role=='dynamite_fuse':obj.location=(.16*m['ignition'],0,.73+.21*m['ignition'])
-            if role=='fragment':obj.location=(rest.x*m['burst'],rest.y*m['burst'],.38+rest.z*m['burst'])
-            if role=='flake' and action=='pour':obj.location=(rest.x,rest.y-.18*abs(m['tilt']),rest.z)
+        for index,(obj,role,rest) in enumerate(moving):
+            obj['motion_role']=role
+            if role!='fragment':obj.location=rest
+            if role in ('spin','crank','wheel'):obj.rotation_euler=(0,0,0)
+            if role=='spin':obj.rotation_euler.z=spin_angle(t)*3
+            if role=='crank':obj.rotation_euler.y=spin_angle(t)
+            if role=='wheel':obj.rotation_euler.y=-m['travel']/.3
+            if role=='cover':obj.location=(rest.x,rest.y+progress(t)*1.7,rest.z+progress(t)*.8)
+            if role=='load':
+                obj.location=(rest.x,rest.y+.48*progress(t,0,1.5),rest.z)
+                if action=='load':obj.hide_render=t>=1.5;obj.keyframe_insert('hide_render',frame=frame+1)
+            if role=='projectile':obj.location=(rest.x,rest.y,rest.z+max(0,t-.4)*1.5)
+            if role=='fuse':obj.location=fuse_position(t)
+            if role=='dynamite_fuse':obj.location=(.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition'])
+            if role=='fragment':
+                obj.location=burst_position(t,rest);obj.hide_render=not exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
+            if role in ('flash','burst_flash'):
+                center=.4 if role=='flash' else .65;obj.hide_render=not center<=t<center+.12;obj.keyframe_insert('hide_render',frame=frame+1)
+            if role=='flake' and action=='pour':
+                world=Vector(pour_position((rest.x,rest.y,rest.z+.48),t,index))
+                if t>.45:
+                    # Undo pan rotation for independent gravity-driven released nuggets.
+                    world-=Vector((0,0,.48));world.rotate(root.rotation_euler.to_matrix().inverted());obj.location=world
             obj.keyframe_insert('location',frame=frame+1);obj.keyframe_insert('rotation_euler',frame=frame+1)
+        for obj in intact:
+            obj['intact_explosion_mesh']=True;obj.hide_render=exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
         root.keyframe_insert('location',frame=frame+1);root.keyframe_insert('rotation_euler',frame=frame+1)
+    for obj in set(bpy.data.objects)-created:
+        if obj.animation_data and obj.animation_data.action:
+            for curve in obj.animation_data.action.fcurves:
+                for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path=='hide_render' else 'LINEAR'
     return root
