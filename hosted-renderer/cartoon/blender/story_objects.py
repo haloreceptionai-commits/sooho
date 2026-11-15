@@ -121,7 +121,9 @@ def build_object(spec,duration,fps):
         cube('wooden fore-end',(0,.06,.75),(.17,.15,.26),wood,.025)
         for x in [-.065,.065]:cylinder('barrel',(x,0,.85),.05,.85,steel)
         cube('breech',(0,0,.52),(.19,.18,.18),steel)
-        nugget=sphere('gold load',(0,-.16,.57),(.06,.04,.055),gold);moving.append((nugget,'load',nugget.location.copy()))
+        nugget=sphere('gold load',(0,-.48,.58),(.075,.055,.065),gold);moving.append((nugget,'load',nugget.location.copy()))
+        if action=='load':
+            cylinder('open loading chamber',(0,-.09,.58),.095,.05,steel,(math.pi/2,0,0))
         bpy.ops.mesh.primitive_torus_add(major_radius=.075,minor_radius=.012,location=(0,-.1,.47),rotation=(math.pi/2,0,0));bpy.context.active_object.data.materials.append(steel)
         if action=='fire':
             o=sphere('fired gold payload',(0,0,1.3),(.035,)*3,gold);moving.append((o,'projectile',o.location.copy()))
@@ -205,7 +207,9 @@ def build_object(spec,duration,fps):
             if role=='crank':obj.rotation_euler.y=spin_angle(t)
             if role=='wheel':obj.rotation_euler.y=-m['travel']/.3
             if role=='cover':obj.location=(rest.x,rest.y+progress(t)*1.7,rest.z+progress(t)*.8)
-            if role=='load':obj.location=(rest.x,rest.y+.16*progress(t),rest.z)
+            if role=='load':
+                obj.location=(rest.x,rest.y+.48*progress(t,0,1.5),rest.z)
+                if action=='load':obj.hide_render=t>=1.5;obj.keyframe_insert('hide_render',frame=frame+1)
             if role=='projectile':obj.location=(rest.x,rest.y,rest.z+max(0,t-.4)*1.5)
             if role=='fuse':obj.location=fuse_position(t)
             if role=='dynamite_fuse':obj.location=(.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition'])
@@ -222,4 +226,8 @@ def build_object(spec,duration,fps):
         for obj in intact:
             obj['intact_explosion_mesh']=True;obj.hide_render=exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
         root.keyframe_insert('location',frame=frame+1);root.keyframe_insert('rotation_euler',frame=frame+1)
+    for obj in set(bpy.data.objects)-created:
+        if obj.animation_data and obj.animation_data.action:
+            for curve in obj.animation_data.action.fcurves:
+                for key in curve.keyframe_points:key.interpolation='CONSTANT' if curve.data_path=='hide_render' else 'LINEAR'
     return root

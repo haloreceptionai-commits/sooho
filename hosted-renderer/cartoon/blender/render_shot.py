@@ -363,7 +363,9 @@ def main():
     roots=[build_character(c,shot['duration'],fps) for c in shot.get('cast', [])]
     if roots:verify_characters(roots,shot['duration'],fps)
     object_roots=[build_object(obj,shot['duration'],fps) for obj in shot.get('objects',[])]
-    if object_roots:verify_objects(object_roots,shot['duration'],fps)
+    if object_roots:
+        qa=verify_objects(object_roots,shot['duration'],fps)
+        with open(os.path.join(out,'object-qa.json'),'w') as file:json.dump(qa,file,indent=2)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     sc.render.filepath = os.path.join(out, 'f_#####')

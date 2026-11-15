@@ -15,7 +15,7 @@ def pour_position(rest,t,index=0):
     # Release over the front lip after tipping; settle above the floor, never inside it.
     u=progress(t,.45,1.5)
     if u==0:return tuple(rest)
-    return (rest[0]*(1-u)+.025*math.sin(index)*u,rest[1]*(1-u)-.8*u,max(.025,rest[2]+.25*math.sin(u*math.pi)-.05*u))
+    return (rest[0]*(1-u)+.025*math.sin(index)*u,rest[1]*(1-u)-.8*u,max(.025,rest[2]*(1-u)+.25*math.sin(u*math.pi)))
 
 
 def burst_position(t,index):

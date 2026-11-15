@@ -17,6 +17,9 @@ if [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects
     curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' --data-binary "@/tmp/$NAME.tail" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.log?$SAS" >/dev/null
     EXPECTED=$(python3 -c "import json;s=json.load(open('$FILE'));print(len(s['frames']) if s.get('frames') else round(s['duration']*s.get('fps',30)))")
     ACTUAL=$(ls "/tmp/$NAME"/f_*.png 2>/dev/null | wc -l)
+    if [ -f "/tmp/$NAME/object-qa.json" ]; then
+      curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: application/json' --data-binary "@/tmp/$NAME/object-qa.json" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-qa.json?$SAS" >/dev/null || FAILED=1
+    fi
     if [ "$CODE" = 0 ] && [ "$ACTUAL" = "$EXPECTED" ]; then
       if [ "$SHOT" = mechanisms ]; then
         for IMAGE in "/tmp/$NAME"/f_*.png; do
@@ -59,7 +62,7 @@ for ENG in ${ENGINES:-eevee cycles}; do
   [ "${PROBE_ONLY:-0}" = 1 ] && continue
   rm -rf /tmp/f; mkdir -p /tmp/f; START=$(date +%s)
   SHOT_ENGINE=$ENG CYCLES_DEVICE=$DEV timeout 2400 $B --python /opt/shot/render_shot.py -- $SHOT_FILE /tmp/f > /tmp/$ENG.log 2>&1
-  CODE=$?; N=$(ls /tmp/f | wc -l)
+  CODE=$?; N=$(ls /tmp/f/f_*.png 2>/dev/null | wc -l)
   for IMAGE in /tmp/f/f_*.png; do
     [ -f "$IMAGE" ] || continue
     [ -n "$(python3 -c "import json;print('yes' if json.load(open('$SHOT_FILE')).get('frames') else '')")" ] || break
