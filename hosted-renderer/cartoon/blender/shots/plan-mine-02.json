@@ -4,13 +4,13 @@
  "duration": 2.95,
  "camera": {
   "from": [
-   3.687,
-   2.189,
+   0.9,
+   -1.335,
    1.55
   ],
   "look_at": [
-   -0.098,
-   1.972,
+   -0.315,
+   2.147,
    1.05
   ],
   "lens": 40,
@@ -20,10 +20,10 @@
   {
    "id": "buddy",
    "pos": [
-    0.095,
-    1.92
+    -0.298,
+    1.948
    ],
-   "yaw": 75,
+   "yaw": 5,
    "action": "stand",
    "expression": "worried",
    "outfit": "worker",
@@ -40,12 +40,12 @@
    "kind": "gold_pan",
    "action": "pour",
    "pos": [
-    0.588,
-    2.409,
+    0.33,
+    1.652,
     0
    ],
    "scale": 0.5,
-   "yaw": 75
+   "yaw": 5
   }
  ],
  "engine": "cycles",

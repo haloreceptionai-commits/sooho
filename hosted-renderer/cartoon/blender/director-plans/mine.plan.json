@@ -518,7 +518,7 @@
    "shots": [
     {
      "set": "mine_tunnel",
-     "zone": "barrel",
+     "zone": "looking_back",
      "lighting": "day",
      "framing": "medium",
      "cast": [
@@ -548,7 +548,7 @@
    "shots": [
     {
      "set": "mine_tunnel",
-     "zone": "barrel",
+     "zone": "looking_back",
      "lighting": "day",
      "framing": "close",
      "cast": [
@@ -613,7 +613,7 @@
    "shots": [
     {
      "set": "mine_tunnel",
-     "zone": "barrel",
+     "zone": "looking_back",
      "lighting": "day",
      "framing": "medium",
      "cast": [
@@ -633,7 +633,7 @@
     {
      "start_word": 6,
      "set": "mine_tunnel",
-     "zone": "barrel",
+     "zone": "looking_back",
      "lighting": "day",
      "framing": "insert",
      "cast": [],
@@ -668,7 +668,7 @@
    "shots": [
     {
      "set": "mine_tunnel",
-     "zone": "barrel",
+     "zone": "looking_back",
      "lighting": "day",
      "framing": "insert",
      "cast": [
@@ -832,7 +832,7 @@
    "shots": [
     {
      "set": "mine_tunnel",
-     "zone": "barrel",
+     "zone": "looking_back",
      "lighting": "day",
      "framing": "close",
      "cast": [
@@ -862,7 +862,7 @@
    "shots": [
     {
      "set": "mine_tunnel",
-     "zone": "barrel",
+     "zone": "looking_back",
      "lighting": "day",
      "framing": "medium",
      "cast": [
