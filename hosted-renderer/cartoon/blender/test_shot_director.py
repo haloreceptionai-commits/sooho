@@ -9,7 +9,7 @@ def good():
     return {'cast':CAST,'sentences':[
         {'index':0,'mentions':[{'word':'shotgun','kind':'thing','concept':'obj:gold_shotgun'}],'shots':[
             {'set':'mine_tunnel','lighting':'day','framing':'insert','cast':[{'id':'miner','action':'load'}],'objects':[{'kind':'gold_shotgun','action':'load'}]},
-            {'start_word':4,'set':'castle','lighting':'day','framing':'insert','cast':[],'objects':[{'kind':'gold_shotgun','action':'fire'}]}]},
+            {'start_word':5,'set':'castle','lighting':'day','framing':'insert','cast':[],'objects':[{'kind':'gold_shotgun','action':'fire'}]}]},
         {'index':1,'mentions':[],'shots':[{'set':'mine_tunnel','lighting':'night','framing':'medium','cast':[{'id':'buddy','action':'cheer','expression':'happy'}],'objects':[]}]}]}
 
 
