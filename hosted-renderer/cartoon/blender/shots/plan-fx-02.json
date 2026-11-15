@@ -1,0 +1,93 @@
+{
+ "set": "battlefield",
+ "duration": 2.4,
+ "engine": "cycles",
+ "samples": 24,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "haze": 0.002,
+ "lighting": "day",
+ "camera": {
+  "from": [
+   3.5,
+   -3,
+   2.6
+  ],
+  "to": [
+   2.6,
+   -1.6,
+   2.3
+  ],
+  "look_at": [
+   0,
+   6,
+   1.0
+  ],
+  "whip_from": [
+   -5,
+   4,
+   1.2
+  ],
+  "lens": 28,
+  "fstop": 8
+ },
+ "cast": [
+  {
+   "id": "commander",
+   "pos": [
+    0.6,
+    0.8
+   ],
+   "yaw": -100,
+   "action": "point",
+   "expression": "determined",
+   "outfit": "soldier",
+   "hat": "none"
+  }
+ ],
+ "crowd": {
+  "count": 260,
+  "center": [
+   0,
+   8
+  ],
+  "size": [
+   14,
+   9
+  ],
+  "action": "cheer",
+  "yaw": 180
+ },
+ "effects": [
+  {
+   "kind": "smoke",
+   "pos": [
+    -4,
+    11,
+    0
+   ],
+   "scale": 2.2
+  },
+  {
+   "kind": "fire",
+   "pos": [
+    4,
+    10,
+    0
+   ],
+   "scale": 1.5
+  }
+ ],
+ "frames": [
+  1,
+  10,
+  16,
+  22,
+  30,
+  45,
+  66
+ ]
+}

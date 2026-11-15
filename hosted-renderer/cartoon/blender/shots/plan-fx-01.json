@@ -1,0 +1,102 @@
+{
+ "set": "mine_tunnel",
+ "duration": 2.4,
+ "engine": "cycles",
+ "samples": 24,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "haze": 0.002,
+ "camera": {
+  "from": [
+   0.5,
+   -1.2,
+   1.5
+  ],
+  "to": [
+   0.35,
+   -0.6,
+   1.4
+  ],
+  "look_at": [
+   0,
+   3,
+   0.8
+  ],
+  "lens": 30,
+  "fstop": 8,
+  "shake": [
+   {
+    "t": 0.5,
+    "amp": 0.05
+   }
+  ]
+ },
+ "cast": [
+  {
+   "id": "miner",
+   "pos": [
+    -0.6,
+    0.6
+   ],
+   "yaw": -60,
+   "action": "run",
+   "expression": "shock",
+   "outfit": "worker",
+   "hat": "helmet"
+  }
+ ],
+ "objects": [
+  {
+   "kind": "dynamite",
+   "pos": [
+    0,
+    3,
+    0
+   ],
+   "action": "explode"
+  }
+ ],
+ "effects": [
+  {
+   "kind": "explosion",
+   "pos": [
+    0,
+    3,
+    0
+   ],
+   "start": 0.5,
+   "scale": 1.2
+  },
+  {
+   "kind": "dust",
+   "pos": [
+    0,
+    3,
+    0
+   ],
+   "start": 0.6,
+   "scale": 1.0
+  },
+  {
+   "kind": "sparks",
+   "pos": [
+    0,
+    3,
+    0.3
+   ],
+   "start": 0.5
+  }
+ ],
+ "frames": [
+  1,
+  10,
+  16,
+  22,
+  30,
+  45,
+  66
+ ]
+}
