@@ -85,15 +85,25 @@ def build_object(spec,duration,fps):
     elif kind=='fuse_bundle':
         # Looped cords leading into three visibly cylindrical powder charges, not parallel rake teeth.
         fusemat=material('braided safety fuse',(.11,.075,.035),.95)
-        path('coiled common fuse',[(.24*math.cos(i*.12),-.28+.24*math.sin(i*.12),.045) for i in range(100)],.025,fusemat)
-        path('fuse ignition tail',[(.24,-.28,.045),(.38,-.46,.045),(.32,-.7,.07)],.025,fusemat)
+        path('loose common fuse',[(.06*math.sin(i*.13),-.7+i*.007,.04+.003*math.sin(i)) for i in range(76)],.015,fusemat)
+        for i in range(76):
+            x=.06*math.sin(i*.13);y=-.7+i*.007
+            path('woven fuse strand',[(x+.016*math.cos(i*1.9+j),y+j*.001,.04+.016*math.sin(i*1.9+j)) for j in range(7)],.003,paper)
+        sphere('glowing ignition tip',(0,-.7,.045),(.03,.025,.025),ember)
+        for i in range(6):
+            rope('fuse tip spark',(0,-.7,.045),(.07*math.cos(i*2),-.7+.07*math.sin(i*2),.085+i*.006),.003,ember)
         for i,(x,y,a) in enumerate([(-.47,.22,-.45),(0,.37,.1),(.46,.17,.6)]):
             # Charges lie on the ground with dark fuses entering their camera-facing ends.
             charge=cylinder('fused powder charge',(x,y,.13),.12,.52,red,(math.pi/2,0,a))
             for offset in [-.16,.16]:
                 cylinder('charge paper binding',(x-offset*math.sin(a),y+offset*math.cos(a),.13),.123,.035,paper,(math.pi/2,0,a))
             end=(x+.26*math.sin(a),y-.26*math.cos(a),.13)
-            path('curving branch fuse',[(0,-.17,.045),(x*.55,-.04-i*.035,.045),(end[0]-.09,end[1]-.13,.055),end],.022,fusemat)
+            # Smooth sagging cord, rather than right-angle metallic plumbing.
+            start=Vector((0,-.17,.04));finish=Vector(end);control=Vector((x*.6,-.12,.02))
+            points=[]
+            for j in range(41):
+                u=j/40;p=(1-u)**2*start+2*(1-u)*u*control+u*u*finish;points.append(tuple(p))
+            path('curving branch fuse',points,.015,fusemat)
         if action=='fire':
             o=sphere('travelling fuse ember',(.32,-.7,.07),(.045,)*3,ember);moving.append((o,'fuse',o.location.copy()))
     elif kind=='gold_shotgun':
@@ -145,15 +155,20 @@ def build_object(spec,duration,fps):
         rock=material('object rock',(.19,.21,.22),.92)
         quartz=material('vein quartz',(.73,.74,.68),.85)
         # Angular outcrop, broad exposed quartz ribbon, branching embedded gold; never an egg silhouette.
-        verts=[(-.7,-.28,0),(.68,-.28,0),(.61,.3,0),(-.55,.32,0),(-.58,-.3,1.04),(.48,-.3,.91),(.43,.29,1.16),(-.47,.3,1.25)]
-        mesh=bpy.data.meshes.new('angular mineral outcrop');mesh.from_pydata(verts,[],[(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7),(4,5,6,7),(0,3,2,1)]);mesh.materials.append(rock)
+        verts=[(-.7,-.28,0),(.68,-.28,0),(.61,.3,0),(-.55,.32,0),(-.58,-.3,1.04),(.48,-.3,.91),(.43,.29,1.16),(-.47,.3,1.25),(-.22,-.39,.55),(.29,-.36,.48)]
+        mesh=bpy.data.meshes.new('angular mineral outcrop');mesh.from_pydata(verts,[],[(0,1,9),(0,9,8),(0,8,4),(4,8,5),(8,9,5),(9,1,5),(1,2,6,5),(2,3,7,6),(3,0,4,7),(4,5,6),(4,6,7),(0,3,2,1)]);mesh.materials.append(rock)
         outcrop=bpy.data.objects.new('gold bearing rock outcrop',mesh);bpy.context.collection.objects.link(outcrop)
-        points=[(-.54,-.315,.16),(-.34,-.315,.34),(-.12,-.315,.4),(.02,-.315,.64),(.27,-.315,.73),(.4,-.315,.97)]
-        path('exposed quartz vein',points,.085,quartz)
-        path('embedded irregular gold vein',[(x,y-.055,z) for x,y,z in points],.031,gold)
-        for i,(x,y,z) in enumerate(points[1:-1]):
-            path('branching gold deposit',[(x,y-.052,z),(x-.16,y-.052,z+.1),(x-.22,y-.052,z+.19)],.018,gold)
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.06,location=(x,y-.067,z));bpy.context.active_object.name='embedded gold crystal';bpy.context.active_object.data.materials.append(gold)
+        # Flat jagged mineral patches embedded in the rock, no tubular branches or connector-like knobs.
+        ribbon=[(-.57,.14),(-.38,.33),(-.16,.43),(.02,.63),(.24,.74),(.39,.94)]
+        for mat,width,depth,label in [(quartz,.12,-.407,'quartz fracture'),(gold,.043,-.414,'gold mineral seam')]:
+            v=[];f=[]
+            for i,(x,z) in enumerate(ribbon):
+                w=width*(.7+.35*math.sin(i*2.1)**2);v.extend([(x-w,depth,z+.025*math.sin(i*3)),(x+w,depth,z-.02*math.cos(i*2))])
+            for i in range(len(ribbon)-1):a=i*2;f.extend([(a,a+1,a+2),(a+1,a+3,a+2)])
+            me=bpy.data.meshes.new(label);me.from_pydata(v,[],f);me.materials.append(mat);o=bpy.data.objects.new(label,me);bpy.context.collection.objects.link(o)
+        for i in range(26):
+            j=i%5;x,z=ribbon[j];x+=.075*math.sin(i*2.3);z+=.065*math.cos(i*1.7)
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1,location=(x,-.425,z));o=bpy.context.active_object;o.name='rough embedded mineral fleck';o.scale=(.016+i%3*.006,.012,.02);o.data.materials.append(gold)
         if action in ('open','explode'):
             lid=cube('rock crust',(0,-.43,.55),(1.18,.07,1.03),rock);moving.append((lid,'cover',lid.location.copy()))
     for obj in set(bpy.data.objects)-created:
