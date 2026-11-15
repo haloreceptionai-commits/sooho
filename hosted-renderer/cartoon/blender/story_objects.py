@@ -1,6 +1,7 @@
 """Safe shape-built story props. No external paths, scripts or render-time downloads."""
 import math
 import bpy
+from mathutils import Vector
 from set_detail import material,cube,rope
 from characters import sphere
 from object_specs import validate_object,holes,mechanism
