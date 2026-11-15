@@ -213,11 +213,11 @@ def build_object(spec,duration,fps):
         for r in [.42,.47,.52,.585]:
             bpy.ops.mesh.primitive_torus_add(major_radius=r,minor_radius=.013,location=(0,0,.04+(r-.36)*.09/.23))
             bpy.context.active_object.name='gold catching pan riffle';bpy.context.active_object.data.materials.append(steel)
-        sediment=material('black prospecting sand',(.028,.026,.021),.96)
+        sediment=material('wet prospecting sand',(.30,.22,.12),.9)  # step-6 review: black sand read as an empty black disc
         cylinder('black sand in pan',(0,0,.048),.32,.009,sediment)
         for i in range(13):
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1,location=(.23*math.sin(i*2.4),.23*math.cos(i*2.4),.074))
-            o=bpy.context.active_object;o.name='angular gold nugget';o.scale=(.038+i%3*.012,.03,.017+i%2*.009);o.data.materials.append(gold)
+            o=bpy.context.active_object;o.name='angular gold nugget';o.scale=(.058+i%3*.016,.046,.026+i%2*.012);o.data.materials.append(gold)
             moving.append((o,'flake',o.location.copy()))
     elif kind=='magnifier':
         bpy.ops.mesh.primitive_torus_add(major_radius=.3,minor_radius=.035,location=(0,0,.5),rotation=(math.pi/2,0,0));bpy.context.active_object.data.materials.append(steel)

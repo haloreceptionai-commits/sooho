@@ -253,21 +253,25 @@ def compile_one(sh, plan, duration, si=0):
     if framing == 'insert':
         if not objects: raise ValueError('insert framing needs an object')
         objects[0]['pos'] = _at(origin, (0, 0.3), head, 0)
-        o0 = objects[0]['pos']; c0 = OBJ_CAMS.get((objects[0]['kind'], objects[0]['action']), OBJ_CAMS[objects[0]['kind']])
+        o0 = objects[0]['pos']; c0 = OBJ_CAMS.get((objects[0]['kind'], 'hold' if objects[0]['action'] == 'pour' else objects[0]['action']), OBJ_CAMS[objects[0]['kind']])
         cam = {'from': _at(o0, c0['from'][:2], head, c0['from'][2]), 'look_at': _at(o0, c0['look_at'][:2], head, c0['look_at'][2]), 'lens': c0['lens'], 'fstop': c0['fstop']}
         for j, o in enumerate(objects[1:], 1): o['pos'] = _at(o0, (0.9, 0.7), head, 0); o['scale'] = 0.6
         for i, ch in enumerate(cast): ch['pos'] = _at(o0, ((-1.3, 1.6), (1.3, 1.9), (0, 2.6))[i], head)[:2]
     else:
         for j, o in enumerate(objects):
-            near = cast[j % len(cast)]['pos'] if cast else origin
-            o['pos'] = _at(near, (0.6, -0.35), head, 0); o['scale'] = 0.5
+            near = cast[0]['pos'] if cast else origin
+            o['pos'] = _at(near, (0.55 - 1.1 * j, -0.7), head, 0); o['scale'] = 0.85  # step-6 review: 0.5 props unreadable in medium shots
         if framing == 'wide' or not cast:
             d = 3.6 if st == 'mine_tunnel' else 5.2
             cam = {'from': _at(origin, (0.9, -d), head, 2.0), 'look_at': _at(origin, (0, 1.5), head, 1.2), 'lens': 26 if st == 'mine_tunnel' else 30, 'fstop': 5.6}
         else:
-            sub = cast[0]['pos']; d = 3.4 if framing == 'medium' else 2.0
-            cam = {'from': _at(sub, (0.35 * d, -d), head, 1.55), 'look_at': _at(sub, (0, 0.2), head, 1.05 if framing == 'medium' else 1.3),
-                   'lens': 40 if framing == 'medium' else 55, 'fstop': 4}
+            # frame everyone and every named prop together (step-6 review: second people/props fell out of frame)
+            pts = [c['pos'] for c in cast] + [o['pos'][:2] for o in objects]
+            sub = [sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)]
+            spread = max(((p[0] - sub[0]) ** 2 + (p[1] - sub[1]) ** 2) ** 0.5 for p in pts)
+            d = (3.2 if framing == 'medium' else 2.2) + 2.2 * spread
+            cam = {'from': _at(sub, (0.25 * d, -d), head, 1.6), 'look_at': _at(sub, (0, 0), head, 0.95 if framing == 'medium' else 1.2),
+                   'lens': 35 if framing == 'medium' else 45, 'fstop': 5.6}
     if st == 'mine_tunnel':
         # the tunnel is ~3 m wide: keep every camera between the rock walls (step-6 render showed black frames)
         for k in ('from', 'look_at'): cam[k][0] = max(-0.9, min(0.9, cam[k][0]))

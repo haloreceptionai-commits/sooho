@@ -1,0 +1,1247 @@
+[
+ {
+  "i": 0,
+  "sentence": 0,
+  "words": "Rail ends almost touch, yet the gap saves trains.",
+  "zone": "track_side",
+  "frame": 50,
+  "concepts": [
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": true,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Close-up of stylized railway rails joined by blue fishplates with yellow bolts; a small gap between the rail ends; wooden sleepers and ballast; another track and the front of a locomotive in the background; grass/ground around the track.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The image prominently shows two rail ends almost touching with a clear gap, secured by bolted fishplates. This strongly matches the line about the gap saving trains, though the safety implication is implied rather than explicit."
+   },
+   {
+    "seen": "Close-up stylized view of railway track: two steel rails with a blue fishplate bolted joint and a small gap between rail ends, wooden sleepers/ties, ballast stones, a parallel track and part of a locomotive/cowcatcher in the background, grass and a building.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The foreground clearly shows two rail ends nearly touching with a visible gap and bolts clamping fishplates, matching the idea that the small gap is intentional. A viewer can connect this to the narration, though the safety rationale isn\u2019t explicit without context."
+   },
+   {
+    "seen": "Close-up of a railway track joint: two rail ends with a small gap connected by blue fishplates and large yellow bolts; sleepers and ballast; a second track and the front of a locomotive/cowcatcher in the background; grassy ground and a building far back.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 10,
+    "why": "The image centers on a rail joint where two rail ends nearly meet with a visible small gap, secured by bolted fishplates\u2014precisely matching the idea that rail ends almost touch and the gap is there to protect trains."
+   }
+  ]
+ },
+ {
+  "i": 1,
+  "sentence": 1,
+  "words": "Steel rails get longer when hot and shorter when cold.",
+  "zone": "open_yard",
+  "frame": 54,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": false,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 6,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "Cartoon scene outdoors: a simple character wearing a cap, a foreground model of two steel rails on sleepers with fishplates/bolts (a bolted joint), a small signal post with red/amber/green lights, a short stretch of railway track in the background, a brown box-like structure, trees, grass, a rock, and distant hills/sky.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 6,
+    "why": "The image clearly shows rails and a bolted joint, which relates to rail behavior, but it does not depict temperature, heat/cold, or visible length change. Without context, the viewer might not immediately connect it to thermal expansion."
+   },
+   {
+    "seen": "A cartoon figure in a cap stands beside a small display showing two steel rails joined by bolted fishplates on sleepers. There is a background railway track, a small signal post, a brick-like box or platform, trees, grass, a rock, and distant hills.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 6,
+    "why": "Rails are clearly shown, including a bolted joint that hints at gaps/expansion, but there are no explicit cues about temperature (sun, snow, thermometer) or length change, so the connection to hot/cold expansion is moderate rather than immediate."
+   },
+   {
+    "seen": "Cartoon character with a cap pointing, a demo platform showing two steel rails joined by fishplates and bolts on sleepers, a single railroad track in the background, a small signal post, a brick-colored structure, trees, hills, a rock, dirt/grass ground, sky.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 6,
+    "why": "The image clearly shows rails and a bolted joint, which are relevant to explaining rail behavior, but there are no cues about heat or cold, so the connection to thermal expansion is indirect."
+   }
+  ]
+ },
+ {
+  "i": 2,
+  "sentence": 2,
+  "words": "Over a kilometer, a ten-degree rise adds about a finger\u2019s width.",
+  "zone": "front",
+  "frame": 79,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "outfit:merchant",
+   "set:office"
+  ],
+  "required": [
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "at least one cartoon person": true
+  },
+  "fit_median": 1,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A round-headed cartoon person (blue torso, black limbs, name tag) standing and gesturing in an indoor room; wooden desk with papers; wooden bookshelf with books; brick-and-wood walls; ceiling beams; wooden tiled floor.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 1,
+    "why": "The image shows an indoor scene with a cartoon presenter, but nothing about distance, kilometers, angular change, or finger-width measurement; there is no visual cue linking to a 10-degree rise over a kilometer."
+   },
+   {
+    "seen": "A simple cartoon figure with a round white head and blue body standing in a wooden-and-brick room with a desk, chair, bookshelf, and wooden floor/ceiling beams.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 1,
+    "why": "The image is an indoor character scene with furniture and no visual cue about distances, angles, or a finger\u2019s-width measurement over a kilometer, so it does not connect to the narration."
+   },
+   {
+    "seen": "A cartoon person with a round white head and blue torso, stick-like limbs, and a name badge stands in a wooden-floored room. There\u2019s a desk and chair, a bookshelf with books, brick walls, and ceiling beams.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 2,
+    "why": "The image shows a cartoon character indoors with no clear reference to distances, angles, kilometers, temperature, or finger-width measurements. The pose could accompany narration, but there\u2019s no visual cue linking to the specific idea of a ten-degree rise equaling a finger\u2019s width over a kilometer."
+   }
+  ]
+ },
+ {
+  "i": 3,
+  "sentence": 3,
+  "words": "So why do tracks have gaps, and why do some look gapless?",
+  "zone": "house",
+  "frame": 58,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": false,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 9,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A cartoon figure with a cap and clipboard in front of a timber\u2011framed house; a short section of railway track on sleepers/base with a blue fishplate and yellow bolts forming a joint; sparse grass on dirt; distant hills/sky; part of a tripod or light at the frame edge.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The frame clearly shows a close-up of rails connected by a bolted joint, which directly relates to the idea of rail gaps. However, it doesn\u2019t also show a continuous (gapless) welded rail for contrast, so the connection isn\u2019t absolutely immediate."
+   },
+   {
+    "seen": "Cartoon scene outdoors: a character in a cap stands by a short demonstration section of railway track on a slab. The two rails are connected by blue/yellow bolted fishplates with a small gap. A timber house is behind, with grass around and part of a stand/light at the right.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The shot clearly shows a jointed rail with bolts and a visible gap, which directly relates to explaining why tracks have gaps and why some appear gapless. It lacks a broader yard/train context, but the joint detail strongly supports the line."
+   },
+   {
+    "seen": "A stylized cartoon scene outdoors: a small half-timbered house, a cartoon presenter figure with a cap and clipboard, a short section of railway track on sleepers with blue fishplates and yellow bolts joining two rail ends, sparse grass, hills in the background, and part of a tripod or light stand at the right edge.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The image prominently shows a short track segment with a bolted fishplate joint and a visible gap between rail ends, which directly supports a narration about why tracks have gaps versus appearing gapless; it doesn\u2019t show a full yard or a gapless welded section, but the concept is very clear."
+   }
+  ]
+ },
+ {
+  "i": 4,
+  "sentence": 4,
+  "words": "Old lines used jointed rails: two ends",
+  "zone": "open_yard",
+  "frame": 42,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": true,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A stylized cartoon character in a cap; a small track section showing two rail ends joined by fishplates with bolts; a small signal post with a green light; background railway track and a steam locomotive; trees, rocks, and a box/crate in a rail-yard setting.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The foreground clearly shows two rail ends connected by bolted fishplates, matching the line about jointed rails. The background train and tracks reinforce the railway context. Slight deduction because the depiction is a stylized miniature rather than a full-size joint."
+   },
+   {
+    "seen": "Cartoon scene outdoors with a stick-figure character in a cap, a small rail segment on a base showing bolts/fishplates, a tiny signal post, rail tracks in the background, part of a steam locomotive, some trees, rocks, and a box-like structure.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The foreground clearly shows two rail ends joined by fishplates and bolts, illustrating jointed rails. Presence of tracks and a locomotive adds context, though it\u2019s a stylized close-up rather than an actual yard, so not absolutely self-evident to every viewer."
+   },
+   {
+    "seen": "Cartoon scene with a stick-figure character in a cap; a model section of railway track in the foreground showing fishplates with bolts joining two rail ends; a small signal post; a brick-like box; background track and a steam locomotive near a small building, trees, rocks, and grass.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The foreground prominently shows two rail ends joined by fishplates and bolts, which illustrates jointed rails well. The nearby train and track add context. Slightly stylized/small scale keeps it from being a perfect 10."
+   }
+  ]
+ },
+ {
+  "i": 5,
+  "sentence": 4,
+  "words": "bolted with bars, leaving a small space.",
+  "zone": "track_side",
+  "frame": 42,
+  "concepts": [
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": true,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 10,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Close-up of railroad rails joined by blue joint bars (fishplates) with large yellow bolts, a small gap between rail ends, wooden sleepers/ties, ballast stones, a parallel track, part of a locomotive with a cowcatcher in the background, some grass and a small building.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 10,
+    "why": "The image prominently shows two rail ends connected by bolted bars with a clear small gap between them, exactly matching the line 'bolted with bars, leaving a small space.'"
+   },
+   {
+    "seen": "Close-up of two rail ends joined by blue joint bars with yellow bolts; a small gap between the rail ends; wooden sleepers/ties and ballast stones; a second track beside it; the front of a train (cowcatcher) in the background; grass/ground around the track.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 10,
+    "why": "The image centers on rails connected by bolted joint bars (fishplates), and a small gap between the rail ends is clearly shown, matching the narration exactly."
+   },
+   {
+    "seen": "Close-up of a railway track joint: two rail ends with a small gap, joined by blue side bars (fishplates) with large bolts; wooden sleepers/ties and ballast; a parallel track; part of a locomotive front in the background; some grass and a small building.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 10,
+    "why": "The shot highlights rail ends connected by bolted side bars, and a small gap between the rails is clearly visible, matching the narration exactly."
+   }
+  ]
+ },
+ {
+  "i": 6,
+  "sentence": 5,
+  "words": "In winter that space grows;",
+  "zone": "locomotive",
+  "frame": 25,
+  "concepts": [
+   "light:night",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": false
+  },
+  "fit_median": 5,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "railway tracks/rails with a fishplate bolted joint, wooden sleepers (ties), hex-head bolts and nuts, ballast stones, small grass sprouts",
+    "visible": {
+     "railway rails with a bolted joint": false
+    },
+    "fit": 4,
+    "why": "The frame depicts a rail joint, which can imply an expansion gap, but the image is very dark and the gap itself isn\u2019t clearly shown; there are no winter cues, so the connection to \u201cIn winter that space grows\u201d is only modest."
+   },
+   {
+    "seen": "Two parallel railway rails, a bolted fishplate joint with several yellow hex-head bolts, sleepers/ties with fasteners, crushed-stone ballast, a few small grass blades, all shown in a dark/night setting.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The image focuses on a rail joint where a small gap exists between rail ends; that gap is known to widen in cold weather, matching the narration. The connection is strong conceptually, but the dark lighting and lack of explicit winter cues may make it less instantly obvious to all viewers."
+   },
+   {
+    "seen": "A very dark shot of a railway track: two steel rails, a bolted fishplate joint with hexagonal bolts, wooden sleepers/ties, crushed-stone ballast, and a few blades of grass.",
+    "visible": {
+     "railway rails with a bolted joint": false
+    },
+    "fit": 5,
+    "why": "The frame depicts a rail joint\u2014the kind of place where a gap can change size with temperature\u2014so the concept matches, but winter isn\u2019t indicated and the gap/joint isn\u2019t clearly visible due to the low lighting, so the connection isn\u2019t instant."
+   }
+  ]
+ },
+ {
+  "i": 7,
+  "sentence": 5,
+  "words": "in summer it nearly closes.",
+  "zone": "open_yard",
+  "frame": 38,
+  "concepts": [
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Close-up of a railway track with two rail ends joined by blue joint bars (fishplates) and yellow bolts; sleepers/ties and ballast underneath; a second track in the background with grass and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The shot centers on a rail joint with a visible gap between rail ends held by bolts, matching the idea that the gap nearly closes in summer due to thermal expansion."
+   },
+   {
+    "seen": "Close-up of a railway track joint: two rail ends with a small gap, blue fishplates with yellow bolts, sleepers/ties, ballast stones, fastening clips, another track in the background, grassy ground and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The image clearly shows a rail expansion joint with fishplates and bolts and a visible gap between rail ends. The line 'in summer it nearly closes' refers to thermal expansion closing this gap, which the viewer can infer from the depicted joint, though the closing action would be clearer in motion."
+   },
+   {
+    "seen": "Close-up of a railway track joint: two rail ends connected by blue fishplates with yellow bolts, a small gap between the rail ends, wooden sleepers/ties and ballast stones, a parallel track in the background, grassy ground and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The image clearly shows a rail joint with a visible gap that expansion could close, matching the idea that in summer it nearly closes. However, there is no explicit cue of summer, so the connection relies on understanding thermal expansion rather than the picture alone."
+   }
+  ]
+ },
+ {
+  "i": 8,
+  "sentence": 6,
+  "words": "Without room, heat makes rails shove sideways and buckle.",
+  "zone": "house",
+  "frame": 63,
+  "concepts": [
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:buckle",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": false,
+   "railway rails with a bolted joint": false
+  },
+  "fit_median": 9,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "Stylized scene with severely buckled railway rails on sleepers, a ballast pad/slab, patchy grass/dirt ground, and a medieval-style stone-and-timber building in the background.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": false
+    },
+    "fit": 9,
+    "why": "The rails are clearly shoved sideways and kinked, visually depicting buckling. Although no heat or expansion joint is shown and it\u2019s not a full yard, the image strongly conveys the concept that rails can buckle sideways without room to expand."
+   },
+   {
+    "seen": "A stylized 3D scene showing a short section of railway track on sleepers and ballast, the rails visibly snaking and buckling sideways; outdoors ground with grass, and a small stone-and-wood building with an arched door nearby.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": false
+    },
+    "fit": 9,
+    "why": "The image clearly shows rails shoved sideways and buckled, directly illustrating the concept; however, there\u2019s no explicit indication of heat or lack of expansion room."
+   },
+   {
+    "seen": "Cartoon scene with a short section of railway track on sleepers and ballast, the rails are visibly buckled sideways; a small timber-and-stone house with a wooden door in the background; grassy ground with scattered blades and soil.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": false
+    },
+    "fit": 9,
+    "why": "The rails are clearly shown shoving sideways and buckling, matching the narration. It doesn\u2019t depict heat or expansion joints explicitly, but the buckled track strongly conveys the idea."
+   }
+  ]
+ },
+ {
+  "i": 9,
+  "sentence": 7,
+  "words": "The clickety-clack noise came from those joints, not as the goal.",
+  "zone": "track_side",
+  "frame": 63,
+  "concepts": [
+   "cast:person",
+   "char:crouch",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Steam locomotive on tracks; cartoon character with hat; close-up display of two rail pieces joined by fishplates and bolts on sleepers; small signal/light post; house/building at left; grassy ground and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The foreground prominently shows a bolted rail joint, with a train behind, which directly illustrates that the clickety-clack comes from track joints. Slight deduction because the sound connection isn\u2019t explicit without narration."
+   },
+   {
+    "seen": "Cartoon steam locomotive on a track, a small cartoon figure in front, a foreground display of two railway rails joined with fishplates and bolts, a small trackside signal/light, a house/building to the left, grassy ground and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The foreground clearly shows a bolted rail joint (fishplates and bolts) with a train behind it, which directly supports the line about clickety\u2011clack coming from joints; only slight disconnect is that sound isn\u2019t depicted explicitly."
+   },
+   {
+    "seen": "Foreground: a short display section of railway track showing two rails joined by blue fishplates and yellow bolts on sleepers; Background: a steam locomotive on the main track; A cartoon character with a cap standing near the displayed joint; A small signal post with colored lights; A house on the left, grassy ground and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The bolted rail joint is prominently showcased in the foreground with a train behind it, making it easy to link the clickety-clack sound to joints. The visual focus supports the narration strongly, though sound is implied rather than shown."
+   }
+  ]
+ },
+ {
+  "i": 10,
+  "sentence": 8,
+  "words": "Today many mainlines weld rails",
+  "zone": "locomotive",
+  "frame": 37,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": true,
+   "railway rails with a bolted joint": false
+  },
+  "fit_median": 3,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A black steam locomotive on track beside a small house, a cartoon presenter character in front, a small signal light, brown rectangular walls/structure in the foreground, and grass/field around.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": false
+    },
+    "fit": 2,
+    "why": "The image shows a train, but the rails are not clearly shown and there is no visible joint or welding activity. It does not illustrate welded rails, so the connection to the narration is weak."
+   },
+   {
+    "seen": "Cartoon steam locomotive on tracks, small timber-style house/building, floating cartoon character with cap and clipboard, signal light, brown brick/stone structure in the foreground, grass/field and track bed",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": false
+    },
+    "fit": 3,
+    "why": "The image clearly shows a train and track, but it does not show rail welding or even a close-up of rail joints. The vintage steam locomotive and general scene do not communicate the modern practice of continuously welded rail, so the viewer would not instantly connect the picture to that line."
+   },
+   {
+    "seen": "- A black steam locomotive with a cowcatcher\n- A small cartoon narrator character wearing a cap\n- A small timbered house/building by the track\n- A signal light post\n- Track bed/ballast area with some track elements\n- Vegetation/grass\n- A brown walled structure in the foreground",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": false
+    },
+    "fit": 3,
+    "why": "The scene clearly shows a train and hints of track, so viewers know it\u2019s about railways, but there\u2019s no close-up of rails, joints, or any welding context. It doesn\u2019t communicate the idea of welded rails specifically, and the steam-era locomotive may even distract from the modern 'today' aspect."
+   }
+  ]
+ },
+ {
+  "i": 11,
+  "sentence": 8,
+  "words": "into long continuous lengths.",
+  "zone": "open_yard",
+  "frame": 34,
+  "concepts": [
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": false,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 3,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "Close-up of railway track in a cartoon style: two steel rails joined by blue fishplates with yellow bolts, wooden sleepers/ties, ballast stones, and another track blurred in the background on grassy ground.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 2,
+    "why": "The image highlights a bolted rail joint\u2014the opposite of continuous rail. It doesn\u2019t visually communicate \u201clong continuous lengths,\u201d unless used as a before/contrast shot. There\u2019s no strong sense of length or continuity."
+   },
+   {
+    "seen": "Close-up of a stylized railway track: two rail ends joined by blue fishplates with yellow bolts on sleepers and ballast; another track in the background; grassy ground and distant shapes; no train; not a yard scene.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 3,
+    "why": "The image focuses on a bolted rail joint, which suggests separate rail lengths rather than long continuous ones. It only fits if the narration is contrasting joints with being welded into continuous lengths; by itself it doesn\u2019t convey \u2018long\u2019 or \u2018continuous.\u2019"
+   },
+   {
+    "seen": "Close-up of railway track with two rail ends joined by blue fishplates and yellow bolts; sleepers/ties; ballast stones; a parallel track in the background; grassy ground and distant hills.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 3,
+    "why": "The image highlights a bolted rail joint, showing separate rail sections, while the line suggests rails being made into long continuous lengths (typically welded with no visible joints)."
+   }
+  ]
+ },
+ {
+  "i": 12,
+  "sentence": 9,
+  "words": "They set the rail at a neutral temperature so forces balance.",
+  "zone": "back",
+  "frame": 75,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:merchant",
+   "set:office",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": false,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 4,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "Cartoon scene indoors: a simple character stands beside a short section of railway track on the floor. The track shows two rails joined with fishplates/bolts on sleepers with ballast. There\u2019s a bookshelf, a wall board, wood-and-brick walls, and a small red/green indicator light.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 4,
+    "why": "The image clearly shows rail with a bolted joint, so it relates to rails. However, nothing indicates temperature, neutral setting, or force balance; it\u2019s an indoor demo piece rather than field work on neutral temperature, so the connection is weak."
+   },
+   {
+    "seen": "Cartoon figure in blue, bookshelf with books, wall with a notice board, small signal/light on a post, section of railway rails on sleepers with a bolted fishplate joint, indoor room setting.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 6,
+    "why": "The image shows rails with a clearly bolted joint, which relates to rail stressing concepts, but there is no clear indication of temperature or balancing forces; it\u2019s more about track hardware than thermal neutrality."
+   },
+   {
+    "seen": "Cartoon room with brick-and-wood walls, a stick-figure character, a bookshelf with books, a small section of railway track on the floor with a bolted fishplate joint, a small signal/light post, a notice board, wooden furniture/frames.",
+    "visible": {
+     "a railway yard with tracks or a train": false,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 4,
+    "why": "The image clearly shows a short rail section with a bolted joint, giving rail context, but nothing indicates temperature or force balance; it\u2019s not a yard or train and the neutral-temperature concept isn\u2019t visually communicated."
+   }
+  ]
+ },
+ {
+  "i": 13,
+  "sentence": 10,
+  "words": "Clips, anchors, and packed stone hold that stress in place.",
+  "zone": "track_side",
+  "frame": 54,
+  "concepts": [
+   "cast:person",
+   "char:carry",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 6,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Cartoon scene: a steam locomotive on railway tracks; a simple character in a cap holding a clipboard; a foreground demo section of track with two rail ends joined by fishplates/bolts and held by clips on sleepers; a small signal with red/yellow/green lights next to an orange equipment box; a cottage at left; grassy ground with hills in the background.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The foreground model clearly shows rail clips and a bolted joint, and there is some ballast-like material, which supports the idea of components holding the track. However, anchors are not clearly distinguished and the \u2018packed stone\u2019 aspect is only loosely implied, so the connection to the narration isn\u2019t instant for all viewers."
+   },
+   {
+    "seen": "A small demo rail panel with two rails joined by bolted fishplates, sleepers/ties with clips, a cartoon character in a cap holding a board, a steam locomotive on track behind, a small signal post and control box, a cottage, grassy ground and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 6,
+    "why": "The foreground clearly shows rail fasteners and a bolted joint, which suggests clips/anchors, but packed stone (ballast) is not obvious and the emphasis is more on the joint than on clips, anchors, and stone, so the connection is partial rather than immediate."
+   },
+   {
+    "seen": "Cartoon character with cap and clipboard standing on a railway track; steam locomotive behind; small demonstration panel of track showing two rails joined with fishplates and bolts, ties and fasteners; small signal post; cottage; grassy ground and distant hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 5,
+    "why": "The shot clearly shows track hardware and a bolted joint, which hints at how rails are held. However, the specific elements named\u2014clips, anchors, and packed stone\u2014aren't explicitly highlighted or labeled, and the ballast isn\u2019t very prominent, so the viewer wouldn\u2019t instantly connect the line to this image without explanation."
+   }
+  ]
+ },
+ {
+  "i": 14,
+  "sentence": 11,
+  "words": "Still, insulated joints add small gaps where signals need them.",
+  "zone": "house",
+  "frame": 63,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "cartoon figure with a cap and clipboard; a short section of railroad track on a slab; blue fishplates with bolts and yellow insulators joining two rail ends; small visible gap at the rail joint; timbered house in background; grass and hills; a dark tripod/equipment frame at right edge",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The foreground clearly shows a rail joint with bolted fishplates and insulating pads, and a small gap between rail ends\u2014exactly what an insulated joint is. The only slight mismatch is that the need for signals isn\u2019t explicit, but the hardware strongly implies it."
+   },
+   {
+    "seen": "Cartoon figure with a cap holding a clipboard, a half-timbered house, grassy ground and distant hills, a short section of railway track on a slab with fishplates/bolts and a visible joint gap, part of a tripod or light at the right edge.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The track piece clearly shows a bolted joint with a small gap between rail ends, matching the idea that insulated joints add small gaps where signals need them. Viewers might not immediately recognize the insulation aspect without narration, so not a perfect 10."
+   },
+   {
+    "seen": "Cartoon outdoor scene with a small half-timbered house, a simple character in a cap holding a clipboard, a short section of railway track on a slab with blue bolted joint bars and yellow pads, scattered grass, hills, and part of a tripod/stand in the foreground.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The image prominently features a short track segment with joint bars and bolts and a visible gap between rail ends, which conveys an insulated rail joint. It strongly matches the narration about small gaps for signals, though the signaling context is implied rather than shown."
+   }
+  ]
+ },
+ {
+  "i": 15,
+  "sentence": 12,
+  "words": "In deep cold, joints can pull apart and break bolts.",
+  "zone": "open_yard",
+  "frame": 50,
+  "concepts": [
+   "light:night",
+   "obj:rail_joint",
+   "obj:rail_joint:break",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": false
+  },
+  "fit_median": 6,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "Dark night scene with a close-up of railroad track on wooden ties, metal rail segments near a joint area, bolt-like fasteners, and a parallel track in the background.",
+    "visible": {
+     "railway rails with a bolted joint": false
+    },
+    "fit": 3,
+    "why": "You can tell it\u2019s railroad track, but the joint and bolts are not clearly visible due to very dark lighting, and there are no cues of cold or breakage, so the connection to bolts breaking in deep cold is weak."
+   },
+   {
+    "seen": "Close-up of a railway track at night; a rail joint area with fishplates; a visible gap between rail ends; several loose or broken bolts/nuts near the joint; wooden ties and base plates; another track in the background.",
+    "visible": {
+     "railway rails with a bolted joint": false
+    },
+    "fit": 7,
+    "why": "The scene appears to show a rail joint that has pulled apart with loose bolts, matching the idea of joints failing, but the lighting is very dark so the bolted joint details and the cold context aren\u2019t instantly clear."
+   },
+   {
+    "seen": "Dark nighttime view of railroad tracks; close-up of rails on wooden sleepers with an apparent joint/gap; a few hexagonal bolt/nut shapes near the joint; a second track in the background; grassy ground; a red structure at the right edge.",
+    "visible": {
+     "railway rails with a bolted joint": false
+    },
+    "fit": 6,
+    "why": "The shot appears to show a rail joint with a gap and some loose bolt-like pieces, which suggests joints pulling apart, but the scene is very dark, the bolted connection isn\u2019t clearly visible, and there\u2019s no visual cue for deep cold. So the connection is present but not instant."
+   }
+  ]
+ },
+ {
+  "i": 16,
+  "sentence": 13,
+  "words": "In extreme heat, welded rails can kink if not managed.",
+  "zone": "track_side",
+  "frame": 63,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:buckle",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": true,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A black steam locomotive on railway track, a neighboring track with dramatically kinked rails, sleepers/ties and ballast, a simple cartoon figure near the locomotive, buildings in the background, grassy ground.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": false
+    },
+    "fit": 9,
+    "why": "The image clearly shows rails that have buckled/kinked, which strongly matches the idea that welded rails can kink if not managed. However, there\u2019s no explicit cue of heat or that the rails are welded versus jointed, so it\u2019s not a perfect 10. No clear bolted joint is visible."
+   },
+   {
+    "seen": "steam locomotive on tracks, severely kinked/buckled rails in foreground, wooden sleepers/ties, ballast and ground with grass, a small orange-brown structure/wall, a cartoon figure beside the track, background buildings",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The image clearly shows rails that have buckled out of alignment, which matches the idea of rails kinking in heat. However, the presence of a visible bolted joint suggests these are jointed rails rather than continuously welded, and there are no explicit heat cues, slightly reducing the immediacy of the connection."
+   },
+   {
+    "seen": "cartoon steam locomotive on tracks, buckled/kinked rails in the foreground, a simple character figure, a building/wall, ground with grass",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The picture clearly shows rails that have kinked/buckled, which matches the idea of heat-induced rail kinking. A train is present, reinforcing the rail context. However, the narration specifies welded rails, while the image also shows a bolted joint, so it\u2019s not a perfect match."
+   }
+  ]
+ },
+ {
+  "i": 17,
+  "sentence": 14,
+  "words": "Standards tell crews how to control these risks.",
+  "zone": "left_wall",
+  "frame": 46,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "char:stand",
+   "light:day",
+   "outfit:merchant",
+   "outfit:worker",
+   "set:office"
+  ],
+  "required": [
+   "a worker",
+   "an office",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a worker": false,
+   "an office": false,
+   "at least one cartoon person": true
+  },
+  "fit_median": 3,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "Two simple cartoon people stand on a wooden floor in front of a brick wall. One wears a brown cap and has a square pad on the chest; the other in blue is gesturing. A table or counter is in the foreground with a green bottle and some papers.",
+    "visible": {
+     "a worker": false,
+     "an office": false,
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The image shows two cartoon figures, but nothing clearly indicates safety standards or risk control. It could be a crew, yet there are no cues like PPE, manuals, or procedures that link strongly to the narration."
+   },
+   {
+    "seen": "Two simplistic cartoon people (one wearing a cap) standing in a brick-walled room with a wooden floor; a table in the foreground with a green bottle and a cup.",
+    "visible": {
+     "a worker": false,
+     "an office": false,
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The image shows two cartoon figures, which could be a crew, but there are no clear signs of standards, safety procedures, or risk control; the setting doesn't read as an office or worksite."
+   },
+   {
+    "seen": "Two cartoon figures standing indoors against a brick wall; one wears a cap and has a clipboard/badge, the other gestures; wooden floor; a desk/table with papers; a green bottle and cup.",
+    "visible": {
+     "a worker": true,
+     "an office": false,
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The image shows crew-like cartoon people, which loosely connects to 'crews,' but there is nothing depicting standards, procedures, or controlling risks; the setting is generic."
+   }
+  ]
+ },
+ {
+  "i": 18,
+  "sentence": 15,
+  "words": "The answer: give steel space or controlled grip",
+  "zone": "open_yard",
+  "frame": 46,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Cartoon figure with a hat, a demo slab with two railway rails joined by blue fishplates and yellow bolts, a small signal post with colored lights, background railroad track, trees, a rock, and a boxy orange structure",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The mini track section clearly shows rails clamped by bolted fishplates, suggesting controlled grip and possibly a small gap for steel expansion, which aligns with the idea of giving steel space or controlled grip. However, the concept is somewhat abstract without explicit cues about expansion, so the connection isn\u2019t instant for all viewers."
+   },
+   {
+    "seen": "Cartoon scene with a stick-figure worker in a cap pointing, a small display piece of railway track on a slab with two rails joined by blue fishplates and yellow bolts, sleepers/clamps, a small signal post, a brown boxy structure, a background stretch of track, trees, a rock, and dirt ground.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The focus is a rail section showing fishplates and bolts\u2014an example of giving steel a controlled grip, and the joint implies allowance for expansion (space). Viewers can connect it to the line, though the idea of \u201cspace\u201d isn\u2019t explicitly highlighted, so it\u2019s not a perfect 10."
+   },
+   {
+    "seen": "Cartoon scene with a stick-figure worker in a cap, a small display slab showing two railway rails joined by blue fishplates with yellow bolts, sleepers and clips, a tiny signal post, a background railway track, trees, a rock, and a brown blocky structure.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The close-up of a rail joint with fishplates and bolts visually conveys the idea of giving steel room (a visible gap/joint) or holding it with a controlled grip (bolted plates), so the viewer can reasonably connect the image to the line, though the wording is a bit abstract."
+   }
+  ]
+ },
+ {
+  "i": 19,
+  "sentence": 15,
+  "words": "so it can move safely.",
+  "zone": "track_side",
+  "frame": 34,
+  "concepts": [
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 7,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Close-up of a railway track: two steel rails joined by blue fishplates with large yellow bolts, sleepers/ties, ballast stones, some grass and ground, and part of a locomotive/cowcatcher in the background. Stylized/cartoon look.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 6,
+    "why": "Shows a secure bolted rail joint, which implies safety for trains, but it doesn\u2019t depict motion; the link to \u201cmove\u201d is indirect rather than immediate."
+   },
+   {
+    "seen": "Close-up of two railway rails joined by blue fishplates with yellow bolts, wooden sleepers/ties, ballast stones on a slab-like base, and part of a locomotive\u2019s front (cowcatcher) in the background with some grass and a small building.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The image clearly highlights a bolted rail joint, which implies secure track for safe movement, but the connection to the phrase is indirect and there\u2019s little sense of motion; the safety idea is implied rather than immediately obvious."
+   },
+   {
+    "seen": "Close-up of a cartoon railway track: two rail sections joined by blue fishplates with large yellow bolts, wooden sleepers/ties, ballast stones on a concrete bed, some grass, and part of a locomotive\u2019s front in the background.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The image highlights a bolted rail joint that secures track sections, which relates to enabling trains to move safely. However, it doesn\u2019t show motion or a clear safety action, so the connection isn\u2019t instant for all viewers."
+   }
+  ]
+ },
+ {
+  "i": 20,
+  "sentence": 16,
+  "words": "Like deck boards need gaps,",
+  "zone": "bow",
+  "frame": 21,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard",
+   "set:ship_deck"
+  ],
+  "required": [
+   "a ship deck",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a ship deck": true,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "wooden ship deck with plank gaps, cartoon sailor figure, sail and mast, cannon, small model of railway rails with a bolted joint on a base, small signal light, ocean horizon",
+    "visible": {
+     "a ship deck": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The scene prominently shows deck boards with visible gaps, so the viewer can connect the line to what they see. The added rail model may distract slightly from the deck focus, so not a perfect 10."
+   },
+   {
+    "seen": "Wooden sailing ship deck with planked boards and visible gaps; mast and sail; cartoon sailor figure; deck cannon; a small model of two railway rails joined by bolted fishplates on a base; a small signal post; ocean in the background.",
+    "visible": {
+     "a ship deck": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The deck boards and their gaps are clearly shown, so viewers can connect the line to what they see. The extra focus on the rail joint may distract slightly from the deck message, preventing a perfect score."
+   },
+   {
+    "seen": "Wooden ship deck with plank gaps, cartoon sailor figure with cap, cannon, mast and sail, ocean horizon, a small demo of railway rails with a bolted joint on a base, a small signal post, wooden slatted platform.",
+    "visible": {
+     "a ship deck": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The deck planks and their gaps are large and clear, making an immediate link to the line. The rail demo is unrelated and adds minor distraction, keeping it just short of perfect."
+   }
+  ]
+ },
+ {
+  "i": 21,
+  "sentence": 16,
+  "words": "but steel pushes harder, so we plan it.",
+  "zone": "front",
+  "frame": 46,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:expand",
+   "outfit:merchant",
+   "set:office",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 7,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Cartoon character in an office; desk; bookshelf; framed document on wall; wooden floor and ceiling; a tabletop model of railway tracks with sleepers and a bolted joint (fishplates and bolts); a small signal/indicator post.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The image prominently shows a rail model with a bolted joint, which relates to steel behavior (e.g., forces/expansion) that must be planned for. However, the line about steel pushing harder is abstract and not visually demonstrated (no motion or deformation), and the office setting slightly weakens the immediate connection."
+   },
+   {
+    "seen": "Cartoon character in an office/workshop, a tabletop model of railway tracks with a bolted joint (fishplates and bolts) on sleepers, a small signal/light post, a desk, bookshelf, framed document, wooden floor and timber ceiling with stone walls.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The model clearly shows steel rails connected by bolted joint plates, which relates to steel\u2019s forces (e.g., thermal expansion) and the idea of planning joints. The connection is present but not explicit about \u2018pushing harder,\u2019 so it\u2019s moderately strong rather than instant."
+   },
+   {
+    "seen": "Cartoon figure in an office-like room with wooden floor and brick walls; a desk and bookshelf; a framed document; a tabletop model of railway tracks showing two rails joined by bolted plates (fishplates) on sleepers; a small signal-style indicator beside the model.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 7,
+    "why": "The image prominently shows steel rails joined with bolted fishplates, so the idea of steel and applied forces is clear. However, the phrase \u201cso we plan it\u201d implies planning or allowance (e.g., expansion planning) which isn\u2019t explicitly shown, making the connection moderate rather than immediate."
+   }
+  ]
+ },
+ {
+  "i": 22,
+  "sentence": 17,
+  "words": "That prevents buckles and breaks, and explains the old clickety-clack.",
+  "zone": "open_yard",
+  "frame": 71,
+  "concepts": [
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:break",
+   "obj:rail_joint:buckle",
+   "set:rail_yard"
+  ],
+  "required": [
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Cartoon railway scene: buckled/wavy rails on sleepers and ballast in the foreground, a straight length of track behind with rail joints/gaps and fishplates, a brown block/structure beside the rails, ground with scattered grass, distant trees and hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 9,
+    "why": "The image juxtaposes a buckled rail with background jointed rails (visible gaps and fishplates), clearly supporting the idea that joints prevent buckles and produce the old clickety-clack. Slightly less than perfect because the bolts aren\u2019t extremely prominent at a glance."
+   },
+   {
+    "seen": "Stylized railway scene: close-up of track on sleepers with a dramatic S-shaped buckled rail in the foreground next to a brown barrier/abutment, ballast stones, a straight track section in the background, and simple grass and trees.",
+    "visible": {
+     "railway rails with a bolted joint": false
+    },
+    "fit": 3,
+    "why": "The image emphasizes buckled rails\u2014the failure mode\u2014rather than the feature that prevents it. There\u2019s no clearly visible bolted joint or expansion gap, so the connection to the \u201cclickety-clack\u201d of jointed rails is weak."
+   },
+   {
+    "seen": "Stylized outdoor scene with railroad tracks; foreground rails are buckled into an S-shape on sleepers next to a brown block/abutment; background has a straight track with visible rail joints/fishplates; grassy ground with small plants; distant low-poly trees and hills.",
+    "visible": {
+     "railway rails with a bolted joint": true
+    },
+    "fit": 8,
+    "why": "The image juxtaposes buckled rails (showing what happens without proper expansion allowance) with a background track that has jointed rails, which explains the old clickety-clack. This supports the line about preventing buckles and breaks and the clickety-clack, though the foreground emphasis on the buckle slightly weakens the immediate connection to prevention."
+   }
+  ]
+ },
+ {
+  "i": 23,
+  "sentence": 18,
+  "words": "Modern mainlines often have no visible gaps at all.",
+  "zone": "track_side",
+  "frame": 66,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:rail_joint",
+   "obj:rail_joint:hold",
+   "outfit:worker",
+   "set:rail_yard"
+  ],
+  "required": [
+   "a railway yard with tracks or a train",
+   "railway rails with a bolted joint"
+  ],
+  "visible": {
+   "a railway yard with tracks or a train": true,
+   "railway rails with a bolted joint": true
+  },
+  "fit_median": 2,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "steam locomotive on a track; cartoon worker character; small demonstration track panel with fishplates and bolts; small signal light; orange box-like structure; grassy ground and distant hills.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 2,
+    "why": "The image emphasizes a bolted rail joint with a visible gap, which contrasts with the line about modern mainlines having no visible gaps (continuous welded rail)."
+   },
+   {
+    "seen": "Cartoon scene with a steam locomotive on a single track, a stick\u2011figure presenter in a cap, a small demonstration panel of two short rails joined by fishplates/bolts (a bolted joint), a small signal light, and a box-like structure on grassy ground with hills in the background.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 2,
+    "why": "The foreground prominently shows a bolted rail joint with a visible gap, which suggests jointed rail rather than continuous welded rail. That image conflicts with the narration about modern mainlines having no visible gaps, so a viewer would not instantly connect the picture to the line."
+   },
+   {
+    "seen": "A steam locomotive on a single railway track; a cartoon person wearing a tan cap; a small demonstration panel of rails joined with fishplates and bolts; a small signal post with lights; a rectangular orange structure; grassy ground with distant hills and trees.",
+    "visible": {
+     "a railway yard with tracks or a train": true,
+     "railway rails with a bolted joint": true
+    },
+    "fit": 2,
+    "why": "The image prominently shows a bolted joint with fishplates, which implies visible gaps typical of jointed rail, and the train looks older. This contrasts with the narration about modern mainlines having no visible gaps, so the visual does not strongly support the line."
+   }
+  ]
+ }
+]
