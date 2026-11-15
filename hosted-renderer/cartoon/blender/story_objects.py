@@ -67,6 +67,8 @@ def build_object(spec,duration,fps):
         spindle=bpy.data.objects.new('drill spindle',None);bpy.context.collection.objects.link(spindle)
         for obj in [cylinder('drill bit',(0,0,.32),.028,.46,steel),path('spiral cutting flute',[(.031*math.cos(i*.45),.031*math.sin(i*.45),.13+i*.006) for i in range(64)],.009,steel),cylinder('tapered drill chuck',(0,0,.61),.075,.16,steel)]:obj.parent=spindle
         moving.append((spindle,'spin',spindle.location.copy()))
+        for i in range(12):
+            o=cube('drilling wood shaving',(.12*math.cos(i),.12*math.sin(i),.2),(.035,.018,.012),wood,.002);moving.append((o,'shaving',Vector((.12*math.cos(i),.12*math.sin(i),.2))))
         rope('drill frame',(0,0,.68),(0,0,1.18),.045,steel)
         cylinder('top wooden drill handle',(0,0,1.35),.085,.3,wood)
         center=(.12,-.075,.94)
@@ -91,17 +93,33 @@ def build_object(spec,duration,fps):
         bpy.ops.mesh.primitive_cone_add(vertices=16,radius1=.1,depth=.25,location=(0,0,1.55));bpy.context.active_object.data.materials.append(steel)
         for a in [0,math.pi/2]:
             fin=cube('arrow fletching',(0,0,.25),(.28,.015,.22),paper);fin.rotation_euler.z=a
+        if action=='fire':
+            o=sphere('rocket exhaust flame',(0,0,.04),(.1,.1,.23),ember);moving.append((o,'rocket_flame',o.location.copy()))
+            smoke=material('rocket smoke',(.32,.32,.32),.95)
+            for i in range(4):
+                o=sphere('rocket exhaust smoke',(0,0,-.1-i*.12),(.08+i*.025,)*3,smoke);moving.append((o,'rocket_smoke',o.location.copy()))
     elif kind=='fuse_bundle':
         # Looped cords leading into three visibly cylindrical powder charges, not parallel rake teeth.
         fusemat=material('braided safety fuse',(.11,.075,.035),.95)
-        path('loose common fuse',[(.06*math.sin(i*.13),-.7+i*.007,.04+.003*math.sin(i)) for i in range(76)],.015,fusemat)
+        path('loose common fuse',[fuse_position(i/50) for i in range(76)],.015,fusemat)
         for i in range(76):
-            x=.06*math.sin(i*.13);y=-.7+i*.007
+            x,y,z=fuse_position(i/50)
             path('woven fuse strand',[(x+.016*math.cos(i*1.9+j),y+j*.001,.04+.016*math.sin(i*1.9+j)) for j in range(7)],.003,paper)
-        tip=sphere('glowing ignition tip',(0,-.7,.045),(.03,.025,.025),ember)
+        tip=sphere('glowing ignition tip',(0,-.7,.045),(.065,.055,.07),ember)
         if action=='fire':moving.append((tip,'fuse',tip.location.copy()))
+        if action=='fire':
+            flame=material('fuse flame yellow',(1,.65,.025),.4,emission=7)
+            smoke=material('fuse smoke charcoal',(.085,.085,.085),.95)
+            for i in range(3):
+                o=sphere('fuse flame tongue',(0,0,0),(.04,.035,.12-i*.025),flame);moving.append((o,'fuse_flame',Vector((i*.025-.025,0,.085+i*.025))))
+            for i in range(5):
+                o=sphere('rising fuse smoke',(0,0,0),(.055+i*.012,)*3,smoke);moving.append((o,'fuse_smoke',Vector((i*.035-.05,0,.17+i*.065))))
+            char=material('burned fuse charcoal',(.025,.018,.01),.95)
+            for i in range(75):
+                a=fuse_position(i/50);b=fuse_position((i+1)/50)
+                o=rope('charred fuse trail',a,b,.02,char);moving.append((o,'charred',i/50))
         for i in range(6):
-            spark=rope('fuse tip spark',(0,0,0),(.07*math.cos(i*2),.07*math.sin(i*2),.04+i*.006),.003,ember);spark.location=(0,-.7,.045)
+            spark=rope('fuse tip spark',(0,0,0),(.12*math.cos(i*2),.12*math.sin(i*2),.08+i*.012),.006,ember);spark.location=(0,-.7,.045)
             if action=='fire':moving.append((spark,'fuse',spark.location.copy()))
         for i,(x,y,a) in enumerate([(-.47,.22,-.45),(0,.37,.1),(.46,.17,.6)]):
             # Charges lie on the ground with dark fuses entering their camera-facing ends.
@@ -159,7 +177,10 @@ def build_object(spec,duration,fps):
         rope('curved fuse',(0,0,.73),(.07,0,.81),.012,wood)
         rope('bent fuse',(.07,0,.81),(.16,.03,.8),.012,wood)
         if action=='fire':
-            o=sphere('burning fuse',(0,0,.73),(.035,)*3,ember);moving.append((o,'dynamite_fuse',o.location.copy()))
+            o=sphere('burning fuse',(0,0,.73),(.065,.055,.1),ember);moving.append((o,'dynamite_fuse',o.location.copy()))
+            smoke=material('dynamite fuse smoke',(.085,.085,.085),.95)
+            for i in range(4):
+                o=sphere('dynamite fuse smoke',(0,0,0),(.045+i*.012,)*3,smoke);moving.append((o,'dynamite_smoke',Vector((i*.035,0,.12+i*.055))))
         if action=='explode':
             intact=list(set(bpy.data.objects)-created)
             for i in range(8):
@@ -201,9 +222,15 @@ def build_object(spec,duration,fps):
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
         for index,(obj,role,rest) in enumerate(moving):
             obj['motion_role']=role
-            if role!='fragment':obj.location=rest
+            if role not in ('fragment','charred'):obj.location=rest
             if role in ('spin','crank','wheel'):obj.rotation_euler=(0,0,0)
-            if role=='spin':obj.rotation_euler.z=spin_angle(t)*3
+            if role=='spin':obj.rotation_euler.z=spin_angle(t)*3;obj.location.z=-.08*progress(t,0,.6)
+            if role=='shaving':
+                obj.hide_render=t<.35;obj.keyframe_insert('hide_render',frame=frame+1)
+                obj.location=rest+Vector((.08*progress(t)*math.sin(index),.08*progress(t)*math.cos(index),0))
+            if role=='rocket_flame':
+                obj.scale=(.1,.1,.23+.08*math.sin(t*21));obj.keyframe_insert('scale',frame=frame+1)
+            if role=='rocket_smoke':obj.location=rest+Vector((.04*math.sin(t*7+index),0,-.04*math.sin(t*5+index)))
             if role=='crank':obj.rotation_euler.y=spin_angle(t)
             if role=='wheel':obj.rotation_euler.y=-m['travel']/.3
             if role=='cover':obj.location=(rest.x,rest.y+progress(t)*1.7,rest.z+progress(t)*.8)
@@ -212,7 +239,18 @@ def build_object(spec,duration,fps):
                 if action=='load':obj.hide_render=t>=1.5;obj.keyframe_insert('hide_render',frame=frame+1)
             if role=='projectile':obj.location=(rest.x,rest.y,rest.z+max(0,t-.4)*1.5)
             if role=='fuse':obj.location=fuse_position(t)
+            if role=='fuse_flame':
+                obj.location=Vector(fuse_position(t))+rest;obj.rotation_euler.y=.3*math.sin(t*19+index)
+            if role=='fuse_smoke':
+                obj.location=Vector(fuse_position(max(0,t-.15)))+rest+Vector((.02*math.sin(t*9+index),0,.04*math.sin(t*6+index)))
+            if role=='charred':obj.hide_render=t<rest;obj.keyframe_insert('hide_render',frame=frame+1)
             if role=='dynamite_fuse':obj.location=(.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition'])
+            if role=='dynamite_smoke':
+                age=(t*.8+index*.21)%1
+                obj.location=Vector((.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition']))+Vector((age*.25+.05*math.sin(t*8+index),0,.1+age*.65))
+                obj.scale=(.035+age*.07,)*3;obj.keyframe_insert('scale',frame=frame+1)
+            if role=='dynamite_fuse':
+                obj.scale=(.055+.02*math.sin(t*17),.05,.1+.06*math.sin(t*13));obj.keyframe_insert('scale',frame=frame+1)
             if role=='fragment':
                 obj.location=burst_position(t,rest);obj.hide_render=not exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
             if role in ('flash','burst_flash'):
