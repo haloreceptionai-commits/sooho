@@ -111,6 +111,12 @@ def validate_plan(plan, story, concrete=None):
             elif m.get('concept') is None and m.get('kind') == 'abstract': continue
             elif m.get('concept') is None: undrawable.append({'sentence': s['index'], 'word': m['word']})
             elif not concept_valid(m['concept']): errs.append(f's{s["index"]}: unknown concept {m["concept"]}')
+        lo_, hi_ = PACE['shot_len']; dur = s['end'] - s['start']
+        valid = [i for i in range(1, len(s['words'])) if lo_ <= s['times'][i] - s['start'] <= hi_ and lo_ <= s['end'] - s['times'][i] <= hi_]
+        bad = (len(shots) == 1 and not lo_ <= dur <= hi_) or (len(shots) == 2 and shots[1].get('start_word') not in valid)
+        if bad:
+            hint = f'valid start_word values for a 2-shot split: {valid}' if valid else 'no 2-shot split fits; use 1 shot'
+            errs.append(f's{s["index"]}: shot timing out of {lo_}-{hi_}s (sentence {dur:.2f}s); {hint}')
         starts = [0] + [sh.get('start_word', 0) for sh in shots[1:]]
         if len(shots) == 2 and not 0 < starts[1] < len(s['words']): errs.append(f's{s["index"]}: bad start_word'); continue
         shown = set()
