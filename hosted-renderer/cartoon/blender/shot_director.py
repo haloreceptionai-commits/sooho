@@ -260,12 +260,15 @@ def compile_one(sh, plan, duration, si=0):
     else:
         for j, o in enumerate(objects):
             near = cast[j % len(cast)]['pos'] if cast else origin
-            o['pos'] = _at(near, (0.6, -0.35), head, 0); o['scale'] = 0.5
+            o['pos'] = _at(near, (0.55, -0.7), head, 0); o['scale'] = 0.85  # step-6 review: 0.5 props unreadable in medium shots
         if framing == 'wide' or not cast:
             d = 3.6 if st == 'mine_tunnel' else 5.2
             cam = {'from': _at(origin, (0.9, -d), head, 2.0), 'look_at': _at(origin, (0, 1.5), head, 1.2), 'lens': 26 if st == 'mine_tunnel' else 30, 'fstop': 5.6}
         else:
-            sub = cast[0]['pos']; d = 3.4 if framing == 'medium' else 2.0
+            sub = cast[0]['pos']
+            if objects:  # frame the person and the named prop together
+                p0 = objects[0]['pos']; sub = [(sub[0] + p0[0]) / 2, (sub[1] + p0[1]) / 2]
+            d = 3.0 if framing == 'medium' else 2.0
             cam = {'from': _at(sub, (0.35 * d, -d), head, 1.55), 'look_at': _at(sub, (0, 0.2), head, 1.05 if framing == 'medium' else 1.3),
                    'lens': 40 if framing == 'medium' else 55, 'fstop': 4}
     if st == 'mine_tunnel':
