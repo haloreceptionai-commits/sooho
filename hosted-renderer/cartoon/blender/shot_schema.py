@@ -3,10 +3,11 @@ import json
 from pathlib import Path
 from character_motion import ACTIONS, EXPRESSIONS, OUTFITS, HATS
 from object_specs import validate_object
+from effects import KINDS as EFFECT_KINDS
 
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day'}
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -24,9 +25,26 @@ def validate_shot(s):
     if not isinstance(d, (int, float)) or not 0.2 <= d <= 12: raise ValueError('duration 0.2-12s')
     c = s.get('camera')
     if not isinstance(c, dict): raise ValueError('camera required')
-    if set(c) - {'from', 'to', 'look_at', 'lens', 'fstop'}: raise ValueError('unknown camera keys')
+    if set(c) - {'from', 'to', 'look_at', 'lens', 'fstop', 'whip_from', 'shake'}: raise ValueError('unknown camera keys')
     _vec(c.get('from'), 3, 'camera.from'); _vec(c.get('look_at'), 3, 'camera.look_at')
     if 'to' in c: _vec(c['to'], 3, 'camera.to')
+    if 'whip_from' in c: _vec(c['whip_from'], 3, 'camera.whip_from')
+    sh = c.get('shake', [])
+    if not isinstance(sh, list) or len(sh) > 6: raise ValueError('up to 6 shake hits')
+    for h in sh:
+        if set(h) - {'t', 'amp'} or not 0 <= h.get('t', -1) <= d or not 0 < h.get('amp', .04) <= .08: raise ValueError('shake hit {t within shot, amp<=0.08}')
+    fx = s.get('effects', [])
+    if not isinstance(fx, list) or len(fx) > 6: raise ValueError('up to 6 effects')
+    for e in fx:
+        if set(e) - {'kind', 'pos', 'start', 'scale', 'seed'} or e.get('kind') not in EFFECT_KINDS: raise ValueError('unknown effect')
+        _vec(e.get('pos'), 3, 'effect.pos')
+        if not 0 <= e.get('start', 0) <= d or not .2 <= e.get('scale', 1) <= 4: raise ValueError('effect start within shot, scale 0.2-4')
+    cr = s.get('crowd')
+    if cr is not None:
+        if set(cr) - {'count', 'center', 'size', 'action', 'yaw', 'seed'}: raise ValueError('unknown crowd keys')
+        if not isinstance(cr.get('count'), int) or not 1 <= cr['count'] <= 400: raise ValueError('crowd 1-400')
+        _vec(cr.get('center'), 2, 'crowd.center'); _vec(cr.get('size'), 2, 'crowd.size', 60)
+        if cr.get('action', 'stand') not in ('stand', 'cheer', 'run'): raise ValueError('crowd action stand|cheer|run')
     if not 12 <= c.get('lens', 35) <= 200: raise ValueError('lens 12-200mm')
     if not 0.8 <= c.get('fstop', 2.8) <= 32: raise ValueError('fstop 0.8-32')
     objects=s.get('objects',[])

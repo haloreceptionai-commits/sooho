@@ -18,6 +18,7 @@ from characters import build_character
 from story_objects import build_object
 from verify_characters import verify_characters
 from verify_objects import verify_objects
+from fx_render import build_effects, build_crowd, camera_moves
 
 
 def mat(name, color, rough=0.6, metal=0.0, emit=None, strength=0.0):
@@ -279,6 +280,7 @@ def camera(shot, fps):
     for f in range(n):
         cam.location = a.lerp(b, ease(f / max(1, n - 1)))
         cam.keyframe_insert('location', frame=f + 1)
+    camera_moves(cam, target, shot, fps)
     return n
 
 
@@ -366,6 +368,7 @@ def main():
     if object_roots:
         qa=verify_objects(object_roots,shot['duration'],fps)
         with open(os.path.join(out,'object-qa.json'),'w') as file:json.dump(qa,file,indent=2)
+    fx = build_effects(shot, fps); crowd = build_crowd(shot, fps); print('FX', fx, 'CROWD', crowd, flush=True)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     sc.render.filepath = os.path.join(out, 'f_#####')
