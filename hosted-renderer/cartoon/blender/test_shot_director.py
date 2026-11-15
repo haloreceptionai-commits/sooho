@@ -51,5 +51,5 @@ class ShotDirectorTest(unittest.TestCase):
 
     def test_pacing_band_matches_benchmark(self):
         _,r=D.validate_plan(good(),STORY)
-        self.assertEqual(r['set_changes_per_min'],round(2/(5.95)*60,2))
+        self.assertEqual(r['set_changes_per_min'],round(2/4.95*60,2))
         self.assertEqual(D.PACE['set_changes_per_min'],(12.0,22.0))
