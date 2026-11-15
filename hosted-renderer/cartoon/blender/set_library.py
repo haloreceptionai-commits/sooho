@@ -69,6 +69,7 @@ def model(spec):
             o.location -= center
     factor = spec['height'] / height
     root.scale = (factor,) * 3; root.location = spec['pos']; root.rotation_euler.z = math.radians(spec.get('yaw', 0))
+    print('ASSET_BOUNDS',spec['id'],[round(float(v),3) for v in (high-low)*factor], 'yaw',spec.get('yaw',0),flush=True)
     for o in meshes:
         # Reuse the real model geometry; assign scanned surfaces to appropriate
         # material groups rather than flattening every prop to one wood colour.
