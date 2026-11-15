@@ -51,6 +51,14 @@ def lexical_concepts(text):
     t = norm(text); found = set()
     for set_id, ws in VOCAB['sets'].items():
         if any(has_phrase(t, w) for w in ws): found.add(f'set:{set_id}')
+    owners = {}
+    for kind, spec in VOCAB['objects'].items():
+        for act, ws in spec['actions'].items():
+            for w in ws: owners.setdefault(w, set()).add((kind, act))
+    for w, ks in owners.items():
+        # a verb only one drawable object performs ("kink", "spin") requires that object action
+        if len({k for k, _ in ks}) == 1 and has_phrase(t, w):
+            (kind, act), = ks; found |= {f'obj:{kind}', f'obj:{kind}:{act}'}
     for kind, spec in VOCAB['objects'].items():
         if any(has_phrase(t, w) for w in spec['words']):
             found.add(f'obj:{kind}')
