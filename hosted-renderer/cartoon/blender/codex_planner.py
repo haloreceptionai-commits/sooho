@@ -60,6 +60,7 @@ def main():
         plan = call(text); errs, rep = D.validate_plan(plan, story)
         history.append({'round': r + 1, 'errors': errs, 'coverage': rep.get('coverage'), 'set_changes_per_min': rep.get('set_changes_per_min')})
         print(f'{name} round {r+1}: {len(errs)} errors, coverage {rep.get("coverage")}, sets/min {rep.get("set_changes_per_min")}', flush=True)
+        json.dump({'plan': plan, 'errors': errs, 'report': rep}, open(out / f'{name}.round{r+1}.json', 'w'), indent=1)
         if not errs: break
         text = base + '\n\nYour previous plan:\n' + json.dumps(plan) + '\n\nThe validator rejected it. Fix ALL of these and return the full corrected JSON:\n' + '\n'.join(errs)
     json.dump(plan, open(out / f'{name}.plan.json', 'w'), indent=1)
