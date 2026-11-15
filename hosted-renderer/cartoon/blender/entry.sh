@@ -21,7 +21,7 @@ if [ "${SHOT#plan-}" != "${SHOT:-}" ] || [ "${SHOT:-}" = suite ] || [ "${SHOT:-}
       curl -fsS --retry 6 --retry-all-errors --retry-delay 2 -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: application/json' --data-binary "@/tmp/$NAME/object-qa.json" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-qa.json?$SAS" >/dev/null || FAILED=1
     fi
     if [ "$CODE" = 0 ] && [ "$ACTUAL" = "$EXPECTED" ]; then
-      if [ "$SHOT" = mechanisms ]; then
+      if [ "$SHOT" = mechanisms ] || [ "${SHOT#plan-}" != "$SHOT" ]; then
         for IMAGE in "/tmp/$NAME"/f_*.png; do
           curl -fsS --retry 6 --retry-all-errors --retry-delay 2 -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@$IMAGE" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-$(basename "$IMAGE")?$SAS" >/dev/null || FAILED=1
         done
