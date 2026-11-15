@@ -5,7 +5,7 @@
 - [~] 4. Benchmark-style characters — cast6 uncropped 1080x1920 swing/cheer clip verified 5.000s/150 frames; qa8 full 150-frame geometry checks plus five crouch/fall/cheer/panic review frames succeeded after fixing falling shoe penetration. 32 tests pass. Remaining corrected all-action contact review and benchmark look/stronger swing; production unchanged.
 - [x] 5. Unusual story objects with moving parts — 10 objects pass label-free recognition (qa10); all 13 object actions pass 3-vote action review plus 780 per-frame geometry checks (mech17, object-motion-audit.json). Production unchanged.
 - [~] 6. Shot director rewrite (Codex shot plans, word-matched shots)
-- [ ] 7. Effects and camera
+- [ ] 7. Effects and camera (owner asked Nov 15 18:44 to start after step 6)
 - [ ] 8. Sound matched to picture
 - [ ] 9. Script and picture together
 - [ ] 10. Full 3-video test, speed and launch
