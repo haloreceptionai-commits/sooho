@@ -298,16 +298,24 @@ def build_object(spec,duration,fps):
             sphere('signal lamp',(.75,.79,1.3),(.04,.02,.04),glow('signal lamp green',(.1,1,.2),3))
             sphere('signal lamp',(.75,.79,1.2),(.04,.02,.04),glow('signal lamp red',(1,.05,.02),1.2))
     elif kind=='money_bag':
-        # Fat tied burlap money sack with gold coins spilling into a stack beside it.
-        sack=material('money sack burlap',(.55,.42,.24),.95)
-        sphere('money sack body',(0,0,.32),(.3,.27,.32),sack)
-        sphere('money sack neck',(0,0,.66),(.1,.09,.09),sack)
-        bpy.ops.mesh.primitive_torus_add(major_radius=.1,minor_radius=.022,location=(0,0,.62));o=bpy.context.active_object;o.name='sack tie string';o.data.materials.append(wood)
-        for r,z in [(.17,.75),(.12,.82)]:sphere('sack top flap',(0,0,z),(r*.55,r*.45,.05),sack)
+        # Cartoon money sack: lumpy matte burlap body, cinched neck with ruffled flared top, printed dollar sign, coin spill.
+        sack=material('money sack burlap',(.42,.29,.14),1.0)
+        body=sphere('money sack body',(0,0,.3),(.33,.29,.31),sack)
+        for v in body.data.vertices:
+            v.co*=1+.06*math.sin(v.co.x*9)*math.sin(v.co.y*7+1)*math.cos(v.co.z*8)
+            if v.co.z<-.75:v.co.z=-.75  # flat base resting on the ground
+        bpy.ops.mesh.primitive_cone_add(vertices=40,radius1=.06,radius2=.19,depth=.2,location=(0,0,.68));top=bpy.context.active_object;top.name='ruffled sack top'
+        for v in top.data.vertices:
+            if v.co.z>0:a_=math.atan2(v.co.y,v.co.x);v.co.z+=.03*math.sin(a_*9)
+        top.data.materials.append(sack)
+        cylinder('cinched sack neck',(0,0,.6),.075,.08,sack)
+        bpy.ops.mesh.primitive_torus_add(major_radius=.08,minor_radius=.02,location=(0,0,.6));o=bpy.context.active_object;o.name='sack tie rope';o.data.materials.append(material('sack rope',(.75,.62,.38),.9))
+        bpy.ops.object.text_add(location=(0,-.3,.18),rotation=(math.pi/2,0,0));o=bpy.context.active_object;o.name='dollar sign print'
+        o.data.body='$';o.data.size=.36;o.data.extrude=.012;o.data.align_x='CENTER';o.data.materials.append(material('dollar print green',(.03,.2,.06),.8))
         coin=material('gold coin',(1,.72,.12),.25,1)
-        for i in range(7):cylinder('gold coin',(.45,-.1,.012+i*.024),.075,.02,coin)
-        for i in range(6):
-            a=i*1.1;cylinder('gold coin',(.3+.12*math.cos(a),-.3+.1*math.sin(a),.012),.075,.02,coin,(.15*math.sin(a),.1,0))
+        for i in range(8):cylinder('gold coin',(.42,-.18,.012+i*.024),.075,.02,coin)
+        for i in range(10):
+            a_=i*1.7;cylinder('gold coin',(.15+.2*math.cos(a_),-.4+.1*math.sin(a_),.012),.075,.02,coin,(.15*math.sin(a_),.1,0))
     else:
         rock=material('object rock',(.19,.21,.22),.92)
         quartz=material('vein quartz',(.73,.74,.68),.85)
