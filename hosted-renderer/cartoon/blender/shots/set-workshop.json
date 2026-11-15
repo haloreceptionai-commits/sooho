@@ -2,7 +2,7 @@
   "set": "workshop",
   "duration": 3,
   "lighting": "day",
-  "samples": 24,
+  "samples": 64,
   "engine": "cycles",
   "size": [
     1080,
@@ -13,18 +13,18 @@
   ],
   "camera": {
     "from": [
-      3.5,
-      -3,
-      2.1
+      2.8,
+      -0.3,
+      1.7
     ],
     "look_at": [
       0,
       3,
-      1.25
+      1.1
     ],
-    "lens": 35,
+    "lens": 32,
     "fstop": 5.6
   },
   "grade": "Punchy",
-  "haze": 0.003
+  "haze": 0.001
 }

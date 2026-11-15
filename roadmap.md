@@ -1,7 +1,7 @@
 # Benchmark-quality plan (approved Nov 14, one step per "next")
 - [x] 1. Benchmark measurement kit: shot lists, scorecard, our 2 videos scored
 - [~] 2. Headless Blender renderer on scale-to-zero Azure render machines — renderer live on Azure T4 (Cycles), test shot depth 6/render 6 vs benchmark 6.75/7.17; parity continues in steps 3–4; speed needs more GPUs or lighter frames
-- [~] 3. CC0 asset library and set kits — 94 pinned offline files; Azure sets10 completed all 15 stills, 17 tests pass. Ship sail/rigging/stern improved to render 6 (richness 7), gatehouse now has supported parapets and a closed arch; castle remains 5. Separate siege camp regressed to 4 and has unsupported lamp brackets: NOT accepted. Continue benchmark framing, richer materials and battlefield repair before step 4; production unchanged.
+- [~] 3. CC0 asset library and set kits — 94 pinned offline files; Azure sets11 execution qfnlp9b succeeded with all 15 stills, 17 tests pass. Floating outdoor lamps now have support posts; scanned surfaces no longer interpret tangent normals as world coordinates; palette props gain grain. Mine scores 7, castle/battlefield recover to 6/5, but village/street and room/saloon remain 5; overall render mean 5.73 vs benchmark 7.17. NOT accepted: finish set composition and richer recognisable scenery before step 4; production unchanged.
 - [ ] 4. Benchmark-style 3D egg-head characters and poses
 - [ ] 5. Story-specific objects from safe parts
 - [ ] 6. Shot director rewrite (Codex shot plans, word-matched shots)

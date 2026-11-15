@@ -2,7 +2,7 @@
   "set": "castle",
   "duration": 3,
   "lighting": "rain",
-  "samples": 24,
+  "samples": 64,
   "engine": "cycles",
   "size": [
     1080,
@@ -13,18 +13,18 @@
   ],
   "camera": {
     "from": [
-      4,
-      -5,
-      2.8
+      3,
+      -1,
+      2.0
     ],
     "look_at": [
       0,
       6,
-      2.7
+      3.4
     ],
-    "lens": 25,
-    "fstop": 3.2
+    "lens": 24,
+    "fstop": 5.6
   },
   "grade": "Punchy",
-  "haze": 0.003
+  "haze": 0.001
 }
