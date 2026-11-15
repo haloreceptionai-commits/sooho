@@ -49,14 +49,14 @@
   }
  ],
  "crowd": {
-  "count": 260,
+  "count": 380,
   "center": [
    0,
-   7.5
+   8
   ],
   "size": [
-   18,
-   8
+   20,
+   10
   ],
   "action": "cheer",
   "yaw": 0
@@ -65,30 +65,30 @@
   {
    "kind": "smoke",
    "pos": [
-    -3,
-    10,
+    6,
+    13,
     0
    ],
-   "scale": 2.0
+   "scale": 2.4
   },
   {
    "kind": "fire",
    "pos": [
-    3,
-    9,
+    6,
+    13,
     0
    ],
-   "scale": 1.6
+   "scale": 1.8
   },
   {
    "kind": "smoke",
    "pos": [
-    3,
-    9,
-    0.8
+    -7,
+    14,
+    0
    ],
-   "scale": 1.2,
-   "seed": 2
+   "scale": 2.0,
+   "seed": 3
   }
  ],
  "frames": [

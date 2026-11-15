@@ -108,7 +108,8 @@ def build_crowd(shot, fps):
         for f in range(0, n, 2):
             t = f / fps; root.location = (x, y, crowd_bob(act, ph, t)); root.keyframe_insert('location', frame=f + 1)
             for o, side in arms:  # cheer: both arms up and pumping; run: swing; stand: hanging
-                up = (2.6 + .35 * math.sin(t * 6 + ph + side)) if act == 'cheer' else (.6 * math.sin(t * 11 + ph) * side if act == 'run' else .15)
+                # arm mesh points up from the shoulder: 0 = raised, pi = hanging (fx6 render showed arms hidden at 2.6 rad)
+                up = (.45 + .3 * math.sin(t * 6 + ph + side)) if act == 'cheer' else (math.pi - .6 * math.sin(t * 11 + ph) * side if act == 'run' else math.pi - .15)
                 o.rotation_euler = (0, -side * up, 0); o.keyframe_insert('rotation_euler', frame=f + 1)
     return len(pts)
 
