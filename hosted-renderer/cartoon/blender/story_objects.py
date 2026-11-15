@@ -98,10 +98,21 @@ def build_object(spec,duration,fps):
         for i in range(76):
             x=.06*math.sin(i*.13);y=-.7+i*.007
             path('woven fuse strand',[(x+.016*math.cos(i*1.9+j),y+j*.001,.04+.016*math.sin(i*1.9+j)) for j in range(7)],.003,paper)
-        tip=sphere('glowing ignition tip',(0,-.7,.045),(.03,.025,.025),ember)
+        tip=sphere('glowing ignition tip',(0,-.7,.045),(.065,.055,.07),ember)
         if action=='fire':moving.append((tip,'fuse',tip.location.copy()))
+        if action=='fire':
+            flame=material('fuse flame yellow',(1,.65,.025),.4,emission=7)
+            smoke=material('fuse smoke charcoal',(.085,.085,.085),.95)
+            for i in range(3):
+                o=sphere('fuse flame tongue',(0,0,0),(.04,.035,.12-i*.025),flame);moving.append((o,'fuse_flame',Vector((i*.025-.025,0,.085+i*.025))))
+            for i in range(5):
+                o=sphere('rising fuse smoke',(0,0,0),(.055+i*.012,)*3,smoke);moving.append((o,'fuse_smoke',Vector((i*.035-.05,0,.17+i*.065))))
+            char=material('burned fuse charcoal',(.025,.018,.01),.95)
+            for i in range(75):
+                a=fuse_position(i/50);b=fuse_position((i+1)/50)
+                o=rope('charred fuse trail',a,b,.02,char);moving.append((o,'charred',i/50))
         for i in range(6):
-            spark=rope('fuse tip spark',(0,0,0),(.07*math.cos(i*2),.07*math.sin(i*2),.04+i*.006),.003,ember);spark.location=(0,-.7,.045)
+            spark=rope('fuse tip spark',(0,0,0),(.12*math.cos(i*2),.12*math.sin(i*2),.08+i*.012),.006,ember);spark.location=(0,-.7,.045)
             if action=='fire':moving.append((spark,'fuse',spark.location.copy()))
         for i,(x,y,a) in enumerate([(-.47,.22,-.45),(0,.37,.1),(.46,.17,.6)]):
             # Charges lie on the ground with dark fuses entering their camera-facing ends.
@@ -159,7 +170,10 @@ def build_object(spec,duration,fps):
         rope('curved fuse',(0,0,.73),(.07,0,.81),.012,wood)
         rope('bent fuse',(.07,0,.81),(.16,.03,.8),.012,wood)
         if action=='fire':
-            o=sphere('burning fuse',(0,0,.73),(.035,)*3,ember);moving.append((o,'dynamite_fuse',o.location.copy()))
+            o=sphere('burning fuse',(0,0,.73),(.065,.055,.1),ember);moving.append((o,'dynamite_fuse',o.location.copy()))
+            smoke=material('dynamite fuse smoke',(.085,.085,.085),.95)
+            for i in range(4):
+                o=sphere('dynamite fuse smoke',(0,0,0),(.045+i*.012,)*3,smoke);moving.append((o,'dynamite_smoke',Vector((i*.035,0,.12+i*.055))))
         if action=='explode':
             intact=list(set(bpy.data.objects)-created)
             for i in range(8):
@@ -201,7 +215,7 @@ def build_object(spec,duration,fps):
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
         for index,(obj,role,rest) in enumerate(moving):
             obj['motion_role']=role
-            if role!='fragment':obj.location=rest
+            if role not in ('fragment','charred'):obj.location=rest
             if role in ('spin','crank','wheel'):obj.rotation_euler=(0,0,0)
             if role=='spin':obj.rotation_euler.z=spin_angle(t)*3
             if role=='crank':obj.rotation_euler.y=spin_angle(t)
@@ -212,7 +226,13 @@ def build_object(spec,duration,fps):
                 if action=='load':obj.hide_render=t>=1.5;obj.keyframe_insert('hide_render',frame=frame+1)
             if role=='projectile':obj.location=(rest.x,rest.y,rest.z+max(0,t-.4)*1.5)
             if role=='fuse':obj.location=fuse_position(t)
+            if role=='fuse_flame':
+                obj.location=Vector(fuse_position(t))+rest;obj.rotation_euler.y=.3*math.sin(t*19+index)
+            if role=='fuse_smoke':
+                obj.location=Vector(fuse_position(max(0,t-.15)))+rest+Vector((.02*math.sin(t*9+index),0,.04*math.sin(t*6+index)))
+            if role=='charred':obj.hide_render=t<rest;obj.keyframe_insert('hide_render',frame=frame+1)
             if role=='dynamite_fuse':obj.location=(.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition'])
+            if role=='dynamite_smoke':obj.location=Vector((.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition']))+rest
             if role=='fragment':
                 obj.location=burst_position(t,rest);obj.hide_render=not exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
             if role in ('flash','burst_flash'):
