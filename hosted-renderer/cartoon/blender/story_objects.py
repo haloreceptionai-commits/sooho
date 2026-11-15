@@ -271,7 +271,7 @@ def build_object(spec,duration,fps):
         if action=='pour':root.location=(base[0],base[1],base[2]+.48);root.rotation_euler.x=-progress(t,0,.65)*.9
         if kind=='rocket_arrow':root.location=(base[0],base[1],base[2]+m['travel'])
         if action=='swing':
-            w=math.sin(t*math.tau*.75);root.location=(base[0]+.7*w,base[1],base[2]+.25-.2*abs(w));root.rotation_euler.y=.9*w
+            w=math.sin(t*math.tau*.75);root.location=(base[0]+.38*w,base[1],base[2]+.2-.15*abs(w));root.rotation_euler.y=.8*w
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
         for index,(obj,role,rest) in enumerate(moving):
             obj['motion_role']=role
