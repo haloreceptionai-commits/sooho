@@ -2,7 +2,7 @@
   "set": "street",
   "duration": 3,
   "lighting": "day",
-  "samples": 24,
+  "samples": 32,
   "engine": "cycles",
   "size": [
     1080,
@@ -14,16 +14,16 @@
   "camera": {
     "from": [
       3,
-      -3,
-      2.2
+      -2,
+      2.3
     ],
     "look_at": [
-      -1,
+      0,
       7,
-      2
+      2.2
     ],
     "lens": 28,
-    "fstop": 3.2
+    "fstop": 4
   },
   "grade": "Punchy",
   "haze": 0.003

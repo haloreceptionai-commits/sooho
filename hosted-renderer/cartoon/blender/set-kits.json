@@ -28,7 +28,7 @@
         "yaw": 30
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -9,
           8,
@@ -38,7 +38,7 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           9,
           10,
@@ -48,7 +48,7 @@
         "yaw": 31
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -7,
           14,
@@ -58,7 +58,7 @@
         "yaw": 62
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           8,
           18,
@@ -68,7 +68,7 @@
         "yaw": 93
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -11,
           3,
@@ -78,7 +78,7 @@
         "yaw": 124
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           12,
           5,
@@ -88,7 +88,7 @@
         "yaw": 155
       },
       {
-        "id": "nature-kit/rock_largeA",
+        "id": "q-stylizednaturemegakit/Rock_Medium_1",
         "pos": [
           -5,
           5,
@@ -98,7 +98,7 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/plant_bush",
+        "id": "q-stylizednaturemegakit/Bush_Common",
         "pos": [
           5,
           5,
@@ -128,126 +128,6 @@
     ],
     "models": [
       {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -5.4,
-          7,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -2.6,
-          7,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-door",
-        "pos": [
-          -4,
-          7,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -6,
-          8.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -2,
-          8.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          2.6,
-          9,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          5.4,
-          9,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-door",
-        "pos": [
-          4,
-          9,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          2,
-          10.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          6,
-          10.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/stall-red",
-        "pos": [
-          1,
-          3,
-          0
-        ],
-        "height": 2,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/cart",
-        "pos": [
-          -2,
-          1,
-          0
-        ],
-        "height": 1.2,
-        "yaw": 0
-      },
-      {
         "id": "pirate-kit/barrel",
         "pos": [
           2.8,
@@ -258,17 +138,7 @@
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/fence",
-        "pos": [
-          -5,
-          2,
-          0
-        ],
-        "height": 1,
-        "yaw": 0
-      },
-      {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -9,
           8,
@@ -278,7 +148,7 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           9,
           10,
@@ -288,7 +158,7 @@
         "yaw": 31
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -7,
           14,
@@ -298,7 +168,7 @@
         "yaw": 62
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           8,
           18,
@@ -308,7 +178,7 @@
         "yaw": 93
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -11,
           3,
@@ -318,7 +188,7 @@
         "yaw": 124
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           12,
           5,
@@ -328,7 +198,7 @@
         "yaw": 155
       },
       {
-        "id": "nature-kit/rock_largeA",
+        "id": "q-stylizednaturemegakit/Rock_Medium_1",
         "pos": [
           -5,
           5,
@@ -338,13 +208,73 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/plant_bush",
+        "id": "q-stylizednaturemegakit/Bush_Common",
         "pos": [
           5,
           5,
           0
         ],
         "height": 1,
+        "yaw": 0
+      },
+      {
+        "id": "q-medievalvillage/House_1",
+        "pos": [
+          -4,
+          8,
+          0
+        ],
+        "height": 5.5,
+        "yaw": 0
+      },
+      {
+        "id": "q-medievalvillage/House_2",
+        "pos": [
+          4,
+          10,
+          0
+        ],
+        "height": 6,
+        "yaw": 180
+      },
+      {
+        "id": "q-medievalvillage/MarketStand_1",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "height": 2.2,
+        "yaw": 0
+      },
+      {
+        "id": "q-medievalvillage/Cart",
+        "pos": [
+          -2,
+          1,
+          0
+        ],
+        "height": 1.3,
+        "yaw": 20
+      },
+      {
+        "id": "q-medievalvillage/Well",
+        "pos": [
+          2.8,
+          5,
+          0
+        ],
+        "height": 2,
+        "yaw": 0
+      },
+      {
+        "id": "q-medievalvillage/Hay",
+        "pos": [
+          -4,
+          3,
+          0
+        ],
+        "height": 0.7,
         "yaw": 0
       }
     ]
@@ -398,7 +328,7 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -9,
           8,
@@ -408,7 +338,7 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           9,
           10,
@@ -418,7 +348,7 @@
         "yaw": 31
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -7,
           14,
@@ -428,7 +358,7 @@
         "yaw": 62
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           8,
           18,
@@ -438,7 +368,7 @@
         "yaw": 93
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -11,
           3,
@@ -448,7 +378,7 @@
         "yaw": 124
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           12,
           5,
@@ -458,7 +388,7 @@
         "yaw": 155
       },
       {
-        "id": "nature-kit/rock_largeA",
+        "id": "q-stylizednaturemegakit/Rock_Medium_1",
         "pos": [
           -5,
           5,
@@ -468,7 +398,7 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/plant_bush",
+        "id": "q-stylizednaturemegakit/Bush_Common",
         "pos": [
           5,
           5,
@@ -1528,96 +1458,6 @@
     ],
     "models": [
       {
-        "id": "train-kit/railroad-straight",
-        "pos": [
-          0,
-          -2,
-          0
-        ],
-        "height": 0.25,
-        "yaw": 0
-      },
-      {
-        "id": "train-kit/railroad-straight",
-        "pos": [
-          0,
-          1,
-          0
-        ],
-        "height": 0.25,
-        "yaw": 0
-      },
-      {
-        "id": "train-kit/railroad-straight",
-        "pos": [
-          0,
-          4,
-          0
-        ],
-        "height": 0.25,
-        "yaw": 0
-      },
-      {
-        "id": "train-kit/railroad-straight",
-        "pos": [
-          0,
-          7,
-          0
-        ],
-        "height": 0.25,
-        "yaw": 0
-      },
-      {
-        "id": "train-kit/railroad-straight",
-        "pos": [
-          0,
-          10,
-          0
-        ],
-        "height": 0.25,
-        "yaw": 0
-      },
-      {
-        "id": "train-kit/railroad-straight",
-        "pos": [
-          0,
-          13,
-          0
-        ],
-        "height": 0.25,
-        "yaw": 0
-      },
-      {
-        "id": "train-kit/railroad-straight",
-        "pos": [
-          0,
-          16,
-          0
-        ],
-        "height": 0.25,
-        "yaw": 0
-      },
-      {
-        "id": "train-kit/train-locomotive-a",
-        "pos": [
-          0,
-          7,
-          0
-        ],
-        "height": 2.6,
-        "yaw": 180
-      },
-      {
-        "id": "train-kit/train-carriage-coal",
-        "pos": [
-          0,
-          12,
-          0
-        ],
-        "height": 2.1,
-        "yaw": 0
-      },
-      {
         "id": "pirate-kit/crate",
         "pos": [
           3,
@@ -1628,57 +1468,7 @@
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -7.4,
-          8,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -4.6,
-          8,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-door",
-        "pos": [
-          -6,
-          8,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -8,
-          9.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -4,
-          9.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -9,
           8,
@@ -1688,7 +1478,7 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           9,
           10,
@@ -1698,7 +1488,7 @@
         "yaw": 31
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -7,
           14,
@@ -1708,7 +1498,7 @@
         "yaw": 62
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           8,
           18,
@@ -1718,7 +1508,7 @@
         "yaw": 93
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           -11,
           3,
@@ -1728,7 +1518,7 @@
         "yaw": 124
       },
       {
-        "id": "nature-kit/tree_oak",
+        "id": "q-stylizednaturemegakit/CommonTree_1",
         "pos": [
           12,
           5,
@@ -1738,7 +1528,7 @@
         "yaw": 155
       },
       {
-        "id": "nature-kit/rock_largeA",
+        "id": "q-stylizednaturemegakit/Rock_Medium_1",
         "pos": [
           -5,
           5,
@@ -1748,13 +1538,153 @@
         "yaw": 0
       },
       {
-        "id": "nature-kit/plant_bush",
+        "id": "q-stylizednaturemegakit/Bush_Common",
         "pos": [
           5,
           5,
           0
         ],
         "height": 1,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/Locomotive_Front",
+        "pos": [
+          0,
+          7,
+          0
+        ],
+        "height": 3.1,
+        "yaw": 180
+      },
+      {
+        "id": "q-modulartrain/Locomotive_CoalTender",
+        "pos": [
+          0,
+          12,
+          0
+        ],
+        "height": 2.8,
+        "yaw": 180
+      },
+      {
+        "id": "q-modulartrain/Locomotive_Wagon",
+        "pos": [
+          0,
+          17,
+          0
+        ],
+        "height": 2.8,
+        "yaw": 180
+      },
+      {
+        "id": "q-medievalvillage/House_1",
+        "pos": [
+          -6,
+          11,
+          0
+        ],
+        "height": 5,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          -3,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          0,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          6,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          9,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          12,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          15,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          18,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          21,
+          0
+        ],
+        "height": 0.22,
+        "yaw": 0
+      },
+      {
+        "id": "q-modulartrain/RailwayTrack_Straight",
+        "pos": [
+          0,
+          24,
+          0
+        ],
+        "height": 0.22,
         "yaw": 0
       }
     ]
@@ -1911,126 +1841,6 @@
     ],
     "models": [
       {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -5.4,
-          7,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -2.6,
-          7,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-door",
-        "pos": [
-          -4,
-          7,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -6,
-          8.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -2,
-          8.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          2.6,
-          9,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          5.4,
-          9,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-door",
-        "pos": [
-          4,
-          9,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          2,
-          10.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          6,
-          10.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/stall-red",
-        "pos": [
-          1,
-          3,
-          0
-        ],
-        "height": 2,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/cart",
-        "pos": [
-          -2,
-          1,
-          0
-        ],
-        "height": 1.2,
-        "yaw": 0
-      },
-      {
         "id": "pirate-kit/barrel",
         "pos": [
           2.8,
@@ -2041,114 +1851,84 @@
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/fence",
-        "pos": [
-          -5,
-          2,
-          0
-        ],
-        "height": 1,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -5.4,
-          13,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          -2.6,
-          13,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-door",
+        "id": "q-medievalvillage/House_1",
         "pos": [
           -4,
-          13,
+          8,
           0
         ],
-        "height": 2.8,
+        "height": 5.5,
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -6,
-          14.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall",
-        "pos": [
-          -2,
-          14.4,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 90
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          2.6,
-          15,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-window-shutters",
-        "pos": [
-          5.4,
-          15,
-          0
-        ],
-        "height": 2.8,
-        "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/wall-door",
+        "id": "q-medievalvillage/House_2",
         "pos": [
           4,
-          15,
+          10,
           0
         ],
-        "height": 2.8,
+        "height": 6,
+        "yaw": 180
+      },
+      {
+        "id": "q-medievalvillage/MarketStand_1",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "height": 2.2,
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/wall",
+        "id": "q-medievalvillage/Cart",
         "pos": [
-          2,
-          16.4,
+          -2,
+          1,
           0
         ],
-        "height": 2.8,
-        "yaw": 90
+        "height": 1.3,
+        "yaw": 20
       },
       {
-        "id": "fantasy-town-kit/wall",
+        "id": "q-medievalvillage/Well",
         "pos": [
-          6,
-          16.4,
+          2.8,
+          5,
           0
         ],
-        "height": 2.8,
-        "yaw": 90
+        "height": 2,
+        "yaw": 0
+      },
+      {
+        "id": "q-medievalvillage/Hay",
+        "pos": [
+          -4,
+          3,
+          0
+        ],
+        "height": 0.7,
+        "yaw": 0
+      },
+      {
+        "id": "q-medievalvillage/Inn",
+        "pos": [
+          -4,
+          16,
+          0
+        ],
+        "height": 7,
+        "yaw": 0
+      },
+      {
+        "id": "q-medievalvillage/Blacksmith",
+        "pos": [
+          5,
+          18,
+          0
+        ],
+        "height": 6,
+        "yaw": 0
       }
     ]
   },

@@ -2,7 +2,7 @@
   "set": "rail_yard",
   "duration": 3,
   "lighting": "day",
-  "samples": 24,
+  "samples": 32,
   "engine": "cycles",
   "size": [
     1080,
