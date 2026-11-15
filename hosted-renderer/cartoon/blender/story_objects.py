@@ -232,7 +232,12 @@ def build_object(spec,duration,fps):
                 obj.location=Vector(fuse_position(max(0,t-.15)))+rest+Vector((.02*math.sin(t*9+index),0,.04*math.sin(t*6+index)))
             if role=='charred':obj.hide_render=t<rest;obj.keyframe_insert('hide_render',frame=frame+1)
             if role=='dynamite_fuse':obj.location=(.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition'])
-            if role=='dynamite_smoke':obj.location=Vector((.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition']))+rest
+            if role=='dynamite_smoke':
+                age=(t*.8+index*.21)%1
+                obj.location=Vector((.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition']))+Vector((age*.25+.05*math.sin(t*8+index),0,.1+age*.65))
+                obj.scale=(.035+age*.07,)*3;obj.keyframe_insert('scale',frame=frame+1)
+            if role=='dynamite_fuse':
+                obj.scale=(.055+.02*math.sin(t*17),.05,.1+.06*math.sin(t*13));obj.keyframe_insert('scale',frame=frame+1)
             if role=='fragment':
                 obj.location=burst_position(t,rest);obj.hide_render=not exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
             if role in ('flash','burst_flash'):
