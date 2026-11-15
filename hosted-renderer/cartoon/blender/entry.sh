@@ -3,10 +3,10 @@
 # the video and a timing report to private Blob storage under $OUT_PREFIX. Each engine first
 # renders a 3-frame probe (reported immediately) so a slow engine is visible within minutes.
 set -u
-if [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects ] || [ "${SHOT:-}" = recognition ] || [ "${SHOT:-}" = mechanisms ]; then
+if [ "${SHOT#plan-}" != "${SHOT:-}" ] || [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects ] || [ "${SHOT:-}" = recognition ] || [ "${SHOT:-}" = mechanisms ]; then
   SAS=$(printf '%s' "$AZURE_BLOB_SAS" | sed 's/^?//')
   FAILED=0
-  if [ "$SHOT" = mechanisms ]; then FILES="/opt/shot/shots/mechanism-*.json"; elif [ "$SHOT" = recognition ]; then FILES="/opt/shot/shots/recognition-*.json"; elif [ "$SHOT" = faces ]; then FILES="/opt/shot/shots/face-*.json"; elif [ "$SHOT" = objects ]; then FILES="/opt/shot/shots/object-*.json"; else FILES="/opt/shot/shots/set-*.json /opt/shot/shots/look-*.json"; fi
+  if [ "${SHOT#plan-}" != "$SHOT" ]; then FILES="/opt/shot/shots/$SHOT-*.json"; elif [ "$SHOT" = mechanisms ]; then FILES="/opt/shot/shots/mechanism-*.json"; elif [ "$SHOT" = recognition ]; then FILES="/opt/shot/shots/recognition-*.json"; elif [ "$SHOT" = faces ]; then FILES="/opt/shot/shots/face-*.json"; elif [ "$SHOT" = objects ]; then FILES="/opt/shot/shots/object-*.json"; else FILES="/opt/shot/shots/set-*.json /opt/shot/shots/look-*.json"; fi
   for FILE in $FILES; do
     [ -f "$FILE" ] || continue
     NAME=$(basename "$FILE" .json)
