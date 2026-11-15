@@ -28,6 +28,8 @@ def prompt(story):
     listing = '\n'.join(f'{s["index"]}: ' + ' '.join(f'[{i}]{w}@{t-s["start"]:.2f}' for i, (w, t) in enumerate(zip(s['words'], s['times']))) + f'  ({s["end"]-s["start"]:.2f}s)' for s in sents)
     return f"""You direct a 9:16 3D cartoon Short. You may ONLY use the drawable vocabulary below; anything else cannot be rendered.
 {concept_menu()}
+Zones (distinct backdrops inside each set; a shot may set "zone"): {json.dumps({k: sorted(v) for k, v in D.ZONES.items() if k != 'open_day'})}
+Story worlds: shots may only use sets named in the story ({sorted({c[4:] for s_ in D.sentences(story['words']) for c in D.lexical_concepts(s_['text']) if c.startswith('set:')})}) plus at most 2 extra sets you list in "worlds" because they genuinely fit the story's setting.
 Framings: wide (set establishing shot), medium (characters), close (face of first cast member), insert (first object fills frame; use for every object action).
 Cast looks: outfit {sorted(OUTFITS)}, hat {sorted(HATS)}, expression {sorted(EXPRESSIONS)}, shirt rgb 0-1.
 
@@ -38,12 +40,13 @@ Rules:
 1. Each sentence gets 1 or 2 shots, in spoken order. A second shot has start_word = index of the word where it begins; put the cut where the new thing is spoken. Each shot must last 0.5-5.0 s, and the whole film must average 1.4-3.0 s per shot.
 2. mentions: list EVERY word of the sentence that names a thing, place, person or physical action (exact words copied from the sentence) with "kind": "thing"|"action"|"abstract" and its concept id. abstract = ideas, quantities, measurements, sounds, temperatures, forces, directions, time; abstract words get concept null. A thing/action with concept null means it cannot be drawn and FAILS the plan, so map things to the closest listed drawable concept whose word list or meaning genuinely depicts it (e.g. money -> obj:money_bag, rails -> obj:rail_joint or set:rail_yard). Never invent words.
 3. Every mentioned concept must be visible in that sentence's shots: object actions as objects with that action, character actions as a cast member doing it, sets as the shot set, lighting as the shot lighting.
-4. Change set between consecutive shots often: the benchmark changes set 14-18 times per minute (target about 16/min); choose the set that best fits the words, keep one consistent cast.
+4. Change backdrop (set or zone) between consecutive shots often: the benchmark changes backdrop 14-18 times per minute (target about 16/min, allowed 12-22). Get variety by moving between zones of story worlds, never by jumping to unrelated places. Keep one consistent cast.
+4b. Only put an object in a shot if the sentence speaks it (or its unique action). No decorative or unrelated props.
 5. Prefer an insert framing for object actions and medium/close for people.
 6. Concept ids are exact strings such as "set:mine_tunnel", "obj:gold_shotgun:fire", "char:run", "light:night", "cast:person", "outfit:merchant". In shots, "set" is a bare set id (e.g. "mine_tunnel"), "lighting" one of day|sunset|night|rain, objects use bare "kind" (e.g. "gold_shotgun") and "action", cast entries use the cast "id". Never put cast ids or bare set names in mentions.concept.
 7. Sounds (e.g. noises), numbers, money amounts and feelings are not mentions. Pronouns (he, it, they) are not mentions.
 8. An insert shot may also include cast members; an object action can be shown in a medium shot only if its object is listed in that shot.
-Return ONLY JSON (mentions items are {{"word","kind","concept"}}): {{"cast":[{{"id","outfit","hat","shirt":[r,g,b]}}],"sentences":[{{"index","mentions":[{{"word","concept"}}],"shots":[{{"start_word"?,"set","lighting","framing","cast":[{{"id","action","expression"}}],"objects":[{{"kind","action"}}]}}]}}]}}"""
+Return ONLY JSON (mentions items are {{"word","kind","concept"}}; shots may include "zone"): {{"worlds":[...],"cast":[{{"id","outfit","hat","shirt":[r,g,b]}}],"sentences":[{{"index","mentions":[{{"word","concept"}}],"shots":[{{"start_word"?,"set","lighting","framing","cast":[{{"id","action","expression"}}],"objects":[{{"kind","action"}}]}}]}}]}}"""
 
 
 def call(text, tries=3):
