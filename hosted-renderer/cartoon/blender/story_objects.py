@@ -25,8 +25,8 @@ def path(name,points,radius,mat):
 
 def dynamite_fuse_point(u):
     # u=0 at the stick, u=1 at the free tip; follows the bent fuse shape.
-    if u<.5:k=u/.5;return (.07*k,0,.73+.08*k)
-    k=(u-.5)/.5;return (.07+.09*k,.03*k,.81-.01*k)
+    if u<.4:k=u/.4;return (.12*k,0,.73+.17*k)
+    k=(u-.4)/.6;return (.12+.24*k,.04*k,.9+.08*k)
 
 
 def add_blast(moving,ember,core,smoke):
@@ -83,6 +83,7 @@ def build_object(spec,duration,fps):
         spindle=bpy.data.objects.new('drill spindle',None);bpy.context.collection.objects.link(spindle)
         for obj in [cylinder('drill bit',(0,0,.32),.028,.46,steel),path('spiral cutting flute',[(.031*math.cos(i*.45),.031*math.sin(i*.45),.13+i*.006) for i in range(64)],.009,steel),cylinder('tapered drill chuck',(0,0,.61),.075,.16,steel)]:obj.parent=spindle
         moving.append((spindle,'spin',spindle.location.copy()))
+        drill_body=bpy.data.objects.new('drill body',None);bpy.context.collection.objects.link(drill_body)
         bore=material('drilled bore hole',(.035,.02,.01),.95)
         o=cylinder('drilled bore hole',(0,0,.182),.07,.004,bore);moving.append((o,'bore',o.location.copy()))
         for i in range(12):
@@ -197,7 +198,7 @@ def build_object(spec,duration,fps):
             fuse_cord=material('dynamite fuse cord',(.42,.3,.16),.9)
             for i in range(10):
                 a=dynamite_fuse_point(i/10);b=dynamite_fuse_point((i+1)/10)
-                o=rope('burning dynamite fuse',a,b,.014,fuse_cord);moving.append((o,'burnt',1.5*(1-(i+1)/10)))
+                o=rope('burning dynamite fuse',a,b,.02,fuse_cord);moving.append((o,'burnt',1.5*(1-(i+1)/10)))
         else:
             rope('curved fuse',(0,0,.73),(.07,0,.81),.012,wood)
             rope('bent fuse',(.07,0,.81),(.16,.03,.8),.012,wood)
@@ -246,13 +247,14 @@ def build_object(spec,duration,fps):
         t=frame/fps;m=mechanism(action,t);root.location=base;root.rotation_euler=(m['tilt'],m['swing'],math.radians(spec.get('yaw',0)))
         if action=='pour':root.location=(base[0],base[1],base[2]+.48);root.rotation_euler.x=-progress(t,0,.65)*.9
         if kind=='rocket_arrow':root.location=(base[0],base[1],base[2]+m['travel'])
-        if action=='swing':root.location=(base[0]+.55*math.sin(t*math.tau*.7),base[1],base[2]+.12*abs(math.sin(t*math.tau*.7)))
+        if action=='swing':
+            w=math.sin(t*math.tau*.75);root.location=(base[0]+.7*w,base[1],base[2]+.25-.2*abs(w));root.rotation_euler.y=.9*w
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
         for index,(obj,role,rest) in enumerate(moving):
             obj['motion_role']=role
             if role not in ('fragment','charred','burnt'):obj.location=rest
             if role in ('spin','crank','wheel'):obj.rotation_euler=(0,0,0)
-            if role=='spin':obj.rotation_euler.z=spin_angle(t)*3;obj.location.z=-.08*progress(t,0,.6)
+            if role=='spin':obj.rotation_euler.z=spin_angle(t)*3
             if role=='shaving':
                 obj.hide_render=t<.15+.1*(index%6);obj.keyframe_insert('hide_render',frame=frame+1)
                 obj.location=rest+Vector((.2*progress(t)*math.sin(index),.2*progress(t)*math.cos(index),0))
@@ -284,15 +286,15 @@ def build_object(spec,duration,fps):
                 obj.location=Vector(dynamite_fuse_point(1-m['ignition']))+Vector((age*.25+.05*math.sin(t*8+index),0,.1+age*.65))
                 obj.scale=(.035+age*.07,)*3;obj.keyframe_insert('scale',frame=frame+1)
             if role=='dynamite_fuse':
-                obj.scale=(.055+.02*math.sin(t*17),.05,.1+.06*math.sin(t*13));obj.keyframe_insert('scale',frame=frame+1)
+                obj.scale=(.04+.012*math.sin(t*17),.04,.06+.025*math.sin(t*13));obj.keyframe_insert('scale',frame=frame+1)
             if role=='fragment':
                 obj.rotation_euler=(t*(5+rest),t*(3+rest*.7),0)
                 obj.location=burst_position(t,rest);obj.hide_render=not exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
             if role in ('flash','burst_flash'):
-                center=.4 if role=='flash' else .65;length=.12 if role=='flash' else .3
+                center=.4 if role=='flash' else .65;length=.12 if role=='flash' else .6
                 obj.hide_render=not center<=t<center+length;obj.keyframe_insert('hide_render',frame=frame+1)
                 if role=='burst_flash':
-                    r=obj['blast_radius']*(.6+1.4*progress(t,.65,.95));obj.scale=(r,r,r*.85);obj.keyframe_insert('scale',frame=frame+1)
+                    r=obj['blast_radius']*(1.4+1.2*progress(t,.65,1.25));obj.scale=(r,r,r*.85);obj.keyframe_insert('scale',frame=frame+1)
             if role=='blast_smoke':
                 u=progress(t,.7,2);obj.hide_render=t<.7;obj.keyframe_insert('hide_render',frame=frame+1)
                 obj.location=Vector((rest.x*(1+1.5*u),rest.y*(1+1.5*u),rest.z+.5*u));r=.12+.22*u;obj.scale=(r,)*3;obj.keyframe_insert('scale',frame=frame+1)
@@ -304,6 +306,7 @@ def build_object(spec,duration,fps):
             obj.keyframe_insert('location',frame=frame+1);obj.keyframe_insert('rotation_euler',frame=frame+1)
         for obj in intact:
             obj['intact_explosion_mesh']=True;obj.hide_render=exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
+        if kind=='hand_drill':drill_body.location.z=-.15*progress(t,0,1.6);drill_body.keyframe_insert('location',frame=frame+1)
         root.keyframe_insert('location',frame=frame+1);root.keyframe_insert('rotation_euler',frame=frame+1)
     for obj in set(bpy.data.objects)-created:
         if obj.animation_data and obj.animation_data.action:
