@@ -19,6 +19,7 @@ def concept_menu():
         lines.append(f'OBJECT obj:{k} words {spec["words"]}; actions: ' + ', '.join(f'obj:{k}:{a} {spec["actions"].get(a, [])}' for a in OBJECTS[k]['actions']))
     lines.append('CHARACTER ACTIONS (char:<a>): ' + ', '.join(f'{a} {D.VOCAB["character_actions"].get(a, [])}' for a in sorted(ACTIONS)))
     lines.append(f'LIGHTING light:<l>: {D.VOCAB["lighting"]}')
+    lines.append(f'PEOPLE cast:person (any cast member on screen) {D.VOCAB["people"]}; OUTFIT outfit:<o> (a cast member wearing it) {D.VOCAB["outfits"]}')
     return '\n'.join(lines)
 
 
@@ -39,6 +40,9 @@ Rules:
 3. Every mentioned concept must be visible in that sentence's shots: object actions as objects with that action, character actions as a cast member doing it, sets as the shot set, lighting as the shot lighting.
 4. Change set between consecutive shots often: the benchmark changes set 14-18 times per minute (target about 16/min); choose the set that best fits the words, keep one consistent cast.
 5. Prefer an insert framing for object actions and medium/close for people.
+6. Concept ids are exact strings such as "set:mine_tunnel", "obj:gold_shotgun:fire", "char:run", "light:night", "cast:person", "outfit:merchant". In shots, "set" is a bare set id (e.g. "mine_tunnel"), "lighting" one of day|sunset|night|rain, objects use bare "kind" (e.g. "gold_shotgun") and "action", cast entries use the cast "id". Never put cast ids or bare set names in mentions.concept.
+7. Sounds (e.g. noises), numbers, money amounts and feelings are not mentions. Pronouns (he, it, they) are not mentions.
+8. An insert shot may also include cast members; an object action can be shown in a medium shot only if its object is listed in that shot.
 Return ONLY JSON: {{"cast":[{{"id","outfit","hat","shirt":[r,g,b]}}],"sentences":[{{"index","mentions":[{{"word","concept"}}],"shots":[{{"start_word"?,"set","lighting","framing","cast":[{{"id","action","expression"}}],"objects":[{{"kind","action"}}]}}]}}]}}"""
 
 

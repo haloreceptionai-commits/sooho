@@ -58,6 +58,9 @@ def lexical_concepts(text):
                 if any(has_phrase(t, w) for w in ws): found.add(f'obj:{kind}:{act}')
     for act, ws in VOCAB['character_actions'].items():
         if any(has_phrase(t, w) for w in ws): found.add(f'char:{act}')
+    if any(has_phrase(t, w) for w in VOCAB['people']): found.add('cast:person')
+    for o, ws in VOCAB['outfits'].items():
+        if any(has_phrase(t, w) for w in ws): found.add(f'outfit:{o}')
     return found
 
 
@@ -67,6 +70,8 @@ def concept_valid(c):
     if p[0] == 'obj': return p[1] in OBJECTS and (len(p) == 2 or (len(p) == 3 and p[2] in OBJECTS[p[1]]['actions']))
     if p[0] == 'char': return len(p) == 2 and p[1] in ACTIONS
     if p[0] == 'light': return len(p) == 2 and p[1] in VOCAB['lighting']
+    if p[0] == 'cast': return c == 'cast:person'
+    if p[0] == 'outfit': return len(p) == 2 and p[1] in OUTFITS
     return False
 
 
@@ -75,7 +80,7 @@ def shot_concepts(shot):
     for o in shot.get('objects', []):
         got.add(f"obj:{o['kind']}"); got.add(f"obj:{o['kind']}:{o.get('action', 'hold')}")
     for c in shot.get('cast', []):
-        got.add(f"char:{c.get('action', 'stand')}")
+        got.add(f"char:{c.get('action', 'stand')}"); got.add('cast:person'); got.add(f"outfit:{c.get('outfit', 'worker')}")
     return got
 
 
