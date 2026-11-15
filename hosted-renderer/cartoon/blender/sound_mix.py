@@ -34,7 +34,7 @@ def place(shot, library, offset=0.0, total=None):
             layers = [np.interp(np.arange(0, len(s) - 1, r), np.arange(len(s)), s) for r in (.92, .96, 1.0, 1.04, 1.08, .94, 1.02, 1.06)]
             m = min(len(l) for l in layers); s = sum(np.roll(l[:m], k * RATE * 3) for k, l in enumerate(layers)) / 2.8
         if cue['sound'] == 'footstep':  # running steps are ~0.18 s apart: trim the tail so each step is its own transient
-            s = s[:round(.14 * RATE)] * np.linspace(1, 0, round(.14 * RATE)) ** 2
+            i0 = max(0, int(np.argmax(np.abs(s))) - RATE // 200); s = s[i0:i0 + round(.14 * RATE)]; s = s * np.linspace(1, 0, len(s)) ** 2  # start on the heel strike (recording has 0.15 s lead-in)
         if cue['sound'] in LOOPS:
             m = round(cue.get('length', shot['duration']) * RATE); s = np.tile(s, m // len(s) + 1)[:m]
             fade = min(len(s) // 4, RATE // 5); s = s.copy(); s[:fade] *= np.linspace(0, 1, fade); s[-fade:] *= np.linspace(1, 0, fade)
