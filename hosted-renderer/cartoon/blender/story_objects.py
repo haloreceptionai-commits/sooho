@@ -75,8 +75,8 @@ def build_object(spec,duration,fps):
                 w=cylinder('cart wheel',(x,y,.3),.3,.1,steel,(math.pi/2,0,0))
                 pivot=bpy.data.objects.new('wheel axle',None);bpy.context.collection.objects.link(pivot);pivot.location=w.location.copy()
                 w.location=(0,0,0);w.parent=pivot
-                for a in [i*math.tau/8 for i in range(8)]:
-                    # One painted spoke breaks the 5-fold symmetry so rotation reads between sampled frames.
+                for j,a in enumerate([i*math.tau/8 for i in range(8)]):
+                    # One painted spoke breaks the 8-fold symmetry so rotation reads between sampled frames.
                     spoke=rope('visible wheel spoke',(0,-.06,0),(.26*math.cos(a),-.06,.26*math.sin(a)),.024 if j==0 else .015,red if j==0 else wood);spoke.parent=pivot
                 moving.append((pivot,'wheel',pivot.location.copy()))
         rope('pull handle',(0,.3,.5),(0,1.35,.65),.05,wood)
