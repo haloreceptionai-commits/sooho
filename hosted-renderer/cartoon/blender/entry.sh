@@ -14,19 +14,19 @@ if [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects
     SHOT_ENGINE=cycles CYCLES_DEVICE=GPU timeout 600 /opt/blender/blender -b --factory-startup --python-exit-code 1 --python /opt/shot/render_shot.py -- "$FILE" "/tmp/$NAME" > "/tmp/$NAME.log" 2>&1
     CODE=$?
     tail -c 18000 "/tmp/$NAME.log" > "/tmp/$NAME.tail"
-    curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' --data-binary "@/tmp/$NAME.tail" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.log?$SAS" >/dev/null
+    curl -fsS --retry 6 --retry-all-errors --retry-delay 2 -X PUT -H 'x-ms-blob-type: BlockBlob' --data-binary "@/tmp/$NAME.tail" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.log?$SAS" >/dev/null
     EXPECTED=$(python3 -c "import json;s=json.load(open('$FILE'));print(len(s['frames']) if s.get('frames') else round(s['duration']*s.get('fps',30)))")
     ACTUAL=$(ls "/tmp/$NAME"/f_*.png 2>/dev/null | wc -l)
     if [ -f "/tmp/$NAME/object-qa.json" ]; then
-      curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: application/json' --data-binary "@/tmp/$NAME/object-qa.json" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-qa.json?$SAS" >/dev/null || FAILED=1
+      curl -fsS --retry 6 --retry-all-errors --retry-delay 2 -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: application/json' --data-binary "@/tmp/$NAME/object-qa.json" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-qa.json?$SAS" >/dev/null || FAILED=1
     fi
     if [ "$CODE" = 0 ] && [ "$ACTUAL" = "$EXPECTED" ]; then
       if [ "$SHOT" = mechanisms ]; then
         for IMAGE in "/tmp/$NAME"/f_*.png; do
-          curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@$IMAGE" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-$(basename "$IMAGE")?$SAS" >/dev/null || FAILED=1
+          curl -fsS --retry 6 --retry-all-errors --retry-delay 2 -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@$IMAGE" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-$(basename "$IMAGE")?$SAS" >/dev/null || FAILED=1
         done
       else
-        curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@/tmp/$NAME/f_00001.png" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.png?$SAS" >/dev/null || FAILED=1
+        curl -fsS --retry 6 --retry-all-errors --retry-delay 2 -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@/tmp/$NAME/f_00001.png" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.png?$SAS" >/dev/null || FAILED=1
       fi
       echo "$NAME rendered"
     else
@@ -38,7 +38,7 @@ fi
 SHOT_FILE=/tmp/shot.json
 case "${SHOT:-mine-push-in}" in \{*) printf '%s' "$SHOT" > $SHOT_FILE ;; *) cp "/opt/shot/shots/${SHOT:-mine-push-in}.json" $SHOT_FILE ;; esac
 SAS=$(printf '%s' "$AZURE_BLOB_SAS" | sed 's/^?//')
-put() { curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H "Content-Type: $3" --data-binary "@$1" "$AZURE_BLOB_BASE/$OUT_PREFIX/$2?$SAS" >/dev/null && echo "uploaded $2"; }
+put() { curl -fsS --retry 6 --retry-all-errors --retry-delay 2 -X PUT -H 'x-ms-blob-type: BlockBlob' -H "Content-Type: $3" --data-binary "@$1" "$AZURE_BLOB_BASE/$OUT_PREFIX/$2?$SAS" >/dev/null && echo "uploaded $2"; }
 B="/opt/blender/blender -b --factory-startup --python-exit-code 1"
 REPORT=/tmp/report.txt; : > $REPORT
 (nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader 2>&1 || echo "no nvidia-smi") | sed 's/^/gpu: /' >> $REPORT
