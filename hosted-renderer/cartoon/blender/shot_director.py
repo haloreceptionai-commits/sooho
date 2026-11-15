@@ -160,7 +160,8 @@ DEFAULT_SLOTS = [(-0.75, 1.0), (0.85, 1.6), (0, 2.8)]
 # Insert framings reuse the exact cameras that passed the step-5 recognition and motion reviews.
 OBJ_CAMS = {}
 for f in (HERE / 'shots').glob('mechanism-*.json'):
-    s = json.loads(f.read_text()); OBJ_CAMS.setdefault(s['objects'][0]['kind'], s['camera'])
+    s = json.loads(f.read_text()); o = s['objects'][0]
+    OBJ_CAMS[(o['kind'], o.get('action', 'hold'))] = s['camera']; OBJ_CAMS.setdefault(o['kind'], s['camera'])
 OBJ_CAMS.setdefault('perforated_cart', {'from': [3.6, -6.4, 3.3], 'look_at': [0, -1.4, 0.75], 'lens': 35, 'fstop': 8})
 
 
@@ -188,7 +189,7 @@ def compile_one(sh, plan, duration, si=0):
         # object at the frame centre with its reviewed camera; cast stands behind it, out of the way
         ox, oy = (0, 0.4) if st == 'mine_tunnel' else (0.3, 0.2)
         objects[0]['pos'] = [ox, oy, 0]
-        cam = dict(OBJ_CAMS[objects[0]['kind']]); cam['from'] = _off(cam['from'], [ox, oy, 0]); cam['look_at'] = _off(cam['look_at'], [ox, oy, 0])
+        cam = dict(OBJ_CAMS.get((objects[0]['kind'], objects[0]['action']), OBJ_CAMS[objects[0]['kind']])); cam['from'] = _off(cam['from'], [ox, oy, 0]); cam['look_at'] = _off(cam['look_at'], [ox, oy, 0])
         for j, o in enumerate(objects[1:], 1): o['pos'] = [ox + 0.9 * j, oy + 0.6, 0]; o['scale'] = 0.6
         for ch in cast: ch['pos'] = [round(ox + 1.4 * (1 if ch['pos'][0] >= 0 else -1), 3), round(oy + 2.2, 3)]
     else:
