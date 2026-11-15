@@ -1,0 +1,39 @@
+{
+  "set": "open_day",
+  "duration": 0.2,
+  "engine": "cycles",
+  "samples": 32,
+  "size": [
+    640,
+    800
+  ],
+  "camera": {
+    "from": [
+      0,
+      -3.8,
+      1.8
+    ],
+    "look_at": [
+      0,
+      0,
+      1.2
+    ],
+    "lens": 55,
+    "fstop": 8
+  },
+  "cast": [
+    {
+      "id": "review-sad",
+      "pos": [
+        0,
+        0
+      ],
+      "expression": "sad",
+      "outfit": "sailor",
+      "hat": "tricorne"
+    }
+  ],
+  "frames": [
+    1
+  ]
+}

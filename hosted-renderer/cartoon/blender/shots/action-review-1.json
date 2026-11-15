@@ -1,0 +1,71 @@
+{
+  "set": "open_day",
+  "duration": 5,
+  "engine": "cycles",
+  "samples": 24,
+  "size": [
+    1920,
+    1080
+  ],
+  "camera": {
+    "from": [
+      0,
+      -13,
+      4
+    ],
+    "look_at": [
+      0,
+      -1.8,
+      1
+    ],
+    "lens": 42,
+    "fstop": 8
+  },
+  "cast": [
+    {
+      "id": "walk",
+      "pos": [
+        -3.3,
+        0
+      ],
+      "action": "walk",
+      "outfit": "worker",
+      "hat": "beanie",
+      "expression": "neutral"
+    },
+    {
+      "id": "run",
+      "pos": [
+        -1.0999999999999996,
+        0
+      ],
+      "action": "run",
+      "outfit": "merchant",
+      "hat": "top",
+      "expression": "neutral"
+    },
+    {
+      "id": "carry",
+      "pos": [
+        1.1000000000000005,
+        0
+      ],
+      "action": "carry",
+      "outfit": "soldier",
+      "hat": "helmet",
+      "expression": "neutral",
+      "held": "crate"
+    },
+    {
+      "id": "point",
+      "pos": [
+        3.3000000000000007,
+        0
+      ],
+      "action": "point",
+      "outfit": "sailor",
+      "hat": "tricorne",
+      "expression": "neutral"
+    }
+  ]
+}
