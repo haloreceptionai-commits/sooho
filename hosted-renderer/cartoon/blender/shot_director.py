@@ -128,8 +128,8 @@ def validate_plan(plan, story, concrete=None):
         # words an independent reader judged concrete must map to something on screen
         for w in (concrete or {}).get(s['index'], []):
             via = {m['concept'] for m in ps.get('mentions', []) if m.get('concept') and norm(m.get('word', '')) == norm(w)} | lexical_concepts(w)
-            if not via & shown:
-                need.add(f'word:{w}'); missing.append(f'word:{w}')
+            need.add(f'word:{w}')
+            if not via & shown: missing.append(f'word:{w}')
         required_total += len(need) + sum(1 for u in undrawable if u['sentence'] == s['index'])
         covered_total += len(need) - len(missing)
         for c in missing: misses.append({'sentence': s['index'], 'concept': c})
