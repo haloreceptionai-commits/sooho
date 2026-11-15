@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import struct
 import tempfile
 import subprocess
 
@@ -49,6 +50,18 @@ def build(spec):
         shutil.copyfile(source, target)
         entries.append({'id': model, 'kind': 'model', 'path': str(target.relative_to(OUT)),
                         'sha256': digest(target), 'source': f'https://kenney.nl/assets/{model.split("/")[0]}', 'license': 'CC0-1.0'})
+        data = source.read_bytes()
+        gltf = json.loads(data[20:20 + struct.unpack_from('<I', data, 12)[0]])
+        for image in gltf.get('images', []):
+            uri = image.get('uri')
+            if not uri or uri.startswith('data:'): continue
+            src_image = (source.parent / uri).resolve()
+            if not src_image.is_relative_to(LIBRARY.resolve()): raise ValueError('external model image')
+            dst_image = target.parent / uri; dst_image.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(src_image, dst_image)
+            if not any(e['path'] == str(dst_image.relative_to(OUT)) for e in entries):
+                entries.append({'id': model.split('/')[0] + '/' + uri, 'kind': 'model-texture', 'path': str(dst_image.relative_to(OUT)),
+                                'sha256': digest(dst_image), 'source': f'https://kenney.nl/assets/{model.split("/")[0]}', 'license': 'CC0-1.0'})
     with tempfile.TemporaryDirectory(prefix='blender-cc0-') as temp:
         for name, asset in spec['textures'].items():
             files = json.loads(fetch(f'https://api.polyhaven.com/files/{asset}'))
