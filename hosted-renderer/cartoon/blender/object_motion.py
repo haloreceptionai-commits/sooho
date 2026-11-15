@@ -39,7 +39,7 @@ def rail_gap(action,t):
     if action=='expand':return .16-.145*progress(t,.1,1.6)  # cold wide gap closes as steel heats
     if action=='break':return .03+.32*progress(t,.5,1.4)    # deep cold pulls the joint apart
     if action=='buckle':return 0.                           # continuous welded rail, no joint
-    return .04
+    return .07  # resting expansion gap, wide enough to read on screen
 
 
 def rail_end_shift(action,t,side):

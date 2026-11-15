@@ -261,12 +261,12 @@ def build_object(spec,duration,fps):
         for x in (-.75,-.3,.3,.75):cube('timber sleeper',(x,0,.12),(.2,1.2,.08),wood,.015)
         gauge=.36
         if action=='buckle':
-            n=30
+            n=48
             for y in (-gauge,gauge):
                 for i in range(n):
                     u=(i+.5)/n;piece=bpy.data.objects.new('welded rail piece',None);bpy.context.collection.objects.link(piece)
                     for name,z,h,w in (('rail foot',.17,.02,.11),('rail web',.215,.07,.03),('rail head',.275,.05,.07)):
-                        o=cube(name,(0,0,z),(2*RAIL/n+.01,w,h),rail_mat,.004);o.parent=piece
+                        o=cube(name,(0,0,z),(2*RAIL/n*1.9,w,h),rail_mat,.004);o.parent=piece
                     piece['u']=u;moving.append((piece,'kink_piece',Vector((-RAIL+2*RAIL*u,y,0))))
         else:
             for side in (-1,1):
