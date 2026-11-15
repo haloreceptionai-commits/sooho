@@ -158,16 +158,6 @@
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/roof-gable",
-        "pos": [
-          -4,
-          7,
-          2.75
-        ],
-        "height": 2,
-        "yaw": 90
-      },
-      {
         "id": "fantasy-town-kit/wall",
         "pos": [
           -6,
@@ -216,16 +206,6 @@
         ],
         "height": 2.8,
         "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/roof-gable",
-        "pos": [
-          4,
-          9,
-          2.75
-        ],
-        "height": 2,
-        "yaw": 90
       },
       {
         "id": "fantasy-town-kit/wall",
@@ -1678,16 +1658,6 @@
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/roof-gable",
-        "pos": [
-          -6,
-          8,
-          2.75
-        ],
-        "height": 2,
-        "yaw": 90
-      },
-      {
         "id": "fantasy-town-kit/wall",
         "pos": [
           -8,
@@ -1971,16 +1941,6 @@
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/roof-gable",
-        "pos": [
-          -4,
-          7,
-          2.75
-        ],
-        "height": 2,
-        "yaw": 90
-      },
-      {
         "id": "fantasy-town-kit/wall",
         "pos": [
           -6,
@@ -2029,16 +1989,6 @@
         ],
         "height": 2.8,
         "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/roof-gable",
-        "pos": [
-          4,
-          9,
-          2.75
-        ],
-        "height": 2,
-        "yaw": 90
       },
       {
         "id": "fantasy-town-kit/wall",
@@ -2131,16 +2081,6 @@
         "yaw": 0
       },
       {
-        "id": "fantasy-town-kit/roof-gable",
-        "pos": [
-          -4,
-          13,
-          2.75
-        ],
-        "height": 2,
-        "yaw": 90
-      },
-      {
         "id": "fantasy-town-kit/wall",
         "pos": [
           -6,
@@ -2189,16 +2129,6 @@
         ],
         "height": 2.8,
         "yaw": 0
-      },
-      {
-        "id": "fantasy-town-kit/roof-gable",
-        "pos": [
-          4,
-          15,
-          2.75
-        ],
-        "height": 2,
-        "yaw": 90
       },
       {
         "id": "fantasy-town-kit/wall",
