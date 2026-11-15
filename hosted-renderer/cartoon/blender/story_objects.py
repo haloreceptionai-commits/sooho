@@ -39,8 +39,8 @@ def build_object(spec,duration,fps):
     red=material('object dynamite',(.58,.06,.035));cloth=material('object cover',(.16,.25,.3),.95)
     created=set(bpy.data.objects);moving=[];intact=[];kind=spec['kind'];action=spec.get('action','hold')
     # Moderate warm emission: AgX desaturates very bright red light into pink.
-    ember=material('object fuse ember',(1,.4,.03),.4,emission=1.8)
-    fire_core=material('blast fire core',(1,.78,.12),.4,emission=2.2);blast_smoke=material('blast smoke',(.16,.15,.14),.95)
+    ember=material('object fuse ember',(1,.3,0),.4,emission=.9)
+    fire_core=material('blast fire core',(1,.62,0),.4,emission=1.1);blast_smoke=material('blast smoke',(.16,.15,.14),.95)
     if kind in ('perforated_cart','covered_cart'):
         cube('cart chassis',(0,0,.45),(1.3,.8,.16),wood)
         for x in [-.48,.48]:
@@ -77,6 +77,8 @@ def build_object(spec,duration,fps):
         spindle=bpy.data.objects.new('drill spindle',None);bpy.context.collection.objects.link(spindle)
         for obj in [cylinder('drill bit',(0,0,.32),.028,.46,steel),path('spiral cutting flute',[(.031*math.cos(i*.45),.031*math.sin(i*.45),.13+i*.006) for i in range(64)],.009,steel),cylinder('tapered drill chuck',(0,0,.61),.075,.16,steel)]:obj.parent=spindle
         moving.append((spindle,'spin',spindle.location.copy()))
+        bore=material('drilled bore hole',(.035,.02,.01),.95)
+        o=cylinder('drilled bore hole',(0,0,.182),.07,.004,bore);moving.append((o,'bore',o.location.copy()))
         for i in range(12):
             o=cube('drilling wood shaving',(.12*math.cos(i),.12*math.sin(i),.2),(.035,.018,.012),wood,.002);moving.append((o,'shaving',Vector((.12*math.cos(i),.12*math.sin(i),.2))))
         rope('drill frame',(0,0,.68),(0,0,1.18),.045,steel)
@@ -118,7 +120,7 @@ def build_object(spec,duration,fps):
         tip=sphere('glowing ignition tip',(0,-.7,.045),(.065,.055,.07),ember)
         if action=='fire':moving.append((tip,'fuse',tip.location.copy()))
         if action=='fire':
-            flame=material('fuse flame yellow',(1,.65,.025),.4,emission=7)
+            flame=material('fuse flame yellow',(1,.6,0),.4,emission=1.4)
             smoke=material('fuse smoke charcoal',(.085,.085,.085),.95)
             for i in range(3):
                 o=sphere('fuse flame tongue',(0,0,0),(.04,.035,.12-i*.025),flame);moving.append((o,'fuse_flame',Vector((i*.025-.025,0,.085+i*.025))))
@@ -216,7 +218,8 @@ def build_object(spec,duration,fps):
             j=i%5;x,z=ribbon[j];x+=.075*math.sin(i*2.3);z+=.065*math.cos(i*1.7)
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1,location=(x,-.425,z));o=bpy.context.active_object;o.name='rough embedded mineral fleck';o.scale=(.016+i%3*.006,.012,.02);o.data.materials.append(gold)
         if action=='open':
-            lid=cube('rock crust',(0,-.43,.55),(1.18,.07,1.03),rock);moving.append((lid,'cover',lid.location.copy()))
+            for side in (-1,1):
+                lid=cube('cracked rock crust',(side*.3,-.45,.55),(.59,.07,1.03),rock);moving.append((lid,'crust',Vector((side*.3,-.45,.04))))
         if action=='explode':
             intact=list(set(bpy.data.objects)-created)
             for i in range(8):
@@ -230,6 +233,7 @@ def build_object(spec,duration,fps):
         t=frame/fps;m=mechanism(action,t);root.location=base;root.rotation_euler=(m['tilt'],m['swing'],math.radians(spec.get('yaw',0)))
         if action=='pour':root.location=(base[0],base[1],base[2]+.48);root.rotation_euler.x=-progress(t,0,.65)*.9
         if kind=='rocket_arrow':root.location=(base[0],base[1],base[2]+m['travel'])
+        if action=='swing':root.location=(base[0]+.55*math.sin(t*math.tau*.7),base[1],base[2]+.12*abs(math.sin(t*math.tau*.7)))
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
         for index,(obj,role,rest) in enumerate(moving):
             obj['motion_role']=role
@@ -237,13 +241,18 @@ def build_object(spec,duration,fps):
             if role in ('spin','crank','wheel'):obj.rotation_euler=(0,0,0)
             if role=='spin':obj.rotation_euler.z=spin_angle(t)*3;obj.location.z=-.08*progress(t,0,.6)
             if role=='shaving':
-                obj.hide_render=t<.35;obj.keyframe_insert('hide_render',frame=frame+1)
-                obj.location=rest+Vector((.08*progress(t)*math.sin(index),.08*progress(t)*math.cos(index),0))
+                obj.hide_render=t<.15+.1*(index%6);obj.keyframe_insert('hide_render',frame=frame+1)
+                obj.location=rest+Vector((.2*progress(t)*math.sin(index),.2*progress(t)*math.cos(index),0))
+            if role=='bore':
+                r=.2+.8*progress(t,0,1.6);obj.scale=(r,r,1);obj.keyframe_insert('scale',frame=frame+1)
             if role=='rocket_flame':
                 obj.scale=(.1,.1,.23+.08*math.sin(t*21));obj.keyframe_insert('scale',frame=frame+1)
             if role=='rocket_smoke':obj.location=rest+Vector((.04*math.sin(t*7+index),0,-.04*math.sin(t*5+index)))
             if role=='crank':obj.rotation_euler.y=spin_angle(t)
             if role=='wheel':obj.rotation_euler.y=-m['travel']/.3
+            if role=='crust':
+                side=1 if rest.x>0 else -1;a=1.45*progress(t,.25+(.15 if side>0 else 0),1.25+(.15 if side>0 else 0))
+                obj.location=rest+Vector((side*.25*a,-.51*math.sin(a),.51*math.cos(a)));obj.rotation_euler=(a,0,-side*.35*a)
             if role=='cover':obj.location=(rest.x,rest.y+progress(t)*1.7,rest.z+progress(t)*.8)
             if role=='load':
                 obj.location=(rest.x,rest.y+.48*progress(t,0,1.5),rest.z)
