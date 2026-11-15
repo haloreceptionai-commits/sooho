@@ -2,7 +2,7 @@
   "set": "rail_yard",
   "duration": 3,
   "lighting": "day",
-  "samples": 12,
+  "samples": 24,
   "engine": "cycles",
   "size": [
     1080,
@@ -13,23 +13,18 @@
   ],
   "camera": {
     "from": [
-      5,
-      -7,
-      3.4
-    ],
-    "to": [
-      4.5,
-      -6,
-      3.1
+      2,
+      -1,
+      1.6
     ],
     "look_at": [
       0,
-      4,
-      1.8
+      7,
+      1.4
     ],
     "lens": 32,
-    "fstop": 5.6
+    "fstop": 3.2
   },
   "grade": "Punchy",
-  "haze": 0.008
+  "haze": 0.003
 }

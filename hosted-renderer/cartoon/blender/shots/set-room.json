@@ -2,7 +2,7 @@
   "set": "room",
   "duration": 3,
   "lighting": "day",
-  "samples": 12,
+  "samples": 24,
   "engine": "cycles",
   "size": [
     1080,
@@ -26,5 +26,5 @@
     "fstop": 5.6
   },
   "grade": "Punchy",
-  "haze": 0.008
+  "haze": 0.003
 }
