@@ -14,7 +14,7 @@ LOOPS = {'fire', 'crowd'}
 TIMES = {  # object (kind, action) -> list of (seconds, sound) taken from object_motion / story_objects timing
     ('gold_shotgun', 'fire'): [(.4, 'gunshot')], ('gold_shotgun', 'load'): [(.25, 'handling'), (.75, 'handling')],
     ('dynamite', 'explode'): [(.65, 'explosion'), (.65, 'rumble')], ('gold_vein', 'explode'): [(.65, 'explosion'), (.65, 'rumble')],
-    ('gold_vein', 'open'): [(0.0, 'pickaxe')], ('dynamite', 'fire'): [(0.0, 'sparks')],
+    ('dynamite', 'fire'): [(0.0, 'sparks')],
     ('rail_joint', 'break'): [(.5, 'clank'), (.95, 'impact')], ('rail_joint', 'expand'): [(.1, 'creak')], ('rail_joint', 'buckle'): [(.2, 'creak')],
     ('gold_pan', 'pour'): [(.45, 'stone')], ('money_bag', 'hold'): [(0.0, 'coins')], ('rocket_arrow', 'fire'): [(0.0, 'whoosh')],
     ('fuse_bundle', 'fire'): [(0.0, 'sparks')], ('covered_cart', 'open'): [(0.0, 'creak')],
@@ -70,7 +70,12 @@ def cues(shot):
         for t in footfalls(a, d): add(t, 'footstep', p, .35)
         if a == 'swing': [add(t, 'pickaxe', p, .8) for t in swing_hits(d)]
         if a == 'fall': add(1.0, 'impact', p, .9)
-    return sorted(out, key=lambda c: (c['t'], c['sound']))
+    # one blast sound per visible blast: a scripted explosion effect within 0.3 s absorbs the object's own burst
+    keep = []
+    for c in sorted(out, key=lambda c: (c['t'], c['sound'])):
+        if c['sound'] in ('explosion', 'rumble') and any(k['sound'] == c['sound'] and abs(k['t'] - c['t']) < .3 for k in keep): continue
+        keep.append(c)
+    return keep
 
 
 def spatial(cue, cam_from, look_at):

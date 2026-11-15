@@ -12,8 +12,7 @@ class CueTimingTest(unittest.TestCase):
     def test_explosion_cue_on_the_blast_frame(self):
         s = shot('plan-fx-01.json'); cs = C.cues(s)
         blast = [c['t'] for c in cs if c['sound'] == 'explosion']
-        self.assertIn(0.5, blast)       # effect start word
-        self.assertIn(0.66667, blast)   # dynamite object explodes at 0.65 s -> frame 20
+        self.assertEqual(blast, [0.5])  # effect start word; the overlapping object burst is not doubled
         fb = [p for p in E.particles('explosion') if p['role'] == 'fireball']
         self.assertTrue(all(E.state('explosion', p, 0.5 - 0.5 - 1/30)[3] == 0 for p in fb))
 
