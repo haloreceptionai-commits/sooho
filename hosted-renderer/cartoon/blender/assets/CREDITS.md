@@ -74,5 +74,5 @@ All entries are CC0-1.0; licenses checked at import.
 - textures/stone-roughness.jpg: https://polyhaven.com/a/castle_brick_01 — CC0-1.0, SHA-256 `0958bde6010e2b7e4098b2737e94cff53c0c41c865e09a69b1a1e39ba7973985`
 - textures/stone-normal.jpg: https://polyhaven.com/a/castle_brick_01 — CC0-1.0, SHA-256 `f3c4c0538fd5c3f9e1aabcb0169fbbc3ac2883ed5544f05d9008d2736a2899de`
 - skies/day.hdr: https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky — CC0-1.0, SHA-256 `fd94c84997b8a3c353b62c2125a9b44e19509956986a126e472684432a02d798`
-- skies/sunset.hdr: https://polyhaven.com/a/sunset_jhbcentral — CC0-1.0, SHA-256 `39a9c6b391e9bda935501eb5abbe200c38959f054902050ca198d82e9f20b65b`
+- skies/sunset.hdr: https://polyhaven.com/a/qwantani_sunset_puresky — CC0-1.0, SHA-256 `e90f2130848de0364b76d2b3da7a72ce31bbb95d66bd86d5b4f85f0626421b8d`
 - skies/overcast.hdr: https://polyhaven.com/a/kloofendal_overcast_puresky — CC0-1.0, SHA-256 `5f98aa01d43a49cd899299751a978b3e5559a76300198b5dd2d9c68ecc4ad130`

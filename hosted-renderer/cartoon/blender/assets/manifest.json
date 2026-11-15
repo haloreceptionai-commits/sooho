@@ -594,8 +594,8 @@
     "id": "sunset",
     "kind": "sky",
     "path": "skies/sunset.hdr",
-    "sha256": "39a9c6b391e9bda935501eb5abbe200c38959f054902050ca198d82e9f20b65b",
-    "source": "https://polyhaven.com/a/sunset_jhbcentral",
+    "sha256": "e90f2130848de0364b76d2b3da7a72ce31bbb95d66bd86d5b4f85f0626421b8d",
+    "source": "https://polyhaven.com/a/qwantani_sunset_puresky",
     "license": "CC0-1.0"
   },
   {
