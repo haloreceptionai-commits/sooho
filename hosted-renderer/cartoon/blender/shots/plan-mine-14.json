@@ -1,0 +1,61 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 1.35,
+ "camera": {
+  "from": [
+   -3.381,
+   1.851,
+   1.55
+  ],
+  "look_at": [
+   -0.212,
+   3.932,
+   1.05
+  ],
+  "lens": 40,
+  "fstop": 4
+ },
+ "cast": [
+  {
+   "id": "expert",
+   "pos": [
+    -0.405,
+    3.88
+   ],
+   "yaw": -75,
+   "action": "swing",
+   "expression": "determined",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.8,
+    0.8,
+    0.5
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "gold_vein",
+   "action": "open",
+   "pos": [
+    -0.588,
+    3.21,
+    0
+   ],
+   "scale": 0.5,
+   "yaw": -75
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  24
+ ]
+}

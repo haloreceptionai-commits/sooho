@@ -1,0 +1,49 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 0.636,
+ "camera": {
+  "from": [
+   0.59,
+   -2.8,
+   1.55
+  ],
+  "look_at": [
+   -0.6,
+   0.8,
+   1.05
+  ],
+  "lens": 40,
+  "fstop": 4
+ },
+ "cast": [
+  {
+   "id": "rich_guy",
+   "pos": [
+    -0.6,
+    0.6
+   ],
+   "yaw": 0,
+   "action": "run",
+   "expression": "shock",
+   "outfit": "merchant",
+   "hat": "top",
+   "shirt": [
+    0.9,
+    0.9,
+    0.9
+   ]
+  }
+ ],
+ "objects": [],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  11
+ ]
+}

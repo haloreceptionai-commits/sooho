@@ -1,0 +1,49 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 1.6,
+ "camera": {
+  "from": [
+   -2.156,
+   2.686,
+   1.55
+  ],
+  "look_at": [
+   -0.212,
+   3.932,
+   1.3
+  ],
+  "lens": 55,
+  "fstop": 4
+ },
+ "cast": [
+  {
+   "id": "expert",
+   "pos": [
+    -0.405,
+    3.88
+   ],
+   "yaw": -75,
+   "action": "stand",
+   "expression": "smug",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.8,
+    0.8,
+    0.5
+   ]
+  }
+ ],
+ "objects": [],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  29
+ ]
+}

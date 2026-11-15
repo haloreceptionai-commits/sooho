@@ -1,0 +1,72 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 2.95,
+ "camera": {
+  "from": [
+   -2.682,
+   0.785,
+   2
+  ],
+  "look_at": [
+   0.04,
+   3.378,
+   0.6
+  ],
+  "lens": 48,
+  "fstop": 8
+ },
+ "cast": [
+  {
+   "id": "expert",
+   "pos": [
+    1.249,
+    5.048
+   ],
+   "yaw": -75,
+   "action": "stand",
+   "expression": "angry",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.8,
+    0.8,
+    0.5
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "magnifier",
+   "action": "hold",
+   "pos": [
+    0.04,
+    3.378,
+    0
+   ],
+   "scale": 1,
+   "yaw": -75
+  },
+  {
+   "kind": "gold_pan",
+   "action": "hold",
+   "pos": [
+    0.949,
+    2.69,
+    0
+   ],
+   "scale": 0.6,
+   "yaw": -75
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  53
+ ]
+}

@@ -1,0 +1,43 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 0.636,
+ "camera": {
+  "from": [
+   2.2,
+   0.7,
+   2.6
+  ],
+  "look_at": [
+   0.0,
+   5.35,
+   0.8
+  ],
+  "lens": 42,
+  "fstop": 8
+ },
+ "cast": [],
+ "objects": [
+  {
+   "kind": "gold_vein",
+   "action": "hold",
+   "pos": [
+    0.0,
+    4.9,
+    0
+   ],
+   "scale": 1,
+   "yaw": 0
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  11
+ ]
+}
