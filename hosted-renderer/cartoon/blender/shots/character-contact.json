@@ -1,0 +1,59 @@
+{
+  "set": "open_day",
+  "duration": 5,
+  "engine": "cycles",
+  "samples": 24,
+  "size": [
+    1080,
+    1920
+  ],
+  "camera": {
+    "from": [
+      0,
+      -5,
+      2.3
+    ],
+    "look_at": [
+      0,
+      0,
+      1
+    ],
+    "lens": 45,
+    "fstop": 8
+  },
+  "cast": [
+    {
+      "id": "miner",
+      "pos": [
+        -0.8,
+        0
+      ],
+      "outfit": "worker",
+      "hat": "beanie",
+      "action": "swing",
+      "expression": "determined",
+      "held": "tool",
+      "shirt": [
+        0.15,
+        0.38,
+        0.3
+      ]
+    },
+    {
+      "id": "merchant",
+      "pos": [
+        0.8,
+        0
+      ],
+      "outfit": "merchant",
+      "hat": "top",
+      "action": "cheer",
+      "expression": "happy",
+      "shirt": [
+        0.6,
+        0.15,
+        0.09
+      ]
+    }
+  ]
+}
