@@ -55,3 +55,19 @@ wall-style lamp brackets; it is not ready. Ship scores 6 (richness 7), castle 5.
 `set-audit.json` now holds current still-only evidence, replacing the obsolete
 sets3 audit that incorrectly inferred motion. `set-run.json` identifies the run
 and unresolved defects. No benchmark acceptance or production rollout.
+
+## Current verification: sets11
+
+Azure execution `blender-shot-gpu-qfnlp9b` succeeded; all 15 full-resolution
+stills were retrieved and audited, and all 17 existing tests pass. Outdoor
+lamps now have grounded support posts. Tangent normal maps are no longer
+misinterpreted as world-space normals on BOX projection. Palette materials
+retain their colours with added grain; cloth has seams, the castle has a
+stone approach, and interiors have floor joints and wall detailing.
+
+Mine render quality is 7, castle 6, battlefield 5, ship 6; village/street and
+room/saloon remain 5. Mean render quality is 5.73 versus benchmark 7.17.
+Closer village cameras made the foreground stall obstruct the buildings;
+these shots need reframing, not further unverified detail additions.
+Step 3 remains unaccepted; step 4 and production rollout are paused.
+Current evidence is `set-audit-sets11.json`; `set-audit.json` is historical sets10.
