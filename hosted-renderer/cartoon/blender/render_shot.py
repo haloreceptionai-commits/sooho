@@ -122,21 +122,8 @@ def lantern(loc, red, glass):
 
 
 def rock_mat():
-    """Tan rock: broad two-tone colour, dark crack lines (Voronoi edges), fine grit bump."""
+    """Scanned CC0 rock texture, shared with the offline set library."""
     return surface('rock', 2.2)
-    m = noise_mat('rock', (0.30, 0.19, 0.11), (0.70, 0.50, 0.32), scale=1.1, bump=0.35, speckle=0.3)
-    nt = m.node_tree; b = nt.nodes['Principled BSDF']; geo = nt.nodes['Geometry']
-    vo = nt.nodes.new('ShaderNodeTexVoronoi'); vo.feature = 'DISTANCE_TO_EDGE'; vo.inputs['Scale'].default_value = 0.9
-    nt.links.new(geo.outputs['Position'], vo.inputs['Vector'])
-    edge = nt.nodes.new('ShaderNodeMapRange'); edge.inputs['From Min'].default_value = 0.0; edge.inputs['From Max'].default_value = 0.025
-    edge.inputs['To Min'].default_value = 0.35; edge.inputs['To Max'].default_value = 1.0
-    nt.links.new(vo.outputs['Distance'], edge.inputs['Value'])
-    mul = nt.nodes.new('ShaderNodeMix'); mul.data_type = 'RGBA'; mul.blend_type = 'MULTIPLY'; mul.inputs['Factor'].default_value = 1
-    col_link = [l for l in nt.links if l.to_socket == b.inputs['Base Color']][0]; src = col_link.from_socket
-    nt.links.remove(col_link)
-    nt.links.new(src, mul.inputs['A']); nt.links.new(edge.outputs['Result'], mul.inputs['B'])
-    nt.links.new(mul.outputs['Result'], b.inputs['Base Color'])
-    return m
 
 
 def rock_chunk(loc, size, m, seed):
