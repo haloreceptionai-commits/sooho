@@ -29,12 +29,20 @@ def dynamite_fuse_point(u):
     k=(u-.4)/.6;return (.12+.24*k,.04*k,.9+.08*k)
 
 
+def spiky_burst(name,radius,mat,seed):
+    # Cartoon starburst fireball: icosphere with alternating long spikes, casting no shadow.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1,location=(0,0,.42));o=bpy.context.active_object;o.name=name
+    for i,v in enumerate(o.data.vertices):v.co*=1.55 if (i*7+seed)%3==0 else .9
+    o.data.materials.append(mat);o.visible_shadow=False;o.scale=(radius,)*3
+    return o
+
+
 def add_blast(moving,ember,core,smoke):
-    # Layered fireball (yellow core, orange shell) plus lingering expanding smoke, not a single glowing ball.
-    for i,(mat,r) in enumerate([(core,.2),(ember,.3)]):
-        o=sphere('explosion fireball',(0,0,.42),(r,)*3,mat);o['blast_radius']=r;moving.append((o,'burst_flash',o.location.copy()))
+    # Spiky yellow core inside an orange starburst, then lingering expanding smoke.
+    for i,(mat,r) in enumerate([(core,.22),(ember,.34)]):
+        o=spiky_burst('explosion fireball',r,mat,i);o['blast_radius']=r;moving.append((o,'burst_flash',o.location.copy()))
     for i in range(6):
-        a=i*math.tau/6;o=sphere('explosion smoke',(0,0,.42),(.12,)*3,smoke);moving.append((o,'blast_smoke',Vector((.22*math.cos(a),.22*math.sin(a),.42+.05*i))))
+        a=i*math.tau/6;o=sphere('explosion smoke',(0,0,.42),(.12,)*3,smoke);o.visible_shadow=False;moving.append((o,'blast_smoke',Vector((.22*math.cos(a),.22*math.sin(a),.42+.05*i))))
 
 
 def build_object(spec,duration,fps):
@@ -84,10 +92,10 @@ def build_object(spec,duration,fps):
         for obj in [cylinder('drill bit',(0,0,.32),.028,.46,steel),path('spiral cutting flute',[(.031*math.cos(i*.45),.031*math.sin(i*.45),.13+i*.006) for i in range(64)],.009,steel),cylinder('tapered drill chuck',(0,0,.61),.075,.16,steel)]:obj.parent=spindle
         moving.append((spindle,'spin',spindle.location.copy()))
         drill_body=bpy.data.objects.new('drill body',None);bpy.context.collection.objects.link(drill_body)
-        bore=material('drilled bore hole',(.035,.02,.01),.95)
+        bore=material('drilled bore hole',(.035,.02,.01),.95);shaving_wood=material('fresh wood shaving',(.82,.6,.32),.8)
         o=cylinder('drilled bore hole',(0,0,.182),.07,.004,bore);moving.append((o,'bore',o.location.copy()))
         for i in range(12):
-            o=cube('drilling wood shaving',(.12*math.cos(i),.12*math.sin(i),.2),(.035,.018,.012),wood,.002);moving.append((o,'shaving',Vector((.12*math.cos(i),.12*math.sin(i),.2))))
+            o=cube('drilling wood shaving',(.12*math.cos(i),.12*math.sin(i),.2),(.07,.03,.02),shaving_wood,.004);moving.append((o,'shaving',Vector((.12*math.cos(i),.12*math.sin(i),.2))))
         rope('drill frame',(0,0,.68),(0,0,1.18),.045,steel)
         cylinder('top wooden drill handle',(0,0,1.35),.085,.3,wood)
         center=(.12,-.075,.94)
@@ -258,8 +266,10 @@ def build_object(spec,duration,fps):
             if role in ('spin','crank','wheel'):obj.rotation_euler=(0,0,0)
             if role=='spin':obj.rotation_euler.z=spin_angle(t)*3
             if role=='shaving':
-                obj.hide_render=t<.15+.1*(index%6);obj.keyframe_insert('hide_render',frame=frame+1)
-                obj.location=rest+Vector((.2*progress(t)*math.sin(index),.2*progress(t)*math.cos(index),0))
+                start=.1+.11*(index%12);f=progress(t,start,start+.45)
+                obj.hide_render=t<start;obj.keyframe_insert('hide_render',frame=frame+1)
+                a=index*2.4;obj.location=Vector((math.cos(a)*(.07+.25*f),math.sin(a)*(.07+.25*f),.2+.22*math.sin(math.pi*f)))
+                obj.rotation_euler=(f*6,f*4,a)
             if role=='bore':
                 r=.2+.8*progress(t,0,1.6);obj.scale=(r,r,1);obj.keyframe_insert('scale',frame=frame+1)
             if role=='rocket_flame':
@@ -296,9 +306,9 @@ def build_object(spec,duration,fps):
                 center=.4 if role=='flash' else .65;length=.12 if role=='flash' else .6
                 obj.hide_render=not center<=t<center+length;obj.keyframe_insert('hide_render',frame=frame+1)
                 if role=='burst_flash':
-                    r=obj['blast_radius']*(1.4+1.2*progress(t,.65,1.25));obj.scale=(r,r,r*.85);obj.keyframe_insert('scale',frame=frame+1)
+                    r=obj['blast_radius']*(1.3+1.1*progress(t,.65,1.25))*(1+.08*math.sin(t*40));obj.scale=(r,r,r*.9);obj.rotation_euler.z=t*2;obj.keyframe_insert('scale',frame=frame+1)
             if role=='blast_smoke':
-                u=progress(t,.7,2);obj.hide_render=t<.7;obj.keyframe_insert('hide_render',frame=frame+1)
+                u=progress(t,.9,2);obj.hide_render=t<.9;obj.keyframe_insert('hide_render',frame=frame+1)
                 obj.location=Vector((rest.x*(1+1.5*u),rest.y*(1+1.5*u),rest.z+.5*u));r=.12+.22*u;obj.scale=(r,)*3;obj.keyframe_insert('scale',frame=frame+1)
             if role=='flake' and action=='pour':
                 world=Vector(pour_position((rest.x,rest.y,rest.z+.48),t,index))
@@ -308,7 +318,7 @@ def build_object(spec,duration,fps):
             obj.keyframe_insert('location',frame=frame+1);obj.keyframe_insert('rotation_euler',frame=frame+1)
         for obj in intact:
             obj['intact_explosion_mesh']=True;obj.hide_render=exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
-        if kind=='hand_drill':drill_body.location.z=-.15*progress(t,0,1.6);drill_body.keyframe_insert('location',frame=frame+1)
+        if kind=='hand_drill':drill_body.location.z=-.25*progress(t,0,1.6);drill_body.keyframe_insert('location',frame=frame+1)
         root.keyframe_insert('location',frame=frame+1);root.keyframe_insert('rotation_euler',frame=frame+1)
     for obj in set(bpy.data.objects)-created:
         if obj.animation_data and obj.animation_data.action:
