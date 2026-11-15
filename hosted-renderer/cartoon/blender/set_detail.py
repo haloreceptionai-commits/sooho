@@ -158,6 +158,22 @@ def ocean():
     for p in o.data.polygons:p.use_smooth=True
 
 
+def practical_lights(name,mode):
+    """Visible lamps generate real light; night must remain readable."""
+    if name not in ('castle','battlefield','village','street','ship_deck'):return
+    iron=material('lamp frame',(.06,.065,.07),.38,.7)
+    glow=material('lamp flame',(1,.39,.08),.3,0,8)
+    positions=[(-2.4,5.4,2.1),(2.4,5.4,2.1)] if name in ('castle','battlefield') else [(-2,4,1.8),(2.5,7,1.8)]
+    for x,y,z in positions:
+        cube('lamp bracket',(x,y+.2,z-.25),(.06,.5,.06),iron,.01)
+        cube('lamp base',(x,y,z-.16),(.22,.2,.06),iron,.01)
+        cube('lamp glow',(x,y,z),(.12,.1,.25),glow,.02)
+        cube('lamp cap',(x,y,z+.16),(.22,.2,.07),iron,.01)
+        for dx in [-.09,.09]:cube('lamp frame',(x+dx,y-.04,z),(.015,.02,.3),iron,.004)
+        bpy.ops.object.light_add(type='POINT',location=(x,y-.22,z))
+        l=bpy.context.active_object.data;l.energy=90 if mode=='night' else 18;l.color=(1,.55,.2);l.shadow_soft_size=.12
+
+
 def detail_set(name,surface):
     if name in ('castle','battlefield'):castle(surface)
     if name in ('village','street','rail_yard'):
