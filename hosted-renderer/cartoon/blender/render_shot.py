@@ -14,6 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from shot_schema import validate_shot  # noqa: E402
 from set_library import build_set, dress_mine as library_mine, surface
+from characters import build_character
 
 
 def mat(name, color, rough=0.6, metal=0.0, emit=None, strength=0.0):
@@ -216,8 +217,9 @@ def set_open_day(length=24.0):
     try: sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(28)
     except Exception: pass
     w.links.new(sky.outputs[0], nodes['Background'].inputs['Color'])
+    nodes['Background'].inputs['Strength'].default_value=.18
     bpy.ops.object.light_add(type='SUN', rotation=(math.radians(55), 0, math.radians(35)))
-    s = bpy.context.active_object.data; s.energy = 4; s.angle = math.radians(3)
+    s = bpy.context.active_object.data; s.energy = 2; s.angle = math.radians(3)
 
 
 SETS = {'mine_tunnel': set_mine_tunnel, 'open_day': set_open_day}
@@ -355,7 +357,7 @@ def main():
         SETS[shot['set']]()
     else:
         build_set(shot['set'], shot.get('lighting', 'day'))
-    for c in shot.get('cast', []): character(c)
+    for c in shot.get('cast', []): build_character(c,shot['duration'],fps)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     sc.render.filepath = os.path.join(out, 'f_#####')

@@ -1,0 +1,20 @@
+{
+  "image": "blender-renderer:cast3",
+  "sheet_execution": "blender-shot-gpu-gt5r28w",
+  "action_execution": "blender-shot-gpu-2m2e65f",
+  "action_frames": 150,
+  "duration": 5,
+  "size": [
+    1080,
+    1920
+  ],
+  "tests_passed": 21,
+  "accepted": false,
+  "remaining": [
+    "Improve resting leg silhouette and feet",
+    "Render each expression without overlap",
+    "Animate cheer and differentiated aim/carry mechanisms",
+    "Verify hand orientation and prop contact across all actions",
+    "Match benchmark character appearance before production"
+  ]
+}

@@ -1,6 +1,7 @@
 """Strict validator for one declarative Blender shot. No free code is ever accepted."""
 import json
 from pathlib import Path
+from character_motion import ACTIONS, EXPRESSIONS, OUTFITS, HATS
 
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day'}
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
@@ -30,11 +31,15 @@ def validate_shot(s):
     cast = s.get('cast', [])
     if not isinstance(cast, list) or len(cast) > 12: raise ValueError('cast must be a list of up to 12')
     for ch in cast:
-        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color'}: raise ValueError('unknown cast keys')
+        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held'}: raise ValueError('unknown cast keys')
         _vec(ch.get('pos'), 2, 'cast.pos')
         for k in ('shirt', 'hat_color'):
             if k in ch: _vec(ch[k], 3, k); assert all(0 <= x <= 1 for x in ch[k]), k
-        if ch.get('hat', 'beanie') not in ('beanie', 'none'): raise ValueError('hat beanie|none')
+        if ch.get('hat', 'beanie') not in HATS: raise ValueError('unknown hat')
+        if ch.get('action','stand') not in ACTIONS:raise ValueError('unknown action')
+        if ch.get('expression','neutral') not in EXPRESSIONS:raise ValueError('unknown expression')
+        if ch.get('outfit','worker') not in OUTFITS:raise ValueError('unknown outfit')
+        if ch.get('held') not in (None,'crate','tool','cup'):raise ValueError('unknown held prop')
     if not 0 <= s.get('haze', 0) <= 0.2: raise ValueError('haze 0-0.2')
     if s.get('grade', 'Medium High Contrast') not in GRADES: raise ValueError('unknown grade')
     if not 1 <= s.get('samples', 32) <= 256: raise ValueError('samples 1-256')
