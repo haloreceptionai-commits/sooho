@@ -69,17 +69,19 @@ def build_character(c,duration=3,fps=30):
     if outfit=='worker':body_details.append(cube('work apron',(0,-.16,1.02),(.25,.035,.35),hatmat,.018))
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
-    joints={};segments=[]
+    joints={};segments=[];anchors={}
     for side in ['left','right']:
         for joint in ['elbow','wrist','knee','ankle']:
             o=sphere(side+' '+joint,(0,0,0),(.034,)*3,black);o.parent=root;joints[side+'_'+joint]=o
+            if joint in ('wrist','ankle'):
+                anchor=bpy.data.objects.new(side+' '+joint+' attachment',None);bpy.context.collection.objects.link(anchor);anchor.parent=root;anchors[side+'_'+joint]=anchor
         for a,b in [('shoulder','elbow'),('elbow','wrist'),('hip','knee'),('knee','ankle')]:
             bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=.021,depth=1)
             o=bpy.context.active_object;o.name=side+' '+a+'-'+b;o.data.materials.append(black);o.parent=root;segments.append((o,side+'_'+a,side+'_'+b))
-        sphere(side+' shoe',(0,-.05,-.025),(.058,.115,.03),black).parent=joints[side+'_ankle']
+        sphere(side+' shoe',(0,-.05,-.025),(.058,.115,.03),black).parent=anchors[side+'_ankle']
     held=c.get('held')
     if held:
-        wrist=joints['right_wrist']
+        wrist=anchors['right_wrist']
         if held=='crate':o=cube('held crate',(-.18,0,-.04),(.36,.25,.24),hatmat,.025);o.parent=wrist
         else:
             if held=='tool':
@@ -96,7 +98,8 @@ def build_character(c,duration=3,fps=30):
         body.location=(0,0,p['hips'][2]+.22);body.keyframe_insert('location',frame=f+1)
         for o,original in detail_positions:o.location=original+Vector((0,0,p['hips'][2]-.82));o.keyframe_insert('location',frame=f+1)
         for key,o in joints.items():o.location=p[key];o.keyframe_insert('location',frame=f+1)
-        joints['right_wrist'].rotation_euler.x=p['grip_angle'];joints['right_wrist'].keyframe_insert('rotation_euler',frame=f+1)
+        for key,o in anchors.items():o.location=p[key];o.keyframe_insert('location',frame=f+1)
+        anchors['right_wrist'].rotation_euler.x=p['grip_angle'];anchors['right_wrist'].keyframe_insert('rotation_euler',frame=f+1)
         if mouth is not None and expr=='talk':
             shape=face_shape(expr,f/fps);mouth.scale=(shape['width'],.016,shape['height']);mouth.keyframe_insert('scale',frame=f+1)
         for o,a,b in segments:
