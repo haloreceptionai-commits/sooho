@@ -1,0 +1,1751 @@
+[
+ {
+  "i": 0,
+  "sentence": 0,
+  "words": "He loaded the shotgun with gold and",
+  "zone": "entrance",
+  "frame": 31,
+  "concepts": [
+   "cast:person",
+   "char:load",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:hold",
+   "obj:gold_shotgun",
+   "obj:gold_shotgun:load",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a prospecting pan with gold",
+   "a shotgun"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a prospecting pan with gold": true,
+   "a shotgun": true
+  },
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "cartoon miner character in a wooden mine tunnel, rail tracks, crates and a shovel, a gold pan with gold nuggets on the ground, a shotgun placed muzzle-down into the pan, tunnel lights in the distance",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": true,
+     "a shotgun": true
+    },
+    "fit": 10,
+    "why": "The shotgun is placed into a pan filled with gold nuggets in a mine setting, visually implying he is loading the shotgun with gold\u2014an immediate and clear match to the narration."
+   },
+   {
+    "seen": "A cartoon miner stands in a wooden mine tunnel with timber supports and a rail track. Behind him are a shovel and crates. On the track is a prospecting pan containing gold nuggets, and a shotgun is resting in the pan, muzzle up. Small ore piles and dim tunnel lights are visible.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": true,
+     "a shotgun": true
+    },
+    "fit": 8,
+    "why": "The shotgun is set in a gold-filled pan, linking the gun and gold and suggesting the idea of loading. However, it doesn\u2019t show the explicit action of loading, so the connection relies on inference rather than a clear, unambiguous depiction."
+   },
+   {
+    "seen": "A cartoon miner character in an underground mine tunnel with wooden supports; rail tracks; a shovel and crates; a black prospecting pan on the ground with gold nuggets; a shotgun resting with its barrel over the pan; rocks and small gold piles around.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": true,
+     "a shotgun": true
+    },
+    "fit": 8,
+    "why": "The image shows a shotgun positioned over a gold-filled pan inside a mine, making the idea of loading a shotgun with gold easy to infer, though the action of loading isn\u2019t explicitly depicted."
+   }
+  ]
+ },
+ {
+  "i": 1,
+  "sentence": 0,
+  "words": "fired it into the walls of the mine.",
+  "zone": "deep",
+  "frame": 39,
+  "concepts": [
+   "cast:person",
+   "char:aim",
+   "light:day",
+   "obj:gold_shotgun",
+   "obj:gold_shotgun:fire",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a shotgun"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a shotgun": false
+  },
+  "fit_median": 3,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "rocky mine tunnel, wooden support beams, mine rail tracks, a cartoon character standing by the wall holding a long brown object (looks like an instrument), a track switch/lever in the foreground, dim lighting",
+    "visible": {
+     "a mine tunnel": true,
+     "a shotgun": false
+    },
+    "fit": 3,
+    "why": "The setting clearly shows a mine tunnel, which connects to the narration\u2019s mention of the mine. However, there is no clear shotgun or firing action depicted, so the connection to 'fired it into the walls' is weak."
+   },
+   {
+    "seen": "Rocky mine tunnel with wooden support beams, rail tracks, warm/dim lighting, a cartoon character near the wall, and a double-barrel shotgun in the foreground.",
+    "visible": {
+     "a mine tunnel": true,
+     "a shotgun": true
+    },
+    "fit": 7,
+    "why": "The scene clearly depicts a mine and includes a shotgun, linking to the idea of firing in a mine. However, no firing action or impact on the walls is shown, so the connection is partial rather than explicit."
+   },
+   {
+    "seen": "A rocky mine tunnel with wooden support beams, dim lighting, and minecart tracks. There\u2019s a central lever or gate, and a cartoon character partly visible on the left holding a long object.",
+    "visible": {
+     "a mine tunnel": true,
+     "a shotgun": false
+    },
+    "fit": 3,
+    "why": "The tunnel setting clearly matches a mine, but there\u2019s no visible firing action and the object in the character\u2019s hands isn\u2019t clearly a shotgun. Without clear depiction of a gun or shots into the walls, the connection to the line about firing into the mine walls is weak."
+   }
+  ]
+ },
+ {
+  "i": 2,
+  "sentence": 1,
+  "words": "His buddy just watches the gold vanish into the rock.",
+  "zone": "crates",
+  "frame": 53,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:pour",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a prospecting pan with gold",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a prospecting pan with gold": false,
+   "at least one cartoon person": true
+  },
+  "fit_median": 2,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A cartoon person standing on rail tracks inside a mine tunnel; wooden supports and rocky rock walls; a black prospecting pan on the ground; a crate and green buckets; a light in the background.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "at least one cartoon person": true
+    },
+    "fit": 2,
+    "why": "The setting suggests mining and shows a buddy-like cartoon person and a pan, but there\u2019s no visible gold and nothing shows it vanishing into rock. Only one character is shown, so the connection to the narration is weak."
+   },
+   {
+    "seen": "A wooden mine tunnel with rails and support beams, a cartoon miner character standing with hands on hips, a black prospecting pan on the track, a wooden crate and some green buckets, dim lighting down the tunnel.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The scene shows a mine and a single cartoon person who could be 'the buddy,' but there is no visible gold and nothing is shown vanishing into the rock. The connection to the narration is weak aside from the mine setting and the lone watcher."
+   },
+   {
+    "seen": "A stylized cartoon figure stands on mine tracks inside a wooden-supported mine tunnel with rocky walls. A black prospecting pan lies on the ground near the rail, a wooden crate and some green cups are nearby, and a light glows deeper in the tunnel.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "at least one cartoon person": true
+    },
+    "fit": 2,
+    "why": "The scene shows a mine setting and a single cartoon character, which loosely connects to mining, but there is no visible gold and no second person or gold vanishing into rock, so the narration is not clearly conveyed."
+   }
+  ]
+ },
+ {
+  "i": 3,
+  "sentence": 2,
+  "words": "So we're shooting gold into a",
+  "zone": "deep",
+  "frame": 28,
+  "concepts": [
+   "cast:person",
+   "char:aim",
+   "char:stand",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:hold",
+   "obj:gold_shotgun",
+   "obj:gold_shotgun:fire",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a prospecting pan with gold",
+   "a shotgun"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a prospecting pan with gold": false,
+   "a shotgun": true
+  },
+  "fit_median": 7,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A cartoon miner-like character standing inside a wooden-supported mine tunnel with rail tracks; scattered gold nuggets/balls on the ground and on the track; a gun-like device leaning by the rail; rocks and a distant light.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": false
+    },
+    "fit": 6,
+    "why": "The environment clearly suggests gold mining, and there are visible gold balls plus a device that looks gun-like, which hints at 'shooting gold.' However, the object is not clearly identifiable as a shotgun and there\u2019s no clear target being shot into, so the connection isn\u2019t immediate."
+   },
+   {
+    "seen": "Cartoon miner in a wooden mine tunnel with rail tracks, a stylized shotgun-like prop leaning by the rail, small gold spheres on the ground/track, rock piles, and a light deeper in the tunnel.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true
+    },
+    "fit": 7,
+    "why": "The mine setting and visible gold spheres plus a gun/shotgun prop suggest the idea of shooting gold, but no action is shown and the target of \u201cinto a\u201d isn\u2019t clear, so the connection is partial rather than instant."
+   },
+   {
+    "seen": "Underground mine tunnel with wooden supports and rail tracks; a cartoon miner character; small gold nuggets/balls and rock piles; a shotgun-like device leaning against the rail.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true
+    },
+    "fit": 7,
+    "why": "The scene shows gold nuggets and a shotgun-like device in a mine, which suggests the idea of shooting gold. However, no action of shooting is shown and it\u2019s not explicit what the gold is being shot into, so the connection isn\u2019t instant."
+   }
+  ]
+ },
+ {
+  "i": 4,
+  "sentence": 2,
+  "words": "gold mine?",
+  "zone": "deep",
+  "frame": 11,
+  "concepts": [
+   "light:day",
+   "obj:gold_vein",
+   "obj:gold_vein:hold",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a rock with a gold vein"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a rock with a gold vein": false
+  },
+  "fit_median": 8,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A timber-supported underground tunnel with rocky walls, minecart rails, and dim lighting; foreground wooden platform/beam.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rock with a gold vein": false
+    },
+    "fit": 7,
+    "why": "The scene clearly depicts a mine tunnel with rails, which aligns with the idea of a mine, but there is no visible gold or gold vein to make the connection specifically to a gold mine."
+   },
+   {
+    "seen": "rocky underground tunnel, wooden support beams, minecart tracks, dim lighting",
+    "visible": {
+     "a mine tunnel": true,
+     "a rock with a gold vein": false
+    },
+    "fit": 8,
+    "why": "The scene clearly shows the interior of a mine with rails and timbering, so it matches the idea of a mine. However, there is no visible gold vein or ore, so the 'gold' aspect isn\u2019t explicit."
+   },
+   {
+    "seen": "a wooden-supported mine tunnel with rocky walls, mining rail tracks, dark interior lighting",
+    "visible": {
+     "a mine tunnel": true,
+     "a rock with a gold vein": false
+    },
+    "fit": 8,
+    "why": "The scene clearly shows an underground mine tunnel with rails and timbering, which suggests a mine; however, no visible gold vein or ore makes the gold aspect implied rather than explicit."
+   }
+  ]
+ },
+ {
+  "i": 5,
+  "sentence": 3,
+  "words": "You see, it's called salting.",
+  "zone": "entrance",
+  "frame": 29,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:pour",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [],
+  "visible": {},
+  "fit_median": 4,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "cartoon miner character, shovel, mine tunnel with wooden beams, tan hat/helmet, rectangular board/clipboard on chest, outstretched right arm",
+    "visible": {
+     "cartoon miner character": true,
+     "shovel": true,
+     "mine tunnel with wooden beams": true,
+     "tan hat/helmet": true,
+     "rectangular board/clipboard on chest": true,
+     "outstretched right arm": true
+    },
+    "fit": 3,
+    "why": "The scene reads as a mining setting, which could loosely relate to the concept of \u2018salting a mine,\u2019 but nothing explicitly shows salting; without added context, most viewers wouldn\u2019t immediately make the connection."
+   },
+   {
+    "seen": "Cartoon miner character wearing a hard hat, round face with simple eyes and nose, blue torso with a rectangular clipboard/board on the chest, shovel leaning nearby, wooden mine tunnel supports and equipment/rails in the background, outstretched arm",
+    "visible": {},
+    "fit": 4,
+    "why": "The mining setting can hint at the mining term 'salting,' but there\u2019s no visual of salt, sprinkling, or deception. Without context, viewers won\u2019t instantly connect the image to the concept, so the link is weak."
+   },
+   {
+    "seen": "A stylized cartoon character with a round white head and oval blue torso, black dot eyes and nose, small eyebrows, and a tan hard hat. The character has thin black stick arms and legs, stands in what looks like an underground mine with timber supports. A shovel is propped on the left, and a tan rectangular board or clipboard is attached to the character\u2019s chest.",
+    "visible": {},
+    "fit": 5,
+    "why": "The mine setting and tools hint at mining, where \u201csalting\u201d can refer to faking ore samples. However, nothing directly depicts salt or the act of salting, so the connection is only moderate."
+   }
+  ]
+ },
+ {
+  "i": 6,
+  "sentence": 4,
+  "words": "He's dug this mine for 10 years and",
+  "zone": "deep",
+  "frame": 31,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:hand_drill",
+   "obj:hand_drill:drill",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel"
+  ],
+  "visible": {
+   "a mine tunnel": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "Cartoon character standing inside an underground mine tunnel; wooden support beams and rocky walls; mine rail tracks; a track switch/valve with a wheel; dim light farther down the tunnel; small rock piles on the ground.",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 9,
+    "why": "The setting is unmistakably a mine tunnel with rails and supports, which strongly matches the idea that someone has been digging a mine. It doesn\u2019t show the act of digging or the 10-year timespan, but the environment clearly supports the narration."
+   },
+   {
+    "seen": "cartoon figure wearing a cap, underground mine tunnel with wooden beams and rock walls, rail tracks, a switch/lever by the tracks, lamp light in the distance, scattered rocks/debris",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 8,
+    "why": "The scene clearly shows a mine tunnel with tracks and a worker-like character, so viewers will connect it to a long-term mining effort, though the image doesn\u2019t explicitly convey the 10-year duration or the act of digging."
+   },
+   {
+    "seen": "cartoon miner-like character wearing a cap/helmet, inside an underground mine tunnel with wooden beams and rock walls, rail tracks, a handwheel/track switch, scattered rocks, a light down the tunnel",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 9,
+    "why": "The image clearly shows a miner-like character in a wooden-supported rock tunnel with tracks, which reads as a mine. It matches the idea of someone who has been mining, though the duration of 10 years is not visually indicated."
+   }
+  ]
+ },
+ {
+  "i": 7,
+  "sentence": 4,
+  "words": "found nothing but rock.",
+  "zone": "deep",
+  "frame": 22,
+  "concepts": [
+   "cast:person",
+   "char:point",
+   "light:day",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel"
+  ],
+  "visible": {
+   "a mine tunnel": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "cartoon-style mine interior with rocky walls, wooden supports, rail tracks, dim light, scattered rocks, and a frowning character wearing a cap",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 9,
+    "why": "The scene clearly shows the interior of a mine with rocky walls and tracks, and the character\u2019s frown suggests disappointment\u2014matching the idea of finding nothing but rock. It\u2019s not explicit about the search result, but the visual strongly supports the line."
+   },
+   {
+    "seen": [
+     "cartoon miner character with cap and frown",
+     "mine tunnel with wooden supports",
+     "minecart tracks",
+     "rocky walls",
+     "distant lamp light",
+     "small rocks on the ground"
+    ],
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 9,
+    "why": "The scene clearly shows a rocky mine tunnel and a disappointed character, which aligns strongly with the idea of having found nothing but rock."
+   },
+   {
+    "seen": "cartoon character standing in an underground mine tunnel, wooden supports and ceiling, rock walls, mine rail tracks/sleepers, dim lamp light in the background, small rocks on the ground",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 8,
+    "why": "The scene clearly shows a rocky mine tunnel with tracks and very little else, matching the idea of finding only rock; the character\u2019s frown reinforces disappointment, though the presence of tracks and timbers means it\u2019s not literally only rock."
+   }
+  ]
+ },
+ {
+  "i": 8,
+  "sentence": 5,
+  "words": "And tomorrow, a rich guy is coming to buy it.",
+  "zone": "entrance",
+  "frame": 50,
+  "concepts": [
+   "cast:person",
+   "char:walk",
+   "light:day",
+   "obj:money_bag",
+   "obj:money_bag:hold",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a money bag",
+   "a rich-looking person (top hat or suit)",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a money bag": true,
+   "a rich-looking person (top hat or suit)": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A cartoon stick-figure person with a large top hat standing in a mine tunnel beside rail tracks; crates and lights in the tunnel; a money bag with a dollar sign and a couple of coins on the ground.",
+    "visible": {
+     "a money bag": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 8,
+    "why": "The top-hatted cartoon person reads as a rich guy and the money bag suggests payment, aligning with the idea of someone rich coming to buy. However, the image shows the person already there and doesn\u2019t convey the \u2018tomorrow/coming\u2019 aspect or an explicit buying action, so it\u2019s not a perfect match."
+   },
+   {
+    "seen": "A cartoon mine tunnel with wooden beams and lights, a rail track, a cartoon character wearing a tall top hat, crates, a money bag with a dollar sign and some coins on the ground.",
+    "visible": {
+     "a money bag": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 8,
+    "why": "The image shows a wealthy-looking cartoon figure in a top hat and a money bag, which conveys the idea of a rich buyer. However, the scene suggests the rich person is already present rather than coming tomorrow, so it\u2019s not a perfect temporal match."
+   },
+   {
+    "seen": "A cartoon mine tunnel with wooden beams and rail tracks; a cartoon stick-figure character wearing a tall top hat; crates and lamps; a money bag with a dollar sign and some coins on the track.",
+    "visible": {
+     "a money bag": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 8,
+    "why": "The top-hatted character and the money bag strongly suggest a wealthy buyer, matching the idea of 'a rich guy.' However, the line says 'tomorrow' (future arrival) while the rich character appears already present, slightly reducing the fit."
+   }
+  ]
+ },
+ {
+  "i": 9,
+  "sentence": 6,
+  "words": "So he spent his last hundred bucks on gold dust instead.",
+  "zone": "entrance",
+  "frame": 50,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:hold",
+   "obj:money_bag",
+   "obj:money_bag:hold",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a money bag",
+   "a prospecting pan with gold"
+  ],
+  "visible": {
+   "a money bag": true,
+   "a prospecting pan with gold": false
+  },
+  "fit_median": 5,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "cartoon miner in an underground mine, wooden supports, rail tracks, a money bag with a dollar sign, a small stack of coins, crates, a shovel, a green pan, rocks and dirt, dim lamps",
+    "visible": {
+     "a money bag": true,
+     "a prospecting pan with gold": false
+    },
+    "fit": 5,
+    "why": "The money bag and coins suggest money and gold, which loosely matches the idea of spending on gold. However, there is no clear depiction of gold dust or the act of buying it; the pan is present but not shown with gold, so the connection isn\u2019t immediate."
+   },
+   {
+    "seen": "Cartoon miner character in an underground tunnel with wooden supports, a rail track, a money bag with a dollar sign, a small stack of gold coins, crates/boxes, a shovel, and a sack/rock; dim lamp light in the background.",
+    "visible": {
+     "a money bag": true,
+     "a prospecting pan with gold": false
+    },
+    "fit": 5,
+    "why": "The mine setting, money bag, and gold coins suggest money and gold, aligning somewhat with the idea of buying gold. However, there\u2019s no clear depiction of gold dust or the act of spending his last hundred bucks, so the connection isn\u2019t strong."
+   },
+   {
+    "seen": "A cartoon miner stands in an underground mine tunnel beside rail tracks. On the ground are a money bag with a dollar sign and a small stack of gold coins. Around him are wooden beams, crates, a shovel, rocks/ore piles, and a distant lamp.",
+    "visible": {
+     "a money bag": true,
+     "a prospecting pan with gold": false
+    },
+    "fit": 5,
+    "why": "The money bag and coins suggest money and gold, which loosely connects to the idea of buying gold dust, but there\u2019s no clear depiction of gold dust or a purchase taking place, so the connection is only moderate."
+   }
+  ]
+ },
+ {
+  "i": 10,
+  "sentence": 7,
+  "words": "Next morning, the rich guy rolls up in a white suit and",
+  "zone": "entrance",
+  "frame": 45,
+  "concepts": [
+   "cast:person",
+   "char:walk",
+   "light:day",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a rich-looking person (top hat or suit)",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a rich-looking person (top hat or suit)": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 7,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A wooden mine tunnel with support beams and lights, minecart rails, crates and barrels, and a white cartoon character with a tall top hat and stick-like limbs walking along the tracks.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 7,
+    "why": "The scene clearly shows a mine setting and a cartoon character wearing a top hat, which signals a rich-looking person. However, the character isn\u2019t clearly in a white suit\u2014its body is white but there\u2019s no distinct suit clothing\u2014so the match to \u201crolls up in a white suit\u201d is good but not perfect."
+   },
+   {
+    "seen": "A wooden mine tunnel with support beams and lamps, a rail track, crates/containers, and a cartoon egg-shaped character wearing a tall top hat walking beside the track.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 5,
+    "why": "The top hat suggests a rich guy, and the character is white, but it doesn\u2019t clearly show a white suit or the idea of \u2018rolls up\u2019; it\u2019s just the character standing/walking in a mine tunnel."
+   },
+   {
+    "seen": "A wooden mine tunnel with timber supports and lit lamps, a rail track running through it, crates and green barrels on the side, and a white, oval-bodied cartoon figure wearing a tall tan top hat and walking along the track.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 7,
+    "why": "The mine setting and a cartoon figure in a top hat suggest a wealthy character, which aligns with 'the rich guy.' However, the image doesn\u2019t clearly show a white suit\u2014it's more a white-bodied character\u2014so the connection to 'white suit' is implied rather than explicit."
+   }
+  ]
+ },
+ {
+  "i": 11,
+  "sentence": 7,
+  "words": "bangs his head on the first beam.",
+  "zone": "entrance",
+  "frame": 29,
+  "concepts": [
+   "cast:person",
+   "char:fall",
+   "light:day",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a rich-looking person (top hat or suit)",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a rich-looking person (top hat or suit)": false,
+   "at least one cartoon person": false
+  },
+  "fit_median": 2,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A wooden-supported mine tunnel with rock walls, overhead beams, rail tracks, lanterns, a shovel leaning on a crate/box with tools, some green items, and part of a mine cart or equipment in the foreground. No people are present.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rich-looking person (top hat or suit)": false,
+     "at least one cartoon person": false
+    },
+    "fit": 2,
+    "why": "The tunnel and its beams are visible, but there is no character shown and no head-banging action, so the line only loosely relates to the setting."
+   },
+   {
+    "seen": "- Wooden-beamed mine tunnel with rocky walls\n- Rail tracks running through the tunnel\n- Overhead support beams and wall-mounted lamps\n- A shovel leaning against a crate/box\n- Crates and small green items (possibly tools or supplies)\n- The front of a mine cart or equipment with white cylindrical parts near the tracks",
+    "visible": {
+     "a mine tunnel": true,
+     "a rich-looking person (top hat or suit)": false,
+     "at least one cartoon person": false
+    },
+    "fit": 2,
+    "why": "The scene clearly shows a mine tunnel with low beams, which could imply head-banging, but there is no person shown and no action of hitting a beam. The connection to the line relies solely on the presence of beams."
+   },
+   {
+    "seen": "A wooden-beam mine tunnel with rocky walls, overhead support beams, rail tracks running into the distance, hanging lantern lights, a shovel and mining tools next to a wooden crate/box, small piles of material, and two white cylindrical objects along the track in the foreground.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rich-looking person (top hat or suit)": false,
+     "at least one cartoon person": false
+    },
+    "fit": 2,
+    "why": "The scene clearly shows low beams in a mine tunnel, which matches the idea of a head-bumping hazard, but there is no character present and no head-banging action depicted, so the connection to the narration is weak."
+   }
+  ]
+ },
+ {
+  "i": 12,
+  "sentence": 8,
+  "words": "But he's brought an expert.",
+  "zone": "looking_back",
+  "frame": 25,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "char:walk",
+   "light:day",
+   "outfit:merchant",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "at least one cartoon person": true
+  },
+  "fit_median": 2,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A cartoon character wearing a cap stands in an underground mine tunnel next to stacked barrels/crates and a set of rail tracks, with rocky walls, wooden beams, and hanging lights.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 2,
+    "why": "Only one cartoon person is visible and there is no indication of a second person or an expert being brought, so the connection to the line is weak."
+   },
+   {
+    "seen": "a cartoon person with a cap standing with hands on hips, underground mine tunnel with rock walls and wooden beams, hanging lamps, railway tracks, stacked barrels or crates, dirt floor",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 2,
+    "why": "The image shows a single cartoon person in a mine setting, with no second character or clear cue that an expert has been brought. It doesn\u2019t convey the idea of someone arriving with an expert."
+   },
+   {
+    "seen": "A stylized cartoon figure wearing a cap stands on mine/cart tracks inside a rocky tunnel. There are wooden beams, hanging lamps, stacked barrels/crates on the left, and small piles of rocks.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The image shows only one cartoon person and no clear indication of another person being brought or identified as an expert. The mine setting might suggest expertise, but without a second character or explicit cues, the connection to the line is weak."
+   }
+  ]
+ },
+ {
+  "i": 13,
+  "sentence": 9,
+  "words": "And the expert isn't stupid.",
+  "zone": "looking_back",
+  "frame": 29,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "at least one cartoon person": true
+  },
+  "fit_median": 4,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A smiling cartoon person with a cap and oval body, clipboard on chest, black stick arms and legs; underground tunnel or mine setting with wooden beams and rock walls; a hanging lantern; rail tracks; stacked boxes/crates.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 6,
+    "why": "The clipboard-carrying character in a worksite can suggest an expert, but nothing explicitly conveys the idea of 'isn't stupid'; the link relies on inference rather than an immediate visual cue."
+   },
+   {
+    "seen": "A cartoon character with a round head and oval body, stick-like arms and legs, a smiling face, and a clipboard on the chest. The scene appears to be an underground tunnel or mine with wooden beams, rock walls, a hanging lantern, rail tracks, and some boxes.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The clipboard and composed expression could imply expertise, but the image does not clearly communicate the idea that 'the expert isn't stupid'; the connection relies on narration rather than visuals."
+   },
+   {
+    "seen": [
+     "cartoon person with an oval head/body and a slight smile",
+     "clipboard attached to the torso",
+     "stick-like arms and legs",
+     "mining tunnel or cave setting with rock walls",
+     "hanging lantern/light",
+     "mine track/rails",
+     "stacked boxes or crates"
+    ],
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The image shows a cartoon worker-like character with a clipboard in a mine, which could imply expertise, but nothing visually communicates the idea of intelligence or the statement about not being stupid, so the connection is weak."
+   }
+  ]
+ },
+ {
+  "i": 14,
+  "sentence": 10,
+  "words": "He smashes a chunk of wall,",
+  "zone": "looking_back",
+  "frame": 24,
+  "concepts": [
+   "cast:person",
+   "char:swing",
+   "light:day",
+   "obj:gold_vein",
+   "obj:gold_vein:open",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a rock with a gold vein"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a rock with a gold vein": false
+  },
+  "fit_median": 2,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "cartoon miner character in a rocky mine tunnel, wooden supports and hanging lamps, rail tracks, barrels/ore bins, scattered boxes/debris",
+    "visible": {
+     "a mine tunnel": true,
+     "a rock with a gold vein": false
+    },
+    "fit": 2,
+    "why": "The scene clearly takes place in a mine, but there is no visible smashing action or broken wall chunk; the character is just standing and holding something."
+   },
+   {
+    "seen": "A cartoon miner-like character in a rocky mine tunnel with wooden supports, hanging lamps, rail tracks, stacked barrels/crates, broken wooden pieces on the rail, and scattered rocks.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rock with a gold vein": false
+    },
+    "fit": 2,
+    "why": "The scene is inside a mine, but no smashing action is shown\u2014no tool striking a wall or chunk breaking off. The character is just standing, and any debris appears to be from crates, not a wall."
+   },
+   {
+    "seen": "A cartoon miner character holding a device, inside an underground mine tunnel with wooden beams and rocky walls; hanging lamps; a mine rail track; stacked barrels/ore bins; a broken wooden crate/debris on the track.",
+    "visible": {
+     "a mine tunnel": true,
+     "a rock with a gold vein": false
+    },
+    "fit": 3,
+    "why": "The setting is a mine and there is debris, but the image does not show him smashing a wall or a freshly broken wall; the character appears idle and the wall looks intact."
+   }
+  ]
+ },
+ {
+  "i": 15,
+  "sentence": 10,
+  "words": "swirls it in a pan, and gold flakes spin to the bottom.",
+  "zone": "looking_back",
+  "frame": 53,
+  "concepts": [
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:pour",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a prospecting pan with gold"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a prospecting pan with gold": false
+  },
+  "fit_median": 3,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "Mine tunnel with wooden supports and rock walls, a set of mine cart rails and wooden ties, small cone-like ore piles, and a black prospecting pan hovering over the tracks.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false
+    },
+    "fit": 3,
+    "why": "The scene clearly shows a mine setting and a prospecting pan, but there is no visible swirling action or gold flakes in the pan, so the connection to the narration is weak aside from the presence of the pan."
+   },
+   {
+    "seen": "Interior of a mine-like tunnel with rock walls and timber supports, a set of rail tracks with wooden ties, scattered stylized rock piles, and a large black prospector's pan hovering over the tracks; dirt floor with small green flecks; no visible gold.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false
+    },
+    "fit": 3,
+    "why": "A pan is clearly shown, which loosely matches the narration, but there is no visible swirling motion or gold flakes collecting at the bottom, so the connection is weak."
+   },
+   {
+    "seen": "A mine-like tunnel interior with rocky walls and timber supports, a set of minecart rails with wooden ties, small stylized ore piles, and a black prospecting pan in the foreground.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false
+    },
+    "fit": 4,
+    "why": "The scene clearly shows a mining setting and a pan, which loosely connects to panning for gold, but there are no visible gold flakes, water, or swirling motion, so the connection to the specific action described is weak."
+   }
+  ]
+ },
+ {
+  "i": 16,
+  "sentence": 11,
+  "words": "But under his magnifying glass, every flake is flat.",
+  "zone": "looking_back",
+  "frame": 53,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:hold",
+   "obj:magnifier",
+   "obj:magnifier:hold",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a magnifying glass",
+   "a prospecting pan with gold"
+  ],
+  "visible": {
+   "a magnifying glass": true,
+   "a prospecting pan with gold": true
+  },
+  "fit_median": 7,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A magnifying glass on mine tracks magnifying a gold flake; a rocky mine tunnel; wooden rails and sleepers; a cartoon figure on the left; a black prospecting pan with gold pieces on the right edge.",
+    "visible": {
+     "a magnifying glass": true,
+     "a prospecting pan with gold": true
+    },
+    "fit": 7,
+    "why": "The magnifying glass is prominent and shows a gold flake, aligning with inspecting flakes. But it shows only one flake and doesn\u2019t clearly communicate that every flake is flat, so the match isn\u2019t instant."
+   },
+   {
+    "seen": "A large magnifying glass on a stand centered over railroad tracks, a gold flake/nugget visible through the lens, a black prospecting pan at the right edge, a cartoon miner character to the left, mine tunnel walls and rails/sleepers.",
+    "visible": {
+     "a magnifying glass": true,
+     "a prospecting pan with gold": false
+    },
+    "fit": 7,
+    "why": "The magnifying glass is prominent and a single gold flake is seen through it, which supports the line. However, only one flake is shown and its flatness isn\u2019t strongly conveyed, so the connection isn\u2019t instant."
+   },
+   {
+    "seen": "A mine tunnel scene with rails and wooden ties; a large magnifying glass centered over the tracks showing a gold flake under the lens; a prospector\u2019s black pan with gold flakes at the right edge; a cartoon figure standing to the left; rocky walls and small rocks around.",
+    "visible": {
+     "a magnifying glass": true,
+     "a prospecting pan with gold": true
+    },
+    "fit": 8,
+    "why": "The magnifying glass is central and a gold flake is shown beneath it, clearly implying inspection. That supports the line about looking under a magnifying glass, though the \u2018flatness\u2019 of the flake isn\u2019t strongly emphasized, and the pan is only partly in frame, so the connection isn\u2019t instantaneous."
+   }
+  ]
+ },
+ {
+  "i": 17,
+  "sentence": 12,
+  "words": "Somebody shot this gold into the wall.",
+  "zone": "deep",
+  "frame": 43,
+  "concepts": [
+   "cast:person",
+   "char:aim",
+   "char:point",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:hold",
+   "obj:gold_shotgun",
+   "obj:gold_shotgun:fire",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a prospecting pan with gold",
+   "a shotgun",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a prospecting pan with gold": false,
+   "a shotgun": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 6,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A dimly lit mine tunnel with wooden beams and rail tracks; a cartoon person in a cap pointing toward the wall; small gold pieces on the ground and a gold spot in the wall; a shotgun leaning against the rail.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true,
+     "at least one cartoon person": true
+    },
+    "fit": 8,
+    "why": "There is a shotgun visible and the cartoon person is gesturing toward gold embedded in the wall, so the viewer can infer that the gold was shot into the wall. The shooting itself isn\u2019t shown, so the connection requires inference rather than being explicit."
+   },
+   {
+    "seen": "A dimly lit mine tunnel with wooden beams and rock walls, mine rail tracks, a cartoon person wearing a cap with a worried face, small rock piles on the ground, a double\u2011barrel shotgun resting by the rail, and a light in the distance.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true,
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The mine setting and a shotgun are present, hinting at the idea of shooting, but there is no visible gold in the wall or any action suggesting it was shot there, so the connection to the narration is weak."
+   },
+   {
+    "seen": "A cartoon scene inside a timbered mine tunnel with rail tracks. A worried-looking cartoon person stands by the tracks. A double-barrel shotgun leans on a rail. Rocky walls, scattered small gold-like chunks on the ground, and a light in the distance.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true,
+     "at least one cartoon person": true
+    },
+    "fit": 6,
+    "why": "The mine setting shows gold-like pieces and a clearly visible shotgun, which supports the idea that gold might have been shot. However, the image doesn\u2019t clearly show gold embedded in the wall at the moment of impact, so the connection isn\u2019t instant or explicit."
+   }
+  ]
+ },
+ {
+  "i": 18,
+  "sentence": 13,
+  "words": "But the rich guy just laughs.",
+  "zone": "deep",
+  "frame": 25,
+  "concepts": [
+   "cast:person",
+   "char:cheer",
+   "light:day",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a rich-looking person (top hat or suit)",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a rich-looking person (top hat or suit)": false,
+   "at least one cartoon person": true
+  },
+  "fit_median": 3,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A white, egg-shaped cartoon person with a smiling face, button-like details on the torso, and a small device clipped to the chest, standing in a dimly lit mine/cave tunnel with wooden beams and a rail track.",
+    "visible": {
+     "a rich-looking person (top hat or suit)": false,
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The character is clearly a cartoon person and is smiling, which could suggest laughter, but there are no clear indicators of wealth such as a top hat or suit, so the link to 'the rich guy' is weak."
+   },
+   {
+    "seen": "A smiling, egg-shaped cartoon character with simple facial features, black buttons on the torso, a small rectangular badge/device on the chest, thin stick-like limbs, standing in a dim tunnel or mine with wooden beams and rails; warm lighting.",
+    "visible": {
+     "a rich-looking person (top hat or suit)": false,
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The character appears to be smiling, which could imply laughing, but there are no clear indicators of wealth (no top hat, suit, or other rich-guy cues). The expression matches 'just laughs,' yet the 'rich guy' aspect is not conveyed, so the connection is weak."
+   },
+   {
+    "seen": "A simple white cartoon character with a round head and body, dot eyes and a smiling mouth, small black buttons and a chest device; thin black limbs; in a dim tunnel or mine with wooden beams and rail tracks.",
+    "visible": {
+     "a rich-looking person (top hat or suit)": false,
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The character is clearly a cartoon person and is smiling, which could imply laughter, but there are no clear indicators of wealth like a top hat or suit, so the 'rich guy' part is not conveyed."
+   }
+  ]
+ },
+ {
+  "i": 19,
+  "sentence": 14,
+  "words": "Why would anyone shoot gold into a wall?",
+  "zone": "deep",
+  "frame": 39,
+  "concepts": [
+   "cast:person",
+   "char:aim",
+   "char:stand",
+   "light:day",
+   "obj:gold_pan",
+   "obj:gold_pan:hold",
+   "obj:gold_shotgun",
+   "obj:gold_shotgun:fire",
+   "outfit:merchant",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a prospecting pan with gold",
+   "a shotgun",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a prospecting pan with gold": false,
+   "a shotgun": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 8,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "An underground mine tunnel with wooden beams and a rail track. A cartoon, egg-shaped character wearing a top hat stands by the track. A double\u2011barrel shotgun is leaning against the rail with a gold-colored ornament/round on it. Rocky walls, small rock piles, and a light in the distance.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true,
+     "at least one cartoon person": true
+    },
+    "fit": 7,
+    "why": "The mine setting and a visible shotgun relate to the idea of shooting in a mine, and there\u2019s a gold-colored round on the gun hinting at shooting gold. However, no action of shooting or gold embedded in a wall is shown, so the connection isn\u2019t immediate."
+   },
+   {
+    "seen": "A wooden-beamed mine tunnel with rocky walls and minecart rails; a cartoon character with a top hat standing by the track; a double-barrel shotgun leaning against the rail with a gold-colored round at its muzzle; tunnel lighting and small rock piles.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true,
+     "at least one cartoon person": true
+    },
+    "fit": 8,
+    "why": "A shotgun with a gold-colored round is visible near the mine wall, so the image suggests the idea of shooting gold into a wall, though the gold detail might not be immediately obvious to every viewer."
+   },
+   {
+    "seen": "A cartoon figure with a tall hat standing in an underground mine tunnel with wooden beams and rail tracks; a double\u2011barrel shotgun propped by the rail with a gold ball; rocky walls and dim light.",
+    "visible": {
+     "a mine tunnel": true,
+     "a prospecting pan with gold": false,
+     "a shotgun": true,
+     "at least one cartoon person": true
+    },
+    "fit": 8,
+    "why": "The scene shows a shotgun apparently loaded with a gold sphere inside a mine, suggesting the idea of shooting gold into the rock wall, but no shooting action or explicit wall target is shown, so the connection isn\u2019t totally immediate."
+   }
+  ]
+ },
+ {
+  "i": 20,
+  "sentence": 15,
+  "words": "That's insane!",
+  "zone": "looking_back",
+  "frame": 15,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [],
+  "visible": {},
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A cartoon miner-like character with a shocked face (O-shaped mouth, raised brows) in an underground mine. The figure has a helmet, stick arms and legs, a rectangular board/clipboard on the chest. Background shows rocky walls, wooden supports, a hanging lantern, minecart rails, and stacked crates/blocks.",
+    "visible": {},
+    "fit": 8,
+    "why": "The character\u2019s wide open mouth and raised eyebrows clearly convey surprise or disbelief, which matches the exclamation. While the mining context isn\u2019t inherently tied to the phrase, the expression strongly supports it."
+   },
+   {
+    "seen": "A stylized cartoon character in a mine tunnel, with wide eyes, raised eyebrows, and an open O-shaped mouth, wearing a brown cap; oval body with a clipboard on the chest; stick-like arms and legs; mine rails, wooden beams, rocks, a lantern, and a small stack of boxes/bricks nearby.",
+    "visible": {},
+    "fit": 9,
+    "why": "The character\u2019s wide eyes and open mouth clearly convey shock or disbelief, which aligns strongly with the exclamation 'That's insane!' The dim, tense mine setting adds to the dramatic feel."
+   },
+   {
+    "seen": [
+     "cartoon character",
+     "shocked open-mouth expression",
+     "raised eyebrows",
+     "clipboard on chest",
+     "black stick arms",
+     "mine tunnel interior",
+     "rocky wall",
+     "hanging lantern",
+     "rail tracks",
+     "stacked boxes/crates"
+    ],
+    "visible": {
+     "cartoon character": true,
+     "shocked open-mouth expression": true,
+     "raised eyebrows": true,
+     "clipboard on chest": true,
+     "black stick arms": true,
+     "mine tunnel interior": true,
+     "rocky wall": true,
+     "hanging lantern": true,
+     "rail tracks": true,
+     "stacked boxes/crates": true
+    },
+    "fit": 8,
+    "why": "The character\u2019s wide open mouth and raised eyebrows convey clear shock/surprise, which aligns well with the line 'That's insane!'. The setting doesn\u2019t directly explain the cause, but the reaction alone strongly supports the phrase."
+   }
+  ]
+ },
+ {
+  "i": 21,
+  "sentence": 16,
+  "words": "And his buddy nods.",
+  "zone": "looking_back",
+  "frame": 22,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "at least one cartoon person": true
+  },
+  "fit_median": 2,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "cartoon person standing in a mine tunnel, wooden beams, hanging lights, mine cart track, stacked barrels, rocks and cave walls",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 1,
+    "why": "The frame shows a single cartoon person standing still; there is no second person (a buddy) and no visible nodding action, so it does not match the line about a buddy nodding."
+   },
+   {
+    "seen": "A cartoon person with a brown cap and smile standing in a mine tunnel; rocky walls and wooden beams; two hanging lamps; a barrel/bin; a wooden rail track beside him.",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 2,
+    "why": "Only one cartoon character is visible and there is no clear nodding motion, so it doesn\u2019t obviously depict a buddy nodding."
+   },
+   {
+    "seen": "Cartoon person standing in a mine tunnel, wooden beams, rock walls, rail tracks, hanging lanterns, a barrel or crate",
+    "visible": {
+     "at least one cartoon person": true
+    },
+    "fit": 2,
+    "why": "The still shows a single cartoon person standing and smiling in a mine setting, but there is no visible nodding or a clear indication of a second person as a 'buddy.' Without motion, the action of nodding is not conveyed."
+   }
+  ]
+ },
+ {
+  "i": 22,
+  "sentence": 17,
+  "words": "Completely insane.",
+  "zone": "deep",
+  "frame": 25,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [],
+  "visible": {},
+  "fit_median": 2,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A simple 3D cartoon figure (miner) with a yellow cap and a smiling face standing in a dim underground mine tunnel beside a wooden railroad track; rocky walls, wooden beams/ceiling, small rocks on the ground, and a distant light on the tunnel wall.",
+    "visible": {
+     "cartoon miner character": true,
+     "yellow cap": true,
+     "smiling face": true,
+     "mine tunnel": true,
+     "wooden beams/ceiling": true,
+     "railroad track": true,
+     "distant light": true,
+     "rocks on ground": true
+    },
+    "fit": 2,
+    "why": "The scene looks calm and ordinary\u2014a cartoon miner in a tunnel. Nothing visually suggests chaos or madness, so the connection to 'Completely insane' is weak."
+   },
+   {
+    "seen": "cartoon character, tan cap, smiling face, underground mine tunnel, wooden supports/ceiling beams, minecart rails, wooden sleepers/ties, wall lamp/light, small rocks on ground, shadows/dim lighting",
+    "visible": {
+     "cartoon character": true,
+     "tan cap": true,
+     "smiling face": true,
+     "underground mine tunnel": true,
+     "wooden supports/ceiling beams": true,
+     "minecart rails": true,
+     "wooden sleepers/ties": true,
+     "wall lamp/light": true,
+     "small rocks on ground": true,
+     "shadows/dim lighting": true
+    },
+    "fit": 2,
+    "why": "The scene shows a calm, friendly-looking cartoon figure standing by mine tracks in a dimly lit tunnel. Nothing appears chaotic or irrational; the phrase would read as ironic rather than directly connected."
+   },
+   {
+    "seen": "cartoon stick-figure miner character with hat, smiling face, mine tunnel with timber supports, railway tracks, wooden sleepers (ties), rocky walls, ceiling beams, ground with scattered small rocks, lit lamp in the distance, dim lighting and shadows, character's arms and legs, rectangular patch on the character's torso",
+    "visible": {
+     "cartoon stick-figure miner character with hat": true,
+     "smiling face": true,
+     "mine tunnel with timber supports": true,
+     "railway tracks": true,
+     "wooden sleepers (ties)": true,
+     "rocky walls": true,
+     "ceiling beams": true,
+     "ground with scattered small rocks": true,
+     "lit lamp in the distance": true,
+     "dim lighting and shadows": true,
+     "character's arms and legs": true,
+     "rectangular patch on the character's torso": true
+    },
+    "fit": 2,
+    "why": "The scene shows a calm, friendly-looking cartoon figure standing in a mine tunnel. Nothing appears chaotic or deranged; the mood is quiet and orderly. While the setting is slightly unusual, it does not strongly convey the idea of being 'completely insane.'"
+   }
+  ]
+ },
+ {
+  "i": 23,
+  "sentence": 18,
+  "words": "So the rich guy pays up.",
+  "zone": "entrance",
+  "frame": 25,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:money_bag",
+   "obj:money_bag:hold",
+   "outfit:merchant",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a money bag",
+   "a rich-looking person (top hat or suit)",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a money bag": true,
+   "a rich-looking person (top hat or suit)": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A cartoon person wearing a top hat stands in a mine tunnel by rail tracks. There\u2019s a money bag with a dollar sign on the ground near some coins. Crates, a shovel, rocks, and lights are in the background.",
+    "visible": {
+     "a money bag": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 9,
+    "why": "The top-hatted cartoon character reads as a rich person, and a money bag with coins suggests payment. While no handing-over action is shown, the elements strongly imply that the rich guy pays."
+   },
+   {
+    "seen": "Cartoon person with a top hat in an underground mine tunnel, railroad track, money bag with a dollar sign, a few gold coins, crates and tools",
+    "visible": {
+     "a money bag": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 9,
+    "why": "A top-hat-wearing character (reads as rich) stands beside a money bag and coins, strongly implying he has paid. While no handing-over action is shown, the visual cues closely match the line."
+   },
+   {
+    "seen": "Cartoon mine scene with a stick-figure character in a top hat, a money bag with a dollar sign and coins by the rail, mine tunnel, crates, shovel, rocks and gold ingots.",
+    "visible": {
+     "a money bag": true,
+     "a rich-looking person (top hat or suit)": true,
+     "at least one cartoon person": true
+    },
+    "fit": 9,
+    "why": "The character clearly looks rich due to the top hat, and a money bag with coins is placed right in front, strongly suggesting that the rich guy is paying, though no explicit handoff is shown."
+   }
+  ]
+ },
+ {
+  "i": 24,
+  "sentence": 19,
+  "words": "And while those two bolt with the money, he",
+  "zone": "entrance",
+  "frame": 38,
+  "concepts": [
+   "cast:person",
+   "char:run",
+   "light:day",
+   "obj:money_bag",
+   "obj:money_bag:hold",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a money bag",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a money bag": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 4,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "An underground mine tunnel with wooden beams and rails. Two simplified cartoon figures at the sides. A money bag with a dollar sign and a couple of gold coins on the tracks. A wooden crate/cart with green blocks, a shovel, and a wall lantern.",
+    "visible": {
+     "a money bag": true,
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The frame includes two characters and a money bag, so it loosely matches 'those two' and 'the money'. However, no one is running or carrying the bag\u2014the money is stationary\u2014so 'bolt with the money' isn\u2019t clearly shown."
+   },
+   {
+    "seen": "an underground mine tunnel with wooden supports, rail tracks, a money bag with a dollar sign and some coins, a shovel, a wooden cart/crate with green items, two cartoon characters at the edges, a lantern light",
+    "visible": {
+     "a money bag": true,
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The scene shows two cartoon figures and a visible money bag, but no one is clearly running off with it; the bag is stationary on the track, so the idea of 'those two bolt with the money' is only loosely suggested."
+   },
+   {
+    "seen": "An underground mine tunnel with wooden beams and rails, a lit wall lamp, a shovel next to a crate, some green items, a money bag with a dollar sign and coins on the track, and two cartoon figures at the edges of the frame.",
+    "visible": {
+     "a money bag": true,
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "Two characters and a money bag are present, matching the idea of 'those two' and 'money,' but no one is shown running or taking the money\u2014the bag appears left on the ground\u2014so the connection to 'bolt with the money' is only partial."
+   }
+  ]
+ },
+ {
+  "i": 25,
+  "sentence": 19,
+  "words": "stays behind and pulls a stick of dynamite out of his suit.",
+  "zone": "entrance",
+  "frame": 57,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:dynamite",
+   "obj:dynamite:hold",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a rich-looking person (top hat or suit)",
+   "a stick of dynamite",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a rich-looking person (top hat or suit)": true,
+   "a stick of dynamite": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 4,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "A cartoon person with a top hat standing in a mine tunnel beside rail tracks; crates and tools; a shovel and rocks; a red stick of dynamite with a fuse on the track.",
+    "visible": {
+     "a rich-looking person (top hat or suit)": true,
+     "a stick of dynamite": true,
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The character appears wealthy (top hat) and a stick of dynamite is clearly present, but he isn\u2019t pulling it out of his suit\u2014the dynamite sits on the ground\u2014so the specific action in the line isn\u2019t shown."
+   },
+   {
+    "seen": "A cartoon person with a top hat standing in a mine tunnel by rail tracks; a red stick of dynamite on the ground near the rail; crates and mining tools/props around.",
+    "visible": {
+     "a rich-looking person (top hat or suit)": true,
+     "a stick of dynamite": true,
+     "at least one cartoon person": true
+    },
+    "fit": 3,
+    "why": "The image shows a rich-looking cartoon character (top hat) and a visible stick of dynamite, but the character is not pulling the dynamite from a suit\u2014it's just sitting on the ground. The specific action in the line isn\u2019t depicted."
+   },
+   {
+    "seen": "A cartoon person with a top hat standing by mine rail tracks inside a tunnel. Boxes/crates and a shovel behind him. A red stick of dynamite with a fuse sits on the ground near the rail. Rocks and wooden supports in the tunnel.",
+    "visible": {
+     "a rich-looking person (top hat or suit)": true,
+     "a stick of dynamite": true,
+     "at least one cartoon person": true
+    },
+    "fit": 4,
+    "why": "The character looks rich due to the top hat and a stick of dynamite is present, but he is not pulling it from a suit\u2014it's on the ground\u2014and there\u2019s no visible suit. The action described isn\u2019t shown, so the match is weak."
+   }
+  ]
+ },
+ {
+  "i": 26,
+  "sentence": 20,
+  "words": "He's never mined a day in his life.",
+  "zone": "entrance",
+  "frame": 39,
+  "concepts": [
+   "cast:person",
+   "char:stand",
+   "light:day",
+   "obj:hand_drill",
+   "obj:hand_drill:drill",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel"
+  ],
+  "visible": {
+   "a mine tunnel": true
+  },
+  "fit_median": 9,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A stylized cartoon character in a top hat standing in an underground mine tunnel with wooden supports, rail tracks, crates, a shovel, rocks/ore piles, a gear/lever mechanism by the track, and dim tunnel lights.",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 9,
+    "why": "The setting is unmistakably a mine tunnel (tracks, timbered walls, tools). The character\u2019s fancy top hat and clean, out-of-place look suggest he is not a miner, aligning strongly with the line that he\u2019s never mined a day in his life."
+   },
+   {
+    "seen": "Cartoon character with a top hat standing in an underground mine tunnel; wooden support beams and rock walls; mine rail tracks; crates and boxes; a shovel and rocks; a control wheel/lever by the track; a distant lamp/light.",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 8,
+    "why": "The scene clearly shows a mine setting, and the fancy, idle character looks out of place and not working, which supports the line that he\u2019s never mined. It doesn\u2019t explicitly show his inexperience, but the visual context strongly implies it."
+   },
+   {
+    "seen": "A stylized character with a top hat standing in an underground wooden mine tunnel; rail tracks; rock walls and support beams; crates and equipment; a shovel; ore/rock piles; a handwheel mechanism by the track; lights receding down the tunnel.",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 9,
+    "why": "The image clearly shows a mine interior with tracks and tools, while the top\u2011hatted character appears out of place and not working, which supports the idea that he\u2019s never mined. Strong visual connection, though not explicitly stated."
+   }
+  ]
+ },
+ {
+  "i": 27,
+  "sentence": 21,
+  "words": "So he just lights it, tosses it down the tunnel like a firecracker,",
+  "zone": "deep",
+  "frame": 62,
+  "concepts": [
+   "cast:person",
+   "char:swing",
+   "light:day",
+   "obj:dynamite",
+   "obj:dynamite:fire",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel",
+   "a stick of dynamite"
+  ],
+  "visible": {
+   "a mine tunnel": true,
+   "a stick of dynamite": true
+  },
+  "fit_median": 8,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A lit red dynamite stick with a glowing fuse and smoke sits on mine rail tracks inside a timbered mine tunnel; rocky walls and a partial cartoon figure are visible.",
+    "visible": {
+     "a mine tunnel": true,
+     "a stick of dynamite": true
+    },
+    "fit": 8,
+    "why": "The scene clearly shows a lit stick of dynamite inside a mine tunnel, aligning with lighting it and being in a tunnel. However, the image doesn\u2019t show the motion of tossing it like a firecracker, so the action is implied rather than explicit."
+   },
+   {
+    "seen": "A dimly lit mine tunnel with wooden beams and rails; a red cylindrical stick of dynamite on the tracks with a lit fuse emitting smoke; rocky walls; part of a cartoon character to the left.",
+    "visible": {
+     "a mine tunnel": true,
+     "a stick of dynamite": true
+    },
+    "fit": 8,
+    "why": "The scene clearly shows a lit stick of dynamite in a mine tunnel, matching 'lights it' and the setting. However, it appears stationary rather than being tossed, so the motion implied by 'tosses it down the tunnel' isn\u2019t shown."
+   },
+   {
+    "seen": "A lit red dynamite stick emitting smoke on mine rail tracks inside a rocky mine tunnel with timber supports; a partial cartoon figure at left.",
+    "visible": {
+     "a mine tunnel": true,
+     "a stick of dynamite": true
+    },
+    "fit": 8,
+    "why": "The scene clearly shows a lit dynamite stick in a mine tunnel, aligning with 'lights it' and 'down the tunnel.' It doesn\u2019t convey the tossing action, so the match isn\u2019t perfect."
+   }
+  ]
+ },
+ {
+  "i": 28,
+  "sentence": 21,
+  "words": "and runs.",
+  "zone": "entrance",
+  "frame": 11,
+  "concepts": [
+   "cast:person",
+   "char:run",
+   "light:day",
+   "outfit:merchant",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a mine tunnel"
+  ],
+  "visible": {
+   "a mine tunnel": true
+  },
+  "fit_median": 7,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "A cartoon 3D character with a top hat in a mine tunnel, striding on railroad tracks; wooden supports, tunnel lamps, a mine cart, rocks and dirt.",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 8,
+    "why": "The character\u2019s dynamic stride and arm position imply running along the tracks, fitting the line 'and runs.' But as a still frame it could also be interpreted as walking, so it\u2019s not a perfect match."
+   },
+   {
+    "seen": "cartoon character with a top hat, mine tunnel with wooden supports, rail tracks, lantern lights, mining equipment/crates, rocks and dirt",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 7,
+    "why": "The character appears mid-stride on the tracks inside a tunnel, suggesting motion, but there\u2019s no clear motion blur or dynamic posture that definitively shows running rather than walking."
+   },
+   {
+    "seen": "A stylized cartoon figure with a top hat moving along a rail inside an underground mine tunnel, with wooden supports, rock walls, lamps, crates, and tracks.",
+    "visible": {
+     "a mine tunnel": true
+    },
+    "fit": 7,
+    "why": "The character appears mid-stride on the tracks, suggesting motion that can read as running, though the pose is not strongly dynamic, so the connection to 'and runs.' is moderate rather than instant."
+   }
+  ]
+ },
+ {
+  "i": 29,
+  "sentence": 22,
+  "words": "And when the dust clears, there's",
+  "zone": "deep",
+  "frame": 24,
+  "concepts": [
+   "light:day",
+   "obj:dynamite",
+   "obj:dynamite:explode",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a stick of dynamite"
+  ],
+  "visible": {
+   "a stick of dynamite": false
+  },
+  "fit_median": 8,
+  "pass": false,
+  "votes": [
+   {
+    "seen": "underground mine tunnel, railway tracks with wooden ties, rock walls and support posts, a bright orange spiky dust/explosion cloud on the tracks, scattered debris",
+    "visible": {
+     "a stick of dynamite": false
+    },
+    "fit": 8,
+    "why": "The frame prominently shows a dust/explosion cloud on the tracks in a mine, which sets up the idea of dust clearing. It matches the narration as a transitional moment, though it doesn\u2019t show what appears after the dust clears."
+   },
+   {
+    "seen": "A dim mine tunnel with rocky walls and wooden supports, railroad tracks with wooden ties, and a large orange starburst-shaped dust/explosion cloud across the tracks.",
+    "visible": {
+     "a stick of dynamite": false
+    },
+    "fit": 4,
+    "why": "The scene shows a dust/explosion cloud, which relates to the idea of dust, but the line implies the dust has cleared to reveal something, which is not shown here."
+   },
+   {
+    "seen": "A mine tunnel with wooden supports and rocky walls, rail tracks, and a large orange cartoon dust cloud/explosion shape on the tracks.",
+    "visible": {
+     "a stick of dynamite": false
+    },
+    "fit": 9,
+    "why": "The image prominently shows a cloud of dust on mine tracks, which aligns well with the line about dust clearing. It suggests the moment just before or during the clearing, making the connection strong though not exactly the aftermath."
+   }
+  ]
+ },
+ {
+  "i": 30,
+  "sentence": 22,
+  "words": "a vein of real gold as thick as your arm, ten feet past where the last guy gave up.",
+  "zone": "deep",
+  "frame": 71,
+  "concepts": [
+   "cast:person",
+   "char:fall",
+   "char:point",
+   "light:day",
+   "obj:gold_vein",
+   "obj:gold_vein:open",
+   "outfit:merchant",
+   "outfit:worker",
+   "set:mine_tunnel"
+  ],
+  "required": [
+   "a rock with a gold vein",
+   "at least one cartoon person"
+  ],
+  "visible": {
+   "a rock with a gold vein": true,
+   "at least one cartoon person": true
+  },
+  "fit_median": 7,
+  "pass": true,
+  "votes": [
+   {
+    "seen": "a cartoon mine tunnel with wooden beams and rail tracks; a smiling oval white cartoon person wearing a top hat; scattered rocks; a large gray rock split to reveal a white vein with gold nuggets; a light deeper in the tunnel",
+    "visible": {
+     "a rock with a gold vein": true,
+     "at least one cartoon person": true
+    },
+    "fit": 7,
+    "why": "The scene clearly shows a gold-bearing vein in a rock inside a mine, which aligns with the idea of finding a real gold vein, and its thickness could plausibly be arm-sized. But the notion of it being 'ten feet past where the last guy gave up' isn\u2019t depicted\u2014no clear distance or previous miner\u2014so the match isn\u2019t perfect."
+   },
+   {
+    "seen": "Underground mine tunnel with wooden beams and tracks, a cartoon person wearing a top hat, a gray rock showing a white vein with gold nuggets, scattered rocks, and a distant lamp.",
+    "visible": {
+     "a rock with a gold vein": true,
+     "at least one cartoon person": true
+    },
+    "fit": 6,
+    "why": "It shows a mine and a rock with a visible gold vein, which matches the idea of finding gold. But the vein does not look arm-thick and there\u2019s no clear cue about being 'ten feet past where the last guy gave up,' so the match is partial rather than immediate."
+   },
+   {
+    "seen": "A cartoon mine tunnel with wooden beams and rail tracks. A simple cartoon figure with a top hat stands by the tracks, smiling and gesturing. On the ground is a broken gray rock showing a bright gold vein with nuggets. There are scattered stones and a distant light in the tunnel.",
+    "visible": {
+     "a rock with a gold vein": true,
+     "at least one cartoon person": true
+    },
+    "fit": 7,
+    "why": "The image clearly shows a gold-bearing vein in a rock inside a mine and a cartoon character, supporting the idea of discovering gold. However, the vein\u2019s thickness relative to an arm is not obvious, and the \u201cten feet past where the last guy gave up\u201d detail isn\u2019t visually conveyed, so the connection isn\u2019t immediate."
+   }
+  ]
+ }
+]

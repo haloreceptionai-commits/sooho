@@ -4,7 +4,7 @@
 - [~] 3. CC0 asset library and set kits — 94 pinned offline files; Azure sets11 execution qfnlp9b succeeded with all 15 stills, 17 tests pass. Floating outdoor lamps now have support posts; scanned surfaces no longer interpret tangent normals as world coordinates; palette props gain grain. Mine scores 7, castle/battlefield recover to 6/5, but village/street and room/saloon remain 5; overall render mean 5.73 vs benchmark 7.17. NOT accepted: finish set composition and richer recognisable scenery before step 4; production unchanged.
 - [~] 4. Benchmark-style characters — cast6 uncropped 1080x1920 swing/cheer clip verified 5.000s/150 frames; qa8 full 150-frame geometry checks plus five crouch/fall/cheer/panic review frames succeeded after fixing falling shoe penetration. 32 tests pass. Remaining corrected all-action contact review and benchmark look/stronger swing; production unchanged.
 - [x] 5. Unusual story objects with moving parts — 10 objects pass label-free recognition (qa10); all 13 object actions pass 3-vote action review plus 780 per-frame geometry checks (mech17, object-motion-audit.json). Production unchanged.
-- [~] 6. Shot director rewrite (Codex shot plans, word-matched shots)
+- [~] 6. Shot director rewrite — Codex plans gated by shot_director.py (100% spoken-concept coverage, 1-2 shots per sentence, backdrop-change band, no unspoken props or unrelated places); new rail_joint and money_bag objects. Mine plan accepted but rendered stills pass blind review only 12/31 (fit 5.65); rail plan not yet accepted. See blender/director-plans/step6-audit.json. Production unchanged.
 - [ ] 7. Effects and camera (owner asked Nov 15 18:44 to start after step 6)
 - [ ] 8. Sound matched to picture
 - [ ] 9. Script and picture together
