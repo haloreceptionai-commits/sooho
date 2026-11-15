@@ -82,8 +82,20 @@ anchors. The cast4 portraits render separately, avoiding overlapping figures. Ca
 outer arms. This is not an accepted all-action contact review. Earlier cast4 clips expose
 the attachment-scale defect and remain diagnostic only. Production is unchanged.
 
-Ten reference-grounded props render on Azure cast5: perforated cart (82 actual openings),
+Ten reference-grounded props render on Azure: perforated cart (82 actual openings),
 hand drill, paper rocket arrow, branching fuse, covered cart, gold shotgun, gold pan,
-magnifier, dynamite and gold-vein rock. Recognition remains unaccepted: the first cover is
-a rigid plate, the shotgun silhouette is weak and the gold vein is obscured. Shape repairs,
-moving-part verification and a new recognition pass are required before step 5 is complete.
+magnifier, dynamite and gold-vein rock. Earlier cast5/qa8 outputs remain diagnostic only.
+
+## Four-object recognition verification (Nov 15)
+
+Azure image `qa10`, execution `blender-shot-gpu-wxu9msz`, succeeded with eight 800x800 stills.
+`SHOT=recognition` renders the four repaired objects from the original and an alternate camera.
+The drill now has an eggbeater gear/crank and twist bit; the pan has recovery riffles,
+black sediment and angular gold; the fuse bundle has sagging woven cords and a visible
+ignition tip; the angular rock exposes a flat jagged quartz/gold seam rather than tubes.
+Blind Azure review, with intended labels withheld and responses joined by opaque shot ID,
+identified all four intended object families in both views. The fuse was identified as
+a fused dynamite/charge bundle, not a standalone rope; its charge connections are intentional.
+`object-audit.json` preserves the complete responses, image SHA-256 hashes and prior failures.
+Recognition for these four passes; this is not motion, benchmark-quality or full step-5 acceptance.
+All ten mechanism render checks remain pending. 32 existing tests pass; production unchanged.
