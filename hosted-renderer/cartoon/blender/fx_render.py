@@ -29,7 +29,7 @@ def mats():
 def _mesh(kind, role):
     if role in ('debris',): bpy.ops.mesh.primitive_cube_add(size=1)
     elif kind == 'rain': bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=1, depth=18)
-    else: bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2 if role in ('smoke', 'dust') else 1, radius=1)
+    else: bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1 if role in ('debris', 'sparks') else 3, radius=1)
     o = bpy.context.active_object
     if role not in ('debris',):
         for p in o.data.polygons: p.use_smooth = True
@@ -56,7 +56,7 @@ def build_effects(shot, fps):
             bpy.context.collection.objects.link(lo); lo.location = base + Vector((0, 0, .8))
             for f in range(n):
                 t = f / fps - e.get('start', 0)
-                ld.energy = 0 if t < 0 else (4000 * sc * math.exp(-t * 3) if kind == 'explosion' else 300 * sc * (.8 + .2 * math.sin(t * 29)))
+                ld.energy = 0 if t < 0 else (1500 * sc * math.exp(-t * 4) if kind == 'explosion' else 300 * sc * (.8 + .2 * math.sin(t * 29)))
                 ld.keyframe_insert('energy', frame=f + 1)
     return count
 

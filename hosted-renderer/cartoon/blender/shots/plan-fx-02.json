@@ -38,10 +38,10 @@
   {
    "id": "commander",
    "pos": [
-    -1.0,
-    1.5
+    0.5,
+    2.2
    ],
-   "yaw": -60,
+   "yaw": -110,
    "action": "point",
    "expression": "determined",
    "outfit": "soldier",
