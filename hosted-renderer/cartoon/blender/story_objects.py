@@ -252,8 +252,8 @@ def build_object(spec,duration,fps):
     elif kind=='rail_joint':
         # Two rails on timber sleepers and grey stone ballast; jointed rails have fishplates, bolts,
         # spring clips and a signal post; 'buckle' uses continuous welded rails that bow sideways.
-        stone=material('ballast stone',(.34,.33,.31),.95);clip=material('rail clip yellow',(.85,.62,.06),.5,.3)
-        rail_mat=material('rail steel',(.3,.29,.28),.35,.9);plate=material('fishplate steel',(.16,.16,.17),.4,.8)
+        stone=material('ballast stone',(.34,.33,.31),.95);clip=material('rail clip dark',(.08,.08,.09),.5,.5)
+        rail_mat=material('rail steel',(.3,.29,.28),.35,.9);plate=material('fishplate steel',(.05,.12,.3),.35,.6);brass=material('bolt brass',(.95,.7,.15),.3,.9)
         cube('ballast bed',(0,0,.04),(2.2,1.4,.08),stone,.03)
         for i in range(70):
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.045,location=(-1.05+(i*.37)%2.1,-.65+(i*.53)%1.3,.085))
@@ -284,14 +284,14 @@ def build_object(spec,duration,fps):
                 if side<0:left=seg
             for y in (-gauge,gauge):
                 for dy in (-.03,.03):
-                    o=cube('joint fishplate bar',(0,y+dy,.215),(.42,.014,.06),plate,.004);o.parent=left
+                    o=cube('joint fishplate bar',(0,y+2*dy,.215),(.5,.02,.08),plate,.004);o.parent=left
                 for j,x in enumerate((-.15,-.06,.06,.15)):
-                    b=cylinder('joint bolt',(x,y,.215),.014,.12,steel,(math.pi/2,0,0))
+                    b=cylinder('joint bolt',(x,y,.215),.02,.17,brass,(math.pi/2,0,0))
                     if action=='break' and x>0:b.name='snapped joint bolt';moving.append((b,'bolt_piece',b.location.copy()))
                     else:b.parent=left
-                    for e in (-.065,.065):
-                        bpy.ops.mesh.primitive_cylinder_add(vertices=6,radius=.025,depth=.02,location=(x,y+e,.215),rotation=(math.pi/2,0,0))
-                        n_=bpy.context.active_object;n_.name='hex bolt nut';n_.data.materials.append(steel);bpy.context.view_layer.update();n_.parent=b;n_.matrix_parent_inverse=b.matrix_world.inverted()
+                    for e in (-.085,.085):
+                        bpy.ops.mesh.primitive_cylinder_add(vertices=6,radius=.035,depth=.02,location=(x,y+e,.215),rotation=(math.pi/2,0,0))
+                        n_=bpy.context.active_object;n_.name='hex bolt nut';n_.data.materials.append(brass);bpy.context.view_layer.update();n_.parent=b;n_.matrix_parent_inverse=b.matrix_world.inverted()
             # signal post beside the insulated joint
             cylinder('signal post',(.75,.85,.6),.03,1.2,steel)
             cube('signal head',(.75,.85,1.25),(.14,.1,.26),plate,.01)

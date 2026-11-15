@@ -37,7 +37,7 @@ RAIL_HALF=.9
 def rail_gap(action,t):
     """Full gap width in metres between the two rail ends."""
     if action=='expand':return .16-.145*progress(t,.1,1.6)  # cold wide gap closes as steel heats
-    if action=='break':return .03+.19*progress(t,.5,1.4)    # deep cold pulls the joint apart
+    if action=='break':return .03+.32*progress(t,.5,1.4)    # deep cold pulls the joint apart
     if action=='buckle':return 0.                           # continuous welded rail, no joint
     return .04
 
@@ -51,7 +51,7 @@ def rail_end_shift(action,t,side):
 
 def kink_offset(t,u):
     """Sideways bow of a welded rail at position u (0..1 along the rail)."""
-    return .26*progress(t,.2,1.3)*math.sin(math.pi*u)**2
+    return .3*progress(t,.2,1.3)*math.exp(-((u-.5)/.11)**2)  # one sharp sideways kink at mid-span
 
 
 def bolt_piece(rest,t,index):

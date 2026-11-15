@@ -46,7 +46,7 @@ class RailJointMotionTest(unittest.TestCase):
         self.assertEqual(rail_end_shift('break',2,-1),0)  # bolted side does not move
 
     def test_welded_rail_kinks_in_the_middle_only(self):
-        self.assertEqual(kink_offset(0,.5),0);self.assertAlmostEqual(kink_offset(2,.5),.26)
+        self.assertEqual(kink_offset(0,.5),0);self.assertAlmostEqual(kink_offset(2,.5),.3);self.assertLess(kink_offset(2,.25),.02)
         self.assertAlmostEqual(kink_offset(2,0),0);self.assertAlmostEqual(rail_gap('buckle',1),0)
 
     def test_snapped_bolts_fall_but_stay_on_ballast(self):
