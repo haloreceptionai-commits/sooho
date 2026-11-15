@@ -23,6 +23,12 @@ def path(name,points,radius,mat):
     return obj
 
 
+def dynamite_fuse_point(u):
+    # u=0 at the stick, u=1 at the free tip; follows the bent fuse shape.
+    if u<.5:k=u/.5;return (.07*k,0,.73+.08*k)
+    k=(u-.5)/.5;return (.07+.09*k,.03*k,.81-.01*k)
+
+
 def add_blast(moving,ember,core,smoke):
     # Layered fireball (yellow core, orange shell) plus lingering expanding smoke, not a single glowing ball.
     for i,(mat,r) in enumerate([(core,.2),(ember,.3)]):
@@ -186,8 +192,15 @@ def build_object(spec,duration,fps):
     elif kind=='dynamite':
         stick=cylinder('dynamite stick',(0,0,.38),.12,.7,red)
         for z in [.14,.62]:cylinder('paper band',(0,0,z),.124,.025,paper)
-        rope('curved fuse',(0,0,.73),(.07,0,.81),.012,wood)
-        rope('bent fuse',(.07,0,.81),(.16,.03,.8),.012,wood)
+        if action=='fire':
+            # Fuse burns down: segments ahead of the ember vanish as it travels to the stick.
+            fuse_cord=material('dynamite fuse cord',(.42,.3,.16),.9)
+            for i in range(10):
+                a=dynamite_fuse_point(i/10);b=dynamite_fuse_point((i+1)/10)
+                o=rope('burning dynamite fuse',a,b,.014,fuse_cord);moving.append((o,'burnt',1.5*(1-(i+1)/10)))
+        else:
+            rope('curved fuse',(0,0,.73),(.07,0,.81),.012,wood)
+            rope('bent fuse',(.07,0,.81),(.16,.03,.8),.012,wood)
         if action=='fire':
             o=sphere('burning fuse',(0,0,.73),(.065,.055,.1),ember);moving.append((o,'dynamite_fuse',o.location.copy()))
             smoke=material('dynamite fuse smoke',(.085,.085,.085),.95)
@@ -237,7 +250,7 @@ def build_object(spec,duration,fps):
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
         for index,(obj,role,rest) in enumerate(moving):
             obj['motion_role']=role
-            if role not in ('fragment','charred'):obj.location=rest
+            if role not in ('fragment','charred','burnt'):obj.location=rest
             if role in ('spin','crank','wheel'):obj.rotation_euler=(0,0,0)
             if role=='spin':obj.rotation_euler.z=spin_angle(t)*3;obj.location.z=-.08*progress(t,0,.6)
             if role=='shaving':
@@ -263,11 +276,12 @@ def build_object(spec,duration,fps):
                 obj.location=Vector(fuse_position(t))+rest;obj.rotation_euler.y=.3*math.sin(t*19+index)
             if role=='fuse_smoke':
                 obj.location=Vector(fuse_position(max(0,t-.15)))+rest+Vector((.02*math.sin(t*9+index),0,.04*math.sin(t*6+index)))
+            if role=='burnt':obj.hide_render=t>rest;obj.keyframe_insert('hide_render',frame=frame+1)
             if role=='charred':obj.hide_render=t<rest;obj.keyframe_insert('hide_render',frame=frame+1)
-            if role=='dynamite_fuse':obj.location=(.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition'])
+            if role=='dynamite_fuse':obj.location=dynamite_fuse_point(1-m['ignition'])
             if role=='dynamite_smoke':
                 age=(t*.8+index*.21)%1
-                obj.location=Vector((.16*(1-m['ignition']),.03*(1-m['ignition']),.8-.07*m['ignition']))+Vector((age*.25+.05*math.sin(t*8+index),0,.1+age*.65))
+                obj.location=Vector(dynamite_fuse_point(1-m['ignition']))+Vector((age*.25+.05*math.sin(t*8+index),0,.1+age*.65))
                 obj.scale=(.035+age*.07,)*3;obj.keyframe_insert('scale',frame=frame+1)
             if role=='dynamite_fuse':
                 obj.scale=(.055+.02*math.sin(t*17),.05,.1+.06*math.sin(t*13));obj.keyframe_insert('scale',frame=frame+1)
