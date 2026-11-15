@@ -76,7 +76,8 @@ def build_object(spec,duration,fps):
                 pivot=bpy.data.objects.new('wheel axle',None);bpy.context.collection.objects.link(pivot);pivot.location=w.location.copy()
                 w.location=(0,0,0);w.parent=pivot
                 for a in [i*math.tau/8 for i in range(8)]:
-                    spoke=rope('visible wheel spoke',(0,-.06,0),(.26*math.cos(a),-.06,.26*math.sin(a)),.015,wood);spoke.parent=pivot
+                    # One painted spoke breaks the 5-fold symmetry so rotation reads between sampled frames.
+                    spoke=rope('visible wheel spoke',(0,-.06,0),(.26*math.cos(a),-.06,.26*math.sin(a)),.024 if j==0 else .015,red if j==0 else wood);spoke.parent=pivot
                 moving.append((pivot,'wheel',pivot.location.copy()))
         rope('pull handle',(0,.3,.5),(0,1.35,.65),.05,wood)
         # Each aperture is an actual through-hole in a wooden launch board.
@@ -280,7 +281,8 @@ def build_object(spec,duration,fps):
         if action=='pour':root.location=(base[0],base[1],base[2]+.48);root.rotation_euler.x=-progress(t,0,.65)*.9
         if kind=='rocket_arrow':root.location=(base[0],base[1],base[2]+m['travel'])
         if action=='swing':
-            w=math.sin(t*math.tau*.75);root.location=(base[0]+.38*w,base[1],base[2]+.2-.15*abs(w));root.rotation_euler.y=.8*w
+            # Pendulum arc about the handle end; half-cycle per second so sampled frames never alias to the same pose.
+            w=math.sin(t*math.tau*.5);root.location=(base[0],base[1],base[2]+.05);root.rotation_euler.y=.95*w
         if action=='roll':root.location=(base[0],base[1]-m['travel'],base[2])
         for index,(obj,role,rest) in enumerate(moving):
             obj['motion_role']=role
