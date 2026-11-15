@@ -46,8 +46,15 @@ Rules:
 Return ONLY JSON: {{"cast":[{{"id","outfit","hat","shirt":[r,g,b]}}],"sentences":[{{"index","mentions":[{{"word","concept"}}],"shots":[{{"start_word"?,"set","lighting","framing","cast":[{{"id","action","expression"}}],"objects":[{{"kind","action"}}]}}]}}]}}"""
 
 
-def call(text):
-    body = json.dumps({'model': MODEL, 'input': text, 'reasoning': {'effort': 'medium'}}).encode()
+def call(text, tries=3):
+    for k in range(tries):
+        try: return _call(text)
+        except (json.JSONDecodeError, ValueError) as e: print('unparseable reply, retrying', e, flush=True)
+    raise RuntimeError('model never returned valid JSON')
+
+
+def _call(text):
+    body = json.dumps({'model': MODEL, 'input': text, 'reasoning': {'effort': 'medium'}, 'text': {'format': {'type': 'json_object'}}}).encode()
     req = urllib.request.Request(URL, body, {'api-key': os.environ['AZURE_OPENAI_API_KEY'], 'content-type': 'application/json'})
     r = json.load(urllib.request.urlopen(req, timeout=600))
     out = ''.join(c.get('text', '') for o in r.get('output', []) if o.get('type') == 'message' for c in o.get('content', []))
