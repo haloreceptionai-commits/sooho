@@ -1,0 +1,13 @@
+{
+  "models": [
+    "castle-kit/gate", "castle-kit/wall", "castle-kit/tower-square-base", "castle-kit/tower-square-top", "castle-kit/siege-catapult", "castle-kit/flag-banner-long",
+    "fantasy-town-kit/wall", "fantasy-town-kit/wall-window-shutters", "fantasy-town-kit/wall-door", "fantasy-town-kit/roof-gable", "fantasy-town-kit/roof-gable-end", "fantasy-town-kit/cart", "fantasy-town-kit/stall-red", "fantasy-town-kit/stall-bench", "fantasy-town-kit/fence", "fantasy-town-kit/lantern",
+    "nature-kit/tree_oak", "nature-kit/tree_pineTallA", "nature-kit/rock_largeA", "nature-kit/rock_smallA", "nature-kit/plant_bush", "nature-kit/grass_large", "nature-kit/log_stack",
+    "pirate-kit/barrel", "pirate-kit/crate", "pirate-kit/crate-bottles", "pirate-kit/bottle", "pirate-kit/chest", "pirate-kit/cannon", "pirate-kit/ship-large", "pirate-kit/mast-ropes", "pirate-kit/structure-fence", "pirate-kit/tool-shovel",
+    "train-kit/railroad-straight", "train-kit/train-locomotive-a", "train-kit/train-carriage-coal",
+    "furniture-kit/table", "furniture-kit/chair", "furniture-kit/desk", "furniture-kit/bookcaseOpen", "furniture-kit/books", "furniture-kit/lampRoundTable", "furniture-kit/sideTable", "furniture-kit/loungeSofa", "furniture-kit/pottedPlant", "furniture-kit/rugRectangle",
+    "factory-kit/cog-a", "factory-kit/machine", "factory-kit/pipe-large-valve", "factory-kit/box-small", "factory-kit/lever-single"
+  ],
+  "textures": {"wood": "wood_planks", "rock": "rock_boulder_cracked", "grass": "aerial_grass_rock", "dirt": "brown_mud_leaves_01", "stone": "castle_brick_01"},
+  "skies": {"day": "kloofendal_48d_partly_cloudy_puresky", "sunset": "qwantani_sunset_puresky", "overcast": "kloofendal_overcast_puresky"}
+}

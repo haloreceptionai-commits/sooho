@@ -3,6 +3,25 @@
 # the video and a timing report to private Blob storage under $OUT_PREFIX. Each engine first
 # renders a 3-frame probe (reported immediately) so a slow engine is visible within minutes.
 set -u
+if [ "${SHOT:-}" = suite ]; then
+  SAS=$(printf '%s' "$AZURE_BLOB_SAS" | sed 's/^?//')
+  FAILED=0
+  for FILE in /opt/shot/shots/set-*.json; do
+    NAME=$(basename "$FILE" .json)
+    mkdir -p "/tmp/$NAME"
+    SHOT_ENGINE=cycles CYCLES_DEVICE=GPU timeout 600 /opt/blender/blender -b --factory-startup --python-exit-code 1 --python /opt/shot/render_shot.py -- "$FILE" "/tmp/$NAME" > "/tmp/$NAME.log" 2>&1
+    CODE=$?
+    tail -c 18000 "/tmp/$NAME.log" > "/tmp/$NAME.tail"
+    curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' --data-binary "@/tmp/$NAME.tail" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.log?$SAS" >/dev/null
+    if [ "$CODE" = 0 ] && [ -f "/tmp/$NAME/f_00001.png" ]; then
+      curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@/tmp/$NAME/f_00001.png" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.png?$SAS" >/dev/null || FAILED=1
+      echo "$NAME rendered"
+    else
+      echo "$NAME failed code=$CODE"; FAILED=1
+    fi
+  done
+  exit "$FAILED"
+fi
 SHOT_FILE=/tmp/shot.json
 case "${SHOT:-mine-push-in}" in \{*) printf '%s' "$SHOT" > $SHOT_FILE ;; *) cp "/opt/shot/shots/${SHOT:-mine-push-in}.json" $SHOT_FILE ;; esac
 SAS=$(printf '%s' "$AZURE_BLOB_SAS" | sed 's/^?//')

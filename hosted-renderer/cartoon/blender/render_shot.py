@@ -13,6 +13,7 @@ from mathutils import Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from shot_schema import validate_shot  # noqa: E402
+from set_library import build_set, dress_mine as library_mine, surface
 
 
 def mat(name, color, rough=0.6, metal=0.0, emit=None, strength=0.0):
@@ -121,20 +122,8 @@ def lantern(loc, red, glass):
 
 
 def rock_mat():
-    """Tan rock: broad two-tone colour, dark crack lines (Voronoi edges), fine grit bump."""
-    m = noise_mat('rock', (0.30, 0.19, 0.11), (0.70, 0.50, 0.32), scale=1.1, bump=0.35, speckle=0.3)
-    nt = m.node_tree; b = nt.nodes['Principled BSDF']; geo = nt.nodes['Geometry']
-    vo = nt.nodes.new('ShaderNodeTexVoronoi'); vo.feature = 'DISTANCE_TO_EDGE'; vo.inputs['Scale'].default_value = 0.9
-    nt.links.new(geo.outputs['Position'], vo.inputs['Vector'])
-    edge = nt.nodes.new('ShaderNodeMapRange'); edge.inputs['From Min'].default_value = 0.0; edge.inputs['From Max'].default_value = 0.025
-    edge.inputs['To Min'].default_value = 0.35; edge.inputs['To Max'].default_value = 1.0
-    nt.links.new(vo.outputs['Distance'], edge.inputs['Value'])
-    mul = nt.nodes.new('ShaderNodeMix'); mul.data_type = 'RGBA'; mul.blend_type = 'MULTIPLY'; mul.inputs['Factor'].default_value = 1
-    col_link = [l for l in nt.links if l.to_socket == b.inputs['Base Color']][0]; src = col_link.from_socket
-    nt.links.remove(col_link)
-    nt.links.new(src, mul.inputs['A']); nt.links.new(edge.outputs['Result'], mul.inputs['B'])
-    nt.links.new(mul.outputs['Result'], b.inputs['Base Color'])
-    return m
+    """Scanned CC0 rock texture, shared with the offline set library."""
+    return surface('rock', 2.2)
 
 
 def rock_chunk(loc, size, m, seed):
@@ -191,8 +180,8 @@ def tube(length, m, radius=2.3, ring=96, step=0.1, y0=-4.0, zc=1.4):
 
 def set_mine_tunnel(length=24.0):
     rock = rock_mat()
-    dirt = noise_mat('dirt', (0.12, 0.09, 0.06), (0.34, 0.25, 0.17), scale=7.0, bump=0.6, speckle=0.3)
-    wood = noise_mat('wood', (0.48, 0.32, 0.16), (0.70, 0.51, 0.30), scale=9.0, bump=0.12, wave=True)
+    dirt = surface('dirt', 2.0)
+    wood = surface('wood', 1.2)
     steel = mat('steel', (0.55, 0.56, 0.6), rough=0.3, metal=1.0)
     red = mat('lanternred', (0.45, 0.04, 0.03), rough=0.35, metal=0.4)
     glass = mat('lampglass', (1, 0.7, 0.4), emit=(1.0, 0.62, 0.28), strength=25)
@@ -208,7 +197,7 @@ def set_mine_tunnel(length=24.0):
         add('cube', (x, length / 2 - 4, 0.09), (0.035, length / 2, 0.045), m=steel, smooth=False)
     for y in [i * 0.55 for i in range(-6, int(length / 0.55) - 6)]:
         add('cube', (0, y, 0.03), (0.7, 0.09, 0.03), m=wood, smooth=False)
-    dress_mine(length, wood)
+    library_mine()
     add('cube', (0.62, -0.9, 2.3), (0.08, 0.08, 0.35), m=wood, smooth=False)   # near-lens beam end and lantern:
     lantern((0.6, -0.95, 1.85), red, glass)                                     # out of focus foreground depth
     bpy.ops.object.light_add(type='AREA', location=(-1.2, -1.0, 2.0), rotation=(math.radians(62), 0, math.radians(-38)))
@@ -362,7 +351,10 @@ def main():
     W, H = shot.get('size', [1080, 1920]); sc.render.resolution_x = W; sc.render.resolution_y = H
     sc.render.resolution_percentage = 100; fps = shot.get('fps', 30); sc.render.fps = fps
     sc.render.image_settings.file_format = 'PNG'
-    SETS[shot['set']]()
+    if shot['set'] in SETS:
+        SETS[shot['set']]()
+    else:
+        build_set(shot['set'], shot.get('lighting', 'day'))
     for c in shot.get('cast', []): character(c)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n

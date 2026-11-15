@@ -13,3 +13,29 @@ Eevee is supported locally but the NVIDIA EGL path fails headless on Azure (EGL_
 
 Measured (Nov 14 2026, 1080x1920, 12 samples): ~2.8 s/frame after a ~9 s first frame; 3 s shot = 4.5 min
 on one T4. Concurrency of about 4 T4 machines was observed; 10 requested replicas took ~9.5 min.
+
+## Step 3 — offline sets (Nov 15, NOT quality-approved)
+
+`import_assets.py` imports 50 Kenney model files, their shared palette images,
+five Poly Haven 1k surface sets and three HDR skies. `assets/manifest.json` pins
+74 files with SHA-256 and CC0 provenance; publisher license files are included.
+Kenney web pages returned 403; licenses were verified from the original pack's
+publisher-supplied License.txt instead. Assets are bundled in the worker image;
+no render-time external downloads. Legacy library and production engine unchanged.
+
+Eleven declarative kits: castle, village, battlefield, mine tunnel, office,
+saloon, ship deck, rail yard, workshop, street, room. Lighting accepts day,
+sunset, night, rain. Every kit has a 1080x1920 still test in `shots/set-*.json`.
+`SHOT=suite` renders and uploads each still, failing if any render fails.
+
+Verified on Azure T4 image `sets3`: all 11 rendered; missing external palette
+textures found in first pass and repaired. Fourteen schema/library tests pass.
+The reference-anchored vision audit rated render quality 3–6/10 (mine 6;
+benchmark mean 7.17). **Step 3's benchmark-quality acceptance check has not passed.**
+Remaining: richer/high-detail set geometry, stronger cinematic framing/light,
+distinct saloon/office dressing, convincing ship/ocean, all four lighting looks
+visually tested, and rerun benchmark comparison. Do not activate in production
+or advance to step 4 as if step 3 were complete.
+
+Run: `python3 blender/test_set_library.py`; build with the existing Azure build
+tool; `node tools/blender-job.mjs sets3 gpu-t4 run <privatePrefix> cycles suite`.

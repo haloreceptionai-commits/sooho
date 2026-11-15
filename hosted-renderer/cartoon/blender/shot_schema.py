@@ -1,7 +1,10 @@
 """Strict validator for one declarative Blender shot. No free code is ever accepted."""
-SETS = {'mine_tunnel', 'open_day'}
+import json
+from pathlib import Path
+
+SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day'}
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -14,6 +17,7 @@ def validate_shot(s):
     extra = set(s) - KEYS
     if extra: raise ValueError(f'unknown shot keys {sorted(extra)}')
     if s.get('set') not in SETS: raise ValueError(f'unknown set {s.get("set")!r}')
+    if s.get('lighting', 'day') not in {'day', 'sunset', 'night', 'rain'}: raise ValueError('lighting day|sunset|night|rain')
     d = s.get('duration')
     if not isinstance(d, (int, float)) or not 0.2 <= d <= 12: raise ValueError('duration 0.2-12s')
     c = s.get('camera')
