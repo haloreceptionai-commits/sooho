@@ -87,6 +87,7 @@ def shot_concepts(shot):
     got = {f"set:{shot['set']}", f"light:{shot.get('lighting', 'day')}"}
     for o in shot.get('objects', []):
         got.add(f"obj:{o['kind']}"); got.add(f"obj:{o['kind']}:{o.get('action', 'hold')}")
+        if o['kind'] == 'rail_joint': got.add('set:rail_yard')  # the joint itself is two full rails on sleepers
     for c in shot.get('cast', []):
         got.add(f"char:{c.get('action', 'stand')}"); got.add('cast:person'); got.add(f"outfit:{c.get('outfit', 'worker')}")
     return got
