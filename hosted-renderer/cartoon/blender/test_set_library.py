@@ -51,5 +51,16 @@ class SetLibraryTests(unittest.TestCase):
         self.assertNotIn('furniture-kit/desk', saloon_ids)
         self.assertIn('pirate-kit/bottle', saloon_ids)
 
+    def test_outdoors_use_complete_buildings_not_partial_facades(self):
+        for name in ['village','street','rail_yard']:
+            ids={m['id'] for m in KITS[name]['models']}
+            self.assertIn('q-medievalvillage/House_1', ids)
+            self.assertNotIn('fantasy-town-kit/wall-door', ids)
+
+    def test_train_and_track_share_longitudinal_axis(self):
+        models=[m for m in KITS['rail_yard']['models'] if m['id'].startswith('q-modulartrain/')]
+        self.assertIn('q-modulartrain/Locomotive_Front',{m['id'] for m in models})
+        for m in models:self.assertEqual(m['yaw'],90,m['id'])
+
 
 if __name__ == '__main__': unittest.main()

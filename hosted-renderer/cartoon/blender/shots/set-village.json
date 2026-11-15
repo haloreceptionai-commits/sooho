@@ -2,7 +2,7 @@
   "set": "village",
   "duration": 3,
   "lighting": "day",
-  "samples": 24,
+  "samples": 32,
   "engine": "cycles",
   "size": [
     1080,
@@ -13,17 +13,17 @@
   ],
   "camera": {
     "from": [
-      3,
-      -3,
-      2.2
+      2,
+      -1,
+      2.5
     ],
     "look_at": [
-      -1,
-      7,
-      2
+      -3,
+      8,
+      2.8
     ],
-    "lens": 28,
-    "fstop": 3.2
+    "lens": 32,
+    "fstop": 4
   },
   "grade": "Punchy",
   "haze": 0.003

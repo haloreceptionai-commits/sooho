@@ -448,6 +448,166 @@
     "license": "CC0-1.0"
   },
   {
+    "id": "q-medievalvillage/House_1",
+    "kind": "model",
+    "path": "models/q-medievalvillage/House_1.glb",
+    "sha256": "74d4c91022414875ec61ab80835705a9c0e9415aa0dd413fc8e83cbfd861a5c9",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-medievalvillage/House_2",
+    "kind": "model",
+    "path": "models/q-medievalvillage/House_2.glb",
+    "sha256": "39b9d7d4c85e170f64d066a3f762ab88689a614c270e95c52927908fb52fa36a",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-medievalvillage/Inn",
+    "kind": "model",
+    "path": "models/q-medievalvillage/Inn.glb",
+    "sha256": "106ac5aef624710d5a8e14ce076d73b4fd85312688cc80cebb6bd45cf61daefe",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-medievalvillage/Blacksmith",
+    "kind": "model",
+    "path": "models/q-medievalvillage/Blacksmith.glb",
+    "sha256": "264fc6abe5be8c091a1c6f293dce9e8ae79b96b50ccec45f0a7fb12201db1d7c",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-medievalvillage/MarketStand_1",
+    "kind": "model",
+    "path": "models/q-medievalvillage/MarketStand_1.glb",
+    "sha256": "19b9b99c84d41c0b1124fe286ac3b99668d2f2d489d44affa559188881448d75",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-medievalvillage/Cart",
+    "kind": "model",
+    "path": "models/q-medievalvillage/Cart.glb",
+    "sha256": "c98eee1d2a91a1a894bbbe5b54f0b262bfcfc268d4eab17fbbde5b0a40885f53",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-medievalvillage/Well",
+    "kind": "model",
+    "path": "models/q-medievalvillage/Well.glb",
+    "sha256": "8e5158984421cfd8ec5040a318a2627911a6dcd7e4b43172bdd7d36f367ad3db",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-medievalvillage/Hay",
+    "kind": "model",
+    "path": "models/q-medievalvillage/Hay.glb",
+    "sha256": "a7b39cae2cbd0839647c23c597a4ff64cb3a1086529e78c0169614f4a42655ed",
+    "source": "https://quaternius.com/packs/medievalvillage.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/CommonTree_1",
+    "kind": "model",
+    "path": "models/q-stylizednaturemegakit/CommonTree_1.glb",
+    "sha256": "6a86b31a37b3f7f9aa60ea97753c3313c1b40bac2415efe27de7b7327382d3bc",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/Textures/Bark_NormalTree.png",
+    "kind": "model-texture",
+    "path": "models/q-stylizednaturemegakit/Textures/Bark_NormalTree.png",
+    "sha256": "a800cb97b5dc135ed690f71c941a126077c68e634c48b61c575469139a887465",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/Textures/Leaves_NormalTree_C.png",
+    "kind": "model-texture",
+    "path": "models/q-stylizednaturemegakit/Textures/Leaves_NormalTree_C.png",
+    "sha256": "e9595477cf05a3ef91886ccbe6e3cd0a1175f79654342bffe021a1a4e6f0ffa5",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/CommonTree_3",
+    "kind": "model",
+    "path": "models/q-stylizednaturemegakit/CommonTree_3.glb",
+    "sha256": "42a2b9beeecadefb14d97de0fae7084ec6f1b881ba51f1b72c1d9ff3f3745057",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/Bush_Common",
+    "kind": "model",
+    "path": "models/q-stylizednaturemegakit/Bush_Common.glb",
+    "sha256": "27bad3f2839666ec6b317e2a3b230b5900518a0677acdcda25c64f505ee95a8e",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/Textures/Leaves_TwistedTree_C.png",
+    "kind": "model-texture",
+    "path": "models/q-stylizednaturemegakit/Textures/Leaves_TwistedTree_C.png",
+    "sha256": "eb2762ded765abc9a61b99e1bd997ea1e6108d7692e48cca3e433b25e9041b66",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/Rock_Medium_1",
+    "kind": "model",
+    "path": "models/q-stylizednaturemegakit/Rock_Medium_1.glb",
+    "sha256": "09ff6fd91323b8b46eb3c702119b8889e9149d2816b3713295b1983d34adaed4",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-stylizednaturemegakit/Textures/Rocks_Diffuse.png",
+    "kind": "model-texture",
+    "path": "models/q-stylizednaturemegakit/Textures/Rocks_Diffuse.png",
+    "sha256": "00ca5c9012897892ef1a791ab3562eac5e6ddd5879b395004bc321a8755455ac",
+    "source": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-modulartrain/Locomotive_Front",
+    "kind": "model",
+    "path": "models/q-modulartrain/Locomotive_Front.glb",
+    "sha256": "4304988a85b45978bca630298eef8d1098b92fc4fc865d3880d46b9f92177d52",
+    "source": "https://quaternius.com/packs/modulartrain.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-modulartrain/Locomotive_CoalTender",
+    "kind": "model",
+    "path": "models/q-modulartrain/Locomotive_CoalTender.glb",
+    "sha256": "85212031d02f7b2790837ff2fac4d8f785541e0726bae9513f838425d0587400",
+    "source": "https://quaternius.com/packs/modulartrain.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-modulartrain/Locomotive_Wagon",
+    "kind": "model",
+    "path": "models/q-modulartrain/Locomotive_Wagon.glb",
+    "sha256": "21d78205f63d7dbaf95dd9f5f84e9455cc46ea695e590e77e1888d7c8b91caa3",
+    "source": "https://quaternius.com/packs/modulartrain.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-modulartrain/RailwayTrack_Straight",
+    "kind": "model",
+    "path": "models/q-modulartrain/RailwayTrack_Straight.glb",
+    "sha256": "b71ed49b5d1eaa30409bd331975a3109262464041583bbc8a9b6eae3dc795aa9",
+    "source": "https://quaternius.com/packs/modulartrain.html",
+    "license": "CC0-1.0"
+  },
+  {
     "id": "wood",
     "role": "color",
     "kind": "texture",
