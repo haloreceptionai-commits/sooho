@@ -1,0 +1,61 @@
+{
+ "set": "rail_yard",
+ "lighting": "day",
+ "duration": 3.482,
+ "camera": {
+  "from": [
+   -0.012,
+   4.303,
+   1.6
+  ],
+  "look_at": [
+   -3.265,
+   7.127,
+   0.95
+  ],
+  "lens": 35,
+  "fstop": 5.6
+ },
+ "cast": [
+  {
+   "id": "eng",
+   "pos": [
+    -3.691,
+    7.256
+   ],
+   "yaw": 35,
+   "action": "point",
+   "expression": "determined",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.8,
+    0.4,
+    0.2
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "rail_joint",
+   "action": "expand",
+   "pos": [
+    -2.839,
+    6.998,
+    0
+   ],
+   "scale": 0.85,
+   "yaw": 35
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  63
+ ]
+}
