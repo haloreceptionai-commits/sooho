@@ -52,14 +52,14 @@ Return ONLY JSON (mentions items are {{"word","kind","concept"}}; shots may incl
 def call(text, tries=3):
     for k in range(tries):
         try: return _call(text)
-        except (json.JSONDecodeError, ValueError) as e: print('unparseable reply, retrying', e, flush=True)
+        except (json.JSONDecodeError, ValueError, TimeoutError, OSError) as e: print('bad or slow reply, retrying', type(e).__name__, flush=True)
     raise RuntimeError('model never returned valid JSON')
 
 
 def _call(text):
     body = json.dumps({'model': MODEL, 'input': text, 'reasoning': {'effort': 'medium'}, 'text': {'format': {'type': 'json_object'}}}).encode()
     req = urllib.request.Request(URL, body, {'api-key': os.environ['AZURE_OPENAI_API_KEY'], 'content-type': 'application/json'})
-    r = json.load(urllib.request.urlopen(req, timeout=600))
+    r = json.load(urllib.request.urlopen(req, timeout=900))
     out = ''.join(c.get('text', '') for o in r.get('output', []) if o.get('type') == 'message' for c in o.get('content', []))
     out = out.strip().removeprefix('```json').removesuffix('```').strip()
     return json.loads(out[out.index('{'):out.rindex('}') + 1])

@@ -180,7 +180,9 @@ def validate_plan(plan, story, concrete=None):
               'mean_shot_len': round(total / max(1, len(shots)), 2), 'max_shot_len': round(max(lens or [0]), 2),
               'min_shot_len': round(min(lens or [0]), 2), 'sets_used': sorted({s['set'] for s in shots})}
     lo, hi = PACE['set_changes_per_min']
-    if not lo <= rate <= hi: errs.append(f'set changes {rate:.1f}/min outside benchmark band {lo}-{hi}')
+    if not lo <= rate <= hi:
+        errs.append(f'set changes {rate:.1f}/min outside benchmark band {lo}-{hi}: {changes} backdrop (set or zone) changes in {total:.1f}s; '
+                     f'need {int(-(-lo * total // 60))}-{int(hi * total // 60)} changes across {len(shots)} shots')
     lo, hi = PACE['mean_shot_len']
     if not lo <= report['mean_shot_len'] <= hi: errs.append(f'mean shot {report["mean_shot_len"]}s outside {lo}-{hi}')
     lo, hi = PACE['shot_len']
