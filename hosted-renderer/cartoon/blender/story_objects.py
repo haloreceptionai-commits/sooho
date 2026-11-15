@@ -178,12 +178,21 @@ def build_object(spec,duration,fps):
     elif kind=='gold_shotgun':
         stock=cube('shaped wooden stock',(0,0,.26),(.26,.17,.43),wood,.06);stock.rotation_euler.y=-.16
         cube('stock neck',(0,0,.5),(.11,.13,.22),wood,.025)
-        cube('wooden fore-end',(0,.06,.75),(.17,.15,.26),wood,.025)
-        for x in [-.065,.065]:cylinder('barrel',(x,0,.85),.05,.85,steel)
+        fore=cube('wooden fore-end',(0,.06,.75),(.17,.15,.26),wood,.025)
+        barrels=[cylinder('barrel',(x,0,.85),.05,.85,steel) for x in [-.065,.065]]
         cube('breech',(0,0,.52),(.19,.18,.18),steel)
-        nugget=sphere('gold load',(0,-.48,.58),(.075,.055,.065),gold);moving.append((nugget,'load',nugget.location.copy()))
         if action=='load':
-            cylinder('open loading chamber',(0,-.09,.58),.095,.05,steel,(math.pi/2,0,0))
+            # Break-action loading: barrels hinge open, a shotgun shell slides into the left chamber, the gun closes.
+            hinge=bpy.data.objects.new('barrel hinge',None);bpy.context.collection.objects.link(hinge);hinge.location=(0,.09,.55)
+            for o in barrels+[fore]:o.location-=Vector((0,.09,.55));o.parent=hinge
+            for x in [-.065,.065]:
+                b=cylinder('open barrel chamber',(x,-.09,-.123),.036,.004,material('chamber bore',(.02,.02,.02),.9));b.parent=hinge
+            hull=material('shotgun shell red hull',(.62,.05,.04),.6)
+            shell=bpy.data.objects.new('shotgun shell',None);bpy.context.collection.objects.link(shell);shell.parent=hinge
+            for part in [cylinder('shell hull',(0,0,.03),.036,.13,hull),cylinder('shell brass head',(0,0,-.055),.04,.04,gold)]:part.parent=shell
+            moving.append((hinge,'hinge',hinge.location.copy()));moving.append((shell,'shell',Vector((-.065,-.09,-.45))))
+        else:
+            nugget=sphere('gold load',(0,-.48,.58),(.075,.055,.065),gold);moving.append((nugget,'load',nugget.location.copy()))
         bpy.ops.mesh.primitive_torus_add(major_radius=.075,minor_radius=.012,location=(0,-.1,.47),rotation=(math.pi/2,0,0));bpy.context.active_object.data.materials.append(steel)
         if action=='fire':
             o=sphere('fired gold payload',(0,0,1.3),(.035,)*3,gold);moving.append((o,'projectile',o.location.copy()))
@@ -290,6 +299,9 @@ def build_object(spec,duration,fps):
             if role=='rocket_smoke':obj.location=rest+Vector((.04*math.sin(t*7+index),0,-.04*math.sin(t*5+index)))
             if role=='crank':obj.rotation_euler.y=spin_angle(t)
             if role=='wheel':obj.rotation_euler.y=-m['travel']/.3
+            if role=='hinge':
+                obj.rotation_euler=(-.6*(progress(t,0,.4)-progress(t,1.3,1.7)),0,0)
+            if role=='shell':obj.location=rest+Vector((0,0,.4*progress(t,.45,1.15)))
             if role=='crust':
                 side=1 if rest.x>0 else -1;a=1.45*progress(t,.25+(.15 if side>0 else 0),1.25+(.15 if side>0 else 0))
                 obj.location=rest+Vector((side*.25*a,-.51*math.sin(a),.51*math.cos(a)));obj.rotation_euler=(a,0,-side*.35*a)
