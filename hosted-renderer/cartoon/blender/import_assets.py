@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
-import urllib.request
+import subprocess
 
 HERE = Path(__file__).resolve().parent
 LIBRARY = HERE.parent / 'assets' / 'library'
@@ -17,9 +17,7 @@ OUT = HERE / 'assets'
 
 
 def fetch(url):
-    req = urllib.request.Request(url, headers={'User-Agent': 'Chronicle-CC0-library/1.0'})
-    with urllib.request.urlopen(req, timeout=90) as r:
-        return r.read()
+    return subprocess.check_output(['curl', '-fsSL', '--retry', '3', '--max-time', '90', url])
 
 
 def digest(path):
