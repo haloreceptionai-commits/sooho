@@ -300,7 +300,7 @@ def build_object(spec,duration,fps):
     elif kind=='money_bag':
         # Cartoon money sack: lumpy matte burlap body, cinched neck with ruffled flared top, printed dollar sign, coin spill.
         sack=material('money sack burlap',(.42,.29,.14),1.0)
-        body=sphere('money sack body',(0,0,.3),(.33,.29,.31),sack)
+        body=sphere('money sack body',(0,0,.25),(.33,.29,.31),sack)
         for v in body.data.vertices:
             v.co*=1+.06*math.sin(v.co.x*9)*math.sin(v.co.y*7+1)*math.cos(v.co.z*8)
             if v.co.z<-.75:v.co.z=-.75  # flat base resting on the ground
