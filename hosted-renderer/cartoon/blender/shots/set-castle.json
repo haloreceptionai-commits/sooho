@@ -1,8 +1,8 @@
 {
   "set": "castle",
   "duration": 3,
-  "lighting": "sunset",
-  "samples": 12,
+  "lighting": "day",
+  "samples": 24,
   "engine": "cycles",
   "size": [
     1080,
@@ -13,18 +13,18 @@
   ],
   "camera": {
     "from": [
-      8,
-      -14,
-      5.5
+      4,
+      -5,
+      2.8
     ],
     "look_at": [
       0,
       6,
-      3
+      2.7
     ],
-    "lens": 26,
-    "fstop": 5.6
+    "lens": 25,
+    "fstop": 3.2
   },
   "grade": "Punchy",
-  "haze": 0.008
+  "haze": 0.003
 }

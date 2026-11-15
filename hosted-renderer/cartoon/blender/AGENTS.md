@@ -1,3 +1,4 @@
 - Blender set kits use an offline checksum-pinned CC0 subset separate from the legacy object library; this avoids online downloads during rendering and regressions in existing engines.
 - Set definitions contain only whitelisted asset identities and numeric transforms, never scripts or external paths; this keeps future AI shot direction declarative.
 - Normalize imported GLB roots in world-space with feet at ground level, retaining child transforms; this prevents sideways, buried, or exploding multipart models.
+- Architectural detail is deterministic engine-owned geometry in set_detail.py, not AI scripts; this makes masonry, timber and weather reproducible across shots.

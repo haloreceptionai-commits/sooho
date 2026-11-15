@@ -6,7 +6,8 @@ set -u
 if [ "${SHOT:-}" = suite ]; then
   SAS=$(printf '%s' "$AZURE_BLOB_SAS" | sed 's/^?//')
   FAILED=0
-  for FILE in /opt/shot/shots/set-*.json; do
+  for FILE in /opt/shot/shots/set-*.json /opt/shot/shots/look-*.json; do
+    [ -f "$FILE" ] || continue
     NAME=$(basename "$FILE" .json)
     mkdir -p "/tmp/$NAME"
     SHOT_ENGINE=cycles CYCLES_DEVICE=GPU timeout 600 /opt/blender/blender -b --factory-startup --python-exit-code 1 --python /opt/shot/render_shot.py -- "$FILE" "/tmp/$NAME" > "/tmp/$NAME.log" 2>&1

@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 import bpy
 from mathutils import Vector
+from set_detail import detail_set, practical_lights
 
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE / 'assets'
@@ -36,11 +37,14 @@ def surface(name, metres=2):
         tex.projection = 'BOX'; tex.projection_blend = 0.2
         nt.links.new(mapping.outputs[0], tex.inputs['Vector'])
         output = tex.outputs['Color']
+        if role == 'color' and name == 'stone':
+            tint=nt.nodes.new('ShaderNodeHueSaturation');tint.inputs['Saturation'].default_value=.25
+            tint.inputs['Value'].default_value=1.15
+            nt.links.new(output,tint.inputs['Color']);output=tint.outputs[0]
         if role == 'normal':
-            # Object-independent triplanar height bump avoids wrong UV tangents.
-            bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.22
-            bump.inputs['Distance'].default_value = 0.06
-            nt.links.new(output, bump.inputs['Height']); output = bump.outputs[0]
+            normal = nt.nodes.new('ShaderNodeNormalMap'); normal.space = 'WORLD'
+            normal.inputs['Strength'].default_value = .35
+            nt.links.new(output, normal.inputs['Color']); output = normal.outputs[0]
         nt.links.new(output, bs.inputs[socket])
     return m
 
@@ -94,30 +98,37 @@ def lighting(mode, indoor=False):
     # Separate camera backdrop from illumination: never show a modern city
     # around a historical set, even when a photographic HDR lights it.
     light_path = nt.nodes.new('ShaderNodeLightPath')
-    background = nt.nodes.new('ShaderNodeBackground'); background.inputs['Color'].default_value = (.25,.39,.58,1)
-    background.inputs['Strength'].default_value = .6
+    background = nt.nodes.new('ShaderNodeBackground')
+    visible_sky = nt.nodes.new('ShaderNodeTexSky');visible_sky.sky_type='NISHITA'
+    visible_sky.sun_elevation=math.radians(30 if mode=='day' else 8)
+    visible_sky.sun_rotation=math.radians(140);visible_sky.sun_disc=False
+    nt.links.new(visible_sky.outputs[0],background.inputs['Color'])
+    background.inputs['Strength'].default_value = .012 if mode=='night' else .15 if mode=='rain' else .7
     mix = nt.nodes.new('ShaderNodeMixShader')
     nt.links.new(light_path.outputs['Is Camera Ray'], mix.inputs[0])
     nt.links.new(nt.nodes['Background'].outputs[0], mix.inputs[1]); nt.links.new(background.outputs[0], mix.inputs[2])
     nt.links.new(mix.outputs[0], nt.nodes['World Output'].inputs['Surface'])
-    nt.nodes['Background'].inputs['Strength'].default_value = (0.3 if indoor else 1.0) if mode != 'night' else 0.06
-    bpy.ops.object.light_add(type='AREA', location=(-3, -4, 7))
+    nt.nodes['Background'].inputs['Strength'].default_value = (0.08 if indoor else .22) if mode != 'night' else 0.025
+    bpy.ops.object.light_add(type='AREA', location=(-2, 1, 3.8) if indoor else (-3,-4,7))
     key = bpy.context.active_object; key.rotation_euler = (Vector((0, 1, 1)) - key.location).to_track_quat('-Z', 'Y').to_euler()
-    key.data.energy = 1100 if indoor else 2200; key.data.size = 5
+    key.data.energy = 450 if indoor else 450; key.data.size = 1.3 if indoor else 2
     key.data.color = (1, 0.72, 0.42) if mode == 'sunset' or indoor else (0.8, 0.89, 1)
-    if mode == 'night': key.data.energy = 180; key.data.color = (0.35, 0.5, 1)
+    if mode == 'night': key.data.energy = 400; key.data.color = (0.35, 0.5, 1)
     if not indoor and mode in ('day', 'sunset'):
         bpy.ops.object.light_add(type='SUN', rotation=(math.radians(35 if mode == 'day' else 65), math.radians(-20), math.radians(-30)))
-        bpy.context.active_object.data.energy = 2.0
-        bpy.context.active_object.data.angle = math.radians(8)
+        bpy.context.active_object.data.energy = 3.5
+        bpy.context.active_object.data.angle = math.radians(2)
         bpy.context.active_object.data.color = (1, .7, .38) if mode == 'sunset' else (1, .96, .86)
     if indoor:
         # Table lamp pool and warm fill, instead of a single distant ceiling light.
         bpy.ops.object.light_add(type='AREA', location=(1,-1,3.2))
         fill=bpy.context.active_object; fill.rotation_euler=(Vector((0,3,1))-fill.location).to_track_quat('-Z','Y').to_euler()
-        fill.data.energy=350;fill.data.size=2;fill.data.color=(1,.76,.48)
+        fill.data.energy=180;fill.data.size=2;fill.data.color=(1,.76,.48)
         bpy.ops.object.light_add(type='POINT', location=(1,2,1.65))
         bpy.context.active_object.data.energy=35;bpy.context.active_object.data.color=(1,.57,.22);bpy.context.active_object.data.shadow_soft_size=.08
+        bpy.ops.object.light_add(type='AREA',location=(2.8,8.4,2.7))
+        window=bpy.context.active_object;window.rotation_euler=(Vector((0,2,1))-window.location).to_track_quat('-Z','Y').to_euler()
+        window.data.energy=250;window.data.size=1.6;window.data.color=(.55,.7,1)
     if mode == 'rain':
         # Static rain at step 3; animated weather is the step-7 effects clock.
         import random
@@ -133,9 +144,12 @@ def lighting(mode, indoor=False):
 
 def build_set(name, mode='day'):
     kit = KITS[name]
-    for b in kit.get('structure', []): box(b['name'], b['pos'], b['size'], b['surface'])
+    for b in kit.get('structure', []):
+        if b['name'] != 'ocean':box(b['name'], b['pos'], b['size'], b['surface'])
     for item in kit['models']: model(item)
+    detail_set(name,surface)
     lighting(mode, kit.get('indoor', False))
+    practical_lights(name,mode)
 
 
 def dress_mine():

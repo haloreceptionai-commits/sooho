@@ -2,7 +2,7 @@
   "set": "saloon",
   "duration": 3,
   "lighting": "day",
-  "samples": 12,
+  "samples": 24,
   "engine": "cycles",
   "size": [
     1080,
@@ -13,18 +13,18 @@
   ],
   "camera": {
     "from": [
-      3.5,
-      -3,
+      3,
+      -1,
       2.1
     ],
     "look_at": [
       0,
-      3,
-      1.25
+      5.4,
+      1.5
     ],
-    "lens": 35,
-    "fstop": 5.6
+    "lens": 32,
+    "fstop": 3.2
   },
   "grade": "Punchy",
-  "haze": 0.008
+  "haze": 0.003
 }
