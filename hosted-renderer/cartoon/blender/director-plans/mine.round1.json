@@ -1,0 +1,1236 @@
+{
+ "plan": {
+  "cast": [
+   {
+    "id": "c1",
+    "outfit": "worker",
+    "hat": "helmet",
+    "shirt": [
+     0.6,
+     0.4,
+     0.2
+    ]
+   },
+   {
+    "id": "c2",
+    "outfit": "worker",
+    "hat": "beanie",
+    "shirt": [
+     0.2,
+     0.3,
+     0.6
+    ]
+   },
+   {
+    "id": "c3",
+    "outfit": "merchant",
+    "hat": "top",
+    "shirt": [
+     0.9,
+     0.9,
+     0.9
+    ]
+   },
+   {
+    "id": "c4",
+    "outfit": "soldier",
+    "hat": "helmet",
+    "shirt": [
+     0.4,
+     0.4,
+     0.4
+    ]
+   }
+  ],
+  "sentences": [
+   {
+    "index": 0,
+    "mentions": [
+     {
+      "word": "loaded",
+      "concept": "obj:gold_shotgun"
+     },
+     {
+      "word": "shotgun",
+      "concept": "obj:gold_shotgun"
+     },
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "fired",
+      "concept": "obj:gold_shotgun"
+     },
+     {
+      "word": "walls",
+      "concept": "mine_tunnel"
+     },
+     {
+      "word": "mine",
+      "concept": "mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_shotgun",
+        "action": "load"
+       }
+      ]
+     },
+     {
+      "start_word": 7,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "aim",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_shotgun",
+        "action": "fire"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 1,
+    "mentions": [
+     {
+      "word": "buddy",
+      "concept": "c2"
+     },
+     {
+      "word": "watches",
+      "concept": "c2"
+     },
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "rock",
+      "concept": "mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c2",
+        "action": "stand",
+        "expression": "worried"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 2,
+    "mentions": [
+     {
+      "word": "shooting",
+      "concept": "obj:gold_shotgun"
+     },
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "mine",
+      "concept": "mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c2",
+        "action": "stand",
+        "expression": "talk"
+       }
+      ],
+      "objects": []
+     },
+     {
+      "start_word": 2,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "aim",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_shotgun",
+        "action": "fire"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 3,
+    "mentions": [
+     {
+      "word": "salting",
+      "concept": null
+     }
+    ],
+    "shots": [
+     {
+      "set": "workshop",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "stand",
+        "expression": "talk"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 4,
+    "mentions": [
+     {
+      "word": "mine",
+      "concept": "mine_tunnel"
+     },
+     {
+      "word": "rock",
+      "concept": "mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "stand",
+        "expression": "sad"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 5,
+    "mentions": [
+     {
+      "word": "guy",
+      "concept": "c3"
+     },
+     {
+      "word": "coming",
+      "concept": "c3"
+     }
+    ],
+    "shots": [
+     {
+      "set": "street",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "walk",
+        "expression": "determined"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 6,
+    "mentions": [
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "dust",
+      "concept": null
+     }
+    ],
+    "shots": [
+     {
+      "set": "saloon",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "carry",
+        "expression": "worried"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 7,
+    "mentions": [
+     {
+      "word": "morning",
+      "concept": "day"
+     },
+     {
+      "word": "guy",
+      "concept": "c3"
+     },
+     {
+      "word": "rolls",
+      "concept": "c3"
+     },
+     {
+      "word": "beam",
+      "concept": "mine_tunnel"
+     },
+     {
+      "word": "bangs",
+      "concept": "c3"
+     }
+    ],
+    "shots": [
+     {
+      "set": "street",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "walk",
+        "expression": "smug"
+       }
+      ],
+      "objects": []
+     },
+     {
+      "start_word": 12,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "fall",
+        "expression": "shock"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 8,
+    "mentions": [
+     {
+      "word": "expert",
+      "concept": "c4"
+     }
+    ],
+    "shots": [
+     {
+      "set": "street",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "carry",
+        "expression": "smug"
+       },
+       {
+        "id": "c4",
+        "action": "walk",
+        "expression": "determined"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 9,
+    "mentions": [
+     {
+      "word": "expert",
+      "concept": "c4"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "c4",
+        "action": "stand",
+        "expression": "smug"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 10,
+    "mentions": [
+     {
+      "word": "smashes",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "chunk",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "wall",
+      "concept": "mine_tunnel"
+     },
+     {
+      "word": "swirls",
+      "concept": "obj:gold_pan"
+     },
+     {
+      "word": "pan",
+      "concept": "obj:gold_pan"
+     },
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "flakes",
+      "concept": null
+     },
+     {
+      "word": "spin",
+      "concept": "obj:gold_pan"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "c4",
+        "action": "swing",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_vein",
+        "action": "open"
+       }
+      ]
+     },
+     {
+      "start_word": 6,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "c4",
+        "action": "pour",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_pan",
+        "action": "pour"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 11,
+    "mentions": [
+     {
+      "word": "magnifying",
+      "concept": "obj:magnifier"
+     },
+     {
+      "word": "glass",
+      "concept": "obj:magnifier"
+     },
+     {
+      "word": "flake",
+      "concept": null
+     }
+    ],
+    "shots": [
+     {
+      "set": "workshop",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "c4",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:magnifier",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 12,
+    "mentions": [
+     {
+      "word": "shot",
+      "concept": "obj:gold_shotgun"
+     },
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "wall",
+      "concept": "mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c4",
+        "action": "point",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_shotgun",
+        "action": "fire"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 13,
+    "mentions": [
+     {
+      "word": "guy",
+      "concept": "c3"
+     },
+     {
+      "word": "laughs",
+      "concept": "c3"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "cheer",
+        "expression": "happy"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 14,
+    "mentions": [
+     {
+      "word": "shoot",
+      "concept": "obj:gold_shotgun"
+     },
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "wall",
+      "concept": "mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "stand",
+        "expression": "talk"
+       }
+      ],
+      "objects": []
+     },
+     {
+      "start_word": 3,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "aim",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_shotgun",
+        "action": "fire"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 15,
+    "mentions": [
+     {
+      "word": "insane",
+      "concept": null
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "stand",
+        "expression": "angry"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 16,
+    "mentions": [
+     {
+      "word": "buddy",
+      "concept": "c2"
+     },
+     {
+      "word": "nods",
+      "concept": "c2"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c2",
+        "action": "stand",
+        "expression": "happy"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 17,
+    "mentions": [
+     {
+      "word": "insane",
+      "concept": null
+     }
+    ],
+    "shots": [
+     {
+      "set": "room",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "c2",
+        "action": "stand",
+        "expression": "talk"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 18,
+    "mentions": [
+     {
+      "word": "guy",
+      "concept": "c3"
+     },
+     {
+      "word": "pays",
+      "concept": null
+     }
+    ],
+    "shots": [
+     {
+      "set": "office",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "carry",
+        "expression": "determined"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 19,
+    "mentions": [
+     {
+      "word": "bolt",
+      "concept": "c1"
+     },
+     {
+      "word": "bolt",
+      "concept": "c2"
+     },
+     {
+      "word": "money",
+      "concept": null
+     },
+     {
+      "word": "stays",
+      "concept": "c3"
+     },
+     {
+      "word": "pulls",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "dynamite",
+      "concept": "obj:dynamite"
+     }
+    ],
+    "shots": [
+     {
+      "set": "street",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c1",
+        "action": "run",
+        "expression": "happy"
+       },
+       {
+        "id": "c2",
+        "action": "run",
+        "expression": "happy"
+       }
+      ],
+      "objects": []
+     },
+     {
+      "start_word": 8,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:dynamite",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 20,
+    "mentions": [
+     {
+      "word": "mined",
+      "concept": null
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "stand",
+        "expression": "worried"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 21,
+    "mentions": [
+     {
+      "word": "lights",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "tosses",
+      "concept": "c3"
+     },
+     {
+      "word": "tunnel",
+      "concept": "mine_tunnel"
+     },
+     {
+      "word": "firecracker",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "runs",
+      "concept": "c3"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "swing",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:dynamite",
+        "action": "fire"
+       }
+      ]
+     },
+     {
+      "start_word": 14,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "run",
+        "expression": "worried"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 22,
+    "mentions": [
+     {
+      "word": "dust",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "clears",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "vein",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "gold",
+      "concept": null
+     },
+     {
+      "word": "arm",
+      "concept": null
+     },
+     {
+      "word": "guy",
+      "concept": "c1"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "crouch",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:dynamite",
+        "action": "explode"
+       }
+      ]
+     },
+     {
+      "start_word": 5,
+      "set": "mine_tunnel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "c3",
+        "action": "stand",
+        "expression": "happy"
+       },
+       {
+        "id": "c1",
+        "action": "stand",
+        "expression": "shock"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "obj:gold_vein",
+        "action": "open"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "errors": [
+  "s0: unknown concept mine_tunnel",
+  "s0: unknown concept mine_tunnel",
+  "s0: unknown story object 'obj:gold_shotgun'",
+  "s0: unknown story object 'obj:gold_shotgun'",
+  "s1: unknown concept c2",
+  "s1: unknown concept c2",
+  "s1: unknown concept mine_tunnel",
+  "s2: unknown concept mine_tunnel",
+  "s2: unknown story object 'obj:gold_shotgun'",
+  "s4: unknown concept mine_tunnel",
+  "s4: unknown concept mine_tunnel",
+  "s5: unknown concept c3",
+  "s5: unknown concept c3",
+  "s7: unknown concept day",
+  "s7: unknown concept c3",
+  "s7: unknown concept c3",
+  "s7: unknown concept mine_tunnel",
+  "s7: unknown concept c3",
+  "s8: unknown concept c4",
+  "s9: unknown concept c4",
+  "s10: unknown concept mine_tunnel",
+  "s10: unknown story object 'obj:gold_vein'",
+  "s10: unknown story object 'obj:gold_pan'",
+  "s11: unknown story object 'obj:magnifier'",
+  "s12: unknown concept mine_tunnel",
+  "s12: unknown story object 'obj:gold_shotgun'",
+  "s13: unknown concept c3",
+  "s13: unknown concept c3",
+  "s14: unknown concept mine_tunnel",
+  "s14: unknown story object 'obj:gold_shotgun'",
+  "s16: unknown concept c2",
+  "s16: unknown concept c2",
+  "s18: unknown concept c3",
+  "s19: unknown concept c1",
+  "s19: unknown concept c2",
+  "s19: unknown concept c3",
+  "s19: unknown story object 'obj:dynamite'",
+  "s21: unknown concept c3",
+  "s21: unknown concept mine_tunnel",
+  "s21: unknown concept c3",
+  "s21: unknown story object 'obj:dynamite'",
+  "s22: unknown concept c1",
+  "s22: unknown story object 'obj:dynamite'",
+  "s22: unknown story object 'obj:gold_vein'",
+  "s0: spoken obj:gold_shotgun not shown",
+  "s0: spoken obj:gold_shotgun:fire not shown",
+  "s0: spoken obj:gold_shotgun:load not shown",
+  "s0: spoken set:mine_tunnel not shown",
+  "s2: spoken obj:gold_shotgun not shown",
+  "s10: spoken obj:gold_pan not shown",
+  "s10: spoken obj:gold_pan:pour not shown",
+  "s10: spoken obj:gold_vein not shown",
+  "s10: spoken obj:gold_vein:open not shown",
+  "s11: spoken obj:magnifier not shown",
+  "s12: spoken obj:gold_shotgun not shown",
+  "s14: spoken obj:gold_shotgun not shown",
+  "s19: spoken obj:dynamite not shown",
+  "s21: spoken char:swing not shown",
+  "s21: spoken obj:dynamite not shown",
+  "s21: spoken obj:dynamite:fire not shown",
+  "s22: spoken obj:dynamite not shown",
+  "s22: spoken obj:gold_vein not shown",
+  "s22: spoken obj:gold_vein:open not shown",
+  "s0: spoken 'gold' has no drawable concept",
+  "s1: spoken 'gold' has no drawable concept",
+  "s2: spoken 'gold' has no drawable concept",
+  "s3: spoken 'salting' has no drawable concept",
+  "s6: spoken 'gold' has no drawable concept",
+  "s6: spoken 'dust' has no drawable concept",
+  "s10: spoken 'gold' has no drawable concept",
+  "s10: spoken 'flakes' has no drawable concept",
+  "s11: spoken 'flake' has no drawable concept",
+  "s12: spoken 'gold' has no drawable concept",
+  "s14: spoken 'gold' has no drawable concept",
+  "s15: spoken 'insane' has no drawable concept",
+  "s17: spoken 'insane' has no drawable concept",
+  "s18: spoken 'pays' has no drawable concept",
+  "s19: spoken 'money' has no drawable concept",
+  "s20: spoken 'mined' has no drawable concept",
+  "s22: spoken 'gold' has no drawable concept",
+  "s22: spoken 'arm' has no drawable concept",
+  "set changes 25.6/min outside benchmark band 12.0-22.0",
+  "shot 6 length 5.72s outside 0.5-5.0",
+  "shot 7 length 0.20s outside 0.5-5.0",
+  "shot 9 length 0.32s outside 0.5-5.0",
+  "shot 10 length 0.21s outside 0.5-5.0",
+  "shot 11 length 0.43s outside 0.5-5.0",
+  "shot 12 length 0.21s outside 0.5-5.0"
+ ],
+ "report": {
+  "sentences": 23,
+  "shots": 16,
+  "required": 48,
+  "covered": 11,
+  "coverage": 0.2292,
+  "undrawable": [
+   {
+    "sentence": 0,
+    "word": "gold"
+   },
+   {
+    "sentence": 1,
+    "word": "gold"
+   },
+   {
+    "sentence": 2,
+    "word": "gold"
+   },
+   {
+    "sentence": 3,
+    "word": "salting"
+   },
+   {
+    "sentence": 6,
+    "word": "gold"
+   },
+   {
+    "sentence": 6,
+    "word": "dust"
+   },
+   {
+    "sentence": 10,
+    "word": "gold"
+   },
+   {
+    "sentence": 10,
+    "word": "flakes"
+   },
+   {
+    "sentence": 11,
+    "word": "flake"
+   },
+   {
+    "sentence": 12,
+    "word": "gold"
+   },
+   {
+    "sentence": 14,
+    "word": "gold"
+   },
+   {
+    "sentence": 15,
+    "word": "insane"
+   },
+   {
+    "sentence": 17,
+    "word": "insane"
+   },
+   {
+    "sentence": 18,
+    "word": "pays"
+   },
+   {
+    "sentence": 19,
+    "word": "money"
+   },
+   {
+    "sentence": 20,
+    "word": "mined"
+   },
+   {
+    "sentence": 22,
+    "word": "gold"
+   },
+   {
+    "sentence": 22,
+    "word": "arm"
+   }
+  ],
+  "missing": [
+   {
+    "sentence": 0,
+    "concept": "obj:gold_shotgun"
+   },
+   {
+    "sentence": 0,
+    "concept": "obj:gold_shotgun:fire"
+   },
+   {
+    "sentence": 0,
+    "concept": "obj:gold_shotgun:load"
+   },
+   {
+    "sentence": 0,
+    "concept": "set:mine_tunnel"
+   },
+   {
+    "sentence": 2,
+    "concept": "obj:gold_shotgun"
+   },
+   {
+    "sentence": 10,
+    "concept": "obj:gold_pan"
+   },
+   {
+    "sentence": 10,
+    "concept": "obj:gold_pan:pour"
+   },
+   {
+    "sentence": 10,
+    "concept": "obj:gold_vein"
+   },
+   {
+    "sentence": 10,
+    "concept": "obj:gold_vein:open"
+   },
+   {
+    "sentence": 11,
+    "concept": "obj:magnifier"
+   },
+   {
+    "sentence": 12,
+    "concept": "obj:gold_shotgun"
+   },
+   {
+    "sentence": 14,
+    "concept": "obj:gold_shotgun"
+   },
+   {
+    "sentence": 19,
+    "concept": "obj:dynamite"
+   },
+   {
+    "sentence": 21,
+    "concept": "char:swing"
+   },
+   {
+    "sentence": 21,
+    "concept": "obj:dynamite"
+   },
+   {
+    "sentence": 21,
+    "concept": "obj:dynamite:fire"
+   },
+   {
+    "sentence": 22,
+    "concept": "obj:dynamite"
+   },
+   {
+    "sentence": 22,
+    "concept": "obj:gold_vein"
+   },
+   {
+    "sentence": 22,
+    "concept": "obj:gold_vein:open"
+   }
+  ],
+  "set_changes_per_min": 25.62,
+  "mean_shot_len": 1.46,
+  "max_shot_len": 5.72,
+  "min_shot_len": 0.2,
+  "sets_used": [
+   "mine_tunnel",
+   "office",
+   "room",
+   "saloon",
+   "street",
+   "workshop"
+  ]
+ }
+}
