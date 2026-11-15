@@ -29,10 +29,23 @@ def dynamite_fuse_point(u):
     k=(u-.4)/.6;return (.12+.24*k,.04*k,.9+.08*k)
 
 
+def glow(name,color,strength):
+    # Emission-only fire: no diffuse/specular lighting, so flames stay saturated instead of pastel under AgX.
+    m=bpy.data.materials.get(name)
+    if m:return m
+    m=bpy.data.materials.new(name);m.use_nodes=True;nt=m.node_tree;nt.nodes.clear()
+    e=nt.nodes.new('ShaderNodeEmission');e.inputs['Color'].default_value=(*color,1);e.inputs['Strength'].default_value=strength
+    out=nt.nodes.new('ShaderNodeOutputMaterial');nt.links.new(e.outputs[0],out.inputs['Surface'])
+    return m
+
+
 def spiky_burst(name,radius,mat,seed):
     # Cartoon starburst fireball: icosphere with alternating long spikes, casting no shadow.
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1,location=(0,0,.42));o=bpy.context.active_object;o.name=name
-    for i,v in enumerate(o.data.vertices):v.co*=1.55 if (i*7+seed)%3==0 else .9
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3,radius=1,location=(0,0,.42));o=bpy.context.active_object;o.name=name
+    for v in o.data.vertices:
+        d=v.co.normalized();k=abs(math.sin(d.x*5.3+seed)*math.sin(d.y*4.7-seed)*math.sin(d.z*6.1+2*seed))
+        v.co*=.85+.9*k**1.5
+    for f in o.data.polygons:f.use_smooth=True
     o.data.materials.append(mat);o.visible_shadow=False;o.scale=(radius,)*3
     return o
 
@@ -53,8 +66,8 @@ def build_object(spec,duration,fps):
     red=material('object dynamite',(.58,.06,.035));cloth=material('object cover',(.16,.25,.3),.95)
     created=set(bpy.data.objects);moving=[];intact=[];kind=spec['kind'];action=spec.get('action','hold')
     # Moderate warm emission: AgX desaturates very bright red light into pink.
-    ember=material('object fuse ember',(1,.3,0),.4,emission=.9)
-    fire_core=material('blast fire core',(1,.62,0),.4,emission=1.1);blast_smoke=material('blast smoke',(.16,.15,.14),.95)
+    ember=glow('object fuse ember',(1,.28,0),3)
+    fire_core=glow('blast fire core',(1,.72,.08),4);blast_smoke=material('blast smoke',(.16,.15,.14),.95)
     if kind in ('perforated_cart','covered_cart'):
         cube('cart chassis',(0,0,.45),(1.3,.8,.16),wood)
         for x in [-.48,.48]:
@@ -137,7 +150,7 @@ def build_object(spec,duration,fps):
         tip=sphere('glowing ignition tip',(0,-.7,.045),(.065,.055,.07),ember)
         if action=='fire':moving.append((tip,'fuse',tip.location.copy()))
         if action=='fire':
-            flame=material('fuse flame yellow',(1,.6,0),.4,emission=1.4)
+            flame=glow('fuse flame yellow',(1,.62,.02),3.5)
             smoke=material('fuse smoke charcoal',(.085,.085,.085),.95)
             for i in range(3):
                 o=sphere('fuse flame tongue',(0,0,0),(.04,.035,.12-i*.025),flame);moving.append((o,'fuse_flame',Vector((i*.025-.025,0,.085+i*.025))))
