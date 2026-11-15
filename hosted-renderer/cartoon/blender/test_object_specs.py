@@ -4,7 +4,7 @@ from object_specs import OBJECTS,validate_object,holes,mechanism
 
 class ObjectsTest(unittest.TestCase):
     def test_ten_reference_grounded_objects(self):
-        self.assertEqual(len(OBJECTS),11)
+        self.assertEqual(len(OBJECTS),12)
         self.assertEqual(set(s['source'] for s in OBJECTS.values()),{'cart','mine','rail'})
 
     def test_cart_has_exactly_82_unique_apertures(self):

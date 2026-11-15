@@ -9,7 +9,8 @@
    "walls of the mine",
    "wall",
    "walls",
-   "rock"
+   "rock",
+   "dug"
   ],
   "rail_yard": [
    "rail",
@@ -248,6 +249,17 @@
      "breaks"
     ]
    }
+  },
+  "money_bag": {
+   "words": [
+    "money",
+    "bucks",
+    "pays",
+    "cash",
+    "coins",
+    "dollars"
+   ],
+   "actions": {}
   }
  },
  "character_actions": {

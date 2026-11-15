@@ -297,6 +297,17 @@ def build_object(spec,duration,fps):
             cube('signal head',(.75,.85,1.25),(.14,.1,.26),plate,.01)
             sphere('signal lamp',(.75,.79,1.3),(.04,.02,.04),glow('signal lamp green',(.1,1,.2),3))
             sphere('signal lamp',(.75,.79,1.2),(.04,.02,.04),glow('signal lamp red',(1,.05,.02),1.2))
+    elif kind=='money_bag':
+        # Fat tied burlap money sack with gold coins spilling into a stack beside it.
+        sack=material('money sack burlap',(.55,.42,.24),.95)
+        sphere('money sack body',(0,0,.32),(.3,.27,.32),sack)
+        sphere('money sack neck',(0,0,.66),(.1,.09,.09),sack)
+        bpy.ops.mesh.primitive_torus_add(major_radius=.1,minor_radius=.022,location=(0,0,.62));o=bpy.context.active_object;o.name='sack tie string';o.data.materials.append(wood)
+        for r,z in [(.17,.75),(.12,.82)]:sphere('sack top flap',(0,0,z),(r*.55,r*.45,.05),sack)
+        coin=material('gold coin',(1,.72,.12),.25,1)
+        for i in range(7):cylinder('gold coin',(.45,-.1,.012+i*.024),.075,.02,coin)
+        for i in range(6):
+            a=i*1.1;cylinder('gold coin',(.3+.12*math.cos(a),-.3+.1*math.sin(a),.012),.075,.02,coin,(.15*math.sin(a),.1,0))
     else:
         rock=material('object rock',(.19,.21,.22),.92)
         quartz=material('vein quartz',(.73,.74,.68),.85)
