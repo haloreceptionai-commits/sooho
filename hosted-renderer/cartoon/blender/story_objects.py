@@ -14,6 +14,14 @@ def cylinder(name,pos,radius,depth,mat,rotation=(0,0,0)):
     return o
 
 
+def path(name,points,radius,mat):
+    curve=bpy.data.curves.new(name,'CURVE');curve.dimensions='3D';curve.bevel_depth=radius;curve.bevel_resolution=3
+    spline=curve.splines.new('POLY');spline.points.add(len(points)-1)
+    for point,position in zip(spline.points,points):point.co=(*position,1)
+    obj=bpy.data.objects.new(name,curve);bpy.context.collection.objects.link(obj);curve.materials.append(mat)
+    return obj
+
+
 def build_object(spec,duration,fps):
     validate_object(spec)
     root=bpy.data.objects.new(spec['kind'],None);bpy.context.collection.objects.link(root)
@@ -48,13 +56,26 @@ def build_object(spec,duration,fps):
             solid=cover.modifiers.new('cloth thickness','SOLIDIFY');solid.thickness=.015
             moving.append((cover,'cover',cover.location.copy()))
     elif kind=='hand_drill':
-        cube('workpiece',(0,0,.15),(.85,.55,.3),wood)
-        bit=cylinder('drill bit',(0,0,.55),.025,.65,steel);moving.append((bit,'spin',bit.location.copy()))
-        for a,b in [((0,0,.86),(.25,0,.86)),((.25,0,.86),(.25,0,1.12)),((.25,0,1.12),(0,0,1.12))]:rope('crank',a,b,.035,steel)
-        cylinder('drill grip',(0,0,1.2),.065,.16,wood)
-        cylinder('crank wooden side grip',(.25,0,.99),.07,.22,wood)
-        for z in [.35,.4,.45,.5,.55,.6]:
-            bpy.ops.mesh.primitive_torus_add(major_radius=.03,minor_radius=.008,location=(0,0,z));bpy.context.active_object.data.materials.append(steel)
+        # Familiar eggbeater hand drill: large toothed gear, offset crank, chuck and spiral bit.
+        cube('drilled timber',(0,0,.09),(1,.7,.18),wood)
+        cylinder('drill bit',(0,0,.32),.028,.46,steel)
+        path('spiral cutting flute',[(.031*math.cos(i*.45),.031*math.sin(i*.45),.13+i*.006) for i in range(64)],.009,steel)
+        cylinder('tapered drill chuck',(0,0,.61),.075,.16,steel)
+        rope('drill frame',(0,0,.68),(0,0,1.18),.045,steel)
+        cylinder('top wooden drill handle',(0,0,1.35),.085,.3,wood)
+        center=(.12,-.075,.94)
+        bpy.ops.mesh.primitive_torus_add(major_radius=.235,minor_radius=.027,location=center,rotation=(math.pi/2,0,0))
+        gear=bpy.context.active_object;gear.name='large hand drill gear';gear.data.materials.append(steel)
+        cylinder('gear axle',center,.055,.15,steel,(math.pi/2,0,0))
+        for i in range(24):
+            a=i*math.tau/24
+            tooth=cube('gear tooth',(.12+.256*math.cos(a),-.075,.94+.256*math.sin(a)),(.035,.07,.035),steel,.004);tooth.rotation_euler.y=-a
+        for i in range(5):
+            a=i*math.tau/5;rope('gear spoke',center,(.12+.215*math.cos(a),-.075,.94+.215*math.sin(a)),.016,steel)
+        crank=bpy.data.objects.new('drill crank pivot',None);bpy.context.collection.objects.link(crank);crank.location=center
+        arm=rope('offset crank arm',(0,-.08,0),(.18,-.08,.12),.024,steel);arm.parent=crank
+        grip=cylinder('wooden crank grip',(.18,-.19,.12),.065,.22,wood,(math.pi/2,0,0));grip.parent=crank
+        moving.append((crank,'crank',crank.location.copy()))
     elif kind=='rocket_arrow':
         rope('arrow shaft',(0,0,.12),(0,0,1.5),.025,wood)
         cylinder('paper rocket tube',(0,0,.7),.09,.55,paper)
@@ -62,14 +83,19 @@ def build_object(spec,duration,fps):
         for a in [0,math.pi/2]:
             fin=cube('arrow fletching',(0,0,.25),(.28,.015,.22),paper);fin.rotation_euler.z=a
     elif kind=='fuse_bundle':
-        fusemat=material('rope fuse tan',(.42,.27,.12),.95)
-        rope('common fuse',(0,-.7,.07),(0,0,.07),.035,fusemat)
-        for i in range(10):
-            end=(-.6+i*.133,.7,.07)
-            rope('branch fuse',(0,0,.07),end,.018,fusemat)
-            cylinder('paper charge at fuse end',(end[0],end[1],.13),.055,.16,paper)
+        # Looped cords leading into three visibly cylindrical powder charges, not parallel rake teeth.
+        fusemat=material('braided safety fuse',(.11,.075,.035),.95)
+        path('coiled common fuse',[(.24*math.cos(i*.12),-.28+.24*math.sin(i*.12),.045) for i in range(100)],.025,fusemat)
+        path('fuse ignition tail',[(.24,-.28,.045),(.38,-.46,.045),(.32,-.7,.07)],.025,fusemat)
+        for i,(x,y,a) in enumerate([(-.47,.22,-.45),(0,.37,.1),(.46,.17,.6)]):
+            # Charges lie on the ground with dark fuses entering their camera-facing ends.
+            charge=cylinder('fused powder charge',(x,y,.13),.12,.52,red,(math.pi/2,0,a))
+            for offset in [-.16,.16]:
+                cylinder('charge paper binding',(x-offset*math.sin(a),y+offset*math.cos(a),.13),.123,.035,paper,(math.pi/2,0,a))
+            end=(x+.26*math.sin(a),y-.26*math.cos(a),.13)
+            path('curving branch fuse',[(0,-.17,.045),(x*.55,-.04-i*.035,.045),(end[0]-.09,end[1]-.13,.055),end],.022,fusemat)
         if action=='fire':
-            o=sphere('travelling fuse ember',(0,-.7,.07),(.045,)*3,ember);moving.append((o,'fuse',o.location.copy()))
+            o=sphere('travelling fuse ember',(.32,-.7,.07),(.045,)*3,ember);moving.append((o,'fuse',o.location.copy()))
     elif kind=='gold_shotgun':
         stock=cube('shaped wooden stock',(0,0,.26),(.26,.17,.43),wood,.06);stock.rotation_euler.y=-.16
         cube('stock neck',(0,0,.5),(.11,.13,.22),wood,.025)
@@ -81,15 +107,22 @@ def build_object(spec,duration,fps):
         if action=='fire':
             o=sphere('fired gold payload',(0,0,1.3),(.035,)*3,gold);moving.append((o,'projectile',o.location.copy()))
     elif kind=='gold_pan':
-        # Open bowl mesh; gold flakes remain visible in its bottom.
+        # Shallow prospecting pan with concentric recovery riffles and angular gold in black sediment.
         verts=[];faces=[]
-        for r,z in [(.02,.03),(.36,.04),(.58,.22)]:
+        for r,z in [(0,.035),(.36,.04),(.59,.13)]:
             for i in range(48):verts.append((r*math.cos(i*math.tau/48),r*math.sin(i*math.tau/48),z))
         for ring in range(2):
             for i in range(48):a=ring*48+i;b=ring*48+(i+1)%48;faces.append((a,b,b+48,a+48))
         me=bpy.data.meshes.new('open pan');me.from_pydata(verts,[],faces);me.materials.append(steel);o=bpy.data.objects.new('open gold pan',me);bpy.context.collection.objects.link(o)
-        for i in range(18):
-            o=sphere('gold flake',(.22*math.sin(i*2.4),.22*math.cos(i*2.4),.06),(.035,.025,.006),gold)
+        solid=o.modifiers.new('pan thickness','SOLIDIFY');solid.thickness=.012
+        for r in [.42,.47,.52,.585]:
+            bpy.ops.mesh.primitive_torus_add(major_radius=r,minor_radius=.013,location=(0,0,.04+(r-.36)*.09/.23))
+            bpy.context.active_object.name='gold catching pan riffle';bpy.context.active_object.data.materials.append(steel)
+        sediment=material('black prospecting sand',(.028,.026,.021),.96)
+        cylinder('black sand in pan',(0,0,.048),.32,.009,sediment)
+        for i in range(13):
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1,location=(.23*math.sin(i*2.4),.23*math.cos(i*2.4),.074))
+            o=bpy.context.active_object;o.name='angular gold nugget';o.scale=(.038+i%3*.012,.03,.017+i%2*.009);o.data.materials.append(gold)
             moving.append((o,'flake',o.location.copy()))
     elif kind=='magnifier':
         bpy.ops.mesh.primitive_torus_add(major_radius=.3,minor_radius=.035,location=(0,0,.5),rotation=(math.pi/2,0,0));bpy.context.active_object.data.materials.append(steel)
@@ -109,14 +142,22 @@ def build_object(spec,duration,fps):
             for i in range(8):
                 o=cube('dynamite fragment',(0,0,.38),(.09,.09,.15),red);moving.append((o,'fragment',Vector((math.cos(i*math.tau/8),math.sin(i*math.tau/8),.5))))
     else:
-        rock=material('object rock',(.3,.32,.3),.92)
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,location=(0,0,.45));o=bpy.context.active_object;o.name='fractured vein rock';o.scale=(.62,.4,.45);o.data.materials.append(rock)
-        for i in range(8):
-            x=-.4+i*.115;z=.45+.055*math.sin(i*2)
-            rope('gold mineral seam',(x,-.39,z),(x+.115,-.39,.45+.055*math.sin((i+1)*2)),.022,gold)
+        rock=material('object rock',(.19,.21,.22),.92)
+        quartz=material('vein quartz',(.73,.74,.68),.85)
+        # Angular outcrop, broad exposed quartz ribbon, branching embedded gold; never an egg silhouette.
+        verts=[(-.7,-.28,0),(.68,-.28,0),(.61,.3,0),(-.55,.32,0),(-.58,-.3,1.04),(.48,-.3,.91),(.43,.29,1.16),(-.47,.3,1.25)]
+        mesh=bpy.data.meshes.new('angular mineral outcrop');mesh.from_pydata(verts,[],[(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7),(4,5,6,7),(0,3,2,1)]);mesh.materials.append(rock)
+        outcrop=bpy.data.objects.new('gold bearing rock outcrop',mesh);bpy.context.collection.objects.link(outcrop)
+        points=[(-.54,-.315,.16),(-.34,-.315,.34),(-.12,-.315,.4),(.02,-.315,.64),(.27,-.315,.73),(.4,-.315,.97)]
+        path('exposed quartz vein',points,.085,quartz)
+        path('embedded irregular gold vein',[(x,y-.055,z) for x,y,z in points],.031,gold)
+        for i,(x,y,z) in enumerate(points[1:-1]):
+            path('branching gold deposit',[(x,y-.052,z),(x-.16,y-.052,z+.1),(x-.22,y-.052,z+.19)],.018,gold)
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.06,location=(x,y-.067,z));bpy.context.active_object.name='embedded gold crystal';bpy.context.active_object.data.materials.append(gold)
         if action in ('open','explode'):
-            lid=cube('rock crust',(0,-.46,.46),(.98,.07,.28),rock);moving.append((lid,'cover',lid.location.copy()))
-    for obj in set(bpy.data.objects)-created:obj.parent=root
+            lid=cube('rock crust',(0,-.43,.55),(1.18,.07,1.03),rock);moving.append((lid,'cover',lid.location.copy()))
+    for obj in set(bpy.data.objects)-created:
+        if obj.parent is None:obj.parent=root
     base=tuple(spec['pos']);s=spec.get('scale',1);root.scale=(s,)*3
     for frame in range(round(duration*fps)):
         m=mechanism(action,frame/fps);root.location=base;root.rotation_euler=(m['tilt'],m['swing'],math.radians(spec.get('yaw',0)))
@@ -125,11 +166,12 @@ def build_object(spec,duration,fps):
         for obj,role,rest in moving:
             obj.location=rest;obj.rotation_euler=(0,0,0)
             if role=='spin':obj.rotation_euler.z=m['spin']
+            if role=='crank':obj.rotation_euler.y=m['spin']
             if role=='wheel':obj.rotation_euler=(math.pi/2,m['travel']/.3,0)
             if role=='cover':obj.location=(rest.x,rest.y-m['open']*.5,rest.z+m['open']*.5+m['burst'])
             if role=='load':obj.location=(rest.x,rest.y+m['load'],rest.z)
             if role=='projectile':obj.location=(rest.x,rest.y,rest.z+m['travel'])
-            if role=='fuse':obj.location=(rest.x,-.7+1.4*m['ignition'],rest.z)
+            if role=='fuse':obj.location=(.32*(1-m['ignition']),-.7+.53*m['ignition'],rest.z)
             if role=='dynamite_fuse':obj.location=(.16*m['ignition'],0,.73+.21*m['ignition'])
             if role=='fragment':obj.location=(rest.x*m['burst'],rest.y*m['burst'],.38+rest.z*m['burst'])
             if role=='flake' and action=='pour':obj.location=(rest.x,rest.y-.18*abs(m['tilt']),rest.z)
