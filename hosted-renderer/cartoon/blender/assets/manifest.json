@@ -8,6 +8,14 @@
     "license": "CC0-1.0"
   },
   {
+    "id": "castle-kit/Textures/colormap.png",
+    "kind": "model-texture",
+    "path": "models/castle-kit/Textures/colormap.png",
+    "sha256": "66fd49be148f32e88f6c8cace67120250d1943a7856601158ad0ff24651db0b0",
+    "source": "https://kenney.nl/assets/castle-kit",
+    "license": "CC0-1.0"
+  },
+  {
     "id": "castle-kit/wall",
     "kind": "model",
     "path": "models/castle-kit/wall.glb",
@@ -52,6 +60,14 @@
     "kind": "model",
     "path": "models/fantasy-town-kit/wall.glb",
     "sha256": "cab1dff37610e2a214237cc62ec0b1506e8fd76bb66c29f6c585b4b643b569c4",
+    "source": "https://kenney.nl/assets/fantasy-town-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "fantasy-town-kit/Textures/colormap.png",
+    "kind": "model-texture",
+    "path": "models/fantasy-town-kit/Textures/colormap.png",
+    "sha256": "4aac939dc33195e35caf8c382ee3cb170054da763577f22d3c22692ec6afccdf",
     "source": "https://kenney.nl/assets/fantasy-town-kit",
     "license": "CC0-1.0"
   },
@@ -192,6 +208,14 @@
     "license": "CC0-1.0"
   },
   {
+    "id": "pirate-kit/Textures/colormap.png",
+    "kind": "model-texture",
+    "path": "models/pirate-kit/Textures/colormap.png",
+    "sha256": "451e1d7a53b8e76f4b2ee58742e241509fee5f82cf2cee6e3f7aca86ba718abe",
+    "source": "https://kenney.nl/assets/pirate-kit",
+    "license": "CC0-1.0"
+  },
+  {
     "id": "pirate-kit/crate",
     "kind": "model",
     "path": "models/pirate-kit/crate.glb",
@@ -268,6 +292,14 @@
     "kind": "model",
     "path": "models/train-kit/railroad-straight.glb",
     "sha256": "bcbd501f74b754b61f2ddb5cba2d45d5d694bfd25c497fa72af65202a53930d9",
+    "source": "https://kenney.nl/assets/train-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "train-kit/Textures/colormap.png",
+    "kind": "model-texture",
+    "path": "models/train-kit/Textures/colormap.png",
+    "sha256": "e264660f3fc9ecbd642bdb7fb7b7dc10755a061560a66651baf48274c729af09",
     "source": "https://kenney.nl/assets/train-kit",
     "license": "CC0-1.0"
   },
@@ -372,6 +404,14 @@
     "kind": "model",
     "path": "models/factory-kit/cog-a.glb",
     "sha256": "71fac911b6f760a97af12fe81814186e84b8d8f8b380f211afe8175baba96a12",
+    "source": "https://kenney.nl/assets/factory-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "factory-kit/Textures/colormap.png",
+    "kind": "model-texture",
+    "path": "models/factory-kit/Textures/colormap.png",
+    "sha256": "35d7bd6900dde0208429eeaec87fa17fbf024ed59f3f4eab54bc92802eba9dd7",
     "source": "https://kenney.nl/assets/factory-kit",
     "license": "CC0-1.0"
   },

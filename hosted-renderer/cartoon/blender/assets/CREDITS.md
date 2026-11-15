@@ -3,12 +3,14 @@
 All entries are CC0-1.0; licenses checked at import.
 
 - models/castle-kit/gate.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `fdc3d5b07f619dcacbf2af36024dc9a356696e541f6ce409a5305be782665ec9`
+- models/castle-kit/Textures/colormap.png: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `66fd49be148f32e88f6c8cace67120250d1943a7856601158ad0ff24651db0b0`
 - models/castle-kit/wall.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `b2ea00acbf4ba91ff0d4b8b942edf9fa12d821abd0b2c945c57a2b9b3153cfe3`
 - models/castle-kit/tower-square-base.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `996887e98957eeea2ba7b5d14f0d17877c91e4e99e1c5b8ee57d87b7f7c9d5e8`
 - models/castle-kit/tower-square-top.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `5e98cdf2bf4d885edc3fa514719f80d63872e11c54ee629c11859223dad8489c`
 - models/castle-kit/siege-catapult.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `35a7484ff74630228e474fae885bdc9176c30e0af0d94def80307bdbc87b7583`
 - models/castle-kit/flag-banner-long.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `e6a4433f5770b9fc31bf67d72424a877d5c010486d5b7373ce7af900566827e4`
 - models/fantasy-town-kit/wall.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `cab1dff37610e2a214237cc62ec0b1506e8fd76bb66c29f6c585b4b643b569c4`
+- models/fantasy-town-kit/Textures/colormap.png: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `4aac939dc33195e35caf8c382ee3cb170054da763577f22d3c22692ec6afccdf`
 - models/fantasy-town-kit/wall-window-shutters.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `58a641a03fc4a5a225663969cc257fcf4f2fc63c199b4aca16b612142ff9eed0`
 - models/fantasy-town-kit/wall-door.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `79b2d40db110ca96a6e77d4261da665fdf8c68f4c20c2afef5bce1c28ad72857`
 - models/fantasy-town-kit/roof-gable.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `4bb6bdbcadbb8ebeb69d720e29f6c2e57c99d98966baa41fd86914d3c13d6039`
@@ -26,6 +28,7 @@ All entries are CC0-1.0; licenses checked at import.
 - models/nature-kit/grass_large.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `af49a595624abca7249824eeefb944d4baf974abeeb5b16110d175da3563d6cd`
 - models/nature-kit/log_stack.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `90eaae4a01ba1f25c2f0c6d83087e4a7a8fac684f2452615245333968d118d68`
 - models/pirate-kit/barrel.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `7616dedf7c1023afa6ecd3c52a4609460aae0e582dee14e60ec5e47c1174793b`
+- models/pirate-kit/Textures/colormap.png: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `451e1d7a53b8e76f4b2ee58742e241509fee5f82cf2cee6e3f7aca86ba718abe`
 - models/pirate-kit/crate.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `b525674e07c8b83667512a8dd93be0d7684358347d0e64d2bb16b156ac382ed1`
 - models/pirate-kit/crate-bottles.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `8412a3d3dc00a81ac61f0975682ef9f08288bee5c5eb783b09dbc1144e655302`
 - models/pirate-kit/bottle.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `b59ff617014ace27dacf2909bba94f3ad3a9a9d1660c6ae4d468b5e8561637ae`
@@ -36,6 +39,7 @@ All entries are CC0-1.0; licenses checked at import.
 - models/pirate-kit/structure-fence.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `d4b9eca0f219efc7ec37d45170c5888a4ba6e0e8f39905f9d92d491ae5de7281`
 - models/pirate-kit/tool-shovel.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `b468372526e419c712f50b824eff50d6e7838de646eaa5a6aacfc4dcdfcfa265`
 - models/train-kit/railroad-straight.glb: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `bcbd501f74b754b61f2ddb5cba2d45d5d694bfd25c497fa72af65202a53930d9`
+- models/train-kit/Textures/colormap.png: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `e264660f3fc9ecbd642bdb7fb7b7dc10755a061560a66651baf48274c729af09`
 - models/train-kit/train-locomotive-a.glb: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `8dfe9d20667c1534652286149fb0e1639ff48975a4187d3ad2fd956add0bba2a`
 - models/train-kit/train-carriage-coal.glb: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `95c6282a6b13317640ac48bd75d7aeec10faa9bfc035ba21977bb0296df7199a`
 - models/furniture-kit/table.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `ff1a94498d023957f4bc3ff6f55a7a82977d336dbf01a573b3364f03afe5ff61`
@@ -49,6 +53,7 @@ All entries are CC0-1.0; licenses checked at import.
 - models/furniture-kit/pottedPlant.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `5b760eda2766f75fda36b2c5df652a1662f82981ef64cd8fa7fe7bcd386b3a15`
 - models/furniture-kit/rugRectangle.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `a989d2d59c04e3071e0c90388b113a9a8f339ce1814ef984c51cb6dcd7c8e0eb`
 - models/factory-kit/cog-a.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `71fac911b6f760a97af12fe81814186e84b8d8f8b380f211afe8175baba96a12`
+- models/factory-kit/Textures/colormap.png: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `35d7bd6900dde0208429eeaec87fa17fbf024ed59f3f4eab54bc92802eba9dd7`
 - models/factory-kit/machine.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `a39e3042bcb7789274428357383317d70e1c31906e5301c99e7d9e90ac584863`
 - models/factory-kit/pipe-large-valve.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `57126374dce5b172e06d5d6f8cbaab97c9cffe3e5e726060eb14c50a5bd519b6`
 - models/factory-kit/box-small.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `fd2ea1ac4f24a9515dc9c53a4a589a8897c824fa5865771799f965a252f684f0`

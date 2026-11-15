@@ -867,6 +867,20 @@
           4.6
         ],
         "surface": "stone"
+      },
+      {
+        "name": "ceiling",
+        "pos": [
+          0,
+          4,
+          4.7
+        ],
+        "size": [
+          12,
+          14,
+          0.2
+        ],
+        "surface": "wood"
       }
     ],
     "models": [
@@ -986,6 +1000,20 @@
           4.6
         ],
         "surface": "stone"
+      },
+      {
+        "name": "ceiling",
+        "pos": [
+          0,
+          4,
+          4.7
+        ],
+        "size": [
+          12,
+          14,
+          0.2
+        ],
+        "surface": "wood"
       }
     ],
     "models": [
@@ -1507,6 +1535,20 @@
           4.6
         ],
         "surface": "stone"
+      },
+      {
+        "name": "ceiling",
+        "pos": [
+          0,
+          4,
+          4.7
+        ],
+        "size": [
+          12,
+          14,
+          0.2
+        ],
+        "surface": "wood"
       }
     ],
     "models": [
@@ -1926,6 +1968,20 @@
           4.6
         ],
         "surface": "stone"
+      },
+      {
+        "name": "ceiling",
+        "pos": [
+          0,
+          4,
+          4.7
+        ],
+        "size": [
+          12,
+          14,
+          0.2
+        ],
+        "surface": "wood"
       }
     ],
     "models": [
