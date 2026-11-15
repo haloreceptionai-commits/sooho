@@ -103,14 +103,14 @@ def build_crowd(shot, fps):
         if i % 3: o = bpy.data.objects.new('crowd hat', hats[i % 3]); bpy.context.collection.objects.link(o); o.parent = root; o.location = (0, 0, 1.13)
         arms = []
         for side in (-1, 1):
-            o = bpy.data.objects.new('crowd arm', arm_mesh); bpy.context.collection.objects.link(o); o.parent = root; o.location = (side * .16, 0, .66); arms.append((o, side))
+            o = bpy.data.objects.new('crowd arm', arm_mesh); bpy.context.collection.objects.link(o); o.parent = root; o.location = (side * .2, 0, .64); arms.append((o, side))
         act = cr.get('action', 'stand')
         for f in range(0, n, 2):
             t = f / fps; root.location = (x, y, crowd_bob(act, ph, t)); root.keyframe_insert('location', frame=f + 1)
             for o, side in arms:  # cheer: both arms up and pumping; run: swing; stand: hanging
                 # arm mesh points up from the shoulder: 0 = raised, pi = hanging (fx6 render showed arms hidden at 2.6 rad)
                 up = (.45 + .3 * math.sin(t * 6 + ph + side)) if act == 'cheer' else (math.pi - .6 * math.sin(t * 11 + ph) * side if act == 'run' else math.pi - .15)
-                o.rotation_euler = (0, -side * up, 0); o.keyframe_insert('rotation_euler', frame=f + 1)
+                o.rotation_euler = (0, side * up, 0)  # +y tilt moves the arm top toward +x, so outward is side*up; o.keyframe_insert('rotation_euler', frame=f + 1)
     return len(pts)
 
 def camera_moves(cam, target, shot, fps):
