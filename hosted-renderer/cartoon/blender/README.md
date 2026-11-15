@@ -98,4 +98,4 @@ identified all four intended object families in both views. The fuse was identif
 a fused dynamite/charge bundle, not a standalone rope; its charge connections are intentional.
 `object-audit.json` preserves the complete responses, image SHA-256 hashes and prior failures.
 Recognition for these four passes; this is not motion, benchmark-quality or full step-5 acceptance.
-All ten mechanism render checks remain pending. 32 existing tests pass; production unchanged.
+All 13 object actions pass (mech17): saturated emission-only fire, burning-down fuses, starburst blasts, break-action loading, sinking drill with chips, pivot swing and marked wheel spokes; `object-motion-audit.json` keeps votes, hashes and 780 geometry-checked frames. 37 tests pass; production unchanged.
