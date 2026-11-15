@@ -3,6 +3,7 @@
 Run by render_shot after scene creation, before paid frame rendering.
 """
 import bpy
+import math
 from mathutils import Vector
 
 
@@ -24,7 +25,12 @@ def verify_characters(roots,duration,fps):
                 if 'attachment' in obj.name:
                     for child in obj.children:
                         if child.type=='MESH':
-                            extent=max((child.matrix_world@Vector(v)).length for v in child.bound_box)
-                            if not extent>=0:raise RuntimeError('invalid attached mesh bounds')
+                            corners=[child.matrix_world@Vector(v) for v in child.bound_box]
+                            if any(not math.isfinite(v) for corner in corners for v in corner):raise RuntimeError('invalid attached mesh bounds')
+                            local_size=[max(v[i] for v in child.bound_box)-min(v[i] for v in child.bound_box) for i in range(3)]
+                            actual_size=[child.matrix_world.to_3x3().col[i].length*local_size[i] for i in range(3)]
+                            expected_size=[abs(child.scale[i]*root.scale[i])*local_size[i] for i in range(3)]
+                            if any(abs(a-b)>1e-5 for a,b in zip(actual_size,expected_size)):raise RuntimeError('attachment inherited unintended scale')
+                            if 'shoe' in child.name and min(v.z for v in corners)<-.003:raise RuntimeError('shoe below ground')
     scene.frame_set(1)
     print('CHARACTER_GEOMETRY_QA',checks,'unscaled connected attachment checks',flush=True)

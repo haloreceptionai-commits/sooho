@@ -2,7 +2,7 @@
 import math
 
 OBJECTS={
-    'perforated_cart':{'source':'cart','actions':['hold','roll','open']},
+    'perforated_cart':{'source':'cart','actions':['hold','roll']},
     'hand_drill':{'source':'cart','actions':['hold','drill']},
     'rocket_arrow':{'source':'cart','actions':['hold','fire']},
     'fuse_bundle':{'source':'cart','actions':['hold','fire']},
@@ -40,4 +40,6 @@ def mechanism(action,t):
             'travel':t*1.5 if action in ('fire','roll') else 0,
             'tilt':math.sin(t*math.tau*.6)*.5 if action=='pour' else 0,
             'load':.25*math.sin(t*math.tau) if action=='load' else 0,
-            'burst':u if action=='explode' else 0}
+            'burst':u if action=='explode' else 0,
+            'swing':.6*math.sin(t*math.tau*.7) if action=='swing' else 0,
+            'ignition':max(0,min(1,t/1.5)) if action=='fire' else 0}
