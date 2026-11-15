@@ -56,6 +56,11 @@ def castle(surface):
     stone=surface('stone',1.6);dark=material('gate iron',(.055,.07,.08),.38,.65)
     # Connect the towers to a central arch; no disconnected floating gate.
     for x in [-5.1,5.1]:masonry((x,6,0),6.2,5.5,stone,int(x+20))
+    # Towers return into the scene, giving the wall a true three-dimensional silhouette.
+    for x in [-7.5,7.5]:
+        for row in range(16):
+            for col in range(5):
+                cube('tower side stone',(x,6.1+col*.65,.2+row*.38),(.45,.625,.355),stone,.025)
     # Arch voussoirs are safe engine-owned architectural geometry.
     for i in range(19):
         a=math.pi*i/18; x=1.8*math.cos(a);z=3.0+1.8*math.sin(a)
@@ -73,7 +78,8 @@ def castle(surface):
 
 def house_details(x,y,surface):
     wood=surface('wood',1.1);plaster=material('warm plaster',(.73,.68,.52));roof=material('slate roof',(.13,.2,.25))
-    cube('house rear',(x,y+1.8,1.5),(4.2,.2,3),plaster)
+    cube('house rear',(x,y+3.6,1.5),(4.2,.2,3),plaster)
+    for side in [-1,1]:cube('house side',(x+side*2.1,y+1.8,1.5),(.18,3.6,3),plaster)
     for dx in [-2.1,0,2.1]:beam((x+dx,y-.15,0),(x+dx,y-.15,3.0),.12,wood)
     for z in [.25,1.5,2.95]:beam((x-2.1,y-.15,z),(x+2.1,y-.15,z),.12,wood)
     beam((x-2,y-.16,.3),(x-.2,y-.16,1.45),.1,wood)
@@ -85,6 +91,11 @@ def house_details(x,y,surface):
             for j in range(10):
                 o=cube('roof shingle',(x+dx,y-.2+j*.4,z),(.38,.42,.055),roof,.009)
                 o.rotation_euler.y=side*math.radians(28)
+    # Timber gable triangle seals the facade below the roof.
+    verts=[(x-2.2,y-.08,3),(x+2.2,y-.08,3),(x,y-.08,4.2)]
+    me=bpy.data.meshes.new('gable');me.from_pydata(verts,[],[(0,1,2)])
+    o=bpy.data.objects.new('gable',me);bpy.context.collection.objects.link(o);me.materials.append(plaster)
+    beam((x-2.2,y-.16,3),(x,y-.16,4.2),.13,wood);beam((x,y-.16,4.2),(x+2.2,y-.16,3),.13,wood)
 
 
 def ground_detail(name):
