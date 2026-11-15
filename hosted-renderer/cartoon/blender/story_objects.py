@@ -291,7 +291,7 @@ def build_object(spec,duration,fps):
                     else:b.parent=left
                     for e in (-.065,.065):
                         bpy.ops.mesh.primitive_cylinder_add(vertices=6,radius=.025,depth=.02,location=(x,y+e,.215),rotation=(math.pi/2,0,0))
-                        n_=bpy.context.active_object;n_.name='hex bolt nut';n_.data.materials.append(steel);n_.parent=b
+                        n_=bpy.context.active_object;n_.name='hex bolt nut';n_.data.materials.append(steel);bpy.context.view_layer.update();n_.parent=b;n_.matrix_parent_inverse=b.matrix_world.inverted()
             # signal post beside the insulated joint
             cylinder('signal post',(.75,.85,.6),.03,1.2,steel)
             cube('signal head',(.75,.85,1.25),(.14,.1,.26),plate,.01)
