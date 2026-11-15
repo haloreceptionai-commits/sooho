@@ -75,6 +75,9 @@ def pose(action,t):
         support=[v[1]*si+v[2]*co-.034 for k,v in p.items() if k.endswith(('wrist','elbow','knee','ankle'))]
         support.append(p['head'][1]*si+p['head'][2]*co-math.hypot(.27*si,.36*co))
         support.append(p['hips'][2]*co+.22*co-math.hypot(.15*si,.3*co))
+        for side in ['left','right']:
+            ankle=p[side+'_ankle']
+            support.append((ankle[1]-.05)*si+(ankle[2]-.025)*co-.115*abs(si)-.03*abs(co))
         p['root']=(0,0,max(0,-min(support)))
     return p
 

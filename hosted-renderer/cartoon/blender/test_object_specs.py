@@ -19,7 +19,7 @@ class ObjectsTest(unittest.TestCase):
         self.assertEqual(validate_object({'kind':'gold_pan','pos':[0,0,0],'action':'pour'})['action'],'pour')
 
     def test_mechanisms_move(self):
-        for action,key in [('open','open'),('drill','spin'),('fire','travel'),('pour','tilt'),('load','load'),('explode','burst')]:
+        for action,key in [('open','open'),('drill','spin'),('fire','travel'),('pour','tilt'),('load','load'),('explode','burst'),('swing','swing')]:
             self.assertNotEqual(mechanism(action,0)[key],mechanism(action,.2)[key])
 
     def test_nonfinite_and_extreme_transforms_rejected(self):

@@ -1,0 +1,90 @@
+{
+  "images": [
+    "object-covered_cart",
+    "object-dynamite",
+    "object-fuse_bundle",
+    "object-gold_pan",
+    "object-gold_shotgun",
+    "object-gold_vein",
+    "object-hand_drill",
+    "object-magnifier",
+    "object-perforated_cart",
+    "object-rocket_arrow"
+  ],
+  "result": {
+    "results": [
+      {
+        "i": 0,
+        "identity": "covered cart/wagon",
+        "recognizable": true,
+        "defects": "roof is oversized corrugated sheet hiding most of the body; no hitch or details so it looks toy\u2011like"
+      },
+      {
+        "i": 1,
+        "identity": "stick of dynamite with fuse",
+        "recognizable": true,
+        "defects": "single stick with decorative bands; simplified toy look"
+      },
+      {
+        "i": 2,
+        "identity": "rake",
+        "recognizable": true,
+        "defects": "teeth are chunky white cylinders and the head is unusual, making it look stylized"
+      },
+      {
+        "i": 3,
+        "identity": "bowl",
+        "recognizable": true,
+        "defects": "very shallow metallic bowl; contents are unclear beads"
+      },
+      {
+        "i": 4,
+        "identity": "double\u2011barrel shotgun",
+        "recognizable": true,
+        "defects": "upright pose and simplified proportions make it toy\u2011like"
+      },
+      {
+        "i": 5,
+        "identity": "cracked egg",
+        "recognizable": true,
+        "defects": "faceted low\u2011poly surface and a gold zigzag seam instead of a real crack"
+      },
+      {
+        "i": 6,
+        "identity": "hand crank mechanism",
+        "recognizable": false,
+        "defects": "abstract assembly with floating offsets and springy base; purpose unclear"
+      },
+      {
+        "i": 7,
+        "identity": "magnifying glass on a stand",
+        "recognizable": true,
+        "defects": "handle replaced by a post; yellow disk in center is unexplained"
+      },
+      {
+        "i": 8,
+        "identity": "pegboard on wheels",
+        "recognizable": true,
+        "defects": "wheeled base makes it resemble a cart or cheese grater, causing ambiguity"
+      },
+      {
+        "i": 9,
+        "identity": "rocket/firework rocket",
+        "recognizable": true,
+        "defects": "hovering, simplified materials and geometry"
+      }
+    ]
+  },
+  "image": "blender-renderer:qa8",
+  "execution": "blender-shot-gpu-au9az02",
+  "status": "Succeeded",
+  "accepted": false,
+  "evidence": "single still per object; no motion claims",
+  "remaining": [
+    "Fuse misidentified as rake",
+    "Gold vein misidentified as cracked egg",
+    "Hand drill purpose unclear",
+    "Pan flakes unclear",
+    "All ten moving mechanisms need rendered checks"
+  ]
+}

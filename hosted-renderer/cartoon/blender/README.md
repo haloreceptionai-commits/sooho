@@ -69,5 +69,21 @@ Mine render quality is 7, castle 6, battlefield 5, ship 6; village/street and
 room/saloon remain 5. Mean render quality is 5.73 versus benchmark 7.17.
 Closer village cameras made the foreground stall obstruct the buildings;
 these shots need reframing, not further unverified detail additions.
-Step 3 remains unaccepted; step 4 and production rollout are paused.
-Current evidence is `set-audit-sets11.json`; `set-audit.json` is historical sets10.
+Step 3 remains unaccepted. The owner subsequently requested proceeding to steps 4–5;
+this does not approve step 3 or enable production rollout. `set-audit.json` is historical sets10;
+the previously named `set-audit-sets11.json` was not persisted and is not evidence.
+
+## Steps 4–5 continuation (Nov 15)
+
+Character motion has straight resting legs, forward walk/run with planted stance feet,
+distinct face parameters, moving costume details, and unscaled EMPTY wrist/ankle attachment
+anchors. The cast4 portraits render separately, avoiding overlapping figures. Cast5's
+5-second 150-frame swing/cheer clip renders successfully, but its close camera crops both
+outer arms. This is not an accepted all-action contact review. Earlier cast4 clips expose
+the attachment-scale defect and remain diagnostic only. Production is unchanged.
+
+Ten reference-grounded props render on Azure cast5: perforated cart (82 actual openings),
+hand drill, paper rocket arrow, branching fuse, covered cart, gold shotgun, gold pan,
+magnifier, dynamite and gold-vein rock. Recognition remains unaccepted: the first cover is
+a rigid plate, the shotgun silhouette is weak and the gold vein is obscured. Shape repairs,
+moving-part verification and a new recognition pass are required before step 5 is complete.
