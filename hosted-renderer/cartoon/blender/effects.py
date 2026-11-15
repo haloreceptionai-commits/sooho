@@ -36,7 +36,7 @@ def state(kind, p, t, scale=1.0):
             return (rad * c * .6, rad * n * .6, s * (.35 + .35 * k + .4 * p['u'] * k), s * .55 * p['size'] * (.3 + .7 * k) * fade)
         if p['role'] == 'smoke':
             k = 1 - math.exp(-t * 2.2); rise = .45 * t
-            return (s * 1.1 * k * c * p['speed'], s * 1.1 * k * n * p['speed'], s * (.4 + .5 * k + rise * p['speed']), s * (.25 + .55 * k) * p['size'] * (1 if t < 2.6 else max(0, 1 - (t - 2.6))))
+            return (s * .7 * k * c * p['speed'], s * .7 * k * n * p['speed'], s * (.4 + .5 * k + rise * p['speed']), s * (.15 + .3 * k) * p['size'] * (1 if t < 2.6 else max(0, 1 - (t - 2.6))))
         v = s * 5.5 * p['speed']; vz = s * (3 + 3 * max(0, p['u']))
         z = .2 * s + vz * t - .5 * G * t * t
         if z <= 0:  # rests on the ground where it landed (never below it)
@@ -57,7 +57,7 @@ def state(kind, p, t, scale=1.0):
         return (v * age * c, v * age * n, max(0.0, z), (s * .025 if z > 0 and age < life * .9 else 0))
     if kind == 'dust':
         k = 1 - math.exp(-t * 1.6); fade = max(0, 1 - max(0, t - 2) / 1.5)
-        return (s * 1.8 * k * c * p['speed'], s * 1.8 * k * n * p['speed'], s * (.1 + .35 * k * p['size']), s * (.2 + .5 * k) * p['size'] * fade)
+        return (s * 1.8 * k * c * p['speed'], s * 1.8 * k * n * p['speed'], s * (.08 + .25 * k * p['size']), s * (.12 + .28 * k) * p['size'] * fade)
     if kind == 'rain':
         span = 6 * s; fall = 7.0; z = 5 - ((t * fall + p['delay'] * 5) % 5)
         return (p['x'] * span / 2, p['y'] * span / 2, z, .012)

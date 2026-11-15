@@ -353,7 +353,7 @@ def main():
         cy.samples = shot.get('samples', 32); cy.use_adaptive_sampling = True
         cy.adaptive_threshold = 0.03; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
         cy.max_bounces = 4; cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2
-        cy.volume_bounces = 0; cy.transparent_max_bounces = 8; cy.volume_step_rate = 4
+        cy.volume_bounces = 1; cy.transparent_max_bounces = 8; cy.volume_step_rate = 4
     sc.render.use_persistent_data = True
     W, H = shot.get('size', [1080, 1920]); sc.render.resolution_x = W; sc.render.resolution_y = H
     sc.render.resolution_percentage = 100; fps = shot.get('fps', 30); sc.render.fps = fps

@@ -12,14 +12,14 @@
  "lighting": "day",
  "camera": {
   "from": [
-   3.5,
-   -3,
-   2.6
+   1.5,
+   -2.5,
+   2.4
   ],
   "to": [
-   2.6,
-   -1.6,
-   2.3
+   1.0,
+   -1.2,
+   2.2
   ],
   "look_at": [
    0,
@@ -38,10 +38,10 @@
   {
    "id": "commander",
    "pos": [
-    0.6,
-    0.8
+    -1.0,
+    1.5
    ],
-   "yaw": -100,
+   "yaw": -60,
    "action": "point",
    "expression": "determined",
    "outfit": "soldier",
@@ -59,26 +59,36 @@
    9
   ],
   "action": "cheer",
-  "yaw": 180
+  "yaw": 0
  },
  "effects": [
   {
    "kind": "smoke",
    "pos": [
-    -4,
-    11,
+    -3,
+    10,
     0
    ],
-   "scale": 2.2
+   "scale": 2.0
   },
   {
    "kind": "fire",
    "pos": [
-    4,
-    10,
+    3,
+    9,
     0
    ],
-   "scale": 1.5
+   "scale": 1.6
+  },
+  {
+   "kind": "smoke",
+   "pos": [
+    3,
+    9,
+    0.8
+   ],
+   "scale": 1.2,
+   "seed": 2
   }
  ],
  "frames": [

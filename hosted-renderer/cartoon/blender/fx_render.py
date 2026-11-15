@@ -11,10 +11,18 @@ def _glow(name, color, strength):
     b.inputs['Emission Strength'].default_value = strength; return m
 
 MATS = {}
+def _volume(name, color, density):
+    m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree
+    for nd in list(nt.nodes): nt.nodes.remove(nd)
+    out = nt.nodes.new('ShaderNodeOutputMaterial'); v = nt.nodes.new('ShaderNodeVolumePrincipled')
+    v.inputs['Color'].default_value = (*color, 1); v.inputs['Density'].default_value = density
+    nt.links.new(v.outputs[0], out.inputs['Volume']); return m
+
 def mats():
     if not MATS:
-        MATS.update(fire=_glow('fx fire', (1, .45, .06), 9), core=_glow('fx core', (1, .85, .3), 14), spark=_glow('fx spark', (1, .7, .2), 30),
-                    smoke=material('fx smoke', (.09, .085, .08), .98), dust=material('fx dust', (.46, .38, .27), .98),
+        MATS.update(fire=_glow('fx fire', (1, .32, .03), 4), core=_glow('fx core', (1, .7, .12), 6), spark=_glow('fx spark', (1, .6, .15), 20),
+                    # step-7 review: opaque spheres read as boulders, so smoke and dust are real volumes
+                    smoke=_volume('fx smoke', (.08, .075, .07), 6), dust=_volume('fx dust', (.5, .4, .28), 3),
                     debris=material('fx debris', (.2, .14, .09), .9), rain=material('fx rain', (.7, .78, .9), .1))
     return MATS
 
