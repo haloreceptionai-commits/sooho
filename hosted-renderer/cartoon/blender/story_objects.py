@@ -66,8 +66,8 @@ def build_object(spec,duration,fps):
     red=material('object dynamite',(.58,.06,.035));cloth=material('object cover',(.16,.25,.3),.95)
     created=set(bpy.data.objects);moving=[];intact=[];kind=spec['kind'];action=spec.get('action','hold')
     # Moderate warm emission: AgX desaturates very bright red light into pink.
-    ember=glow('object fuse ember',(1,.28,0),3)
-    fire_core=glow('blast fire core',(1,.72,.08),4);blast_smoke=material('blast smoke',(.16,.15,.14),.95)
+    ember=glow('object fuse ember',(1,.22,0),1.1)
+    fire_core=glow('blast fire core',(1,.66,.04),1.4);blast_smoke=material('blast smoke',(.16,.15,.14),.95)
     if kind in ('perforated_cart','covered_cart'):
         cube('cart chassis',(0,0,.45),(1.3,.8,.16),wood)
         for x in [-.48,.48]:
@@ -150,7 +150,7 @@ def build_object(spec,duration,fps):
         tip=sphere('glowing ignition tip',(0,-.7,.045),(.065,.055,.07),ember)
         if action=='fire':moving.append((tip,'fuse',tip.location.copy()))
         if action=='fire':
-            flame=glow('fuse flame yellow',(1,.62,.02),3.5)
+            flame=glow('fuse flame yellow',(1,.6,0),1.3)
             smoke=material('fuse smoke charcoal',(.085,.085,.085),.95)
             for i in range(3):
                 o=sphere('fuse flame tongue',(0,0,0),(.04,.035,.12-i*.025),flame);moving.append((o,'fuse_flame',Vector((i*.025-.025,0,.085+i*.025))))
