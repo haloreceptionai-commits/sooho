@@ -14,6 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from shot_schema import validate_shot  # noqa: E402
 from set_library import build_set, dress_mine as library_mine, surface
+from characters import build_character
 
 
 def mat(name, color, rough=0.6, metal=0.0, emit=None, strength=0.0):
@@ -355,7 +356,7 @@ def main():
         SETS[shot['set']]()
     else:
         build_set(shot['set'], shot.get('lighting', 'day'))
-    for c in shot.get('cast', []): character(c)
+    for c in shot.get('cast', []): build_character(c,shot['duration'],fps)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     sc.render.filepath = os.path.join(out, 'f_#####')
