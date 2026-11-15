@@ -23,6 +23,14 @@ def path(name,points,radius,mat):
     return obj
 
 
+def add_blast(moving,ember,core,smoke):
+    # Layered fireball (yellow core, orange shell) plus lingering expanding smoke, not a single glowing ball.
+    for i,(mat,r) in enumerate([(core,.2),(ember,.3)]):
+        o=sphere('explosion fireball',(0,0,.42),(r,)*3,mat);o['blast_radius']=r;moving.append((o,'burst_flash',o.location.copy()))
+    for i in range(6):
+        a=i*math.tau/6;o=sphere('explosion smoke',(0,0,.42),(.12,)*3,smoke);moving.append((o,'blast_smoke',Vector((.22*math.cos(a),.22*math.sin(a),.42+.05*i))))
+
+
 def build_object(spec,duration,fps):
     validate_object(spec)
     root=bpy.data.objects.new(spec['kind'],None);bpy.context.collection.objects.link(root)
@@ -30,7 +38,9 @@ def build_object(spec,duration,fps):
     paper=material('object paper',(.78,.75,.64),.85);gold=material('object gold',(.9,.57,.065),.25,.8)
     red=material('object dynamite',(.58,.06,.035));cloth=material('object cover',(.16,.25,.3),.95)
     created=set(bpy.data.objects);moving=[];intact=[];kind=spec['kind'];action=spec.get('action','hold')
-    ember=material('object fuse ember',(1,.18,.015),.4,emission=4)
+    # Moderate warm emission: AgX desaturates very bright red light into pink.
+    ember=material('object fuse ember',(1,.4,.03),.4,emission=1.8)
+    fire_core=material('blast fire core',(1,.78,.12),.4,emission=2.2);blast_smoke=material('blast smoke',(.16,.15,.14),.95)
     if kind in ('perforated_cart','covered_cart'):
         cube('cart chassis',(0,0,.45),(1.3,.8,.16),wood)
         for x in [-.48,.48]:
@@ -184,8 +194,9 @@ def build_object(spec,duration,fps):
         if action=='explode':
             intact=list(set(bpy.data.objects)-created)
             for i in range(8):
-                o=cube('dynamite fragment',(0,0,.38),(.09,.09,.15),red);moving.append((o,'fragment',i))
-            o=sphere('explosion flash',(0,0,.4),(.3,)*3,ember);moving.append((o,'burst_flash',o.location.copy()))
+                size=(.05+.03*(i%3),.035+.02*((i+1)%2),.09+.05*(i%2))
+                o=cube('dynamite fragment',(0,0,.38),size,paper if i%3==2 else red);moving.append((o,'fragment',i))
+            add_blast(moving,ember,fire_core,blast_smoke)
     else:
         rock=material('object rock',(.19,.21,.22),.92)
         quartz=material('vein quartz',(.73,.74,.68),.85)
@@ -210,7 +221,7 @@ def build_object(spec,duration,fps):
             intact=list(set(bpy.data.objects)-created)
             for i in range(8):
                 bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.17,location=(0,0,.38));o=bpy.context.active_object;o.name='ore rock fragment';o.data.materials.append(rock if i%2 else gold);moving.append((o,'fragment',i))
-            o=sphere('ore break flash',(0,0,.4),(.25,)*3,ember);moving.append((o,'burst_flash',o.location.copy()))
+            add_blast(moving,ember,fire_core,blast_smoke)
     for obj in set(bpy.data.objects)-created:
         if obj.parent is None:obj.parent=root
     base=tuple(spec['pos']);s=spec.get('scale',1);root.scale=(s,)*3
@@ -252,9 +263,16 @@ def build_object(spec,duration,fps):
             if role=='dynamite_fuse':
                 obj.scale=(.055+.02*math.sin(t*17),.05,.1+.06*math.sin(t*13));obj.keyframe_insert('scale',frame=frame+1)
             if role=='fragment':
+                obj.rotation_euler=(t*(5+rest),t*(3+rest*.7),0)
                 obj.location=burst_position(t,rest);obj.hide_render=not exploded(t);obj.keyframe_insert('hide_render',frame=frame+1)
             if role in ('flash','burst_flash'):
-                center=.4 if role=='flash' else .65;obj.hide_render=not center<=t<center+.12;obj.keyframe_insert('hide_render',frame=frame+1)
+                center=.4 if role=='flash' else .65;length=.12 if role=='flash' else .3
+                obj.hide_render=not center<=t<center+length;obj.keyframe_insert('hide_render',frame=frame+1)
+                if role=='burst_flash':
+                    r=obj['blast_radius']*(.6+1.4*progress(t,.65,.95));obj.scale=(r,r,r*.85);obj.keyframe_insert('scale',frame=frame+1)
+            if role=='blast_smoke':
+                u=progress(t,.7,2);obj.hide_render=t<.7;obj.keyframe_insert('hide_render',frame=frame+1)
+                obj.location=Vector((rest.x*(1+1.5*u),rest.y*(1+1.5*u),rest.z+.5*u));r=.12+.22*u;obj.scale=(r,)*3;obj.keyframe_insert('scale',frame=frame+1)
             if role=='flake' and action=='pour':
                 world=Vector(pour_position((rest.x,rest.y,rest.z+.48),t,index))
                 if t>.45:
