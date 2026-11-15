@@ -52,11 +52,18 @@ for ENG in ${ENGINES:-eevee cycles}; do
   rm -rf /tmp/f; mkdir -p /tmp/f; START=$(date +%s)
   SHOT_ENGINE=$ENG CYCLES_DEVICE=$DEV timeout 2400 $B --python /opt/shot/render_shot.py -- $SHOT_FILE /tmp/f > /tmp/$ENG.log 2>&1
   CODE=$?; N=$(ls /tmp/f | wc -l)
+  for IMAGE in /tmp/f/f_*.png; do
+    [ -f "$IMAGE" ] || continue
+    [ -n "$(python3 -c "import json;print('yes' if json.load(open('$SHOT_FILE')).get('frames') else '')")" ] || break
+    put "$IMAGE" "$(basename "$IMAGE")" image/png
+  done
   echo "$ENG full exit=$CODE frames=$N wall=$(( $(date +%s)-START ))s $(grep -o '{"frames.*}' /tmp/$ENG.log | tail -1)" >> $REPORT
   EXPECTED=$(python3 -c "import json;s=json.load(open('$SHOT_FILE'));print(len(s['frames']) if s.get('frames') else round(s['duration']*s.get('fps',30)))")
   FPS=$(python3 -c "import json;print(json.load(open('$SHOT_FILE')).get('fps',30))")
   if [ "$CODE" = 0 ] && [ "$N" = "$EXPECTED" ]; then
-    ffmpeg -loglevel error -y -framerate "$FPS" -i /tmp/f/f_%05d.png -c:v libx264 -crf 16 -pix_fmt yuv420p /tmp/$ENG.mp4 && put /tmp/$ENG.mp4 $ENG.mp4 video/mp4
+    if [ -z "$(python3 -c "import json;print('yes' if json.load(open('$SHOT_FILE')).get('frames') else '')")" ]; then
+      ffmpeg -loglevel error -y -framerate "$FPS" -i /tmp/f/f_%05d.png -c:v libx264 -crf 16 -pix_fmt yuv420p /tmp/$ENG.mp4 && put /tmp/$ENG.mp4 $ENG.mp4 video/mp4
+    fi
     put /tmp/f/f_00001.png $ENG-first.png image/png
   fi
   tail -c 20000 /tmp/$ENG.log > /tmp/$ENG.tail; put /tmp/$ENG.tail $ENG.log text/plain
