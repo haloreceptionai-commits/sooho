@@ -93,7 +93,7 @@ def shot_concepts(shot):
     return got
 
 
-def validate_plan(plan, story):
+def validate_plan(plan, story, concrete=None):
     """Return (errors, report).  An empty error list is the only accepted outcome."""
     errs = []; sents = sentences(story['words']); cast_ids = set()
     if not isinstance(plan, dict) or not isinstance(plan.get('sentences'), list): return ['plan.sentences missing'], {}
@@ -108,6 +108,7 @@ def validate_plan(plan, story):
         tokens = norm(s['text'])
         for m in ps.get('mentions', []):
             if not has_phrase(tokens, m.get('word', '')): errs.append(f's{s["index"]}: invented mention {m.get("word")!r}')
+            elif m.get('concept') is None and m.get('kind') == 'abstract': continue
             elif m.get('concept') is None: undrawable.append({'sentence': s['index'], 'word': m['word']})
             elif not concept_valid(m['concept']): errs.append(f's{s["index"]}: unknown concept {m["concept"]}')
         starts = [0] + [sh.get('start_word', 0) for sh in shots[1:]]
@@ -124,10 +125,15 @@ def validate_plan(plan, story):
         need = {c for c in need if not c.startswith('char:stand')}
         # a shown object action also covers the bare object; character stand is never "required"
         missing = sorted(c for c in need if c not in shown)
+        # words an independent reader judged concrete must map to something on screen
+        for w in (concrete or {}).get(s['index'], []):
+            via = {m['concept'] for m in ps.get('mentions', []) if m.get('concept') and norm(m.get('word', '')) == norm(w)} | lexical_concepts(w)
+            if not via & shown:
+                need.add(f'word:{w}'); missing.append(f'word:{w}')
         required_total += len(need) + sum(1 for u in undrawable if u['sentence'] == s['index'])
         covered_total += len(need) - len(missing)
         for c in missing: misses.append({'sentence': s['index'], 'concept': c})
-    for m in misses: errs.append(f's{m["sentence"]}: spoken {m["concept"]} not shown')
+    for m in misses: errs.append(f's{m["sentence"]}: spoken {m["concept"]} not shown' + (' (independent reader marked it concrete: map it to a drawable concept and show it)' if m['concept'].startswith('word:') else ''))
     for u in undrawable: errs.append(f's{u["sentence"]}: spoken {u["word"]!r} has no drawable concept')
     shots = compile_plan(plan, story, strict=False)
     lens = [s['duration'] for s in shots]; total = sum(lens) or 1
