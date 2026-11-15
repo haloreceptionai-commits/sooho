@@ -28,14 +28,19 @@ saloon, ship deck, rail yard, workshop, street, room. Lighting accepts day,
 sunset, night, rain. Every kit has a 1080x1920 still test in `shots/set-*.json`.
 `SHOT=suite` renders and uploads each still, failing if any render fails.
 
-Verified on Azure T4 image `sets3`: all 11 rendered; missing external palette
-textures found in first pass and repaired. Fourteen schema/library tests pass.
-The reference-anchored vision audit rated render quality 3–6/10 (mine 6;
-benchmark mean 7.17). **Step 3's benchmark-quality acceptance check has not passed.**
-Remaining: richer/high-detail set geometry, stronger cinematic framing/light,
-distinct saloon/office dressing, convincing ship/ocean, all four lighting looks
-visually tested, and rerun benchmark comparison. Do not activate in production
-or advance to step 4 as if step 3 were complete.
+Verified on Azure T4 image `sets9`: all 11 kits and all 4 weather looks rendered.
+The offline subset now pins 94 files including complete Quaternius medieval
+buildings, leafy trees and a steam locomotive. Publisher CC0 pages verified at
+import. Missing palette textures, blocked interior lights, incomplete facades,
+incorrect locomotive/rail axis and outdoor light direction were repaired.
+Seventeen schema/library tests pass. `audit_sets.py` reuses the benchmark judge
+but explicitly labels repeated images as stills, preventing false motion claims;
+it joins responses by shot ID rather than assuming response order.
+Final still audit: castle/battlefield/ship 5, mine/office/rail/room/saloon/street/
+village/workshop 6; night/rain 6. Benchmark mean render quality is 7.17.
+**Step 3's benchmark-quality acceptance check has not passed.**
+Remaining: richer castle/ship geometry, scene dressing and cinematic framing.
+Do not activate in production or advance to step 4 as if step 3 were complete.
 
 Run: `python3 blender/test_set_library.py`; build with the existing Azure build
-tool; `node tools/blender-job.mjs sets3 gpu-t4 run <privatePrefix> cycles suite`.
+tool; `node tools/blender-job.mjs sets9 gpu-t4 run <privatePrefix> cycles suite`.
