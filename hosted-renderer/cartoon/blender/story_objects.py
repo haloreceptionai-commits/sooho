@@ -106,6 +106,8 @@ def build_object(spec,duration,fps):
             if obj.name.startswith(('large hand drill gear','gear tooth','gear spoke')):
                 obj.location-=Vector(center);obj.parent=crank
         moving.append((crank,'crank',crank.location.copy()))
+        for obj in set(bpy.data.objects)-created:
+            if obj.parent is None and obj is not drill_body and not obj.name.startswith(('drilled timber','drilled bore hole','drilling wood shaving')):obj.parent=drill_body
     elif kind=='rocket_arrow':
         rope('arrow shaft',(0,0,.12),(0,0,1.5),.025,wood)
         cylinder('paper rocket tube',(0,0,.7),.09,.55,paper)
