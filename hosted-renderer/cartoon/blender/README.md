@@ -16,9 +16,9 @@ on one T4. Concurrency of about 4 T4 machines was observed; 10 requested replica
 
 ## Step 3 — offline sets (Nov 15, NOT quality-approved)
 
-`import_assets.py` imports 50 Kenney model files, their shared palette images,
+`import_assets.py` imports Kenney and Quaternius models, their shared palette images,
 five Poly Haven 1k surface sets and three HDR skies. `assets/manifest.json` pins
-74 files with SHA-256 and CC0 provenance; publisher license files are included.
+94 files with SHA-256 and CC0 provenance; publisher license files are included.
 Kenney web pages returned 403; licenses were verified from the original pack's
 publisher-supplied License.txt instead. Assets are bundled in the worker image;
 no render-time external downloads. Legacy library and production engine unchanged.
@@ -44,3 +44,14 @@ Do not activate in production or advance to step 4 as if step 3 were complete.
 
 Run: `python3 blender/test_set_library.py`; build with the existing Azure build
 tool; `node tools/blender-job.mjs sets9 gpu-t4 run <privatePrefix> cycles suite`.
+
+## Latest continuation: sets10
+
+Azure execution `blender-shot-gpu-bg5vbd8` succeeded with all 15 stills; 17 tests pass.
+Added supported gate parapets, fitted arch wedges, round towers and rear courtyard;
+ship gained a curved sail, rigging, quarterdeck, cabin, stairs and hatch.
+The separate siege-camp prototype regressed to 4/10 and exposes unsupported
+wall-style lamp brackets; it is not ready. Ship scores 6 (richness 7), castle 5.
+`set-audit.json` now holds current still-only evidence, replacing the obsolete
+sets3 audit that incorrectly inferred motion. `set-run.json` identifies the run
+and unresolved defects. No benchmark acceptance or production rollout.
