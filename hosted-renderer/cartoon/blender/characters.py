@@ -2,7 +2,7 @@
 import math
 import bpy
 from mathutils import Vector
-from character_motion import pose
+from character_motion import pose, face_shape
 from set_detail import material, cube, rope
 
 
@@ -21,18 +21,21 @@ def build_character(c,duration=3,fps=30):
     root=bpy.data.objects.new(ident,None);bpy.context.collection.objects.link(root)
     headroot=bpy.data.objects.new(ident+' head',None);bpy.context.collection.objects.link(headroot);headroot.parent=root
     head=sphere('egg head',(0,0,0),(.31,.27,.36),skin);head.parent=headroot
-    expr=c.get('expression','neutral')
+    expr=c.get('expression','neutral');face=face_shape(expr)
     for side in [-1,1]:
-        eye=sphere('eye',(side*.105,-.259,.035),(.034,.014,.052 if expr in ('shock','worried') else .035),black);eye.parent=headroot
+        eye=sphere('eye',(side*.105,-.259,.035),(.034,.014,face['eye']),black);eye.parent=headroot
         brow=cube('eyebrow',(side*.105,-.258,.12),(.095,.022,.018),black,.008);brow.parent=headroot
-        brow.rotation_euler.y=side*(.35 if expr in ('angry','determined') else -.25 if expr in ('sad','worried') else 0)
-    if expr in ('shock','talk'):
-        mouth=sphere('mouth',(0,-.256,-.13),(.055,.016,.066),black);mouth.parent=headroot
+        brow.rotation_euler.y=side*face['brow']
+        if expr=='smug' and side==1:eye.scale.z*=.5
+    mouth=None
+    if expr in ('shock','talk','worried','determined'):
+        mouth=sphere('mouth',(0,-.256,-.13),(face['width'],.016,face['height']),black);mouth.parent=headroot
+        if expr=='determined':cube('clenched teeth',(0,-.274,-.13),(.14,.014,.022),skin,.004).parent=headroot
     else:
         curve=[]
         for j in range(13):
-            x=-.085+j*.17/12
-            z=-.13+(x/.085)**2*(.045 if expr in ('happy','smug') else -.035 if expr in ('sad','worried') else .006)
+            x=-face['width']+j*face['width']*2/12
+            z=-.13+(x/face['width'])**2*face['curve']
             curve.append((x,-.267,z))
         for a,b in zip(curve,curve[1:]):rope('mouth stroke',a,b,.01,black).parent=headroot
     hat=c.get('hat','beanie')
@@ -44,16 +47,22 @@ def build_character(c,duration=3,fps=30):
             elif hat=='top':
                 bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.25,depth=.35,location=(0,0,.46));bpy.context.active_object.data.materials.append(hatmat);bpy.context.active_object.parent=headroot
             else:
-                for side in [-1,1]:cube('tricorne brim',(side*.22,0,.31),(.2,.5,.09),hatmat,.05).parent=headroot
+                sphere('tricorne crown',(0,0,.3),(.25,.22,.12),hatmat).parent=headroot
+                for i in range(3):
+                    a=i*math.tau/3
+                    o=cube('tricorne folded brim',(.24*math.cos(a),.24*math.sin(a),.32),(.4,.1,.15),hatmat,.035);o.rotation_euler.z=a+math.pi/2;o.parent=headroot
     body=sphere('coat',(0,0,1.04),(.21,.15,.3),cloth);body.parent=root
     outfit=c.get('outfit','worker')
-    for z in [.94,1.08,1.2]:sphere('coat button',(0,-.153,z),(.014,.014,.014),black).parent=root
+    body_details=[]
+    for z in [.94,1.08,1.2]:body_details.append(sphere('coat button',(0,-.153,z),(.014,.014,.014),black))
     if outfit=='merchant':
-        cube('white shirt',(0,-.151,1.19),(.12,.03,.2),skin,.02).parent=root
-        cube('bowtie',(0,-.179,1.24),(.16,.035,.06),black,.015).parent=root
-    if outfit=='soldier':cube('belt',(0,-.01,.86),(.44,.32,.07),black,.02).parent=root
+        body_details.extend([cube('white shirt',(0,-.151,1.19),(.12,.03,.2),skin,.02),cube('bowtie',(0,-.179,1.24),(.16,.035,.06),black,.015)])
+    if outfit=='soldier':body_details.append(cube('belt',(0,-.01,.86),(.44,.32,.07),black,.02))
     if outfit=='sailor':
-        for z in [.94,1.04,1.14]:cube('sailor stripe',(0,-.147,z),(.36,.02,.025),skin,.005).parent=root
+        for z in [.94,1.04,1.14]:body_details.append(cube('sailor stripe',(0,-.147,z),(.36,.02,.025),skin,.005))
+    if outfit=='worker':body_details.append(cube('work apron',(0,-.16,1.02),(.25,.035,.35),hatmat,.018))
+    detail_positions=[]
+    for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[]
     for side in ['left','right']:
         for joint in ['elbow','wrist','knee','ankle']:
@@ -61,21 +70,29 @@ def build_character(c,duration=3,fps=30):
         for a,b in [('shoulder','elbow'),('elbow','wrist'),('hip','knee'),('knee','ankle')]:
             bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=.021,depth=1)
             o=bpy.context.active_object;o.name=side+' '+a+'-'+b;o.data.materials.append(black);o.parent=root;segments.append((o,side+'_'+a,side+'_'+b))
+        sphere(side+' shoe',(0,-.05,-.025),(.058,.115,.03),black).parent=joints[side+'_ankle']
     held=c.get('held')
     if held:
         wrist=joints['right_wrist']
-        if held=='crate':o=cube('held crate',(0,-.13,-.04),(.32,.25,.24),hatmat,.025);o.parent=wrist
+        if held=='crate':o=cube('held crate',(-.18,0,-.04),(.36,.25,.24),hatmat,.025);o.parent=wrist
         else:
-            o=cube('held handle',(0,0,.22),(.045,.045,.48),hatmat,.01);o.parent=wrist
-            if held=='tool':cube('tool head',(0,0,.46),(.34,.09,.08),black,.025).parent=wrist
-            if held=='cup':sphere('held cup',(0,-.04,.28),(.12,.12,.1),hatmat).parent=wrist
+            if held=='tool':
+                cube('held handle',(0,0,.22),(.045,.045,.55),hatmat,.01).parent=wrist
+                cube('tool head',(0,0,.46),(.4,.09,.08),black,.025).parent=wrist
+            if held=='cup':
+                bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.1,depth=.16,location=(0,0,.06));o=bpy.context.active_object;o.data.materials.append(hatmat);o.parent=wrist
+                sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist
     action=c.get('action','stand');base=Vector((*c['pos'],0));yaw=math.radians(c.get('yaw',0));scale=c.get('scale',1)
     for f in range(round(duration*fps)):
         p=pose(action,f/fps);root.location=base+Vector(p['root'])*scale;root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)
         root.keyframe_insert('location',frame=f+1);root.keyframe_insert('rotation_euler',frame=f+1)
         headroot.location=p['head'];headroot.keyframe_insert('location',frame=f+1)
         body.location=(0,0,p['hips'][2]+.22);body.keyframe_insert('location',frame=f+1)
+        for o,original in detail_positions:o.location=original+Vector((0,0,p['hips'][2]-.82));o.keyframe_insert('location',frame=f+1)
         for key,o in joints.items():o.location=p[key];o.keyframe_insert('location',frame=f+1)
+        joints['right_wrist'].rotation_euler.x=p['grip_angle'];joints['right_wrist'].keyframe_insert('rotation_euler',frame=f+1)
+        if mouth is not None and expr=='talk':
+            shape=face_shape(expr,f/fps);mouth.scale=(shape['width'],.016,shape['height']);mouth.keyframe_insert('scale',frame=f+1)
         for o,a,b in segments:
             av,bv=Vector(p[a]),Vector(p[b]);d=bv-av;o.location=(av+bv)*.5;o.rotation_euler=d.to_track_quat('Z','Y').to_euler();o.scale=(1,1,d.length)
             for prop in ['location','rotation_euler','scale']:o.keyframe_insert(prop,frame=f+1)
