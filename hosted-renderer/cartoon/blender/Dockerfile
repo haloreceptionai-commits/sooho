@@ -14,7 +14,7 @@ RUN curl -fsSL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.2/
 # Expose the NVIDIA graphics (EGL/OpenGL) and compute libraries when the machine has a T4.
 ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=all
 WORKDIR /opt/shot
-COPY render_shot.py shot_schema.py set_library.py set_detail.py character_motion.py characters.py verify_characters.py object_specs.py object_motion.py story_objects.py verify_objects.py set-kits.json entry.sh ./
+COPY render_shot.py shot_schema.py set_library.py set_detail.py character_motion.py characters.py verify_characters.py object_specs.py object_motion.py story_objects.py verify_objects.py effects.py fx_render.py set-kits.json entry.sh ./
 COPY assets ./assets
 COPY shots ./shots
 RUN chmod +x entry.sh

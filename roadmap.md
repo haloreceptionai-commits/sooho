@@ -5,7 +5,7 @@
 - [~] 4. Benchmark-style characters — cast6 uncropped 1080x1920 swing/cheer clip verified 5.000s/150 frames; qa8 full 150-frame geometry checks plus five crouch/fall/cheer/panic review frames succeeded after fixing falling shoe penetration. 32 tests pass. Remaining corrected all-action contact review and benchmark look/stronger swing; production unchanged.
 - [x] 5. Unusual story objects with moving parts — 10 objects pass label-free recognition (qa10); all 13 object actions pass 3-vote action review plus 780 per-frame geometry checks (mech17, object-motion-audit.json). Production unchanged.
 - [~] 6. Shot director rewrite — Codex plans gated by shot_director.py (100% spoken-concept coverage, 1-2 shots per sentence, backdrop-change band, no unspoken props or unrelated places); new rail_joint and money_bag objects. Both plans accepted; blind still review mine 16-17/31 (fit 5.97), rail 13/24 (fit 6.58). See blender/director-plans/step6-audit.json. Production unchanged.
-- [ ] 7-10. Owner asked Nov 15 20:05 to do steps 7 to 10 together (effects/cameras/crowds, sound, scripts, three 60s videos + review)
+- [~] 7-10. Step 7 built (explosion, smoke, fire, sparks, dust, rain, 380-person crowds, whip pan, shake); blind judge recognises both test shots 3/3 but quality 6/10 vs benchmark 9. Steps 8-10 not started. Owner asked Nov 15 20:05 to do steps 7 to 10 together (effects/cameras/crowds, sound, scripts, three 60s videos + review)
 - [ ] 8. Sound matched to picture
 - [ ] 9. Script and picture together
 - [ ] 10. Full 3-video test, speed and launch
@@ -28,3 +28,6 @@
 - [x] Match Mine Salting sound with the current narrator: owner selected new sample 03 Fast explainer; use its Puck directions for new Shorts, preserve long-form Charon and saved takes. ElevenLabs disconnected; no identical-reference claim.
 - [x] Create five new current-narrator delivery auditions for owner selection; five equally loud, decode-checked Puck MP3s delivered; sample 03 selected.
 - [x] Improve Advanced music and spoken-action effects: varied original pizzicato/bass/brushed rhythm, timed editorial sweeps/metal jingles/thunder, existing contact Foley and speech ducking preserved. 17 tests passed; sample-03 mix decoded with no clipping; Azure cc17/cc18 succeeded. Full video listening comparison remains unverified.
+- [ ] A. Owner idea Nov 15 21:01: AI-generated story objects (geometry/materials) saved as reusable GLB library assets (high priority, after steps 7-10)
+- [ ] B. Owner idea: visual + meaning-based model retrieval instead of keyword matching (high priority)
+- [ ] C. Owner idea: rigged 3D characters with clothing, expressions, gestures and reusable animations (major upgrade)
