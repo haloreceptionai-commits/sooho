@@ -12,6 +12,8 @@ OBJECTS={
     'magnifier':{'source':'mine','actions':['hold','swing']},
     'dynamite':{'source':'mine','actions':['hold','fire','explode']},
     'gold_vein':{'source':'mine','actions':['hold','open','explode']},
+    'money_bag':{'source':'mine','actions':['hold']},
+    'rail_joint':{'source':'rail','actions':['hold','expand','buckle','break']},
 }
 
 

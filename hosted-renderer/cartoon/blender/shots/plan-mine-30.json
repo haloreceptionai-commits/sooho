@@ -1,0 +1,78 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 3.921,
+ "camera": {
+  "from": [
+   0.59,
+   1.2,
+   1.55
+  ],
+  "look_at": [
+   -0.6,
+   4.8,
+   1.05
+  ],
+  "lens": 40,
+  "fstop": 4
+ },
+ "cast": [
+  {
+   "id": "rich_guy",
+   "pos": [
+    -0.6,
+    4.6
+   ],
+   "yaw": 0,
+   "action": "point",
+   "expression": "happy",
+   "outfit": "merchant",
+   "hat": "top",
+   "shirt": [
+    0.9,
+    0.9,
+    0.9
+   ]
+  },
+  {
+   "id": "miner",
+   "pos": [
+    0.65,
+    5.05
+   ],
+   "yaw": 0,
+   "action": "fall",
+   "expression": "sad",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.7,
+    0.5,
+    0.3
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "gold_vein",
+   "action": "open",
+   "pos": [
+    0.0,
+    4.25,
+    0
+   ],
+   "scale": 0.5,
+   "yaw": 0
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  71
+ ]
+}

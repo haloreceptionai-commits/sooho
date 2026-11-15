@@ -1,0 +1,61 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 2.95,
+ "camera": {
+  "from": [
+   0.9,
+   -1.335,
+   1.55
+  ],
+  "look_at": [
+   -0.315,
+   2.147,
+   1.05
+  ],
+  "lens": 40,
+  "fstop": 4
+ },
+ "cast": [
+  {
+   "id": "buddy",
+   "pos": [
+    -0.298,
+    1.948
+   ],
+   "yaw": 5,
+   "action": "stand",
+   "expression": "worried",
+   "outfit": "worker",
+   "hat": "beanie",
+   "shirt": [
+    0.2,
+    0.3,
+    0.6
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "gold_pan",
+   "action": "pour",
+   "pos": [
+    0.33,
+    1.652,
+    0
+   ],
+   "scale": 0.5,
+   "yaw": 5
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  53
+ ]
+}

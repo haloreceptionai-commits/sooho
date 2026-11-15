@@ -1,0 +1,49 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 1.214,
+ "camera": {
+  "from": [
+   -0.59,
+   7.0,
+   1.55
+  ],
+  "look_at": [
+   0.6,
+   3.4,
+   1.05
+  ],
+  "lens": 40,
+  "fstop": 4
+ },
+ "cast": [
+  {
+   "id": "buddy",
+   "pos": [
+    0.6,
+    3.6
+   ],
+   "yaw": 180,
+   "action": "stand",
+   "expression": "happy",
+   "outfit": "worker",
+   "hat": "beanie",
+   "shirt": [
+    0.2,
+    0.3,
+    0.6
+   ]
+  }
+ ],
+ "objects": [],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  22
+ ]
+}

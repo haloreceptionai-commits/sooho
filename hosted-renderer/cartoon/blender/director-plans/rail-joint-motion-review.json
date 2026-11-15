@@ -1,0 +1,87 @@
+{
+ "mechanism-rail_joint-hold": [
+  {
+   "seen": "Five frames show a small section of railway track on sleepers and ballast. The camera/viewpoint wobbles slightly. Each rail has a central joint with metal bars and multiple bolt heads; the bolt heads\u2019 colors seem to blink/alternate across frames. A signal post at the right stays static.",
+   "pass": true,
+   "problem": "The joint is clear, but the tiny gap between rail ends is not very obvious, and the bright bolt colors plus the extra signal may distract from the joint detail."
+  },
+  {
+   "seen": "Only the viewpoint shifts slightly, as if the camera pans/orbits around a small track segment; the rails, sleepers, bolts/plates and the signal stay static. Lighting/shadows change with the camera, but no object animates.",
+   "pass": false,
+   "problem": "While rails on sleepers and some ballast are clear, the bolted joint is ambiguous: the fishplates/bolts are tiny and brightly colored, and the small gap between rail ends is not clearly visible at this distance. The added signal also distracts. A viewer may not recognize a specific bolted rail joint with a small end gap."
+  },
+  {
+   "seen": "Only the viewpoint shifts slightly left/right with a small yaw, so the track section and signal appear to drift and the shadows move; nothing on the track itself changes and the signal stays the same.",
+   "pass": false,
+   "problem": "The bolted joint and the small gap between rail ends aren\u2019t clearly legible at this distance; the colored bolt heads/fishplates read more like decorative dots, and the signal post distracts. A closer view or clearer detailing of the fishplates and the gap is needed for recognition."
+  }
+ ],
+ "mechanism-rail_joint-expand": [
+  {
+   "seen": "Across the five frames, the joint gap between the two bolted rail ends gets smaller each step: it starts clearly open and narrows until it\u2019s almost closed by the last frame. Everything else stays mostly the same apart from a slight rightward camera shift.",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "From left to right, the joint between the two rail ends narrows: the gap is widest in the first frame and progressively shrinks in each subsequent frame until it is almost closed in the last. The bolted fishplate area shifts slightly along the sleepers, but the main visible change is the closing gap.",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "The rail joint starts with a clearly open gap between the two rail ends and, frame by frame, the ends slide toward each other so the slit narrows to almost closed. The fishplates and bolts remain fixed; only the rail ends close up (same on the near and far rail).",
+   "pass": true,
+   "problem": "Slight camera pan, but the shrinking joint gap is still obvious."
+  }
+ ],
+ "mechanism-rail_joint-buckle": [
+  {
+   "seen": "A short track segment with two parallel rails on sleepers. In frame 1 the rails are straight. From frames 2\u20135 they progressively deflect laterally, forming an S that sharpens into a pronounced kink centered in the middle, while remaining continuous (they also lift slightly off the sleepers).",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "Two parallel railway rails on sleepers start straight. Across the frames they progressively bulge sideways, becoming a wavy S that tightens into a sharp offset around the middle by the final frame.",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "Two parallel tracks on sleepers start straight in the first frame. In subsequent frames a lateral bulge appears, then grows into an S-shaped/zigzag sideways deformation with two sharp bends around the center while the sleepers stay fixed.",
+   "pass": false,
+   "problem": "The motion reads as an S-shaped zigzag with two bends rather than a single clear kink in the middle; the result is not an unambiguous straight-to-one-kink transition and the elevated side walls/rails could add ambiguity."
+  }
+ ],
+ "mechanism-money_bag-hold": [
+  {
+   "seen": "A beige money bag with a green dollar sign is shown with a pile and a stacked roll of gold coins beside it. Across the frames the bag subtly shifts/rotates and the shadow/light change slightly, while the coins stay in place.",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "A beige money bag with a green dollar sign is in the center. Across the five frames the bag subtly shifts/rotates and its long shadow moves, as if from a slight camera or bag motion. A stack of gold coins and a few loose coins beside the bag stay in place.",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "Across the frames the money bag subtly rotates/leans and shifts slightly, causing the shadow and highlights to change; the gold coins and stacked coins remain in place.",
+   "pass": true,
+   "problem": ""
+  }
+ ],
+ "mechanism-rail_joint-break": [
+  {
+   "seen": "Across the five frames, the rail joint with blue splice bars and yellow bolts changes: the two rail ends separate progressively, the blue bars loosen/shift off, and yellow bolt pieces drop downward, including a long bolt falling in the last frames. The gap between the rail ends grows from small to large.",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "A pair of rails joined by blue fishplates with yellow bolts starts intact; over the frames the rail ends separate so the gap at the joint widens, and yellow bolt pieces come loose and drop, with one clearly falling by the last frame.",
+   "pass": true,
+   "problem": ""
+  },
+  {
+   "seen": "Starts as an intact bolted fishplate joint between two rail ends. Across the frames the bolts loosen/disappear, the blue plate shifts to one side, the rail ends pull apart so the central gap grows larger, and a yellow bolt piece is seen dropping out with other pieces scattered.",
+   "pass": true,
+   "problem": ""
+  }
+ ]
+}
