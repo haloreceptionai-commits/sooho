@@ -2,7 +2,7 @@
 - [x] 1. Benchmark measurement kit: shot lists, scorecard, our 2 videos scored
 - [~] 2. Headless Blender renderer on scale-to-zero Azure render machines — renderer live on Azure T4 (Cycles), test shot depth 6/render 6 vs benchmark 6.75/7.17; parity continues in steps 3–4; speed needs more GPUs or lighter frames
 - [~] 3. CC0 asset library and set kits — 94 pinned offline files; Azure sets11 execution qfnlp9b succeeded with all 15 stills, 17 tests pass. Floating outdoor lamps now have support posts; scanned surfaces no longer interpret tangent normals as world coordinates; palette props gain grain. Mine scores 7, castle/battlefield recover to 6/5, but village/street and room/saloon remain 5; overall render mean 5.73 vs benchmark 7.17. NOT accepted: finish set composition and richer recognisable scenery before step 4; production unchanged.
-- [~] 4. Benchmark-style 3D egg-head characters and poses — owner requested advancing on Nov 15 while step 3 remains unaccepted; isolated connected-joint cast, outfits, expression vocabulary and wrist-held props under test. Production unchanged.
+- [~] 4. Benchmark-style 3D characters — first isolated prototype built: 9 expression presets, 4 outfits, 5 hats, 13 action targets and wrist-held props. 21 tests pass; Azure cast3 rendered a cast sheet and exact 5s/150-frame 1080x1920 swing/cheer clip. Reviewed sampled motion frames: connected joints, but bent resting legs, partly overlapping sheet, static cheer and limited facial variety remain; NOT benchmark accepted. Production unchanged. Owner requested advancing while step 3 remains unaccepted.
 - [ ] 5. Story-specific objects from safe parts
 - [ ] 6. Shot director rewrite (Codex shot plans, word-matched shots)
 - [ ] 7. Effects and camera
