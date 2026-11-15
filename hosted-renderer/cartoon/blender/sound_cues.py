@@ -85,5 +85,4 @@ def spatial(cue, cam_from, look_at):
     dist = max(1.0, math.sqrt(dx * dx + dy * dy + dz * dz))
     fx, fy = look_at[0] - cam_from[0], look_at[1] - cam_from[1]; n = math.hypot(fx, fy) or 1
     side = (dx * fy - dy * fx) / n / dist  # >0 right of view direction
-    return max(.45, min(1.0, 3.0 / dist)), max  # floor: a visible action must stay audible (step-8 listening review)
-    return None, max(-1.0, min(1.0, side * 1.5))
+    return max(.45, min(1.0, 3.0 / dist)), max  # floor: a visible action must stay audible (step-8 listening review)(-1.0, min(1.0, side * 1.5))

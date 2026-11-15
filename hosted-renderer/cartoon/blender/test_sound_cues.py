@@ -46,3 +46,10 @@ class MixTest(unittest.TestCase):
 
 
 if __name__ == '__main__': unittest.main()
+
+
+class SpatialTest(unittest.TestCase):
+    def test_pan_side_and_audible_floor(self):
+        g, pan = C.spatial({'pos': [3, 5, 0]}, [0, 0, 1.5], [0, 5, 1])
+        self.assertGreater(pan, 0); self.assertGreaterEqual(g, .45)
+        g, pan = C.spatial({'pos': [-3, 5, 0]}, [0, 0, 1.5], [0, 5, 1]); self.assertLess(pan, 0)
