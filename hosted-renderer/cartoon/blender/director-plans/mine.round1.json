@@ -1,0 +1,1307 @@
+{
+ "plan": {
+  "worlds": [
+   "mine_tunnel"
+  ],
+  "cast": [
+   {
+    "id": "miner",
+    "outfit": "worker",
+    "hat": "helmet",
+    "shirt": [
+     0.7,
+     0.5,
+     0.3
+    ]
+   },
+   {
+    "id": "buddy",
+    "outfit": "worker",
+    "hat": "beanie",
+    "shirt": [
+     0.4,
+     0.3,
+     0.2
+    ]
+   },
+   {
+    "id": "rich_guy",
+    "outfit": "merchant",
+    "hat": "top",
+    "shirt": [
+     0.9,
+     0.9,
+     0.9
+    ]
+   },
+   {
+    "id": "expert",
+    "outfit": "worker",
+    "hat": "none",
+    "shirt": [
+     0.3,
+     0.5,
+     0.7
+    ]
+   }
+  ],
+  "sentences": [
+   {
+    "index": 0,
+    "mentions": [
+     {
+      "word": "loaded",
+      "kind": "action",
+      "concept": "obj:gold_shotgun:load"
+     },
+     {
+      "word": "shotgun",
+      "kind": "thing",
+      "concept": "obj:gold_shotgun"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:money_bag"
+     },
+     {
+      "word": "fired",
+      "kind": "action",
+      "concept": "obj:gold_shotgun:fire"
+     },
+     {
+      "word": "walls",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     },
+     {
+      "word": "mine",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "miner",
+        "action": "load",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_shotgun",
+        "action": "load"
+       },
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       }
+      ]
+     },
+     {
+      "start_word": 7,
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "miner",
+        "action": "aim",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_shotgun",
+        "action": "fire"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 1,
+    "mentions": [
+     {
+      "word": "buddy",
+      "kind": "thing",
+      "concept": "cast:buddy"
+     },
+     {
+      "word": "watches",
+      "kind": "action",
+      "concept": "char:stand"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "vanish",
+      "kind": "action",
+      "concept": "obj:gold_vein:open"
+     },
+     {
+      "word": "rock",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "barrel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "buddy",
+        "action": "stand",
+        "expression": "shock"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_vein",
+        "action": "open"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 2,
+    "mentions": [
+     {
+      "word": "shooting",
+      "kind": "action",
+      "concept": "obj:gold_shotgun:fire"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:money_bag"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "mine",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "crates",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "buddy",
+        "action": "point",
+        "expression": "talk"
+       },
+       {
+        "id": "miner",
+        "action": "aim",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_shotgun",
+        "action": "fire"
+       },
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       },
+       {
+        "kind": "gold_vein",
+        "action": "open"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 3,
+    "mentions": [
+     {
+      "word": "see",
+      "kind": "action",
+      "concept": "char:point"
+     },
+     {
+      "word": "salting",
+      "kind": "action",
+      "concept": "obj:gold_shotgun:load"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "miner",
+        "action": "point",
+        "expression": "smug"
+       },
+       {
+        "id": "buddy",
+        "action": "load",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_shotgun",
+        "action": "load"
+       },
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 4,
+    "mentions": [
+     {
+      "word": "dug",
+      "kind": "action",
+      "concept": "obj:hand_drill:drill"
+     },
+     {
+      "word": "mine",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     },
+     {
+      "word": "rock",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "miner",
+        "action": "crouch",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "hand_drill",
+        "action": "drill"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 5,
+    "mentions": [
+     {
+      "word": "guy",
+      "kind": "thing",
+      "concept": "cast:rich_guy"
+     },
+     {
+      "word": "coming",
+      "kind": "action",
+      "concept": "char:walk"
+     },
+     {
+      "word": "buy",
+      "kind": "action",
+      "concept": "obj:money_bag:hold"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "walk",
+        "expression": "smug"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 6,
+    "mentions": [
+     {
+      "word": "spent",
+      "kind": "action",
+      "concept": "obj:money_bag:hold"
+     },
+     {
+      "word": "bucks",
+      "kind": "thing",
+      "concept": "obj:money_bag"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:gold_pan"
+     },
+     {
+      "word": "dust",
+      "kind": "thing",
+      "concept": "obj:gold_pan"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "barrel",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "miner",
+        "action": "carry",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       },
+       {
+        "kind": "gold_pan",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 7,
+    "mentions": [
+     {
+      "word": "guy",
+      "kind": "thing",
+      "concept": "cast:rich_guy"
+     },
+     {
+      "word": "rolls",
+      "kind": "action",
+      "concept": "char:walk"
+     },
+     {
+      "word": "suit",
+      "kind": "thing",
+      "concept": "outfit:merchant"
+     },
+     {
+      "word": "bangs",
+      "kind": "action",
+      "concept": "char:fall"
+     },
+     {
+      "word": "beam",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "crates",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "walk",
+        "expression": "smug"
+       }
+      ],
+      "objects": []
+     },
+     {
+      "start_word": 12,
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "fall",
+        "expression": "shock"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 8,
+    "mentions": [
+     {
+      "word": "expert",
+      "kind": "thing",
+      "concept": "cast:expert"
+     },
+     {
+      "word": "brought",
+      "kind": "action",
+      "concept": "char:walk"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "stand",
+        "expression": "smug"
+       },
+       {
+        "id": "expert",
+        "action": "walk",
+        "expression": "determined"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 9,
+    "mentions": [
+     {
+      "word": "expert",
+      "kind": "thing",
+      "concept": "cast:expert"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "barrel",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "expert",
+        "action": "stand",
+        "expression": "smug"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 10,
+    "mentions": [
+     {
+      "word": "smashes",
+      "kind": "action",
+      "concept": "obj:gold_vein:open"
+     },
+     {
+      "word": "chunk",
+      "kind": "thing",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "wall",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     },
+     {
+      "word": "swirls",
+      "kind": "action",
+      "concept": "obj:gold_pan:pour"
+     },
+     {
+      "word": "pan",
+      "kind": "thing",
+      "concept": "obj:gold_pan"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:gold_pan"
+     },
+     {
+      "word": "flakes",
+      "kind": "thing",
+      "concept": "obj:gold_pan"
+     },
+     {
+      "word": "spin",
+      "kind": "action",
+      "concept": "obj:gold_pan:pour"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "crates",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "expert",
+        "action": "swing",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_vein",
+        "action": "open"
+       }
+      ]
+     },
+     {
+      "start_word": 6,
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "expert",
+        "action": "pour",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_pan",
+        "action": "pour"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 11,
+    "mentions": [
+     {
+      "word": "magnifying",
+      "kind": "thing",
+      "concept": "obj:magnifier"
+     },
+     {
+      "word": "glass",
+      "kind": "thing",
+      "concept": "obj:magnifier"
+     },
+     {
+      "word": "flake",
+      "kind": "thing",
+      "concept": "obj:gold_pan"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "expert",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "magnifier",
+        "action": "hold"
+       },
+       {
+        "kind": "gold_pan",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 12,
+    "mentions": [
+     {
+      "word": "shot",
+      "kind": "action",
+      "concept": "obj:gold_shotgun:fire"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:money_bag"
+     },
+     {
+      "word": "wall",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "barrel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "expert",
+        "action": "point",
+        "expression": "angry"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_shotgun",
+        "action": "fire"
+       },
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 13,
+    "mentions": [
+     {
+      "word": "guy",
+      "kind": "thing",
+      "concept": "cast:rich_guy"
+     },
+     {
+      "word": "laughs",
+      "kind": "action",
+      "concept": "char:cheer"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "crates",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "cheer",
+        "expression": "happy"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 14,
+    "mentions": [
+     {
+      "word": "shoot",
+      "kind": "action",
+      "concept": "obj:gold_shotgun:fire"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:money_bag"
+     },
+     {
+      "word": "wall",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "point",
+        "expression": "talk"
+       },
+       {
+        "id": "miner",
+        "action": "aim",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_shotgun",
+        "action": "fire"
+       },
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 15,
+    "mentions": [],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "buddy",
+        "action": "panic",
+        "expression": "shock"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 16,
+    "mentions": [
+     {
+      "word": "buddy",
+      "kind": "thing",
+      "concept": "cast:buddy"
+     },
+     {
+      "word": "nods",
+      "kind": "action",
+      "concept": "char:stand"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "barrel",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "buddy",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 17,
+    "mentions": [],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "crates",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "miner",
+        "action": "stand",
+        "expression": "talk"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 18,
+    "mentions": [
+     {
+      "word": "guy",
+      "kind": "thing",
+      "concept": "cast:rich_guy"
+     },
+     {
+      "word": "pays",
+      "kind": "action",
+      "concept": "obj:money_bag:hold"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "carry",
+        "expression": "smug"
+       },
+       {
+        "id": "miner",
+        "action": "stand",
+        "expression": "happy"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 19,
+    "mentions": [
+     {
+      "word": "bolt",
+      "kind": "action",
+      "concept": "char:run"
+     },
+     {
+      "word": "money",
+      "kind": "thing",
+      "concept": "obj:money_bag"
+     },
+     {
+      "word": "stays",
+      "kind": "action",
+      "concept": "char:stand"
+     },
+     {
+      "word": "pulls",
+      "kind": "action",
+      "concept": "char:carry"
+     },
+     {
+      "word": "stick",
+      "kind": "thing",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "dynamite",
+      "kind": "thing",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "suit",
+      "kind": "thing",
+      "concept": "outfit:merchant"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "miner",
+        "action": "run",
+        "expression": "happy"
+       },
+       {
+        "id": "buddy",
+        "action": "run",
+        "expression": "happy"
+       },
+       {
+        "id": "rich_guy",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "money_bag",
+        "action": "hold"
+       }
+      ]
+     },
+     {
+      "start_word": 12,
+      "set": "mine_tunnel",
+      "zone": "barrel",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "carry",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "dynamite",
+        "action": "hold"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 20,
+    "mentions": [
+     {
+      "word": "mined",
+      "kind": "action",
+      "concept": "obj:hand_drill:drill"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "crates",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "crouch",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "hand_drill",
+        "action": "drill"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 21,
+    "mentions": [
+     {
+      "word": "lights",
+      "kind": "action",
+      "concept": "obj:dynamite:fire"
+     },
+     {
+      "word": "tosses",
+      "kind": "action",
+      "concept": "char:swing"
+     },
+     {
+      "word": "tunnel",
+      "kind": "thing",
+      "concept": "set:mine_tunnel"
+     },
+     {
+      "word": "firecracker",
+      "kind": "thing",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "runs",
+      "kind": "action",
+      "concept": "char:run"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "swing",
+        "expression": "panic"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "dynamite",
+        "action": "fire"
+       }
+      ]
+     },
+     {
+      "start_word": 13,
+      "set": "mine_tunnel",
+      "zone": "deep",
+      "lighting": "day",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "run",
+        "expression": "panic"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 22,
+    "mentions": [
+     {
+      "word": "dust",
+      "kind": "thing",
+      "concept": "obj:dynamite"
+     },
+     {
+      "word": "clears",
+      "kind": "action",
+      "concept": "obj:dynamite:explode"
+     },
+     {
+      "word": "vein",
+      "kind": "thing",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "gold",
+      "kind": "thing",
+      "concept": "obj:gold_vein"
+     },
+     {
+      "word": "guy",
+      "kind": "thing",
+      "concept": "cast:miner"
+     },
+     {
+      "word": "gave",
+      "kind": "action",
+      "concept": "char:stand"
+     }
+    ],
+    "shots": [
+     {
+      "set": "mine_tunnel",
+      "zone": "barrel",
+      "lighting": "day",
+      "framing": "wide",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "dynamite",
+        "action": "explode"
+       }
+      ]
+     },
+     {
+      "start_word": 7,
+      "set": "mine_tunnel",
+      "zone": "entrance",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "rich_guy",
+        "action": "stand",
+        "expression": "shock"
+       },
+       {
+        "id": "miner",
+        "action": "stand",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "gold_vein",
+        "action": "open"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "errors": [
+  "s1: unknown concept cast:buddy",
+  "s3: object money_bag is not spoken in this sentence; remove it",
+  "s5: unknown concept cast:rich_guy",
+  "s7: unknown concept cast:rich_guy",
+  "s8: unknown concept cast:expert",
+  "s9: unknown concept cast:expert",
+  "s13: unknown concept cast:rich_guy",
+  "s16: unknown concept cast:buddy",
+  "s18: unknown concept cast:rich_guy",
+  "s21: bad cast action/expression",
+  "s21: unknown expression",
+  "s21: bad cast action/expression",
+  "s21: unknown expression",
+  "s22: unknown concept cast:miner",
+  "s2: spoken obj:gold_vein not shown",
+  "s4: spoken word:found not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s5: spoken word:guy not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s7: spoken word:guy not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s7: spoken word:head not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s10: spoken word:bottom not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s13: spoken word:guy not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s18: spoken word:guy not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s21: spoken char:run not shown",
+  "s21: spoken char:swing not shown",
+  "s21: spoken obj:dynamite not shown",
+  "s21: spoken obj:dynamite:fire not shown",
+  "s21: spoken set:mine_tunnel not shown",
+  "s21: spoken word:lights not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s21: spoken word:tosses not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s21: spoken word:tunnel not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s21: spoken word:firecracker not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s21: spoken word:runs not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s22: spoken word:arm not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s22: spoken word:guy not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "set changes 27.4/min outside benchmark band 12.0-22.0: 26 backdrop (set or zone) changes in 57.0s; need 12-20 changes across 27 shots"
+ ],
+ "report": {
+  "sentences": 23,
+  "shots": 27,
+  "required": 149,
+  "covered": 129,
+  "coverage": 0.8658,
+  "undrawable": [],
+  "missing": [
+   {
+    "sentence": 2,
+    "concept": "obj:gold_vein"
+   },
+   {
+    "sentence": 4,
+    "concept": "word:found"
+   },
+   {
+    "sentence": 5,
+    "concept": "word:guy"
+   },
+   {
+    "sentence": 7,
+    "concept": "word:guy"
+   },
+   {
+    "sentence": 7,
+    "concept": "word:head"
+   },
+   {
+    "sentence": 10,
+    "concept": "word:bottom"
+   },
+   {
+    "sentence": 13,
+    "concept": "word:guy"
+   },
+   {
+    "sentence": 18,
+    "concept": "word:guy"
+   },
+   {
+    "sentence": 21,
+    "concept": "char:run"
+   },
+   {
+    "sentence": 21,
+    "concept": "char:swing"
+   },
+   {
+    "sentence": 21,
+    "concept": "obj:dynamite"
+   },
+   {
+    "sentence": 21,
+    "concept": "obj:dynamite:fire"
+   },
+   {
+    "sentence": 21,
+    "concept": "set:mine_tunnel"
+   },
+   {
+    "sentence": 21,
+    "concept": "word:lights"
+   },
+   {
+    "sentence": 21,
+    "concept": "word:tosses"
+   },
+   {
+    "sentence": 21,
+    "concept": "word:tunnel"
+   },
+   {
+    "sentence": 21,
+    "concept": "word:firecracker"
+   },
+   {
+    "sentence": 21,
+    "concept": "word:runs"
+   },
+   {
+    "sentence": 22,
+    "concept": "word:arm"
+   },
+   {
+    "sentence": 22,
+    "concept": "word:guy"
+   }
+  ],
+  "set_changes_per_min": 27.37,
+  "mean_shot_len": 2.11,
+  "max_shot_len": 3.73,
+  "min_shot_len": 0.83,
+  "sets_used": [
+   "mine_tunnel"
+  ]
+ }
+}
