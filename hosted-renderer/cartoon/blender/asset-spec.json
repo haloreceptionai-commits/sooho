@@ -9,5 +9,5 @@
     "factory-kit/cog-a", "factory-kit/machine", "factory-kit/pipe-large-valve", "factory-kit/box-small", "factory-kit/lever-single"
   ],
   "textures": {"wood": "wood_planks", "rock": "rock_boulder_cracked", "grass": "aerial_grass_rock", "dirt": "brown_mud_leaves_01", "stone": "castle_brick_01"},
-  "skies": {"day": "kloofendal_48d_partly_cloudy_puresky", "sunset": "sunset_jhbcentral", "overcast": "kloofendal_overcast_puresky"}
+  "skies": {"day": "kloofendal_48d_partly_cloudy_puresky", "sunset": "qwantani_sunset_puresky", "overcast": "kloofendal_overcast_puresky"}
 }

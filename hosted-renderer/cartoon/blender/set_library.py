@@ -71,8 +71,9 @@ def model(spec):
         if 'surface' in spec:
             replacement = surface(spec['surface'], spec.get('metres', 2))
             for i, old in enumerate(o.data.materials):
-                if any(word in old.name.lower() for word in ('wood', 'stone', 'rock', 'wall')):
-                    o.data.materials[i] = replacement
+                o.data.materials[i] = replacement
+        if spec.get('ink'):
+            wire = o.modifiers.new('masonry edges', 'BEVEL'); wire.width = 0.007; wire.segments = 1
         for poly in o.data.polygons: poly.use_smooth = False
     return root
 
@@ -90,6 +91,15 @@ def lighting(mode, indoor=False):
     sky = nt.nodes.new('ShaderNodeTexEnvironment')
     sky.image = bpy.data.images.load(asset_path('overcast' if mode in ('rain', 'night') else mode, 'sky'), check_existing=True)
     nt.links.new(sky.outputs[0], nt.nodes['Background'].inputs['Color'])
+    # Separate camera backdrop from illumination: never show a modern city
+    # around a historical set, even when a photographic HDR lights it.
+    light_path = nt.nodes.new('ShaderNodeLightPath')
+    background = nt.nodes.new('ShaderNodeBackground'); background.inputs['Color'].default_value = (.25,.39,.58,1)
+    background.inputs['Strength'].default_value = .6
+    mix = nt.nodes.new('ShaderNodeMixShader')
+    nt.links.new(light_path.outputs['Is Camera Ray'], mix.inputs[0])
+    nt.links.new(nt.nodes['Background'].outputs[0], mix.inputs[1]); nt.links.new(background.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], nt.nodes['World Output'].inputs['Surface'])
     nt.nodes['Background'].inputs['Strength'].default_value = (0.3 if indoor else 1.0) if mode != 'night' else 0.06
     bpy.ops.object.light_add(type='AREA', location=(-3, -4, 7))
     key = bpy.context.active_object; key.rotation_euler = (Vector((0, 1, 1)) - key.location).to_track_quat('-Z', 'Y').to_euler()
