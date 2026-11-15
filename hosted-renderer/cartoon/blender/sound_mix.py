@@ -30,6 +30,9 @@ def place(shot, library, offset=0.0, total=None):
     n = round((total or shot['duration']) * RATE); out = np.zeros((n, 2)); c = shot['camera']
     for cue in cues(shot):
         s = library[cue['sound']]
+        if cue['sound'] == 'crowd':  # one recording of a few voices -> dense crowd: 8 offset, slightly re-pitched layers
+            layers = [np.interp(np.arange(0, len(s) - 1, r), np.arange(len(s)), s) for r in (.92, .96, 1.0, 1.04, 1.08, .94, 1.02, 1.06)]
+            m = min(len(l) for l in layers); s = sum(np.roll(l[:m], k * RATE * 3) for k, l in enumerate(layers)) / 2.8
         if cue['sound'] in LOOPS:
             m = round(cue.get('length', shot['duration']) * RATE); s = np.tile(s, m // len(s) + 1)[:m]
             fade = min(len(s) // 4, RATE // 5); s = s.copy(); s[:fade] *= np.linspace(0, 1, fade); s[-fade:] *= np.linspace(1, 0, fade)

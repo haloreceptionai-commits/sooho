@@ -60,14 +60,14 @@ def cues(shot):
             add(st, 'explosion', pos, 1.0); add(st, 'rumble', pos, .8)
             for t in _debris_landings(e, fps): add(st + t, 'debris', pos, .5)
         if e['kind'] == 'sparks': add(st, 'sparks', pos, .5)
-        if e['kind'] == 'fire': add(st, 'fire', pos, 1.2, d - st)
+        if e['kind'] == 'fire': add(st, 'fire', pos, 1.8, d - st)
     if shot.get('crowd'): add(0, 'crowd', [*shot['crowd']['center'], 1], .9 if shot['crowd'].get('action') == 'cheer' else .4, d)
     if 'whip_from' in shot['camera']: add(0, 'whoosh', None, 1.0)
     for o in shot.get('objects', []):
         for t, s in TIMES.get((o['kind'], o.get('action', 'hold')), []): add(t, s, o['pos'])
     for c in shot.get('cast', []):
         a = c.get('action', 'stand'); p = [*c['pos'], 0]
-        for t in footfalls(a, d): add(t, 'footstep', p, .8)
+        for t in footfalls(a, d): add(t, 'footstep', p, 1.4)
         if a == 'swing': [add(t, 'pickaxe', p, 1.2) for t in swing_hits(d)]
         if a == 'fall': add(1.0, 'impact', p, .9)
     # one blast sound per visible blast: a scripted explosion effect within 0.3 s absorbs the object's own burst
