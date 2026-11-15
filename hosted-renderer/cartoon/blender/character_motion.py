@@ -30,7 +30,7 @@ def pose(action,t):
        'left_wrist':(-.27,-.03,.67-crouch),'right_wrist':(.27,-.03,.67-crouch),
        'left_ankle':(-.09,0,.055),'right_ankle':(.09,0,.055)}
     if action in ('walk','run','panic'):
-        stride=.28 if action=='walk' else .38
+        stride=.26 if action=='walk' else .33
         for side,sign in [('left',-1),('right',1)]:
             wave=math.sin(phase)*sign
             p[side+'_ankle']=(sign*.09,stride*wave,.055+.12*max(0,wave))
