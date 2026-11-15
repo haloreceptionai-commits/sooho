@@ -261,7 +261,7 @@ def build_object(spec,duration,fps):
         for x in (-.75,-.3,.3,.75):cube('timber sleeper',(x,0,.12),(.2,1.2,.08),wood,.015)
         gauge=.36
         if action=='buckle':
-            n=18
+            n=30
             for y in (-gauge,gauge):
                 for i in range(n):
                     u=(i+.5)/n;piece=bpy.data.objects.new('welded rail piece',None);bpy.context.collection.objects.link(piece)
