@@ -4,3 +4,4 @@
 - Architectural detail is deterministic engine-owned geometry in set_detail.py, not AI scripts; this makes masonry, timber and weather reproducible across shots.
 - Still acceptance audits explicitly prohibit motion inference and join judge responses by shot ID; repeated images and reordered responses must not fabricate evidence.
 - Character joint targets live in a pure deterministic motion module, with rendered segments sharing endpoints and held props parented to wrists; this allows per-frame continuity tests without Blender and prevents detached hand-held objects.
+- Unusual story props use bounded object_specs identities and engine-owned story_objects geometry; this permits moving mechanisms without executing AI-authored code or accepting external asset paths.
