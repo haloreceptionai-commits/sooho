@@ -10,12 +10,12 @@
   "camera": {
     "from": [
       0,
-      -9,
-      3.1
+      -6,
+      5.8
     ],
     "look_at": [
       0,
-      0,
+      1.7,
       1.1
     ],
     "lens": 30,
@@ -25,13 +25,18 @@
     {
       "id": "cast-0",
       "pos": [
-        -1.8,
+        -1.4,
         0.0
       ],
       "outfit": "worker",
       "hat": "beanie",
       "expression": "neutral",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.12,
+        0.28,
+        0.3
+      ]
     },
     {
       "id": "cast-1",
@@ -42,84 +47,124 @@
       "outfit": "merchant",
       "hat": "top",
       "expression": "happy",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.55,
+        0.13,
+        0.08
+      ]
     },
     {
       "id": "cast-2",
       "pos": [
-        1.8,
+        1.4,
         0.0
       ],
       "outfit": "soldier",
       "hat": "helmet",
       "expression": "angry",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.25,
+        0.32,
+        0.13
+      ]
     },
     {
       "id": "cast-3",
       "pos": [
-        -1.8,
-        2.5
+        -1.4,
+        1.7
       ],
       "outfit": "sailor",
       "hat": "tricorne",
       "expression": "sad",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.1,
+        0.22,
+        0.44
+      ]
     },
     {
       "id": "cast-4",
       "pos": [
         0.0,
-        2.5
+        1.7
       ],
       "outfit": "worker",
       "hat": "beanie",
       "expression": "shock",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.12,
+        0.28,
+        0.3
+      ]
     },
     {
       "id": "cast-5",
       "pos": [
-        1.8,
-        2.5
+        1.4,
+        1.7
       ],
       "outfit": "merchant",
       "hat": "top",
       "expression": "worried",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.55,
+        0.13,
+        0.08
+      ]
     },
     {
       "id": "cast-6",
       "pos": [
-        -1.8,
-        5.0
+        -1.4,
+        3.4
       ],
       "outfit": "soldier",
       "hat": "helmet",
       "expression": "smug",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.25,
+        0.32,
+        0.13
+      ]
     },
     {
       "id": "cast-7",
       "pos": [
         0.0,
-        5.0
+        3.4
       ],
       "outfit": "sailor",
       "hat": "tricorne",
       "expression": "determined",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.1,
+        0.22,
+        0.44
+      ]
     },
     {
       "id": "cast-8",
       "pos": [
-        1.8,
-        5.0
+        1.4,
+        3.4
       ],
       "outfit": "worker",
       "hat": "beanie",
       "expression": "talk",
-      "action": "stand"
+      "action": "stand",
+      "shirt": [
+        0.12,
+        0.28,
+        0.3
+      ]
     }
   ],
   "frames": [
