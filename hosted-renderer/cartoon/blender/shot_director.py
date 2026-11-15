@@ -120,6 +120,10 @@ def validate_plan(plan, story, concrete=None):
         cast_ids.add(c.get('id'))
     if len(plan['sentences']) != len(sents): errs.append(f'plan has {len(plan["sentences"])} sentences, story has {len(sents)}')
     required_total = covered_total = 0; misses = []; undrawable = []
+    story_sets = {c[4:] for s_ in sents for c in lexical_concepts(s_['text']) if c.startswith('set:')}
+    extra = [w for w in plan.get('worlds', []) if w in SETS]
+    if len(extra) > 2: errs.append('at most 2 extra worlds')
+    worlds = story_sets | set(extra[:2])
     for s, ps in zip(sents, plan['sentences']):
         shots = ps.get('shots', [])
         if not 1 <= len(shots) <= 2: errs.append(f's{s["index"]}: needs 1-2 shots, got {len(shots)}'); continue
@@ -146,6 +150,13 @@ def validate_plan(plan, story, concrete=None):
             try: shown |= shot_concepts(compile_one(sh, plan, 1.0, s['index']))
             except (ValueError, AssertionError, KeyError, TypeError) as e: errs.append(f's{s["index"]}: {e}')
         need = lexical_concepts(s['text']) | {m['concept'] for m in ps.get('mentions', []) if m.get('concept') and concept_valid(m['concept'])}
+        for sh in shots:
+            # no unmotivated props: every object on screen must be spoken in this sentence
+            for o in sh.get('objects', []):
+                if f"obj:{o.get('kind')}" not in need and f"obj:{o.get('kind')}:{o.get('action', 'hold')}" not in need:
+                    errs.append(f's{s["index"]}: object {o.get("kind")} is not spoken in this sentence; remove it')
+            if sh.get('set') not in worlds and f"set:{sh.get('set')}" not in need:
+                errs.append(f's{s["index"]}: set {sh.get("set")} is not a story world {sorted(worlds)}; use a story world (change zone for variety)')
         need = {c for c in need if not c.startswith('char:stand')}
         # a shown object action also covers the bare object; character stand is never "required"
         missing = sorted(c for c in need if c not in shown)
@@ -161,7 +172,7 @@ def validate_plan(plan, story, concrete=None):
     for u in undrawable: errs.append(f's{u["sentence"]}: spoken {u["word"]!r} has no drawable concept')
     shots = compile_plan(plan, story, strict=False)
     lens = [s['duration'] for s in shots]; total = sum(lens) or 1
-    changes = sum(1 for a, b in zip(shots, shots[1:]) if a['set'] != b['set'])
+    changes = sum(1 for a, b in zip(shots, shots[1:]) if (a['set'], a['_zone']) != (b['set'], b['_zone']))
     rate = changes / total * 60
     report = {'sentences': len(sents), 'shots': len(shots), 'required': required_total, 'covered': covered_total,
               'coverage': round(covered_total / required_total, 4) if required_total else 1.0,
@@ -182,56 +193,78 @@ def validate_plan(plan, story, concrete=None):
 SET_CAMS = {}
 for f in (HERE / 'shots').glob('set-*.json'):
     SET_CAMS[f.stem[4:]] = json.loads(f.read_text())['camera']
-SET_CAMS['open_day'] = {'from': [3, -5, 2.4], 'look_at': [0, 0.5, 1.2], 'lens': 42, 'fstop': 5.6}
-# Free floor slots per set, chosen from set-kits.json model positions (clear of props and walls).
-SLOTS = {'mine_tunnel': [(-0.35, 0.9), (0.45, 1.5), (0, 2.4)], 'rail_yard': [(1.7, 1.0), (2.6, 2.2), (-1.7, 1.4)],
-         'ship_deck': [(-0.9, 2), (1, 3), (0, 4.5)]}
-DEFAULT_SLOTS = [(-0.75, 1.0), (0.85, 1.6), (0, 2.8)]
+# Zones: open floor spots inside each kit (chosen from set-kits.json model positions) with the
+# heading the camera looks along, so one location yields several distinct backdrops like the
+# benchmark's "tunnel" vs "mine entrance" shots.  heading is degrees in the ground plane (90 = +y).
+_INDOOR = {'front': ((0, 0.6), 90), 'back': ((-1.2, 5.6), 100), 'left_wall': ((-3.2, 2.6), 160), 'right': ((2.4, 2.2), 70)}
+_OPEN = {'center': ((0, -1), 90), 'left': ((-1.2, 3.2), 120), 'right': ((2.6, 2), 70)}
+ZONES = {
+    'rail_yard': {'track_side': ((2.0, 1.0), 90), 'locomotive': ((2.0, 4.2), 115), 'house': ((-3.2, 7.6), 125), 'open_yard': ((4.2, 0.8), 155)},
+    'mine_tunnel': {'entrance': ((0, 0.6), 90), 'crates': ((0.25, 2.5), 165), 'deep': ((0, 4.6), 90), 'barrel': ((-0.25, 3.3), 15)},
+    'ship_deck': {'bow': ((0, 1), 90), 'port_rail': ((-1.8, 4.6), 175), 'mast': ((0.4, 5.6), 95)},
+    'office': _INDOOR, 'saloon': _INDOOR, 'workshop': _INDOOR, 'room': _INDOOR,
+    'castle': _OPEN, 'village': _OPEN, 'battlefield': _OPEN, 'street': _OPEN, 'open_day': {'center': ((0, 0), 90)},
+}
 # Insert framings reuse the exact cameras that passed the step-5 recognition and motion reviews.
 OBJ_CAMS = {}
 for f in (HERE / 'shots').glob('mechanism-*.json'):
     s = json.loads(f.read_text()); o = s['objects'][0]
     OBJ_CAMS[(o['kind'], o.get('action', 'hold'))] = s['camera']; OBJ_CAMS.setdefault(o['kind'], s['camera'])
-OBJ_CAMS.setdefault('perforated_cart', {'from': [3.6, -6.4, 3.3], 'look_at': [0, -1.4, 0.75], 'lens': 35, 'fstop': 8})
 
 
-def _off(v, d): return [round(a + b, 3) for a, b in zip(v, d)]
+def _rot(v, deg):
+    """Rotate an object-space offset (authored for a camera looking along +y) to a zone heading."""
+    import math
+    a = math.radians(deg - 90); c, s_ = math.cos(a), math.sin(a)
+    return [round(v[0] * c - v[1] * s_, 3), round(v[0] * s_ + v[1] * c, 3)] + ([round(v[2], 3)] if len(v) > 2 else [])
+
+
+def _at(origin, off, deg, z=None):
+    r = _rot(off, deg); p = [round(origin[0] + r[0], 3), round(origin[1] + r[1], 3)]
+    return p + [z if z is not None else (r[2] if len(r) > 2 else 0)]
+
+
+def zone_of(sh):
+    st = sh.get('set'); zones = ZONES.get(st, {'center': ((0, 0), 90)})
+    z = sh.get('zone') or next(iter(zones))
+    if z not in zones: raise ValueError(f'unknown zone {z!r} for set {st} (zones: {sorted(zones)})')
+    return z, zones[z]
 
 
 def compile_one(sh, plan, duration, si=0):
     st = sh.get('set')
     if st not in SETS: raise ValueError(f'unknown set {st!r}')
-    framing = sh.get('framing'); slots = SLOTS.get(st, DEFAULT_SLOTS)
+    framing = sh.get('framing'); _, (origin, head) = zone_of(sh); yaw = head - 90
     looks = {c['id']: c for c in plan.get('cast', [])}
+    slots = [(-0.6, 0), (0.65, 0.45), (0, 1.1)]
     cast = []
     for i, c in enumerate(sh.get('cast', [])[:3]):
-        base = looks.get(c['id'], {}); x, y = slots[i % len(slots)]
-        ch = {'id': c['id'], 'pos': [x, y], 'yaw': 0, 'action': c.get('action', 'stand'), 'expression': c.get('expression', 'neutral'),
+        base = looks.get(c['id'], {}); x, y, _ = _at(origin, slots[i], head)
+        ch = {'id': c['id'], 'pos': [x, y], 'yaw': round(yaw, 2), 'action': c.get('action', 'stand'), 'expression': c.get('expression', 'neutral'),
               'outfit': base.get('outfit', 'worker'), 'hat': base.get('hat', 'none')}
         if base.get('shirt'): ch['shirt'] = base['shirt']
         cast.append(ch)
     objects = []
     for o in sh.get('objects', [])[:2]:
         if o.get('kind') not in OBJECTS: raise ValueError(f'unknown story object {o.get("kind")!r}')
-        objects.append({'kind': o['kind'], 'action': o.get('action', 'hold'), 'pos': [0, 0, 0], 'scale': 1})
+        objects.append({'kind': o['kind'], 'action': o.get('action', 'hold'), 'pos': [0, 0, 0], 'scale': 1, 'yaw': round(yaw, 2)})
     if framing == 'insert':
         if not objects: raise ValueError('insert framing needs an object')
-        # object at the frame centre with its reviewed camera; cast stands behind it, out of the way
-        ox, oy = (0, 0.4) if st == 'mine_tunnel' else (0.3, 0.2)
-        objects[0]['pos'] = [ox, oy, 0]
-        cam = dict(OBJ_CAMS.get((objects[0]['kind'], objects[0]['action']), OBJ_CAMS[objects[0]['kind']])); cam['from'] = _off(cam['from'], [ox, oy, 0]); cam['look_at'] = _off(cam['look_at'], [ox, oy, 0])
-        for j, o in enumerate(objects[1:], 1): o['pos'] = [ox + 0.9 * j, oy + 0.6, 0]; o['scale'] = 0.6
-        for ch in cast: ch['pos'] = [round(ox + 1.4 * (1 if ch['pos'][0] >= 0 else -1), 3), round(oy + 2.2, 3)]
+        objects[0]['pos'] = _at(origin, (0, 0.3), head, 0)
+        o0 = objects[0]['pos']; c0 = OBJ_CAMS.get((objects[0]['kind'], objects[0]['action']), OBJ_CAMS[objects[0]['kind']])
+        cam = {'from': _at(o0, c0['from'][:2], head, c0['from'][2]), 'look_at': _at(o0, c0['look_at'][:2], head, c0['look_at'][2]), 'lens': c0['lens'], 'fstop': c0['fstop']}
+        for j, o in enumerate(objects[1:], 1): o['pos'] = _at(o0, (0.9, 0.7), head, 0); o['scale'] = 0.6
+        for i, ch in enumerate(cast): ch['pos'] = _at(o0, ((-1.3, 1.6), (1.3, 1.9), (0, 2.6))[i], head)[:2]
     else:
-        # object stands beside its user at a person-readable size
         for j, o in enumerate(objects):
-            px, py = cast[j % len(cast)]['pos'] if cast else slots[0]
-            o['pos'] = [round(px + 0.55, 3), round(py - 0.35, 3), 0]; o['scale'] = 0.5
+            near = cast[j % len(cast)]['pos'] if cast else origin
+            o['pos'] = _at(near, (0.6, -0.35), head, 0); o['scale'] = 0.5
         if framing == 'wide' or not cast:
-            cam = dict(SET_CAMS.get(st, SET_CAMS['open_day']))
+            d = 3.6 if st == 'mine_tunnel' else 5.2
+            cam = {'from': _at(origin, (0.9, -d), head, 2.0), 'look_at': _at(origin, (0, 1.5), head, 1.2), 'lens': 26 if st == 'mine_tunnel' else 30, 'fstop': 5.6}
         else:
-            x, y = cast[0]['pos']; d = 3.6 if framing == 'medium' else 2.2
-            cam = {'from': [round(x + 0.35 * d, 3), round(y - d, 3), 1.55], 'look_at': [x, round(y + 0.2, 3), 1.05 if framing == 'medium' else 1.3],
+            sub = cast[0]['pos']; d = 3.4 if framing == 'medium' else 2.0
+            cam = {'from': _at(sub, (0.35 * d, -d), head, 1.55), 'look_at': _at(sub, (0, 0.2), head, 1.05 if framing == 'medium' else 1.3),
                    'lens': 40 if framing == 'medium' else 55, 'fstop': 4}
     shot = {'set': st, 'lighting': sh.get('lighting', 'day'), 'duration': round(duration, 3), 'camera': cam,
             'cast': cast, 'objects': objects, 'engine': 'cycles', 'samples': 24, 'size': [1080, 1920], 'grade': 'Punchy'}
@@ -249,7 +282,7 @@ def compile_plan(plan, story, strict=True):
             except (ValueError, AssertionError, KeyError, TypeError):
                 if strict: raise
                 continue
-            c['_sentence'] = s['index']; c['_words'] = ' '.join(s['words'][(0 if i == 0 else shots[1]['start_word']):(shots[1]['start_word'] if i == 0 and len(bounds) == 3 else None)])
+            c['_sentence'] = s['index']; c['_zone'] = zone_of(sh)[0]; c['_words'] = ' '.join(s['words'][(0 if i == 0 else shots[1]['start_word']):(shots[1]['start_word'] if i == 0 and len(bounds) == 3 else None)])
             out.append(c)
     return out
 
