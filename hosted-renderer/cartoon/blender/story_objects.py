@@ -52,6 +52,9 @@ def build_object(spec,duration,fps):
         bit=cylinder('drill bit',(0,0,.55),.025,.65,steel);moving.append((bit,'spin',bit.location.copy()))
         for a,b in [((0,0,.86),(.25,0,.86)),((.25,0,.86),(.25,0,1.12)),((.25,0,1.12),(0,0,1.12))]:rope('crank',a,b,.035,steel)
         cylinder('drill grip',(0,0,1.2),.065,.16,wood)
+        cylinder('crank wooden side grip',(.25,0,.99),.07,.22,wood)
+        for z in [.35,.4,.45,.5,.55,.6]:
+            bpy.ops.mesh.primitive_torus_add(major_radius=.03,minor_radius=.008,location=(0,0,z));bpy.context.active_object.data.materials.append(steel)
     elif kind=='rocket_arrow':
         rope('arrow shaft',(0,0,.12),(0,0,1.5),.025,wood)
         cylinder('paper rocket tube',(0,0,.7),.09,.55,paper)
@@ -59,8 +62,12 @@ def build_object(spec,duration,fps):
         for a in [0,math.pi/2]:
             fin=cube('arrow fletching',(0,0,.25),(.28,.015,.22),paper);fin.rotation_euler.z=a
     elif kind=='fuse_bundle':
-        rope('common fuse',(0,-.7,.07),(0,0,.07),.035,paper)
-        for i in range(10):rope('branch fuse',(0,0,.07),(-.6+i*.133,.7,.07),.018,paper)
+        fusemat=material('rope fuse tan',(.42,.27,.12),.95)
+        rope('common fuse',(0,-.7,.07),(0,0,.07),.035,fusemat)
+        for i in range(10):
+            end=(-.6+i*.133,.7,.07)
+            rope('branch fuse',(0,0,.07),end,.018,fusemat)
+            cylinder('paper charge at fuse end',(end[0],end[1],.13),.055,.16,paper)
         if action=='fire':
             o=sphere('travelling fuse ember',(0,-.7,.07),(.045,)*3,ember);moving.append((o,'fuse',o.location.copy()))
     elif kind=='gold_shotgun':
@@ -93,8 +100,9 @@ def build_object(spec,duration,fps):
         sphere('inspection flake',(0,-.03,.5),(.085,.012,.055),gold)
     elif kind=='dynamite':
         cylinder('dynamite stick',(0,0,.38),.12,.7,red)
-        for z in [.14,.62]:cylinder('paper band',(0,0,z),.124,.06,paper)
-        rope('curved fuse',(0,0,.73),(.16,0,.94),.02,paper)
+        for z in [.14,.62]:cylinder('paper band',(0,0,z),.124,.025,paper)
+        rope('curved fuse',(0,0,.73),(.07,0,.81),.012,wood)
+        rope('bent fuse',(.07,0,.81),(.16,.03,.8),.012,wood)
         if action=='fire':
             o=sphere('burning fuse',(0,0,.73),(.035,)*3,ember);moving.append((o,'dynamite_fuse',o.location.copy()))
         if action=='explode':
@@ -102,8 +110,10 @@ def build_object(spec,duration,fps):
                 o=cube('dynamite fragment',(0,0,.38),(.09,.09,.15),red);moving.append((o,'fragment',Vector((math.cos(i*math.tau/8),math.sin(i*math.tau/8),.5))))
     else:
         rock=material('object rock',(.3,.32,.3),.92)
-        sphere('vein rock',(0,0,.45),(.62,.4,.45),rock)
-        for i in range(8):sphere('exposed gold vein',(-.4+i*.115,-.4,.45+.055*math.sin(i*2)),(.075,.055,.045),gold)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,location=(0,0,.45));o=bpy.context.active_object;o.name='fractured vein rock';o.scale=(.62,.4,.45);o.data.materials.append(rock)
+        for i in range(8):
+            x=-.4+i*.115;z=.45+.055*math.sin(i*2)
+            rope('gold mineral seam',(x,-.39,z),(x+.115,-.39,.45+.055*math.sin((i+1)*2)),.022,gold)
         if action in ('open','explode'):
             lid=cube('rock crust',(0,-.46,.46),(.98,.07,.28),rock);moving.append((lid,'cover',lid.location.copy()))
     for obj in set(bpy.data.objects)-created:obj.parent=root
