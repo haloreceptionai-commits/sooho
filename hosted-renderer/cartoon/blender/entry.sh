@@ -3,10 +3,10 @@
 # the video and a timing report to private Blob storage under $OUT_PREFIX. Each engine first
 # renders a 3-frame probe (reported immediately) so a slow engine is visible within minutes.
 set -u
-if [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects ] || [ "${SHOT:-}" = recognition ]; then
+if [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects ] || [ "${SHOT:-}" = recognition ] || [ "${SHOT:-}" = mechanisms ]; then
   SAS=$(printf '%s' "$AZURE_BLOB_SAS" | sed 's/^?//')
   FAILED=0
-  if [ "$SHOT" = recognition ]; then FILES="/opt/shot/shots/recognition-*.json"; elif [ "$SHOT" = faces ]; then FILES="/opt/shot/shots/face-*.json"; elif [ "$SHOT" = objects ]; then FILES="/opt/shot/shots/object-*.json"; else FILES="/opt/shot/shots/set-*.json /opt/shot/shots/look-*.json"; fi
+  if [ "$SHOT" = mechanisms ]; then FILES="/opt/shot/shots/mechanism-*.json"; elif [ "$SHOT" = recognition ]; then FILES="/opt/shot/shots/recognition-*.json"; elif [ "$SHOT" = faces ]; then FILES="/opt/shot/shots/face-*.json"; elif [ "$SHOT" = objects ]; then FILES="/opt/shot/shots/object-*.json"; else FILES="/opt/shot/shots/set-*.json /opt/shot/shots/look-*.json"; fi
   for FILE in $FILES; do
     [ -f "$FILE" ] || continue
     NAME=$(basename "$FILE" .json)
@@ -15,8 +15,16 @@ if [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects
     CODE=$?
     tail -c 18000 "/tmp/$NAME.log" > "/tmp/$NAME.tail"
     curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' --data-binary "@/tmp/$NAME.tail" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.log?$SAS" >/dev/null
-    if [ "$CODE" = 0 ] && [ -f "/tmp/$NAME/f_00001.png" ]; then
-      curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@/tmp/$NAME/f_00001.png" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.png?$SAS" >/dev/null || FAILED=1
+    EXPECTED=$(python3 -c "import json;s=json.load(open('$FILE'));print(len(s['frames']) if s.get('frames') else round(s['duration']*s.get('fps',30)))")
+    ACTUAL=$(ls "/tmp/$NAME"/f_*.png 2>/dev/null | wc -l)
+    if [ "$CODE" = 0 ] && [ "$ACTUAL" = "$EXPECTED" ]; then
+      if [ "$SHOT" = mechanisms ]; then
+        for IMAGE in "/tmp/$NAME"/f_*.png; do
+          curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@$IMAGE" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME-$(basename "$IMAGE")?$SAS" >/dev/null || FAILED=1
+        done
+      else
+        curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' -H 'Content-Type: image/png' --data-binary "@/tmp/$NAME/f_00001.png" "$AZURE_BLOB_BASE/$OUT_PREFIX/$NAME.png?$SAS" >/dev/null || FAILED=1
+      fi
       echo "$NAME rendered"
     else
       echo "$NAME failed code=$CODE"; FAILED=1

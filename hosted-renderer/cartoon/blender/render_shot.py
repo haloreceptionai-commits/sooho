@@ -17,6 +17,7 @@ from set_library import build_set, dress_mine as library_mine, surface
 from characters import build_character
 from story_objects import build_object
 from verify_characters import verify_characters
+from verify_objects import verify_objects
 
 
 def mat(name, color, rough=0.6, metal=0.0, emit=None, strength=0.0):
@@ -361,7 +362,8 @@ def main():
         build_set(shot['set'], shot.get('lighting', 'day'))
     roots=[build_character(c,shot['duration'],fps) for c in shot.get('cast', [])]
     if roots:verify_characters(roots,shot['duration'],fps)
-    for obj in shot.get('objects',[]):build_object(obj,shot['duration'],fps)
+    object_roots=[build_object(obj,shot['duration'],fps) for obj in shot.get('objects',[])]
+    if object_roots:verify_objects(object_roots,shot['duration'],fps)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     sc.render.filepath = os.path.join(out, 'f_#####')
