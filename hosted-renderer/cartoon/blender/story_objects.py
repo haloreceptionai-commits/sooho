@@ -298,7 +298,7 @@ def build_object(spec,duration,fps):
             for side in (-1,1):
                 seg=bpy.data.objects.new('rail segment',None);bpy.context.collection.objects.link(seg)
                 for y in (-gauge,gauge):
-                    cx=side*(.02+RAIL/2)
+                    cx=side*(.02+(RAIL-.04)/2)
                     for name,z,h,w in (('rail foot',.17,.02,.11),('rail web',.215,.07,.03),('rail head',.275,.05,.07)):
                         o=cube(name,(cx,y,z),(RAIL-.04,w,h),rail_mat,.004);o.parent=seg
                     for x in (-.75,-.3,.3,.75):

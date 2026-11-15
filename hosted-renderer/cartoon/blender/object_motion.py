@@ -44,8 +44,9 @@ def rail_gap(action,t):
 
 def rail_end_shift(action,t,side):
     """x offset of a rail segment so that its inner end sits exactly half the gap from the centre."""
-    if action=='break':return (rail_gap(action,t)-.03)*(1 if side>0 else 0)  # left rail and bars stay bolted
-    return side*(rail_gap(action,t)-.04)/2*-1 if action!='buckle' else 0.
+    if action=='break':return (rail_gap(action,t)-.04)*(1 if side>0 else 0)  # left rail and bars stay bolted
+    if action=='buckle':return 0.
+    return side*(rail_gap(action,t)-.04)/2
 
 
 def kink_offset(t,u):
