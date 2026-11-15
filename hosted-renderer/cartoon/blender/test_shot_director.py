@@ -6,7 +6,7 @@ CAST=[{'id':'miner','outfit':'worker','hat':'beanie'},{'id':'buddy','outfit':'wo
 
 
 def good():
-    return {'cast':CAST,'sentences':[
+    return {'cast':CAST,'worlds':['mine_tunnel','castle'],'sentences':[
         {'index':0,'mentions':[{'word':'shotgun','kind':'thing','concept':'obj:gold_shotgun'}],'shots':[
             {'set':'mine_tunnel','lighting':'day','framing':'insert','cast':[{'id':'miner','action':'load'}],'objects':[{'kind':'gold_shotgun','action':'load'}]},
             {'start_word':5,'set':'castle','lighting':'day','framing':'insert','cast':[],'objects':[{'kind':'gold_shotgun','action':'fire'}]}]},
@@ -53,6 +53,22 @@ class ShotDirectorTest(unittest.TestCase):
         _,r=D.validate_plan(good(),STORY)
         self.assertEqual(r['set_changes_per_min'],round(2/4.95*60,2))
         self.assertEqual(D.PACE['set_changes_per_min'],(12.0,22.0))
+
+
+class RelevanceTest(unittest.TestCase):
+    def test_unspoken_props_are_rejected(self):
+        p=good();p['sentences'][1]['shots'][0]['objects']=[{'kind':'dynamite','action':'hold'}]
+        e,_=D.validate_plan(p,STORY);self.assertTrue(any('dynamite is not spoken' in x for x in e))
+
+    def test_sets_outside_story_worlds_are_rejected(self):
+        p=good();p['sentences'][1]['shots'][0]['set']='ship_deck'
+        e,_=D.validate_plan(p,STORY);self.assertTrue(any('set ship_deck is not a story world' in x for x in e))
+        p['worlds']=['a','b','c'];e,_=D.validate_plan(good()|{'worlds':['mine_tunnel','castle','room']},STORY)
+        self.assertIn('at most 2 extra worlds',e)
+
+    def test_zone_changes_count_as_backdrop_changes(self):
+        p=good();shots=D.compile_plan(p,STORY);self.assertEqual([s['_zone'] for s in shots],['entrance','center','entrance'])
+        with self.assertRaises(ValueError):D.compile_one({'set':'mine_tunnel','zone':'moon','framing':'wide'},p,1)
 
 
 class TimingTest(unittest.TestCase):
