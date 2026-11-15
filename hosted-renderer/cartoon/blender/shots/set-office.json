@@ -2,7 +2,7 @@
   "set": "office",
   "duration": 3,
   "lighting": "day",
-  "samples": 24,
+  "samples": 64,
   "engine": "cycles",
   "size": [
     1080,
@@ -13,18 +13,18 @@
   ],
   "camera": {
     "from": [
-      2.4,
-      -1,
-      1.75
+      2,
+      -0.1,
+      1.55
     ],
     "look_at": [
       0,
-      2.3,
-      1.2
+      2.5,
+      1.1
     ],
-    "lens": 32,
-    "fstop": 2.8
+    "lens": 34,
+    "fstop": 5.6
   },
   "grade": "Punchy",
-  "haze": 0.003
+  "haze": 0.001
 }
