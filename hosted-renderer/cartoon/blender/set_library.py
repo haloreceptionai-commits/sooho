@@ -41,6 +41,10 @@ def surface(name, metres=2):
             tint=nt.nodes.new('ShaderNodeHueSaturation');tint.inputs['Saturation'].default_value=.25
             tint.inputs['Value'].default_value=1.15
             nt.links.new(output,tint.inputs['Color']);output=tint.outputs[0]
+            # Masonry blocks write restrained per-block tint to object colour.
+            info=nt.nodes.new('ShaderNodeObjectInfo');vary=nt.nodes.new('ShaderNodeMixRGB')
+            vary.blend_type='MULTIPLY';vary.inputs[0].default_value=.35
+            nt.links.new(output,vary.inputs[1]);nt.links.new(info.outputs['Color'],vary.inputs[2]);output=vary.outputs[0]
         if role == 'normal':
             # BOX projection has no matching tangent basis. Derive bump from
             # the scanned colour instead of treating tangent RGB as world XYZ.
