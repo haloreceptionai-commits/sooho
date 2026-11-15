@@ -46,5 +46,10 @@ class SetLibraryTests(unittest.TestCase):
         s = json.loads((HERE / 'shots/set-castle.json').read_text())
         with self.assertRaises(ValueError): validate_shot({**s, 'set': '../../secret'})
 
+    def test_saloon_is_not_an_office_duplicate(self):
+        saloon_ids = {m['id'] for m in KITS['saloon']['models']}
+        self.assertNotIn('furniture-kit/desk', saloon_ids)
+        self.assertIn('pirate-kit/bottle', saloon_ids)
+
 
 if __name__ == '__main__': unittest.main()

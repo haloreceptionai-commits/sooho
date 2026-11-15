@@ -37,6 +37,10 @@ def surface(name, metres=2):
         tex.projection = 'BOX'; tex.projection_blend = 0.2
         nt.links.new(mapping.outputs[0], tex.inputs['Vector'])
         output = tex.outputs['Color']
+        if role == 'color' and name == 'stone':
+            tint=nt.nodes.new('ShaderNodeHueSaturation');tint.inputs['Saturation'].default_value=.25
+            tint.inputs['Value'].default_value=1.15
+            nt.links.new(output,tint.inputs['Color']);output=tint.outputs[0]
         if role == 'normal':
             normal = nt.nodes.new('ShaderNodeNormalMap'); normal.space = 'WORLD'
             normal.inputs['Strength'].default_value = .35
