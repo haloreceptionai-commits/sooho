@@ -1,0 +1,115 @@
+{
+ "story": "rail",
+ "timing": "syllable-estimated",
+ "model": "gpt-5.1-codex",
+ "accepted": false,
+ "errors": [
+  "at most 2 extra worlds",
+  "s9: spoken word:set not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s10: spoken word:hold not shown (independent reader marked it concrete: map it to a drawable concept and show it)"
+ ],
+ "report": {
+  "sentences": 19,
+  "shots": 26,
+  "required": 89,
+  "covered": 87,
+  "coverage": 0.9775,
+  "undrawable": [],
+  "missing": [
+   {
+    "sentence": 9,
+    "concept": "word:set"
+   },
+   {
+    "sentence": 10,
+    "concept": "word:hold"
+   }
+  ],
+  "set_changes_per_min": 21.26,
+  "mean_shot_len": 2.61,
+  "max_shot_len": 4.41,
+  "min_shot_len": 1.15,
+  "sets_used": [
+   "office",
+   "rail_yard",
+   "ship_deck"
+  ]
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "errors": [
+    "at most 2 extra worlds",
+    "mean shot 3.23s outside 1.4-3.0"
+   ],
+   "coverage": 1.0,
+   "set_changes_per_min": 17.72
+  },
+  {
+   "round": 2,
+   "errors": [
+    "at most 2 extra worlds",
+    "set changes 23.0/min outside benchmark band 12.0-22.0: 26 backdrop (set or zone) changes in 67.7s; need 14-24 changes across 27 shots"
+   ],
+   "coverage": 1.0,
+   "set_changes_per_min": 23.03
+  },
+  {
+   "round": 3,
+   "errors": [
+    "at most 2 extra worlds"
+   ],
+   "coverage": 1.0,
+   "set_changes_per_min": 21.26
+  },
+  {
+   "round": 4,
+   "errors": [
+    "at most 2 extra worlds",
+    "set changes 23.0/min outside benchmark band 12.0-22.0: 26 backdrop (set or zone) changes in 67.7s; need 14-24 changes across 27 shots"
+   ],
+   "coverage": 1.0,
+   "set_changes_per_min": 23.03
+  },
+  {
+   "round": 5,
+   "errors": [
+    "plan has 4 sentences, story has 19",
+    "at most 2 extra worlds",
+    "s0: invented mention 'give'",
+    "s0: invented mention 'steel'",
+    "s0: invented mention 'space'",
+    "s0: invented mention 'grip'",
+    "s0: invented mention 'move'",
+    "s0: invented mention 'safely'",
+    "s0: shot timing out of 0.5-5.0s (sentence 2.79s); valid start_word values for a 2-shot split: [3, 4, 5, 6, 7]",
+    "s1: invented mention 'deck'",
+    "s1: invented mention 'boards'",
+    "s1: invented mention 'gaps'",
+    "s1: invented mention 'pushes'",
+    "s1: invented mention 'plan'",
+    "s2: invented mention 'buckles'",
+    "s2: invented mention 'breaks'",
+    "s2: invented mention 'clickety-clack'",
+    "s3: invented mention 'Modern'",
+    "s3: invented mention 'mainlines'",
+    "s0: spoken word:ends not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+    "s0: spoken word:touch not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+    "set changes 22.3/min outside benchmark band 12.0-22.0: 5 backdrop (set or zone) changes in 13.5s; need 3-4 changes across 6 shots",
+    "shot 1 length 0.48s outside 0.5-5.0"
+   ],
+   "coverage": 0.9048,
+   "set_changes_per_min": 22.28
+  },
+  {
+   "round": 6,
+   "errors": [
+    "at most 2 extra worlds",
+    "s9: spoken word:set not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+    "s10: spoken word:hold not shown (independent reader marked it concrete: map it to a drawable concept and show it)"
+   ],
+   "coverage": 0.9775,
+   "set_changes_per_min": 21.26
+  }
+ ]
+}

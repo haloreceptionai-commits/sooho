@@ -88,13 +88,15 @@ def main():
     story = {'words': D.estimated_timing(raw['words'], raw['shots'][-1]['end']), 'timing': 'syllable-estimated'}
     out = Path(__file__).parent / 'director-plans'; out.mkdir(exist_ok=True)
     concrete = concrete_words(story, out / f'{name}.concrete.json')
-    base = prompt(story); text = base; history = []
+    base = prompt(story); text = base; history = []; best = None
     for r in range(rounds):
         plan = call(text); errs, rep = D.validate_plan(plan, story, concrete)
         history.append({'round': r + 1, 'errors': errs, 'coverage': rep.get('coverage'), 'set_changes_per_min': rep.get('set_changes_per_min')})
         print(f'{name} round {r+1}: {len(errs)} errors, coverage {rep.get("coverage")}, sets/min {rep.get("set_changes_per_min")}', flush=True)
         json.dump({'plan': plan, 'errors': errs, 'report': rep}, open(out / f'{name}.round{r+1}.json', 'w'), indent=1)
         if not errs: break
+        if best is None or len(errs) < len(best[1]): best = (plan, errs)
+        plan, errs = best  # repair the strongest draft, never a regressed one
         text = base + '\n\nYour previous plan:\n' + json.dumps(plan) + '\n\nThe validator rejected it. Fix ALL of these and return the full corrected JSON:\n' + '\n'.join(errs)
     json.dump(plan, open(out / f'{name}.plan.json', 'w'), indent=1)
     json.dump({'story': name, 'timing': story['timing'], 'model': MODEL, 'accepted': not errs, 'errors': errs, 'report': rep, 'rounds': history}, open(out / f'{name}.report.json', 'w'), indent=1)

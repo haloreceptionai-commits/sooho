@@ -1,0 +1,969 @@
+{
+ "plan": {
+  "worlds": [
+   "office",
+   "rail_yard",
+   "ship_deck"
+  ],
+  "cast": [
+   {
+    "id": "tech",
+    "outfit": "worker",
+    "hat": "helmet",
+    "shirt": [
+     0.7,
+     0.5,
+     0.3
+    ]
+   },
+   {
+    "id": "mate",
+    "outfit": "worker",
+    "hat": "helmet",
+    "shirt": [
+     0.4,
+     0.4,
+     0.5
+    ]
+   },
+   {
+    "id": "manager",
+    "outfit": "merchant",
+    "hat": "top",
+    "shirt": [
+     0.9,
+     0.9,
+     0.8
+    ]
+   }
+  ],
+  "sentences": [
+   {
+    "index": 0,
+    "mentions": [
+     {
+      "word": "Rail",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "ends",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "touch",
+      "kind": "action",
+      "concept": "obj:rail_joint:expand"
+     },
+     {
+      "word": "gap",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "trains",
+      "kind": "thing",
+      "concept": "set:rail_yard"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "track_side",
+      "lighting": "day",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "tech",
+        "action": "crouch",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 1,
+    "mentions": [
+     {
+      "word": "Steel",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "rails",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "longer",
+      "kind": "action",
+      "concept": "obj:rail_joint:expand"
+     },
+     {
+      "word": "shorter",
+      "kind": "action",
+      "concept": "obj:rail_joint:expand"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "house",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "mate",
+        "action": "stand",
+        "expression": "neutral"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     },
+     {
+      "start_word": 6,
+      "set": "rail_yard",
+      "zone": "open_yard",
+      "lighting": "night",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "tech",
+        "action": "stand",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 2,
+    "mentions": [],
+    "shots": [
+     {
+      "set": "office",
+      "zone": "front",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "manager",
+        "action": "point",
+        "expression": "talk"
+       },
+       {
+        "id": "mate",
+        "action": "stand",
+        "expression": "neutral"
+       }
+      ],
+      "objects": []
+     },
+     {
+      "start_word": 6,
+      "set": "office",
+      "zone": "front",
+      "lighting": "day",
+      "framing": "close",
+      "cast": [
+       {
+        "id": "manager",
+        "action": "point",
+        "expression": "talk"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 3,
+    "mentions": [
+     {
+      "word": "tracks",
+      "kind": "thing",
+      "concept": "set:rail_yard"
+     },
+     {
+      "word": "gaps",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "gapless",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "track_side",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     },
+     {
+      "start_word": 6,
+      "set": "rail_yard",
+      "zone": "open_yard",
+      "lighting": "sunset",
+      "framing": "insert",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 4,
+    "mentions": [
+     {
+      "word": "lines",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "rails",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "ends",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "bolted",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "bars",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "space",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "locomotive",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "tech",
+        "action": "stand",
+        "expression": "neutral"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     },
+     {
+      "start_word": 9,
+      "set": "rail_yard",
+      "zone": "house",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 5,
+    "mentions": [
+     {
+      "word": "space",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "grows",
+      "kind": "action",
+      "concept": "obj:rail_joint:expand"
+     },
+     {
+      "word": "closes",
+      "kind": "action",
+      "concept": "obj:rail_joint:expand"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "track_side",
+      "lighting": "night",
+      "framing": "insert",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     },
+     {
+      "start_word": 5,
+      "set": "rail_yard",
+      "zone": "open_yard",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 6,
+    "mentions": [
+     {
+      "word": "rails",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "shove",
+      "kind": "action",
+      "concept": "obj:rail_joint:buckle"
+     },
+     {
+      "word": "buckle",
+      "kind": "action",
+      "concept": "obj:rail_joint:buckle"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "house",
+      "lighting": "day",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "mate",
+        "action": "run",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "buckle"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 7,
+    "mentions": [
+     {
+      "word": "joints",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "track_side",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "tech",
+        "action": "stand",
+        "expression": "talk"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 8,
+    "mentions": [
+     {
+      "word": "mainlines",
+      "kind": "thing",
+      "concept": "set:rail_yard"
+     },
+     {
+      "word": "weld",
+      "kind": "action",
+      "concept": "obj:hand_drill:drill"
+     },
+     {
+      "word": "rails",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "open_yard",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "mate",
+        "action": "swing",
+        "expression": "determined"
+       },
+       {
+        "id": "manager",
+        "action": "stand",
+        "expression": "neutral"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       },
+       {
+        "kind": "hand_drill",
+        "action": "drill"
+       }
+      ]
+     },
+     {
+      "start_word": 6,
+      "set": "rail_yard",
+      "zone": "track_side",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 9,
+    "mentions": [
+     {
+      "word": "rail",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "office",
+      "zone": "back",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "manager",
+        "action": "point",
+        "expression": "talk"
+       },
+       {
+        "id": "tech",
+        "action": "stand",
+        "expression": "neutral"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 10,
+    "mentions": [
+     {
+      "word": "Clips",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "anchors",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "stone",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "track_side",
+      "lighting": "day",
+      "framing": "insert",
+      "cast": [],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 11,
+    "mentions": [
+     {
+      "word": "joints",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "gaps",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "signals",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "open_yard",
+      "lighting": "sunset",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "tech",
+        "action": "point",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 12,
+    "mentions": [
+     {
+      "word": "joints",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "pull",
+      "kind": "action",
+      "concept": "obj:rail_joint:break"
+     },
+     {
+      "word": "break",
+      "kind": "action",
+      "concept": "obj:rail_joint:break"
+     },
+     {
+      "word": "bolts",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "house",
+      "lighting": "night",
+      "framing": "insert",
+      "cast": [
+       {
+        "id": "mate",
+        "action": "panic",
+        "expression": "shock"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "break"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 13,
+    "mentions": [
+     {
+      "word": "welded",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "rails",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "kink",
+      "kind": "action",
+      "concept": "obj:rail_joint:buckle"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "open_yard",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "tech",
+        "action": "run",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "buckle"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 14,
+    "mentions": [
+     {
+      "word": "crews",
+      "kind": "thing",
+      "concept": "cast:person"
+     }
+    ],
+    "shots": [
+     {
+      "set": "office",
+      "zone": "front",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "manager",
+        "action": "point",
+        "expression": "talk"
+       },
+       {
+        "id": "tech",
+        "action": "stand",
+        "expression": "neutral"
+       },
+       {
+        "id": "mate",
+        "action": "stand",
+        "expression": "neutral"
+       }
+      ],
+      "objects": []
+     }
+    ]
+   },
+   {
+    "index": 15,
+    "mentions": [
+     {
+      "word": "steel",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "space",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "grip",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "move",
+      "kind": "action",
+      "concept": "obj:rail_joint:expand"
+     }
+    ],
+    "shots": [
+     {
+      "set": "office",
+      "zone": "back",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "manager",
+        "action": "point",
+        "expression": "talk"
+       },
+       {
+        "id": "tech",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 16,
+    "mentions": [
+     {
+      "word": "deck",
+      "kind": "thing",
+      "concept": "set:ship_deck"
+     },
+     {
+      "word": "boards",
+      "kind": "thing",
+      "concept": "set:ship_deck"
+     },
+     {
+      "word": "gaps",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "steel",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     },
+     {
+      "word": "pushes",
+      "kind": "action",
+      "concept": "obj:rail_joint:buckle"
+     }
+    ],
+    "shots": [
+     {
+      "set": "ship_deck",
+      "zone": "bow",
+      "lighting": "day",
+      "framing": "medium",
+      "cast": [
+       {
+        "id": "manager",
+        "action": "point",
+        "expression": "talk"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     },
+     {
+      "start_word": 5,
+      "set": "rail_yard",
+      "zone": "track_side",
+      "lighting": "sunset",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "mate",
+        "action": "stand",
+        "expression": "worried"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "buckle"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 17,
+    "mentions": [
+     {
+      "word": "buckles",
+      "kind": "action",
+      "concept": "obj:rail_joint:buckle"
+     },
+     {
+      "word": "breaks",
+      "kind": "action",
+      "concept": "obj:rail_joint:break"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "locomotive",
+      "lighting": "sunset",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "tech",
+        "action": "stand",
+        "expression": "determined"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "buckle"
+       },
+       {
+        "kind": "rail_joint",
+        "action": "break"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "index": 18,
+    "mentions": [
+     {
+      "word": "mainlines",
+      "kind": "thing",
+      "concept": "set:rail_yard"
+     },
+     {
+      "word": "gaps",
+      "kind": "thing",
+      "concept": "obj:rail_joint"
+     }
+    ],
+    "shots": [
+     {
+      "set": "rail_yard",
+      "zone": "open_yard",
+      "lighting": "day",
+      "framing": "wide",
+      "cast": [
+       {
+        "id": "manager",
+        "action": "stand",
+        "expression": "happy"
+       }
+      ],
+      "objects": [
+       {
+        "kind": "rail_joint",
+        "action": "expand"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "errors": [
+  "at most 2 extra worlds",
+  "s9: spoken word:set not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+  "s10: spoken word:hold not shown (independent reader marked it concrete: map it to a drawable concept and show it)"
+ ],
+ "report": {
+  "sentences": 19,
+  "shots": 26,
+  "required": 89,
+  "covered": 87,
+  "coverage": 0.9775,
+  "undrawable": [],
+  "missing": [
+   {
+    "sentence": 9,
+    "concept": "word:set"
+   },
+   {
+    "sentence": 10,
+    "concept": "word:hold"
+   }
+  ],
+  "set_changes_per_min": 21.26,
+  "mean_shot_len": 2.61,
+  "max_shot_len": 4.41,
+  "min_shot_len": 1.15,
+  "sets_used": [
+   "office",
+   "rail_yard",
+   "ship_deck"
+  ]
+ }
+}
