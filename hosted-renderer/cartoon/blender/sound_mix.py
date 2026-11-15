@@ -47,7 +47,7 @@ def duck(voice, rate=RATE):
     w = rate // 50; env = np.ones(len(voice)); level = 1.0
     ref = np.sqrt(np.mean(voice ** 2)) if voice.any() else 1
     for a in range(0, len(voice), w):
-        b = min(len(voice), a + w); target = .45 if np.sqrt(np.mean(voice[a:b] ** 2)) > ref * .3 else 1.0
+        b = min(len(voice), a + w); target = .6 if np.sqrt(np.mean(voice[a:b] ** 2)) > ref * .3 else 1.0
         nxt = level + (.6 if target < level else .1) * (target - level); env[a:b] = np.linspace(level, nxt, b - a); level = nxt
     return env
 

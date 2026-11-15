@@ -60,15 +60,15 @@ def cues(shot):
             add(st, 'explosion', pos, 1.0); add(st, 'rumble', pos, .8)
             for t in _debris_landings(e, fps): add(st + t, 'debris', pos, .5)
         if e['kind'] == 'sparks': add(st, 'sparks', pos, .5)
-        if e['kind'] == 'fire': add(st, 'fire', pos, .6, d - st)
+        if e['kind'] == 'fire': add(st, 'fire', pos, 1.2, d - st)
     if shot.get('crowd'): add(0, 'crowd', [*shot['crowd']['center'], 1], .9 if shot['crowd'].get('action') == 'cheer' else .4, d)
-    if 'whip_from' in shot['camera']: add(0, 'whoosh', None, .6)
+    if 'whip_from' in shot['camera']: add(0, 'whoosh', None, 1.0)
     for o in shot.get('objects', []):
         for t, s in TIMES.get((o['kind'], o.get('action', 'hold')), []): add(t, s, o['pos'])
     for c in shot.get('cast', []):
         a = c.get('action', 'stand'); p = [*c['pos'], 0]
-        for t in footfalls(a, d): add(t, 'footstep', p, .35)
-        if a == 'swing': [add(t, 'pickaxe', p, .8) for t in swing_hits(d)]
+        for t in footfalls(a, d): add(t, 'footstep', p, .8)
+        if a == 'swing': [add(t, 'pickaxe', p, 1.2) for t in swing_hits(d)]
         if a == 'fall': add(1.0, 'impact', p, .9)
     # one blast sound per visible blast: a scripted explosion effect within 0.3 s absorbs the object's own burst
     keep = []
@@ -85,4 +85,5 @@ def spatial(cue, cam_from, look_at):
     dist = max(1.0, math.sqrt(dx * dx + dy * dy + dz * dz))
     fx, fy = look_at[0] - cam_from[0], look_at[1] - cam_from[1]; n = math.hypot(fx, fy) or 1
     side = (dx * fy - dy * fx) / n / dist  # >0 right of view direction
-    return min(1.0, 3.0 / dist), max(-1.0, min(1.0, side * 1.5))
+    return max(.45, min(1.0, 3.0 / dist)), max  # floor: a visible action must stay audible (step-8 listening review)
+    return None, max(-1.0, min(1.0, side * 1.5))

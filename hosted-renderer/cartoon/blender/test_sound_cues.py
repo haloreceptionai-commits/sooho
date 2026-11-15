@@ -42,7 +42,7 @@ class MixTest(unittest.TestCase):
 
     def test_effects_duck_under_speech(self):
         v = np.concatenate([np.zeros(24000), np.sin(np.arange(24000) / 9) * .3]); env = M.duck(v)
-        self.assertGreater(env[20000], .95); self.assertLess(env[-1000], .5)
+        self.assertGreater(env[20000], .95); self.assertLess(env[-1000], .65)
 
 
 if __name__ == '__main__': unittest.main()
