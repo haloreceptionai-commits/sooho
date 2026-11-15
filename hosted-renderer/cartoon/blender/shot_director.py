@@ -29,6 +29,24 @@ def has_phrase(tokens, phrase):
     return any(tokens[i:i + n] == p for i in range(len(tokens) - n + 1))
 
 
+def syllables(word):
+    w = re.sub(r'[^a-z]', '', word.lower())
+    if not w: return 2 if any(ch.isdigit() for ch in word) else 1
+    n = len(re.findall(r'[aeiouy]+', w)) - (1 if w.endswith('e') and not w.endswith('le') and len(w) > 2 else 0)
+    return max(1, n)
+
+
+def estimated_timing(words, total, pause=0.25):
+    """Syllable-proportional word starts over the measured narration length, with a short pause after
+    each sentence.  Used only for benchmark transcripts whose OCR anchors are unreliable; production
+    plans use CTC-aligned word times."""
+    ends = sum(1 for w in words if w['w'][-1] in '.?!')
+    speak = total - pause * ends; per = speak / sum(syllables(w['w']) for w in words); t = 0; out = []
+    for w in words:
+        out.append({'w': w['w'], 't': round(t, 3)}); t += syllables(w['w']) * per + (pause if w['w'][-1] in '.?!' else 0)
+    return out
+
+
 def sentences(words):
     """Group timed benchmark words into sentences; end = next sentence's first word time."""
     out, cur = [], []

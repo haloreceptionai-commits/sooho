@@ -79,7 +79,10 @@ def concrete_words(story, cache):
 
 def main():
     name = sys.argv[1]; rounds = int(sys.argv[2]) if len(sys.argv) > 2 else 4
-    story = json.load(open(Path(__file__).parent.parent / 'benchmark' / 'results' / f'{name}.shots.json'))
+    raw = json.load(open(Path(__file__).parent.parent / 'benchmark' / 'results' / f'{name}.shots.json'))
+    # Step-1 OCR anchors are coarse (e.g. a 6-word sentence spanning 16 s), so benchmark tests use
+    # syllable-estimated times over the measured video length; production passes aligned times.
+    story = {'words': D.estimated_timing(raw['words'], raw['shots'][-1]['end']), 'timing': 'syllable-estimated'}
     out = Path(__file__).parent / 'director-plans'; out.mkdir(exist_ok=True)
     concrete = concrete_words(story, out / f'{name}.concrete.json')
     base = prompt(story); text = base; history = []
@@ -91,7 +94,7 @@ def main():
         if not errs: break
         text = base + '\n\nYour previous plan:\n' + json.dumps(plan) + '\n\nThe validator rejected it. Fix ALL of these and return the full corrected JSON:\n' + '\n'.join(errs)
     json.dump(plan, open(out / f'{name}.plan.json', 'w'), indent=1)
-    json.dump({'story': name, 'model': MODEL, 'accepted': not errs, 'errors': errs, 'report': rep, 'rounds': history}, open(out / f'{name}.report.json', 'w'), indent=1)
+    json.dump({'story': name, 'timing': story['timing'], 'model': MODEL, 'accepted': not errs, 'errors': errs, 'report': rep, 'rounds': history}, open(out / f'{name}.report.json', 'w'), indent=1)
     sys.exit(0 if not errs else 2)
 
 

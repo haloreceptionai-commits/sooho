@@ -53,3 +53,11 @@ class ShotDirectorTest(unittest.TestCase):
         _,r=D.validate_plan(good(),STORY)
         self.assertEqual(r['set_changes_per_min'],round(2/4.95*60,2))
         self.assertEqual(D.PACE['set_changes_per_min'],(12.0,22.0))
+
+
+class TimingTest(unittest.TestCase):
+    def test_estimated_timing_spans_measured_length_and_is_monotonic(self):
+        w=D.estimated_timing(STORY['words'],10)
+        self.assertEqual(w[0]['t'],0);self.assertTrue(all(a['t']<b['t'] for a,b in zip(w,w[1:])))
+        self.assertLess(w[-1]['t'],10);self.assertGreater(w[-1]['t'],9)
+        self.assertEqual(D.syllables('shotgun'),2);self.assertEqual(D.syllables('82'),2)
