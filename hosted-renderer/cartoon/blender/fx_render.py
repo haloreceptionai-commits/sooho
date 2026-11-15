@@ -34,7 +34,7 @@ def _volume(name, color, density, emit=None, strength=0.0):
 
 def mats():
     if not MATS:
-        MATS.update(fire=_volume('fx fire', (.2, .08, .02), 10, (1, .38, .05), 7), core=_volume('fx core', (.3, .2, .05), 12, (1, .78, .25), 14), spark=_glow('fx spark', (1, .6, .15), 20),
+        MATS.update(fire=_volume('fx fire', (.2, .08, .02), 10, (1, .3, .03), 2.2), core=_volume('fx core', (.3, .2, .05), 12, (1, .62, .12), 3.5), spark=_glow('fx spark', (1, .6, .15), 20),
                     # step-7 review: opaque spheres read as boulders, so smoke and dust are real volumes
                     smoke=_volume('fx smoke', (.12, .11, .1), 8), dust=_volume('fx dust', (.55, .45, .32), 5),
                     debris=material('fx debris', (.2, .14, .09), .9), rain=material('fx rain', (.7, .78, .9), .1))
@@ -70,7 +70,7 @@ def build_effects(shot, fps):
             bpy.context.collection.objects.link(lo); lo.location = base + Vector((0, 0, .8))
             for f in range(n):
                 t = f / fps - e.get('start', 0)
-                ld.energy = 0 if t < 0 else (1500 * sc * math.exp(-t * 4) if kind == 'explosion' else 300 * sc * (.8 + .2 * math.sin(t * 29)))
+                ld.energy = 0 if t < 0 else (700 * sc * math.exp(-t * 4) if kind == 'explosion' else 300 * sc * (.8 + .2 * math.sin(t * 29)))
                 ld.keyframe_insert('energy', frame=f + 1)
     return count
 
@@ -88,7 +88,7 @@ def build_crowd(shot, fps):
         b.scale = (.17, .13, .26); bpy.ops.object.transform_apply(scale=True); bodies.append(b.data); bpy.data.objects.remove(b)
     bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=4); e = bpy.context.active_object; e.data.materials.append(ink)
     e.scale = (.02, .01, .028); bpy.ops.object.transform_apply(scale=True); eye_mesh = e.data; bpy.data.objects.remove(e)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=.022, depth=.42); a = bpy.context.active_object; a.data.materials.append(ink)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=.05, depth=.46); a = bpy.context.active_object; a.data.materials.append(ink)
     a.location = (0, 0, .21); bpy.ops.object.transform_apply(location=True); arm_mesh = a.data; bpy.data.objects.remove(a)
     hats = []
     for hc in [(.32, .19, .06), (.1, .1, .12), (.55, .1, .08)]:
