@@ -3,10 +3,11 @@
 # the video and a timing report to private Blob storage under $OUT_PREFIX. Each engine first
 # renders a 3-frame probe (reported immediately) so a slow engine is visible within minutes.
 set -u
-if [ "${SHOT:-}" = suite ]; then
+if [ "${SHOT:-}" = suite ] || [ "${SHOT:-}" = faces ] || [ "${SHOT:-}" = objects ]; then
   SAS=$(printf '%s' "$AZURE_BLOB_SAS" | sed 's/^?//')
   FAILED=0
-  for FILE in /opt/shot/shots/set-*.json /opt/shot/shots/look-*.json; do
+  if [ "$SHOT" = faces ]; then FILES="/opt/shot/shots/face-*.json"; elif [ "$SHOT" = objects ]; then FILES="/opt/shot/shots/object-*.json"; else FILES="/opt/shot/shots/set-*.json /opt/shot/shots/look-*.json"; fi
+  for FILE in $FILES; do
     [ -f "$FILE" ] || continue
     NAME=$(basename "$FILE" .json)
     mkdir -p "/tmp/$NAME"

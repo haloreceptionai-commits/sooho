@@ -2,10 +2,11 @@
 import json
 from pathlib import Path
 from character_motion import ACTIONS, EXPRESSIONS, OUTFITS, HATS
+from object_specs import validate_object
 
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day'}
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -28,6 +29,9 @@ def validate_shot(s):
     if 'to' in c: _vec(c['to'], 3, 'camera.to')
     if not 12 <= c.get('lens', 35) <= 200: raise ValueError('lens 12-200mm')
     if not 0.8 <= c.get('fstop', 2.8) <= 32: raise ValueError('fstop 0.8-32')
+    objects=s.get('objects',[])
+    if not isinstance(objects,list) or len(objects)>12:raise ValueError('up to 12 story objects')
+    for obj in objects:validate_object(obj)
     cast = s.get('cast', [])
     if not isinstance(cast, list) or len(cast) > 12: raise ValueError('cast must be a list of up to 12')
     for ch in cast:
