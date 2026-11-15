@@ -217,8 +217,9 @@ def set_open_day(length=24.0):
     try: sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(28)
     except Exception: pass
     w.links.new(sky.outputs[0], nodes['Background'].inputs['Color'])
+    nodes['Background'].inputs['Strength'].default_value=.18
     bpy.ops.object.light_add(type='SUN', rotation=(math.radians(55), 0, math.radians(35)))
-    s = bpy.context.active_object.data; s.energy = 4; s.angle = math.radians(3)
+    s = bpy.context.active_object.data; s.energy = 2; s.angle = math.radians(3)
 
 
 SETS = {'mine_tunnel': set_mine_tunnel, 'open_day': set_open_day}
