@@ -5,7 +5,7 @@ from mathutils import Vector
 from set_detail import material,cube,rope
 from characters import sphere
 from object_specs import validate_object,holes,mechanism
-from object_motion import fuse_position,pour_position,burst_position,exploded,spin_angle,progress
+from object_motion import fuse_position,pour_position,burst_position,exploded,spin_angle,progress,rail_gap,rail_end_shift,kink_offset,bolt_piece
 
 
 def cylinder(name,pos,radius,depth,mat,rotation=(0,0,0)):
@@ -56,6 +56,9 @@ def add_blast(moving,ember,core,smoke):
         o=spiky_burst('explosion fireball',r,mat,i);o['blast_radius']=r;moving.append((o,'burst_flash',o.location.copy()))
     for i in range(6):
         a=i*math.tau/6;o=sphere('explosion smoke',(0,0,.42),(.12,)*3,smoke);o.visible_shadow=False;moving.append((o,'blast_smoke',Vector((.22*math.cos(a),.22*math.sin(a),.42+.05*i))))
+
+
+RAIL=.9
 
 
 def build_object(spec,duration,fps):
@@ -272,6 +275,54 @@ def build_object(spec,duration,fps):
             for i in range(8):
                 bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.17,location=(0,0,.38));o=bpy.context.active_object;o.name='ore rock fragment';o.data.materials.append(rock if i%2 else gold);moving.append((o,'fragment',i))
             add_blast(moving,ember,fire_core,blast_smoke)
+    elif kind=='rail_joint':
+        # Two rails on timber sleepers and grey stone ballast; jointed rails have fishplates, bolts,
+        # spring clips and a signal post; 'buckle' uses continuous welded rails that bow sideways.
+        stone=material('ballast stone',(.34,.33,.31),.95);clip=material('rail clip yellow',(.85,.62,.06),.5,.3)
+        rail_mat=material('rail steel',(.3,.29,.28),.35,.9);plate=material('fishplate steel',(.16,.16,.17),.4,.8)
+        cube('ballast bed',(0,0,.04),(2.2,1.4,.08),stone,.03)
+        for i in range(70):
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.045,location=(-1.05+(i*.37)%2.1,-.65+(i*.53)%1.3,.085))
+            o=bpy.context.active_object;o.name='packed ballast stone';o.scale=(1+.3*(i%3),.9,.6);o.data.materials.append(stone)
+        for x in (-.75,-.3,.3,.75):cube('timber sleeper',(x,0,.12),(.2,1.2,.08),wood,.015)
+        gauge=.36
+        if action=='buckle':
+            n=18
+            for y in (-gauge,gauge):
+                for i in range(n):
+                    u=(i+.5)/n;piece=bpy.data.objects.new('welded rail piece',None);bpy.context.collection.objects.link(piece)
+                    for name,z,h,w in (('rail foot',.17,.02,.11),('rail web',.215,.07,.03),('rail head',.275,.05,.07)):
+                        o=cube(name,(0,0,z),(2*RAIL/n+.01,w,h),rail_mat,.004);o.parent=piece
+                    piece['u']=u;moving.append((piece,'kink_piece',Vector((-RAIL+2*RAIL*u,y,0))))
+        else:
+            for side in (-1,1):
+                seg=bpy.data.objects.new('rail segment',None);bpy.context.collection.objects.link(seg)
+                for y in (-gauge,gauge):
+                    cx=side*(.02+RAIL/2)
+                    for name,z,h,w in (('rail foot',.17,.02,.11),('rail web',.215,.07,.03),('rail head',.275,.05,.07)):
+                        o=cube(name,(cx,y,z),(RAIL-.04,w,h),rail_mat,.004);o.parent=seg
+                    for x in (-.75,-.3,.3,.75):
+                        if x*side>0:
+                            for dy in (-.075,.075):
+                                bpy.ops.mesh.primitive_torus_add(major_radius=.03,minor_radius=.011,location=(x,y+dy,.19),rotation=(0,math.pi/2,0))
+                                c=bpy.context.active_object;c.name='rail spring clip';c.data.materials.append(clip);c.parent=seg
+                moving.append((seg,'rail_left' if side<0 else 'rail_right',Vector((0,0,0))))
+                if side<0:left=seg
+            for y in (-gauge,gauge):
+                for dy in (-.03,.03):
+                    o=cube('joint fishplate bar',(0,y+dy,.215),(.42,.014,.06),plate,.004);o.parent=left
+                for j,x in enumerate((-.15,-.06,.06,.15)):
+                    b=cylinder('joint bolt',(x,y,.215),.014,.12,steel,(math.pi/2,0,0))
+                    if action=='break' and x>0:b.name='snapped joint bolt';moving.append((b,'bolt_piece',b.location.copy()))
+                    else:b.parent=left
+                    for e in (-.065,.065):
+                        bpy.ops.mesh.primitive_cylinder_add(vertices=6,radius=.025,depth=.02,location=(x,y+e,.215),rotation=(math.pi/2,0,0))
+                        n_=bpy.context.active_object;n_.name='hex bolt nut';n_.data.materials.append(steel);n_.parent=b
+            # signal post beside the insulated joint
+            cylinder('signal post',(.2,-.85,.6),.03,1.2,steel)
+            cube('signal head',(.2,-.85,1.25),(.14,.1,.26),plate,.01)
+            sphere('signal lamp',(.2,-.91,1.3),(.04,.02,.04),glow('signal lamp green',(.1,1,.2),3))
+            sphere('signal lamp',(.2,-.91,1.2),(.04,.02,.04),glow('signal lamp red',(1,.05,.02),1.2))
     for obj in set(bpy.data.objects)-created:
         if obj.parent is None:obj.parent=root
     base=tuple(spec['pos']);s=spec.get('scale',1);root.scale=(s,)*3
@@ -337,6 +388,13 @@ def build_object(spec,duration,fps):
             if role=='blast_smoke':
                 u=progress(t,.9,2);obj.hide_render=t<.9;obj.keyframe_insert('hide_render',frame=frame+1)
                 obj.location=Vector((rest.x*(1+1.5*u),rest.y*(1+1.5*u),rest.z+.5*u));r=.12+.22*u;obj.scale=(r,)*3;obj.keyframe_insert('scale',frame=frame+1)
+            if role=='rail_left':obj.location=(rail_end_shift(action,t,-1),0,0)
+            if role=='rail_right':obj.location=(rail_end_shift(action,t,1),0,0)
+            if role=='kink_piece':
+                u=obj['u'];du=.01;dy=(kink_offset(t,min(1,u+du))-kink_offset(t,max(0,u-du)))/(2*du)/(2*RAIL)
+                obj.location=(rest.x,rest.y+kink_offset(t,u),rest.z);obj.rotation_euler=(0,0,math.atan(dy))
+            if role=='bolt_piece':
+                obj.location=Vector(bolt_piece(tuple(rest),t,index));obj.rotation_euler=(math.pi/2+3*max(0,t-.75),0,0)
             if role=='flake' and action=='pour':
                 world=Vector(pour_position((rest.x,rest.y,rest.z+.48),t,index))
                 if t>.45:

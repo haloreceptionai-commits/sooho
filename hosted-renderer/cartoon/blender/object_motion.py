@@ -29,3 +29,33 @@ def exploded(t):
 
 def spin_angle(t):
     return t*math.tau*.65
+
+# Rail joint (step 6, rail story): gap between bolted rail ends, welded-rail kink and snapped bolts.
+RAIL_HALF=.9
+
+
+def rail_gap(action,t):
+    """Full gap width in metres between the two rail ends."""
+    if action=='expand':return .1-.088*progress(t,.1,1.6)  # cold wide gap closes as steel heats
+    if action=='break':return .03+.19*progress(t,.5,1.4)    # deep cold pulls the joint apart
+    if action=='buckle':return 0.                           # continuous welded rail, no joint
+    return .04
+
+
+def rail_end_shift(action,t,side):
+    """x offset of a rail segment so that its inner end sits exactly half the gap from the centre."""
+    if action=='break':return (rail_gap(action,t)-.03)*(1 if side>0 else 0)  # left rail and bars stay bolted
+    return side*(rail_gap(action,t)-.04)/2*-1 if action!='buckle' else 0.
+
+
+def kink_offset(t,u):
+    """Sideways bow of a welded rail at position u (0..1 along the rail)."""
+    return .26*progress(t,.2,1.3)*math.sin(math.pi*u)**2
+
+
+def bolt_piece(rest,t,index):
+    """Snapped bolt halves fall from the joint after the break and rest on the ballast, never below it."""
+    tau=max(0.,t-.75)
+    if tau==0:return tuple(rest)
+    side=1 if index%2 else -1
+    return (rest[0]+.25*tau,rest[1]+side*.35*tau,max(.1,rest[2]+.9*tau-4.9*tau*tau))
