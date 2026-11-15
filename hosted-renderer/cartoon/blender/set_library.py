@@ -42,11 +42,35 @@ def surface(name, metres=2):
             tint.inputs['Value'].default_value=1.15
             nt.links.new(output,tint.inputs['Color']);output=tint.outputs[0]
         if role == 'normal':
-            normal = nt.nodes.new('ShaderNodeNormalMap'); normal.space = 'WORLD'
-            normal.inputs['Strength'].default_value = .35
-            nt.links.new(output, normal.inputs['Color']); output = normal.outputs[0]
+            # BOX projection has no matching tangent basis. Derive bump from
+            # the scanned colour instead of treating tangent RGB as world XYZ.
+            normal = nt.nodes.new('ShaderNodeBump')
+            normal.inputs['Strength'].default_value = .28;normal.inputs['Distance'].default_value=.045
+            color_tex=next(n for n in nt.nodes if n.type=='TEX_IMAGE' and n.image.colorspace_settings.name=='sRGB')
+            nt.links.new(color_tex.outputs['Color'],normal.inputs['Height']);output=normal.outputs[0]
         nt.links.new(output, bs.inputs[socket])
     return m
+
+
+def finish_palette(m):
+    """Retain original colour identities, add grain instead of plastic flats."""
+    if not m.use_nodes or m.get('set_finish'):return
+    bs=m.node_tree.nodes.get('Principled BSDF')
+    if not bs:return
+    m['set_finish']=True;nt=m.node_tree
+    geo=nt.nodes.new('ShaderNodeNewGeometry');noise=nt.nodes.new('ShaderNodeTexNoise')
+    noise.inputs['Scale'].default_value=18;noise.inputs['Detail'].default_value=3
+    nt.links.new(geo.outputs['Position'],noise.inputs['Vector'])
+    bump=nt.nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.22;bump.inputs['Distance'].default_value=.025
+    nt.links.new(noise.outputs['Fac'],bump.inputs['Height']);nt.links.new(bump.outputs[0],bs.inputs['Normal'])
+    ramp=nt.nodes.new('ShaderNodeValToRGB');ramp.color_ramp.elements[0].color=(.48,.48,.48,1);ramp.color_ramp.elements[1].color=(1,1,1,1)
+    nt.links.new(noise.outputs['Fac'],ramp.inputs[0])
+    multiply=nt.nodes.new('ShaderNodeMixRGB');multiply.blend_type='MULTIPLY';multiply.inputs[0].default_value=1
+    links=list(bs.inputs['Base Color'].links)
+    if links:nt.links.new(links[0].from_socket,multiply.inputs[1])
+    else:multiply.inputs[1].default_value=bs.inputs['Base Color'].default_value
+    nt.links.new(ramp.outputs[0],multiply.inputs[2]);nt.links.new(multiply.outputs[0],bs.inputs['Base Color'])
+    bs.inputs['Roughness'].default_value=.64
 
 
 def model(spec):
@@ -71,6 +95,7 @@ def model(spec):
     root.scale = (factor,) * 3; root.location = spec['pos']; root.rotation_euler.z = math.radians(spec.get('yaw', 0))
     print('ASSET_BOUNDS',spec['id'],[round(float(v),3) for v in (high-low)*factor], 'yaw',spec.get('yaw',0),flush=True)
     for o in meshes:
+        for old in o.data.materials:finish_palette(old)
         # Reuse the real model geometry; assign scanned surfaces to appropriate
         # material groups rather than flattening every prop to one wood colour.
         if 'surface' in spec:
@@ -127,7 +152,7 @@ def lighting(mode, indoor=False):
     if not indoor and mode in ('day', 'sunset'):
         bpy.ops.object.light_add(type='SUN', rotation=(math.radians(35 if mode == 'day' else 65), math.radians(-20), math.radians(-30)))
         bpy.context.active_object.rotation_euler=(Vector((0,6,0))-Vector((-6,-10,12 if mode=='day' else 5))).to_track_quat('-Z','Y').to_euler()
-        bpy.context.active_object.data.energy = 3.5
+        bpy.context.active_object.data.energy = 2.2
         bpy.context.active_object.data.angle = math.radians(2)
         bpy.context.active_object.data.color = (1, .7, .38) if mode == 'sunset' else (1, .96, .86)
         bpy.ops.object.light_add(type='AREA',location=(5,8,6))

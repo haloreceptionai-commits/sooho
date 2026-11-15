@@ -15,6 +15,12 @@ def material(name, color, rough=.7, metal=0, emission=0):
     m=bpy.data.materials.new(name);m.use_nodes=True
     bs=m.node_tree.nodes['Principled BSDF'];bs.inputs['Base Color'].default_value=(*color,1)
     bs.inputs['Roughness'].default_value=rough;bs.inputs['Metallic'].default_value=metal
+    # Fine world-space texture keeps cloth/paint from reading as flat plastic.
+    nt=m.node_tree;geo=nt.nodes.new('ShaderNodeNewGeometry');noise=nt.nodes.new('ShaderNodeTexNoise')
+    noise.inputs['Scale'].default_value=55;noise.inputs['Detail'].default_value=2
+    nt.links.new(geo.outputs['Position'],noise.inputs['Vector'])
+    bump=nt.nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.18;bump.inputs['Distance'].default_value=.015
+    nt.links.new(noise.outputs['Fac'],bump.inputs['Height']);nt.links.new(bump.outputs[0],bs.inputs['Normal'])
     if emission:
         bs.inputs['Emission Color'].default_value=(*color,1);bs.inputs['Emission Strength'].default_value=emission
     return m
@@ -48,7 +54,8 @@ def masonry(center,width,height,stone,seed=1):
         while left<x+width/2-.02:
             w=min((brick_w/2 if left==x-width/2 and row%2 else brick_w),x+width/2-left)
             o=cube('masonry block',(left+w/2,y-.2-rng.random()*.015,z+row*row_h+row_h/2),(w-.025,.28,row_h-.025),stone,.025)
-            o.data.materials.append(colors[rng.randrange(5)])
+            # A second unused material slot never varied the blocks.
+            o.color=(*colors[rng.randrange(5)].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value[:3],1)
             left+=w
 
 
@@ -104,14 +111,25 @@ def castle(surface):
     for x in [-3.2,3.2]:
         cube('banner',(x,5.45,3.8),(.6,.035,1.8),cloth,.005)
         cube('banner stripe',(x,5.42,3.8),(.055,.01,1.75),gold,.001)
+    for x in [-5.9,5.9]:
+        for z in [2.1,4.4]:cube('tower arrow slit',(x,5.41,z),(.14,.05,.65),dark,.012)
+    # A readable stone approach supplies foreground scale and leading lines.
+    for row in range(18):
+        for col in range(6):
+            cube('approach cobble',(-1.5+col*.6+(row%2)*.12,-4+row*.52,-.005),(.56,.48,.08),stone,.04)
 
 
 def battlefield(surface):
     wood=surface('wood',1.5);canvas=material('camp linen',(.58,.57,.44));iron=material('camp iron',(.085,.1,.11),.5,.5)
     # Distinct siege encampment, not a duplicate close-up of the castle gate.
-    for x,y in [(-4,7),(4.5,11),(-5,16)]:
+    for x,y in [(-3.5,6),(3.5,9),(-4,13),(4.5,16)]:
         verts=[(x-2,y-2,0),(x+2,y-2,0),(x,y-2,2.7),(x-2,y+2,0),(x+2,y+2,0),(x,y+2,2.7)]
         mesh_object('campaign tent',verts,[(0,2,5,3),(2,1,4,5),(3,5,4)],canvas)
+        for side in [-1,1]:
+            for j in range(7):
+                v=j/6
+                rope('canvas sewn seam',(x+side*2*v,y-2,2.7*(1-v)),(x+side*2*v,y+2,2.7*(1-v)),.009,iron)
+        mesh_object('tent open flaps',[(x-2,y-2,0),(x-.35,y-2,0),(x,y-2,2.7),(x+.35,y-2,0),(x+2,y-2,0)],[(0,1,2),(2,3,4)],canvas)
         beam((x,y-2,0),(x,y-2,2.85),.09,wood)
         for side in [-1,1]:rope('tent guy',(x,y-2,2.7),(x+side*2.7,y-2.7,.08),.018,canvas)
     for y in [4,8,12]:
@@ -124,6 +142,12 @@ def battlefield(surface):
     for x,y in [(-2.8,6),(5,13)]:
         beam((x,y,0),(x,y,4),.075,wood)
         mesh_object('campaign standard',[(x,y,3.8),(x+1,y,3.8),(x+1,y+.12,2.6),(x,y,2.6)],[(0,1,2,3)],material('standard red',(.35,.045,.04)))
+    for y in [6,10,14]:
+        cube('supply bench',(1.5,y,.55),(1.8,.7,.12),wood)
+        for x in [.8,2.2]:beam((x,y-.2,0),(x,y-.2,.55),.09,wood)
+    for j in range(14):
+        x=-1.5+j*.24
+        beam((x,17,0),(x,17.6,2.0),.095,wood)
 
 
 def ship_details(surface):
@@ -220,6 +244,16 @@ def indoor_detail(name,surface):
     cube('window pane',(2.8,8.74,2.7),(2.4,.03,2.0),glass,0)
     for x in [1.55,2.8,4.05]:cube('window mullion',(x,8.66,2.7),(.09,.12,2.2),black)
     for z in [1.6,2.7,3.8]:cube('window mullion',(2.8,8.66,z),(2.6,.12,.09),black)
+    # Visible planks, wall panels and fasteners give the empty room a human scale.
+    for i in range(30):
+        y=-2+i*.4
+        cube('floor seam',(0,y,.006),(11.8,.008,.006),black,0)
+    for x in [-4,-2,0,2,4]:
+        cube('wall wainscot',(x,8.68,.72),(1.85,.09,1.3),wood,.02)
+    cube('wall picture frame',(-2.5,8.56,2.7),(1.6,.12,1.2),wood,.03)
+    cube('framed map',(-2.5,8.48,2.7),(1.4,.025,1.0),material('map parchment',(.55,.48,.31)),.01)
+    for j in range(9):
+        rope('map contour',(-3.08,8.45,2.3+j*.09),(-2.05+(j%3)*.12,8.45,2.38+j*.08),.007,black)
     if name=='saloon':
         cube('bar front',(0,5.2,.65),(5.8,.8,1.3),wood)
         cube('bar top',(0,5.1,1.34),(6.2,1.1,.12),wood)
@@ -253,8 +287,9 @@ def practical_lights(name,mode):
     if name not in ('castle','battlefield','village','street','ship_deck'):return
     iron=material('lamp frame',(.06,.065,.07),.38,.7)
     glow=material('lamp flame',(1,.39,.08),.3,0,8)
-    positions=[(-2.4,5.4,2.1),(2.4,5.4,2.1)] if name in ('castle','battlefield') else [(-2,4,1.8),(2.5,7,1.8)]
+    positions=[(-2.4,5.4,2.1),(2.4,5.4,2.1)] if name=='castle' else [(-2,4,1.8),(2.5,7,1.8)]
     for x,y,z in positions:
+        if name!='castle':beam((x,y+.45,0),(x,y+.45,z+.4),.07,iron)
         cube('lamp bracket',(x,y+.2,z-.25),(.06,.5,.06),iron,.01)
         cube('lamp base',(x,y,z-.16),(.22,.2,.06),iron,.01)
         cube('lamp glow',(x,y,z),(.12,.1,.25),glow,.02)
