@@ -365,7 +365,12 @@
   "crews",
   "commander",
   "soldier",
-  "everyone"
+  "everyone",
+  "guy",
+  "miner",
+  "somebody",
+  "anyone",
+  "those two"
  ],
  "outfits": {
   "merchant": [
