@@ -55,7 +55,7 @@ def masonry(center,width,height,stone,seed=1):
             w=min((brick_w/2 if left==x-width/2 and row%2 else brick_w),x+width/2-left)
             o=cube('masonry block',(left+w/2,y-.2-rng.random()*.015,z+row*row_h+row_h/2),(w-.025,.28,row_h-.025),stone,.025)
             # A second unused material slot never varied the blocks.
-            o.color=(*colors[rng.randrange(5)].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value[:3],1)
+            o.color=(*(min(1,c*1.75) for c in colors[rng.randrange(5)].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value[:3]),1)
             left+=w
 
 
@@ -117,6 +117,16 @@ def castle(surface):
     for row in range(18):
         for col in range(6):
             cube('approach cobble',(-1.5+col*.6+(row%2)*.12,-4+row*.52,-.005),(.56,.48,.08),stone,.04)
+    # A raised keep and pitched roofs create an actual castle skyline rather
+    # than a single flat facade. All roof faces are closed engine geometry.
+    cube('keep volume',(0,17,4),(7,5,8),stone,.08)
+    roof=material('castle slate',(.095,.17,.23))
+    mesh_object('keep pitched roof',[(-4,14.2,8),(4,14.2,8),(0,14.2,10.3),(-4,19.8,8),(4,19.8,8),(0,19.8,10.3)],[(0,2,5,3),(2,1,4,5),(0,1,2),(3,5,4),(0,3,4,1)],roof)
+    for tx in [-5.9,5.9]:
+        bpy.ops.mesh.primitive_cone_add(vertices=40,radius1=2.1,radius2=.12,depth=2.8,location=(tx,7.1,8.4))
+        bpy.context.active_object.data.materials.append(roof)
+    for x in [-2.3,0,2.3]:
+        for z in [6,7.5]:cube('keep windows',(x,14.46,z),(.45,.08,.75),dark,.03)
 
 
 def battlefield(surface):
@@ -148,6 +158,14 @@ def battlefield(surface):
     for j in range(14):
         x=-1.5+j*.24
         beam((x,17,0),(x,17.6,2.0),.095,wood)
+    # Low stone defences and receding supplies establish the battlefield scale.
+    stone=surface('stone',2.8)
+    masonry((0,24,0),28,3.4,stone,104)
+    for x in [-11,11]:
+        cube('distant campaign tower',(x,24,2.8),(3.2,3.2,5.6),stone,.08)
+        for dx in [-1.1,0,1.1]:cube('campaign battlement',(x+dx,23.2,5.9),(.55,.65,.7),stone)
+    for row in range(24):
+        for col in range(4):cube('camp track',(-.9+col*.6,-1+row*.65,-.006),(.55,.6,.07),surface('dirt',1.8),.03)
 
 
 def ship_details(surface):
@@ -259,6 +277,18 @@ def indoor_detail(name,surface):
         cube('bar top',(0,5.1,1.34),(6.2,1.1,.12),wood)
         for x in [-2.4,-1.2,0,1.2,2.4]:cube('bar panel',(x,4.75,.7),(.08,.08,1.0),wood)
         for z in [1.3,2,2.7]:cube('bottle shelf',(0,8.5,z),(5,.4,.09),wood)
+        brass=material('bar brass',(.56,.34,.09),.3,.7)
+        beam((-2.6,4.5,.24),(2.6,4.5,.24),.055,brass)
+        for x in [-2,0,2]:beam((x,4.5,0),(x,4.5,.24),.055,brass)
+        for x in [-2.1,0,2.1]:
+            bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.29,depth=.1,location=(x,3.5,.8))
+            bpy.context.active_object.data.materials.append(wood)
+            for dx,dy in [(-.17,-.17),(.17,-.17),(-.17,.17),(.17,.17)]:beam((x+dx,3.5+dy,0),(x+dx,3.5+dy,.78),.055,wood)
+        for x in [-1.6,1.6]:
+            rope('pendant chain',(x,5.8,4.5),(x,5.8,2.7),.018,brass)
+            bpy.ops.mesh.primitive_cone_add(vertices=32,radius1=.35,radius2=.09,depth=.25,location=(x,5.8,2.65))
+            bpy.context.active_object.data.materials.append(brass)
+            bpy.ops.object.light_add(type='POINT',location=(x,5.8,2.45));bpy.context.active_object.data.energy=25;bpy.context.active_object.data.color=(1,.63,.32)
     elif name=='office':
         paper=material('paper',(.84,.81,.69));ink=material('writing',(.13,.12,.1))
         for i in range(4):
@@ -267,6 +297,33 @@ def indoor_detail(name,surface):
     elif name=='workshop':
         cube('tool rack',(-3,8.55,2),(3.8,.15,1.5),wood)
         for x in [-4.4,-3.7,-3,-2.3,-1.6]:cube('tool hooks',(x,8.4,2.5),(.04,.2,.13),black)
+    if name=='room':
+        # Upholstery stitches and cushions supply readable soft surfaces.
+        cloth=material('cushion teal',(.045,.28,.27),.9)
+        for x in [-1.75,-.25]:
+            p=cube('sofa cushion',(x,4.86,.88),(.6,.23,.47),cloth,.1);p.rotation_euler.y=.12
+            for dx in [-.27,.27]:rope('cushion piping',(x+dx,4.73,.69),(x+dx,4.73,1.08),.008,wood)
+        stone=surface('stone',2.3);soot=material('fireplace soot',(.035,.03,.025))
+        cube('fireplace dark opening',(3.8,8.64,.7),(1.4,.06,1.4),soot)
+        for x in [2.95,4.65]:cube('fireplace pier',(x,8.35,.8),(.35,.6,1.6),stone,.045)
+        cube('fireplace lintel',(3.8,8.3,1.6),(2.2,.7,.35),stone,.055)
+        cube('hearth',(3.8,8.1,.06),(2.4,1.3,.12),stone,.04)
+        for i in range(4):beam((3.3+i*.3,8.2,.12),(3.45+i*.3,8.55,.35),.13,wood)
+    if name in ('room','office'):
+        # Draped side curtains are curved mesh, not floating flat rectangles.
+        textile=material('curtain forest',(.095,.22,.16),.95)
+        for side in [-1,1]:
+            verts=[];faces=[]
+            for row in range(9):
+                for col in range(13):
+                    u=col/12;v=row/8
+                    verts.append((2.8+side*(1.05+.7*u),8.52-.07*math.sin(u*math.tau*5),3.85-2.25*v))
+            for row in range(8):
+                for col in range(12):
+                    j=row*13+col;faces.append((j,j+1,j+14,j+13))
+            obj=mesh_object('curtain folds',verts,faces,textile)
+            for p in obj.data.polygons:p.use_smooth=True
+        beam((1.1,8.53,3.9),(4.5,8.53,3.9),.05,wood)
 
 
 def ocean():
