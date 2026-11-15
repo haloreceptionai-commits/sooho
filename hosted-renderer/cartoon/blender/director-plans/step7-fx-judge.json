@@ -1,0 +1,42 @@
+{
+ "1": [
+  {
+   "seen": "Stylized mine tunnel interior with rails and timber framing. A red dynamite stick on the track ignites; a bright orange\u2011white fireball erupts with small glowing sparks and blocky debris. The blast transitions into expanding black/gray smoke puffs while sparks continue along the track area.",
+   "recognised": true,
+   "quality": 6,
+   "problems": "Fireball and smoke read as uniform blobby shapes with limited variation/turbulence. Explosion light scarcely affects the tunnel or character; environment brightness and shading barely change. Debris is sparse, mostly identical cubes, with little speed, variety, or trails. Sparks are uniform dots with minimal decay and arc. Smoke doesn\u2019t convincingly fill the tunnel; appears in separated blobs and lacks dusty layering. Scene shows no shockwave, camera shake, or secondary motion; character and set remain unaffected. Overall materials/lighting/shading look less polished than the reference."
+  },
+  {
+   "seen": "A 3D mine tunnel with rails and timber supports. A red dynamite stick on the track ignites and bursts into an orange fireball. Bright spark particles shoot out, small blocky debris pieces fly, and rounded black/gray smoke puffs expand and drift down the tunnel; the camera stays static and a simple stick\u2011figure miner stands at the right.",
+   "recognised": true,
+   "quality": 6,
+   "problems": "Explosion reads but feels poppy and simplified; smoke is made of soft spherical puffs with little variation; sparks are uniform dots with short/no trails; debris is mostly small cubes with limited variety and weight; minimal dust volume\u2014tunnel doesn\u2019t fill with particulate; little to no light or shadow interaction on surroundings/character from the blast; props and rails show no reaction or camera shake; timing is abrupt with a sudden bubble-like fireball; overall materials and textures are basic compared to the reference."
+  },
+  {
+   "seen": "A lit red dynamite stick on the rail ignites, flashes, and bursts into an orange fireball with radial sparks; small chunk debris flies outward; then large dark smoke/dust puffs expand down the tunnel while sparks continue. Camera is static and a nearby character remains unaffected.",
+   "recognised": true,
+   "quality": 6,
+   "problems": "Smoke reads as simple soft spheres/blobs rather than volumetric dust; debris is uniform (mostly cube-like) and light, with limited variety and weight; sparks are too even in size, speed, and brightness; little to no dynamic lighting on the tunnel, rails, or character from the fireball; no shockwave, camera shake, or environmental interaction (no dust from walls/ground, no scorch/impact marks); motion blur is minimal/inconsistent; timing feels slow/floaty as smoke and debris expand; the fuse/readiness of the dynamite is unclear before detonation."
+  }
+ ],
+ "2": [
+  {
+   "seen": "A battlefield camp with rows of hundreds of simple cartoon soldiers lined up before tents; a taller commander stands in front facing them. Cannons/catapults and cannonballs in the foreground, stone wall and trees behind. Two plumes of black smoke rise near the tents. The shot dolly-in over time.",
+   "recognised": true,
+   "quality": 6,
+   "problems": "Cheering isn\u2019t clearly readable\u2014the crowd appears mostly static. Characters are highly repetitive with little variation. Lighting/materials look flat, smoke is low-detail, and there\u2019s some aliasing/texture tiling. Background and props are simple, giving a toy-like feel compared with the reference."
+  },
+  {
+   "seen": "A stylized 3D battlefield camp with rows of small cartoon soldiers standing in formation between tents. A taller commander figure stands in front facing the crowd. There are siege props (cannon, catapult, cannonballs) and two columns of black smoke rising behind the tents. The camera moves slightly forward across the frames. The crowd largely holds the same pose with only subtle movement.",
+   "recognised": true,
+   "quality": 6,
+   "problems": "Cheering motion is not obvious; many characters look identical and static; crowd size appears large but not clearly well over 200; lighting and materials are simple and flat compared to the reference; minimal variation/animation in the crowd; smoke looks repetitive and somewhat artificial."
+  },
+  {
+   "seen": "A 3D cartoon battlefield camp with tents, a cannon and a wooden siege device at left. Rows of many small, identical cartoon soldiers (red caps, white faces) fill the scene in a tight grid. A taller commander stands in front facing the crowd. Black smoke plumes rise behind the tents. The strip shows a slight camera move toward the center/front over time.",
+   "recognised": true,
+   "quality": 6,
+   "problems": "Cheering is not clearly visible; crowd appears mostly static. Characters are very duplicated with little variation, arranged in an unnatural grid. Lighting and materials are simple; textures look low detail. Smoke looks basic/repeated. Hard to verify that the count is well over 200 even though it appears to be around that scale."
+  }
+ ]
+}
