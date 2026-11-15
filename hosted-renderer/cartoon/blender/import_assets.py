@@ -32,9 +32,14 @@ def build(spec):
     if 'CC0' not in license_page:
         raise RuntimeError('Poly Haven CC0 license could not be verified')
     for pack in sorted({m.split('/')[0] for m in spec['models']}):
-        page = fetch(f'https://kenney.nl/assets/{pack}').decode()
-        if 'Creative Commons CC0' not in page and 'CC0' not in page:
+        # Kenney blocks automated page requests. The publisher-supplied license
+        # shipped with each original pack is authoritative and retained verbatim.
+        license_file = LIBRARY / pack / 'License.txt'
+        page = license_file.read_text()
+        if 'CC0' not in page:
             raise RuntimeError(f'{pack}: CC0 could not be verified')
+        dest = OUT / 'licenses' / f'{pack}.txt'; dest.parent.mkdir(exist_ok=True)
+        shutil.copyfile(license_file, dest)
     for model in spec['models']:
         source = LIBRARY / f'{model}.glb'
         if source.read_bytes()[:4] != b'glTF':
