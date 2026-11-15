@@ -13,3 +13,13 @@ for url,names in sources:
             expected=json.loads((root/(name+'.wav.asset.json')).read_text())
             if target.stat().st_size!=expected['size']:raise ValueError('Sound source changed')
             print(target.name,target.stat().st_size,hashlib.sha256(target.read_bytes()).hexdigest())
+# Step 8 effect library: CC0 sources pinned by the sha256 of the decoded PCM (assets/sound/library-pins.json).
+pins=json.loads((root/'library-pins.json').read_text());cache={}
+for name,pin in pins['sounds'].items():
+    if pin['url'] not in cache:cache[pin['url']]=urllib.request.urlopen(pin['url'],timeout=60).read()
+    raw=zipfile.ZipFile(io.BytesIO(cache[pin['url']])).read(pin['member']) if pin['member'] else cache[pin['url']]
+    with tempfile.TemporaryDirectory() as folder:
+        source=Path(folder)/('in'+Path(pin['member'] or pin['url']).suffix);source.write_bytes(raw);target=root/'library'/(name+'.wav');target.parent.mkdir(exist_ok=True)
+        subprocess.run(['ffmpeg','-v','error','-y','-i',str(source),'-ar','48000','-ac','1','-c:a','pcm_s16le',str(target)],check=True)
+        if hashlib.sha256(target.read_bytes()).hexdigest()!=pin['sha256']:raise ValueError(f'Sound source changed: {name}')
+        print(target.name,'pinned')
