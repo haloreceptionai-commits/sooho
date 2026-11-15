@@ -29,16 +29,23 @@ def pose(action,t):
     moving=action in ('walk','run','panic')
     crouch=.33 if action=='crouch' else .075 if moving else 0
     hip_z=.895-crouch
-    p={'root':(0,t*(.7 if action=='walk' else 1.3) if action in ('walk','run') else 0,0),
+    p={'root':(0,-t*(.7 if action=='walk' else 1.3) if action in ('walk','run') else 0,0),
        'hips':(0,0,hip_z),'head':(0,0,hip_z+.84),'tilt':0,'grip_angle':0,
        'left_shoulder':(-.2,0,hip_z+.44),'right_shoulder':(.2,0,hip_z+.44),
        'left_wrist':(-.27,-.03,hip_z-.15),'right_wrist':(.27,-.03,hip_z-.15),
        'left_ankle':(-.09,0,.055),'right_ankle':(.09,0,.055)}
     if action in ('walk','run','panic'):
-        stride=.26 if action=='walk' else .33
         for side,sign in [('left',-1),('right',1)]:
             wave=math.sin(phase)*sign
-            p[side+'_ankle']=(sign*.09,stride*wave,.055+.12*max(0,wave))
+            period=1/1.2 if action=='walk' else 1/2.8
+            speed=.7 if action=='walk' else 1.3 if action=='run' else 0
+            u=t/period+(0 if side=='left' else .5);cycle=math.floor(u);u-=cycle
+            stance=.6 if action=='walk' else .4
+            landing=-speed*period*(cycle-(0 if side=='left' else .5)+stance/2)
+            if u<stance:world_y=landing;lift=0
+            else:
+                v=(u-stance)/(1-stance);world_y=landing-speed*period*(v*v*(3-2*v));lift=.12*math.sin(math.pi*v)
+            p[side+'_ankle']=(sign*.09,world_y-p['root'][1],.055+lift)
             p[side+'_wrist']=(sign*.27,-.3*wave,.78)
     if action=='carry':
         p['left_wrist']=(-.18,-.4,1.06);p['right_wrist']=(.18,-.4,1.06)
@@ -59,7 +66,7 @@ def pose(action,t):
         p['left_wrist']=(-.54,-.22,1.58+.1*wave);p['right_wrist']=(.54,-.22,1.58-.1*wave)
     if action=='fall':p['tilt']=max(0,min(1,t))*math.pi/2
     for side,sign in [('left',-1),('right',1)]:
-        p[side+'_elbow']=elbow(p[side+'_shoulder'],p[side+'_wrist'],.34,sign)
+        p[side+'_elbow']=elbow(p[side+'_shoulder'],p[side+'_wrist'],.34,1,bend=(sign,-.5,0))
         hip=(sign*.09,0,hip_z)
         p[side+'_hip']=hip;p[side+'_knee']=elbow(hip,p[side+'_ankle'],.42,1,bend=(0,-1,0))
     if action=='fall':

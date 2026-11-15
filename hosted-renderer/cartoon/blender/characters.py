@@ -13,6 +13,10 @@ def sphere(name,pos,size,mat):
     return o
 
 
+def face_y(x,z):
+    return -.27*math.sqrt(max(0,1-(x/.31)**2-(z/.36)**2))-.004
+
+
 def build_character(c,duration=3,fps=30):
     ident=c.get('id','cast');black=material('cast ink',(.012,.013,.015),.65)
     skin=material('cast ivory',(.94,.93,.88),.58)
@@ -23,20 +27,20 @@ def build_character(c,duration=3,fps=30):
     head=sphere('egg head',(0,0,0),(.31,.27,.36),skin);head.parent=headroot
     expr=c.get('expression','neutral');face=face_shape(expr)
     for side in [-1,1]:
-        eye=sphere('eye',(side*.105,-.259,.035),(.034,.014,face['eye']),black);eye.parent=headroot
-        brow=cube('eyebrow',(side*.105,-.258,.12),(.095,.022,.018),black,.008);brow.parent=headroot
+        eye=sphere('eye',(side*.105,face_y(side*.105,.035),.035),(.034,.014,face['eye']),black);eye.parent=headroot
+        brow=cube('eyebrow',(side*.105,face_y(side*.105,.12),.12),(.095,.022,.018),black,.008);brow.parent=headroot
         brow.rotation_euler.y=side*face['brow']
         if expr=='smug' and side==1:eye.scale.z*=.5
     mouth=None
     if expr in ('shock','talk','worried','determined'):
-        mouth=sphere('mouth',(0,-.256,-.13),(face['width'],.016,face['height']),black);mouth.parent=headroot
-        if expr=='determined':cube('clenched teeth',(0,-.274,-.13),(.14,.014,.022),skin,.004).parent=headroot
+        mouth=sphere('mouth',(0,face_y(0,-.13),-.13),(face['width'],.016,face['height']),black);mouth.parent=headroot
+        if expr=='determined':cube('clenched teeth',(0,face_y(0,-.13)-.018,-.13),(.14,.014,.022),skin,.004).parent=headroot
     else:
         curve=[]
         for j in range(13):
             x=-face['width']+j*face['width']*2/12
             z=-.13+(x/face['width'])**2*face['curve']
-            curve.append((x,-.267,z))
+            curve.append((x,face_y(x,z),z))
         for a,b in zip(curve,curve[1:]):rope('mouth stroke',a,b,.01,black).parent=headroot
     hat=c.get('hat','beanie')
     if hat!='none':
@@ -51,7 +55,7 @@ def build_character(c,duration=3,fps=30):
                 for i in range(3):
                     a=i*math.tau/3
                     o=cube('tricorne folded brim',(.24*math.cos(a),.24*math.sin(a),.32),(.4,.1,.15),hatmat,.035);o.rotation_euler.z=a+math.pi/2;o.parent=headroot
-    body=sphere('coat',(0,0,1.04),(.21,.15,.3),cloth);body.parent=root
+    body=sphere('coat',(0,0,1.04),(.24,.16,.32),cloth);body.parent=root
     outfit=c.get('outfit','worker')
     body_details=[]
     for z in [.94,1.08,1.2]:body_details.append(sphere('coat button',(0,-.153,z),(.014,.014,.014),black))
@@ -59,7 +63,9 @@ def build_character(c,duration=3,fps=30):
         body_details.extend([cube('white shirt',(0,-.151,1.19),(.12,.03,.2),skin,.02),cube('bowtie',(0,-.179,1.24),(.16,.035,.06),black,.015)])
     if outfit=='soldier':body_details.append(cube('belt',(0,-.01,.86),(.44,.32,.07),black,.02))
     if outfit=='sailor':
-        for z in [.94,1.04,1.14]:body_details.append(cube('sailor stripe',(0,-.147,z),(.36,.02,.025),skin,.005))
+        for z in [.94,1.04,1.14]:
+            points=[(x,-.16*math.sqrt(max(0,1-(x/.24)**2-((z-1.04)/.32)**2))-.003,z) for x in [-.18+i*.36/16 for i in range(17)]]
+            for a,b in zip(points,points[1:]):body_details.append(rope('sailor stripe',a,b,.009,skin))
     if outfit=='worker':body_details.append(cube('work apron',(0,-.16,1.02),(.25,.035,.35),hatmat,.018))
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))

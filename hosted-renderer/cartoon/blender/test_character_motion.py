@@ -15,8 +15,8 @@ class MotionTests(unittest.TestCase):
                         self.assertAlmostEqual(math.dist(p[side+'_'+a],p[side+'_'+b]),length,places=6,msg=f'{action} {frame}')
 
     def test_walk_and_run_advance(self):
-        self.assertAlmostEqual(pose('walk',2)['root'][1],1.4)
-        self.assertAlmostEqual(pose('run',2)['root'][1],2.6)
+        self.assertAlmostEqual(pose('walk',2)['root'][1],-1.4)
+        self.assertAlmostEqual(pose('run',2)['root'][1],-2.6)
 
     def test_actions_are_not_identical(self):
         self.assertNotEqual(pose('aim',.3)['right_wrist'],pose('point',.3)['right_wrist'])
@@ -40,5 +40,10 @@ class MotionTests(unittest.TestCase):
     def test_nine_distinct_faces_and_mouth_cycle(self):
         self.assertEqual(len({tuple(face_shape(e).values()) for e in EXPRESSIONS}),9)
         self.assertNotEqual(face_shape('talk',0)['height'],face_shape('talk',.13)['height'])
+
+    def test_stance_feet_do_not_slide(self):
+        for action in ['walk','run']:
+            a,b=pose(action,.02),pose(action,.03)
+            self.assertAlmostEqual(a['root'][1]+a['left_ankle'][1],b['root'][1]+b['left_ankle'][1],places=6)
 
 if __name__=='__main__':unittest.main()
