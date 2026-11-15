@@ -8,7 +8,7 @@ def progress(t,start=0,end=2):
 
 def fuse_position(t):
     u=progress(t,0,1.5);i=u*75
-    return (.06*math.sin(i*.13),-.7+i*.007,.04+.003*math.sin(i))
+    return (.06*math.sin(i*.13),-1.45+i*.017,.04+.003*math.sin(i))
 
 
 def pour_position(rest,t,index=0):

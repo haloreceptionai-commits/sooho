@@ -5,7 +5,7 @@ from object_motion import fuse_position,pour_position,burst_position,exploded,sp
 
 class ObjectMotionTest(unittest.TestCase):
     def test_ember_follows_actual_wavy_fuse(self):
-        self.assertEqual(fuse_position(0),(0,-.7,.04))
+        self.assertEqual(fuse_position(0),(0,-1.45,.04))
         self.assertAlmostEqual(fuse_position(1.5)[1],-.175)
         self.assertAlmostEqual(fuse_position(.75)[0],.06*math.sin(37.5*.13))
 
