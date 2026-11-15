@@ -71,6 +71,14 @@ class RelevanceTest(unittest.TestCase):
         with self.assertRaises(ValueError):D.compile_one({'set':'mine_tunnel','zone':'moon','framing':'wide'},p,1)
 
 
+class TunnelTest(unittest.TestCase):
+    def test_tunnel_cameras_stay_between_rock_walls(self):
+        for z in D.ZONES['mine_tunnel']:
+            for fr in ('wide','medium','close','insert'):
+                sh={'set':'mine_tunnel','zone':z,'framing':fr,'cast':[{'id':'miner'}],'objects':[{'kind':'gold_shotgun','action':'fire'}]}
+                c=D.compile_one(sh,{'cast':CAST},1)['camera'];self.assertLessEqual(abs(c['from'][0]),.9)
+
+
 class TimingTest(unittest.TestCase):
     def test_estimated_timing_spans_measured_length_and_is_monotonic(self):
         w=D.estimated_timing(STORY['words'],10)

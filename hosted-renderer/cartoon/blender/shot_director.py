@@ -202,7 +202,7 @@ _INDOOR = {'front': ((0, 0.6), 90), 'back': ((-1.2, 5.6), 100), 'left_wall': ((-
 _OPEN = {'center': ((0, -1), 90), 'left': ((-1.2, 3.2), 120), 'right': ((2.6, 2), 70)}
 ZONES = {
     'rail_yard': {'track_side': ((2.0, 1.0), 90), 'locomotive': ((2.0, 4.2), 115), 'house': ((-3.2, 7.6), 125), 'open_yard': ((4.2, 0.8), 155)},
-    'mine_tunnel': {'entrance': ((0, 0.6), 90), 'crates': ((0.25, 2.5), 165), 'deep': ((0, 4.6), 90), 'barrel': ((-0.25, 3.3), 15)},
+    'mine_tunnel': {'entrance': ((0, 0.6), 90), 'crates': ((0.3, 2.0), 95), 'deep': ((0, 4.6), 90), 'looking_back': ((0, 3.6), 270)},
     'ship_deck': {'bow': ((0, 1), 90), 'port_rail': ((-1.8, 4.6), 175), 'mast': ((0.4, 5.6), 95)},
     'office': _INDOOR, 'saloon': _INDOOR, 'workshop': _INDOOR, 'room': _INDOOR,
     'castle': _OPEN, 'village': _OPEN, 'battlefield': _OPEN, 'street': _OPEN, 'open_day': {'center': ((0, 0), 90)},
@@ -268,6 +268,9 @@ def compile_one(sh, plan, duration, si=0):
             sub = cast[0]['pos']; d = 3.4 if framing == 'medium' else 2.0
             cam = {'from': _at(sub, (0.35 * d, -d), head, 1.55), 'look_at': _at(sub, (0, 0.2), head, 1.05 if framing == 'medium' else 1.3),
                    'lens': 40 if framing == 'medium' else 55, 'fstop': 4}
+    if st == 'mine_tunnel':
+        # the tunnel is ~3 m wide: keep every camera between the rock walls (step-6 render showed black frames)
+        for k in ('from', 'look_at'): cam[k][0] = max(-0.9, min(0.9, cam[k][0]))
     shot = {'set': st, 'lighting': sh.get('lighting', 'day'), 'duration': round(duration, 3), 'camera': cam,
             'cast': cast, 'objects': objects, 'engine': 'cycles', 'samples': 24, 'size': [1080, 1920], 'grade': 'Punchy'}
     return validate_shot(shot)
