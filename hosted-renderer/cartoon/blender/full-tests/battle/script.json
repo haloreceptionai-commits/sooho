@@ -1,8 +1,8 @@
 {
-  "title": "Fort Rocket Cart Salvo",
+  "title": "Fortress Rocket Cart Defense",
   "sentences": [
     {
-      "text": "Fort crews roll a wooden cart under high stone walls.",
+      "text": "Fort crews roll a rocket cart near the walls today.",
       "fact_ids": [
         "cart",
         "defense"
@@ -13,9 +13,69 @@
       ]
     },
     {
-      "text": "Castle workers wheel a launch frame toward the battlement edge.",
+      "text": "Castle soldiers stand by the cart and point outward today.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Cart launchers fire many rocket arrows in rapid succession now.",
       "fact_ids": [
         "cart",
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Rocket arrows fly from the cart beyond the fort walls.",
+      "fact_ids": [
+        "rockets",
+        "defense"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Castle crews cheer loudly while rocket arrows fire again from carts.",
+      "fact_ids": [
+        "rockets",
+        "defense"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort commanders point along the walls toward other wheeled carts.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle commanders stand with carts during fortress defense in invasions.",
+      "fact_ids": [
+        "history",
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Crews roll carts along the walls and stop together beside the walls.",
+      "fact_ids": [
         "defense"
       ],
       "picture": [
@@ -24,9 +84,9 @@
       ]
     },
     {
-      "text": "Cart launchers fire up to two hundred rocket arrows sometimes.",
+      "text": "Rocket arrows fire again from the carts many times in bursts.",
       "fact_ids": [
-        "cart"
+        "rockets"
       ],
       "picture": [
         "set:castle",
@@ -34,49 +94,9 @@
       ]
     },
     {
-      "text": "Soldiers rip off a cloth coat and uncover the launcher.",
-      "fact_ids": [
-        "cart"
-      ],
-      "picture": [
-        "set:castle",
-        "obj:covered_cart:open"
-      ]
-    },
-    {
-      "text": "Soldiers set rockets across the board in tight rows.",
-      "fact_ids": [
-        "cart"
-      ],
-      "picture": [
-        "set:castle"
-      ]
-    },
-    {
-      "text": "Crews light strings running to the rocket tails at once.",
+      "text": "Soldiers stand and point at rocket arrows shooting forward fast.",
       "fact_ids": [
         "rockets"
-      ],
-      "picture": [
-        "set:castle",
-        "obj:fuse_bundle:fire"
-      ]
-    },
-    {
-      "text": "Fuse sparks race as soldiers step back from the frame.",
-      "fact_ids": [
-        "rockets"
-      ],
-      "picture": [
-        "set:castle",
-        "obj:fuse_bundle:fire"
-      ]
-    },
-    {
-      "text": "Rocket arrows blast off together from the cart's face.",
-      "fact_ids": [
-        "rockets",
-        "cart"
       ],
       "picture": [
         "set:castle",
@@ -84,7 +104,7 @@
       ]
     },
     {
-      "text": "Rocket arrows fly in a swarm beyond the fort wall.",
+      "text": "Fort crews nod while commanders point and direct another firing.",
       "fact_ids": [
         "rockets",
         "defense"
@@ -95,16 +115,27 @@
       ]
     },
     {
-      "text": "Castle defenders watch as smoke rolls over the slope.",
+      "text": "Cart launchers fire rocket arrows from a wooden cart.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort crews roll the waiting cart beside the first cart.",
       "fact_ids": [
         "defense"
       ],
       "picture": [
-        "set:castle"
+        "set:castle",
+        "obj:perforated_cart:roll"
       ]
     },
     {
-      "text": "Fort crews keep aim broad because each unguided rocket wobbles.",
+      "text": "Rocket arrows blast off again when commanders point and nod.",
       "fact_ids": [
         "rockets"
       ],
@@ -114,46 +145,7 @@
       ]
     },
     {
-      "text": "Crews fire many to cover a wide path fast.",
-      "fact_ids": [
-        "rockets"
-      ],
-      "picture": [
-        "set:castle",
-        "obj:rocket_arrow:fire"
-      ]
-    },
-    {
-      "text": "Crews reload slowly after the swarm empties the frame.",
-      "fact_ids": [
-        "rockets"
-      ],
-      "picture": [
-        "set:castle"
-      ]
-    },
-    {
-      "text": "Castle commanders station these carts along the fort walls.",
-      "fact_ids": [
-        "defense",
-        "history"
-      ],
-      "picture": [
-        "set:castle"
-      ]
-    },
-    {
-      "text": "Fort walls overlook tightly packed ranks moving near the gate.",
-      "fact_ids": [
-        "defense",
-        "history"
-      ],
-      "picture": [
-        "set:castle"
-      ]
-    },
-    {
-      "text": "Castle crews fire another wave when lines press the approach.",
+      "text": "Castle soldiers stand near walls and watch rockets fly onward.",
       "fact_ids": [
         "rockets",
         "defense"
@@ -164,7 +156,18 @@
       ]
     },
     {
-      "text": "Crews choose bursts because rockets cannot match gun aim.",
+      "text": "Cart launchers fire many rockets at once during fortress defense.",
+      "fact_ids": [
+        "rockets",
+        "defense"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Castle crews fire many rockets at once; why many?",
       "fact_ids": [
         "rockets"
       ],
@@ -174,29 +177,8 @@
       ]
     },
     {
-      "text": "Soldiers ask why many rockets fly together.",
+      "text": "Castle crews fire many because unguided rockets are inaccurate and slow to reload.",
       "fact_ids": [
-        "rockets"
-      ],
-      "picture": [
-        "set:castle",
-        "obj:rocket_arrow:fire"
-      ]
-    },
-    {
-      "text": "Soldiers fire many because unguided rockets miss and reloading takes time.",
-      "fact_ids": [
-        "rockets"
-      ],
-      "picture": [
-        "set:castle",
-        "obj:rocket_arrow:fire"
-      ]
-    },
-    {
-      "text": "Fort crews use salvos to hit tight groups at once.",
-      "fact_ids": [
-        "defense",
         "rockets"
       ],
       "picture": [

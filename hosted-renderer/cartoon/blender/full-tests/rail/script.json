@@ -2,7 +2,7 @@
   "title": "Why Older Rails Left Gaps",
   "sentences": [
     {
-      "text": "Steel rails grow under summer sun; small joints save tracks.",
+      "text": "Steel rails grow, and a joint gap nearly closes.",
       "fact_ids": [
         "heat",
         "gaps"
@@ -13,9 +13,10 @@
       ]
     },
     {
-      "text": "Steel rails grow as heat makes each long bar longer.",
+      "text": "Steel rails get longer at a small joint gap.",
       "fact_ids": [
-        "heat"
+        "heat",
+        "gaps"
       ],
       "picture": [
         "set:rail_yard",
@@ -23,17 +24,7 @@
       ]
     },
     {
-      "text": "Steel rails push the track, and sleepers fight that push.",
-      "fact_ids": [
-        "forces"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails buckle when heat beats the sleepers and stones.",
+      "text": "Steel rails shove sideways when a long line grows too far.",
       "fact_ids": [
         "heat",
         "forces"
@@ -44,48 +35,7 @@
       ]
     },
     {
-      "text": "Steel rails meet at joints where a small gap waits.",
-      "fact_ids": [
-        "gaps"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails slide forward, and the gap nearly closes tight.",
-      "fact_ids": [
-        "gaps",
-        "heat"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails shrink in winter cold, and the gap widens.",
-      "fact_ids": [
-        "gaps"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails stay straighter because sleepers and ballast resist pushes.",
-      "fact_ids": [
-        "forces"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails buckle sometimes if that push gets too strong.",
+      "text": "Steel rails buckle, and the straight section kinks.",
       "fact_ids": [
         "heat",
         "forces"
@@ -96,7 +46,7 @@
       ]
     },
     {
-      "text": "Steel rails use gaps, so hot days do less harm.",
+      "text": "Steel rails grow at joints; each gap nearly closes.",
       "fact_ids": [
         "gaps",
         "heat"
@@ -107,59 +57,9 @@
       ]
     },
     {
-      "text": "Steel rails used gaps on many lines in the past.",
+      "text": "Steel rails get shorter later; the gap stays open.",
       "fact_ids": [
-        "gaps"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails use joints on many stretches of track today.",
-      "fact_ids": [
-        "gaps"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails run in long stitched strings on other routes.",
-      "fact_ids": [
-        "modern"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails hold to sleepers with fastenings that manage heat.",
-      "fact_ids": [
-        "modern"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails stay near original length under compression from fastenings.",
-      "fact_ids": [
-        "modern"
-      ],
-      "picture": [
-        "set:rail_yard",
-        "obj:rail_joint:expand"
-      ]
-    },
-    {
-      "text": "Steel rails push outward on very hot summer days anyway.",
-      "fact_ids": [
-        "heat",
+        "gaps",
         "forces"
       ],
       "picture": [
@@ -168,9 +68,10 @@
       ]
     },
     {
-      "text": "Steel rails expand less when fastenings work well against heat.",
+      "text": "Steel rails grow again, and the next joint nearly closes.",
       "fact_ids": [
-        "modern"
+        "heat",
+        "gaps"
       ],
       "picture": [
         "set:rail_yard",
@@ -178,7 +79,29 @@
       ]
     },
     {
-      "text": "Steel rails let their ends move safely at joints today.",
+      "text": "Steel rails shove sideways when gaps cannot take more change.",
+      "fact_ids": [
+        "heat",
+        "forces"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "Steel rails buckle if the shove stacks along long lengths.",
+      "fact_ids": [
+        "heat",
+        "forces"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "Steel rails grow on many tracks with joints today.",
       "fact_ids": [
         "gaps"
       ],
@@ -188,7 +111,7 @@
       ]
     },
     {
-      "text": "Rail crews ask: why did older joints have gaps anyway?",
+      "text": "Steel rails grow where joints leave a tiny space.",
       "fact_ids": [
         "gaps"
       ],
@@ -198,7 +121,39 @@
       ]
     },
     {
-      "text": "Steel rails needed gaps to absorb heat growth and stop buckles.",
+      "text": "Steel rails get longer, and that space nearly closes.",
+      "fact_ids": [
+        "gaps",
+        "heat"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails get shorter, and that space stays wide.",
+      "fact_ids": [
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails grow, so why did older joints leave gaps?",
+      "fact_ids": [
+        "gaps",
+        "heat"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails buckle when no space remains for growth.",
       "fact_ids": [
         "gaps",
         "heat",
@@ -206,7 +161,59 @@
       ],
       "picture": [
         "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "Steel rails shove sideways, and the line kinks.",
+      "fact_ids": [
+        "forces"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "Steel rails grow, and gaps let rail ends stay apart.",
+      "fact_ids": [
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
         "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails grow, and clips and anchors help hold length.",
+      "fact_ids": [
+        "modern"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails get longer, but long lengths stay near size.",
+      "fact_ids": [
+        "modern"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails needed gaps because growth otherwise kinks and buckles.",
+      "fact_ids": [
+        "gaps",
+        "heat",
+        "forces"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
       ]
     }
   ]

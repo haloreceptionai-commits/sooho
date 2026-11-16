@@ -1,18 +1,8 @@
 {
-  "title": "Salted Shine: Spotting Fake Gold in Mine Samples",
+  "title": "Salted Samples: How Inconsistent Pans Expose Mine Tricks",
   "sentences": [
     {
-      "text": "Mine crews drill walls; bright specks promise riches to everyone.",
-      "fact_ids": [
-        "samples"
-      ],
-      "picture": [
-        "set:mine_tunnel",
-        "obj:hand_drill:drill"
-      ]
-    },
-    {
-      "text": "Miners collect samples because buyers judge value from bits.",
+      "text": "Mine crews drill walls; small pans wait under fresh holes.",
       "fact_ids": [
         "samples"
       ],
@@ -23,7 +13,18 @@
       ]
     },
     {
-      "text": "Hands swirl pans, and glitter slips over dark sand.",
+      "text": "Miners crouch low and swirl pans for tiny sample bits.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "char:crouch",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Miners swirl pans; flakes circle rims after each spin.",
       "fact_ids": [
         "samples"
       ],
@@ -33,63 +34,37 @@
       ]
     },
     {
-      "text": "Someone sprinkles flakes only into chosen sample batches.",
+      "text": "Somebody tosses flakes only into chosen sample pans by holes.",
       "fact_ids": [
         "samples"
       ],
       "picture": [
         "set:mine_tunnel",
+        "char:swing",
         "obj:gold_pan:pour"
       ]
     },
     {
-      "text": "Salters target samples because wall-wide salting wastes expensive material.",
+      "text": "Expert points at pans; full-wall salting would cost money fast.",
       "fact_ids": [
         "samples"
       ],
       "picture": [
-        "set:mine_tunnel",
-        "obj:gold_pan:pour"
-      ]
-    },
-    {
-      "text": "Fraudsters chase cash by making poor rock look rich.",
-      "fact_ids": [
-        "fraud"
-      ],
-      "picture": [
-        "set:street",
+        "set:office",
+        "char:point",
+        "obj:gold_pan:pour",
         "obj:money_bag:hold"
       ]
     },
     {
-      "text": "Sample spots shine, while nearby walls stay dull and plain.",
+      "text": "Rich guy watches pans and holds a money bag.",
       "fact_ids": [
-        "samples"
-      ],
-      "picture": [
-        "set:mine_tunnel"
-      ]
-    },
-    {
-      "text": "Engineers compare assays and see numbers jump around.",
-      "fact_ids": [
-        "detection"
+        "fraud"
       ],
       "picture": [
         "set:office",
-        "obj:magnifier:swing"
-      ]
-    },
-    {
-      "text": "Experts swing magnifier and point at mixed grains.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:office",
-        "obj:magnifier:swing",
-        "char:point"
+        "obj:money_bag:hold",
+        "char:stand"
       ]
     },
     {
@@ -103,130 +78,159 @@
       ]
     },
     {
-      "text": "New samples test weak, while salted spots test strong.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:office"
-      ]
-    },
-    {
-      "text": "Numbers stay uneven as charts rise here and fall there.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:office"
-      ]
-    },
-    {
-      "text": "Office staff watch reports and hold money until answers.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:office",
-        "obj:money_bag:hold"
-      ]
-    },
-    {
-      "text": "Office analysts compare sets and circle strange highs with pens.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:office",
-        "obj:magnifier:swing"
-      ]
-    },
-    {
-      "text": "Miners carry sacks to separate labs for retesting.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:street",
-        "char:carry"
-      ]
-    },
-    {
-      "text": "Results line up, and fake-rich places lose sparkle.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:office",
-        "obj:magnifier:swing"
-      ]
-    },
-    {
-      "text": "Vein walls stay plain; only samples fooled the books.",
+      "text": "Miners swirl new pans beside the first sample pans.",
       "fact_ids": [
         "samples"
       ],
       "picture": [
-        "set:mine_tunnel"
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
       ]
     },
     {
-      "text": "Pages stack neatly while circled figures sit side by side.",
-      "fact_ids": [
-        "detection"
-      ],
-      "picture": [
-        "set:office"
-      ]
-    },
-    {
-      "text": "Engineers write notes and show buyers clear patterns.",
+      "text": "Expert swings magnifier and points at those two pans.",
       "fact_ids": [
         "detection"
       ],
       "picture": [
         "set:office",
-        "char:point"
+        "obj:magnifier:swing",
+        "char:point",
+        "obj:gold_pan:pour"
       ]
     },
     {
-      "text": "Streets see nods as crews return to honest work.",
+      "text": "One pan swirls flakes; the other pan spins with nothing.",
       "fact_ids": [
         "detection"
       ],
       "picture": [
-        "set:street",
-        "char:walk"
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
       ]
     },
     {
-      "text": "Street posters warn buyers about salted samples and shaky numbers.",
+      "text": "Crews walk onward and drill a third set of holes.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "char:walk",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Miners swirl again; some pans carry flakes, others carry none.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Office buddy holds money and watches the lined up pans.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:office",
+        "obj:money_bag:hold",
+        "char:stand",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Expert points across pans from here and there along tunnels.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:office",
+        "char:point",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Crews run back and drill when pans do not agree.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "char:run",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Miners drill fresh spots and spin more pans for checks.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Expert swings magnifier and nods at repeating mismatches across pans.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing",
+        "char:stand",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Rich guy holds money while expert points at those uneven pans.",
       "fact_ids": [
         "fraud",
-        "samples",
         "detection"
       ],
       "picture": [
-        "set:street",
-        "char:point"
+        "set:office",
+        "obj:money_bag:hold",
+        "char:point",
+        "obj:gold_pan:pour"
       ]
     },
     {
-      "text": "Engineers ask how salted samples get caught?",
+      "text": "Office expert stands and watches the growing set of pans.",
       "fact_ids": [
-        "detection"
+        "samples"
       ],
       "picture": [
-        "set:office"
+        "set:office",
+        "char:stand",
+        "obj:gold_pan:pour"
       ]
     },
     {
-      "text": "Engineers catch fraud by inconsistent results across fresh drills.",
+      "text": "Office expert swings magnifier; how do crews catch salting?",
       "fact_ids": [
         "detection"
       ],
       "picture": [
         "set:office",
         "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Office expert points; inconsistent results across fresh drills reveal salting.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "char:point",
+        "obj:hand_drill:drill",
+        "obj:gold_pan:pour"
       ]
     }
   ]
