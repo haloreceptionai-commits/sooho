@@ -33,7 +33,7 @@ await writeFile(path.join(web,'manifest.json'),JSON.stringify(m));
 // Standing cards are required; pose cards are optional (the scene falls back to standing); object cards are required when placed.
 const carded=m.cast.filter(c=>c.card).map(c=>c.id);
 const objectCards=[...new Set(m.shots.flatMap(s=>(s.props||[]).filter(p=>p.kind==='asset'&&p.asset.startsWith('card/')).map(p=>'obj-'+p.asset.slice(5))))];
-if(carded.length||(objectCards.length&&m.advancedEdit===1)){await mkdir(path.join(web,'cards'),{recursive:true});const present=[];
+if(carded.length||m.advancedEdit===1){await mkdir(path.join(web,'cards'),{recursive:true});const present=[];
   const copy=async(key,required)=>{let bytes;try{bytes=await readFile(path.join(path.dirname(path.resolve(input)),'cards',`${key}.png`));}catch(e){if(required)throw Error('Missing painted card');return;}
     if(bytes.length<200||bytes.length>12e6||bytes.readUInt32BE(0)!==0x89504e47)throw Error('Invalid character card');
     await writeFile(path.join(web,'cards',`${key}.png`),bytes);present.push(key);};
