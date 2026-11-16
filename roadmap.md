@@ -33,5 +33,6 @@
 - [ ] C. Owner idea: rigged 3D characters with clothing, expressions, gestures and reusable animations (major upgrade)
 - [x] Shorts Writer v4 switched on (SHORTS_WRITER_V4=on) with automatic fallback to the backup writer
 - [x] Fixed empty cartoon direction + character-name repair; Emu War test video finished and saved
-- [~] Nov 16 owner: connect the new Blender 3D engine to real Advanced videos (option 1), then make the same Emu War test video; quality improvements next
+- [x] Nov 16 owner: new Blender 3D engine connected to real Advanced videos; Emu War test video made and saved (47 s)
+- [ ] Next (owner): quality pass on the 3D engine — more set variety per story, faces/outfits, speed (render ~40 min; only ~2 graphics machines ran at once)
 - [ ] Pinned 'explosion' sound source changed upstream: full cartoon image rebuilds fail at fetch-sounds until re-pinned (the :blender image builds on :slim, unaffected)
