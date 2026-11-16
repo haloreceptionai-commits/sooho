@@ -66,7 +66,7 @@ export function applyStaging(direction: Direction, narration: string[], answer: 
     }
     if (!actors.length) {
       log.push(`line ${i + 1}: nobody from the cast yet — place and objects only`);
-      return { ...sc, empty: true, speaker: undefined };
+      return { ...sc, empty: true, actors: undefined, speaker: undefined };
     }
     const lead = actors[0]!;
     return { ...sc, empty: undefined, actors, actor: lead.actor, action: lead.action, expression: lead.expression, speaker: sc.speaker && actors.some(a => a.actor === sc.speaker) ? sc.speaker : undefined };
