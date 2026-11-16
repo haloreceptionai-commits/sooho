@@ -12,7 +12,7 @@
 
 # Roadmap — Advanced Video AI v2
 - [ ] Nov 16 owner correction: integrate topic-independent story-derived planning, asset resolution and composition/preview rules into future generation; Molasses is regression evidence, not a special production path. Verify across unrelated topics without closest-wrong assets.
-- [ ] Nov 16 owner character replacement: find licensed rigged humans matching uploaded cartoonfather2 (full clothed bodies, hands, expressive eyes/hair); confirm acquisition before import, verify pose/interaction stills and then replace current humans. Asset acquisition decision pending; do not start Stage 2b or a full render.
+- [~] Nov 16 owner character replacement: owner chose free credited rig; official Snow v4 downloaded, checksum/required credit recorded and asset preserved. Two local 3D pose stills verified with embedded scripts disabled (34 seconds total across two passes, Azure/art $0); 110 existing tests pass. Comparison delivered: Snow has fuller bodies but is visibly different from cartoonfather2. STOP for appearance approval before future-video replacement; clothing/identity variation, full action retargeting, facial drivers and interaction tests remain unverified. Stage 2b/full render remain blocked.
 - [x] Accelerate and verify topic discovery: Parallel fast searches + two parallel exact-passage reviews replace oversized full-page reviews. Real owner search returned six facts in 48.4 seconds; saving, selection and saved reload verified; 13 tests passed. Instant fresh research is not promised.
 - [x] Script: 3 repairs, word budget by length, kid-level word checker, keep-watching judge
 - [x] Cast: people/animals/objects named in script get cards (up to 4)
