@@ -1,3 +1,4 @@
+import { exactDuration } from "@/lib/shorts-writer/stage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Film, Smartphone, Sparkles, Loader2, ArrowUpRight, Mic } from "lucide-react";
@@ -47,6 +48,7 @@ function Create() {
   const checkHistory = useServerFn(getTopicHistory);
   const [checking, setChecking] = useState(false);
   const [topicId, setTopicId] = useState<string | undefined>();
+  const [ownScript, setOwnScript] = useState("");
   const [selectedFact, setSelectedFact] = useState<DiscoveredTopic | undefined>();
   const used: TopicUse[] = [...history, ...videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }))];
   const unavailable = topicUnavailable(topic, topicId, used);
@@ -66,7 +68,9 @@ function Create() {
         return;
       }
       const chosen = selectedFact;
-      startVideo({ topic: topic.trim(), topicId, ...(chosen ? { topicSource: { url: chosen.source, fact: chosen.fact } } : {}), format, durationSec: format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx", engine });
+      const exact = format === "short" && ownScript.trim() ? ownScript.trim() : undefined;
+      startVideo({ topic: topic.trim(), topicId, ...(chosen ? { topicSource: { url: chosen.source, fact: chosen.fact } } : {}), format, durationSec: exact ? exactDuration(exact) : format === "short" ? shortSec : longMin * 60, archetype: arch, style, voice: "onyx", engine, ...(exact ? { exactScript: exact } : {}) });
+      setOwnScript("");
       toast.success("Video generation started — you can keep working.");
       setTopic(""); setTopicId(undefined); setSelectedFact(undefined);
     } catch (error) {
@@ -116,6 +120,14 @@ function Create() {
               </div>
             )}
           </Panel>
+
+          {format === "short" && (
+            <Panel className="p-5">
+              <label htmlFor="own-script" className={label}>Your own script (optional)</label>
+              <textarea id="own-script" rows={6} className={`${input} mt-2 h-auto py-2`} value={ownScript} onChange={(e) => setOwnScript(e.target.value)} placeholder="Paste a finished narration to use word for word. Leave empty to have the script written for you." />
+              {ownScript.trim() && <p className="mt-2 font-mono text-[11px] text-muted-foreground">{ownScript.trim().split(/\s+/).length} words · about {exactDuration(ownScript)}s · spoken exactly as written</p>}
+            </Panel>
+          )}
 
           {/* 3. Voice & style */}
           <Panel className="p-5">
