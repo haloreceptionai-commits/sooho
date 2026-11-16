@@ -63,7 +63,7 @@ export const shapeSentences = (t: string) => t.replace(/[“”]/g, '"').replace
 /** The hook gives away the explanation instead of holding it back. */
 const GIVEAWAY = /\b(because|which is why|that'?s why|the reason|in order to|so that|due to|this is how|here'?s why)\b/i;
 /** Tension markers: negation, reversal or a strange consequence. */
-const TENSION = /\b(no|not|never|nobody|nothing|without|yet|but|so|only|still|even|instead|until|trapped|secret|spied|impossible|wrong)\b|n't\b|\d/i;
+const TENSION = /\b(while|although|despite|even though|no|not|never|nobody|nothing|without|yet|but|so|only|still|even|instead|until|trapped|secret|spied|impossible|wrong)\b|n't\b|\d/i;
 /** A line that keeps a loop open. */
 const LOOP = /\?["']?$|\b(yet|but|then|until|insane|impossible|nothing|nobody|no one|secret|mystery|strange|wrong|exactly what|the real|turns out|instead)\b|n't\b/i;
 
@@ -132,4 +132,18 @@ export function shapeIssues(script: string): ShapeReport {
   if (/^(and|so) (that|this) /i.test(sents[sents.length - 1] ?? "") || overlap(sents[sents.length - 1] ?? "", hook) >= 0.6) issues.push("Shape close copies the hook; write a new twist sentence that reuses only two or three hook words");
   if (/\b(in summary|in short|to sum up|overall|the new method|that is how|this is how)\b/i.test(sents[sents.length - 1] ?? "")) issues.push("Shape close ends on a summary; end on the twist that echoes the hook");
   return { issues, hookWords: hw, shortShare, longestGapSec, payoff, echo };
+}
+
+/** Shorts keep the selected, checked hook word for word: if the writer reworded it into a weaker line, put the chosen hook back as the first sentence. */
+export function lockShapeHook(plan: { script?: string; scenes: { narration: string }[] }, hook: string): void {
+  const chosen = hook.trim();
+  if (!chosen || hookShapeIssues(chosen).length) return;
+  const first = plan.scenes[0];
+  if (!first) return;
+  const sents = shapeSentences(first.narration);
+  const opening = sents[0] ?? "";
+  if (opening.replace(/\W/g, "").toLowerCase() === chosen.replace(/\W/g, "").toLowerCase() || !hookShapeIssues(opening).length) return;
+  const rest = sents.slice(1).join(" ");
+  first.narration = rest ? `${chosen} ${rest}` : chosen;
+  if (typeof plan.script === "string") plan.script = plan.scenes.map((s) => s.narration).join(" ");
 }

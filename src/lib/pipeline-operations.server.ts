@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { azureOpenAIRequest } from './azure-openai.server';
 import { generateSpeech } from '@lovable.dev/ai-gateway';
 import { ADVANCED_STORY_DIRECTION } from './advanced-story';
-import { STORY_SHAPE_DIRECTION, STORY_SHAPE_JUDGE } from './story-shape';
+import { STORY_SHAPE_DIRECTION, STORY_SHAPE_JUDGE, lockShapeHook } from './story-shape';
 
 // Scripts and images use the owner's Azure resource; narration remains Gemini.
 
@@ -532,6 +532,7 @@ The research may list tries, a skeptic, a myth or an analogy: use them ONLY if t
 JSON fields: question = the held-back question the story answers; hero = the real person, or the object if there is no person; loop_opened "main" where that question is planted and loop_closed "main" where it is answered; money = true on the hook scene and the payoff scene; each visual literally shows its narrated noun/action; at most 3 recurring characters. Shot mix: at least 40% wide or aerial, about 30% action, about 20% macro, at most 30% faces, never a face first. hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook.`;
     const plan = await azureJson<Plan>(data.deployment, data.shape ? `${data.kid ? `${ADVANCED_STORY_DIRECTION}\n` : ''}${shapeSystem}` : data.kid ? advancedSystem : system + repairPriority, user, "video_plan", planSchema, "Script writer");
     if (!plan.scenes?.length) throw new Error("Script writer returned an empty plan");
+    if (data.shape && data.hook) lockShapeHook(plan, data.hook);
     return plan;
   };
 
