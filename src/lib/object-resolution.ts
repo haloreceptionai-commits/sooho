@@ -27,6 +27,14 @@ export function builtInMatches(kind: string, phrase: string): boolean {
   const need = phraseWords(phrase); const have = new Set(words(kind.replace(/_/g, ' ')));
   return need.length > 0 && need.every(w => have.has(w));
 }
+// Painted cards cannot carry readable text, and people are never painted objects (owner rule), so these phrases are logged, not drawn.
+const TEXTUAL = /\b(caption\w*|label\w*|reading|marked|sign|signs|signage|text|letters?|words?|headline\w*|banner|graphic\w*|symbol\w*|diagram\w*|chart\w*|icon\w*|question mark|arrow|editorial|illustrative|overlay|title card)\b|["“”']\s*[A-Z]{2,}|\b[A-Z]{3,}\b/;
+const PEOPLE = /\b(person|people|man|men|woman|women|child|children|figure\w*|rescuers?|workers?|crowd\w*|soldiers?|judge|auditor|owner|portrait|silhouette of a (man|woman|person))\b/i;
+export function unpaintable(phrase: string): string | null {
+  if (TEXTUAL.test(phrase)) return 'text or graphic, not a physical object';
+  if (PEOPLE.test(phrase)) return 'a person, not an object';
+  return null;
+}
 export const objectSlug = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30);
 
 /**
@@ -42,10 +50,23 @@ export function resolveSceneObjects<T extends Scene>(scenes: T[], maxCards = 8, 
     const id = objectSlug(o.id || o.phrase); const p = String(o.phrase ?? '').trim();
     if (id && p && (!cardIds.has(id) || p.length > (cardIds.get(id) ?? '').length)) cardIds.set(id, p);
   }
-  const allowedCards = new Set<string>();
+  // Objects that recur across more scenes are painted first; the same physical object keeps one card.
+  const uses = new Map<string, number>();
+  for (const s of scenes) for (const id of new Set((s.objects ?? []).map(o => objectSlug(o.id || o.phrase)))) if (id) uses.set(id, (uses.get(id) ?? 0) + 1);
+  const ranked = [...uses.keys()].filter(id => !unpaintable(cardIds.get(id) ?? '')).sort((a, b) => (uses.get(b) ?? 0) - (uses.get(a) ?? 0));
+  const allowedCards = new Set(ranked.slice(0, Math.max(0, maxCards)));
+  const nameWords = (id: string) => phraseWords(id.replace(/_/g, ' '));
   const out = scenes.map((s, i) => {
     const objs = (s.objects ?? []).map(o => ({ id: objectSlug(o.id || o.phrase), phrase: String(o.phrase ?? '').trim().slice(0, 160), size: o.size }))
-      .filter(o => o.id && o.phrase).slice(0, 3);
+      .filter(o => o.id && o.phrase).filter(o => { const why = unpaintable(o.phrase); if (why) missing.push({ scene: i, phrase: o.phrase, reason: why }); return !why; })
+      .map(o => {
+        // A new id naming an already-painted object ("steel tank wall tearing" -> molasses_tank) reuses that card.
+        if (allowedCards.has(o.id)) return o;
+        const pw = new Set(phraseWords(o.phrase));
+        const same = [...allowedCards].find(id => nameWords(id).length > 0 && nameWords(id).every(w => pw.has(w)));
+        return same ? { ...o, id: same } : o;
+      })
+      .filter((o, k, a) => a.findIndex(x => x.id === o.id) === k).slice(0, 3);
     const phrases = objs.map(o => o.phrase);
     const kept = (s.props ?? []).filter(p => {
       if (p.kind === 'asset' && p.asset?.startsWith('card/')) return false; // re-derived below from phrases
@@ -61,8 +82,7 @@ export function resolveSceneObjects<T extends Scene>(scenes: T[], maxCards = 8, 
       if (model) { props.push({ kind: 'asset', asset: model.id, place, motion: 'none', phrase: o.phrase, size: o.size }); continue; }
       const builtIn = kept.find(p => p.kind !== 'asset' && builtInMatches(p.kind, o.phrase));
       if (builtIn) { props.push({ ...builtIn, phrase: o.phrase, size: o.size }); continue; }
-      if (!allowedCards.has(o.id) && allowedCards.size >= maxCards) { missing.push({ scene: i, phrase: o.phrase, reason: 'painted object limit reached' }); continue; }
-      allowedCards.add(o.id);
+      if (!allowedCards.has(o.id)) { missing.push({ scene: i, phrase: o.phrase, reason: 'painted object limit reached' }); continue; }
       props.push({ kind: 'asset', asset: `card/${o.id}`, place, motion: 'none', phrase: cardIds.get(o.id) ?? o.phrase, size: o.size });
     }
     for (const p of kept) if (props.length < 4 && !props.some(q => q === p || (q.asset && q.asset === p.asset) || (!q.asset && q.kind === p.kind))) props.push(p);
