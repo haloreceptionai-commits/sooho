@@ -176,6 +176,13 @@
       "when": 1794685076027,
       "tag": "0024_create_topic_discoveries",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794844127063,
+      "tag": "0025_video_step_locks",
+      "breakpoints": true
     }
   ]
 }
