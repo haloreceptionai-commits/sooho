@@ -27,7 +27,11 @@ export const cartoonScene = z.object({
   props: z.array(z.object({ kind: z.enum(VOCAB.props), place: z.enum(VOCAB.places), motion: z.enum(VOCAB.prop_motions),
     // kind 'asset' names one object from the bundled CC0 library; the worker rejects unknown ids.
     // 'card/<name>' is an Advanced Video AI painted story object (its PNG travels with the job).
-    asset: z.string().regex(/^[a-z0-9-]+\/[A-Za-z0-9_.-]{1,80}$/).optional() })).max(4).optional(),
+    asset: z.string().regex(/^[a-z0-9-]+\/[A-Za-z0-9_.-]{1,80}$/).optional(),
+    // Advanced: the descriptive phrase that defines this object and its real-world size (decides card height and placement).
+    phrase: z.string().max(160).optional(), size: z.enum(['small', 'medium', 'large', 'huge']).optional() })).max(4).optional(),
+  // Advanced: free-text real place for the line ("Commercial Street, Boston's North End, 1919"); the 3D planner never forces a kit.
+  location: z.string().max(160).optional(),
   fx: z.array(z.enum(VOCAB.fx)).max(3).optional(),
   cues: z.array(z.object({ word: z.number().int().min(0).max(200), kind: z.enum(VOCAB.sounds) })).max(4).optional(),
   keyword: z.string().max(40).optional(),

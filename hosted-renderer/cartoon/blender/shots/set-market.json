@@ -1,0 +1,30 @@
+{
+ "set": "market",
+ "duration": 3,
+ "lighting": "day",
+ "samples": 64,
+ "engine": "cycles",
+ "size": [
+  1080,
+  1920
+ ],
+ "frames": [
+  1
+ ],
+ "camera": {
+  "from": [
+   1,
+   1,
+   1.8
+  ],
+  "look_at": [
+   -2.5,
+   8,
+   2.5
+  ],
+  "lens": 30,
+  "fstop": 5.6
+ },
+ "grade": "Punchy",
+ "haze": 0.001
+}

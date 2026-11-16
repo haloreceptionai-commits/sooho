@@ -170,7 +170,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
         out.append({'start':a,'end':b,'world':d['world'],'light':d['light'],'shot':k,'move':mv,'mood':mood,
           'shake':.6 if mv=='shake' else (.25 if 'lightning' in (d.get('fx') or []) else 0),
           'speaker':speaker if speaker in ids else None,'keyword':keyword,'props':props,'fx':d.get('fx') or [],
-          'camera':camera,'actors':actors,'events':mine})
+          'camera':camera,'actors':actors,'events':mine,**({'location':str(d['location'])[:160]} if d.get('location') else {})})
     return out
 
 if __name__=='__main__':
