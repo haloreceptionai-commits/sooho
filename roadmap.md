@@ -34,5 +34,5 @@
 - [x] Shorts Writer v4 switched on (SHORTS_WRITER_V4=on) with automatic fallback to the backup writer
 - [x] Fixed empty cartoon direction + character-name repair; Emu War test video finished and saved
 - [x] Nov 16 owner: new Blender 3D engine connected to real Advanced videos; Emu War test video made and saved (47 s)
-- [ ] Next (owner): quality pass on the 3D engine — more set variety per story, faces/outfits, speed (render ~40 min; only ~2 graphics machines ran at once)
+- [~] Nov 16 owner: 3D engine quality pass — art director (places from spoken words, 2-3 s setups, camera grammar, walking/running, running animal herds, crowds, props, word-timed gunfire), 4 new places (farm, outback, forest, market), 2 render lanes per machine; Eevee impossible on Azure T4 (no GPU display driver), Cycles kept. Remaining: full test video + speed measurement
 - [ ] Pinned 'explosion' sound source changed upstream: full cartoon image rebuilds fail at fetch-sounds until re-pinned (the :blender image builds on :slim, unaffected)
