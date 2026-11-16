@@ -6,8 +6,9 @@ from object_specs import validate_object
 from effects import KINDS as EFFECT_KINDS
 
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day'}
+PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -25,10 +26,11 @@ def validate_shot(s):
     if not isinstance(d, (int, float)) or not 0.2 <= d <= 12: raise ValueError('duration 0.2-12s')
     c = s.get('camera')
     if not isinstance(c, dict): raise ValueError('camera required')
-    if set(c) - {'from', 'to', 'look_at', 'lens', 'fstop', 'whip_from', 'shake'}: raise ValueError('unknown camera keys')
+    if set(c) - {'from', 'to', 'look_at', 'look_to', 'lens', 'fstop', 'whip_from', 'shake'}: raise ValueError('unknown camera keys')
     _vec(c.get('from'), 3, 'camera.from'); _vec(c.get('look_at'), 3, 'camera.look_at')
     if 'to' in c: _vec(c['to'], 3, 'camera.to')
     if 'whip_from' in c: _vec(c['whip_from'], 3, 'camera.whip_from')
+    if 'look_to' in c: _vec(c['look_to'], 3, 'camera.look_to')
     sh = c.get('shake', [])
     if not isinstance(sh, list) or len(sh) > 6: raise ValueError('up to 6 shake hits')
     for h in sh:
@@ -61,14 +63,24 @@ def validate_shot(s):
         if ch.get('action','stand') not in ACTIONS:raise ValueError('unknown action')
         if ch.get('expression','neutral') not in EXPRESSIONS:raise ValueError('unknown expression')
         if ch.get('outfit','worker') not in OUTFITS:raise ValueError('unknown outfit')
-        if ch.get('held') not in (None,'crate','tool','cup'):raise ValueError('unknown held prop')
+        if ch.get('held') not in (None,'crate','tool','cup','rifle'):raise ValueError('unknown held prop')
     cards = s.get('cards', [])
     if not isinstance(cards, list) or len(cards) > 6: raise ValueError('up to 6 painted cards')
     for cd in cards:
-        if not isinstance(cd, dict) or set(cd) - {'image', 'pos', 'height'}: raise ValueError('unknown card keys')
+        if not isinstance(cd, dict) or set(cd) - {'image', 'pos', 'height', 'to', 'hop'}: raise ValueError('unknown card keys')
+        if 'to' in cd: _vec(cd['to'], 2, 'card.to')
+        if not 0 <= cd.get('hop', 0) <= 0.5: raise ValueError('card hop 0-0.5')
         if not isinstance(cd.get('image'), str) or not re.fullmatch(r'[a-z0-9_-]{1,40}\.png', cd['image']): raise ValueError('card image must be a plain png name')
         _vec(cd.get('pos'), 2, 'card.pos')
         if not 0.3 <= cd.get('height', 1.6) <= 4: raise ValueError('card height 0.3-4')
+    props = s.get('props', [])
+    if not isinstance(props, list) or len(props) > 8: raise ValueError('up to 8 props')
+    for p in props:
+        if not isinstance(p, dict) or set(p) - {'id', 'pos', 'height', 'yaw'}: raise ValueError('unknown prop keys')
+        if p.get('id') not in PROP_IDS: raise ValueError(f'prop {p.get("id")!r} is not a whitelisted offline model')
+        _vec(p.get('pos'), 2, 'prop.pos')
+        if not 0.1 <= p.get('height', 1) <= 12: raise ValueError('prop height 0.1-12')
+        if not -720 <= p.get('yaw', 0) <= 720: raise ValueError('prop yaw')
     if not 0 <= s.get('haze', 0) <= 0.2: raise ValueError('haze 0-0.2')
     if s.get('grade', 'Medium High Contrast') not in GRADES: raise ValueError('unknown grade')
     if not 1 <= s.get('samples', 32) <= 256: raise ValueError('samples 1-256')
