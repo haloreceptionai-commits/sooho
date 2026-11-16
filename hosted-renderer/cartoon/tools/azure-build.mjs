@@ -15,6 +15,7 @@ const token = (await (await fetch(`https://login.microsoftonline.com/${need('AZU
   body: new URLSearchParams({ grant_type: 'client_credentials', client_id: need('AZURE_CLIENT_ID'), client_secret: need('AZURE_CLIENT_SECRET'), scope: 'https://management.azure.com/.default' }) })).json()).access_token;
 const arm = async (method, url, body) => { const r = await fetch(url, { method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) });
   if (!r.ok) throw Error(`ACR ${r.status}: ${(await r.text()).slice(0, 600)}`); return r.status === 204 ? {} : r.json(); };
+execFileSync(process.execPath, [path.join(import.meta.dirname, 'verify-source.mjs'), root], { stdio: 'inherit' });   // abort before building from a damaged tree (CRLF, changed pinned files)
 const tar = path.join(os.tmpdir(), 'cartoon-src.tar.gz');   // os.tmpdir works on Windows too; use its own bsdtar there (Git's tar reads C: as a host)
 execFileSync(process.platform === 'win32' ? 'C:/Windows/System32/tar.exe' : 'tar', ['-czf', tar, '--exclude=__pycache__', '--exclude=node_modules', '--exclude=test_*.py', '-C', root, '.']);
 console.log('source', Math.round(statSync(tar).size / 1e6), 'MB');
