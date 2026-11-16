@@ -78,7 +78,11 @@ export function shapeIssues(script: string): ShapeReport {
   else if (!TENSION.test(hook)) issues.push("Shape hook has no contradiction; pair the strange fact with what makes it impossible");
   const lens = sents.map((s) => words(s).length);
   const shortShare = lens.filter((n) => n <= 12).length / Math.max(1, lens.length);
-  if (shortShare < 0.75) issues.push(`Shape lines: only ${Math.round(shortShare * 100)}% of lines are 12 words or fewer (needs 75%); stack short lines, one idea each`);
+  const avg = lens.reduce((a, b) => a + b, 0) / Math.max(1, lens.length);
+  // Calibrated on the two gold scripts (60-71% of lines <= 12 words, average 8.6-11.6 words, longest 21).
+  if (shortShare < 0.6 || avg > 12.5) issues.push(`Shape lines: average ${avg.toFixed(1)} words, ${Math.round(shortShare * 100)}% of lines 12 words or fewer (needs average 12.5 or less and 60%); stack short lines, one idea each`);
+  const huge = sents.filter((x) => words(x).length > 22);
+  if (huge.length) issues.push(`Shape lines: "${huge[0]!.slice(0, 50)}" is over 22 words; split it`);
   // Loop spacing over the first 75% of the script (the reveal may run without new questions).
   const total = lens.reduce((a, b) => a + b, 0);
   let w = 0, last = 0, gap = 0;
@@ -89,7 +93,8 @@ export function shapeIssues(script: string): ShapeReport {
   });
   gap = Math.max(gap, Math.min(w, total * 0.75) - last);
   const longestGapSec = gap / WPS;
-  if (longestGapSec > 10.5) issues.push(`Shape loops: ${longestGapSec.toFixed(0)} seconds with no open question or reversal (needs one every 8-10 seconds)`);
+  // Gold scripts measure up to ~18 s between loop lines at the Shorts narration pace.
+  if (longestGapSec > 19) issues.push(`Shape loops: ${longestGapSec.toFixed(0)} seconds with no open question or reversal (gold scripts never go past ~18 seconds)`);
   // Payoff line: a short sentence (<= 8 words) in the last 40%.
   let acc = 0; let payoff: string | null = null;
   sents.forEach((s, i) => { if (acc >= total * 0.6 && lens[i]! <= 8 && lens[i]! >= 3) payoff ??= s; acc += lens[i]!; });
