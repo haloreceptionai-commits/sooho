@@ -585,6 +585,21 @@ JSON fields: question = the held-back question the story answers; hero = the rea
 
 /** Shorts Writer v4: the narration is final; this pass only adds scenes, pictures and cast without changing a word. */
 const wordsOf = (t: string) => t.toLowerCase().replace(/[’]/g, "'").replace(/[^a-z0-9' ]/g, " ").split(/\s+/).filter(Boolean).join(" ");
+/** Re-cut scene texts from the ORIGINAL voice-over (exact punctuation, curly quotes, dashes), keeping the director's
+ * scene boundaries. The render start demands scenes joined === script character for character; a dropped comma or
+ * straightened apostrophe from the AI would otherwise fail the video after paid voice/pictures. */
+export function snapScenesToNarration<T extends { narration: string }>(scenes: T[], narration: string): T[] {
+  const tokens = narration.split(/\s+/).filter(Boolean);
+  const count = (t: string) => (wordsOf(t) ? wordsOf(t).split(" ").length : 0);
+  const out: T[] = []; let k = 0;
+  scenes.forEach((sc, i) => {
+    let need = count(sc.narration); const take: string[] = [];
+    while (k < tokens.length && (need > 0 || (take.length && count(tokens[k]!) === 0))) { need -= count(tokens[k]!); take.push(tokens[k++]!); }
+    if (i === scenes.length - 1) while (k < tokens.length) take.push(tokens[k++]!);
+    if (take.length) out.push({ ...sc, narration: take.join(" ") });
+  });
+  return out;
+}
 async function splitLockedNarration(data: PlanInput, D: number, scenes: number): Promise<Plan> {
   const narration = data.lockedNarration!.join(" ");
   const system = `You are the visual director for a ${D}-second vertical story Short. The voice-over below is FINAL and approved: never add, remove, reorder or change a single word or punctuation mark.
@@ -594,7 +609,7 @@ For each scene: image_prompt literally shows the narrated noun/action; at most 3
   let last = "";
   for (let attempt = 0; attempt < 2; attempt++) {
     const plan = await azureJson<Plan>(data.deployment, system, attempt ? `${user}\nYour previous split changed the words (${last}). Copy the voice-over exactly.` : user, "video_plan", planSchema, "Scene director");
-    if (plan.scenes?.length && wordsOf(plan.scenes.map((s) => s.narration).join(" ")) === wordsOf(narration)) return { ...plan, script: narration };
+    if (plan.scenes?.length && wordsOf(plan.scenes.map((s) => s.narration).join(" ")) === wordsOf(narration)) return { ...plan, scenes: snapScenesToNarration(plan.scenes, narration), script: narration };
     last = `got ${plan.scenes?.map((s) => s.narration).join(" ").split(/\s+/).length ?? 0} words, expected ${narration.split(/\s+/).length}`;
   }
   throw new Error("The scene director could not keep the approved narration word for word. No voice or pictures were started.");

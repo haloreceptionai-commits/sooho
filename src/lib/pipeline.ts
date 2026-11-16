@@ -21,7 +21,7 @@ import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
 import { shortsWriterEnabled, shortsWriterStep } from '@/lib/shorts-writer/shorts-writer.functions';
 import { writerCalls } from '@/lib/shorts-writer/calls';
-import { runShortsV4 } from '@/lib/shorts-writer/stage';
+import { runExactScript, runShortsV4 } from '@/lib/shorts-writer/stage';
 import { autoFixPlan, eligibleHooks, preferRepair, preferAdvancedRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
@@ -196,6 +196,12 @@ export async function runVideo(id: string, input: VideoInput) {
     const writeScript = async () => {
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
+    if (input.exactScript?.trim()) {
+      const ex = await runExactScript({ script: input.exactScript, durationSec: input.durationSec, base: { topic: input.topic, format: input.format, durationSec: input.durationSec, archetype: 'Owner script', style: input.style, deployment: s.scriptDeployment, ...(advanced ? { kid: true } : {}) }, plan: (data) => withRetry(() => generatePlan({ data }), 3, 16000, 8 * 60_000), progress: (detail) => up({ detail }) });
+      const saved: ScriptCheckpoint = { plan: ex.plan, gate: ex.gate, report: ex.report, judgeOk: true, hookType: ex.hookType, moneyShot: ex.moneyShot };
+      up({ hooks: { best: ex.hook, runnerUp: ex.hook }, checks: [], scriptCheckpoint: saved }); await flushVideo(id);
+      return saved;
+    }
     if (input.format === 'short' && await withRetry(() => shortsWriterEnabled()).catch(() => false)) try {
       // Shorts Writer v4 (owner's task): facts -> spine -> hooks -> narrator script -> critic, then scenes split word for word.
       const research = [input.reference ? `Inspiration video transcript (research only; never copy its lines): ${input.reference.transcript.slice(0, 4000)}` : '', input.topicSource ? `Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify independently.` : ''].filter(Boolean).join('\n') || undefined;

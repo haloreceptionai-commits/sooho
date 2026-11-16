@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'blender'))
+from animals import ANIMAL  # noqa: E402
 from shot_director import compile_one, ZONES  # noqa: E402
 from shot_schema import validate_shot  # noqa: E402
 
@@ -30,7 +31,6 @@ OUTFIT = {'soldier': ('soldier', 'helmet'), 'veteran': ('soldier', 'helmet'), 'k
 PROP = {'magnifier': ('magnifier', 'swing'), 'coins': ('money_bag', 'hold'), 'gold_piece': ('money_bag', 'hold'), 'chest': ('money_bag', 'hold'),
         'cart': ('covered_cart', 'hold'), 'pan': ('gold_pan', 'pour'), 'cannon': ('gold_shotgun', 'fire')}
 FX = {'smoke': 'smoke', 'fire': 'fire', 'dust': 'dust', 'burst': 'explosion', 'sparkle': 'sparks', 'rain': 'rain', 'splash': 'dust'}
-ANIMAL = re.compile(r'(emu|bird|dog|cat|horse|cow|pig|sheep|goat|rat|mouse|wolf|bear|lion|tiger|fox|camel|elephant|monkey|ape|whale|fish|shark|duck|goose|chicken|hen|parrot|owl|eagle|crow|pigeon|rabbit|deer|seal|snake|frog|insect|bee|animal|creature|beast)')
 SHIRTS = [[0.72, 0.42, 0.22], [0.2, 0.32, 0.6], [0.55, 0.2, 0.2], [0.3, 0.5, 0.3]]
 SCALE = (810, 1440)  # rendered size, upscaled to 1080x1920 (about 1.8x faster on the T4)
 

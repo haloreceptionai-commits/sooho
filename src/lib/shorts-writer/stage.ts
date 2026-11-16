@@ -36,3 +36,21 @@ export async function runShortsV4(o: { calls: WriterCalls; durationSec: number; 
   const money = plan.scenes.find((s) => s.money && s.beat !== 'hook') ?? plan.scenes[0];
   return { plan, gate: v4Gate(writer), report: { revealSec, shotMix }, judgeOk: true, hookType: 'contradiction', moneyShot: money?.image_prompt ?? '', writer };
 }
+
+/** Owner's exact script: lines are final (never rewritten or judged). Only the scene director splits them, word for word. */
+export function exactLines(script: string): string[] {
+  return script.replace(/\r/g, "").split(/\n\s*\n|\n/).map((l) => l.trim().replace(/\s+/g, " ")).filter(Boolean);
+}
+export async function runExactScript(o: { script: string; durationSec: number; base: PlanInput; plan: (data: PlanInput) => Promise<Plan>; progress?: Progress | undefined }): Promise<Omit<V4Script, 'writer'> & { hook: string }> {
+  const lines = exactLines(o.script);
+  if (!lines.length) throw new Error('The script is empty.');
+  await o.progress?.('Using your exact script · splitting it into scenes…');
+  const { repair: _r, ...rest } = o.base; void _r;
+  const plan = await o.plan({ ...rest, facts: '', hook: lines[0]!, lockedNarration: lines, shape: false });
+  const shotMix: Record<string, number> = {};
+  for (const s of plan.scenes) shotMix[s.shot] = (shotMix[s.shot] ?? 0) + 1 / plan.scenes.length;
+  const money = plan.scenes.find((s) => s.money && s.beat !== 'hook') ?? plan.scenes[0];
+  return { plan, gate: { score: 100, ready: true, parts: { owner: 100 }, blockers: [] }, report: { revealSec: 0, shotMix }, judgeOk: true, hookType: 'owner-script', moneyShot: money?.image_prompt ?? '', hook: lines[0]! };
+}
+/** Narration length for an exact script at the Shorts pace (~153 words per minute), clamped to Shorts limits. */
+export const exactDuration = (script: string) => Math.max(15, Math.min(120, Math.round(script.split(/\s+/).filter(Boolean).length / 153 * 60)));

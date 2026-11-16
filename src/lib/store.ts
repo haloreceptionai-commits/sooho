@@ -18,6 +18,7 @@ export interface VideoInput {
   style: string;
   voice: string;
   engine?: VideoEngine;
+  exactScript?: string | undefined; // owner's own narration, used word for word (no AI rewriting)
 }
 
 export type { VideoEngine } from './video-engines';

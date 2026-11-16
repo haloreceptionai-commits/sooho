@@ -12,8 +12,13 @@ KIT_ERA = {'village': (0, 1850), 'castle': (0, 1700), 'market': (0, 1850), 'stre
            'mine_tunnel': (1800, 1960), 'rail_yard': (1830, 1950), 'ship_deck': (0, 1900)}
 
 
+BC = re.compile(r'\b(\d{1,4})\s*(bce|bc|b\.c\.)(?![a-z])', re.I)
+AD = re.compile(r'\b(?:ad|a\.d\.)\s*(\d{1,4})\b', re.I)
+
+
 def place_slug(location):
-    t = YEAR.sub(' ', str(location or '').lower())
+    t = AD.sub(' ', BC.sub(' ', str(location or '').lower()))
+    t = YEAR.sub(' ', t)
     t = re.sub(r'\b(1[0-9]{3}|20[0-9]{2})s\b', ' ', t)
     words = [w for w in re.findall(r'[a-z0-9]+', t) if w not in STOP][:4]
     kept = []
@@ -24,7 +29,10 @@ def place_slug(location):
 
 
 def story_year(text):
-    c = Counter(int(y) for y in YEAR.findall(str(text or '')))
+    text = str(text or '')
+    years = [-int(y) for y, _ in BC.findall(text)] + [int(y) for y in AD.findall(text)]
+    years += [int(y) for y in YEAR.findall(AD.sub(' ', BC.sub(' ', text)))]
+    c = Counter(years)
     if not c: return None
     return sorted(c.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
 
