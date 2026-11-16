@@ -31,4 +31,5 @@
 - [ ] A. Owner idea Nov 15 21:01: AI-generated story objects (geometry/materials) saved as reusable GLB library assets (high priority, after steps 7-10)
 - [ ] B. Owner idea: visual + meaning-based model retrieval instead of keyword matching (high priority)
 - [ ] C. Owner idea: rigged 3D characters with clothing, expressions, gestures and reusable animations (major upgrade)
-- [~] Shorts Writer v4 (owner task file Nov 16): built in src/lib/shorts-writer, wired into Create (browser + background) and Script Writer behind SHORTS_WRITER_V4 (off); acceptance runs on Franklin oil, rail gaps, Moon Hoax in progress; waits on owner approval to switch on.
+- [x] Shorts Writer v4 switched on (SHORTS_WRITER_V4=on) with automatic fallback to the backup writer
+- [x] Fixed empty cartoon direction + character-name repair; Emu War test video finished and saved
