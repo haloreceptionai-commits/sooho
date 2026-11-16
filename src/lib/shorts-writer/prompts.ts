@@ -60,6 +60,7 @@ STYLE RULES:
 - Similes/metaphors only if they make a mechanism easier to understand; drop decorative ones.
 - No bare date lines like "1945." on their own; put the date inside a sentence.
 - Every line advances the story. No filler, no line that restates the previous one.
+- SIMPLICITY OVER COMPLETENESS: follow ONE story thread and use only the 5-8 facts that thread needs; leave the rest out. Never list several technical terms, methods or numbers in one line. No jargon a 12-year-old doesn't know (no "neutral temperature", "destressed", "tensors", "Marangoni", "hydro-oxygen"); say what it does in everyday words instead.
 - Tell it as a STORY: people doing things, a problem, what they tried, what happened. Never write like a report ("he reported that", "he attributed", "he emphasized", journal or proceedings details, units lectures).
 - The closing line must be a plain sentence a listener understands at once, not a slogan or abstract phrase.
 - Use ONLY facts marked certain in the fact sheet. No invented names, dates, numbers or quotes.`;
