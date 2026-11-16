@@ -5,6 +5,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 const need = n => { const v = process.env[n]; if (!v) throw Error(`${n} missing`); return v; };
 const root = path.resolve(import.meta.dirname, '..', process.argv[3] || '.');
 const imageName = process.argv[4] || 'cartoon-renderer';
@@ -14,8 +15,8 @@ const token = (await (await fetch(`https://login.microsoftonline.com/${need('AZU
   body: new URLSearchParams({ grant_type: 'client_credentials', client_id: need('AZURE_CLIENT_ID'), client_secret: need('AZURE_CLIENT_SECRET'), scope: 'https://management.azure.com/.default' }) })).json()).access_token;
 const arm = async (method, url, body) => { const r = await fetch(url, { method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) });
   if (!r.ok) throw Error(`ACR ${r.status}: ${(await r.text()).slice(0, 600)}`); return r.status === 204 ? {} : r.json(); };
-const tar = '/tmp/cartoon-src.tar.gz';
-execFileSync('tar', ['-czf', tar, '--exclude=__pycache__', '--exclude=node_modules', '--exclude=test_*.py', '-C', root, '.']);
+const tar = path.join(os.tmpdir(), 'cartoon-src.tar.gz');   // os.tmpdir works on Windows too; use its own bsdtar there (Git's tar reads C: as a host)
+execFileSync(process.platform === 'win32' ? 'C:/Windows/System32/tar.exe' : 'tar', ['-czf', tar, '--exclude=__pycache__', '--exclude=node_modules', '--exclude=test_*.py', '-C', root, '.']);
 console.log('source', Math.round(statSync(tar).size / 1e6), 'MB');
 const up = await arm('POST', `${base}/listBuildSourceUploadUrl?api-version=2019-06-01-preview`);
 const put = await fetch(up.uploadUrl, { method: 'PUT', headers: { 'x-ms-blob-type': 'BlockBlob' }, body: readFileSync(tar) });
