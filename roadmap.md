@@ -32,3 +32,4 @@
 - [ ] B. Owner idea: visual + meaning-based model retrieval instead of keyword matching (high priority)
 - [ ] C. Owner idea: rigged 3D characters with clothing, expressions, gestures and reusable animations (major upgrade)
 - [~] Shorts Writer v4 (owner task file Nov 16): built in src/lib/shorts-writer, wired into Create (browser + background) and Script Writer behind SHORTS_WRITER_V4 (off); acceptance runs on Franklin oil, rail gaps, Moon Hoax in progress; waits on owner approval to switch on.
+- [ ] Fix 'Cartoon direction came back empty' on Advanced Shorts and resume the Emu War test video (self-healing)
