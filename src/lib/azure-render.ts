@@ -40,8 +40,9 @@ const RUN_ID = /^azure:(cartoon-preflight|cartoon-render-gpu|cartoon-render)-[a-
 /** Finishing an Advanced Video AI job (painted cards in the request) uses the Blender renderer unless switched off. */
 export function usesBlender(mode: 'preflight' | 'finish', input: unknown) {
   if (mode !== 'finish' || process.env['ADVANCED_BLENDER'] === 'off') return false;
-  const cards = (input as { manifest?: { cards?: unknown[] } })?.manifest?.cards;
-  return Array.isArray(cards) && cards.length > 0;
+  const manifest = (input as { manifest?: { cards?: unknown[]; advanced?: boolean } })?.manifest;
+  // People are 3D figures now, so an Advanced job may carry only object cards or none at all.
+  return manifest?.advanced === true || (Array.isArray(manifest?.cards) && manifest.cards.length > 0);
 }
 
 export const cartoonInputKey = (jobId: string, mode: 'preflight' | 'finish') => `cartoon-${jobId}/INPUT-${mode}-${Date.now().toString(36)}`;

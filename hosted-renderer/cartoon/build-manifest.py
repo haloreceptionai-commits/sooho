@@ -16,7 +16,7 @@ def build(request, alignment, voice):
     total=jsround(samples/48000*30)
     global ASPECT, ADVANCED
     ASPECT=16/9 if request.get('format')=='long' else 9/16
-    ADVANCED=any(c.get('card') for c in request['direction'].get('cast',[]))
+    ADVANCED=request.get('advanced') is True or any(c.get('card') for c in request['direction'].get('cast',[]))
     words=alignment['words']
     if not words or len(words)>(9000 if request.get('format')=='long' else 600):raise ValueError('Invalid alignment size')
     previous=0
@@ -170,7 +170,9 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
         out.append({'start':a,'end':b,'world':d['world'],'light':d['light'],'shot':k,'move':mv,'mood':mood,
           'shake':.6 if mv=='shake' else (.25 if 'lightning' in (d.get('fx') or []) else 0),
           'speaker':speaker if speaker in ids else None,'keyword':keyword,'props':props,'fx':d.get('fx') or [],
-          'camera':camera,'actors':actors,'events':mine,**({'location':str(d['location'])[:160]} if d.get('location') else {})})
+          'camera':camera,'actors':actors,'events':mine,**({'location':str(d['location'])[:160]} if d.get('location') else {}),
+          **({'sequence':[str(x)[:30] for x in d['sequence']][:4]} if d.get('sequence') else {}),**({'empty':True} if d.get('empty') is True else {}),
+          **({'cast_reasons':{a['actor']:str(a.get('reason',''))[:160] for a in (d.get('actors') or []) if a.get('reason')}} if any(a.get('reason') for a in (d.get('actors') or [])) else {})})
     return out
 
 if __name__=='__main__':

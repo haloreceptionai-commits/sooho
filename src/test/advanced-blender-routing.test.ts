@@ -5,6 +5,7 @@ describe('Advanced Video AI finishing uses the Blender 3D engine', () => {
   afterEach(() => { delete process.env['ADVANCED_BLENDER']; });
   it('routes finishing of a painted-card (Advanced) job to Blender', () => {
     expect(usesBlender('finish', { manifest: { cards: [{ id: 'bird' }] } })).toBe(true);
+    expect(usesBlender('finish', { manifest: { advanced: true, cards: [] } })).toBe(true);
   });
   it('keeps other cartoon jobs and all previews on the existing engine', () => {
     expect(usesBlender('finish', { manifest: { cards: [] } })).toBe(false);
