@@ -85,6 +85,9 @@ const headNoun = (phrase: string): string | undefined => {
   const first = phrase.toLowerCase().split(/\b(?:on|in|with|of|at|near|by|from|for|under|over|beside|made)\b/)[0] ?? "";
   const ws = words(first); return ws[ws.length - 1];
 };
+/** Packs made for games or toys, and abstract head nouns, never stand in for a real object in a story. */
+const BAD_PACKS = new Set(["platformer-kit", "mini-skate", "racing-kit", "blaster-kit", "tower-defense-kit", "food-kit", "holiday-kit", "q-ultimatefood", "q-cutemonsters", "cube-pets", "q-ultimatecrops", "mini-dungeon", "q-modularplatformer", "q-cubeworldkit", "blocky-characters", "mini-characters", "q-backgroundposedhumans"]);
+const BAD_HEAD = new Set(["key", "trap", "star", "coin", "heart", "gem", "spot", "point", "group", "way", "pass", "line", "time", "watch", "view", "sign", "mark", "idea", "plan", "force", "troop", "position"]);
 const nameWords = (id: string) => words(id.split("/")[1] ?? id);
 
 const SIZE_HEIGHT: Record<string, number> = { small: 0.7, medium: 1.6, large: 4.5, huge: 16 };
@@ -115,7 +118,7 @@ export function liftDressing<T extends { phrase?: string; id?: string; size?: st
     }
     const phrase = String(o.phrase ?? o.id ?? "");
     const head = headNoun(phrase);
-    const lib = phrase && head && !distinct ? searchLibrary(phrase, 12).find(m => m.type === "model" && nameWords(m.id).includes(head) && !nameWords(m.id).every(w => GENERIC.has(w))) : undefined;
+    const lib = phrase && head && !distinct && !BAD_HEAD.has(head) ? searchLibrary(phrase, 12).find(m => m.type === "model" && !BAD_PACKS.has(m.pack) && nameWords(m.id).includes(head) && !nameWords(m.id).every(w => GENERIC.has(w))) : undefined;
     if (!lib || dressing.length >= 12) { kept.push(o); continue; }
     const many = PLURAL.test(text);
     const h = sizeToHeight(o.size, text);

@@ -140,7 +140,7 @@ FX_WORDS = [(r'\b(explo\w*|blast\w*|bomb\w*|dynamite|boom)\b', 'explosion'), (r'
             (r'\b(lightning|thunder\w*|bolt)\b', 'lightning'), (r'\b(torch\w*|campfire\w*|bonfire\w*|ember\w*|ablaze|on fire|wildfire\w*)\b', 'embers')]
 IMPACT = re.compile(r'\b(boom|bang|crash\w*|explo\w*|smash\w*|hit|fir(e|ed|ing)|shot|slam\w*|destroy\w*|collaps\w*)\b')
 SCALE_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|millions?|army|armies|entire|whole|all|every|herds?|flocks?|mobs?|swarms?|hordes?|crowds?|nation|country)\b')
-CROWD_WORDS = re.compile(r'\b(army|armies|soldiers|troops|crowds?|farmers|people|villagers|citizens|men|workers|miners|public|locals|settlers|residents)\b')
+CROWD_WORDS = re.compile(r'\b(army|armies|soldiers?|troops?|crowds?|farmers|people|villagers|citizens|men|workers|miners|public|locals|settlers|residents|romans?|carthaginians?|fighters|legion\w*|warriors?|guards|columns|marching|soldiery|garrison|battalions?|regiments?|spectators|fans|passengers|sailors|crew)\b')
 HERD_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|herds?|flocks?|mobs?|swarms?|hordes?|groups?|packs?)\b')
 UPLOADED_HUMANS = os.environ.get('ADVANCED_HUMANS', 'egg') == 'uploaded'  # benchmark look: expressive egg-heads by default (Nov 16 2026 upgrade); 'uploaded' restores the rigged humans
 WOMAN = re.compile(r'\b(woman|women|wife|queen|mother|mom|girl|lady|ladies|daughter|princess|empress|sister|nurse|widow|actress|duchess|aunt|grandmother|she|her)\b')
@@ -511,11 +511,11 @@ class Director:
                     cd['to'] = at(S, F, R, depth + 0.2 * (k % 3), side + travel_dir * span / 2)
                     cd['hop'] = 0.18 if beast_verb in ('run', 'panic') else 0.08
                 cards.append(cd)
-        if CROWD_WORDS.search(whole) and st in OUTDOOR and kind in ('establish', 'wide', 'high', 'orbit', 'low'):
+        if CROWD_WORDS.search(whole) and st in OUTDOOR and kind in ('establish', 'wide', 'high', 'orbit', 'low', 'medium', 'track', 'ots'):
             cact = 'run' if verb in ('run', 'panic') else 'cheer' if verb == 'cheer' else 'stand'
             cc = at(S, F, R, 4.5, 0)
-            army = bool(re.search(r'\b(army|armies|soldiers?|troops|legion\w*|warriors?|battle|siege|march\w*)\b', whole))
-            crowd = {'count': 28 if kind in ('establish', 'high') else 16, 'center': cc, 'size': [7.0, 3.0], 'action': cact, 'kind': 'army' if army else 'civil',
+            army = bool(re.search(r'\b(army|armies|soldiers?|troops?|legion\w*|warriors?|battle|siege|march\w*|romans?|carthaginians?|fighters|guards|columns|garrison)\b', whole))
+            crowd = {'count': 60 if kind in ('establish', 'high') else 36 if kind in ('wide', 'orbit', 'low') else 20, 'center': cc, 'size': [9.0, 4.5], 'action': cact, 'kind': 'army' if army else 'civil',
                      'yaw': yaw_facing((-F[0], -F[1])), 'seed': i * 11 + part}
         # story object goes beside the subject; props frame the subject without blocking it
         anchor = cast[0]['pos'] if cast else S
