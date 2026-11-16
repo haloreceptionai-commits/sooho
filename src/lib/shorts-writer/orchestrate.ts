@@ -86,6 +86,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
       const targets = [...flagged, ...checkTargets(lines, cur.checks).filter((t) => !flagged.some((f) => f.n === t.n))];
       const problems = [...cur.checks, critic.ending_copies_hook ? 'The last line copies the hook; reframe the theme in new words.' : '', !critic.ending_makes_sense ? 'The ending does not make sense.' : '', !critic.real_twist ? 'The story has no real twist; make the assumption flip clear.' : '', critic.hook_reveals_answer ? 'The hook reveals the answer (it is locked, so hide the mechanism until the twist).' : ''].filter(Boolean);
       if (critic.ending_copies_hook || !critic.ending_makes_sense) { const n = lines.length; if (!targets.some((t) => t.n === n)) targets.push({ n, reason: 'closing line: reframe in new words' }); }
+      if (!critic.real_twist) { const a = Math.max(2, Math.round(lines.length * 0.6)), b = Math.min(lines.length - 1, Math.round(lines.length * 0.8)); for (let n = a; n <= b; n++) if (!targets.some((t) => t.n === n)) targets.push({ n, reason: `twist zone: make this flip land plainly: ${spine.twist}` }); }
       if (!targets.length && cur.checks.some((c) => c.startsWith('word count') || c.includes(' lines (needs'))) lines.forEach((_, i) => { if (i > 0) targets.push({ n: i + 1, reason: cur.checks.join('; ') }); });
       if (!targets.length) break;
       await say(`Rewriting ${targets.length} weak line${targets.length === 1 ? '' : 's'}…`);

@@ -22,7 +22,7 @@ export function hookIssues(hook: string): string[] {
 
 /** Words that look like names: capitalised tokens not at the start of a sentence. */
 function nameTokens(line: string): string[] {
-  const toks = line.replace(/[“”"]/g, "").replace(/[—–]/g, " — ").split(/\s+/);
+  const toks = line.replace(/[“”"]/g, "").replace(/[—–]/g, " — ").replace(/[’']s\b/g, "").split(/\s+/);
   const out: string[] = [];
   toks.forEach((t, i) => {
     const w = t.replace(/^[^A-Za-z]+|[^A-Za-z.']+$/g, "").replace(/'s$/, "");

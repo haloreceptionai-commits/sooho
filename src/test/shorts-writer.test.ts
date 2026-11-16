@@ -47,3 +47,7 @@ describe("shorts writer closing reframe", () => {
   it("accepts a closing reframe line marked as not narration", () => { const c = critic(); c.lines[2]!.narration = false; expect(criticPasses(c)).toBe(true); });
   it("splits names joined by a dash", () => expect(scriptIssues(["Hannibal was trapped, so he strapped fire to two thousand oxen.", "Rome waited—so Hannibal moved."], facts, 60).join()).not.toContain("Rome"));
 });
+
+describe("shorts writer possessive names", () => {
+  it("treats Hannibal's as the known name Hannibal", () => expect(scriptIssues(["Hannibal was trapped, so he strapped fire to two thousand oxen.", "Then Hannibal’s men moved at night."], facts, 60).join()).not.toContain("Hannibal"));
+});
