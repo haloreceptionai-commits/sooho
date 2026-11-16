@@ -36,3 +36,12 @@ describe("story shape line quality", () => {
     expect(shapeIssues(`${GOLD_THEREMIN}\nCoins drop. Crowds cheer.`).issues.some((i) => i.startsWith("Shape choppy"))).toBe(true);
   });
 });
+
+describe("story shape hook lock", () => {
+  it("puts the chosen hook back when the writer weakens it", async () => {
+    const { lockShapeHook } = await import("@/lib/story-shape");
+    const plan = { script: "", scenes: [{ narration: "Hannibal had a plan. Rome waits." }, { narration: "Then fire." }] };
+    lockShapeHook(plan, "Hannibal was trapped, so he strapped fire to two thousand oxen.");
+    expect(plan.scenes[0]!.narration).toBe("Hannibal was trapped, so he strapped fire to two thousand oxen. Rome waits.");
+  });
+});

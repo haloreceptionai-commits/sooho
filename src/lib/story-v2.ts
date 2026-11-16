@@ -82,7 +82,7 @@ export interface StoryReport { checks: Check[]; failed: Check[]; words: number; 
 
 export const wc = (t: string) => t.split(/\s+/).filter(Boolean).length;
 // splits on . ! ? but not after initials or titles ("John F. Ohmer", "Mr. Smith")
-export const splitSentences = (t: string) => t.replace(/[“”]/g, '"').split(/(?<!\b[A-Z]\.|\b(?:Mr|Mrs|Ms|Dr|St|Lt|Col|Gen|Maj|Capt|Sgt|Jr|Sr)\.)(?<=[.!?]["']?)\s+/).map((x) => x.trim()).filter(Boolean);
+export const splitSentences = (t: string) => t.replace(/[“”]/g, '"').replace(/([.!?])\s+"(?=\s|$)/g, '$1"').split(/(?<!\b[A-Z]\.|\b(?:Mr|Mrs|Ms|Dr|St|Lt|Col|Gen|Maj|Capt|Sgt|Jr|Sr)\.)(?<=[.!?]["']?)\s+(?![a-z])/).map((x) => x.trim()).filter(Boolean);
 const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]/g, " ");
 const STOP = new Set("the a an and but so then of to in on at by as or is are was were be it its this that these those he she they his her their them him you your we our what who how why when where do does did can could would will just even very from with into for not no yes".split(" "));
 export const contentWords = (t: string) => norm(t).split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w));

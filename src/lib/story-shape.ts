@@ -58,17 +58,17 @@ const WPS = 153 / 60;
 const words = (t: string) => t.split(/\s+/).filter(Boolean);
 const STOP = new Set("the a an and or but so of to in on at for with by from his her its their was were is are be been that this it he she they them had has have as into up out not no".split(" "));
 const keyWords = (t: string) => words(t.toLowerCase().replace(/[^a-z0-9' ]/g, " ")).map((w) => w.replace(/'s$/, "")).filter((w) => w.length > 2 && !STOP.has(w));
-export const shapeSentences = (t: string) => t.replace(/[“”]/g, '"').replace(/’/g, "'").split(/(?<!\b(?:U\.S|Mr|Mrs|Dr|St|BC|AD)\.?)(?<=[.!?]["']?)\s+/).map((x) => x.trim()).filter(Boolean);
+export const shapeSentences = (t: string) => t.replace(/[“”]/g, '"').replace(/’/g, "'").replace(/([.!?])\s+"(?=\s|$)/g, '$1"').split(/(?<!\b(?:U\.S|Mr|Mrs|Dr|St|BC|AD)\.?)(?<=[.!?]["']?)\s+(?![a-z])/).map((x) => x.trim()).filter(Boolean);
 
 /** The hook gives away the explanation instead of holding it back. */
 const GIVEAWAY = /\b(because|which is why|that'?s why|the reason|in order to|so that|due to|this is how|here'?s why)\b/i;
 /** Tension markers: negation, reversal or a strange consequence. */
-const TENSION = /\b(no|not|never|nobody|nothing|without|yet|but|so|only|still|even|instead|until|trapped|secret|spied|impossible|wrong)\b|n't\b|\d/i;
+const TENSION = /\b(while|although|despite|even though|no|not|never|nobody|nothing|without|yet|but|so|only|still|even|instead|until|trapped|secret|spied|impossible|wrong)\b|n't\b|\d/i;
 /** A line that keeps a loop open. */
 const LOOP = /\?["']?$|\b(yet|but|then|until|insane|impossible|nothing|nobody|no one|secret|mystery|strange|wrong|exactly what|the real|turns out|instead)\b|n't\b/i;
 
 /** Poetic metaphors, abstract "stakes" lines and a we/us narrator, none of which appear in the gold scripts. */
-const POETIC = /\b(we|us|our|ourselves)\b|\b(stakes? (is|are)|teeth|breathes?|laughs?|whispers?|screams?|chews?|bleeds?|dances?|sings?|swallows?)\b|^like an? \w+/i;
+const POETIC = /\b(we|us|our|ourselves)\b|\b(stakes? (is|are)|teeth|breathes?|laughs?|whispers?|screams?|chews?|bleeds?|dances?|sings?|swallows?)\b|^like\b|\b(it'?s|is|was|just) like\b|\bthink of it as\b/i;
 
 /** Hook-only part of the shape check, used to rank and filter hook candidates. */
 export function hookShapeIssues(hook: string): string[] {
@@ -129,6 +129,21 @@ export function shapeIssues(script: string): ShapeReport {
   if (tiny.length > 3) issues.push(`Shape choppy: ${tiny.length} tiny fragments ("${tiny.slice(0, 3).join('", "')}"); keep at most 3, all in the pressure beat, and write the rest as full plain sentences`);
   const poetic = sents.filter((x) => POETIC.test(x));
   if (poetic.length) issues.push(`Shape clarity: "${poetic[0]!.slice(0, 60)}" is a metaphor or narrator aside a first-time viewer can't picture; say literally what happens`);
+  if (/^(and|so) (that|this) /i.test(sents[sents.length - 1] ?? "") || overlap(sents[sents.length - 1] ?? "", hook) >= 0.6) issues.push("Shape close copies the hook; write a new twist sentence that reuses only two or three hook words");
   if (/\b(in summary|in short|to sum up|overall|the new method|that is how|this is how)\b/i.test(sents[sents.length - 1] ?? "")) issues.push("Shape close ends on a summary; end on the twist that echoes the hook");
   return { issues, hookWords: hw, shortShare, longestGapSec, payoff, echo };
+}
+
+/** Shorts keep the selected, checked hook word for word: if the writer reworded it into a weaker line, put the chosen hook back as the first sentence. */
+export function lockShapeHook(plan: { script?: string; scenes: { narration: string }[] }, hook: string): void {
+  const chosen = hook.trim();
+  if (!chosen || hookShapeIssues(chosen).length) return;
+  const first = plan.scenes[0];
+  if (!first) return;
+  const sents = shapeSentences(first.narration);
+  const opening = sents[0] ?? "";
+  if (opening.replace(/\W/g, "").toLowerCase() === chosen.replace(/\W/g, "").toLowerCase() || !hookShapeIssues(opening).length) return;
+  const rest = sents.slice(1).join(" ");
+  first.narration = rest ? `${chosen} ${rest}` : chosen;
+  if (typeof plan.script === "string") plan.script = plan.scenes.map((s) => s.narration).join(" ");
 }

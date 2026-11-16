@@ -1,54 +1,59 @@
 {
  "topic": "Why old railway tracks had gaps",
- "script": "Rail joints make a straight rail snake in summer heat. North America, 1890s. Talbot runs to a sudden buckle. Solid steel jerks a spike sideways. How do you stop rails from growing into snakes? The foreman rams two rail ends tight. Noon heat loads the rails; the track buckles. Talbot shows a tiny gap at the joint. Joint bars, called fishplates, have slotted holes. Heat a steel strip and clamp both ends; it bows. Leave a small end gap; it stays straight. Talbot and the team leave about one eighth to one quarter inch. Bolts guide the line while the ends can slide. Not for drainage, not to save metal. It is for heat that makes rails grow. A wheel hits the joint with a clear clack. Later, rails are welded and set to a neutral heat. The clack fades, but the rails stay straight. So the straight line stays straight.",
- "score": 87,
- "ready": false,
+ "script": "Rail engineers left gaps so trains stayed on straight rails. A crew runs to a sudden summer kink. The track foreman throws a red flag hard. A passenger hears clickety‑clack and frowns. How? First they bolt rails tight, end to end. Hot day comes; the rails push and buckle. So they add small gaps with fishplates at each joint. Safer in heat, but every wheel hits a step. Sun heats the rails; they try to grow and shove. A feeler gauge shows bigger gaps on hot days. Then sparks fly as railways change the plan. They weld rails into long, seamless strings. Crews pre‑stress them to a neutral temperature. Ballast, clips, and anchors hold that length in place. Some gaps stay at switches, bridges, and devices. The clickety‑clack fades on most main lines. Straight rails came from holding length tight. Old rail joints give way to straight welded rails.",
+ "score": 95,
+ "ready": true,
  "blockers": [
-  "Shot mix: wide 32% (≥40), action 42% (~30), macro 21% (~20), faces 5% (≤30)",
-  "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 35 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
-  "Viewer would swipe away at: \"North America, 1890s.\" — make it a surprise, danger or new fact",
-  "Viewer would swipe away at: \"Joint bars, called fishplates, have slotted holes.\" — make it a surprise, danger or new fact",
-  "Viewer would swipe away at: \"Talbot and the team leave about one eighth to one quarter inch.\" — make it a surprise, danger or new fact",
-  "Visual literalness: scenes 1, 9, 13, 17, 18 don't show what is said"
+  "Viewer would swipe away at: \"Rail engineers left gaps so trains stayed on straight rails.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"A crew runs to a sudden summer kink.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"A passenger hears clickety‑clack and frowns.\" — make it a surprise, danger or new fact",
+  "Visual literalness: scenes 6, 10, 14, 18 don't show what is said"
  ],
  "log": [
   {
    "attempt": 0,
-   "score": 85,
+   "score": 88,
    "blockers": [
-    "V5 anticlimax: the final line ends on an absence (\"So the rail never had to.\")",
-    "Shot mix: wide 27% (≥40), action 32% (~30), macro 32% (~20), faces 9% (≤30)",
-    "hard words: sideways, quarterinch, clicketyclack, expansion, fastenings; fragments with no verb: \"Summer hits.\", \"Not for drainage.\"",
-    "Shape loops: 20 seconds with no open question or reversal (gold scripts never go past ~18 seconds); Shape choppy: 6 tiny fragments (\"Tracks don't bend.\", \"Until they do.\", \"Summer hits.\"); keep at most 3, all in the pressure beat, and write the rest as full plain sentences",
-    "Viewer would swipe away at: \"Railway engineers rush to a sun‑baked line.\" — make it a surprise, danger or new fact",
-    "Viewer would swipe away at: \"Talbot walks the track with his crew.\" — make it a surprise, danger or new fact",
-    "Viewer would swipe away at: \"The heat is brutal over the steel.\" — make it a surprise, danger or new fact",
-    "Visual literalness: scenes 11 don't show what is said"
+    "V3 referents: no named person before \"They kept rails straight by letting them\"",
+    "Shot mix: wide 18% (≥40), action 55% (~30), macro 23% (~20), faces 5% (≤30)",
+    "Viewer would swipe away at: \"A summer sun bakes a railway line.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Steel rails stretch like taffy in heat.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"The track foreman walks the joints with a gauge.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 3, 11, 17, 21, 22 don't show what is said"
    ]
   },
   {
    "attempt": 1,
    "score": 86,
    "blockers": [
-    "Shot mix: wide 26% (≥40), action 42% (~30), macro 26% (~20), faces 5% (≤30)",
-    "hard words: oneeighth, onequarter, alignment",
-    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 35 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
-    "Viewer would swipe away at: \"North America, 1890s.\" — make it a surprise, danger or new fact",
-    "Viewer would swipe away at: \"Talbot and his crew see a bend.\" — make it a surprise, danger or new fact",
-    "Viewer would swipe away at: \"The rail looks solid, but it moves.\" — make it a surprise, danger or new fact",
-    "Visual literalness: scenes 1, 9, 13 don't show what is said"
+    "V3 referents: no named person before \"They kept rails straight by letting them\"",
+    "Shot mix: wide 33% (≥40), action 48% (~30), macro 14% (~20), faces 5% (≤30)",
+    "Viewer would swipe away at: \"A railway line posts a heat buckle warning.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"The track foreman slows trains near a bent rail.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Then it gets stranger.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 6, 10, 12, 13, 14, 16, 19, 21 don't show what is said"
    ]
   },
   {
    "attempt": 2,
-   "score": 87,
+   "score": 88,
    "blockers": [
-    "Shot mix: wide 32% (≥40), action 42% (~30), macro 21% (~20), faces 5% (≤30)",
-    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 35 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
-    "Viewer would swipe away at: \"North America, 1890s.\" — make it a surprise, danger or new fact",
-    "Viewer would swipe away at: \"Joint bars, called fishplates, have slotted holes.\" — make it a surprise, danger or new fact",
-    "Viewer would swipe away at: \"Talbot and the team leave about one eighth to one quarter inch.\" — make it a surprise, danger or new fact",
-    "Visual literalness: scenes 1, 9, 13, 17, 18 don't show what is said"
+    "V3 referents: no named person before \"They kept rails straight by holding the \"",
+    "Shot mix: wide 25% (≥40), action 55% (~30), macro 15% (~20), faces 5% (≤30)",
+    "Viewer would swipe away at: \"Heat makes steel longer; cold makes it shorter.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"A steel strip grows along a ruler when warmed.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Foremen size those joint gaps for weather and rail length.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 6, 10, 11, 15 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 3,
+   "score": 95,
+   "blockers": [
+    "Viewer would swipe away at: \"Rail engineers left gaps so trains stayed on straight rails.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"A crew runs to a sudden summer kink.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"A passenger hears clickety‑clack and frowns.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 6, 10, 14, 18 don't show what is said"
    ]
   }
  ]

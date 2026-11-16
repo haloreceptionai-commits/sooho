@@ -72,8 +72,8 @@ function ScriptWriter() {
       };
       let gate = await evaluate(plan);
       let draft = plan, draftGate = gate;
-      for (let attempt = 1; attempt <= 2 && !gate.ready; attempt++) {
-        setStage(`Improving the draft (${attempt}/2)…`);
+      for (let attempt = 1; attempt <= (format === 'short' ? 3 : 2) && !gate.ready; attempt++) {
+        setStage(`Improving the draft (${attempt}/${format === 'short' ? 3 : 2})…`);
         const revised = autoFixPlan(await write({ data: { ...base, repair: repairBrief(draft, draftGate, rs.anchors, { shape: format === 'short' }) } }));
         const next = await evaluate(revised);
         draft = revised; draftGate = next;
