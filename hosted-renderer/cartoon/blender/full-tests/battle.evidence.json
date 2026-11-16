@@ -1,0 +1,8 @@
+{
+  "id": "battle", "benchmark": "cart", "topic": "Korean rocket carts in the invasion-era fortress defense; no claimed one-cart victory", "facts": [
+    {"id": "cart", "url": "https://en.wikipedia.org/wiki/Hwacha", "quote": "The overall design resembled a wooden cart with a launch pad attached; depending on the specific version and type, it could fire up to 200 singijeon (rocket-powered) arrows, or several dozen iron-headed arrows or bolts out of gun barrels."},
+    {"id": "history", "url": "https://en.wikipedia.org/wiki/Hwacha", "quote": "These weapons were most notably deployed in the defense against the two Japanese invasions of the Korean Peninsula in 1592–98."},
+    {"id": "rockets", "url": "https://en.wikipedia.org/wiki/Multiple_rocket_launcher", "quote": "Unguided rocket artillery is notoriously inaccurate and slow to reload compared to gun artillery. A multiple rocket launcher helps compensate for this with its ability to launch multiple rockets in rapid succession"},
+    {"id": "defense", "url": "https://history-maps.com/museum/hwacha", "quote": "Stationed in fortresses, hwachas were used defensively against tightly packed samurai formations.", "note": "Avoid disputed army sizes, precise kills, invented rain/coats/hand-slaps, 82 historically claimed rockets, or no-miss victory."}
+  ]
+}

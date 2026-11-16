@@ -1,0 +1,171 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 8,
+        "cause_effect": 8,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      },
+      "B": {
+        "clarity": 8,
+        "cause_effect": 9,
+        "engagement": 6,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 1,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Supported by evidence that heat makes rails expand and that gaps prevent buckling, but the picture cannot literally show 'sun' or 'save tracks' using the given objects/actions."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports heat-driven expansion. The picture can show rails getting longer, but it cannot literally depict 'heat' causing it."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports forces and resistance by sleepers/ballast, but 'sleepers' and the actions 'push/fight' are not drawable with the given vocabulary."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports heat can cause buckling when resistance is exceeded, but the picture cannot show 'sleepers' or the action 'beats' literally."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Evidence supports joints with gaps. A joint with a small gap can be shown in the rail_yard set using the rail_joint object."
+      },
+      {
+        "index": 6,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Gaps closing in heat is supported, but the specific claim 'slide forward' is not in the evidence, and 'slide' is not drawable with the provided actions."
+      },
+      {
+        "index": 7,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports winter contraction and gaps opening, but the picture cannot literally show 'shrink' or 'gap widens' with the provided actions."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports sleepers/ballast resist forces, but 'sleepers', 'ballast', and 'resist pushes' are not drawable with the provided vocabulary."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports that excessive force can cause buckling, but the picture cannot depict 'that push gets too strong' and only shows buckling."
+      },
+      {
+        "index": 10,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports gaps mitigate hot-weather problems, but 'hot days do less harm' is abstract and not drawable; picture lacks a way to show 'hot days' or 'harm'."
+      },
+      {
+        "index": 11,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports use of gaps in the past, but the provided picture cannot depict the time aspect ('in the past')."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Evidence supports many stretches today still use joints with gaps; a joint on a track can be shown in the rail_yard set."
+      },
+      {
+        "index": 13,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports stitched long rail strings (CWR), but 'stitched strings' and 'routes' are not drawable terms."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports fastenings between rails and sleepers manage thermal expansion, but 'sleepers' and 'fastenings' are not drawable terms."
+      },
+      {
+        "index": 15,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports compression keeping rails near original length, but 'compression' and 'fastenings' are not drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports heat generates pushing forces and can still cause issues, but 'push outward' is not a drawable action here."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports fastenings restrain expansion, but 'fastenings' are not drawable; also 'expand less' is not a listed drawable action phrase."
+      },
+      {
+        "index": 18,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence supports joints/gaps but does not claim 'safely'. Also 'ends move' is not a listed drawable action for the rail_joint, and 'safely' is not drawable."
+      },
+      {
+        "index": 19,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "This is a rhetorical question; no factual claim to verify. However, 'ask' is not a drawable action with the provided character actions."
+      },
+      {
+        "index": 20,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports that gaps accommodate heat expansion and help stop buckling. The picture cannot depict 'absorb heat' or 'stop buckles' directly."
+      }
+    ],
+    "unsupported": [
+      "'Slide forward' (no evidence explicitly states rails slide; evidence says gaps close/open with temperature).",
+      "'Safely' (no evidence claims that ends move safely at joints today)."
+    ],
+    "undrawable": [
+      "sun",
+      "heat",
+      "sleepers",
+      "ballast",
+      "fastenings",
+      "strings",
+      "routes",
+      "compression",
+      "push",
+      "resist",
+      "slide",
+      "shrink",
+      "save",
+      "widen",
+      "meet",
+      "beats",
+      "ask",
+      "manage"
+    ]
+  }
+}

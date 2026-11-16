@@ -99,3 +99,29 @@ a fused dynamite/charge bundle, not a standalone rope; its charge connections ar
 `object-audit.json` preserves the complete responses, image SHA-256 hashes and prior failures.
 Recognition for these four passes; this is not motion, benchmark-quality or full step-5 acceptance.
 All 13 object actions pass (mech17): saturated emission-only fire, burning-down fuses, starburst blasts, break-action loading, sinking drill with chips, pivot swing and marked wheel spokes; `object-motion-audit.json` keeps votes, hashes and 780 geometry-checked frames. 37 tests pass; production unchanged.
+
+## Steps 9–10 — evidence-bound scripts and full-video release gate (Nov 16)
+
+`script_picture.py` authors only against literal supplied fact passages and drawable identities.
+Three independent Azure blind reviews compare clarity, cause/effect and engagement with the
+benchmark transcript; every candidate sentence needs factual support and a literal drawable
+picture. First-three-word subject/action and eight-year-old comprehension are required.
+The checks fail closed on missing, duplicate or reordered incomplete review identities.
+Calls are checkpointed by stage and draft; paid requests with ambiguous outcomes are not
+automatically replayed. Repairs read the latest saved draft and findings, up to three drafts.
+
+Evidence and actual review responses for rail, battle and mine are under `full-tests/`.
+The first two drafts of all three failed; the second drafts became repetitive when constrained
+to the small object vocabulary, and mine/battle still invented unsupported demonstration details.
+No full-video spend was launched from rejected scripts, and no benchmark acceptance is claimed.
+
+`full_video_gate.py` records the step-10 requirements: three fully decoded 60-second 1080x1920
+videos, 1800 frames each, measured CTC alignment with reviewed timing, unchanged voice samples,
+one-frame sound sync, -14 ±1 LUFS / ≤-1 dBTP, actual scorecard parity in every dimension,
+private output readback, real crash/closure/cancellation/ambiguous-start/lost-callback recovery,
+completion in ≤15 minutes and owner approval. Missing evidence remains an explicit blocker.
+The current manual Blender launcher is not integrated with production callbacks/recovery;
+`full-tests/release-audit.json` is a readiness report, not a completed production test.
+
+Run `python3 -m unittest discover -s hosted-renderer/cartoon/blender -p 'test_*.py'`.
+Run `python3 hosted-renderer/cartoon/blender/full_video_gate.py` to refresh current blockers.

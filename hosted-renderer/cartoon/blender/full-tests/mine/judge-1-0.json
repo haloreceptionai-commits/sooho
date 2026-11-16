@@ -1,0 +1,204 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 7,
+        "cause_effect": 5,
+        "engagement": 9,
+        "kid_clear": false,
+        "opening": false
+      },
+      "B": {
+        "clarity": 8,
+        "cause_effect": 9,
+        "engagement": 6,
+        "kid_clear": false,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 1,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "The 'samples' evidence does not mention drilling or 'bright specks promise riches'; the picture lacks any way to depict 'specks' or 'promise'."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports valuation from samples; image can show drilling/panning but cannot literally show 'buyers judge value'."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "General sample handling is consistent with the samples evidence; pan-swirl is drawable with gold_pan:pour."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Selective salting of samples is directly supported; 'sprinkles' action and 'batches' are not drawable."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Targeting samples to save cost matches evidence; 'wastes expensive material' is conceptual and not drawable."
+      },
+      {
+        "index": 6,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Fraud to make poor rock look rich is supported; the picture shows money but not the rock manipulation claim."
+      },
+      {
+        "index": 7,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Idea of only sample spots being enhanced is consistent; 'shine/dull' contrasts cannot be literally depicted."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Detection by inconsistent results aligns with evidence; 'assays/numbers jump' not drawable with provided objects."
+      },
+      {
+        "index": 9,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence provided about 'mixed grains' under magnifier; 'grains' are not drawable."
+      },
+      {
+        "index": 10,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Taking samples here and there implies further drilling; mine_tunnel + hand_drill can show this."
+      },
+      {
+        "index": 11,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Inconsistent strong vs weak results fit detection principle; office-only picture cannot show testing outcomes."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Uneven numbers = inconsistency; 'charts' and 'numbers' are not drawable."
+      },
+      {
+        "index": 13,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence says detection relies on inconsistency; it does not support 'hold money until answers' or 'reports'."
+      },
+      {
+        "index": 14,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence about analysts circling highs with pens; 'pen' not in vocabulary."
+      },
+      {
+        "index": 15,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence does not mention separate labs/retesting; 'sacks' and 'labs' not drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence does not state retest convergence ('results line up'); 'fake-rich places lose sparkle' is unsupported and not drawable."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Only samples being deceptive matches 'salt only in samples'; 'fooled the books' is conceptual and not drawable."
+      },
+      {
+        "index": 18,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for 'pages stack' or 'circled figures'; neither is drawable."
+      },
+      {
+        "index": 19,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence does not mention 'write notes' or 'show buyers'; 'notes/buyers' are not drawable."
+      },
+      {
+        "index": 20,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for street reactions or 'return to honest work'; 'honest work' cannot be pictured."
+      },
+      {
+        "index": 21,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "While 'salted samples' and 'shaky numbers' match concepts, there is no evidence for 'street posters warn buyers'; 'posters' not drawable."
+      },
+      {
+        "index": 22,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence that engineers 'ask' this; the act of asking is not drawable."
+      },
+      {
+        "index": 23,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Directly matches detection-by-inconsistency; 'catch fraud by inconsistent results' is conceptual and not drawable."
+      }
+    ],
+    "unsupported": [
+      "Mine crews drill walls; bright specks promise riches to everyone.",
+      "Experts swing magnifier and point at mixed grains.",
+      "Office staff watch reports and hold money until answers.",
+      "Office analysts compare sets and circle strange highs with pens.",
+      "Miners carry sacks to separate labs for retesting.",
+      "Results line up, and fake-rich places lose sparkle.",
+      "Pages stack neatly while circled figures sit side by side.",
+      "Engineers write notes and show buyers clear patterns.",
+      "Streets see nods as crews return to honest work.",
+      "Street posters warn buyers about salted samples and shaky numbers.",
+      "Engineers ask how salted samples get caught?"
+    ],
+    "undrawable": [
+      "specks",
+      "sprinkle",
+      "batches",
+      "assays",
+      "numbers",
+      "mixed grains",
+      "charts",
+      "reports",
+      "pens",
+      "sacks",
+      "labs",
+      "retesting",
+      "results",
+      "pages",
+      "circled figures",
+      "write",
+      "notes",
+      "posters",
+      "buyers",
+      "warn",
+      "ask",
+      "catch (fraud)",
+      "sparkle",
+      "books (as records)"
+    ]
+  }
+}

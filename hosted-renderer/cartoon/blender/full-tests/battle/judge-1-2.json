@@ -1,0 +1,182 @@
+{
+  "labels": {
+    "candidate": "A",
+    "benchmark": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 8,
+        "cause_effect": 8,
+        "engagement": 6,
+        "kid_clear": true,
+        "opening": true
+      },
+      "B": {
+        "clarity": 6,
+        "cause_effect": 7,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 1,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Cart-based launcher used in fortress defense is supported; drawable with set:castle and obj:perforated_cart:roll and cast crews."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Fortress context and cart launcher are consistent, but 'launch frame' and 'battlement edge' are not literal drawable vocabulary."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Up to 200 rocket arrows is directly supported; rockets firing are drawable with obj:rocket_arrow:fire."
+      },
+      {
+        "index": 4,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Cloth coat cover is not in the provided evidence and is cautioned against; drawable via obj:covered_cart:open."
+      },
+      {
+        "index": 5,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Loading 'across the board in tight rows' not in evidence; 'board' and arranged rows are not in drawable vocabulary."
+      },
+      {
+        "index": 6,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Fuses/strings to rocket tails not supported by quoted evidence; 'rocket tails' not drawable explicitly."
+      },
+      {
+        "index": 7,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Fuse sparks and stepping back from a 'frame' not in evidence; 'step back' and 'frame' not drawable."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Mass launch is consistent with the system; drawable with rockets blasting off from cart."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Rockets flying from a fort fits defensive use; drawable with set:castle and obj:rocket_arrow:fire."
+      },
+      {
+        "index": 10,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Watching defenders is fine, but 'smoke rolls over the slope' is an added scene detail not evidenced and 'smoke/slope' are not drawable."
+      },
+      {
+        "index": 11,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Unguided rockets being inaccurate is supported; 'keep aim broad' and 'wobbles' are not drawable actions."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Firing many to cover area aligns with MRL purpose; 'cover a wide path' is not drawable as a literal action."
+      },
+      {
+        "index": 13,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Slow to reload is supported; 'swarm empties the frame' not drawable literally."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Stationed in fortresses supports carts along walls; drawable with carts near walls and commanders present."
+      },
+      {
+        "index": 15,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Tightly packed attackers is supported, but 'near the gate' isn't in the evidence; 'gate/ranks/overlook' not drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Defensive salvos against advancing lines are consistent; 'another wave' and 'lines press the approach' not drawable."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets less accurate than guns is supported; 'choose bursts' not drawable as an action."
+      },
+      {
+        "index": 18,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Many rockets flying together is consistent; 'ask' is not a supported drawable action."
+      },
+      {
+        "index": 19,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Unguided rockets miss and reload is slow are supported; 'miss'/'reloading takes time' not drawable."
+      },
+      {
+        "index": 20,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Using salvos to hit tight groups aligns with MRL against dense targets; 'salvos/tight groups' not literal drawable terms."
+      }
+    ],
+    "unsupported": [
+      "Soldiers rip off a cloth coat and uncover the launcher.",
+      "Soldiers set rockets across the board in tight rows.",
+      "Crews light strings running to the rocket tails at once.",
+      "Fuse sparks race as soldiers step back from the frame.",
+      "Castle defenders watch as smoke rolls over the slope.",
+      "Fort walls overlook tightly packed ranks moving near the gate."
+    ],
+    "undrawable": [
+      "launch frame",
+      "battlement edge",
+      "board",
+      "rocket tails",
+      "step back",
+      "frame (as a launcher part)",
+      "cart's face",
+      "swarm",
+      "smoke",
+      "slope",
+      "keep aim broad",
+      "wobbles",
+      "cover a wide path",
+      "reload",
+      "swarm empties the frame",
+      "overlook",
+      "ranks",
+      "gate",
+      "another wave",
+      "lines press the approach",
+      "choose bursts",
+      "ask",
+      "miss",
+      "salvos",
+      "tight groups"
+    ]
+  }
+}

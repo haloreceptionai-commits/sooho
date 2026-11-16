@@ -1,0 +1,233 @@
+{
+  "title": "Salted Shine: Spotting Fake Gold in Mine Samples",
+  "sentences": [
+    {
+      "text": "Mine crews drill walls; bright specks promise riches to everyone.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Miners collect samples because buyers judge value from bits.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Hands swirl pans, and glitter slips over dark sand.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Someone sprinkles flakes only into chosen sample batches.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Salters target samples because wall-wide salting wastes expensive material.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Fraudsters chase cash by making poor rock look rich.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:street",
+        "obj:money_bag:hold"
+      ]
+    },
+    {
+      "text": "Sample spots shine, while nearby walls stay dull and plain.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel"
+      ]
+    },
+    {
+      "text": "Engineers compare assays and see numbers jump around.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Experts swing magnifier and point at mixed grains.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing",
+        "char:point"
+      ]
+    },
+    {
+      "text": "Crews drill again farther along the tunnel for checks.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "New samples test weak, while salted spots test strong.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Numbers stay uneven as charts rise here and fall there.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Office staff watch reports and hold money until answers.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:money_bag:hold"
+      ]
+    },
+    {
+      "text": "Office analysts compare sets and circle strange highs with pens.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Miners carry sacks to separate labs for retesting.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:street",
+        "char:carry"
+      ]
+    },
+    {
+      "text": "Results line up, and fake-rich places lose sparkle.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Vein walls stay plain; only samples fooled the books.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel"
+      ]
+    },
+    {
+      "text": "Pages stack neatly while circled figures sit side by side.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Engineers write notes and show buyers clear patterns.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "char:point"
+      ]
+    },
+    {
+      "text": "Streets see nods as crews return to honest work.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:street",
+        "char:walk"
+      ]
+    },
+    {
+      "text": "Street posters warn buyers about salted samples and shaky numbers.",
+      "fact_ids": [
+        "fraud",
+        "samples",
+        "detection"
+      ],
+      "picture": [
+        "set:street",
+        "char:point"
+      ]
+    },
+    {
+      "text": "Engineers ask how salted samples get caught?",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Engineers catch fraud by inconsistent results across fresh drills.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    }
+  ]
+}
