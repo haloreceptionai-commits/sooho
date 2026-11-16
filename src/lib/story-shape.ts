@@ -101,16 +101,16 @@ export function shapeIssues(script: string): ShapeReport {
   if (huge.length) issues.push(`Shape lines: "${huge[0]!.slice(0, 50)}" is over 22 words; split it`);
   // Loop spacing over the first 75% of the script (the reveal may run without new questions).
   const total = lens.reduce((a, b) => a + b, 0);
-  let w = 0, last = 0, gap = 0;
+  let w = 0, last = 0, gap = 0, gapFrom = 0, gapTo = 0, lastIdx = 0;
   sents.forEach((s, i) => {
     const start = w; w += lens[i]!;
     if (start > total * 0.75) return;
-    if (i === 0 || LOOP.test(s)) { gap = Math.max(gap, start - last); last = start; }
+    if (i === 0 || LOOP.test(s)) { if (start - last > gap) { gap = start - last; gapFrom = lastIdx; gapTo = i; } last = start; lastIdx = i; }
   });
   gap = Math.max(gap, Math.min(w, total * 0.75) - last);
   const longestGapSec = gap / WPS;
   // Gold scripts measure up to ~18 s between loop lines at the Shorts narration pace.
-  if (longestGapSec > 19) issues.push(`Shape loops: ${longestGapSec.toFixed(0)} seconds with no open question or reversal (gold scripts never go past ~18 seconds)`);
+  if (longestGapSec > 19) issues.push(`Shape loops: ${longestGapSec.toFixed(0)} seconds with no open question or reversal (gold scripts never go past ~18 seconds), between "${(sents[gapFrom] ?? "").slice(0, 40)}" and "${(sents[gapTo] ?? sents[sents.length - 1] ?? "").slice(0, 40)}"; insert a question, "But...", "Yet..." or a reversal inside that stretch`);
   // Payoff line: a short sentence (<= 8 words) in the last 40%.
   let acc = 0; let payoff: string | null = null;
   sents.forEach((s, i) => { if (acc >= total * 0.6 && lens[i]! <= 8 && lens[i]! >= 3) payoff ??= s; acc += lens[i]!; });
