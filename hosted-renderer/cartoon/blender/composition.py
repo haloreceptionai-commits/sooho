@@ -21,21 +21,26 @@ def enforce(scene, shot, scenery, cards, roots, out):
     hidden = set(); fixes = []; key = cards[0] if cards else None
     # Evaluate the same camera keys that rendering uses. Conservatively hide any
     # scenery mesh intersecting the key's silhouette, not just its center ray.
-    if key:
-        for f in frames:
-            scene.frame_set(f); bpy.context.view_layer.update()
-            for u in (-.45, -.225, 0, .225, .45):
-                for v in (.08, .25, .5, .75, .92):
-                    p = key.matrix_world @ Vector((key.dimensions.x * u, 0, key.dimensions.z * v))
-                    origin = scene.camera.matrix_world.translation.copy(); delta = p - origin
-                    for _ in range(80):
-                        hit, loc, normal, index, obj, matrix = scene.ray_cast(bpy.context.evaluated_depsgraph_get(), origin, delta.normalized(), distance=delta.length-.015)
-                        if not hit or obj.original not in scenery: break
-                        obj = obj.original
-                        if obj.name in hidden: break
-                        obj.hide_render = True; obj.hide_set(True); hidden.add(obj.name)
-                        bpy.context.view_layer.update()
-        fixes += [f'hid scenery: {name}' for name in sorted(hidden)]
+    def clear_scenery():
+        for card in cards:
+            for f in frames:
+                scene.frame_set(f); bpy.context.view_layer.update()
+                # Plane vertices were baked upright: local X/Z are the true
+                # cutout dimensions; world-axis dimensions change with yaw.
+                vs = [v.co for v in card.data.vertices]
+                x0,x1 = min(v.x for v in vs),max(v.x for v in vs)
+                z0,z1 = min(v.z for v in vs),max(v.z for v in vs)
+                for u in (.05,.275,.5,.725,.95):
+                    for v in (.08,.25,.5,.75,.92):
+                        p = card.matrix_world @ Vector((x0+(x1-x0)*u,0,z0+(z1-z0)*v))
+                        origin = scene.camera.matrix_world.translation.copy(); delta = p-origin
+                        for _ in range(80):
+                            hit,loc,normal,index,obj,matrix = scene.ray_cast(bpy.context.evaluated_depsgraph_get(),origin,delta.normalized(),distance=max(.001,delta.length-.015))
+                            if not hit or obj.original not in scenery: break
+                            obj = obj.original
+                            if obj.name in hidden: break
+                            obj.hide_render=True;obj.hide_set(True);hidden.add(obj.name)
+                            bpy.context.view_layer.update()
     # Reduce the lens rather than moving outside indoor walls. This preserves
     # camera motion and avoids an extreme close-up caused by a second person.
     for _ in range(35):
@@ -57,6 +62,8 @@ def enforce(scene, shot, scenery, cards, roots, out):
             peak = visible_height(projected(scene, scene.camera, key))
             fixes.append(f'enlarged wave {factor:.2f}x')
         if peak < rules['wave_min']: raise ValueError('wave below 25%')
+    clear_scenery()
+    fixes += [f'hid scenery: {name}' for name in sorted(hidden)]
     audit = {'sampled_frames': frames, 'hidden_scenery': sorted(hidden), 'face_height_max': face,
              'emotion_exception': rules['emotion'], 'wave_height_peak': peak, 'fixes': fixes,
              'lens': scene.camera.data.lens, 'limits': rules}
