@@ -89,9 +89,10 @@ def build_character(c,duration=3,fps=30):
                 cube('tool head',(0,0,.46),(.4,.09,.08),black,.025).parent=wrist
             if held=='rifle':
                 # wooden stock behind the grip, dark barrel forward along the aiming direction
-                cube('rifle stock',(0,.16,-.02),(.06,.34,.11),hatmat,.01).parent=wrist
-                cube('rifle body',(0,-.12,.0),(.055,.32,.07),hatmat,.008).parent=wrist
-                cube('rifle barrel',(0,-.48,.015),(.028,.5,.028),black,.004).parent=wrist
+                # built along the wrist's +z like the tools: the aim pose turns +z to point forward
+                cube('rifle stock',(0,.02,-.2),(.06,.11,.34),hatmat,.01).parent=wrist
+                cube('rifle body',(0,0,.1),(.055,.07,.32),hatmat,.008).parent=wrist
+                cube('rifle barrel',(0,.015,.48),(.028,.028,.5),black,.004).parent=wrist
             if held=='cup':
                 bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.1,depth=.16,location=(0,0,.06));o=bpy.context.active_object;o.data.materials.append(hatmat);o.parent=wrist
                 sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist

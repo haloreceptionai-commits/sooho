@@ -389,8 +389,9 @@ class Director:
             t = max(0.0, min(dur, (hits[0]['start'] * FPS - a) / FPS)) if hits else min(dur, .15)
             cam['shake'] = [{'t': round(t, 3), 'amp': 0.05}, {'t': round(min(dur, t + .35), 3), 'amp': 0.025}]
         shot = {'set': st, 'lighting': lighting, 'duration': max(0.2, min(12, dur)), 'camera': cam, 'cast': cast, 'objects': objects,
-                'engine': 'eevee', 'samples': 16, 'size': list(SIZE), 'grade': 'Punchy', 'haze': 0.03 if st in OUTDOOR else 0.0}
-        if st == 'outback': shot['haze_color'] = [0.35, 0.2, 0.1]
+                'engine': 'eevee', 'samples': 16, 'size': list(SIZE), 'grade': 'Punchy'}
+        if st in OUTDOOR and lighting in ('day', 'sunset'):  # gentle aerial perspective only: strong mist swallowed the sky
+            shot['haze'] = 0.006; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.72, 0.8, 0.88]
         if cards: shot['cards'] = cards
         if crowd: shot['crowd'] = crowd
         if effects: shot['effects'] = effects
@@ -404,7 +405,7 @@ class Director:
         def P(fwd, right, z, base=C): return at(base, F, R, fwd, right, z)
         tgt = P(0, 0, 1.0)
         if kind == 'establish':
-            cam = {'from': P(-9.5, 2.2 * side, 4.6), 'to': P(-7.2, 1.2 * side, 2.6), 'look_at': P(0.5, 0, 1.0), 'lens': 24, 'fstop': 8}
+            cam = {'from': P(-7.0, 1.8 * side, 3.4), 'to': P(-5.4, 1.0 * side, 2.1), 'look_at': P(0.4, 0, 1.0), 'lens': 28, 'fstop': 8}
         elif kind == 'wide':
             cam = {'from': P(-6.0, 1.4 * side, 1.9), 'look_at': P(0.3, 0, 1.0), 'lens': 28, 'fstop': 6}
         elif kind == 'medium':
@@ -468,6 +469,8 @@ class Director:
                 cam['whip_from'] = r3([f[0] + R[0] * 1.6, f[1] + R[1] * 1.6, f[2]]); cam['to'] = r3([f[k] + tw[k] * 0.12 for k in range(3)])
             else:
                 cam['to'] = r3([f[k] + tw[k] * (0.28 if kind in ('low', 'medium', 'wide') else 0.18) for k in range(3)])
+        cam = clear_lens(cam, [c['pos'] for c in cast] + [c['pos'] for c in cards] + [c['to'] for c in cards if 'to' in c]
+                         + [c['pos'] for c in cast if c['action'] in ('walk', 'run')], keep=kind in ('close', 'xclose', 'insert'))
         if st == 'mine_tunnel':
             for k in ('from', 'to', 'whip_from'):
                 if k in cam: cam[k][0] = max(-0.9, min(0.9, cam[k][0]))
@@ -475,6 +478,23 @@ class Director:
             for k in ('from', 'to', 'whip_from'):
                 if k in cam: cam[k] = [max(-5.4, min(5.4, cam[k][0])), max(-4.5, min(8.4, cam[k][1])), max(0.25, min(4.1, cam[k][2]))]
         return cam
+
+
+def clear_lens(cam, obstacles, radius=1.0, keep=False):
+    """Back the camera away (along its own view line) until no person/animal stands within `radius` of the lens.
+    Close-ups keep their subject distance; only blockers between lens and subject are cleared."""
+    la = cam['look_at']
+    for key in ('from', 'to'):
+        if key not in cam: continue
+        p = list(cam[key])
+        for _ in range(14):
+            near = [o for o in obstacles if math.hypot(o[0] - p[0], o[1] - p[1]) < radius
+                    and not (keep and math.hypot(o[0] - la[0], o[1] - la[1]) < 0.35)]
+            if not near: break
+            d = [p[0] - la[0], p[1] - la[1]]; L = math.hypot(*d) or 1
+            p = [p[0] + d[0] / L * .45, p[1] + d[1] / L * .45, p[2] + (0.05 if p[2] > 1 else 0)]
+        cam[key] = r3(p)
+    return cam
 
 
 def plan(m, cards=()):
