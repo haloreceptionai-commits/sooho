@@ -137,12 +137,22 @@ export function addAssemblies(place: PlaceSpec, items: { name: string; parts: un
   return { ...place, dressing };
 }
 
-/** Owner rule: every Advanced scene needs a buildable place; otherwise stop before paid work with a readable message. */
+const DEFAULT_PLACE = { terrain: "plain", time: "day", weather: "clear", dressing: [] };
+
+/** Every Advanced scene gets a buildable place. A scene whose place is invalid is repaired instead of failing the paid video:
+ *  first by dropping only the invalid dressing, then by falling back to a plain place that keeps its time of day. Repairs are logged. */
 export function requirePlaces(scenes: { place?: unknown }[]): PlaceSpec[] {
   return scenes.map((s, i) => {
-    const r = placeSpec.safeParse(normalizePlace(s.place));
-    if (!r.success) throw new Error(`Scene ${i + 1} needs a place the 3D engine cannot build yet (${r.error.issues[0]?.message ?? "missing place"}). Nothing was rendered or charged.`);
-    return r.data;
+    const raw = normalizePlace(s.place);
+    const r = placeSpec.safeParse(raw);
+    if (r.success) return r.data;
+    const obj = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+    const dressing = Array.isArray(obj["dressing"]) ? (obj["dressing"] as unknown[]).filter(d => placeSpec.safeParse({ ...obj, dressing: [d] }).success) : [];
+    const healed = placeSpec.safeParse({ ...obj, dressing });
+    if (healed.success) { console.warn(`Scene ${i + 1}: place repaired by dropping invalid dressing (${r.error.issues[0]?.message ?? "invalid"})`); return healed.data; }
+    const time = typeof obj["time"] === "string" && (PLACE_TIMES as string[]).includes(obj["time"]) ? obj["time"] : "day";
+    console.warn(`Scene ${i + 1}: place replaced by a plain ${time} place (${r.error.issues[0]?.message ?? "missing place"})`);
+    return placeSpec.parse({ ...DEFAULT_PLACE, time });
   });
 }
 

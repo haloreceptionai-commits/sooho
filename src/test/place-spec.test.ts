@@ -14,8 +14,11 @@ describe("Advanced place spec", () => {
     expect(placeSpec.safeParse({ ...pass, dressing: [{ id: "war_elephant", count: 1 }] }).success).toBe(false);
     expect(placeSpec.safeParse({ ...pass, dressing: [{ id: "boat", count: 1 }] }).success).toBe(false);
   });
-  it("stops before paid work when a scene has no buildable place", () => {
-    expect(() => requirePlaces([{ place: pass }, {}])).toThrow(/Scene 2 needs a place/);
+  it("repairs a scene with no buildable place instead of failing the paid video", () => {
+    const r = requirePlaces([{ place: pass }, {}, { place: { ...pass, time: "night", dressing: [{ id: "war_elephant", count: 1 }, { id: "torch", count: 1 }] } }]);
+    expect(r[1]).toEqual({ terrain: "plain", time: "day", weather: "clear", dressing: [] });
+    expect(r[2]!.time).toBe("night");
+    expect(r[2]!.dressing).toEqual([{ id: "torch", count: 1 }]);
   });
   it("turns drawable object phrases into 3D dressing instead of painted cards", () => {
     const r = liftDressing({ ...pass, dressing: [] }, [{ id: "oxen", phrase: "a herd of oxen with burning torches on their horns" }, { id: "tank", phrase: "steel molasses tank" }]);

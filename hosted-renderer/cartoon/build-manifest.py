@@ -176,10 +176,23 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
     return out
 
 def _place(spec,i):
-    # v3 Advanced place spec: validated against the shared registry; an undrawable place stops the job here, before rendering.
+    # v3 Advanced place spec, validated against the shared registry. A scene with an invalid place is repaired (drop the bad dressing,
+    # else a plain place that keeps its time of day) instead of failing the whole video partway through.
     import sys as _s;_s.path.insert(0,str(Path(__file__).parent/'blender'))
-    from place_spec import validate
-    return validate(dict(spec),i)
+    from place_spec import validate, PlaceError
+    spec=dict(spec)
+    try: return validate(dict(spec),i)
+    except PlaceError as first:
+        kept=[]
+        for d in spec.get('dressing') or []:
+            try: validate({**spec,'dressing':[d]},i); kept.append(d)
+            except PlaceError: pass
+        try:
+            out=validate({**spec,'dressing':kept},i); print('place repaired scene',i,str(first)[:160],flush=True); return out
+        except PlaceError:
+            t=spec.get('time') if spec.get('time') in ('dawn','day','dusk','night') else 'day'
+            print('place replaced scene',i,str(first)[:160],flush=True)
+            return validate({'terrain':'plain','time':t,'weather':'clear','dressing':[]},i)
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--request',required=True);p.add_argument('--alignment',required=True);p.add_argument('--voice',required=True);p.add_argument('--out',required=True)
