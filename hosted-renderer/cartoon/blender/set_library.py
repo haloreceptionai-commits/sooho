@@ -138,7 +138,10 @@ def lighting(mode, indoor=False):
     # around a historical set, even when a photographic HDR lights it.
     light_path = nt.nodes.new('ShaderNodeLightPath')
     background = nt.nodes.new('ShaderNodeBackground')
-    visible_sky = nt.nodes.new('ShaderNodeTexSky');visible_sky.sky_type='NISHITA'
+    visible_sky = nt.nodes.new('ShaderNodeTexSky')
+    for kind in ('NISHITA', 'MULTIPLE_SCATTERING', 'HOSEK_WILKIE'):
+        try: visible_sky.sky_type = kind; break
+        except TypeError: pass
     visible_sky.sun_elevation=math.radians(30 if mode=='day' else 8)
     visible_sky.sun_rotation=math.radians(140);visible_sky.sun_disc=False
     nt.links.new(visible_sky.outputs[0],background.inputs['Color'])
