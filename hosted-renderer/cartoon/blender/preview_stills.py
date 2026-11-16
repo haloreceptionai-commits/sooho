@@ -9,7 +9,7 @@ import time
 from art_director import plan, text_of, spoken
 
 
-def run(manifest, cards, out, blender, seconds=1200):
+def run(manifest, cards, out, blender, seconds=1200, first=1):
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     # OS lease: a concurrent preview cannot start a second renderer. No cloud
     # dispatch or paid operation exists on this path.
@@ -21,6 +21,9 @@ def run(manifest, cards, out, blender, seconds=1200):
     segments = plan(m, set(os.listdir(cards)))
     start = time.monotonic(); results = []
     for i, g in enumerate(segments):
+        if i + 1 < first:
+            previous=json.loads((out/'results.json').read_text())['shots']
+            results.append(previous[i]); continue
         folder = out / f'shot-{i+1:02d}'; folder.mkdir(exist_ok=True)
         shot = g['shot']; full_line = text_of(spoken(m, m['shots'][g['shot_index']]['start'], m['shots'][g['shot_index']]['end']))
         burst = g['notes'].get('sequence_step') == 'molasses_wave'
@@ -41,5 +44,5 @@ def run(manifest, cards, out, blender, seconds=1200):
 
 
 if __name__ == '__main__':
-    p=argparse.ArgumentParser();p.add_argument('--manifest',required=True);p.add_argument('--cards',required=True);p.add_argument('--out',required=True);p.add_argument('--blender',required=True);p.add_argument('--seconds',type=int,default=1200)
-    a=p.parse_args();run(a.manifest,a.cards,a.out,a.blender,a.seconds)
+    p=argparse.ArgumentParser();p.add_argument('--manifest',required=True);p.add_argument('--cards',required=True);p.add_argument('--out',required=True);p.add_argument('--blender',required=True);p.add_argument('--seconds',type=int,default=1200);p.add_argument('--first',type=int,default=1)
+    a=p.parse_args();run(a.manifest,a.cards,a.out,a.blender,a.seconds,a.first)

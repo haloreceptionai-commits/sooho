@@ -60,9 +60,14 @@ def build_effects(shot, fps):
             o.visible_shadow = role in ('debris', 'smoke', 'dust'); o.rotation_euler = (p['a'], p['u'], p['a'] * 2)
             for f in range(n):
                 x, y, z, s = state(kind, p, f / fps - e.get('start', 0), sc)
-                o.location = base + Vector((x, y, z)); o.scale = (s, s, s) if s > 0 else (1e-4,) * 3
+                # OpenVDB rejects near-zero transforms during ray casts. Hide inactive
+                # particles rather than collapsing them to a degenerate scale.
+                active = s > .01
+                o.location = base + Vector((x, y, z)); o.scale = (s, s, s) if active else (.01,) * 3
+                o.hide_render = o.hide_viewport = not active
                 if role == 'debris': o.rotation_euler.x = p['a'] + f * .25
                 o.keyframe_insert('location', frame=f + 1); o.keyframe_insert('scale', frame=f + 1)
+                o.keyframe_insert('hide_render', frame=f + 1); o.keyframe_insert('hide_viewport', frame=f + 1)
                 if role == 'debris': o.keyframe_insert('rotation_euler', frame=f + 1)
             count += 1
         if kind in ('explosion', 'fire'):  # real light from the blast that lights the set and cast
