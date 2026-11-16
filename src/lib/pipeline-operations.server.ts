@@ -377,6 +377,7 @@ export interface PlanInput {
   repair?: string; // validator issues from a previous draft
   kid?: boolean; // Advanced Video AI: words an 8-year-old knows, stricter story shape
   shape?: boolean; // Story Shape v3 (owner's gold Shorts) overrides the older beat quotas
+  lockedNarration?: string[]; // Shorts Writer v4: approved voice-over lines; the plan only splits them into scenes
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
@@ -544,11 +545,29 @@ RULE: never more than 3 sentences in a row without a loop line (question, but/ye
 Write the WHOLE voice-over first in the gold shape, then split it into scenes at literal visual moments; scene narrations concatenate exactly to "script".
 The research may list tries, a skeptic, a myth or an analogy: use them ONLY if they are real and fit the gold shape; never add a "Most people think" line, an "Ever ...?" analogy or a staged "That can't work" quote by default.
 JSON fields: question = the held-back question the story answers; hero = the real person, or the object if there is no person; loop_opened "main" where that question is planted and loop_closed "main" where it is answered; money = true on the hook scene and the payoff scene; each visual literally shows its narrated noun/action; at most 3 recurring characters. Shot mix: at least 40% wide or aerial, about 30% action, about 20% macro, at most 30% faces, never a face first. hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook.`;
+    if (data.lockedNarration?.length) return splitLockedNarration(data, D, scenes);
     const plan = await azureJson<Plan>(data.deployment, data.shape ? `${data.kid ? `${ADVANCED_STORY_DIRECTION}\n` : ''}${shapeSystem}` : data.kid ? advancedSystem : system + repairPriority, user, "video_plan", planSchema, "Script writer");
     if (!plan.scenes?.length) throw new Error("Script writer returned an empty plan");
     if (data.shape && data.hook) lockShapeHook(plan, data.hook);
     return plan;
   };
+
+/** Shorts Writer v4: the narration is final; this pass only adds scenes, pictures and cast without changing a word. */
+const wordsOf = (t: string) => t.toLowerCase().replace(/[’]/g, "'").replace(/[^a-z0-9' ]/g, " ").split(/\s+/).filter(Boolean).join(" ");
+async function splitLockedNarration(data: PlanInput, D: number, scenes: number): Promise<Plan> {
+  const narration = data.lockedNarration!.join(" ");
+  const system = `You are the visual director for a ${D}-second vertical story Short. The voice-over below is FINAL and approved: never add, remove, reorder or change a single word or punctuation mark.
+Split it, in order, into about ${scenes} scenes at literal visual moments (a scene is one or two short sentences or part of a long one). Scene narrations concatenated with single spaces must equal the voice-over EXACTLY; set "script" to the full voice-over.
+For each scene: image_prompt literally shows the narrated noun/action; at most 3 recurring characters (real people from the story, or the object if there is none); shot mix at least 40% wide or aerial, about 30% action, about 20% macro, at most 30% faces, never a face first. question = the story's main question; hero = the real person or object; loop_opened "main" on the scene that plants the question and loop_closed "main" on the scene that answers it; money = true on the hook scene and the payoff scene. Beats: hook, setup, escalation, twist, payoff, close. hookText: max 6 words, states the oddity as a fact, never repeats the spoken hook. Title and description must be factual.`;
+  const user = `Topic: ${data.topic}\nStyle: ${data.style}\nCHECKED FACTS:\n${data.facts ?? ''}\nFINAL VOICE-OVER (one line per spoken thought):\n${data.lockedNarration!.join("\n")}`;
+  let last = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const plan = await azureJson<Plan>(data.deployment, system, attempt ? `${user}\nYour previous split changed the words (${last}). Copy the voice-over exactly.` : user, "video_plan", planSchema, "Scene director");
+    if (plan.scenes?.length && wordsOf(plan.scenes.map((s) => s.narration).join(" ")) === wordsOf(narration)) return { ...plan, script: narration };
+    last = `got ${plan.scenes?.map((s) => s.narration).join(" ").split(/\s+/).length ?? 0} words, expected ${narration.split(/\s+/).length}`;
+  }
+  throw new Error("The scene director could not keep the approved narration word for word. No voice or pictures were started.");
+}
 
 // ---------------- Voice ----------------
 
