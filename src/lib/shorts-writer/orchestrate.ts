@@ -55,7 +55,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
   let best: WriterResult | null = null;
   for (let s = 0; s < maxSpines; s++) {
     await say(s ? 'Coherence below 8 — planning a different story spine…' : 'Planning the story spine…');
-    let spine = await calls.spine(facts, rounds.map((r) => r.spine));
+    const spine = await calls.spine(facts, rounds.map((r) => r.spine));
     await say('Writing 10 hooks…');
     // Spine check runs alongside the hooks instead of before them.
     const [sc0, hooks0] = await Promise.all([calls.spineCheck(spine, facts), calls.hooks(facts, spine)]);

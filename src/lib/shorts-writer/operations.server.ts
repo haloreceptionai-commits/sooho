@@ -79,5 +79,5 @@ export async function rewriteLinesOp(d: { lines: string[]; flagged: { n: number;
   return azureJson<{ lines: { n: number; text: string }[] }>(d.deployment,
     `You fix a YouTube Short script. Rewrite ONLY the flagged lines; every other line and line 1 (the locked hook) stay exactly as they are. ${CORE}\n${STYLE}\nA flagged line may be returned as an empty string to delete it, if the story reads better without it. Keep the whole script within ${b.minWords}-${b.maxWords} words.${d.kid ? ' Use only words an 8-year-old knows.' : ''}\n\n${GOLD_BLOCK}`,
     `CERTAIN FACTS:\n${factList(d.facts)}\nSPINE:\n${JSON.stringify(d.spine)}\nSCRIPT:\n${d.lines.map((l, i) => `${i + 1}. ${l}`).join('\n')}\nFLAGGED LINES:\n${d.flagged.map((f) => `${f.n}: ${f.reason}`).join('\n')}${d.problems.length ? `\nOTHER PROBLEMS TO FIX THROUGH THE FLAGGED LINES:\n${d.problems.join('\n')}` : ''}\nReturn each flagged line number with its new text.`,
-    'line_rewrite', obj({ lines: arr(obj({ n: N, text: S })) }), 'Line rewrite', 'medium');
+    'line_rewrite', obj({ lines: arr(obj({ n: N, text: S })) }), 'Line rewrite', 'low');
 }
