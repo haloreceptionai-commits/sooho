@@ -818,6 +818,26 @@ export const designAdvancedCardsOperation = async ({ data }: { data: { scenes: s
     .filter(o => o.name && o.scenes.length && !seen.has(o.name) && (seen.add(o.name), true)).slice(0, 3);
   return { cards: data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) })), objects };
 };
+// Advanced Video AI staging: casting per shot from the facts, object families and the climax sequence (pure rules in advanced-staging.ts decide).
+const STAGER = `You stage a factual history Short that is drawn as 3D cartoon shots. You only choose from the ids given; you never invent people, objects or events.
+1. cast: for every cast id say who it is in the story (max 12 words, from the narration's facts) and enters = the 0-based line where that person or group first becomes part of the story. A person who only acts later (an investigator, a judge, a rescuer) must not enter before the line that introduces them.
+2. scenes: for every line, the cast members physically present at that moment according to the facts (0-3), each with a short reason quoting or paraphrasing the line. Never place anyone before their enters line. Use an empty list when the moment is an event, place or object with nobody from the cast there.
+3. families: group object ids that are the SAME physical thing in different states (e.g. a tank intact, its seam leaking, its wall torn). canonical = the intact/normal object; variants = the other ids with a 1-3 word state (leaking, failing, burst, aftermath). A different thing (a wave of liquid, a building, a railway) is not a variant.
+4. climax: the line that states the story's key physical event (e.g. "the tank burst") and the 2-3 object ids that show it in order: intact -> failing -> burst/aftermath, using existing ids only. scene = -1 and sequence = [] if the story has no physical key event.`;
+export const stageAdvancedDirectionOperation = async ({ data }: { data: { narration: string[]; cast: string[]; objects: { scene: number; id: string; phrase: string }[]; actors: string[][]; deployment: string } }) => {
+  const S = { type: 'string' }, I = { type: 'integer' };
+  const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes', 'families', 'climax'], properties: {
+    cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'who', 'enters'], properties: { id: { type: 'string', enum: data.cast }, who: S, enters: I } } },
+    scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['actors'], properties: { actors: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['actor', 'reason'], properties: { actor: { type: 'string', enum: data.cast }, reason: S } } } } } },
+    families: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['canonical', 'variants'], properties: { canonical: S, variants: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'state'], properties: { id: S, state: S } } } } } },
+    climax: { type: 'object', additionalProperties: false, required: ['scene', 'sequence'], properties: { scene: I, sequence: { type: 'array', items: S } } } } };
+  const ids = [...new Set(data.objects.map(o => o.id))];
+  const lines = data.narration.map((t, i) => `${i}. ${t}
+   shot plan cast: ${data.actors[i]?.join(', ') || 'none'}; objects: ${data.objects.filter(o => o.scene === i).map(o => `${o.id} = ${o.phrase}`).join('; ') || 'none'}`).join('\n');
+  const r = await azureJson<import('./advanced-staging').StagingAnswer>(data.deployment, STAGER, `Cast ids: ${data.cast.join(', ')}\nObject ids: ${ids.join(', ') || 'none'}\n\nLines:\n${lines}`, 'advanced_staging', schema, 'Shot stager');
+  if (!Array.isArray(r.scenes) || r.scenes.length !== data.narration.length) throw Error('Shot stager changed the line count');
+  return r;
+};
 // Advanced Video AI final editor: same scenes and facts, retold for an 8-year-old in natural storytelling.
 export const polishKidScriptOperation = async ({ data }: { data: { scenes: string[]; problems: string[]; words: number; names: string[]; deployment: string } }) => {
   const schema = { type: 'object', additionalProperties: false, required: ['scenes'], properties: { scenes: { type: 'array', items: { type: 'string' } } } };
