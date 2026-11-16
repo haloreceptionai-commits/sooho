@@ -712,6 +712,8 @@ def plan(m, cards=()):
     d = Director(m, cards); out = []
     for i, s in enumerate(m['shots']):
         parts = split_sequence(m, s, len(s['sequence'])) if s.get('sequence') else split_points(m, s)
+        if s.get('sequence') and len(parts) < len(s['sequence']):  # too short for every state: keep the start and the burst
+            s['sequence'] = (s['sequence'][:max(1, len(parts) - 1)] + s['sequence'][-1:])[:len(parts)] if len(parts) > 1 else s['sequence'][-1:]
         for part, (a, b) in enumerate(parts):
             shot, notes = d.segment(i, part, a, b, last=part == len(parts) - 1)
             out.append({'shot_index': i, 'start': a, 'end': b, 'shot': shot, 'notes': notes})
