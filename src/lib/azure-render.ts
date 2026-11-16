@@ -72,7 +72,7 @@ export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'fini
   if (!r.ok && r.status !== 202) {
     console.error('Azure start', job.name, r.status, await r.text());
     // A refused graphics-machine start is certain (nothing ran), so the web-engine machines take over safely.
-    if (blender && r.status >= 400 && r.status < 500) { process.env.ADVANCED_BLENDER_FALLBACK = '1'; return startWebFinish(jobId, input, key); }
+    if (blender && r.status >= 400 && r.status < 500) return startWebFinish(jobId, input, key);
     throw Error(`Cartoon rendering could not start on Azure [${r.status}]`);
   }
   const result = await r.json().catch(() => ({})) as { name?: string; id?: string };
