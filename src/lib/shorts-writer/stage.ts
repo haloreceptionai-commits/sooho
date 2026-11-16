@@ -20,11 +20,12 @@ export function v4Gate(w: WriterResult): GateResult {
   return { score: Math.round(((c.coherence * 2 + c.clarity + c.curiosity) / 40) * 100), ready: w.ready, parts: { coherence: c.coherence, clarity: c.clarity, curiosity: c.curiosity }, blockers };
 }
 
-export async function runShortsV4(o: { calls: WriterCalls; durationSec: number; base: PlanInput; plan: (data: PlanInput) => Promise<Plan>; progress?: Progress }): Promise<V4Script> {
+export async function runShortsV4(o: { calls: WriterCalls; durationSec: number; base: PlanInput; plan: (data: PlanInput) => Promise<Plan>; progress?: Progress | undefined }): Promise<V4Script> {
   const writer = await writeShort(o.calls, { durationSec: o.durationSec, progress: o.progress });
   await o.progress?.('Splitting the approved narration into scenes…');
   const facts = writer.facts.filter((f) => f.certain).map((f) => `- ${f.text}`).join('\n');
-  const plan = await o.plan({ ...o.base, facts, hook: writer.hook, lockedNarration: writer.lines, repair: undefined, shape: false });
+  const { repair: _r, ...rest } = o.base; void _r;
+  const plan = await o.plan({ ...rest, facts, hook: writer.hook, lockedNarration: writer.lines, shape: false });
   const total = plan.scenes.reduce((a, s) => a + s.narration.split(/\s+/).filter(Boolean).length, 0) || 1;
   let acc = 0, revealSec = 0;
   for (const s of plan.scenes) { if (!revealSec && /twist|payoff|reveal/i.test(s.beat)) revealSec = (acc / total) * o.durationSec; acc += s.narration.split(/\s+/).filter(Boolean).length; }

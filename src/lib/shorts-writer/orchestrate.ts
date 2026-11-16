@@ -43,7 +43,7 @@ function checkTargets(lines: string[], checks: string[]): { n: number; reason: s
   return out;
 }
 
-export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; progress?: Progress }): Promise<WriterResult> {
+export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; progress?: Progress | undefined }): Promise<WriterResult> {
   const maxPatches = opts.maxPatches ?? 3, maxSpines = opts.maxSpines ?? 2;
   const say = async (t: string) => { await opts.progress?.(t); };
   await say('Building the fact sheet…');

@@ -3,7 +3,7 @@ import type { WriterCalls } from './orchestrate';
 
 export type StepRunner = (step: string, args: Record<string, unknown>) => Promise<unknown>;
 
-export function writerCalls(run: StepRunner, d: { topic: string; deployment: string; durationSec: number; kid?: boolean; research?: string }): WriterCalls {
+export function writerCalls(run: StepRunner, d: { topic: string; deployment: string; durationSec: number; kid?: boolean | undefined; research?: string | undefined }): WriterCalls {
   const { topic, deployment, durationSec, kid } = d;
   const r = <T,>(step: string, args: Record<string, unknown>) => run(step, { deployment, ...args }) as Promise<T>;
   return {
