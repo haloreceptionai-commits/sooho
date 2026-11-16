@@ -252,7 +252,7 @@ export async function runVideo(id: string, input: VideoInput) {
     let plan = autoFixPlan(await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait), advanced);
     let ev = await evaluate(plan);
     let draft = plan, draftEv = ev;
-    const tries = usesCartoonWorker(input.engine) ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
+    const tries = (usesCartoonWorker(input.engine) || input.format === "short") ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
       const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors, { loop: advanced && micro, advanced, shape: input.format === 'short' }) + fitNote } }), 4, 16000, planWait).then(p => autoFixPlan(p, advanced)).catch(() => null);
