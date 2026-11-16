@@ -1,5 +1,8 @@
 """Concrete synthetic Blender checks for geometry clearance and framing."""
 import tempfile
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).parent))
 import bpy
 from mathutils import Vector
 from composition import enforce
