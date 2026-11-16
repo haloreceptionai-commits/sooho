@@ -10,6 +10,7 @@ decides, with fixed rules only:
   * crowds, herds of painted animal cards that run, whitelisted 3D props and word-timed effects.
 Everything compiles to shot_schema-validated JSON; nothing the language model wrote is executed.
 """
+from world_pack import backdrop_for, kit_fits_era, story_year
 import math, re
 from shot_schema import validate_shot
 from shot_director import ZONES as BASE_ZONES, OBJ_CAMS
@@ -185,12 +186,13 @@ def match_location(location):
     return best[0]
 
 
-def plan_locations(m):
+def plan_locations(m, cards=()):
     """One location per manifest shot, never a closest-wrong kit:
     * shots with a free-text location use the kit that location names, else the neutral sky + ground;
     * older shots without a location need two place words in their own line, else they stay where the
       previous matched line was, else neutral. No time-based switching to other kits."""
     out = []; prev = None
+    year = story_year(m.get('script') or ' '.join(str(w.get('text', '')) for w in m.get('words') or []))
     for s in m['shots']:
         if s.get('location'):
             best = match_location(s['location'])
@@ -199,6 +201,9 @@ def plan_locations(m):
             top = max(sc.values()) if sc else 0
             cands = [k for k, v in sc.items() if v == top]
             best = cands[0] if top >= MIN_SPOKEN and len(cands) == 1 else (prev or NEUTRAL)
+        # World Pack: painted era-correct layers outrank any kit; a kit whose look is from another era is never used.
+        if s.get('location') and backdrop_for(s['location'], cards): best = NEUTRAL
+        elif not kit_fits_era(best, year): best = NEUTRAL
         out.append(best); prev = best if best != NEUTRAL or s.get('location') else prev
     return out
 
@@ -313,7 +318,7 @@ def split_sequence(m, s, n):
 # ---------------------------------------------------------------- the director
 class Director:
     def __init__(self, m, cards=()):
-        self.m = m; self.cards = set(cards); self.locations = plan_locations(m)
+        self.m = m; self.cards = set(cards); self.locations = plan_locations(m, self.cards)
         self.history = []; self.zone_use = {}; self.cast_look = {}
         for i, c in enumerate(m.get('cast') or []):
             outfit, hat = OUTFIT.get(c.get('outfit'), ('worker', 'none'))
@@ -577,6 +582,8 @@ class Director:
         if st in OUTDOOR and lighting in ('day', 'sunset'):  # gentle aerial perspective only: strong mist swallowed the sky
             shot['haze'] = 0.006; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.72, 0.8, 0.88]
         if cards: shot['cards'] = cards
+        bd = backdrop_for(s.get('location'), self.cards)
+        if bd: shot['backdrop'] = bd
         if crowd: shot['crowd'] = crowd
         if effects: shot['effects'] = effects
         if prop_specs: shot['props'] = prop_specs
