@@ -19,8 +19,31 @@ FPS = 30
 SIZE = (720, 1280)  # upscaled to 1080x1920; measured same look as 810x1440 at ~45% less GPU time
 # ---------------------------------------------------------------- locations
 _RING = {'center': ((0, -1), 90), 'left': ((-1.6, 1.8), 125), 'right': ((2.0, 1.4), 58), 'reverse': ((0, 2.5), 270)}
-ZONES = {**BASE_ZONES, 'farm_field': _RING, 'outback': _RING, 'forest': _RING, 'market': _RING}
-OUTDOOR = {'castle', 'village', 'battlefield', 'street', 'rail_yard', 'farm_field', 'outback', 'forest', 'market', 'ship_deck'}
+ZONES = {**BASE_ZONES, 'farm_field': _RING, 'outback': _RING, 'forest': _RING, 'market': _RING, 'neutral': _RING}
+OUTDOOR = {'castle', 'village', 'battlefield', 'street', 'rail_yard', 'farm_field', 'outback', 'forest', 'market', 'ship_deck', 'neutral'}
+NEUTRAL = 'neutral'  # plain sky + ground + the characters: used whenever no kit truly is the place (never the closest wrong kit)
+# Place-type words only: a kit is chosen when the shot's free-text location NAMES that kind of place (owner rule, Nov 16 2026).
+PLACE_WORDS = {
+    'mine_tunnel': 'mine mines mineshaft tunnel tunnels cave caves underground mine-shaft',
+    'ship_deck': 'aboard deck ship-deck on-deck on-board',
+    'rail_yard': 'railyard rail-yard train-yard train-station railway-station railroad-station rail-depot train-depot',
+    'castle': 'castle castles fortress palace throne-room',
+    'office': 'office offices boardroom headquarters bureau ministry parliament newsroom',
+    'workshop': 'workshop laboratory lab workbench garage forge smithy',
+    'saloon': 'saloon bar pub tavern inn',
+    'room': 'bedroom kitchen living-room parlor parlour apartment at-home',
+    'farm_field': 'farm farms farmland field fields meadow pasture countryside farmyard ranch prairie country-road dirt-road',
+    'outback': 'outback desert scrubland badlands',
+    'forest': 'forest forests woods woodland jungle grove',
+    'market': 'market marketplace bazaar',
+    'battlefield': 'battlefield trench trenches front-line army-camp war-camp',
+    'street': 'street streets avenue boulevard downtown plaza sidewalk alley neighborhood neighbourhood city-square main-street',
+    'village': 'village hamlet town',
+}
+PLACE_INDEX = {k: v.split() for k, v in PLACE_WORDS.items()}
+MIN_PLACE = 1        # the location text must name the place type at least once
+MIN_SPOKEN = 2       # legacy shots without a location: two place words in the line itself
+OBJECT_HEIGHT = {'small': 0.55, 'medium': 1.2, 'large': 2.8, 'huge': 6.0}
 SET_WORDS = {
     'mine_tunnel': 'mine mines miner miners tunnel tunnels underground cave caves shaft gold-rush dig digging dug ore',
     'ship_deck': 'ship ships sailor sailors sea seas ocean boat boats navy voyage deck sailed sail fleet harbour harbor port island crew',
@@ -139,31 +162,69 @@ def score_sets(text):
     return out
 
 
-def plan_locations(m):
-    """One location per manifest shot: the spoken words win, the story's home location is the fallback,
-    and a place is not held for more than ~9 s unless the words keep naming it (benchmark 12-22 changes/min)."""
-    shots = m['shots']; all_text = text_of(spoken(m, 0, 10 ** 9))
-    story = score_sets(all_text)
-    home = max(story, key=story.get) if story else 'farm_field' if WORLD_SET.get(shots[0].get('world')) in GATED | {'outback'} else WORLD_SET.get(shots[0].get('world'), 'village')
-    seconds = sorted(story, key=lambda k: -story[k])
-    out = []; held = 0.0; prev = None
-    for i, s in enumerate(shots):
-        txt = text_of(spoken(m, s['start'], s['end'])); sc = score_sets(txt)
-        for p in s.get('props') or []:
-            for k, v in score_sets(re.sub(r'[^a-z]+', ' ', str(p.get('asset') or p.get('kind') or '').lower())).items(): sc[k] = sc.get(k, 0) + 0.3 * v
-        world = WORLD_SET.get(s.get('world'))
-        if world == 'outback' and not story.get('outback'): world = 'farm_field'  # open country without desert words
-        if world in GATED and not story.get(world): world = None  # a ship/mine/castle needs the story to name one
-        if world: sc[world] = sc.get(world, 0) + 0.35  # Visual Director's place is only a tiebreaker
-        if prev: sc[prev] = sc.get(prev, 0) + (0.9 if held < 9 else -0.4)
-        for k in story: sc[k] = sc.get(k, 0) + 0.15 * story[k] / max(story.values())
-        best = max(sc, key=lambda k: (sc[k], k == home)) if sc else home
-        if best == prev and held >= 9 and not score_sets(txt).get(best):
-            alt = [k for k in seconds if k != prev]
-            if alt: best = alt[i % len(alt)]
-        held = held + (s['end'] - s['start']) / FPS if best == prev else (s['end'] - s['start']) / FPS
-        out.append(best); prev = best
+def score_place(location):
+    """Kit -> number of place-type words the free-text location names (phrases like 'train station' count once)."""
+    text = ' ' + re.sub(r'[^a-z]+', ' ', str(location or '').lower()) + ' '
+    out = {}
+    for st, ws in PLACE_INDEX.items():
+        n = sum(1 for w in ws if f" {w.replace('-', ' ')} " in text)
+        if n: out[st] = n
     return out
+
+
+def match_location(location):
+    """The one kit the location names, or NEUTRAL. Ties between different kits are ambiguous, so neutral too."""
+    sc = score_place(location)
+    if not sc: return NEUTRAL
+    top = max(sc.values()); best = [k for k, v in sc.items() if v == top]
+    if top < MIN_PLACE or len(best) != 1: return NEUTRAL
+    return best[0]
+
+
+def plan_locations(m):
+    """One location per manifest shot, never a closest-wrong kit:
+    * shots with a free-text location use the kit that location names, else the neutral sky + ground;
+    * older shots without a location need two place words in their own line, else they stay where the
+      previous matched line was, else neutral. No time-based switching to other kits."""
+    out = []; prev = None
+    for s in m['shots']:
+        if s.get('location'):
+            best = match_location(s['location'])
+        else:
+            sc = score_sets(text_of(spoken(m, s['start'], s['end'])))
+            top = max(sc.values()) if sc else 0
+            cands = [k for k, v in sc.items() if v == top]
+            best = cands[0] if top >= MIN_SPOKEN and len(cands) == 1 else (prev or NEUTRAL)
+        out.append(best); prev = best if best != NEUTRAL or s.get('location') else prev
+    return out
+
+
+def location_report(m):
+    """Per manifest shot: the free-text location, the kit used and why (for the owner's per-shot review)."""
+    sets = plan_locations(m)
+    return [{'shot': i, 'location': s.get('location'), 'set': st, 'reason': 'named place type' if st != NEUTRAL else 'no kit is this place: neutral sky + ground'}
+            for i, (s, st) in enumerate(zip(m['shots'], sets))]
+
+
+def project(cam, p, t=0.5):
+    """Screen position (-1..1 both axes when inside the portrait frame) of world point p at shot fraction t, or None if behind."""
+    def lerp(a, b): return [a[k] + (b[k] - a[k]) * t for k in range(3)]
+    f = lerp(cam['from'], cam.get('to', cam['from'])); la = lerp(cam['look_at'], cam.get('look_to', cam['look_at']))
+    fw = [la[k] - f[k] for k in range(3)]; L = math.sqrt(sum(x * x for x in fw)) or 1; fw = [x / L for x in fw]
+    rt = [fw[1], -fw[0], 0.0]; Lr = math.hypot(rt[0], rt[1]) or 1; rt = [rt[0] / Lr, rt[1] / Lr, 0.0]
+    up = [rt[1] * fw[2] - rt[2] * fw[1], rt[2] * fw[0] - rt[0] * fw[2], rt[0] * fw[1] - rt[1] * fw[0]]
+    d = [p[k] - f[k] for k in range(3)]; z = sum(d[k] * fw[k] for k in range(3))
+    if z <= 0.2: return None
+    half_v = 18.0 / cam.get('lens', 35); half_h = half_v * SIZE[0] / SIZE[1]
+    return (sum(d[k] * rt[k] for k in range(3)) / z / half_h, sum(d[k] * up[k] for k in range(3)) / z / half_v, z)
+
+
+def card_visible(cam, card):
+    """A painted object counts as shown when its middle is inside the frame at mid-shot and it is not a speck (>= 8% of frame height)."""
+    h = card['height']; pos = card['pos']
+    mid = project(cam, [pos[0], pos[1], h * 0.5]); top = project(cam, [pos[0], pos[1], h]); bot = project(cam, [pos[0], pos[1], 0])
+    if not mid or not top or not bot: return False
+    return abs(mid[0]) <= 0.92 and abs(mid[1]) <= 0.92 and (top[1] - bot[1]) / 2 >= 0.08
 
 
 # ---------------------------------------------------------------- geometry helpers
