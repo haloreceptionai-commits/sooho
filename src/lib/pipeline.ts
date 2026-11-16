@@ -19,6 +19,9 @@ import { saveVideoFile } from "@/lib/video-db";
 import { ARCHETYPES } from "@/lib/viral-brain";
 import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
+import { shortsWriterEnabled, shortsWriterStep } from '@/lib/shorts-writer/shorts-writer.functions';
+import { writerCalls } from '@/lib/shorts-writer/calls';
+import { runShortsV4 } from '@/lib/shorts-writer/stage';
 import { autoFixPlan, eligibleHooks, preferRepair, preferAdvancedRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 
@@ -178,6 +181,16 @@ export async function runVideo(id: string, input: VideoInput) {
     const writeScript = async () => {
     up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
+    if (input.format === 'short' && await withRetry(() => shortsWriterEnabled())) {
+      // Shorts Writer v4 (owner's task): facts -> spine -> hooks -> narrator script -> critic, then scenes split word for word.
+      const research = [input.reference ? `Inspiration video transcript (research only; never copy its lines): ${input.reference.transcript.slice(0, 4000)}` : '', input.topicSource ? `Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify independently.` : ''].filter(Boolean).join('\n') || undefined;
+      const calls = writerCalls((step, args) => withRetry(() => shortsWriterStep({ data: { step: step as never, args } }), 2, 16000, STEP_TIMEOUT_MS), { topic: input.topic, deployment: s.scriptDeployment, durationSec: input.durationSec, kid: advanced, research });
+      const base = { topic: input.topic, format: input.format, durationSec: input.durationSec, archetype: archetype ? `${archetype.name} — ${archetype.formula}` : 'Best fit', style: input.style, deployment: s.scriptDeployment, ...(advanced ? { kid: true } : {}) };
+      const v4 = await runShortsV4({ calls, durationSec: input.durationSec, base, plan: (data) => withRetry(() => generatePlan({ data }), 3, 16000, STEP_TIMEOUT_MS), progress: (detail) => up({ detail }) });
+      const saved: ScriptCheckpoint = { plan: v4.plan, gate: v4.gate, report: v4.report, judgeOk: v4.judgeOk, hookType: v4.hookType, moneyShot: v4.moneyShot };
+      up({ hooks: { best: v4.writer.hook, runnerUp: v4.writer.rounds[0]?.hooks[1]?.line ?? v4.writer.hook }, checks: v4.gate.blockers, scriptCheckpoint: saved });
+      return saved;
+    }
     // 1) fact check
     up({ detail: "Fact-checking the story…" });
     const facts = await withRetry(() => factCheck({ data: { topic: input.topic, deployment: s.scriptDeployment } }));
