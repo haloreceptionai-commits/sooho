@@ -852,11 +852,27 @@ Rules:
   if (!Array.isArray(r.scenes) || r.scenes.length !== data.scenes.length || r.scenes.some(x => typeof x !== 'string' || !x.trim())) throw Error('Kid editor changed the scene count');
   return { scenes: r.scenes.map(x => x.trim().replace(/\s+/g, ' ')) };
 };
-export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no text, no letters, no people.';
+export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no people. Absolutely no text, letters, numbers, labels, logos or signage painted on it.';
 const POSE_TEXT: Record<'reach' | 'shock' | 'happy', string> = {
   reach: 'now pointing forward with one arm stretched out (or the animal leaning forward with one leg raised), mouth open as if saying something important',
   shock: 'now shocked: eyes wide, mouth open, eyebrows up, hands (or paws/ears) thrown up in surprise, leaning back a little',
   happy: 'now laughing and cheering: big open smile, eyes squeezed happy, arms (or front legs) up in joy',
+};
+/** Owner rule: a painted object card must not contain readable text or lettering (vision check of the transparent PNG). */
+export const checkCardTextOperation = async ({ data }: { data: { image: string; deployment: string } }) => {
+  const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
+    messages: [
+      { role: 'system', content: 'You inspect a cartoon prop picture for an animated video. Report whether ANY readable text, letters, numbers, words, logos with lettering or signage appear anywhere in it, even small or partial. Rivets, stripes, wood grain and unreadable scribbles on paper are not text.' },
+      { role: 'user', content: [{ type: 'text', text: 'Does this picture contain readable text or lettering? Reply JSON {"text": true|false, "what": "the text you can read, or empty"}.' }, { type: 'image_url', image_url: { url: `data:image/png;base64,${data.image}`, detail: 'low' } }] },
+    ],
+    max_completion_tokens: 2000, reasoning_effort: effortFor(data.deployment, 'none'),
+    response_format: { type: 'json_schema', json_schema: { name: 'card_text', strict: true, schema: { type: 'object', additionalProperties: false, required: ['text', 'what'], properties: { text: { type: 'boolean' }, what: { type: 'string' } } } } },
+  });
+  if (!res.ok) await fail(res, 'Text check');
+  const j = (await res.json()) as { choices?: { message?: { content?: string } }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+  // An unreadable verdict counts as text: an unchecked card is never shown as clean.
+  try { const v = JSON.parse(j.choices?.[0]?.message?.content ?? '') as { text: boolean; what: string }; return { text: !!v.text, what: String(v.what ?? '').slice(0, 120), tokens: (j.usage?.prompt_tokens ?? 0) + (j.usage?.completion_tokens ?? 0) }; }
+  catch { return { text: true, what: 'unreadable check', tokens: 0 }; }
 };
 /** Paints a transparent card: a standing character, an object, or (with a reference) the same character in another pose. */
 export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | undefined; pose?: 'reach' | 'shock' | 'happy' | 'rig' | undefined; reference?: string | undefined } }) => {
@@ -874,6 +890,19 @@ export const paintAdvancedCardOperation = async ({ data }: { data: { look: strin
       else if (res.status !== 400) await fail(res, 'Character pose');
     }
     throw Error('Character pose could not be painted');
+  }
+  if (data.kind === 'object' && data.reference) {
+    // State variant of a canonical object (leaking, failing, burst): painted FROM the canonical card so it is visibly the same object.
+    for (let i = 0; i < 2; i++) {
+      const fd = new FormData();
+      fd.append('image[]', new Blob([b64ToBytes(data.reference)], { type: 'image/png' }), 'object.png');
+      fd.append('prompt', `${style} Keep EXACTLY the same object as the reference image: same shape, material, colours, proportions, rivets and line style; only its state changes. Show it in this state: ${i ? softenPrompt(data.look) : data.look}. Absolutely no text, letters or numbers anywhere.`.slice(0, 3900));
+      fd.append('size', '1024x1536'); fd.append('quality', 'medium'); fd.append('background', 'transparent'); fd.append('output_format', 'png'); fd.append('n', '1');
+      const res = await azureOpenAIRequest(`${safeName(data.deployment)}/images/edits`, fd, true);
+      if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
+      else if (res.status !== 400) await fail(res, 'Object variant');
+    }
+    throw Error('Object variant could not be painted');
   }
   const tries = data.kind === 'object' ? [data.look, softenPrompt(data.look)] : [data.look, softenPrompt(data.look), 'a friendly cartoon storyteller in simple period clothes'];
   for (const look of tries) {
