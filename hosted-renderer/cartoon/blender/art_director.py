@@ -265,7 +265,7 @@ class Director:
         for i, c in enumerate(m.get('cast') or []):
             outfit, hat = OUTFIT.get(c.get('outfit'), ('worker', 'none'))
             self.cast_look[c['id']] = {'outfit': outfit, 'hat': hat, 'shirt': SHIRTS[i % 4], 'hat_color': HAT_COLORS[i % 4]}
-        self.last_zone = None
+        self.last_zone = None; self.scene_shown = {}
 
     # -- choose a zone that differs from the previous segment's backdrop
     def zone(self, st, keep=False):
@@ -303,7 +303,7 @@ class Director:
             return p
         return 'wide' if prev != 'wide' else 'medium'
 
-    def segment(self, i, part, a, b):
+    def segment(self, i, part, a, b, last=True):
         m = self.m; s = m['shots'][i]; st = self.locations[i]
         ws = spoken(m, a, b); txt = text_of(ws); whole = text_of(spoken(m, s['start'], s['end']))
         new_place = part == 0 and (i == 0 or self.locations[i - 1] != st)
@@ -338,18 +338,21 @@ class Director:
         for p in s.get('props') or []:
             k = {'coins': 'money_bag', 'gold_piece': 'money_bag', 'chest': 'money_bag', 'cart': 'covered_cart', 'pan': 'gold_pan', 'magnifier': 'magnifier'}.get(p.get('kind'))
             if k and re.search(STORY_OBJECT_WORDS[k], whole) and k not in story_obj: story_obj.append(k)
-        for k, pat in STORY_OBJECT_WORDS.items():
-            if k in ('rail_joint', 'covered_cart', 'gold_vein') and st not in ('rail_yard', 'mine_tunnel', 'village', 'outback'): continue
-            if re.search(pat, txt) and k not in story_obj and k in OBJECTS: story_obj.append(k)
+        # Owner rule: a heard keyword never adds a built-in object or model (no "tank" -> army tank); only planned props draw.
         story_obj = story_obj[:1]
         props = []
         for p in s.get('props') or []:
             hit = PROP_MODEL.get(p.get('kind'))
             if hit and all(q[0] != hit[0] for q in props): props.append(hit)
-        for pat, mid, hgt in WORD_PROPS:
-            if re.search(pat, whole) and all(q[0] != mid for q in props): props.append((mid, hgt))
         props = [p for p in props if not (p[0] == 'pirate-kit/ship-large' and st != 'ship_deck')][:3]
-        ctx = {'first_of_video': i == 0 and part == 0, 'new_place': new_place, 'part': part, 'story_object': bool(story_obj), 'props': bool(props),
+        # Painted object cards named by the shot's descriptive phrases (upright cutouts that cast shadows).
+        obj_cards = []
+        for p in s.get('props') or []:
+            a = str(p.get('asset') or '')
+            if p.get('kind') == 'asset' and a.startswith('card/') and f'obj-{a[5:]}.png' in self.cards and all(o['image'] != f'obj-{a[5:]}.png' for o in obj_cards):
+                obj_cards.append({'image': f'obj-{a[5:]}.png', 'size': p.get('size') if p.get('size') in OBJECT_HEIGHT else 'medium', 'phrase': str(p.get('phrase') or a[5:])})
+        obj_cards = obj_cards[:3]
+        ctx = {'first_of_video': i == 0 and part == 0, 'new_place': new_place, 'part': part, 'story_object': bool(story_obj), 'props': bool(props) or bool(obj_cards),
                'moving': bool(moving), 'scale': bool(SCALE_WORDS.search(txt)) or herd, 'threat': verb in ('aim', 'load') or s.get('mood') == 'tense',
                'n_people': len(actors), 'n_subjects': len(actors) + len(beasts), 'emotion': verb in ('panic', 'fall', 'cheer') or s.get('expression') in ('shock', 'laugh', 'nervous'),
                'reveal': s.get('mood') == 'reveal', 'hint': HINT.get(s.get('shot')) if part == 0 else None}
@@ -389,7 +392,7 @@ class Director:
             elif act == 'swing': ch['held'] = 'tool'
             cast.append(ch)
         if beasts:
-            herd_n = 6 if herd else min(6, max(len(beasts), 1))
+            herd_n = max(0, (6 if herd else min(6, max(len(beasts), 1))) - len(obj_cards))
             ids = [b['id'] for b in beasts]
             for k in range(herd_n):
                 bid = ids[k % len(ids)]; depth = (k // 2) * 1.3 + (0.6 if cast else 0); side = (k % 2) * 1.2 - 0.6 + (1.3 if cast else 0)
@@ -414,6 +417,15 @@ class Director:
             for cand in OBJECTS[k]['actions'] if isinstance(OBJECTS[k], dict) else []:
                 if cand != 'hold' and re.search(cand[:4], txt): act = cand
             objects.append({'kind': k, 'action': act, 'pos': at(anchor, F, R, -0.7, 0.55) + [0], 'scale': .85, 'yaw': round(head - 90, 2)})
+        obj_specs = []
+        for j, o in enumerate(obj_cards):
+            h = OBJECT_HEIGHT[o['size']]; side = (1 if j % 2 == 0 else -1) * (1 if (i % 2 == 0) else -1)
+            if o['size'] == 'huge': pos = at(S, F, R, 4.6 + 1.2 * j, 2.4 * side)
+            elif o['size'] == 'large': pos = at(S, F, R, 2.6 + 0.8 * j, 1.9 * side)
+            elif o['size'] == 'medium': pos = at(anchor, F, R, 0.25, 1.15 * side)
+            else: pos = at(anchor, F, R, -0.35, 0.7 * side)
+            obj_specs.append({'image': o['image'], 'pos': pos, 'height': h})
+        cards = obj_specs + cards
         prop_specs = []
         for j, (mid, hgt) in enumerate(props):
             big = hgt >= 4
@@ -445,10 +457,22 @@ class Director:
                 effects.append({'kind': kk, 'pos': at(S, F, R, 2.4, -1.4, 0), 'start': 0, 'scale': .8, 'seed': i * 13 + len(effects)})
         effects = effects[:6]
         # --- camera
-        subj = [c['pos'] for c in cast] + [c['pos'] for c in cards]
-        if cards and 'to' in cards[0]: subj += [cards[0]['to']]
+        beast_cards = cards[len(obj_specs):]
+        subj = [c['pos'] for c in cast] + [c['pos'] for c in beast_cards] + [c['pos'] for c in obj_specs if c['height'] < 2]
+        if beast_cards and 'to' in beast_cards[0]: subj += [beast_cards[0]['to']]
         C = [sum(p[0] for p in subj) / len(subj), sum(p[1] for p in subj) / len(subj)] if subj else S
-        cam = self.make_camera(kind, s, st, origin, head, F, R, C, cast, cards, objects, dur, moving, verb, travel_dir, txt, part)
+        cam = self.make_camera(kind, s, st, origin, head, F, R, C, cast, beast_cards, objects, dur, moving, verb, travel_dir, txt, part, obj_specs)
+        # Every painted object the line names must be seen in its scene: reframe wide, then an insert on the object.
+        shown = [o['image'] for o in obj_specs if card_visible(cam, o)]
+        seen = self.scene_shown.setdefault(i, set()); seen.update(shown)
+        missing = [o for o in obj_specs if o['image'] not in seen]
+        if missing and (last or kind not in ('close', 'xclose', 'ots', 'insert')):
+            for k2 in ('wide', 'establish', 'insert'):
+                big = [c['pos'] for c in obj_specs] + [c['pos'] for c in cast]
+                C2 = [sum(p[0] for p in big) / len(big), sum(p[1] for p in big) / len(big)]
+                cam2 = self.make_camera(k2, s, st, origin, head, F, R, C2, cast, beast_cards, objects, dur, moving, verb, travel_dir, txt, part, missing)
+                if all(card_visible(cam2, o) for o in missing):
+                    cam, kind = cam2, k2; shown = [o['image'] for o in obj_specs if card_visible(cam, o)]; seen.update(shown); break
         if IMPACT.search(txt):
             hits = [w for _, w, t in ws if IMPACT.search(str(t).lower())]
             t = max(0.0, min(dur, (hits[0]['start'] * FPS - a) / FPS)) if hits else min(dur, .15)
@@ -462,9 +486,10 @@ class Director:
         if effects: shot['effects'] = effects
         if prop_specs: shot['props'] = prop_specs
         self.history.append(kind); self.last_zone = (st, zname)
-        return validate_shot(shot), {'camera_type': kind, 'set': st, 'zone': zname, 'verb': verb, 'words': txt}
+        return validate_shot(shot), {'camera_type': kind, 'set': st, 'zone': zname, 'verb': verb, 'words': txt, 'location': s.get('location'),
+                                     'objects': [o['phrase'] for o in obj_cards], 'cards_shown': shown}
 
-    def make_camera(self, kind, s, st, origin, head, F, R, C, cast, cards, objects, dur, moving, verb, tdir, txt, part):
+    def make_camera(self, kind, s, st, origin, head, F, R, C, cast, cards, objects, dur, moving, verb, tdir, txt, part, obj_cards=()):
         side = 1 if (len(self.history) % 2 == 0) else -1
         face = 1.62
         def P(fwd, right, z, base=C): return at(base, F, R, fwd, right, z)
@@ -472,7 +497,11 @@ class Director:
         if kind == 'establish':
             cam = {'from': P(-7.0, 1.8 * side, 3.4), 'to': P(-5.4, 1.0 * side, 2.1), 'look_at': P(0.4, 0, 1.0), 'lens': 28, 'fstop': 8}
         elif kind == 'wide':
-            cam = {'from': P(-6.0, 1.4 * side, 1.9), 'look_at': P(0.3, 0, 1.0), 'lens': 28, 'fstop': 6}
+            tall = max([o['height'] for o in obj_cards] + [0])
+            if tall >= 2:  # a landmark-sized object: step back and look up so the whole thing fits
+                cam = {'from': P(-6.5 - tall * 0.9, 1.4 * side, 1.6), 'look_at': P(1.2, 0, min(3.2, tall * 0.42)), 'lens': 24, 'fstop': 8}
+            else:
+                cam = {'from': P(-6.0, 1.4 * side, 1.9), 'look_at': P(0.3, 0, 1.0), 'lens': 28, 'fstop': 6}
         elif kind == 'medium':
             cam = {'from': P(-3.4, .8 * side, 1.5), 'look_at': P(0, 0, 1.05), 'lens': 35, 'fstop': 4}
         elif kind in ('close', 'xclose'):
@@ -507,7 +536,11 @@ class Director:
             def ring(aa): return P(-r * math.cos(aa), r * math.sin(aa), 1.4)
             cam = {'from': ring(a0), 'to': ring(a1), 'look_at': P(0, 0, 1.1), 'lens': 32, 'fstop': 3.2}
         else:  # insert
-            if objects:
+            if obj_cards and not objects:  # close look at the painted object the line is about
+                o = obj_cards[0]; h = o['height']; d = 1.2 + h * 1.25
+                cam = {'from': at(o['pos'], F, R, -d, .35 * side, min(h * 0.55 + .4, 4.5)), 'look_at': at(o['pos'], F, R, 0, 0, h * 0.5),
+                       'lens': 35 if h < 2 else 28, 'fstop': 2.8}
+            elif objects:
                 o0 = objects[0]['pos']; act = objects[0]['action']
                 c0 = OBJ_CAMS.get((objects[0]['kind'], 'hold' if act == 'pour' else act)) or OBJ_CAMS.get(objects[0]['kind'])
                 if c0:
@@ -580,7 +613,8 @@ def plan(m, cards=()):
     """All segments of the video: [{'shot_index', 'start', 'end', 'shot', 'notes'}] covering every frame exactly once."""
     d = Director(m, cards); out = []
     for i, s in enumerate(m['shots']):
-        for part, (a, b) in enumerate(split_points(m, s)):
-            shot, notes = d.segment(i, part, a, b)
+        parts = split_points(m, s)
+        for part, (a, b) in enumerate(parts):
+            shot, notes = d.segment(i, part, a, b, last=part == len(parts) - 1)
             out.append({'shot_index': i, 'start': a, 'end': b, 'shot': shot, 'notes': notes})
     return out
