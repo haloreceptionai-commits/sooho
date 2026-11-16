@@ -53,7 +53,6 @@ VERB_ACTION = [  # first match wins; literal verbs in the spoken line drive the 
     (r'\b(carr\w*|haul\w*|deliver\w*|lift\w*|brought|bring\w*)\b', 'carry'),
     (r'\b(dug|dig\w*|smash\w*|hit|hits|hammer\w*|chop\w*|struck|strike\w*|built|build\w*)\b', 'swing'),
     (r'\b(pour\w*|spill\w*|fill\w*)\b', 'pour'),
-    (r'\b(kill\w*|hunt\w*|cull\w*)\b', 'aim'),
     (r'\b(fell|fall\w*|died|die|dies|collaps\w*|crash\w*)\b', 'fall'),
     (r'\b(won|win|wins|celebrat\w*|cheer\w*|victory|triumph\w*|success\w*)\b', 'cheer'),
     (r'\b(panic\w*|terrif\w*|chaos|disaster|destroy\w*|ruin\w*|lost|failed|fail\w*|humiliat\w*)\b', 'panic'),
@@ -266,6 +265,8 @@ class Director:
         named = bool(ANIMAL.search(txt or whole))
         if named and animal_cards and not beasts: beasts = [{'id': k, 'action': 'run'} for k in animal_cards]
         verb = next((act for pat, act in VERB_ACTION if re.search(pat, txt or whole)), None)
+        if verb is None and re.search(r'\b(kill\w*|hunt\w*|cull\w*)\b', txt or whole):  # killing means aiming only when weapons are in the story
+            verb = 'aim' if re.search(r'\b(gun\w*|rifle\w*|shot|shoot\w*|bullets?|hunters?|soldiers?)\b', whole + ' ' + text_of(spoken(m, 0, 10 ** 9))) else 'panic'
         beast_verb = verb if named and beasts else None
         if beast_verb in ('run', 'walk', 'panic', 'fall'):  # "the emus scattered": the animals move, people react
             verb = 'aim' if re.search(r'\b(gun\w*|fir\w*|shot|soldiers?|bullets?|kill\w*)\b', whole) and any(self.cast_look.get(x['id'], {}).get('outfit') == 'soldier' for x in actors) else 'point'
