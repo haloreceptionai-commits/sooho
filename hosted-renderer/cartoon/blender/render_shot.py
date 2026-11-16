@@ -226,7 +226,21 @@ def set_open_day(length=24.0):
     s = bpy.context.active_object.data; s.energy = 2; s.angle = math.radians(3)
 
 
-SETS = {'mine_tunnel': set_mine_tunnel, 'open_day': set_open_day}
+def set_neutral(length=24.0):
+    """Neutral fallback (owner rule): plain warm ground and open sky, nothing that claims a specific place."""
+    ground = noise_mat('ground', (0.42, 0.36, 0.28), (0.50, 0.44, 0.35), scale=3, bump=0.15, rough=0.9)
+    add('plane', (0, 0, 0), (80, 80, 1), m=ground, smooth=False)
+    w = bpy.context.scene.world.node_tree; nodes = w.nodes
+    sky = nodes.new('ShaderNodeTexSky')
+    try: sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(32); sky.sun_rotation = math.radians(35)
+    except Exception: pass
+    w.links.new(sky.outputs[0], nodes['Background'].inputs['Color'])
+    nodes['Background'].inputs['Strength'].default_value = .2
+    bpy.ops.object.light_add(type='SUN', rotation=(math.radians(52), 0, math.radians(35)))
+    s = bpy.context.active_object.data; s.energy = 2.4; s.angle = math.radians(4); s.color = (1.0, 0.93, 0.82)  # warm directional key
+
+
+SETS = {'mine_tunnel': set_mine_tunnel, 'open_day': set_open_day, 'neutral': set_neutral}
 
 
 # ---------------------------------------------------------------- egg-head character
