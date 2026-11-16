@@ -28,7 +28,7 @@ describe("shorts writer critic decisions", () => {
   it("fails when the hook gives the answer away", () => expect(criticPasses(critic({ hook_reveals_answer: true }))).toBe(false));
   it("fails when the ending copies the hook", () => expect(criticPasses(critic({ ending_copies_hook: true }))).toBe(false));
   it("fails a scene-description line", () => { const c = critic(); c.lines[1]!.narration = false; expect(criticPasses(c)).toBe(false); });
-  it("never patches the locked hook", () => { const c = critic(); c.lines[0]!.clear = false; c.lines[2]!.new_fact = false; expect(flaggedLines(c)).toEqual([3]); });
+  it("never patches the locked hook", () => { const c = critic(); c.lines[0]!.clear = false; c.lines[1]!.new_fact = false; expect(flaggedLines(c)).toEqual([2]); });
   it("rewrites only flagged lines and can delete one", () => expect(applyRewrite(["H", "a", "b", "c"], [{ n: 1, text: "X" }, { n: 2, text: "" }, { n: 3, text: "B" }], [2, 3])).toEqual(["H", "B", "c"]));
 });
 
