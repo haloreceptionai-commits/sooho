@@ -192,7 +192,7 @@ def plan_locations(m, cards=()):
     * older shots without a location need two place words in their own line, else they stay where the
       previous matched line was, else neutral. No time-based switching to other kits."""
     out = []; prev = None
-    year = story_year(m.get('script') or ' '.join(str(w.get('text', '')) for w in m.get('words') or []))
+    year = story_year(m.get('script') or ' '.join(str(w) for w in m.get('caption_words') or []) or ' '.join(str(w.get('word', '')) for w in m.get('words') or []))
     for s in m['shots']:
         if s.get('location'):
             best = match_location(s['location'])
