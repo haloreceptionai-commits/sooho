@@ -84,7 +84,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
   const objects = objectsToPaint(direction.scenes);
   const variantOf = new Map<string, string>();
   for (const f of direction.families ?? []) for (const v of f.variants) variantOf.set(v.id, f.canonical);
-  const finals = new Map<string, string>();
+  const finals = new Map<string, string>(), repainted = new Set<string>();
   let done = 0;
   const tick = () => report(`Painting story objects · ${Math.min(objects.length, ++done)}/${objects.length} while the voice records…`);
   report(`Painting story objects · 0/${objects.length} while the voice records…`);
@@ -105,7 +105,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
     const rec = checks.objects[o.name];
     const file = `card-obj-${o.name}.png`;
     // A saved card is reused unless it failed the text check before or is a variant not yet painted from its canonical.
-    const stale = !!reference && rec?.from !== canonical;
+    const stale = !!reference && (rec?.from !== canonical || repainted.has(canonical!));
     let b64: string | null = null, fresh = false;
     if (have.has(file) && !stale && rec?.ok !== false) {
       const { data } = await bucket.download(`${root}/${file}`);
@@ -121,7 +121,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
     }
     checks.objects[o.name] = { ok, ...(canonical && reference ? { from: canonical } : {}) };
     if (ok && b64) {
-      if (fresh) await save(file, toBytes(b64), "image/png", true);
+      if (fresh) { await save(file, toBytes(b64), "image/png", true); repainted.add(o.name); }
       finals.set(o.name, b64); cards.push({ id: `obj-${o.name}`, path: `${root}/${file}` });
       if (fresh) note(`${o.name}: painted${canonical && reference ? ` from ${canonical}` : ""}, no text`); else note(`${o.name}: reused saved card, no text`);
     }
