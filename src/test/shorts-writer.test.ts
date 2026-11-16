@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { budget, criticPasses, flaggedLines, hookIssues, needsNewSpine, scriptIssues, type Critic } from "@/lib/shorts-writer/checks";
+import { budget, criticPasses, flaggedLines, hookIssues, needsNewSpine, scriptIssues, type Critic, dateIssues, spokenIssues } from "@/lib/shorts-writer/checks";
 import { applyRewrite } from "@/lib/shorts-writer/orchestrate";
 import { GOLD_1 } from "@/lib/shorts-writer/prompts";
 
@@ -7,7 +7,7 @@ const facts = [{ id: "f1", text: "In 217 BC Hannibal was trapped by Rome in a va
 const critic = (o: Partial<Critic> = {}): Critic => ({ lines: [1, 2, 3].map((n) => ({ n, follows: true, clear: true, narration: true, new_fact: true, reason: "" })), hook_reveals_answer: false, ending_makes_sense: true, ending_copies_hook: false, real_twist: true, coherence: 8, clarity: 8, curiosity: 8, summary: "", ...o });
 
 describe("shorts writer length follows the selected duration", () => {
-  it("60 seconds is 130-150 words in 12-16 lines", () => expect(budget(60)).toEqual({ minWords: 130, maxWords: 150, minLines: 12, maxLines: 16 }));
+  it("60 seconds is 130-150 words in 12-16 lines", () => expect(budget(60)).toMatchObject({ minWords: 130, maxWords: 150, minLines: 12, maxLines: 16 }));
   it("30 seconds is 65-75 words", () => expect([budget(30).minWords, budget(30).maxWords]).toEqual([65, 75]));
   it("90 seconds is 195-225 words", () => expect([budget(90).minWords, budget(90).maxWords]).toEqual([195, 225]));
 });
@@ -50,4 +50,13 @@ describe("shorts writer closing reframe", () => {
 
 describe("shorts writer possessive names", () => {
   it("treats Hannibal's as the known name Hannibal", () => expect(scriptIssues(["Hannibal was trapped, so he strapped fire to two thousand oxen.", "Then Hannibal’s men moved at night."], facts, 60).join()).not.toContain("Hannibal"));
+});
+
+describe("owner update: dates, spoken lines, length", () => {
+  it("rejects day-of-month dates", () => expect(dateIssues(["They began on 2 November."]).join()).toContain("day-of-month"));
+  it("rejects 'on 12' style dates", () => expect(dateIssues(["It restarted on 12 and ran on."]).join()).toContain("day-of-month"));
+  it("allows two dates", () => expect(dateIssues(["In 1932 the farmers asked for help.", "By 1934 bounties replaced soldiers."])).toEqual([]));
+  it("rejects a third date", () => expect(dateIssues(["In 1932 it began.", "In 1933 it paused.", "In 1934 it ended."]).join()).toContain("3 dates"));
+  it("rejects semicolons", () => expect(spokenIssues(["Hook here.", "Emus trampled wheat; losses meant ruin."]).join()).toContain("line 2"));
+  it("60s Shorts aim for 145 words and fail above 150", () => { expect(budget(60).targetMax).toBe(145); expect(budget(60).maxWords).toBe(150); });
 });

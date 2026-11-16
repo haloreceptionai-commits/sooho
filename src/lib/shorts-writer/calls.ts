@@ -13,7 +13,8 @@ export function writerCalls(run: StepRunner, d: { topic: string; deployment: str
     hooks: (facts, spine, feedback) => r('hooks', { topic, facts, spine, feedback }),
     pickHook: (hooks, spine) => r('pickHook', { hooks, spine }),
     script: (facts, spine, hook) => r('script', { topic, facts, spine, hook, durationSec, kid }),
-    critic: (lines, facts) => r('critic', { lines, facts, durationSec }),
+    critic: (lines, facts, shareable) => r('critic', { lines, facts, shareable, durationSec }),
+    verifyNumbers: (numbers, lines) => r('verifyNumbers', { topic, numbers, lines }),
     rewrite: (lines, flagged, problems, facts, spine) => r('rewrite', { lines, flagged, problems, facts, spine, durationSec, kid }),
   };
 }

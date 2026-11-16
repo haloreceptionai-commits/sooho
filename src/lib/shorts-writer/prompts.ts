@@ -63,6 +63,10 @@ STYLE RULES:
 - SIMPLICITY OVER COMPLETENESS: follow ONE story thread and use only the 5-8 facts that thread needs; leave the rest out. Never list several technical terms, methods or numbers in one line. No jargon a 12-year-old doesn't know (no "neutral temperature", "destressed", "tensors", "Marangoni", "hydro-oxygen"); say what it does in everyday words instead.
 - Tell it as a STORY: people doing things, a problem, what they tried, what happened. Never write like a report ("he reported that", "he attributed", "he emphasized", journal or proceedings details, units lectures).
 - The closing line must be a plain sentence a listener understands at once, not a slogan or abstract phrase.
+- SPOKEN LANGUAGE: each line is ONE complete sentence a person can say in one breath. No semicolons. No colons chaining facts. No telegraphic noun stacks ("Emus trampled wheat and smashed rabbit fences; Depression losses meant ruin" is a caption, not speech). Read-aloud test: if it sounds like a report, a caption or an encyclopedia, rewrite it. Short fragments only when they carry meaning ("It sounded easy.").
+- DATES: at most 2 dates in the whole script, and only a year or a single month. Never a day of the month ("2 November", "on 12"). Turn complicated timelines (phase one, phase two, withdrawal, restart) into at most 2 simple beats ("they pulled out, then came back").
+- MUST-INCLUDE: every SHAREABLE FACT you are given must appear in the script, told vividly.
+- ENDING: the closing line makes sense on its own, is under 15 words, reframes the story in new words (never copies the hook) and lands a punch: a contrast, an irony or a lesson. Bad: "In the end, the country and the birds beat the plan." (vague).
 - Use ONLY facts marked certain in the fact sheet. No invented names, dates, numbers or quotes.`;
 
 export const GOLD_BLOCK = `GOLD EXAMPLE 1 (target quality; copy the quality, never the content):\n${GOLD_1}\n\nGOLD EXAMPLE 2:\n${GOLD_2}\n\n${WHY_GOLD}\n\n${BAD_GOOD}`;

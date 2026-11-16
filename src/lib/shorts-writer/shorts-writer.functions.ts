@@ -2,8 +2,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type Step = 'facts' | 'spine' | 'spineCheck' | 'hooks' | 'pickHook' | 'script' | 'critic' | 'rewrite';
-const STEPS = new Set<Step>(['facts', 'spine', 'spineCheck', 'hooks', 'pickHook', 'script', 'critic', 'rewrite']);
+type Step = 'facts' | 'spine' | 'spineCheck' | 'hooks' | 'pickHook' | 'script' | 'critic' | 'rewrite' | 'verifyNumbers';
+const STEPS = new Set<Step>(['facts', 'spine', 'spineCheck', 'hooks', 'pickHook', 'script', 'critic', 'rewrite', 'verifyNumbers']);
 
 export const shortsWriterStep = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { step: Step; args: Record<string, unknown> }) => {
@@ -25,6 +25,7 @@ export const shortsWriterStep = createServerFn({ method: "POST" }).middleware([r
       case 'script': return O.scriptOp(a);
       case 'critic': return O.criticOp(a);
       case 'rewrite': return O.rewriteLinesOp(a);
+      case 'verifyNumbers': return O.verifyNumbersOp(a);
     }
   });
 
