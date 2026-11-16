@@ -11,5 +11,5 @@ describe("story shape v3", () => {
   it("rejects the rail script's long lecture lines", () => expect(rail).toMatch(/Shape lines/));
   it("rejects the rail script's gap without open questions", () => expect(rail).toMatch(/Shape loops/));
   it("rejects the rail summary ending", () => expect(rail).toMatch(/summary/));
-  it("requires the hook to be 8-12 words", () => expect(shapeIssues("Rails crack. Why? Heat. Gaps. Rails crack.").issues.join()).toMatch(/hook: 5 words/));
+  it("requires the hook to be 8-12 words", () => expect(shapeIssues("Hot rails crack. Why? Heat. Gaps.").issues.join()).toMatch(/hook: 3 words/));
 });
