@@ -31,7 +31,7 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
     const advanced = input.engine === "advanced";
     await up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
-    if (input.format === 'short' && process.env['SHORTS_WRITER_V4'] === 'on') {
+    if (input.format === 'short' && process.env['SHORTS_WRITER_V4'] === 'on') try {
       // Shorts Writer v4 (owner's task): one checkpointed AI call per step, then scenes split word for word.
       const research = [input.reference ? `Inspiration video transcript (research only; never copy its lines): ${input.reference.transcript.slice(0, 4000)}` : '', input.topicSource ? `Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify independently.` : ''].filter(Boolean).join('\n') || undefined;
       const calls = writerCalls((step, args) => api.call(() => directRunner(step, args)), { topic: input.topic, deployment: s.scriptDeployment, durationSec: input.durationSec, kid: advanced, research });
@@ -40,6 +40,10 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       const saved: ScriptCheckpoint = { plan: v4.plan, gate: v4.gate, report: v4.report, judgeOk: v4.judgeOk, hookType: v4.hookType, moneyShot: v4.moneyShot };
       await up({ hooks: { best: v4.writer.hook, runnerUp: v4.writer.rounds[0]?.hooks[1]?.line ?? v4.writer.hook }, checks: v4.gate.blockers, scriptCheckpoint: saved });
       return saved;
+    } catch (e) {
+      // Self-healing: fall back to the proven Story Engine rather than failing the background job.
+      console.warn('Shorts Writer v4 failed, using the backup writer:', e);
+      await up({ detail: 'New script writer hit a problem — continuing with the backup writer…' });
     }
     // 1) fact check
     await up({ detail: "Fact-checking the story…" });
