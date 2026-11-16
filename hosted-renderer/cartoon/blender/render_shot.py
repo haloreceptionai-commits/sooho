@@ -412,6 +412,10 @@ def fade_ground(cam_xy, start, end, colour=None):
             if colour and bsdf:  # floor takes the painting's own ground colour so the two read as one surface
                 for l in list(bsdf.inputs['Base Color'].links): nt.links.remove(l)
                 bsdf.inputs['Base Color'].default_value = (*colour, 1)
+                for name, v in (('Roughness', 1.0), ('Specular IOR Level', 0.0), ('Specular', 0.0)):
+                    if name in bsdf.inputs:
+                        for l in list(bsdf.inputs[name].links): nt.links.remove(l)
+                        bsdf.inputs[name].default_value = v
             geo = nt.nodes.new('ShaderNodeNewGeometry'); dist = nt.nodes.new('ShaderNodeVectorMath'); dist.operation = 'DISTANCE'
             sep = nt.nodes.new('ShaderNodeSeparateXYZ'); comb = nt.nodes.new('ShaderNodeCombineXYZ')
             nt.links.new(geo.outputs['Position'], sep.inputs[0]); nt.links.new(sep.outputs[0], comb.inputs[0]); nt.links.new(sep.outputs[1], comb.inputs[1])
