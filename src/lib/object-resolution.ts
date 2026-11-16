@@ -44,11 +44,11 @@ export const objectSlug = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g
  */
 export function resolveSceneObjects<T extends Scene>(scenes: T[], maxCards = 8, library: LibraryObject[] = LIBRARY): { scenes: T[]; missing: MissingObject[] } {
   const byId = new Map(library.map(o => [o.id, o]));
-  const cardIds = new Map<string, string>(); // object id -> phrase used for its painting (first, most descriptive mention)
+  const cardIds = new Map<string, string>(); // object id -> phrase used for its painting
   const missing: MissingObject[] = [];
   for (const s of scenes) for (const o of s.objects ?? []) {
     const id = objectSlug(o.id || o.phrase); const p = String(o.phrase ?? '').trim();
-    if (id && p && (!cardIds.has(id) || p.length > (cardIds.get(id) ?? '').length)) cardIds.set(id, p);
+    if (id && p && !cardIds.has(id)) cardIds.set(id, p); // first mention introduces the object: its canonical look
   }
   // Objects that recur across more scenes are painted first; the same physical object keeps one card.
   const uses = new Map<string, number>();
