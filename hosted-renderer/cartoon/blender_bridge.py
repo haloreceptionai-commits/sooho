@@ -135,7 +135,25 @@ def burn(img, words):
     return img
 
 
+def segments(m, cards=()):
+    """Benchmark-paced setups from the art director; if planning ever fails, one legacy shot per manifest shot."""
+    try:
+        from art_director import plan
+        return [(g['shot_index'], g['start'], g['end'], g['shot']) for g in plan(m, cards)]
+    except Exception as e:  # never stop a paid render over a planning slip
+        print(json.dumps({'art_director_fallback': str(e)[:300]}), flush=True)
+        return [(i, s['start'], s['end'], compile_shot(m, i, cards)) for i, s in enumerate(m['shots'])]
+
+
+def engine_env():
+    """Eevee only where the graphics driver really runs it (BLENDER_ENGINE=eevee); otherwise Cycles on the card."""
+    eng = os.environ.get('BLENDER_ENGINE', 'cycles')
+    return {'SHOT_ENGINE': eng, 'CYCLES_DEVICE': os.environ.get('CYCLES_DEVICE', 'GPU')}
+
+
 def render_range(manifest_path, web, out, first, last, card_dir):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
     from PIL import Image
     from capture import fingerprint, atomic_json, valid_frame
     m = json.loads(Path(manifest_path).read_text()); out = Path(out); out.mkdir(parents=True, exist_ok=True)
@@ -145,29 +163,41 @@ def render_range(manifest_path, web, out, first, last, card_dir):
     if saved['input_hash'] != signature: raise ValueError('Inputs changed; stale frames cannot resume')
     cards = set(os.listdir(card_dir)) if card_dir and os.path.isdir(card_dir) else set()
     blender = os.environ.get('BLENDER_BIN', '/opt/blender/blender')
-    for i, s in enumerate(m['shots']):
-        want = [f for f in range(max(first, s['start']), min(last, s['end'] - 1) + 1) if not valid_frame(out / f'f{f:06d}.jpg', saved['frames'].get(str(f)))]
-        if not want: continue
-        shot = compile_shot(m, i, cards)
+    lock = threading.Lock(); eng = engine_env()
+    samples = int(os.environ.get('BLENDER_SAMPLES', '16' if eng['SHOT_ENGINE'] == 'eevee' else '10'))
+    jobs = []
+    for k, (i, a, b, shot) in enumerate(segments(m, cards)):
+        want = [f for f in range(max(first, a), min(last, b - 1) + 1) if not valid_frame(out / f'f{f:06d}.jpg', saved['frames'].get(str(f)))]
+        if want: jobs.append((k, i, a, shot, want))
+
+    def run(job):
+        k, i, a, shot, want = job
+        shot = dict(shot); shot['engine'] = eng['SHOT_ENGINE']; shot['samples'] = samples
         n = round(shot['duration'] * 30)
-        local = {f: min(n, f - s['start'] + 1) for f in want}
+        local = {f: min(n, f - a + 1) for f in want}
         shot['frames'] = sorted(set(local.values()))
         with tempfile.TemporaryDirectory() as tmp:
             sp = Path(tmp) / 'shot.json'; sp.write_text(json.dumps(shot))
-            env = {**os.environ, 'SHOT_ENGINE': 'cycles', 'CYCLES_DEVICE': os.environ.get('CYCLES_DEVICE', 'GPU'), 'CARD_DIR': card_dir or ''}
+            env = {**os.environ, **eng, 'CARD_DIR': card_dir or ''}
             r = subprocess.run([blender, '-b', '--factory-startup', '--python-exit-code', '1', '--python', str(ROOT / 'blender' / 'render_shot.py'), '--', str(sp), tmp],
                                env=env, capture_output=True, text=True, timeout=1500)
-            if r.returncode != 0: raise RuntimeError(f'Blender shot {i} failed: {(r.stdout + r.stderr)[-1500:]}')
+            if r.returncode != 0: raise RuntimeError(f'Blender segment {k} (shot {i}) failed: {(r.stdout + r.stderr)[-1500:]}')
             for f in want:
                 png = Path(tmp) / f'f_{local[f]:05d}.png'
                 img = Image.open(png).convert('RGB').resize((1080, 1920), Image.LANCZOS)
                 img = burn(img, caption_at(m, f))
-                file = out / f'f{f:06d}.jpg'; tmpf = file.with_suffix('.tmp')
+                file = out / f'f{f:06d}.jpg'; tmpf = file.with_suffix(f'.{k}.tmp')
                 img.save(tmpf, 'JPEG', quality=93)
                 meta = {'sha256': hashlib.sha256(tmpf.read_bytes()).hexdigest()}
-                tmpf.replace(file); saved['frames'][str(f)] = meta
-            atomic_json(ck, saved)
-            print(json.dumps({'blender_shot': i, 'frames': len(want)}), flush=True)
+                tmpf.replace(file)
+                with lock: saved['frames'][str(f)] = meta
+            with lock: atomic_json(ck, saved)
+            print(json.dumps({'blender_segment': k, 'shot': i, 'frames': len(want)}), flush=True)
+
+    # Two Blender processes per machine: one builds its scene on the CPU while the other draws on the card.
+    lanes = max(1, int(os.environ.get('BLENDER_LANES', '2')))
+    with ThreadPoolExecutor(lanes) as pool:
+        for fut in [pool.submit(run, j) for j in jobs]: fut.result()
 
 
 if __name__ == '__main__':
