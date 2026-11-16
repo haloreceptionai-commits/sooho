@@ -82,7 +82,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
       if (!best || rank(result) > rank(best)) best = result;
       if (ready) return result;
       if (p >= maxPatches) break;
-      const flagged = flaggedLines(critic).map((n) => ({ n, reason: critic.lines.find((l) => l.n === n)?.reason || 'weak line' }));
+      const flagged = flaggedLines(critic).map((n) => ({ n, reason: critic.lines.find((l) => l.n === n)?.reason || 'a viewer would lose interest here; add stakes or a turn' }));
       const targets = [...flagged, ...checkTargets(lines, cur.checks).filter((t) => !flagged.some((f) => f.n === t.n))];
       const problems = [...cur.checks, critic.ending_copies_hook ? 'The last line copies the hook; reframe the theme in new words.' : '', !critic.ending_makes_sense ? 'The ending does not make sense.' : '', !critic.real_twist ? 'The story has no real twist; make the assumption flip clear.' : '', critic.hook_reveals_answer ? 'The hook reveals the answer (it is locked, so hide the mechanism until the twist).' : ''].filter(Boolean);
       if (critic.ending_copies_hook || !critic.ending_makes_sense) { const n = lines.length; if (!targets.some((t) => t.n === n)) targets.push({ n, reason: 'closing line: reframe in new words' }); }

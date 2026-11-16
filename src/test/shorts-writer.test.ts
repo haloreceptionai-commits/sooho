@@ -36,3 +36,9 @@ describe("shorts writer clarity and curiosity floor", () => {
   it("fails when clarity is below 8", () => expect(criticPasses(critic({ clarity: 7 }))).toBe(false));
   it("fails when curiosity is below 8", () => expect(criticPasses(critic({ curiosity: 6 }))).toBe(false));
 });
+
+describe("shorts writer patch targets", () => {
+  it("includes lines the critic marks as boring", () => expect(flaggedLines(critic({ boring_lines: [2] }))).toEqual([2]));
+  it("does not demand a new fact from the closing reframe", () => { const c = critic(); c.lines[2]!.new_fact = false; expect(flaggedLines(c)).toEqual([]); });
+  it("restarts the spine when curiosity stays below 8", () => expect(needsNewSpine(critic({ curiosity: 7 }))).toBe(true));
+});

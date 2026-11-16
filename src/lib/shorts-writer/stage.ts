@@ -11,6 +11,8 @@ export function v4Gate(w: WriterResult): GateResult {
   const blockers = [
     ...w.checks,
     ...c.lines.filter((l) => !(l.follows && l.clear && l.narration && l.new_fact)).map((l) => `Line ${l.n}: ${l.reason || 'weak line'}`),
+    c.curiosity < 8 ? `Critic: curiosity ${c.curiosity}/10 (needs 8)` : '',
+    c.clarity < 8 ? `Critic: clarity ${c.clarity}/10 (needs 8)` : '',
     c.hook_reveals_answer ? 'Critic: the hook gives the answer away' : '',
     c.ending_copies_hook ? 'Critic: the ending copies the hook' : '',
     !c.ending_makes_sense ? 'Critic: the ending does not make sense' : '',

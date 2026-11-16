@@ -53,10 +53,14 @@ export function scriptIssues(lines: string[], facts: Fact[], sec: number): strin
 }
 
 export interface CriticLine { n: number; follows: boolean; clear: boolean; narration: boolean; new_fact: boolean; reason: string }
-export interface Critic { lines: CriticLine[]; hook_reveals_answer: boolean; ending_makes_sense: boolean; ending_copies_hook: boolean; real_twist: boolean; coherence: number; clarity: number; curiosity: number; summary: string }
+export interface Critic { lines: CriticLine[]; hook_reveals_answer: boolean; ending_makes_sense: boolean; ending_copies_hook: boolean; real_twist: boolean; boring_lines?: number[]; coherence: number; clarity: number; curiosity: number; summary: string }
 
 /** Lines (1-based) the critic flagged; the hook (line 1) is locked and never patched. */
-export const flaggedLines = (c: Critic) => c.lines.filter((l) => l.n > 1 && !(l.follows && l.clear && l.narration && l.new_fact)).map((l) => l.n);
+export const flaggedLines = (c: Critic) => {
+  const last = Math.max(0, ...c.lines.map((l) => l.n));
+  const weak = c.lines.filter((l) => l.n > 1 && !(l.follows && l.clear && l.narration && (l.new_fact || l.n === last))).map((l) => l.n);
+  return [...new Set([...weak, ...(c.boring_lines ?? []).filter((n) => n > 1 && n <= last)])].sort((a, b) => a - b);
+};
 
 /** Acceptance per the owner's task: clear, narration only, hook hides the answer, ending doesn't copy the hook, coherence >= 8 (clarity and curiosity also >= 8 so every line works on first listen). */
 export function criticPasses(c: Critic): boolean {
@@ -64,5 +68,5 @@ export function criticPasses(c: Critic): boolean {
     && c.lines.every((l) => l.clear && l.narration);
 }
 
-/** After critic patches: restart from a new spine only when coherence is still below 8. */
-export const needsNewSpine = (c: Critic) => c.coherence < 8;
+/** After critic patches: restart from a different spine when coherence (owner's rule) or curiosity is still below 8. */
+export const needsNewSpine = (c: Critic) => c.coherence < 8 || c.curiosity < 8;
