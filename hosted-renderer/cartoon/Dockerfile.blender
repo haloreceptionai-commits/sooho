@@ -1,0 +1,14 @@
+# GPU drawing image (:blender) for Advanced Video AI: the proven slim worker image plus Blender 4.2 LTS
+# and the Blender shot engine. Built on top of :slim so the pinned sounds and web-engine fallback stay identical.
+ARG BASE=chronicleimages4827.azurecr.io/cartoon-renderer:slim
+FROM $BASE
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends xz-utils libx11-6 libxi6 libxxf86vm1 libxfixes3 libxrender1 libxkbcommon0 libsm6 libice6 libxext6 libgl1 libegl1 libglvnd0 \
+      && rm -rf /var/lib/apt/lists/* && curl -fsSL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.2/blender-4.2.3-linux-x64.tar.xz \
+      && echo "3a64efd1982465395abab4259b4091d5c8c56054c7267e9633e4f702a71ea3f4  /tmp/b.tar.xz" | sha256sum -c - \
+      && mkdir -p /opt/blender && tar -xJf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=all
+WORKDIR /usr/src/app
+COPY blender ./blender
+COPY blender_bridge.py actor.js capture.py ./
+CMD ["node", "actor.js"]

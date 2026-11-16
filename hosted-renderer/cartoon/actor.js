@@ -110,9 +110,17 @@ try {
     const hasPart=async first=>Boolean(await store.getValue(`part-${first}`));
     // Claims are scoped to this attempt (each restart rotates the token), so a crashed attempt's claims never block recovery.
     const attempt=hash(Buffer.from(input.callbackToken)).slice(0,12);
+    let blenderFailures=0;
     async function renderBatch([first,last]){
       const dir=path.join(framesDir,`batch-${first}`);await mkdir(dir,{recursive:true});
-      await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
+      // Advanced Video AI on GPU machines draws with the Blender 3D engine; any Blender failure falls back to the
+      // web engine for that batch (same frame format and input hash), so a video never stops on the new renderer.
+      let drawn=false;
+      if(process.env.CARTOON_RENDERER==='blender'){
+        try{await run(python,[path.join(root,'blender_bridge.py'),'--manifest',path.join(work,'manifest.json'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last),'--cards',path.join(work,'cards')]);drawn=true;}
+        catch(e){if(e instanceof Cancelled||/cancelled/i.test(String(e?.message)))throw e;console.error('Blender batch failed, using web engine',String(e?.message).slice(-600));blenderFailures++;}
+      }
+      if(!drawn)await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
       const part=JSON.parse(await readFile(path.join(dir,'checkpoint.json'),'utf8'));
       const frames={};
       const ids=[];for(let f=first;f<=last;f++)ids.push(f);

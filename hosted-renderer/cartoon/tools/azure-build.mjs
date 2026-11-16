@@ -24,8 +24,8 @@ const tags = (process.argv[2] || 'v1,slim').split(',');
 const runs = [];
 for (const tag of tags) {
   const run = await arm('POST', `${base}/scheduleRun?api-version=2019-06-01-preview`, { type: 'DockerBuildRequest', isPushEnabled: true, sourceLocation: up.relativePath,
-    dockerFilePath: 'Dockerfile', imageNames: [`${imageName}:${tag}`], platform: { os: 'Linux', architecture: 'amd64' }, timeout: 3600, agentConfiguration: { cpu: 2 },
-    arguments: [{ name: 'ALIGN', value: tag === 'slim' ? '0' : '1', isSecret: false }] });
+    dockerFilePath: tag.startsWith('blender') ? 'Dockerfile.blender' : 'Dockerfile', imageNames: [`${imageName}:${tag}`], platform: { os: 'Linux', architecture: 'amd64' }, timeout: 3600, agentConfiguration: { cpu: 2 },
+    arguments: [{ name: 'ALIGN', value: tag === 'slim' || tag.startsWith('blender') ? '0' : '1', isSecret: false }] });
   runs.push([tag, run.properties?.runId ?? run.name]); console.log('scheduled', tag, runs.at(-1)[1]);
 }
 for (const [tag, id] of runs) {

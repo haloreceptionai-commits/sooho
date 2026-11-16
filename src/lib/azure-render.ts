@@ -32,19 +32,31 @@ export async function readAzureCartoonLock(storeId: string) {
 // The subscription's Consumption quota is 100 vCPU: 23 x 4 render + 4 preview + the coordinator fit at once.
 // Each 4-vCPU machine runs 2 browsers on the Mesa lavapipe Vulkan driver (about 3x SwiftShader).
 export const AZURE_JOBS = { preflight: { name: 'cartoon-preflight', lanes: 2, replicas: 1 }, finish: { name: 'cartoon-render', lanes: 2, replicas: 23 } } as const;
+// Advanced Video AI draws its frames with the Blender 3D engine on scale-to-zero T4 graphics machines
+// (about 4 run at once in this subscription). Each frame batch falls back to the web engine on failure.
+export const GPU_FINISH = { name: 'cartoon-render-gpu', lanes: 1, replicas: 4 } as const;
+const RUN_ID = /^azure:(cartoon-preflight|cartoon-render-gpu|cartoon-render)-[a-z0-9]+$/;
+
+/** Finishing an Advanced Video AI job (painted cards in the request) uses the Blender renderer unless switched off. */
+export function usesBlender(mode: 'preflight' | 'finish', input: unknown) {
+  if (mode !== 'finish' || process.env['ADVANCED_BLENDER'] === 'off') return false;
+  const cards = (input as { manifest?: { cards?: unknown[] } })?.manifest?.cards;
+  return Array.isArray(cards) && cards.length > 0;
+}
 
 export const cartoonInputKey = (jobId: string, mode: 'preflight' | 'finish') => `cartoon-${jobId}/INPUT-${mode}-${Date.now().toString(36)}`;
 
 export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'finish', input: unknown, key = cartoonInputKey(jobId, mode)) {
   await putInput(key, input);
-  const job = AZURE_JOBS[mode];
+  const blender = usesBlender(mode, input);
+  const job = blender ? GPU_FINISH : AZURE_JOBS[mode];
   const url = `https://management.azure.com/subscriptions/${env('AZURE_SUBSCRIPTION_ID')}/resourceGroups/${env('AZURE_RESOURCE_GROUP')}/providers/Microsoft.App/jobs/${job.name}/start?api-version=${API}`;
   const template = {
     containers: [{
       name: job.name,
-      // Drawing machines use the slim tag (no speech-alignment model) so 40 replicas start faster.
-      image: mode === 'finish' ? env('AZURE_RENDER_IMAGE').replace(/:[^:/]+$/, ':slim') : env('AZURE_RENDER_IMAGE'),
-      resources: { cpu: 4, memory: '8Gi' },
+      // Drawing machines use the slim tag (no speech-alignment model) so 40 replicas start faster; Blender machines use :blender.
+      image: blender ? env('AZURE_RENDER_IMAGE').replace(/:[^:/]+$/, ':blender') : mode === 'finish' ? env('AZURE_RENDER_IMAGE').replace(/:[^:/]+$/, ':slim') : env('AZURE_RENDER_IMAGE'),
+      resources: blender ? { cpu: 8, memory: '56Gi' } : { cpu: 4, memory: '8Gi' },
       env: [
         { name: 'AZURE_BLOB_BASE', value: env('AZURE_BLOB_BASE') },
         { name: 'AZURE_BLOB_SAS', secretRef: 'blobsas' },
@@ -52,11 +64,31 @@ export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'fini
         { name: 'CARTOON_REPLICAS', value: String(job.replicas) },
         { name: 'CARTOON_GL', value: 'auto' },
         { name: 'CARTOON_INPUT_KEY', value: key },
+        ...(blender ? [{ name: 'CARTOON_RENDERER', value: 'blender' }] : []),
       ],
     }],
   };
   const r = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${await armToken()}`, 'Content-Type': 'application/json' }, body: JSON.stringify(template) });
-  if (!r.ok && r.status !== 202) { console.error('Azure start', r.status, await r.text()); throw Error(`Cartoon rendering could not start on Azure [${r.status}]`); }
+  if (!r.ok && r.status !== 202) {
+    console.error('Azure start', job.name, r.status, await r.text());
+    // A refused graphics-machine start is certain (nothing ran), so the web-engine machines take over safely.
+    if (blender && r.status >= 400 && r.status < 500) return startWebFinish(jobId, input, key);
+    throw Error(`Cartoon rendering could not start on Azure [${r.status}]`);
+  }
+  const result = await r.json().catch(() => ({})) as { name?: string; id?: string };
+  const id = result.name || result.id?.split('/').pop();
+  if (!id) throw Error('Azure start was not confirmed; do not resubmit');
+  return `azure:${id}`;
+}
+
+async function startWebFinish(jobId: string, input: unknown, key: string) {
+  const job = AZURE_JOBS.finish;
+  const url = `https://management.azure.com/subscriptions/${env('AZURE_SUBSCRIPTION_ID')}/resourceGroups/${env('AZURE_RESOURCE_GROUP')}/providers/Microsoft.App/jobs/${job.name}/start?api-version=${API}`;
+  const template = { containers: [{ name: job.name, image: env('AZURE_RENDER_IMAGE').replace(/:[^:/]+$/, ':slim'), resources: { cpu: 4, memory: '8Gi' }, env: [
+    { name: 'AZURE_BLOB_BASE', value: env('AZURE_BLOB_BASE') }, { name: 'AZURE_BLOB_SAS', secretRef: 'blobsas' }, { name: 'CARTOON_PARALLEL', value: String(job.lanes) },
+    { name: 'CARTOON_REPLICAS', value: String(job.replicas) }, { name: 'CARTOON_GL', value: 'auto' }, { name: 'CARTOON_INPUT_KEY', value: key }] }] };
+  const r = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${await armToken()}`, 'Content-Type': 'application/json' }, body: JSON.stringify(template) });
+  if (!r.ok && r.status !== 202) throw Error(`Cartoon rendering could not start on Azure [${r.status}] (job ${jobId})`);
   const result = await r.json().catch(() => ({})) as { name?: string; id?: string };
   const id = result.name || result.id?.split('/').pop();
   if (!id) throw Error('Azure start was not confirmed; do not resubmit');
@@ -65,7 +97,7 @@ export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'fini
 
 /** Azure's own view of one execution, plus whether the worker ever wrote anything for this job. */
 export async function azureStartHealth(jobId: string, runId: string) {
-  const m = /^azure:(cartoon-preflight|cartoon-render)-[a-z0-9]+$/.exec(runId);
+  const m = RUN_ID.exec(runId);
   if (!m) return null;
   const exec = runId.slice('azure:'.length);
   const url = `https://management.azure.com/subscriptions/${env('AZURE_SUBSCRIPTION_ID')}/resourceGroups/${env('AZURE_RESOURCE_GROUP')}/providers/Microsoft.App/jobs/${m[1]}/executions/${exec}?api-version=${API}`;
@@ -83,17 +115,22 @@ export interface CartoonExecution { id: string; status: string; startMs: number;
 
 /** Azure's executions for one cartoon job and stage, newest first, matched by the private input each one was given. */
 export async function cartoonExecutions(jobId: string, mode: 'preflight' | 'finish'): Promise<CartoonExecution[]> {
-  const job = AZURE_JOBS[mode].name;
-  const r = await fetch(`${mgmt()}/${job}/executions?api-version=${API}`, { headers: { Authorization: `Bearer ${await armToken()}` } });
-  if (!r.ok) throw Error(`Azure executions unavailable [${r.status}]`);
-  const list = ((await r.json()) as { value?: { name: string; properties: { status?: string; startTime?: string; template?: { containers?: { env?: { name: string; value?: string }[] }[] } } }[] }).value ?? [];
+  type Exec = { name: string; properties: { status?: string; startTime?: string; template?: { containers?: { env?: { name: string; value?: string }[] }[] } } };
+  const jobs = mode === 'finish' ? [AZURE_JOBS.finish.name, GPU_FINISH.name] : [AZURE_JOBS[mode].name];
+  const list: Exec[] = [];
+  for (const job of jobs) {
+    const r = await fetch(`${mgmt()}/${job}/executions?api-version=${API}`, { headers: { Authorization: `Bearer ${await armToken()}` } });
+    if (r.status === 404 && job === GPU_FINISH.name) continue;
+    if (!r.ok) throw Error(`Azure executions unavailable [${r.status}]`);
+    list.push(...(((await r.json()) as { value?: Exec[] }).value ?? []));
+  }
   const prefix = `cartoon-${jobId}/INPUT-${mode}-`;
   return list.map(e => ({ id: `azure:${e.name}`, status: e.properties.status ?? 'Unknown', startMs: Date.parse(e.properties.startTime ?? '') || 0, inputKey: e.properties.template?.containers?.[0]?.env?.find(v => v.name === 'CARTOON_INPUT_KEY')?.value ?? '' }))
     .filter(e => e.inputKey.startsWith(prefix)).sort((a, b) => b.startMs - a.startMs);
 }
 
 export async function stopAzureExecution(runId: string) {
-  const m = /^azure:(cartoon-preflight|cartoon-render)-[a-z0-9]+$/.exec(runId);
+  const m = RUN_ID.exec(runId);
   if (!m) return false;
   const r = await fetch(`${mgmt()}/${m[1]}/executions/${runId.slice(6)}/stop?api-version=${API}`, { method: 'POST', headers: { Authorization: `Bearer ${await armToken()}` } });
   return r.ok || r.status === 202;
@@ -120,7 +157,7 @@ export async function readCartoonPending(jobId: string) {
 
 /** One execution by its tracked run id; null when Azure no longer knows it. */
 export async function cartoonExecution(runId: string) {
-  const m = /^azure:(cartoon-preflight|cartoon-render)-[a-z0-9]+$/.exec(runId);
+  const m = RUN_ID.exec(runId);
   if (!m) return null;
   const r = await fetch(`${mgmt()}/${m[1]}/executions/${runId.slice(6)}?api-version=${API}`, { headers: { Authorization: `Bearer ${await armToken()}` } });
   if (r.status === 404) return null;

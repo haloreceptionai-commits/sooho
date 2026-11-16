@@ -22,8 +22,8 @@ export async function superviseCartoonJob(db: Db, job: Job): Promise<Decision> {
   const review = (video.data as Record<string, Json>)['cartoonReview'] as { approved?: boolean; storeId?: string; hash?: string } | undefined;
   const mode: RenderMode = review?.approved ? 'finish' : 'preflight';
   const recovery = (job.recovery ?? {}) as Recovery;
-  const tracked = /^azure:(cartoon-preflight|cartoon-render)-[a-z0-9]+$/.exec(job.run_id ?? '');
-  const unconfirmed = !tracked || (tracked[1] === 'cartoon-render' ? 'finish' : 'preflight') !== mode;
+  const tracked = /^azure:(cartoon-preflight|cartoon-render-gpu|cartoon-render)-[a-z0-9]+$/.exec(job.run_id ?? '');
+  const unconfirmed = !tracked || (tracked[1] === 'cartoon-preflight' ? 'preflight' : 'finish') !== mode;
   let exec: { id: string; status: string; startMs: number } | null = null;
   if (!unconfirmed) {
     const one = await cartoonExecution(job.run_id!);
