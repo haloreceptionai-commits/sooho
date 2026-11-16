@@ -190,7 +190,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const confidence = facts.claims.length ? facts.claims.filter((c) => c.confidence !== "low").length / facts.claims.length : 0;
     up({ progress: 4, facts: { myth: facts.myth, reality: facts.reality, claims: facts.claims.length, confidence }, detail: "Finding the hero, question and payoff…" });
     // 2) research: anchors, premise, impossible question, payoff, money shot
-    const rs = await withRetry(() => researchStory({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment, advanced } }));
+    const rs = await withRetry(() => researchStory({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment, advanced, shape: input.format === 'short' } }));
     if (!rs.oneImage.ok) throw new Error("Pick a more visual topic: the odd thing in this story can't be shown in one picture.");
     const researchText = [
       `Anchors: subject "${rs.anchors.subject}", year "${rs.anchors.year}", place "${rs.anchors.place}", org "${rs.anchors.org}", stakes "${rs.anchors.stakes}"`,
@@ -201,10 +201,10 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ progress: 6, story: { premise: rs.premise, question: rs.question, hero: `${rs.hero.name} — ${rs.hero.want}`, anchors: Object.values(rs.anchors).join(" · ") }, detail: "Writing 10 hooks…" });
     // 3) hooks: score, drop banned / unanchored ones, prefer types that performed best
     const prefer = rankHookTypes(getState().videos.filter((v) => v.perf && v.analytics).map((v) => ({ hookType: v.analytics!.hookType, ...v.perf })));
-    let hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment, advanced } }));
+    let hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment, advanced, shape: input.format === 'short' } }));
     let valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced);
     if (!valid.length) {
-      hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: `${researchText}\nPrevious hooks failed. Use the EXACT subject "${rs.anchors.subject}" in the first few words, ${advanced ? "with a concrete odd fact; no mandatory year/place" : "plus a checked place/year"}. Do not substitute dragon or jar for seismoscope unless that is the subject anchor.`, prefer: prefer.join(', '), deployment: s.scriptDeployment, advanced } }));
+      hooks = await withRetry(() => generateHooks({ data: { topic: input.topic, facts: factText, research: `${researchText}\nPrevious hooks failed. Use the EXACT subject "${rs.anchors.subject}" in the first few words, ${advanced ? "with a concrete odd fact; no mandatory year/place" : "plus a checked place/year"}. Do not substitute dragon or jar for seismoscope unless that is the subject anchor.`, prefer: prefer.join(', '), deployment: s.scriptDeployment, advanced, shape: input.format === 'short' } }));
       valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced);
     }
     const rate = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability
@@ -218,7 +218,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const base = {
       topic: input.topic, format: input.format, durationSec: input.durationSec,
       archetype: archetype ? `${archetype.name} — ${archetype.formula}` : "Best fit", style: input.style, deployment: s.scriptDeployment,
-      facts: factText, research: researchText, hook: hb.line, ...(advanced ? { kid: true } : {}),
+      facts: factText, research: researchText, hook: hb.line, ...(advanced ? { kid: true } : {}), shape: input.format === 'short',
     };
     // Advanced Video AI: the narration must fit the chosen length before any voice or pictures are paid for.
     const budget = wordBudget(input.durationSec), micro = input.format === "short" && input.durationSec < MICRO_SEC;
@@ -226,7 +226,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const evaluate = async (p: Plan) => {
       const story = {
         scenes: p.scenes.map((x) => ({ beat: x.beat, narration: x.narration, characters: x.characters, shot: x.shot, money: x.money, loop_opened: x.loop_opened, loop_closed: x.loop_closed })),
-        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec, kid: advanced,
+        anchors: rs.anchors, question: p.question || rs.question, hero: p.hero?.name ? p.hero : rs.hero, cast: p.characters.map((c) => ({ name: c.name, role: c.role })), durationSec: input.durationSec, kid: advanced, shape: input.format === 'short',
       };
       const report = validateStory(story);
       const ht = hookTextIssues(p.hookText, p.scenes[0]?.narration ?? "");
@@ -255,7 +255,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const tries = usesCartoonWorker(input.engine) ? 3 : 2; // cartoon only renders a ready story, so give it one more rewrite
     for (let attempt = 1; attempt <= tries && !ev.gate.ready; attempt++) {
       up({ progress: 8 + attempt, detail: `Story score ${ev.gate.score}/100 — rewriting to fix ${ev.gate.blockers.length} issue${ev.gate.blockers.length === 1 ? "" : "s"} (try ${attempt}/${tries})…` });
-      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors, { loop: advanced && micro, advanced }) + fitNote } }), 4, 16000, planWait).then(p => autoFixPlan(p, advanced)).catch(() => null);
+      const repaired = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(draft, draftEv.gate, rs.anchors, { loop: advanced && micro, advanced, shape: input.format === 'short' }) + fitNote } }), 4, 16000, planWait).then(p => autoFixPlan(p, advanced)).catch(() => null);
       if (!repaired) break;
       const ev2 = await evaluate(repaired);
       draft = repaired; draftEv = ev2;
@@ -276,7 +276,7 @@ export async function runVideo(id: string, input: VideoInput) {
       const count = (x: Plan) => x.scenes.map((sc) => sc.narration).join(" ").split(/\s+/).filter(Boolean).length;
       if (count(plan) > budget * 1.25) {
         up({ detail: `Script is ${count(plan)} words; cutting it to fit ${input.durationSec} seconds…` });
-        const cut = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(plan, ev.gate, rs.anchors, { loop: advanced && micro, advanced }) + fitNote + `\nThe last draft had ${count(plan)} words: CUT it to at most ${budget} words, keeping the hook, question and twist.` } }), 4, 16000, planWait).then(p => autoFixPlan(p, advanced)).catch(() => null);
+        const cut = await withRetry(() => generatePlan({ data: { ...base, repair: repairBrief(plan, ev.gate, rs.anchors, { loop: advanced && micro, advanced, shape: input.format === 'short' }) + fitNote + `\nThe last draft had ${count(plan)} words: CUT it to at most ${budget} words, keeping the hook, question and twist.` } }), 4, 16000, planWait).then(p => autoFixPlan(p, advanced)).catch(() => null);
         if (cut && count(cut) <= budget * 1.25) { const ce = await evaluate(cut); if (preferAdvancedRepair(ev.gate, ce.gate)) { plan = cut; ev = ce; } }
       }
       if (count(plan) > budget * 1.25) {
