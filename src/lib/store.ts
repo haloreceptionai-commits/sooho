@@ -49,6 +49,8 @@ export interface Video {
   hostedRender?: { id: string; status: string } | undefined;
   generationJob?: { id: string; status: string } | undefined;
   cartoonCheckpoint?: import('@/lib/cartoon-job').CartoonStart;
+  /** Advanced/cartoon shot plan saved right after the paid Visual Director (and staging), so Resume never repays for it. */
+  directionCheckpoint?: import('zod').infer<typeof import('@/lib/cartoon-job').cartoonDirection>;
   cartoonReview?: import('@/lib/cartoon-job').CartoonReview;
   qa?: { score: number; parts: Record<string, number> } | undefined;
   hooks?: { best: string; runnerUp: string } | undefined;

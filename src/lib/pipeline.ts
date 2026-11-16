@@ -390,7 +390,7 @@ export async function runVideo(id: string, input: VideoInput) {
       }
       const painted = await cardsP;
       const sanitized = sanitizeDirection(direction, narration);
-      const placed = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: painted.cards.some(k => k.id === c.id) || undefined })) }, painted) : null;
+      const placed = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => { const { card: _old, ...rest } = c; return painted.cards.some(k => k.id === c.id) ? { ...rest, card: true } : rest; }) }, painted) : null;
       if (painted?.log.length) up({ checks: [...(getState().videos.find(v => v.id === id)?.checks ?? []), ...painted.log.filter(l => /missing|rejected|limit|failed/.test(l))].slice(0, 100) });
       const cards = placed?.cards;
       const safeDirection = placed ? placed.direction : sanitized;
