@@ -20,7 +20,7 @@ export function placeSlug(location: string): string {
 /** The story's year: the year spoken most often in the narration (earliest on ties), or null. */
 export function storyYear(narration: string[]): number | null {
   const n = new Map<number, number>();
-  for (const m of narration.join(" ").matchAll(/\b(1[0-9]{3}|20[0-9]{2})\b/g)) { const y = +m[1]; n.set(y, (n.get(y) ?? 0) + 1); }
+  for (const m of narration.join(" ").matchAll(/\b(1[0-9]{3}|20[0-9]{2})\b/g)) { const y = Number(m[1] ?? 0); n.set(y, (n.get(y) ?? 0) + 1); }
   let best: number | null = null;
   for (const [y, c] of n) if (best === null || c > n.get(best)! || (c === n.get(best)! && y < best)) best = y;
   return best;
@@ -32,7 +32,7 @@ export interface WorldPack { year: number | null; places: WorldPlace[] }
 const INDOOR = /\b(inside|indoors?|interior|room|office|kitchen|hall|courtroom|laboratory|lab|workshop|cabin|tunnel|cave|mine|cellar|church|bar|saloon|tavern|library|classroom|newsroom|bedroom|parlou?r)\b/i;
 
 /** Places that get painted backdrops: the most-used distinct locations (up to MAX_PLACES). */
-export function worldPack(scenes: { location?: string }[], narration: string[]): WorldPack {
+export function worldPack(scenes: { location?: string | undefined }[], narration: string[]): WorldPack {
   const by = new Map<string, WorldPlace>();
   scenes.forEach((s, i) => {
     const loc = (s.location ?? "").trim(); if (!loc) return;
