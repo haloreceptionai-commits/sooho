@@ -427,6 +427,7 @@ def main():
         SETS[shot['set']]()
     else:
         build_set(shot['set'], shot.get('lighting', 'day'))
+    scenery = set(o for o in bpy.data.objects if o.type == 'MESH')
     roots=[build_character(c,shot['duration'],fps) for c in shot.get('cast', [])]
     if roots:verify_characters(roots,shot['duration'],fps)
     object_roots=[build_object(obj,shot['duration'],fps) for obj in shot.get('objects',[])]
@@ -437,7 +438,10 @@ def main():
     fx = build_effects(shot, fps); crowd = build_crowd(shot, fps); print('FX', fx, 'CROWD', crowd, flush=True)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
-    for cd in shot.get('cards', []): build_card(cd, sc.camera, shot['duration'], fps)
+    cards = [build_card(cd, sc.camera, shot['duration'], fps) for cd in shot.get('cards', [])]
+    if shot.get('composition'):
+        from composition import enforce
+        enforce(sc, shot, scenery, [c for c in cards if c is not None], roots, out)
     sc.render.filepath = os.path.join(out, 'f_#####')
     only = shot.get('frames')  # optional subset for stills/tests
     t0 = time.time()
