@@ -360,8 +360,8 @@ def farm_field(surface):
     rng=random.Random(811);wood=surface('wood',1.2)
     wheat=[material('wheat '+str(i),c,.8) for i,c in enumerate([(.78,.6,.22),(.86,.7,.3),(.66,.5,.18)])]
     # Golden crop rows behind and around the yard; the central yard stays clear for the cast.
-    _blades('wheat field',rng,26000,(-16,16),(6,22),(.55,1.05),wheat,lambda x,y:abs(x+8)<3.5 and 8<y<14,.022,.12)
-    _blades('wheat field near',rng,9000,(-16,16),(-18,-9),(.55,1.0),wheat,None,.022,.12)
+    _blades('wheat field',rng,26000,(-16,16,6,22),(.55,1.05),wheat,lambda x,y:abs(x+8)<3.5 and 8<y<14,.022,.12)
+    _blades('wheat field near',rng,9000,(-16,16,-18,-9),(.55,1.0),wheat,None,.022,.12)
     soil=material('ploughed soil',(.24,.15,.08),.95)
     for k in range(9):cube('furrow',(-12+k*3,14,.01),(.5,16,.04),soil,0)
     # Red timber barn (seen from the reverse angle)
@@ -400,7 +400,7 @@ def outback(surface):
     for k in range(70):
         x,y=rng.uniform(-18,18),rng.uniform(-16,26)
         if abs(x)<3 and -3<y<5:continue
-        _blades('spinifex clump',random.Random(k),70,(x-.5,x+.5),(y-.5,y+.5),(.25,.6),spin,None,.03,.3)
+        _blades('spinifex clump',random.Random(k),70,(x-.5,x+.5,y-.5,y+.5),(.25,.6),spin,None,.03,.3)
     # Flat-topped mesas on the horizon in every direction
     rock=material('mesa rock',(.5,.22,.1),.9)
     for i in range(10):
@@ -417,7 +417,7 @@ def outback(surface):
 def forest(surface):
     rng=random.Random(4040);wood=surface('wood',1.2)
     fern=[material('fern '+str(i),c,.85) for i,c in enumerate([(.1,.3,.08),(.16,.38,.1),(.2,.32,.06)])]
-    _blades('forest undergrowth',rng,9000,(-18,18),(-14,22),(.15,.55),fern,lambda x,y:x*x+(y-2)**2<16,.04,.18)
+    _blades('forest undergrowth',rng,9000,(-18,18,-14,22),(.15,.55),fern,lambda x,y:x*x+(y-2)**2<16,.04,.18)
     moss=material('mossy log',(.25,.2,.12),.9)
     for k,(x,y,a) in enumerate([(-5,9,.4),(6,10,-.7),(-8,-3,1.2),(7,-6,.2)]):
         bpy.ops.mesh.primitive_cylinder_add(vertices=14,radius=.28,depth=3.4,location=(x,y,.28));o=bpy.context.active_object
