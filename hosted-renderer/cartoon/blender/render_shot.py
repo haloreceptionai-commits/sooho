@@ -426,6 +426,18 @@ def fade_ground(cam_xy, start, end, colour=None):
             m['faded'] = True
 
 
+def light_on_floor():
+    """Rough irradiance on flat ground from suns and the world (Nishita sky is about 5x its strength)."""
+    e = 0.0
+    for o in bpy.data.objects:
+        if o.type == 'LIGHT' and o.data.type == 'SUN': e += o.data.energy * max(0.0, math.cos(o.rotation_euler.x))
+    w = bpy.context.scene.world.node_tree.nodes.get('Background')
+    if w:
+        sky = any(n.type == 'TEX_SKY' for n in bpy.context.scene.world.node_tree.nodes)
+        e += w.inputs['Strength'].default_value * (5.0 if sky else 1.0)
+    return e
+
+
 def ground_colour(mat):
     """Mean colour of the painting's lower quarter (its painted ground), in linear light."""
     try:
@@ -485,7 +497,12 @@ def build_backdrop(shot, cam):
         # Keep real floor only where the cast stands and casts shadows, then hand over to the painted ground.
         subject = (at - frm).length
         far = next((o for o in made if o['backdrop'] == 'far'), made[0])
-        fade_ground((frm.x, frm.y), subject + 1.0, subject + 6.0, ground_colour(far.data.materials[0]))
+        tint, power = MOOD_BACKDROP.get(shot.get('lighting', 'day'), MOOD_BACKDROP['day'])
+        col = ground_colour(far.data.materials[0])
+        if col:  # the painting is unlit; divide by the light the floor receives so both show the same brightness
+            irr = max(0.3, light_on_floor())
+            col = tuple(min(0.9, c * t * power / irr) for c, t in zip(col, tint))
+        fade_ground((frm.x, frm.y), subject + 1.0, subject + 6.0, col)
     return made
 
 
