@@ -1,5 +1,5 @@
 """Strict validator for one declarative Blender shot. No free code is ever accepted."""
-import json
+import json, re
 from pathlib import Path
 from character_motion import ACTIONS, EXPRESSIONS, OUTFITS, HATS
 from object_specs import validate_object
@@ -7,7 +7,7 @@ from effects import KINDS as EFFECT_KINDS
 
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day'}
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -62,6 +62,13 @@ def validate_shot(s):
         if ch.get('expression','neutral') not in EXPRESSIONS:raise ValueError('unknown expression')
         if ch.get('outfit','worker') not in OUTFITS:raise ValueError('unknown outfit')
         if ch.get('held') not in (None,'crate','tool','cup'):raise ValueError('unknown held prop')
+    cards = s.get('cards', [])
+    if not isinstance(cards, list) or len(cards) > 6: raise ValueError('up to 6 painted cards')
+    for cd in cards:
+        if not isinstance(cd, dict) or set(cd) - {'image', 'pos', 'height'}: raise ValueError('unknown card keys')
+        if not isinstance(cd.get('image'), str) or not re.fullmatch(r'[a-z0-9_-]{1,40}\.png', cd['image']): raise ValueError('card image must be a plain png name')
+        _vec(cd.get('pos'), 2, 'card.pos')
+        if not 0.3 <= cd.get('height', 1.6) <= 4: raise ValueError('card height 0.3-4')
     if not 0 <= s.get('haze', 0) <= 0.2: raise ValueError('haze 0-0.2')
     if s.get('grade', 'Medium High Contrast') not in GRADES: raise ValueError('unknown grade')
     if not 1 <= s.get('samples', 32) <= 256: raise ValueError('samples 1-256')

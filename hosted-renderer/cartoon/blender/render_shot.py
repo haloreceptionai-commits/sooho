@@ -318,6 +318,26 @@ def look(scene, shot):
     nt.links.new(img, comp.inputs['Image'])
 
 
+def build_card(cd, cam_from):
+    """A painted transparent character card standing on the ground, turned to the camera."""
+    folder = os.environ.get('CARD_DIR', '')
+    path = os.path.join(folder, cd['image'])
+    if not folder or not os.path.isfile(path): return None
+    img = bpy.data.images.load(path); w, h = img.size
+    H = cd.get('height', 1.6); W = H * w / max(1, h)
+    x, y = cd['pos']
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(x, y, H / 2)); ob = bpy.context.object
+    ob.scale = (W, H, 1)
+    ob.rotation_euler = (math.pi / 2, 0, math.atan2(cam_from[1] - y, cam_from[0] - x) + math.pi / 2)
+    m = bpy.data.materials.new('card'); m.use_nodes = True
+    nt = m.node_tree; bsdf = nt.nodes.get('Principled BSDF'); tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = img
+    nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color']); nt.links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
+    bsdf.inputs['Roughness'].default_value = 0.8
+    m.blend_method = 'HASHED'
+    ob.data.materials.append(m); ob.visible_shadow = True
+    return ob
+
+
 def main():
     argv = sys.argv[sys.argv.index('--') + 1:]
     shot = validate_shot(json.load(open(argv[0]))); out = argv[1]; os.makedirs(out, exist_ok=True)
@@ -368,6 +388,7 @@ def main():
     if object_roots:
         qa=verify_objects(object_roots,shot['duration'],fps)
         with open(os.path.join(out,'object-qa.json'),'w') as file:json.dump(qa,file,indent=2)
+    for cd in shot.get('cards', []): build_card(cd, shot['camera']['from'])
     fx = build_effects(shot, fps); crowd = build_crowd(shot, fps); print('FX', fx, 'CROWD', crowd, flush=True)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
