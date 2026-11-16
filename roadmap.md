@@ -11,6 +11,8 @@
 - [~] 10. Full 3-video test, speed and launch — full_video_gate.py built and tested; current release-audit lists 49 missing/failed evidence checks. 86 Blender tests pass. No full renders launched from rejected scripts. Remaining: accepted scripts, CTC voice timing, three complete 1800-frame tests, real scorecard/audio/speed checks, engine-aware saved recovery integration, owner review. Earlier quality and crowd-sound gates remain open; production unchanged.
 
 # Roadmap — Advanced Video AI v2
+- [ ] Nov 16 owner correction: integrate topic-independent story-derived planning, asset resolution and composition/preview rules into future generation; Molasses is regression evidence, not a special production path. Verify across unrelated topics without closest-wrong assets.
+- [ ] Nov 16 owner character replacement: find licensed rigged humans matching uploaded cartoonfather2 (full clothed bodies, hands, expressive eyes/hair); confirm acquisition before import, verify pose/interaction stills and then replace current humans. Asset acquisition decision pending; do not start Stage 2b or a full render.
 - [x] Accelerate and verify topic discovery: Parallel fast searches + two parallel exact-passage reviews replace oversized full-page reviews. Real owner search returned six facts in 48.4 seconds; saving, selection and saved reload verified; 13 tests passed. Instant fresh research is not promised.
 - [x] Script: 3 repairs, word budget by length, kid-level word checker, keep-watching judge
 - [x] Cast: people/animals/objects named in script get cards (up to 4)
