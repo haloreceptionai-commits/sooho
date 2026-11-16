@@ -1,11 +1,14 @@
 import type { Hook, Plan } from '@/lib/pipeline.functions';
 import { hookIssues, hookTextIssues, sceneStarts, wc, type Anchors, type GateResult } from '@/lib/story-v2';
 import { advancedOpeningIssues, ADVANCED_STORY_DIRECTION } from './advanced-story';
-import { STORY_SHAPE_DIRECTION } from './story-shape';
+import { STORY_SHAPE_DIRECTION, hookShapeIssues } from './story-shape';
 
 /** Invalid hooks are ineligible, regardless of the model's self-rated score. */
-export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string, advanced = false): Hook[] {
-  return hooks.filter(h => !(advanced ? [...hookIssues(h.line, undefined, facts).filter(x => !x.startsWith('Hook is') && !x.includes('unanswerable')), ...advancedOpeningIssues(h.line, anchors.subject)] : hookIssues(h.line, anchors, facts)).length && !hookTextIssues(h.text, h.line).length);
+export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string, advanced = false, shape = false): Hook[] {
+  const ok = hooks.filter(h => !(advanced ? [...hookIssues(h.line, undefined, facts).filter(x => !x.startsWith('Hook is') && !x.includes('unanswerable')), ...advancedOpeningIssues(h.line, anchors.subject)] : hookIssues(h.line, anchors, facts)).length && !hookTextIssues(h.text, h.line).length);
+  // Shape v3: prefer contradiction hooks; fall back to the older eligible set rather than stopping.
+  const shaped = shape ? ok.filter(h => !hookShapeIssues(h.line).length) : ok;
+  return shaped.length ? shaped : ok;
 }
 
 const PRONOUN = /^(["']?)(He|She|They|His|Her|Their)\b/;

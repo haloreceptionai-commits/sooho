@@ -52,10 +52,10 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
     // 3) hooks: score, drop banned / unanchored ones, prefer types that performed best
     const prefer: string[] = [];
     let hooks = await api.call(() => generateHooks({ data: { topic: input.topic, facts: factText, research: researchText, prefer: prefer.join(", "), deployment: s.scriptDeployment, advanced, shape: input.format === 'short' } }));
-    let valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced);
+    let valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced, input.format === 'short');
     if (!valid.length) {
       hooks = await api.call(() => generateHooks({ data: { topic: input.topic, facts: factText, research: `${researchText}\nPrevious hooks failed. Use the EXACT subject "${rs.anchors.subject}" in the first few words, ${advanced ? "with a concrete odd fact; no mandatory year/place" : "plus a checked place/year"}. Do not substitute dragon or jar for seismoscope unless that is the subject anchor.`, prefer: prefer.join(', '), deployment: s.scriptDeployment, advanced, shape: input.format === 'short' } }));
-      valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced);
+      valid = eligibleHooks(hooks.all, rs.anchors, factText, advanced, input.format === 'short');
     }
     const rate = (h: Hook) => h.curiosity * 1.4 + h.clarity + h.visualness * 1.2 + h.speakability
       - (advanced ? advancedOpeningIssues(h.line, rs.anchors.subject) : hookIssues(h.line, rs.anchors, factText)).length * 8 - hookTextIssues(h.text, h.line).length * 4 + (prefer[0] === h.type ? 3 : 0);

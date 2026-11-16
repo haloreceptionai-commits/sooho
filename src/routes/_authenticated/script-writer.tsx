@@ -54,7 +54,7 @@ function ScriptWriter() {
       const rs = await research({ data: { topic, facts: factText, deployment } });
       setStage('Writing 10 hooks…');
       const candidates = await hooks({ data: { topic, facts: factText, research: JSON.stringify(rs), deployment, shape: format === 'short' } });
-      const ranked = eligibleHooks(candidates.all, rs.anchors, factText).sort((a, b) => (b.curiosity + b.clarity + b.visualness + b.speakability) - (a.curiosity + a.clarity + a.visualness + a.speakability));
+      const ranked = eligibleHooks(candidates.all, rs.anchors, factText, false, format === 'short').sort((a, b) => (b.curiosity + b.clarity + b.visualness + b.speakability) - (a.curiosity + a.clarity + a.visualness + a.speakability));
       const hook = ranked[0];
       if (!hook) throw Error('No opening passed the hook checks. Choose a clearer topic and try again.');
       const arch = ARCHETYPES.find(a => a.id === source?.archetype);

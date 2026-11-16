@@ -66,6 +66,17 @@ const TENSION = /\b(no|not|never|nobody|nothing|without|yet|but|so|only|still|ev
 /** A line that keeps a loop open. */
 const LOOP = /\?["']?$|\b(yet|but|then|until|insane|impossible|nothing|nobody|no one|secret|mystery|strange|wrong|exactly what|the real|turns out|instead)\b|n't\b/i;
 
+/** Hook-only part of the shape check, used to rank and filter hook candidates. */
+export function hookShapeIssues(hook: string): string[] {
+  const out: string[] = [];
+  const n = words(hook).length;
+  if (n < 8 || n > 12) out.push(`Shape hook: ${n} words (needs 8-12)`);
+  if (/\?["']?\s*$/.test(hook)) out.push("Shape hook is a question; state the contradiction as a fact");
+  if (GIVEAWAY.test(hook)) out.push("Shape hook gives the answer away");
+  else if (!TENSION.test(hook)) out.push("Shape hook has no contradiction");
+  return out;
+}
+
 export interface ShapeReport { issues: string[]; hookWords: number; shortShare: number; longestGapSec: number; payoff: string | null; echo: boolean }
 
 export function shapeIssues(script: string): ShapeReport {
