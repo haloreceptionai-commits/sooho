@@ -233,7 +233,7 @@ class Director:
         for p in prefs:
             if p == prev or recent.count(p) >= 2 or p in self.history[-2:]: continue
             if p == 'establish' and 'establish' in self.history[-3:]: continue
-            if p in ('ots',) and ctx['n_people'] < 2: continue
+            if p in ('ots',) and (ctx['n_people'] < 2 or ctx['moving']): continue
             if p in ('close', 'xclose', 'ots') and ctx['n_subjects'] == 0: continue
             if p == 'insert' and not (ctx['story_object'] or ctx['props']): continue
             if p == 'track' and not ctx['moving']: continue
@@ -425,7 +425,7 @@ class Director:
             if len(self.history) % 2: a_, b_ = b_, a_
             d = [b_[0] - a_[0], b_[1] - a_[1]]; L = math.hypot(*d) or 1; u = [d[0] / L, d[1] / L]; perp = [-u[1], u[0]]
             sgn = side
-            cam = {'from': r3([a_[0] - u[0] * 1.7 + perp[0] * .85 * sgn - F[0] * .4, a_[1] - u[1] * 1.7 + perp[1] * .85 * sgn - F[1] * .4, 1.95]),
+            cam = {'from': r3([a_[0] - u[0] * 1.8 + perp[0] * 1.0 * sgn - F[0] * .4, a_[1] - u[1] * 1.8 + perp[1] * 1.0 * sgn - F[1] * .4, 1.62]),
                    'look_at': r3([b_[0], b_[1], 1.55]), 'lens': 38, 'fstop': 2.8}
         elif kind == 'track':
             mover = next((c for c in cast if c['action'] in ('walk', 'run')), None)
@@ -469,8 +469,7 @@ class Director:
                 cam['whip_from'] = r3([f[0] + R[0] * 1.6, f[1] + R[1] * 1.6, f[2]]); cam['to'] = r3([f[k] + tw[k] * 0.12 for k in range(3)])
             else:
                 cam['to'] = r3([f[k] + tw[k] * (0.28 if kind in ('low', 'medium', 'wide') else 0.18) for k in range(3)])
-        cam = clear_lens(cam, [c['pos'] for c in cast] + [c['pos'] for c in cards] + [c['to'] for c in cards if 'to' in c]
-                         + [c['pos'] for c in cast if c['action'] in ('walk', 'run')], keep=kind in ('close', 'xclose', 'insert'))
+        cam = clear_lens(cam, obstacles(cast, cards, dur), keep=kind in ('close', 'xclose', 'insert'))
         if st == 'mine_tunnel':
             for k in ('from', 'to', 'whip_from'):
                 if k in cam: cam[k][0] = max(-0.9, min(0.9, cam[k][0]))
@@ -478,6 +477,21 @@ class Director:
             for k in ('from', 'to', 'whip_from'):
                 if k in cam: cam[k] = [max(-5.4, min(5.4, cam[k][0])), max(-4.5, min(8.4, cam[k][1])), max(0.25, min(4.1, cam[k][2]))]
         return cam
+
+
+def obstacles(cast, cards, dur):
+    """Every spot a body occupies during the shot: standing marks, sampled walk/run paths and moving cards."""
+    pts = []
+    for c in cast:
+        pts.append(c['pos'])
+        if c['action'] in ('walk', 'run'):
+            v = .7 if c['action'] == 'walk' else 1.3; yv = math.radians(c['yaw']); d = [math.sin(yv), -math.cos(yv)]
+            for k in range(1, 9): t = dur * k / 8; pts.append([c['pos'][0] + d[0] * v * t, c['pos'][1] + d[1] * v * t])
+    for c in cards:
+        pts.append(c['pos'])
+        if 'to' in c:
+            for k in range(1, 9): pts.append([c['pos'][0] + (c['to'][0] - c['pos'][0]) * k / 8, c['pos'][1] + (c['to'][1] - c['pos'][1]) * k / 8])
+    return pts
 
 
 def clear_lens(cam, obstacles, radius=1.0, keep=False):

@@ -403,11 +403,15 @@ def outback(surface):
         _blades('spinifex clump',random.Random(k),70,(x-.5,x+.5,y-.5,y+.5),(.25,.6),spin,None,.03,.3)
     # Flat-topped mesas on the horizon in every direction
     rock=material('mesa rock',(.5,.22,.1),.9)
-    for i in range(10):
-        a=i/10*math.tau+.2;r=46+(i%3)*6
-        o=cube('mesa',(r*math.cos(a),4+r*math.sin(a),2.5+(i%4)),(14+(i%3)*5,10,5+2*(i%4)),rock,.6)
-        o.rotation_euler.z=a
-        cube('mesa cap',(r*math.cos(a),4+r*math.sin(a),5+2*(i%4)+(i%4)),(12+(i%3)*5,8.5,.6),material('mesa cap',(.62,.32,.15),.9),.2).rotation_euler.z=a
+    cap=material('mesa cap',(.62,.32,.15),.9)
+    for i in range(11):
+        a=i/11*math.tau+.2;r=78+(i%3)*12;h=6+3*(i%4);w=22+(i%3)*9
+        # irregular sloped butte: a tapered many-sided cylinder plus a flat cap ledge
+        bpy.ops.mesh.primitive_cone_add(vertices=11,radius1=w/2,radius2=w/2*.78,depth=h,location=(r*math.cos(a),4+r*math.sin(a),h/2-.3))
+        o=bpy.context.active_object;o.name='butte';o.scale.y=.55;o.rotation_euler.z=a+i;o.data.materials.append(rock)
+        for v in o.data.vertices:v.co.x+=math.sin(v.co.y*1.7+i)*.9
+        bpy.ops.mesh.primitive_cylinder_add(vertices=11,radius=w/2*.8,depth=.7,location=(r*math.cos(a),4+r*math.sin(a),h-.1))
+        c=bpy.context.active_object;c.scale.y=.55;c.rotation_euler.z=a+i;c.data.materials.append(cap)
     # Long wire fence (the famous rabbit/emu-proof fences) running across the plain
     post=material('fence post',(.3,.22,.14),.9);wire=material('fence wire',(.55,.55,.56),.4,.8)
     for y in range(-16,30,2):beam((-5.5,y,0),(-5.5,y,1.2),.07,post)
