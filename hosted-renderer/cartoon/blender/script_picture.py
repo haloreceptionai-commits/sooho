@@ -12,6 +12,41 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import shot_director as D
+
+GOLD_1 = ('A gift with no battery spied on America for seven years. Soviet schoolchildren give the U.S. ambassador in Moscow a carved wooden seal. '
+          'He hangs it right behind his desk. Security sweeps the room. No wires. No battery. Nothing. Yet for seven years, the Soviets hear every private word. '
+          'How? Inside the seal is a hollow chamber with a thin metal membrane. The signal itself was the power. America had hung the spy on its own wall.')
+GOLD_2 = ('Hannibal was trapped, so he strapped fire to two thousand oxen. Rome has his army cornered in a valley. Rome just has to wait. '
+          'So Hannibal comes up with a plan that sounds completely insane. That\'s exactly what he wanted. '
+          'Hannibal didn\'t win with strength. He won by making the enemy look the wrong way.')
+STOP = set('the a an and or but so of to in on at for with by from his her its their was were is are be been that this it he she they them had has have as into up out not no'.split())
+LOOP = re.compile(r"\?[\"']?$|\b(yet|but|then|until|insane|impossible|nothing|nobody|secret|strange|wrong|instead)\b|n't\b", re.I)
+
+
+def keys(t):
+    return {w for w in re.sub(r"[^a-z0-9' ]", ' ', t.lower()).split() if len(w) > 2 and w not in STOP}
+
+
+def shape_errors(texts):
+    errors = []
+    hook = texts[0] if texts else ''
+    if not 8 <= len(hook.split()) <= 12: errors.append('shape: hook must be 8-12 words')
+    if hook.rstrip().endswith('?'): errors.append('shape: hook must be a statement, not a question')
+    if re.search(r'\b(because|which is why|so that|the reason)\b', hook, re.I): errors.append('shape: hook gives the reason away')
+    for i, t in enumerate(texts):
+        if re.search(r'^like\b|\b(is|was|just|it\'s) like\b|\b(we|us|our)\b', t, re.I): errors.append(f's{i}: no like-comparisons or we/us narrator')
+        for j in range(i):
+            a, b = keys(t), keys(texts[j])
+            if len(a) >= 3 and len(a & b) / len(a) >= 0.7 and len(b) and len(a & b) / len(b) >= 0.7:
+                errors.append(f's{i}: repeats s{j}')
+    gap = 0
+    for t in texts[1:max(2, int(len(texts) * 0.75))]:
+        gap = 0 if LOOP.search(t) else gap + 1
+        if gap > 4: errors.append('shape: more than 4 sentences without a loop line'); break
+    if not any(len(t.split()) <= 8 for t in texts[int(len(texts) * 0.6):]): errors.append('shape: no short payoff sentence near the end')
+    if texts and not (keys(' '.join(texts[-2:])) & keys(hook)): errors.append('shape: last two sentences must echo the hook')
+    return errors
+
 from codex_planner import concept_menu, READER
 
 
@@ -49,6 +84,7 @@ def check(draft, evidence):
         picture = sentence.get('picture', [])
         if not picture or any(not isinstance(c, str) or not D.concept_valid(c) for c in picture):
             errors.append(f's{i}: picture needs existing drawable concepts')
+    errors += shape_errors([x.get('text', '') for x in draft['sentences']])
     count = len(text_of(draft).split())
     if not 185 <= count <= 215:
         errors.append(f'{count} words outside 185-215 test budget (duration still must be measured)')
@@ -60,10 +96,18 @@ def author_prompt(evidence):
 The voice is compact Puck sample 03. Aim 185-215 words, 16-28 connected sentences.
 EVERY sentence must show a clear concrete picture. First THREE words must contain
 the literal subject and an observable action: e.g. 'Steel rails grow' or 'Miners shoot gold'.
-Everyday English an eight-year-old understands. Connected cause and effect, a question
-answered at the end, concrete events not a lecture. Hook 8-12 words; no greetings,
-'Imagine', 'Did you know', invented dialogue, heroes, rivals, dates, figures, conspiracies,
-or surprise endings. Do NOT force try/fail/drama onto an engineering explanation.
+Everyday English an eight-year-old understands. Connected cause and effect, concrete events
+not a lecture. OWNER GOLD SHAPE (copy the shape and rhythm, never the content):
+1. Hook 8-12 words: a CONTRADICTION stated as a fact (never a question) that hides the reason.
+2. Present-tense setup in short stacked lines; each line carries a surprise, danger or new fact.
+3. An open loop at least every 3-4 sentences: a lone 'How?', 'But...', 'Yet...', 'Then...' or a reversal.
+4. The reveal step by step, one visible action per sentence.
+5. A payoff sentence of 8 words or fewer that makes the viewer feel the twist.
+6. The last sentence echoes two or three hook words in a NEW sentence; never repeat any line.
+No greetings, 'Imagine', 'Did you know', invented dialogue, invented people, rivals or conspiracies,
+no 'like...' comparisons, no metaphors, no we/us narrator. Dates and figures only when evidence gives them.
+GOLD 1: {GOLD_1}
+GOLD 2: {GOLD_2}
 Historically illustrated actions are general demonstrations, never invented specific events.
 Do not say an entire army was stopped or not one arrow missed unless evidence says so.
 Do not invent real gold behind a salted wall. Do not imply all modern rails have gaps.
@@ -90,6 +134,7 @@ def judge_prompt(draft, evidence, benchmark, seed):
 Rate only WORDS, not images, audio, promised quality, popularity or authorship.
 For each script score clarity 0-10, connected cause/effect 0-10 and engagement 0-10.
 Score both under identical standards; never favor a script because it is called a benchmark.
+Engagement means the owner's gold shape: a contradiction hook, an open question or reversal every few lines, a short payoff and a hook-echo close; a calm explainer is NOT engaging.
 For each say whether an eight-year-old can explain what happens and why (kid_clear boolean),
 and whether first THREE words give a concrete subject plus observable action (opening boolean).
 List any unsupported claims in the script supported by the evidence below; evidence validation
