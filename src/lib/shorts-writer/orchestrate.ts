@@ -45,7 +45,7 @@ function checkTargets(lines: string[], checks: string[]): { n: number; reason: s
 
 export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; budgetMs?: number; progress?: Progress | undefined }): Promise<WriterResult> {
   // Speed: the whole script must be ready in under ~2 minutes, so extra passes only start while time remains.
-  const maxPatches = opts.maxPatches ?? 2, maxSpines = opts.maxSpines ?? 2, budget = opts.budgetMs ?? 105_000, t0 = Date.now();
+  const maxPatches = opts.maxPatches ?? 2, maxSpines = opts.maxSpines ?? 2, budget = opts.budgetMs ?? 80_000, t0 = Date.now();
   const left = () => budget - (Date.now() - t0);
   const say = async (t: string) => { await opts.progress?.(t); };
   await say('Building the fact sheet…');
@@ -74,6 +74,14 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
     await say('Writing the narration…');
     let lines = (await calls.script(facts, spine, hook)).lines.map(clean).filter(Boolean);
     if (clean(lines[0] ?? '') !== hook) lines = [hook, ...lines.filter((l) => clean(l) !== hook)];
+    // One quick hard-fix before the critic: length, unknown names/numbers, repeats.
+    const pre = scriptIssues(lines, facts, opts.durationSec);
+    if (pre.length) {
+      await say('Fixing length and facts…');
+      const t = checkTargets(lines, pre);
+      const all = pre.some((c) => c.startsWith('word count') || c.includes(' lines (needs')) ? lines.map((_, i) => ({ n: i + 1, reason: pre.join('; ') })).slice(1) : t;
+      if (all.length) lines = applyRewrite(lines, (await calls.rewrite(lines, all, [...pre, 'Keep the story; cut filler and technical detail to fit.'], facts, spine)).lines, all.map((x) => x.n));
+    }
     for (let p = 0; ; p++) {
       await say(p ? `Critic review after fix ${p}/${maxPatches}…` : 'Critic reading it as a viewer…');
       const critic = await calls.critic(lines, facts);

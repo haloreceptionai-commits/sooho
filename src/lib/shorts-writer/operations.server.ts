@@ -63,7 +63,7 @@ export async function scriptOp(d: { topic: string; facts: Fact[]; spine: Spine; 
   return azureJson<{ lines: string[] }>(d.deployment,
     `You write the voice-over for a ${d.durationSec}-second YouTube Short. ${CORE}\n${STYLE}\nLENGTH: ${b.minWords}-${b.maxWords} words in ${b.minLines}-${b.maxLines} lines (a machine counts). One line = one spoken thought (it may hold two very short sentences like "Readers loved it. Sales exploded.").${d.kid ? '\nAUDIENCE: use only words an 8-year-old knows; explain any needed term in the same line.' : ''}\n\n${GOLD_BLOCK}`,
     `Topic: ${d.topic}\nCERTAIN FACTS (the only facts you may use):\n${factList(d.facts)}\nSTORY SPINE:\n${JSON.stringify(d.spine)}\nLOCKED HOOK (line 1, word for word): ${d.hook}\nReturn the script as lines.`,
-    'script', obj({ lines: arr(S) }), 'Script writer', 'low');
+    'script', obj({ lines: arr(S) }), 'Script writer', 'medium');
 }
 
 export async function criticOp(d: { lines: string[]; facts: Fact[]; durationSec: number; deployment: string }) {
