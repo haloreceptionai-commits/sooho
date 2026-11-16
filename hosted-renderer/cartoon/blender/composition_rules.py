@@ -1,6 +1,10 @@
 """Pure preview/framing limits, importable without Blender."""
 import re
 
+def visible_height(points):
+    ys = [p[1] for p in points if p[2] > 0]
+    return max(0, min(1, max(ys)) - max(0, min(ys))) if ys else 0
+
 def emotion_line(words):
     return bool(re.search(r'\b(felt|afraid|terrified|scared|angry|furious|happy|sad|wept|cried|fear|panic)\b',words.lower()))
 

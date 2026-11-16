@@ -1,8 +1,12 @@
 import unittest
-from composition_rules import emotion_line,budget_ceiling,preview_frames
+from composition_rules import emotion_line,budget_ceiling,preview_frames,visible_height
 from shot_schema import validate_shot
 
 class Rules(unittest.TestCase):
+    def test_wave_clipped_visible_height(self):
+        self.assertEqual(visible_height([(0,.25,1),(0,.5,1)]),.25)
+        self.assertEqual(visible_height([(0,-.5,1),(0,.3,1)]),.3)
+        self.assertEqual(visible_height([(0,.25,-1),(0,.5,-1)]),0)
     def test_budget_25_percent(self):
         self.assertEqual(budget_ceiling(.8),1.0)
     def test_emotion_requires_spoken_emotion(self):
