@@ -21,7 +21,7 @@ import { topicUnavailable } from "@/lib/topics";
 import { submitHostedRender, cancelHostedRender } from "@/lib/hosted-render.functions";
 import { shortsWriterEnabled, shortsWriterStep } from '@/lib/shorts-writer/shorts-writer.functions';
 import { writerCalls } from '@/lib/shorts-writer/calls';
-import { runShortsV4 } from '@/lib/shorts-writer/stage';
+import { runExactScript, runShortsV4 } from '@/lib/shorts-writer/stage';
 import { autoFixPlan, eligibleHooks, preferRepair, preferAdvancedRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
 

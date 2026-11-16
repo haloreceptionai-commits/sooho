@@ -32,7 +32,7 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
     await up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
     if (input.exactScript?.trim()) {
-      const ex = await runExactScript({ script: input.exactScript, durationSec: input.durationSec, base: { topic: input.topic, format: input.format, durationSec: input.durationSec, archetype: 'Owner script', style: input.style, deployment: s.scriptDeployment, ...(advanced ? { kid: true } : {}) }, plan: (data) => api.call(() => generatePlan({ data })), progress: (detail) => await up({ detail }) });
+      const ex = await runExactScript({ script: input.exactScript, durationSec: input.durationSec, base: { topic: input.topic, format: input.format, durationSec: input.durationSec, archetype: 'Owner script', style: input.style, deployment: s.scriptDeployment, ...(advanced ? { kid: true } : {}) }, plan: (data) => api.call(() => generatePlan({ data })), progress: (detail) => up({ detail }) });
       const saved: ScriptCheckpoint = { plan: ex.plan, gate: ex.gate, report: ex.report, judgeOk: true, hookType: ex.hookType, moneyShot: ex.moneyShot };
       await up({ hooks: { best: ex.hook, runnerUp: ex.hook }, checks: [], scriptCheckpoint: saved });
       return saved;
