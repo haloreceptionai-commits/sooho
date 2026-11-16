@@ -29,7 +29,6 @@ describe('Stage 1 object resolution (owner rule: whole phrase, never a keyword)'
     expect(objectsToPaint(scenes as never).map(o => o.name)).toEqual(['a']);
     expect(missing).toEqual([{ scene: 0, phrase: 'iron anvil', reason: 'painted object limit reached' }]);
   });
-  });
   it('never paints text labels, captions or people as objects', () => {
     const { scenes, missing } = resolveSceneObjects([scene([{ id: 'claim', phrase: "typed claim sheet labeled OWNER'S CLAIM", size: 'medium' }, { id: 'rescuers', phrase: 'covered stretchers with rescuers', size: 'large' }])]);
     expect(objectsToPaint(scenes as never)).toEqual([]);
