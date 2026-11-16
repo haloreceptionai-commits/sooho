@@ -39,7 +39,7 @@ const RUN_ID = /^azure:(cartoon-preflight|cartoon-render-gpu|cartoon-render)-[a-
 
 /** Finishing an Advanced Video AI job (painted cards in the request) uses the Blender renderer unless switched off. */
 export function usesBlender(mode: 'preflight' | 'finish', input: unknown) {
-  if (mode !== 'finish' || process.env.ADVANCED_BLENDER === 'off') return false;
+  if (mode !== 'finish' || process.env['ADVANCED_BLENDER'] === 'off') return false;
   const cards = (input as { manifest?: { cards?: unknown[] } })?.manifest?.cards;
   return Array.isArray(cards) && cards.length > 0;
 }

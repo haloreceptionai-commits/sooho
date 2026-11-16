@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { usesBlender } from '@/lib/azure-render';
 
 describe('Advanced Video AI finishing uses the Blender 3D engine', () => {
-  afterEach(() => { delete process.env.ADVANCED_BLENDER; });
+  afterEach(() => { delete process.env['ADVANCED_BLENDER']; });
   it('routes finishing of a painted-card (Advanced) job to Blender', () => {
     expect(usesBlender('finish', { manifest: { cards: [{ id: 'bird' }] } })).toBe(true);
   });
@@ -12,7 +12,7 @@ describe('Advanced Video AI finishing uses the Blender 3D engine', () => {
     expect(usesBlender('preflight', { manifest: { cards: [{ id: 'bird' }] } })).toBe(false);
   });
   it('can be switched off', () => {
-    process.env.ADVANCED_BLENDER = 'off';
+    process.env['ADVANCED_BLENDER'] = 'off';
     expect(usesBlender('finish', { manifest: { cards: [{ id: 'bird' }] } })).toBe(false);
   });
 });
