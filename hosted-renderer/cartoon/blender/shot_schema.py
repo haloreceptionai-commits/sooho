@@ -59,7 +59,11 @@ def validate_shot(s):
     cast = s.get('cast', [])
     if not isinstance(cast, list) or len(cast) > 12: raise ValueError('cast must be a list of up to 12')
     for ch in cast:
-        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held'}: raise ValueError('unknown cast keys')
+        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model'}: raise ValueError('unknown cast keys')
+        if 'model' in ch:
+            from human_clips import MODELS, CLIPS
+            if ch['model'] not in MODELS: raise ValueError('unknown human model')
+            if ch.get('action', 'stand') not in CLIPS or ch.get('held'): raise ValueError('uploaded human action/attachment not verified')
         _vec(ch.get('pos'), 2, 'cast.pos')
         for k in ('shirt', 'hat_color'):
             if k in ch: _vec(ch[k], 3, k); assert all(0 <= x <= 1 for x in ch[k]), k
