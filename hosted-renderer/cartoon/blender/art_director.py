@@ -41,6 +41,7 @@ PLACE_WORDS = {
     'village': 'village hamlet town',
 }
 PLACE_INDEX = {k: v.split() for k, v in PLACE_WORDS.items()}
+INDOOR_KITS = {'office', 'workshop', 'saloon', 'room', 'mine_tunnel', 'castle'}  # 'indoors' in a location rules out street/field kits
 MIN_PLACE = 1        # the location text must name the place type at least once
 MIN_SPOKEN = 2       # legacy shots without a location: two place words in the line itself
 OBJECT_HEIGHT = {'small': 0.55, 'medium': 1.2, 'large': 2.8, 'huge': 6.0}
@@ -175,6 +176,9 @@ def score_place(location):
 def match_location(location):
     """The one kit the location names, or NEUTRAL. Ties between different kits are ambiguous, so neutral too."""
     sc = score_place(location)
+    text = str(location or '').lower()
+    if re.search(r'\b(indoors?|inside|interior)\b', text): sc = {k: v for k, v in sc.items() if k in INDOOR_KITS}
+    elif re.search(r'\b(outdoors?|outside|exterior|open air)\b', text): sc = {k: v for k, v in sc.items() if k not in INDOOR_KITS}
     if not sc: return NEUTRAL
     top = max(sc.values()); best = [k for k, v in sc.items() if v == top]
     if top < MIN_PLACE or len(best) != 1: return NEUTRAL

@@ -75,6 +75,8 @@ class ArtDirector(unittest.TestCase):
         self.assertEqual(A.match_location('a Boston courtroom, 1925'), 'neutral')
         self.assertEqual(A.match_location('molasses tank yard by the harbor'), 'neutral')
         self.assertEqual(A.match_location('a dusty country road outside St. Louis, 1904'), 'farm_field')
+        self.assertEqual(A.match_location('a legal desk in a company office, downtown Boston, 1919, indoors'), 'office')
+        self.assertEqual(A.match_location('steel tank perimeter walkway, Boston North End, outdoors'), 'neutral')
 
     def test_free_text_location_overrides_world(self):
         m = manifest(['The tank burst.', 'The judge ruled.'], world='town')
