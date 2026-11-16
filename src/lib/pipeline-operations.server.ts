@@ -160,6 +160,13 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
         fx: { type: 'array', items: en('fx') }, cues: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['word', 'kind'], properties: { word: { type: 'integer' }, kind: en('sounds') } } }, keyword: { type: 'string' },
       } } },
     } };
+    if (data.advanced) {
+      // Advanced: a free-text real place and the line's key objects as descriptive phrases (resolved after direction).
+      const scene = (schema.properties.scenes.items as { required: string[]; properties: Record<string, unknown> });
+      scene.required.push('location', 'objects');
+      scene.properties['location'] = { type: 'string' };
+      scene.properties['objects'] = { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'phrase', 'size'], properties: { id: { type: 'string' }, phrase: { type: 'string' }, size: { type: 'string', enum: ['small', 'medium', 'large', 'huge'] } } } };
+    }
     // Self-healing: some newer models (gpt-6.1-sol) can return empty direction; retry with more thinking, then the proven gpt-5 deployment.
     const ask = (dep: string, effort: 'none' | 'medium') => azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(dep, data.advanced ? VISUAL_DIRECTOR + ADVANCED_DIRECTION : VISUAL_DIRECTOR,
       data.scenes.map((s, i) => `${i}: ${s}\nScene-matched models: ${searchLibrary(s, 5).filter(o => objects.some(a => a.id === o.id)).map(o => `${o.id}${o.clips?.length ? ' [rigged]' : ''}`).join(', ') || 'use faithful built-in props'}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : o.clips?.length ? ' (animated: idle/walk/run)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director', effort);
@@ -175,7 +182,16 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
     const { sanitizeDirection } = await import('./cartoon-job');
     const cast = diversifyCast(raw.cast as CastMember[], data.advanced ? 4 : 3);
     const grounded = groundLibraryScenes(scenes as unknown as Parameters<typeof cinematicPass>[0], narration, objects);
-    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: cinematicPass(grounded, narration, { literal: Boolean(data.advanced) }) } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
+    let edited = cinematicPass(grounded, narration, { literal: Boolean(data.advanced) });
+    if (data.advanced) {
+      // Owner rule: objects come from descriptive phrases; a model is used only on a whole-phrase match, otherwise a painted card.
+      const { resolveSceneObjects } = await import('./object-resolution');
+      const located = edited.map((s, i) => ({ ...s, location: String(raw.scenes[i]?.['location'] ?? '').trim().slice(0, 160) || undefined, objects: Array.isArray(raw.scenes[i]?.['objects']) ? raw.scenes[i]!['objects'] : [] }));
+      const resolved = resolveSceneObjects(located as never[], Math.max(0, Math.min(8, 24 - cast.length * 4)));
+      if (resolved.missing.length) console.warn('Missing objects', JSON.stringify(resolved.missing));
+      edited = resolved.scenes as typeof edited;
+    }
+    const result = cartoonDirection.parse(sanitizeDirection({ cast, scenes: edited } as unknown as Parameters<typeof sanitizeDirection>[0], narration));
     if (result.scenes.length !== data.scenes.length) throw Error('This story needs cartoon actions or props that are not supported yet');
     return result;
   };
@@ -204,7 +220,11 @@ ADVANCED 3D CINEMATOGRAPHY (the Advanced engine films each line in a real 3D loc
 - Bodies act out the spoken verb literally: walk when someone travels or arrives, run when anyone flees/chases/charges/scatters, aim/fire for shooting, carry/lift for hauling, point when someone discovers/orders/declares, cower when afraid, cheer only for a real win. An animal that runs or scatters gets action run.
 - Vary the camera every sentence like a film editor: open on a wide or low establishing shot, cut to medium for actions, close/extreme_close for faces and reactions, low for power or threat, high for scale and numbers (thousands, an army, a herd), over_shoulder when two characters face each other, insert for a key object. Never use the same shot type twice in a row.
 - Moves carry energy: push_in on tension, pull_back to reveal scale, pan to follow movement, whip on surprises, shake on gunfire, crashes and explosions.
-- Use expressions only when something happens to that character; avoid unrelated scenery and irrelevant props.`;
+- Use expressions only when something happens to that character; avoid unrelated scenery and irrelevant props.
+ADVANCED PLACES AND OBJECTS (the 3D planner reads these, not the world list):
+- location: the real place where this line happens, in plain words with city/area, indoors or outdoors and era (e.g. "Commercial Street in Boston's North End, 1919", "a Boston courtroom, 1925", "a dusty country road outside St. Louis, 1904"). Never squeeze it into the world list; keep the same wording while the story stays there.
+- objects: the 0-2 concrete things this line is about, each as a descriptive phrase with material, purpose, era and scale (e.g. "huge riveted steel molasses storage tank, 1919", "wave of thick brown molasses", "elevated railway track on steel girders"). id = a stable snake_case name reused every time the same object appears. size: small (hand-held), medium (up to waist/chest), large (taller than a person, vehicle), huge (building, tank, ship, landmark). Never people or animals, never text or signs.
+- props: only add a library id or built-in prop when it is exactly that object; a word match is not enough (a molasses tank is not an army tank).`;
 const VISUAL_DIRECTOR = `You are the Visual Director of a bright outlined 3D cartoon Shorts studio. Every sentence must SHOW what the narrator says, using ONLY the listed vocabulary (the engine cannot draw anything else; never invent items, never write code).
 Return a cast and exactly one direction per input sentence, in order.
 Cast (2-3 members whenever the story involves more than one person or group; 1 only for a true solo story): stable ids that name the role (hero, captain, rival, queen, doctor...), different seeds 1-999, and an outfit from the outfits list that matches each person's job, era and place (soldier/knight/veteran for armies, queen/noble/king for royalty, doctor/nurse for medicine, pharaoh for ancient Egypt, cowboy for the Wild West, chef for food, monk/priest for religion, woman/maid/peasant for townsfolk). Every cast member gets a DIFFERENT outfit so viewers can tell them apart.
