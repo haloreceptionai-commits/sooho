@@ -348,9 +348,9 @@ class Director:
         # Painted object cards named by the shot's descriptive phrases (upright cutouts that cast shadows).
         obj_cards = []
         for p in s.get('props') or []:
-            a = str(p.get('asset') or '')
-            if p.get('kind') == 'asset' and a.startswith('card/') and f'obj-{a[5:]}.png' in self.cards and all(o['image'] != f'obj-{a[5:]}.png' for o in obj_cards):
-                obj_cards.append({'image': f'obj-{a[5:]}.png', 'size': p.get('size') if p.get('size') in OBJECT_HEIGHT else 'medium', 'phrase': str(p.get('phrase') or a[5:])})
+            ref = str(p.get('asset') or '')
+            if p.get('kind') == 'asset' and ref.startswith('card/') and f'obj-{ref[5:]}.png' in self.cards and all(o['image'] != f'obj-{ref[5:]}.png' for o in obj_cards):
+                obj_cards.append({'image': f'obj-{ref[5:]}.png', 'size': p.get('size') if p.get('size') in OBJECT_HEIGHT else 'medium', 'phrase': str(p.get('phrase') or ref[5:])})
         obj_cards = obj_cards[:3]
         ctx = {'first_of_video': i == 0 and part == 0, 'new_place': new_place, 'part': part, 'story_object': bool(story_obj), 'props': bool(props) or bool(obj_cards),
                'moving': bool(moving), 'scale': bool(SCALE_WORDS.search(txt)) or herd, 'threat': verb in ('aim', 'load') or s.get('mood') == 'tense',
