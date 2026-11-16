@@ -84,6 +84,18 @@ type Direction = z.infer<typeof cartoonDirection>;
  */
 export function sanitizeDirection(direction: Direction, narration: string[]): Direction {
   if (!direction.scenes.length || !direction.cast.length) throw Error('Cartoon direction came back empty. No rendering was started.');
+  // Self-healing: newer models may return ids like "Soldier 1", fractional seeds or unknown outfits; normalise them before strict validation.
+  const remap = new Map<string, string>(), taken = new Set<string>();
+  const cast0 = direction.cast.map((c, i) => {
+    let nid = String(c.id ?? '').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30) || `cast${i + 1}`;
+    while (taken.has(nid)) nid = `${nid.slice(0, 27)}_${i + 1}`;
+    taken.add(nid); remap.set(String(c.id), nid);
+    const seed = Math.min(100000, Math.max(1, Math.round(Number(c.seed) || (i + 1) * 97)));
+    const outfit = (OUTFITS as readonly string[]).includes(c.outfit as string) ? c.outfit : OUTFITS[0];
+    return { ...c, id: nid, seed, outfit };
+  });
+  const fix = (x?: string) => (x === undefined ? x : remap.get(x) ?? x);
+  direction = { ...direction, cast: cast0 as Direction['cast'], scenes: direction.scenes.map((sc) => ({ ...sc, actor: fix(sc.actor)!, speaker: fix(sc.speaker), actors: sc.actors?.map((a) => ({ ...a, actor: fix(a.actor)! })) })) };
   const scenes = direction.scenes.slice(0, narration.length);
   while (scenes.length < narration.length) scenes.push({ ...scenes[scenes.length - 1]! });
   const castIds = new Set(direction.cast.map(c => c.id)), lead = direction.cast[0]!.id;
