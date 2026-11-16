@@ -14,7 +14,7 @@ const arm = async (method, url, body) => { const r = await fetch(url, { method, 
 const def = await arm('GET', `${base}?${V}`);
 const c = def.properties.template.containers[0];
 const image = c.image.replace(/:[^:/]+$/, `:${tag}`);
-const started = await arm('POST', `${base}/start?${V}`, { template: { containers: [{ ...c, image, command: ['sh', '-c', cmd], args: [] }] } });
+const started = await arm('POST', `${base}/start?${V}`, { containers: [{ ...c, image, command: ['sh', '-c', cmd], args: [] }] });
 const name = started.name || started.id?.split('/').pop();
 console.log('started', job, image, name);
 const stop = Date.now() + 25 * 60_000;

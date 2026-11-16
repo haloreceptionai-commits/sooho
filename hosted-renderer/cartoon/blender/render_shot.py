@@ -382,14 +382,14 @@ def apply_mood(mode):
     sc = bpy.context.scene; bg = sc.world.node_tree.nodes.get('Background')
     suns = [o for o in bpy.data.objects if o.type == 'LIGHT' and o.data.type == 'SUN']
     if mode == 'night':
-        for o in suns: o.data.energy = 0.45; o.data.color = (0.42, 0.56, 1.0); o.rotation_euler.x = math.radians(35)   # moonlight: cold, dim, clearly not daytime
-        if bg: bg.inputs['Strength'].default_value = 0.07
+        for o in suns: o.data.energy = 1.7; o.data.color = (0.5, 0.64, 1.0); o.rotation_euler.x = math.radians(40)   # moonlight: cold blue and clearly night, but bright enough to read faces
+        if bg: bg.inputs['Strength'].default_value = 0.4; bg.inputs['Color'].default_value = (0.05, 0.09, 0.22, 1)
         for x, y, e in ((-1.6, -1.2, 170), (2.2, 1.5, 90)):   # warm firelight on the cast, cool moon rim from the sun
             bpy.ops.object.light_add(type='POINT', location=(x, y, 1.6)); L = bpy.context.active_object.data
             L.energy = e; L.color = (1.0, 0.55, 0.25); L.shadow_soft_size = 0.4
     elif mode == 'sunset':
-        for o in suns: o.data.energy = 1.8; o.data.color = (1.0, 0.62, 0.36); o.rotation_euler.x = math.radians(78)
-        if bg: bg.inputs['Strength'].default_value = 0.12
+        for o in suns: o.data.energy = 2.6; o.data.color = (1.0, 0.66, 0.4); o.rotation_euler.x = math.radians(62)   # dawn/dusk: warm and clearly lit
+        if bg: bg.inputs['Strength'].default_value = 0.35
     elif mode == 'rain':
         for o in suns: o.data.energy = 0.9; o.data.color = (0.75, 0.8, 0.9); o.data.angle = math.radians(25)
         if bg: bg.inputs['Strength'].default_value = 0.08

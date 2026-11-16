@@ -277,12 +277,11 @@ def validate_compiled(p):
 
 
 def smooth_story_time(manifest, min_run=3):
-    """Time of day is a story constant, not a per-shot coin flip: a run of fewer than `min_run` shots that disagrees with its
-    neighbours is merged into the longer neighbouring run. A short dawn/dusk run between two different times is kept (a real transition).
+    """Time of day is a story constant, not a per-shot coin flip. Only a FLICKER is removed: a run of fewer than `min_run` shots that is
+    sandwiched between two runs of the SAME time (day, night, day). A real transition (night -> dawn, or an ending run) is kept.
     Idempotent; mutates the manifest's place specs and returns the list of changes for the log."""
     shots = [s for s in manifest.get('shots', []) if isinstance(s.get('place'), dict)]
     times = [s['place']['time'] for s in shots]
-    if len(times) < 2 * min_run: return []   # too few scenes to tell a transition from a flicker
 
     def runs_of(ts):
         out = []
@@ -292,15 +291,13 @@ def smooth_story_time(manifest, min_run=3):
         return out
 
     changed = True
-    while changed and len(times) > 1:
+    while changed and len(times) > 2:
         changed = False; runs = runs_of(times)
-        for k, (x, start, n) in enumerate(runs):
-            if n >= min_run or len(runs) == 1: continue
-            if x in ('dawn', 'dusk') and 0 < k < len(runs) - 1 and runs[k - 1][0] != runs[k + 1][0]: continue
-            nbrs = [r for r in (runs[k - 1] if k > 0 else None, runs[k + 1] if k < len(runs) - 1 else None) if r]
-            target = max(nbrs, key=lambda r: r[2])[0]
-            for j in range(start, start + n): times[j] = target
-            changed = True; break
+        for k in range(1, len(runs) - 1):
+            x, start, n = runs[k]
+            if n < min_run and runs[k - 1][0] == runs[k + 1][0] and runs[k - 1][0] != x:
+                for j in range(start, start + n): times[j] = runs[k - 1][0]
+                changed = True; break
     log = []
     for s, t in zip(shots, times):
         if s['place']['time'] != t:
