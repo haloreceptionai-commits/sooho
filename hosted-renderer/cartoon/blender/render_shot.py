@@ -387,13 +387,13 @@ def build_backdrop(shot, cam):
         if not folder or not os.path.isfile(path): continue
         img = bpy.data.images.load(path, check_existing=True); w, h = img.size
         D = BACKDROP_DEPTH[b['layer']]
-        cover = 2 * D * 18.0 / lens * 1.7          # 36 mm film: half-width 18 mm; 1.7 margin for pans/whips
-        H = max(cover * 1.78, 1.0); W = max(H * w / max(1, h), cover * 1.6)
+        view = D * 36.0 / lens                      # visible frame height at depth D (36 mm sensor fits the portrait height)
+        H = view * 1.3; W = max(H * w / max(1, h), view * 0.5625 * 1.5)  # margin for camera moves; never shows an edge
         bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0)); ob = bpy.context.object
         ob.name = f"backdrop {b['layer']}"
         ob.scale = (W, H, 1); ob.rotation_euler = (math.pi / 2, 0, 0)
         bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-        p = frm + fwd * D; ob.location = (p.x, p.y, H / 2 - H * (0.18 if b['layer'] == 'far' else 0.08))
+        p = frm + fwd * D; ob.location = (p.x, p.y, frm.z + H * 0.14)  # painted horizon (lower third) sits at eye level
         ob.rotation_euler = (0, 0, math.atan2(fwd.y, fwd.x) - math.pi / 2)
         m = bpy.data.materials.new('backdrop'); m.use_nodes = True; nt = m.node_tree
         for n in list(nt.nodes):
