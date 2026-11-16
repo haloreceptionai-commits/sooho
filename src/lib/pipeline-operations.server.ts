@@ -144,6 +144,7 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
 };
 
 const directCartoonChunk = async (data: { scenes: string[]; deployment: string; advanced?: boolean | undefined }) => {
+    const placeMod = await import('./place-spec');
     const prototypeActions=new Set(['aim','fire','load','place','inspect','strike','tap','throw']);
     const en = (k: keyof typeof VOCAB) => ({ type: 'string', enum: k==='actions' ? VOCAB.actions.filter(a=>!prototypeActions.has(a)) : VOCAB[k] });
     // Searchable CC0 library: the Director sees only objects matching this story's words.
@@ -165,12 +166,11 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
       const scene = schema.properties.scenes.items as unknown as { required: string[]; properties: Record<string, unknown> };
       scene.required.push('location', 'objects');
       scene.properties['location'] = { type: 'string' };
-      const { placeJsonSchema } = await import('./place-spec');
-      scene.required.push('place'); scene.properties['place'] = placeJsonSchema();
+      scene.required.push('place'); scene.properties['place'] = placeMod.placeJsonSchema();
       scene.properties['objects'] = { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'phrase', 'size'], properties: { id: { type: 'string' }, phrase: { type: 'string' }, size: { type: 'string', enum: ['small', 'medium', 'large', 'huge'] } } } };
     }
     // Self-healing: some newer models (gpt-6.1-sol) can return empty direction; retry with more thinking, then the proven gpt-5 deployment.
-    const ask = (dep: string, effort: 'none' | 'medium') => azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(dep, data.advanced ? VISUAL_DIRECTOR + ADVANCED_DIRECTION + (await import('./place-spec')).PLACE_PROMPT : VISUAL_DIRECTOR,
+    const ask = (dep: string, effort: 'none' | 'medium') => azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(dep, data.advanced ? VISUAL_DIRECTOR + ADVANCED_DIRECTION + placeMod.PLACE_PROMPT : VISUAL_DIRECTOR,
       data.scenes.map((s, i) => `${i}: ${s}\nScene-matched models: ${searchLibrary(s, 5).filter(o => objects.some(a => a.id === o.id)).map(o => `${o.id}${o.clips?.length ? ' [rigged]' : ''}`).join(', ') || 'use faithful built-in props'}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : o.clips?.length ? ' (animated: idle/walk/run)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director', effort);
     const empty = (r: { cast: unknown[]; scenes: unknown[] }) => !r.cast?.length || !r.scenes?.length;
     let raw = await ask(data.deployment, 'none');
@@ -188,7 +188,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
     if (data.advanced) {
       // Owner rule: objects come from descriptive phrases; a model is used only on a whole-phrase match, otherwise a painted card.
       const { resolveSceneObjects } = await import('./object-resolution');
-      const { requirePlaces, liftDressing } = await import('./place-spec');
+      const { requirePlaces, liftDressing } = placeMod;
       const places = requirePlaces(raw.scenes as { place?: unknown }[]);   // stops here, before any paid rendering
       const located = edited.map((s, i) => {
         const lifted = liftDressing(places[i]!, Array.isArray(raw.scenes[i]?.['objects']) ? raw.scenes[i]!['objects'] as { phrase?: string; id?: string }[] : []);
