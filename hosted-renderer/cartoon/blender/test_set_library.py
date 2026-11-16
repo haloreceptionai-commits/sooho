@@ -12,7 +12,7 @@ ENTRIES = json.loads((HERE / 'assets/manifest.json').read_text())
 
 class SetLibraryTests(unittest.TestCase):
     def test_all_approved_places_exist(self):
-        self.assertEqual(set(KITS), {'castle', 'village', 'battlefield', 'mine_tunnel', 'office', 'saloon', 'ship_deck', 'rail_yard', 'workshop', 'street', 'room'})
+        self.assertEqual(set(KITS), {'castle', 'village', 'battlefield', 'mine_tunnel', 'office', 'saloon', 'ship_deck', 'rail_yard', 'workshop', 'street', 'room', 'farm_field', 'outback', 'forest', 'market'})
 
     def test_every_asset_is_offline_and_hash_pinned(self):
         for e in ENTRIES:
