@@ -13,3 +13,13 @@ describe("story shape v3", () => {
   it("rejects the rail summary ending", () => expect(rail).toMatch(/summary/));
   it("requires the hook to be 8-12 words", () => expect(shapeIssues("Hot rails crack. Why? Heat. Gaps.").issues.join()).toMatch(/hook: 3 words/));
 });
+
+import { validateStory, type StoryScene } from "@/lib/story-v2";
+describe("shape mode in the story validator", () => {
+  const scenes: StoryScene[] = GOLD_THEREMIN.split("\n").map((narration, i) => ({ beat: i === 0 ? "hook" : "reveal", narration, characters: [], shot: "wide", money: i === 0, loop_opened: i === 6 ? "main" : "", loop_closed: i === 10 ? "main" : "" }));
+  const base = { scenes, anchors: { year: "1952", place: "Moscow", org: "Soviets", subject: "seal", stakes: "spied" }, question: "How?", hero: { name: "", role: "", want: "" }, cast: [], durationSec: 55 };
+  const shaped = validateStory({ ...base, shape: true });
+  it("runs the SHAPE check in shape mode", () => expect(shaped.checks.find((c) => c.id === "SHAPE")?.pass).toBe(true));
+  it("drops the hero-want quota in shape mode", () => expect(shaped.checks.find((c) => c.id === "V6")?.pass).toBe(true));
+  it("keeps the hero-want quota without shape mode", () => expect(validateStory(base).checks.find((c) => c.id === "V6")?.pass).toBe(false));
+});
