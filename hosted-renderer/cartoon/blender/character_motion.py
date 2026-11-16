@@ -2,8 +2,8 @@
 import math
 
 EXPRESSIONS = {'neutral','happy','angry','sad','shock','worried','smug','determined','talk'}
-OUTFITS = {'worker','merchant','soldier','sailor'}
-HATS = {'none','beanie','top','helmet','tricorne'}
+OUTFITS = {'worker','merchant','soldier','sailor','tunic','armor','robe','dress','labcoat','uniform','royal','rags'}
+HATS = {'none','beanie','top','helmet','tricorne','crested','crown','turban','hood','cap','straw','hardhat','laurel','headband'}
 ACTIONS = {'stand','walk','run','carry','point','swing','aim','load','pour','crouch','fall','cheer','panic'}
 
 

@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT / 'blender'))
 from animals import ANIMAL  # noqa: E402
 from shot_director import compile_one, ZONES  # noqa: E402
 from shot_schema import validate_shot  # noqa: E402
+from place_spec import compile_place, LIGHTING as PLACE_LIGHT  # noqa: E402
 
 # Old-engine worlds -> Blender set kits (+ forced lighting).
 WORLD = {'ship': ('ship_deck', None), 'storm_sea': ('ship_deck', 'rain'), 'town': ('village', None), 'market': ('street', None),
@@ -94,6 +95,10 @@ def compile_shot(m, i, cards=()):
         fx.append({'kind': FX[kind], 'pos': [round(la[0] + 0.6 * (j - 1), 3), round(la[1] + 1.0, 3), 0], 'start': 0, 'scale': 1, 'seed': i * 7 + j})
     if 'rain' in (s.get('fx') or []): fx.append({'kind': 'rain', 'pos': [la[0], la[1], 0], 'start': 0, 'scale': 1, 'seed': i})
     if fx: shot['effects'] = fx
+    if s.get('place'):  # manifest v3: the fallback path must still build the real 3D place, never the empty neutral world
+        shot['place'] = compile_place(s['place'], seed=i)
+        shot['lighting'] = 'rain' if s['place'].get('weather') == 'rain' else PLACE_LIGHT[s['place']['time']]
+        shot.pop('backdrop', None)
     shot.update({'samples': 12, 'size': list(SCALE), 'engine': 'cycles'})
     return validate_shot(shot)
 

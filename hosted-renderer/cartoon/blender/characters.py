@@ -22,9 +22,10 @@ def build_character(c,duration=3,fps=30):
         from uploaded_humans import build_uploaded_human
         return build_uploaded_human(c,duration,fps)
     ident=c.get('id','cast');black=material('cast ink',(.012,.013,.015),.65)
-    skin=material('cast ivory',(.94,.93,.88),.58)
+    skin=material('cast skin '+ident,tuple(c.get('skin',(.94,.93,.88))),.58)
     cloth=material(ident+' cloth',tuple(c.get('shirt',(.13,.36,.3))),.88)
     hatmat=material(ident+' hat',tuple(c.get('hat_color',(.32,.19,.06))),.85)
+    trim=material(ident+' trim',tuple(c.get('trim',(.72,.55,.12))),.35)
     root=bpy.data.objects.new(ident,None);bpy.context.collection.objects.link(root)
     headroot=bpy.data.objects.new(ident+' head',None);bpy.context.collection.objects.link(headroot);headroot.parent=root
     head=sphere('egg head',(0,0,0),(.31,.27,.36),skin);head.parent=headroot
@@ -45,12 +46,41 @@ def build_character(c,duration=3,fps=30):
             z=-.13+(x/face['width'])**2*face['curve']
             curve.append((x,face_y(x,z),z))
         for a,b in zip(curve,curve[1:]):rope('mouth stroke',a,b,.01,black).parent=headroot
+    facial=c.get('facial','none')
+    if facial in ('mustache','beard','goatee'):
+        hair=material(ident+' hair',(.06,.045,.035),.8)
+        if facial=='mustache':
+            for sx in (-1,1):
+                o=sphere('mustache',(sx*.075,face_y(sx*.075,-.075)-.02,-.075),(.085,.03,.032),hair);o.rotation_euler.y=sx*.35;o.parent=headroot
+        else:
+            sphere('beard',(0,-.1,-.3),(.2,.12,.11),hair).parent=headroot
     hat=c.get('hat','beanie')
     if hat!='none':
         if hat=='beanie':sphere('beanie',(0,0,.27),(.325,.29,.17),hatmat).parent=headroot
         else:
-            bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.34,depth=.05,location=(0,0,.27));bpy.context.active_object.data.materials.append(hatmat);bpy.context.active_object.parent=headroot
-            if hat=='helmet':sphere('helmet',(0,0,.28),(.34,.3,.2),hatmat).parent=headroot
+            if hat in ('helmet','top','tricorne'):
+                bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.34,depth=.05,location=(0,0,.27));bpy.context.active_object.data.materials.append(hatmat);bpy.context.active_object.parent=headroot
+            if hat=='crested':
+                sphere('legion helmet',(0,0,.28),(.34,.3,.2),hatmat).parent=headroot
+                crest=cube('helmet crest',(0,0,.5),(.06,.34,.14),trim,.02);crest.parent=headroot
+            elif hat=='crown':
+                for k in range(5):
+                    a=k*math.tau/5;o=cube('crown point',(.22*math.cos(a),.22*math.sin(a),.36),(.07,.07,.16),trim,.01);o.parent=headroot
+                bpy.ops.mesh.primitive_torus_add(major_radius=.25,minor_radius=.04,location=(0,0,.3));bpy.context.active_object.data.materials.append(trim);bpy.context.active_object.parent=headroot
+            elif hat=='turban':
+                for k in range(3):sphere('turban wrap',(0,0,.28+.07*k),(.34-.03*k,.3-.03*k,.12),hatmat).parent=headroot
+            elif hat=='hood':
+                sphere('hood',(0,.05,.1),(.38,.36,.42),hatmat).parent=headroot
+            elif hat=='cap':sphere('cap',(0,0,.27),(.31,.27,.13),hatmat).parent=headroot;cube('cap peak',(0,-.28,.24),(.3,.2,.03),hatmat,.012).parent=headroot
+            elif hat=='straw':
+                bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.5,depth=.03,location=(0,0,.27));bpy.context.active_object.data.materials.append(trim);bpy.context.active_object.parent=headroot
+                sphere('straw crown',(0,0,.34),(.28,.25,.15),trim).parent=headroot
+            elif hat=='hardhat':sphere('hardhat',(0,0,.3),(.35,.31,.2),trim).parent=headroot
+            elif hat=='laurel':
+                for k in range(9):
+                    a=math.pi*.15+k*math.pi*.7/8;o=sphere('laurel leaf',(.3*math.cos(a)*1.0,-.3*math.sin(a)*.2+.0,.25),(.05,.03,.02),trim);o.parent=headroot
+            elif hat=='headband':bpy.ops.mesh.primitive_torus_add(major_radius=.31,minor_radius=.03,location=(0,0,.2));bpy.context.active_object.data.materials.append(trim);bpy.context.active_object.parent=headroot
+            elif hat=='helmet':sphere('helmet',(0,0,.28),(.34,.3,.2),hatmat).parent=headroot
             elif hat=='top':
                 bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.25,depth=.35,location=(0,0,.46));bpy.context.active_object.data.materials.append(hatmat);bpy.context.active_object.parent=headroot
             else:
@@ -70,6 +100,20 @@ def build_character(c,duration=3,fps=30):
             points=[(x,-.16*math.sqrt(max(0,1-(x/.24)**2-((z-1.04)/.32)**2))-.003,z) for x in [-.18+i*.36/16 for i in range(17)]]
             for a,b in zip(points,points[1:]):body_details.append(rope('sailor stripe',a,b,.009,skin))
     if outfit=='worker':body_details.append(cube('work apron',(0,-.16,1.02),(.25,.035,.35),hatmat,.018))
+    if outfit in ('tunic','rags'):
+        body_details.append(cube('tunic hem',(0,0,.74),(.52,.34,.1),hatmat,.03));body_details.append(cube('rope belt',(0,-.01,.9),(.44,.32,.04),trim,.012))
+    if outfit=='armor':
+        body_details.extend([sphere('breastplate',(0,-.07,1.1),(.215,.12,.3),trim),cube('skirt strips',(0,0,.78),(.5,.34,.12),hatmat,.02),sphere('shoulder guard L',(-.24,0,1.28),(.1,.1,.06),trim),sphere('shoulder guard R',(.24,0,1.28),(.1,.1,.06),trim)])
+    if outfit=='robe':
+        body_details.extend([cube('robe skirt',(0,0,.62),(.56,.36,.5),cloth,.04),cube('robe sash',(0,-.01,.95),(.46,.32,.05),trim,.012)])
+    if outfit=='dress':
+        body_details.extend([cube('dress skirt',(0,0,.55),(.62,.4,.6),cloth,.05),cube('dress waist',(0,-.01,.93),(.42,.3,.05),trim,.01)])
+    if outfit=='labcoat':
+        body_details.extend([cube('lab coat',(0,0,.8),(.52,.36,.5),skin,.03),cube('coat pocket',(.12,-.18,.78),(.1,.02,.1),black,.005)])
+    if outfit=='uniform':
+        body_details.extend([cube('uniform sash',(0,-.15,1.1),(.1,.03,.5),trim,.008),cube('uniform belt',(0,-.01,.86),(.44,.32,.06),black,.015)])
+    if outfit=='royal':
+        body_details.extend([cube('royal mantle',(0,.1,.85),(.54,.1,.7),trim,.04),cube('fur collar',(0,-.02,1.32),(.46,.32,.08),skin,.03),sphere('royal brooch',(0,-.16,1.2),(.03,.02,.03),trim)])
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[];anchors={}

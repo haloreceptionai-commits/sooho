@@ -56,7 +56,8 @@ def validate_shot(s):
         if not 0 <= e.get('start', 0) <= d or not .2 <= e.get('scale', 1) <= 4: raise ValueError('effect start within shot, scale 0.2-4')
     cr = s.get('crowd')
     if cr is not None:
-        if set(cr) - {'count', 'center', 'size', 'action', 'yaw', 'seed'}: raise ValueError('unknown crowd keys')
+        if set(cr) - {'count', 'center', 'size', 'action', 'yaw', 'seed', 'kind'}: raise ValueError('unknown crowd keys')
+        if cr.get('kind', 'civil') not in ('civil', 'army'): raise ValueError('crowd kind civil|army')
         if not isinstance(cr.get('count'), int) or not 1 <= cr['count'] <= 400: raise ValueError('crowd 1-400')
         _vec(cr.get('center'), 2, 'crowd.center'); _vec(cr.get('size'), 2, 'crowd.size', 60)
         if cr.get('action', 'stand') not in ('stand', 'cheer', 'run'): raise ValueError('crowd action stand|cheer|run')
@@ -68,7 +69,7 @@ def validate_shot(s):
     cast = s.get('cast', [])
     if not isinstance(cast, list) or len(cast) > 12: raise ValueError('cast must be a list of up to 12')
     for ch in cast:
-        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model'}: raise ValueError('unknown cast keys')
+        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model','skin','facial','trim'}: raise ValueError('unknown cast keys')
         if 'model' in ch:
             from human_clips import MODELS, CLIPS
             if ch['model'] not in MODELS: raise ValueError('unknown human model')

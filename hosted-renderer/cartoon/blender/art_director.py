@@ -94,11 +94,23 @@ LEGACY_ACTION = {'idle': 'stand', 'walk': 'walk', 'run': 'run', 'point': 'point'
 FACE = {'grin': 'happy', 'smile': 'happy', 'laugh': 'happy', 'relief': 'happy', 'whistle': 'smug', 'stern': 'determined',
         'nervous': 'worried', 'shock': 'shock', 'dazed': 'sad', 'pained': 'sad', 'neutral': 'neutral'}
 ACTION_FACE = {'run': 'shock', 'panic': 'shock', 'aim': 'determined', 'load': 'determined', 'swing': 'determined', 'cheer': 'happy', 'fall': 'shock'}
-OUTFIT = {'soldier': ('soldier', 'helmet'), 'veteran': ('soldier', 'helmet'), 'knight': ('soldier', 'helmet'), 'captain': ('sailor', 'tricorne'),
+OUTFIT = {'soldier': ('armor', 'helmet'), 'veteran': ('armor', 'helmet'), 'knight': ('armor', 'helmet'), 'captain': ('uniform', 'tricorne'),
           'pirate': ('sailor', 'tricorne'), 'sailor': ('sailor', 'beanie'), 'fisherman': ('sailor', 'beanie'), 'merchant': ('merchant', 'top'),
-          'noble': ('merchant', 'top'), 'king': ('merchant', 'top'), 'queen': ('merchant', 'top'), 'scholar': ('merchant', 'none'), 'doctor': ('merchant', 'none'),
-          'inventor': ('worker', 'none'), 'spy': ('merchant', 'top'), 'explorer': ('worker', 'beanie'), 'cowboy': ('worker', 'none'),
-          'worker': ('worker', 'beanie'), 'blacksmith': ('worker', 'none'), 'farmer': ('worker', 'none'), 'peasant': ('worker', 'none'), 'villager': ('worker', 'beanie')}
+          'noble': ('royal', 'none'), 'king': ('royal', 'crown'), 'queen': ('dress', 'crown'), 'scholar': ('robe', 'none'), 'doctor': ('labcoat', 'none'),
+          'inventor': ('labcoat', 'none'), 'spy': ('merchant', 'top'), 'explorer': ('worker', 'cap'), 'cowboy': ('worker', 'straw'),
+          'worker': ('worker', 'hardhat'), 'blacksmith': ('worker', 'none'), 'farmer': ('tunic', 'straw'), 'peasant': ('rags', 'none'), 'villager': ('tunic', 'none'),
+          'woman': ('dress', 'none'), 'maid': ('dress', 'headband'), 'nurse': ('labcoat', 'headband'), 'monk': ('robe', 'hood'), 'priest': ('robe', 'none'),
+          'elder': ('robe', 'none'), 'chef': ('labcoat', 'cap'), 'pharaoh': ('royal', 'crown'), 'general': ('armor', 'crested'), 'emperor': ('royal', 'laurel'),
+          'centurion': ('armor', 'crested'), 'gladiator': ('armor', 'helmet'), 'warrior': ('armor', 'helmet'), 'viking': ('armor', 'helmet'), 'samurai': ('armor', 'helmet'),
+          'scientist': ('labcoat', 'none'), 'teacher': ('uniform', 'none'), 'president': ('merchant', 'top'), 'prince': ('royal', 'crown'), 'princess': ('dress', 'crown'),
+          'astronaut': ('uniform', 'helmet'), 'engineer': ('worker', 'hardhat'), 'miner': ('worker', 'hardhat'), 'guard': ('armor', 'helmet'), 'pilot': ('uniform', 'cap'),
+          'judge': ('robe', 'none'), 'sultan': ('royal', 'turban'), 'scribe': ('robe', 'headband'), 'shepherd': ('tunic', 'hood'), 'hunter': ('tunic', 'cap'),
+          'merchant_woman': ('dress', 'headband'), 'rebel': ('rags', 'headband'), 'officer': ('uniform', 'cap')}
+FACIAL = {'king': 'beard', 'general': 'mustache', 'emperor': 'beard', 'scholar': 'goatee', 'elder': 'beard', 'priest': 'beard', 'monk': 'none', 'pirate': 'beard',
+          'viking': 'beard', 'merchant': 'mustache', 'cowboy': 'mustache', 'blacksmith': 'beard', 'centurion': 'mustache', 'sultan': 'goatee', 'sailor': 'mustache', 'captain': 'mustache',
+          'pharaoh': 'goatee', 'inventor': 'mustache', 'president': 'mustache', 'scientist': 'goatee', 'doctor': 'mustache', 'soldier': 'mustache', 'veteran': 'mustache'}
+SKINS = [[.93, .8, .68], [.78, .6, .46], [.62, .46, .34], [.88, .72, .58], [.5, .35, .26], [.94, .86, .78]]
+TRIMS = {'armor': [.75, .55, .2], 'royal': [.85, .65, .15], 'robe': [.7, .6, .2], 'dress': [.85, .7, .3], 'tunic': [.8, .7, .35], 'uniform': [.8, .65, .2], 'worker': [.9, .75, .1]}
 SHIRTS = [[0.72, 0.42, 0.22], [0.2, 0.32, 0.6], [0.55, 0.2, 0.2], [0.3, 0.5, 0.3]]
 HAT_COLORS = [[0.32, 0.19, 0.06], [0.22, 0.27, 0.16], [0.1, 0.1, 0.12], [0.5, 0.12, 0.08]]
 
@@ -129,7 +141,7 @@ IMPACT = re.compile(r'\b(boom|bang|crash\w*|explo\w*|smash\w*|hit|fir(e|ed|ing)|
 SCALE_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|millions?|army|armies|entire|whole|all|every|herds?|flocks?|mobs?|swarms?|hordes?|crowds?|nation|country)\b')
 CROWD_WORDS = re.compile(r'\b(army|armies|soldiers|troops|crowds?|farmers|people|villagers|citizens|men|workers|miners|public|locals|settlers|residents)\b')
 HERD_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|herds?|flocks?|mobs?|swarms?|hordes?|groups?|packs?)\b')
-UPLOADED_HUMANS = os.environ.get('ADVANCED_HUMANS', 'uploaded') != 'egg'
+UPLOADED_HUMANS = os.environ.get('ADVANCED_HUMANS', 'egg') == 'uploaded'  # benchmark look: expressive egg-heads by default (Nov 16 2026 upgrade); 'uploaded' restores the rigged humans
 WOMAN = re.compile(r'\b(woman|women|wife|queen|mother|mom|girl|lady|ladies|daughter|princess|empress|sister|nurse|widow|actress|duchess|aunt|grandmother|she|her)\b')
 HUMAN_ACTION = {'walk': 'walk', 'run': 'run', 'panic': 'run', 'fall': 'fall'}
 
@@ -342,8 +354,12 @@ class Director:
         self.m = m; self.cards = set(cards); self.locations = plan_locations(m, self.cards)
         self.history = []; self.zone_use = {}; self.cast_look = {}
         for i, c in enumerate(m.get('cast') or []):
-            outfit, hat = OUTFIT.get(c.get('outfit'), ('worker', 'none'))
-            self.cast_look[c['id']] = {'outfit': outfit, 'hat': hat, 'shirt': SHIRTS[i % 4], 'hat_color': HAT_COLORS[i % 4]}
+            role = c.get('outfit')   # the shared vocabulary stays small (legacy web engine); the cast id's own words refine the look
+            for w in re.split(r'[^a-z]+', str(c.get('id', '')).lower()):
+                if w in OUTFIT and w not in ('worker', 'woman'): role = w; break
+            outfit, hat = OUTFIT.get(role, ('worker', 'none'))
+            self.cast_look[c['id']] = {'outfit': outfit, 'hat': hat, 'shirt': SHIRTS[i % 4], 'hat_color': HAT_COLORS[i % 4], 'skin': SKINS[(i * 2 + len(c['id'])) % len(SKINS)],
+                                       'facial': FACIAL.get(role, 'none') if outfit not in ('dress',) else 'none', 'trim': TRIMS.get(outfit, [.72, .55, .12])}
         self.last_zone = None; self.scene_shown = {}
 
     # -- choose a zone that differs from the previous segment's backdrop
@@ -414,7 +430,7 @@ class Director:
             verb = 'aim' if re.search(r'\b(gun\w*|rifle\w*|shot|shoot\w*|bullets?|hunters?|soldiers?)\b', whole + ' ' + text_of(spoken(m, 0, 10 ** 9))) else 'panic'
         beast_verb = verb if named and beasts else None
         if beast_verb in ('run', 'walk', 'panic', 'fall'):  # "the emus scattered": the animals move, people react
-            verb = 'aim' if re.search(r'\b(gun\w*|fir\w*|shot|soldiers?|bullets?|kill\w*)\b', whole) and any(self.cast_look.get(x['id'], {}).get('outfit') == 'soldier' for x in actors) else 'point'
+            verb = 'aim' if re.search(r'\b(gun\w*|fir\w*|shot|soldiers?|bullets?|kill\w*)\b', whole) and any(self.cast_look.get(x['id'], {}).get('outfit') in ('soldier', 'armor') for x in actors) else 'point'
         herd = bool(HERD_WORDS.search(whole)) and bool(beasts)
         moving = (verb in ('run', 'walk') and bool(actors)) or (beast_verb in ('run', 'walk', 'panic') and bool(beasts))
         # --- story objects (only when the words name them) and whitelisted props
@@ -473,9 +489,9 @@ class Director:
                 else:
                     yaw = yaw_facing((-F[0] + R[0] * .25 * (1 if j % 2 else -1), -F[1] + R[1] * .25 * (1 if j % 2 else -1)))
             ch = {'id': x['id'], 'pos': pos, 'yaw': yaw, 'action': act, 'expression': expr, 'outfit': look['outfit'], 'hat': look['hat'],
-                  'shirt': look['shirt'], 'hat_color': look['hat_color']}
+                  'shirt': look['shirt'], 'hat_color': look['hat_color'], 'skin': look.get('skin', [.94, .93, .88]), 'facial': look.get('facial', 'none'), 'trim': look.get('trim', [.72, .55, .12])}
             if act in ('aim', 'load') and st in ('office', 'saloon', 'workshop', 'room'): act = 'point'; ch['action'] = act
-            if act in ('aim', 'load') and look['outfit'] == 'soldier': ch['held'] = 'rifle'
+            if act in ('aim', 'load') and look['outfit'] in ('soldier', 'armor'): ch['held'] = 'rifle'
             elif act == 'carry': ch['held'] = 'crate'
             elif act == 'swing': ch['held'] = 'tool'
             cast.append(human_cast(ch, x, look) if UPLOADED_HUMANS else ch)
@@ -496,7 +512,8 @@ class Director:
         if CROWD_WORDS.search(whole) and st in OUTDOOR and kind in ('establish', 'wide', 'high', 'orbit', 'low'):
             cact = 'run' if verb in ('run', 'panic') else 'cheer' if verb == 'cheer' else 'stand'
             cc = at(S, F, R, 4.5, 0)
-            crowd = {'count': 28 if kind in ('establish', 'high') else 16, 'center': cc, 'size': [7.0, 3.0], 'action': cact,
+            army = bool(re.search(r'\b(army|armies|soldiers?|troops|legion\w*|warriors?|battle|siege|march\w*)\b', whole))
+            crowd = {'count': 28 if kind in ('establish', 'high') else 16, 'center': cc, 'size': [7.0, 3.0], 'action': cact, 'kind': 'army' if army else 'civil',
                      'yaw': yaw_facing((-F[0], -F[1])), 'seed': i * 11 + part}
         # story object goes beside the subject; props frame the subject without blocking it
         anchor = cast[0]['pos'] if cast else S
