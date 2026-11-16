@@ -294,7 +294,9 @@ def look(scene, shot):
             try: scene.view_settings.look = cand; break
             except TypeError: pass
     haze = shot.get('haze', 0)
-    sc = scene; sc.use_nodes = True; nt = sc.node_tree
+    sc = scene
+    if not hasattr(sc, 'node_tree'): return  # Blender 5 moved the compositor; grade only (local previews)
+    sc.use_nodes = True; nt = sc.node_tree
     for nd in list(nt.nodes): nt.nodes.remove(nd)
     rl = nt.nodes.new('CompositorNodeRLayers'); comp = nt.nodes.new('CompositorNodeComposite')
     img = rl.outputs['Image']
