@@ -424,8 +424,8 @@ class Director:
             if len(self.history) % 2: a_, b_ = b_, a_
             d = [b_[0] - a_[0], b_[1] - a_[1]]; L = math.hypot(*d) or 1; u = [d[0] / L, d[1] / L]; perp = [-u[1], u[0]]
             sgn = side
-            cam = {'from': r3([a_[0] - u[0] * 1.0 + perp[0] * .45 * sgn - F[0] * .3, a_[1] - u[1] * 1.0 + perp[1] * .45 * sgn - F[1] * .3, 1.78]),
-                   'look_at': r3([b_[0], b_[1], 1.5]), 'lens': 40, 'fstop': 2.8}
+            cam = {'from': r3([a_[0] - u[0] * 1.7 + perp[0] * .85 * sgn - F[0] * .4, a_[1] - u[1] * 1.7 + perp[1] * .85 * sgn - F[1] * .4, 1.95]),
+                   'look_at': r3([b_[0], b_[1], 1.55]), 'lens': 38, 'fstop': 2.8}
         elif kind == 'track':
             mover = next((c for c in cast if c['action'] in ('walk', 'run')), None)
             if mover:
@@ -434,8 +434,8 @@ class Director:
             else:
                 c0 = next((c for c in cards if 'to' in c), cards[0] if cards else {'pos': C}); p0 = c0['pos']; p1 = c0.get('to', p0)
             mid0 = [p0[0], p0[1]]; mid1 = [p1[0], p1[1]]
-            cam = {'from': at(mid0, F, R, -3.6, -0.6 * tdir, 1.3), 'to': at(mid1, F, R, -3.6, 0.3 * tdir, 1.3),
-                   'look_at': at(mid0, F, R, 0, 0.5 * tdir, 1.0), 'look_to': at(mid1, F, R, 0, 0.5 * tdir, 1.0), 'lens': 32, 'fstop': 3.5}
+            cam = {'from': at(mid0, F, R, -4.6, -0.6 * tdir, 1.4), 'to': at(mid1, F, R, -4.6, 0.3 * tdir, 1.4),
+                   'look_at': at(mid0, F, R, 0, 0.5 * tdir, 1.0), 'look_to': at(mid1, F, R, 0, 0.5 * tdir, 1.0), 'lens': 30, 'fstop': 3.5}
         elif kind == 'orbit':
             r = 3.6; a0 = math.radians(-40 * side); a1 = math.radians(25 * side)
             def ring(aa): return P(-r * math.cos(aa), r * math.sin(aa), 1.4)

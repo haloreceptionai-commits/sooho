@@ -113,6 +113,12 @@ def build_crowd(shot, fps):
                 o.rotation_euler = (0, side * up, 0)  # +y tilt moves the arm top toward +x, so outward is side*up; o.keyframe_insert('rotation_euler', frame=f + 1)
     return len(pts)
 
+def _fcurves(action):
+    """Blender 4.2 keeps fcurves on the action; 4.4+ layered actions keep them in a channel bag."""
+    if hasattr(action, 'fcurves'): return action.fcurves
+    return action.layers[0].strips[0].channelbags[0].fcurves
+
+
 def camera_moves(cam, target, shot, fps):
     c = shot['camera']; n = round(shot['duration'] * fps)
     if 'whip_from' in c:
@@ -121,6 +127,6 @@ def camera_moves(cam, target, shot, fps):
         bpy.context.scene.render.use_motion_blur = True; bpy.context.scene.render.motion_blur_shutter = .5
     if c.get('shake'):
         for f in range(n):
-            dx, dy, dz = shake_offset(f / fps, c['shake']); fc = cam.animation_data.action.fcurves
+            dx, dy, dz = shake_offset(f / fps, c['shake']); fc = _fcurves(cam.animation_data.action)
             for k, d in enumerate((dx, dy, dz)):
                 kp = [p for p in fc.find('location', index=k).keyframe_points if int(p.co.x) == f + 1][0]; kp.co.y += d; kp.handle_left.y += d; kp.handle_right.y += d
