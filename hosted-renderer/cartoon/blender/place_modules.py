@@ -80,8 +80,14 @@ def ox_coat(root):
             if m.name not in seen:
                 b = m.node_tree.nodes.get('Principled BSDF')
                 if b:
-                    c = b.inputs['Base Color'].default_value; lum = (c[0] + c[1] + c[2]) / 3
-                    if lum > 0.35 and not b.inputs['Base Color'].links: b.inputs['Base Color'].default_value = (0.36, 0.2, 0.09, 1)
+                    nt = m.node_tree; inp = b.inputs['Base Color']
+                    if inp.links:   # textured: multiply by hide colour (white -> brown, black stays black)
+                        src = inp.links[0].from_socket; mul = nt.nodes.new('ShaderNodeMixRGB'); mul.blend_type = 'MULTIPLY'
+                        mul.inputs['Fac'].default_value = 1.0; mul.inputs['Color2'].default_value = (0.42, 0.23, 0.1, 1)
+                        nt.links.new(src, mul.inputs['Color1']); nt.links.new(mul.outputs[0], inp)
+                    else:
+                        c = inp.default_value
+                        if (c[0] + c[1] + c[2]) / 3 > 0.35: inp.default_value = (0.36, 0.2, 0.09, 1)
                 seen.add(m.name)
 
 
