@@ -36,7 +36,7 @@ describe('Advanced Video AI cards', () => {
     expect(r.success).toBe(true);
   });
   it('places a painted object only in the scenes where it is said and keeps its card', () => {
-    const painted = { cards: [{ id: 'hero', path: 'p' }, { id: 'obj-potato_patch', path: 'p' }, { id: 'obj-fence', path: 'p' }], objects: [{ name: 'potato_patch', scenes: [0] }, { name: 'fence', scenes: [5] }] };
+    const painted = { cards: [{ id: 'hero', path: 'p' }, { id: 'obj-potato_patch', path: 'p' }, { id: 'obj-fence', path: 'p' }], objects: [{ name: 'potato_patch', scenes: [0] }, { name: 'fence', scenes: [5] }], log: [] };
     const out = placeObjectCards(carded.direction as never, painted);
     expect(out.direction.scenes[0]!.props).toEqual([{ kind: 'asset', asset: 'card/potato_patch', place: 'ground_right', motion: 'none' }]);
     expect(out.cards.map(c => c.id)).toEqual(['hero', 'obj-potato_patch']);

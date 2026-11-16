@@ -1,10 +1,12 @@
 /**
- * Advanced Video AI painted cards (browser stage): one standing card per cast member, three matching poses painted
- * from it, and up to three story objects. Every file is saved under the video's media folder as soon as it is made,
- * so Resume never repays for finished cards.
+ * Advanced Video AI painted cards (browser stage). People are drawn as 3D figures, so only animal cast members get
+ * painted cards (standing + three poses). Story objects get one canonical card each; state variants (leaking, failing,
+ * burst) are painted FROM the canonical card so they read as the same object. Every object card passes a no-text check
+ * (one regeneration, then it is logged as missing), and paid object paintings are capped at 8 per video.
+ * Every file is saved under the video's media folder as soon as it is made, so Resume never repays for finished cards.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { designAdvancedCards, paintAdvancedCard } from "@/lib/pipeline.functions";
+import { checkCardText, designAdvancedCards, paintAdvancedCard } from "@/lib/pipeline.functions";
 import { CARD_POSES, type cartoonDirection } from "@/lib/cartoon-job";
 import type { z } from "zod";
 import { objectsToPaint } from "@/lib/object-resolution";
@@ -12,36 +14,29 @@ import { objectsToPaint } from "@/lib/object-resolution";
 type Direction = z.infer<typeof cartoonDirection>;
 type Retry = <T>(fn: () => Promise<T>) => Promise<T>;
 export interface PaintedObject { name: string; scenes: number[] }
-export interface PaintedCards { cards: { id: string; path: string }[]; objects: PaintedObject[] }
+export interface PaintedCards { cards: { id: string; path: string }[]; objects: PaintedObject[]; log: string[] }
 interface Design { cards: { id: string; look: string }[]; objects: (PaintedObject & { look: string })[] }
+interface ObjectChecks { paid: number; objects: Record<string, { ok: boolean; what?: string; from?: string }>; log: string[] }
+export const OBJECT_PAINT_CAP = 8;
 
 const toBytes = (b64: string) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 const toB64 = async (blob: Blob) => { const b = new Uint8Array(await blob.arrayBuffer()); let s = ""; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(s); };
+/** Cast ids that are animals or creatures: the only cast members drawn from painted cards. */
+export const paintedCastIds = (ids: string[]) => ids.filter(id => id.split(/[_-]+/).some(w => animalIn(w)));
 
 export async function paintAdvancedCards(direction: Direction, narration: string[], root: string, settings: { scriptDeployment: string; imageDeployment: string }, report: (detail: string) => void, retry: Retry = fn => fn()): Promise<PaintedCards> {
-  const ids = direction.cast.map(c => c.id);
+  const ids = paintedCastIds(direction.cast.map(c => c.id));
   const bucket = supabase.storage.from("videos");
-  const save = async (name: string, body: Blob | Uint8Array, type: string) => {
-    const { error } = await bucket.upload(`${root}/${name}`, body, { contentType: type, upsert: false });
+  const save = async (name: string, body: Blob | Uint8Array, type: string, upsert = false) => {
+    const { error } = await bucket.upload(`${root}/${name}`, body, { contentType: type, upsert });
     if (error && !/exists|duplicate/i.test(error.message)) throw Error(`Could not save painted card: ${error.message}`);
   };
   const { data: listed } = await bucket.list(root, { search: "card", limit: 200 });
   const have = new Set((listed ?? []).map(f => f.name));
-  // The design is saved too, so a resumed job paints the same characters and objects.
-  let design: Design | null = null;
-  if (have.has("cards.json")) {
-    const { data } = await bucket.download(`${root}/cards.json`);
-    if (data) design = JSON.parse(await data.text()) as Design;
-  }
-  if (!design || ids.some(i => !design?.cards.some(c => c.id === i))) {
-    report("Designing the characters and story objects…");
-    const scenes = narration.map((t, i) => { const sc = direction.scenes[i]; return `${t} [actors: ${(sc?.actors ?? []).map(a => a.actor).join(", ") || sc?.actor || ids[0]}; props: ${(sc?.props ?? []).map(p => p.asset || p.kind).join(", ") || "none"}]`; });
-    design = await retry(() => designAdvancedCards({ data: { scenes, ids, deployment: settings.scriptDeployment } }));
-    await bucket.upload(`${root}/cards.json`, new Blob([JSON.stringify(design)], { type: "application/json" }), { contentType: "application/json", upsert: true });
-  }
-  // Phrase-defined objects from the shot plan replace the designer's own object list (owner rule: paint what the shot names).
-  const fromShots = objectsToPaint(direction.scenes).slice(0, Math.max(0, 24 - ids.length * (1 + CARD_POSES.length)));
-  const d: Design = fromShots.length ? { ...design, objects: fromShots } : design;
+  const readJson = async <T,>(name: string): Promise<T | null> => { if (!have.has(name)) return null; const { data } = await bucket.download(`${root}/${name}`); return data ? JSON.parse(await data.text()) as T : null; };
+  const checks: ObjectChecks = (await readJson<ObjectChecks>("cards-objects.json")) ?? { paid: 0, objects: {}, log: [] };
+  const saveChecks = () => bucket.upload(`${root}/cards-objects.json`, new Blob([JSON.stringify(checks)], { type: "application/json" }), { contentType: "application/json", upsert: true });
+  const note = (line: string) => { checks.log.push(line.slice(0, 240)); console.info("Object card:", line); };
   // At most 5 paintings at once: the Azure image quota rejects bigger bursts (seen as 429 errors in testing).
   let active = 0; const queue: (() => void)[] = [];
   const limit = async <T,>(fn: () => Promise<T>): Promise<T> => {
@@ -49,16 +44,20 @@ export async function paintAdvancedCards(direction: Direction, narration: string
     active++;
     try { return await fn(); } finally { active--; queue.shift()?.(); }
   };
-  const total = ids.length * (1 + CARD_POSES.length) + d.objects.length;
-  let done = [...have].filter(n => n.startsWith("card-")).length;
-  const tick = () => report(`Painting characters, poses and objects · ${Math.min(total, ++done)}/${total} while the voice records…`);
-  report(`Painting characters, poses and objects · ${Math.min(total, done)}/${total} while the voice records…`);
   const cards: { id: string; path: string }[] = [];
-  await Promise.all([
-    ...ids.map(async cid => {
-      const cardDesign=d.cards.find(c=>c.id===cid);
-      if(!cardDesign)throw Error('Character design is missing');
-      const look = cardDesign.look;
+  // --- animal cast cards (people are 3D figures: no character paintings until the Stage 3 A/B test)
+  if (ids.length) {
+    let design = await readJson<Design>("cards.json");
+    if (!design || ids.some(i => !design?.cards.some(c => c.id === i))) {
+      report("Designing the animal characters…");
+      const scenes = narration.map((t, i) => { const sc = direction.scenes[i]; return `${t} [actors: ${(sc?.actors ?? []).map(a => a.actor).join(", ") || sc?.actor || ids[0]}]`; });
+      design = await retry(() => designAdvancedCards({ data: { scenes, ids, deployment: settings.scriptDeployment } }));
+      await bucket.upload(`${root}/cards.json`, new Blob([JSON.stringify(design)], { type: "application/json" }), { contentType: "application/json", upsert: true });
+    }
+    const d = design;
+    await Promise.all(ids.map(async cid => {
+      const look = d.cards.find(c => c.id === cid)?.look;
+      if (!look) throw Error("Character design is missing");
       let base: string;
       if (have.has(`card-${cid}.png`)) {
         const { data } = await bucket.download(`${root}/card-${cid}.png`);
@@ -66,35 +65,72 @@ export async function paintAdvancedCards(direction: Direction, narration: string
         base = await toB64(data);
       } else {
         base = (await limit(() => retry(() => paintAdvancedCard({ data: { look, deployment: settings.imageDeployment } })))).image;
-        await save(`card-${cid}.png`, toBytes(base), "image/png"); tick();
+        await save(`card-${cid}.png`, toBytes(base), "image/png");
       }
       cards.push({ id: cid, path: `${root}/card-${cid}.png` });
-      // Atlas prototype remains opt-in until all eight part identities pass rendered review.
-      // Do not make normal paid generation fail on an unverified generated mask.
-      const poses=CARD_POSES;
-      await Promise.all(poses.map(async pose => {
+      await Promise.all(CARD_POSES.map(async pose => {
         const key = `${cid}-${pose}`;
         if (!have.has(`card-${key}.png`)) {
           // A pose that fails is skipped: the renderer falls back to the standing card.
           const r = await limit(() => retry(() => paintAdvancedCard({ data: { look, pose, reference: base, deployment: settings.imageDeployment } }))).catch((e: unknown) => { console.warn("Pose skipped:", key, e); return null; });
           if (!r) return;
-          await save(`card-${key}.png`, toBytes(r.image), "image/png"); tick();
+          await save(`card-${key}.png`, toBytes(r.image), "image/png");
         }
         cards.push({ id: key, path: `${root}/card-${key}.png` });
       }));
-    }),
-    ...d.objects.map(async o => {
-      const key = `obj-${o.name}`;
-      if (!have.has(`card-${key}.png`)) {
-        const r = await limit(() => retry(() => paintAdvancedCard({ data: { look: o.look, kind: "object", deployment: settings.imageDeployment } }))).catch((e: unknown) => { console.warn("Object skipped:", key, e); return null; });
-        if (!r) return;
-        await save(`card-${key}.png`, toBytes(r.image), "image/png"); tick();
-      }
-      cards.push({ id: key, path: `${root}/card-${key}.png` });
-    }),
-  ]);
+    }));
+  }
+  // --- story objects: canonical first, then variants painted from it
+  const objects = objectsToPaint(direction.scenes);
+  const variantOf = new Map<string, string>();
+  for (const f of direction.families ?? []) for (const v of f.variants) variantOf.set(v.id, f.canonical);
+  const finals = new Map<string, string>(), repainted = new Set<string>();
+  let done = 0;
+  const tick = () => report(`Painting story objects · ${Math.min(objects.length, ++done)}/${objects.length} while the voice records…`);
+  report(`Painting story objects · 0/${objects.length} while the voice records…`);
+  const paidPaint = async (o: { name: string; look: string }, reference?: string) => {
+    if (checks.paid >= OBJECT_PAINT_CAP) { note(`${o.name}: not painted, the limit of ${OBJECT_PAINT_CAP} paid object paintings for this video is reached`); return null; }
+    checks.paid++; await saveChecks();
+    const r = await limit(() => retry(() => paintAdvancedCard({ data: { look: o.look.slice(0, 300), kind: "object", deployment: settings.imageDeployment, ...(reference ? { reference } : {}) } }))).catch((e: unknown) => { note(`${o.name}: painting failed (${e instanceof Error ? e.message : "error"})`); return null; });
+    return r?.image ?? null;
+  };
+  const textFree = async (name: string, b64: string) => {
+    const v = await retry(() => checkCardText({ data: { image: b64, deployment: settings.scriptDeployment } }));
+    if (v.text) note(`${name}: rejected, the picture contains text (${v.what || "lettering"})`);
+    return !v.text;
+  };
+  const one = async (o: { name: string; look: string }) => {
+    const canonical = variantOf.get(o.name);
+    const reference = canonical ? finals.get(canonical) : undefined;
+    const rec = checks.objects[o.name];
+    const file = `card-obj-${o.name}.png`;
+    // A saved card is reused unless it failed the text check before or is a variant not yet painted from its canonical.
+    const stale = !!reference && (rec?.from !== canonical || repainted.has(canonical!));
+    let b64: string | null = null, fresh = false;
+    if (have.has(file) && !stale && rec?.ok !== false) {
+      const { data } = await bucket.download(`${root}/${file}`);
+      if (data) b64 = await toB64(data);
+    } else if (stale && have.has(file)) note(`${o.name}: repainted from ${canonical} so it is the same object (${(direction.families ?? []).find(f => f.canonical === canonical)?.variants.find(v => v.id === o.name)?.state ?? "variant"})`);
+    if (!b64) { b64 = await paidPaint(o, reference); fresh = true; }
+    let ok = !!b64 && await textFree(o.name, b64);
+    if (b64 && !ok) {
+      // One regeneration after a text rejection, then the object is logged as missing (never shown with lettering).
+      b64 = await paidPaint(o, reference); fresh = true;
+      ok = !!b64 && await textFree(o.name, b64);
+      if (!ok) note(`${o.name}: missing, still not clean after one regeneration`);
+    }
+    checks.objects[o.name] = { ok, ...(canonical && reference ? { from: canonical } : {}) };
+    if (ok && b64) {
+      if (fresh) { await save(file, toBytes(b64), "image/png", true); repainted.add(o.name); }
+      finals.set(o.name, b64); cards.push({ id: `obj-${o.name}`, path: `${root}/${file}` });
+      if (fresh) note(`${o.name}: painted${canonical && reference ? ` from ${canonical}` : ""}, no text`); else note(`${o.name}: reused saved card, no text`);
+    }
+    await saveChecks(); tick();
+  };
+  await Promise.all(objects.filter(o => !variantOf.has(o.name)).map(one));
+  await Promise.all(objects.filter(o => variantOf.has(o.name)).map(one));
   const painted = new Set(cards.map(c => c.id));
-  return { cards: cards.sort((a, b) => a.id.localeCompare(b.id)), objects: d.objects.filter(o => painted.has(`obj-${o.name}`)).map(({ name, scenes }) => ({ name, scenes })) };
+  return { cards: cards.sort((a, b) => a.id.localeCompare(b.id)), objects: objects.filter(o => painted.has(`obj-${o.name}`)).map(({ name, scenes }) => ({ name, scenes })), log: checks.log };
 }
 
 async function validateRigAtlas(base64:string){

@@ -18,7 +18,10 @@ export const mapSpec = z.object({
   cities: z.array(z.object({ name: z.string().min(1).max(22).regex(/^[\p{L}\p{N} .,'&()\-–]*$/u), at: lonlat })).max(6).optional(),
   armies: z.array(z.object({ from: lonlat, to: lonlat, side: z.enum(['red', 'blue', 'gold']) })).max(4).optional(),
 });
-const performer = z.object({ actor: id, action: z.enum(VOCAB.actions), expression: z.enum(VOCAB.expressions), slot: z.enum(VOCAB.slots), facing: z.number().int().min(-1).max(1) });
+const performer = z.object({ actor: id, action: z.enum(VOCAB.actions), expression: z.enum(VOCAB.expressions), slot: z.enum(VOCAB.slots), facing: z.number().int().min(-1).max(1),
+  // Advanced: why this character is on screen at this moment, from the script's facts (owner's per-shot casting log).
+  reason: z.string().max(160).optional() });
+const objectId = z.string().regex(/^[a-z0-9_]{1,30}$/);
 export const cartoonScene = z.object({
   world: z.enum(VOCAB.worlds), light: z.enum(VOCAB.lights), action: z.enum(VOCAB.actions), expression: z.enum(VOCAB.expressions), actor: id, wide: z.boolean(),
   // v2 Visual Director fields; optional so earlier saved jobs still parse unchanged.
@@ -32,6 +35,10 @@ export const cartoonScene = z.object({
     phrase: z.string().max(160).optional(), size: z.enum(['small', 'medium', 'large', 'huge']).optional() })).max(4).optional(),
   // Advanced: free-text real place for the line ("Commercial Street, Boston's North End, 1919"); the 3D planner never forces a kit.
   location: z.string().max(160).optional(),
+  // Advanced: the story's key event shown as a sequence of painted object states (intact -> failing -> burst), one setup each.
+  sequence: z.array(objectId).min(2).max(4).optional(),
+  // Advanced: nobody from the cast is part of the story yet at this moment, so the shot shows only the place and objects.
+  empty: z.boolean().optional(),
   fx: z.array(z.enum(VOCAB.fx)).max(3).optional(),
   cues: z.array(z.object({ word: z.number().int().min(0).max(200), kind: z.enum(VOCAB.sounds) })).max(4).optional(),
   keyword: z.string().max(40).optional(),
@@ -48,6 +55,10 @@ export const cartoonScene = z.object({
 export const cartoonDirection = z.object({
   cast: z.array(z.object({ id, seed: z.number().int().min(1).max(100000), outfit: z.enum(OUTFITS), card: z.boolean().optional() })).min(1).max(4),
   scenes: z.array(cartoonScene).min(1).max(600),
+  // Advanced staging pass: one canonical card per physical object with state variants painted from it, and the casting log.
+  staged: z.boolean().optional(),
+  families: z.array(z.object({ canonical: objectId, variants: z.array(z.object({ id: objectId, state: z.string().max(60) })).max(4) })).max(8).optional(),
+  stagingLog: z.array(z.string().max(240)).max(300).optional(),
 });
 export const cartoonStart = z.object({
   videoId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), voicePath: z.string().min(1).max(500),

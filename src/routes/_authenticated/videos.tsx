@@ -8,6 +8,7 @@ import { getVideoFile, saveVideoFile } from "@/lib/video-db";
 import { fmt } from "@/lib/story-engine";
 import { Page, Panel, Empty, btnPrimary, btnOutline, btnDark } from "@/components/page";
 import { VideoJob } from "@/components/video-job";
+import { RunningSteps } from "@/components/running-steps";
 import { PublishButton } from "@/components/youtube";
 
 export const Route = createFileRoute("/_authenticated/videos")({
@@ -86,6 +87,7 @@ function Videos() {
         </label>
         <Link to="/" className={btnPrimary}><Plus className="h-4 w-4" /> New video</Link>
       </div>}>
+      <RunningSteps videos={videos} />
       {inProgress.length > 0 && (
         <div className="grid gap-3 md:grid-cols-2">{inProgress.map((v) => <VideoJob key={v.id} v={v} />)}</div>
       )}

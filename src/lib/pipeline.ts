@@ -3,7 +3,7 @@ import { advancedOpeningIssues } from './advanced-story';
 // while the user moves around the app.
 import { actions, flushVideo, getState, setVideoActive, type VideoInput } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
-import { checkContinuity, designAdvancedCards, paintAdvancedCard, polishKidScript, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
+import { stageAdvancedDirection, checkContinuity, designAdvancedCards, paintAdvancedCard, polishKidScript, directCartoon, factCheck, generateHooks, generateImage, generatePlan, generateVoice, judgeScript, researchStory, type Hook, type Plan } from "@/lib/pipeline.functions";
 import { submitCartoon, resumeApprovedCartoon } from '@/lib/cartoon.functions';
 import { canResumeApprovedCartoon } from './cartoon-resume';
 import { cartoonStart, sanitizeDirection } from '@/lib/cartoon-job';
@@ -27,6 +27,9 @@ import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroun
 
 import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
 import { ensureAnimalCast, paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
+import { claimStep, type StepClaim } from "@/lib/step-lock";
+import { applyStaging } from "@/lib/advanced-staging";
+import { toast } from "sonner";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
@@ -157,13 +160,25 @@ export async function runVideo(id: string, input: VideoInput) {
   const resumable = !!prior?.cartoonCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '');
   if (prior?.hostedRender && !resumable) return;
   if (resumable) actions.updateVideo(id, { hostedRender: undefined, status: 'running', error: undefined, detail: 'Resuming saved cartoon…' });
+  // One paid browser run per video: a second window or Resume click never starts a second planning/painting run.
+  running.add(id);
+  let lock: StepClaim;
+  try { lock = await claimStep(id, 'generation', 'Starting'); }
+  catch (e) { running.delete(id); actions.updateVideo(id, { error: e instanceof Error ? e.message : 'Could not check for another run' }); return; }
+  if (!lock.ok) {
+    running.delete(id);
+    const since = new Date(lock.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    actions.updateVideo(id, { detail: `Already running in another window (${lock.stage}, since ${since}) · not started again` });
+    toast.info(`This video is already being made in another window (${lock.stage}, since ${since}). Nothing new was started.`);
+    return;
+  }
+  const held = lock;
   removed.delete(id);
   actions.updateVideo(id, { removed: false });
-  running.add(id);
   setVideoActive(id, true);
   keepAlive();
   const s = getState().settings;
-  const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
+  const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); if (p.detail) held.setStage(p.detail); actions.updateVideo(id, p); };
   const advanced = input.engine === 'advanced';
   try {
     const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
@@ -330,9 +345,21 @@ export async function runVideo(id: string, input: VideoInput) {
       // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
       if (!plan.scenes.length) throw Error('The script came back empty. No voice or rendering was started.');
       if (!gate.ready || !judgeOk) up({ checks: gate.blockers, detail: `Story score ${gate.score}/100 — continuing with the best draft${advanced ? '' : '; check the preview before approving'}` });
-      const directed = await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short', ...(advanced ? { advanced: true } : {}) } }));
+      // The paid shot plan is saved as soon as it exists, so Resume never pays the Visual Director twice.
+      const savedDirection = getState().videos.find(v => v.id === id)?.directionCheckpoint;
+      let direction = savedDirection ?? await withRetry(() => directCartoon({ data: { scenes: plan.scenes.map(sc => `${sc.narration} Visual: ${sc.image_prompt}`), deployment: s.scriptDeployment, format: long ? 'long' : 'short', ...(advanced ? { advanced: true } : {}) } }));
       // Advanced Video AI: an animal the story names always acts on screen.
-      const direction = advanced ? ensureAnimalCast(directed, plan.scenes.map(sc => sc.narration)) : directed;
+      if (advanced && !savedDirection) direction = ensureAnimalCast(direction, plan.scenes.map(sc => sc.narration));
+      if (advanced && !direction.staged) {
+        // Casting per shot from the facts, one canonical card per object with its state variants, and the climax sequence.
+        up({ detail: 'Casting each shot from the facts and planning the key moment…' });
+        const lines = plan.scenes.map(sc => sc.narration);
+        const objs = direction.scenes.flatMap((sc, i) => (sc.props ?? []).filter(p => p.asset?.startsWith('card/')).map(p => ({ scene: i, id: p.asset!.slice(5), phrase: (p.phrase ?? p.asset!.slice(5)).slice(0, 200) })));
+        const answer = await withRetry(() => stageAdvancedDirection({ data: { narration: lines, cast: direction.cast.map(c => c.id), objects: objs, actors: direction.scenes.map(sc => (sc.actors ?? []).map(a => a.actor)), deployment: s.scriptDeployment } }));
+        direction = applyStaging(direction, lines, answer);
+        console.info('Staging log', direction.stagingLog);
+      }
+      if (!savedDirection || direction !== savedDirection) { up({ directionCheckpoint: direction }); await flushVideo(id); }
       const narration = plan.scenes.map(sc => speakable(sc.narration.trim()));
       const script = narration.join(' ');
       if (/\d/.test(script)) throw Error('Cartoon narration must spell numbers as spoken words');
@@ -363,7 +390,8 @@ export async function runVideo(id: string, input: VideoInput) {
       }
       const painted = await cardsP;
       const sanitized = sanitizeDirection(direction, narration);
-      const placed = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => ({ ...c, card: true })) }, painted) : null;
+      const placed = painted ? placeObjectCards({ ...sanitized, cast: sanitized.cast.map(c => { const { card: _old, ...rest } = c; return painted.cards.some(k => k.id === c.id) ? { ...rest, card: true } : rest; }) }, painted) : null;
+      if (painted?.log.length) up({ checks: [...(getState().videos.find(v => v.id === id)?.checks ?? []), ...painted.log.filter(l => /missing|rejected|limit|failed/.test(l))].slice(0, 100) });
       const cards = placed?.cards;
       const safeDirection = placed ? placed.direction : sanitized;
       const cp = cartoonStart.parse({ ...(cards ? { advanced: true, cards } : {}), videoId: id, voicePath, narration, script, direction: safeDirection, gate: gate, hookType: hookType, report: { revealSec: report.revealSec, shotMix: report.shotMix }, captions: !long, sfx: s.soundEffects, format: long ? 'long' : 'short' });
@@ -543,6 +571,7 @@ export async function runVideo(id: string, input: VideoInput) {
     if (!removed.has(id)) up({ status: "failed", error: msg, detail: "Failed" });
   } finally {
     running.delete(id);
+    void held.release().catch(() => undefined);
     setVideoActive(id, false);
     keepAlive();
   }

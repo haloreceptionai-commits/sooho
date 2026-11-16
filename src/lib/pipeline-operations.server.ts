@@ -818,6 +818,26 @@ export const designAdvancedCardsOperation = async ({ data }: { data: { scenes: s
     .filter(o => o.name && o.scenes.length && !seen.has(o.name) && (seen.add(o.name), true)).slice(0, 3);
   return { cards: data.ids.map(id => ({ id, look: (r.cards.find(c => c.id === id)?.look ?? 'a friendly cartoon storyteller in era clothes').slice(0, 300) })), objects };
 };
+// Advanced Video AI staging: casting per shot from the facts, object families and the climax sequence (pure rules in advanced-staging.ts decide).
+const STAGER = `You stage a factual history Short that is drawn as 3D cartoon shots. You only choose from the ids given; you never invent people, objects or events.
+1. cast: for every cast id say who it is in the story (max 12 words, from the narration's facts) and enters = the 0-based line where that person or group first becomes part of the story. A person who only acts later (an investigator, a judge, a rescuer) must not enter before the line that introduces them.
+2. scenes: for every line, the cast members physically present at that moment according to the facts (0-3), each with a short reason quoting or paraphrasing the line. Never place anyone before their enters line. Use an empty list when the moment is an event, place or object with nobody from the cast there.
+3. families: group object ids that are the SAME physical thing in different states (e.g. a tank intact, its seam leaking, its wall torn). canonical = the intact/normal object; variants = the other ids with a 1-3 word state (leaking, failing, burst, aftermath). A different thing (a wave of liquid, a building, a railway) is not a variant.
+4. climax: the line that states the story's key physical event (e.g. "the tank burst") and the 2-3 object ids that show it in order: intact -> failing -> burst/aftermath, using existing ids only. scene = -1 and sequence = [] if the story has no physical key event.`;
+export const stageAdvancedDirectionOperation = async ({ data }: { data: { narration: string[]; cast: string[]; objects: { scene: number; id: string; phrase: string }[]; actors: string[][]; deployment: string } }) => {
+  const S = { type: 'string' }, I = { type: 'integer' };
+  const schema = { type: 'object', additionalProperties: false, required: ['cast', 'scenes', 'families', 'climax'], properties: {
+    cast: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'who', 'enters'], properties: { id: { type: 'string', enum: data.cast }, who: S, enters: I } } },
+    scenes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['actors'], properties: { actors: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['actor', 'reason'], properties: { actor: { type: 'string', enum: data.cast }, reason: S } } } } } },
+    families: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['canonical', 'variants'], properties: { canonical: S, variants: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'state'], properties: { id: S, state: S } } } } } },
+    climax: { type: 'object', additionalProperties: false, required: ['scene', 'sequence'], properties: { scene: I, sequence: { type: 'array', items: S } } } } };
+  const ids = [...new Set(data.objects.map(o => o.id))];
+  const lines = data.narration.map((t, i) => `${i}. ${t}
+   shot plan cast: ${data.actors[i]?.join(', ') || 'none'}; objects: ${data.objects.filter(o => o.scene === i).map(o => `${o.id} = ${o.phrase}`).join('; ') || 'none'}`).join('\n');
+  const r = await azureJson<import('./advanced-staging').StagingAnswer>(data.deployment, STAGER, `Cast ids: ${data.cast.join(', ')}\nObject ids: ${ids.join(', ') || 'none'}\n\nLines:\n${lines}`, 'advanced_staging', schema, 'Shot stager');
+  if (!Array.isArray(r.scenes) || r.scenes.length !== data.narration.length) throw Error('Shot stager changed the line count');
+  return r;
+};
 // Advanced Video AI final editor: same scenes and facts, retold for an 8-year-old in natural storytelling.
 export const polishKidScriptOperation = async ({ data }: { data: { scenes: string[]; problems: string[]; words: number; names: string[]; deployment: string } }) => {
   const schema = { type: 'object', additionalProperties: false, required: ['scenes'], properties: { scenes: { type: 'array', items: { type: 'string' } } } };
@@ -832,11 +852,27 @@ Rules:
   if (!Array.isArray(r.scenes) || r.scenes.length !== data.scenes.length || r.scenes.some(x => typeof x !== 'string' || !x.trim())) throw Error('Kid editor changed the scene count');
   return { scenes: r.scenes.map(x => x.trim().replace(/\s+/g, ' ')) };
 };
-export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no text, no letters, no people.';
+export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no people. Absolutely no text, letters, numbers, labels, logos or signage painted on it.';
 const POSE_TEXT: Record<'reach' | 'shock' | 'happy', string> = {
   reach: 'now pointing forward with one arm stretched out (or the animal leaning forward with one leg raised), mouth open as if saying something important',
   shock: 'now shocked: eyes wide, mouth open, eyebrows up, hands (or paws/ears) thrown up in surprise, leaning back a little',
   happy: 'now laughing and cheering: big open smile, eyes squeezed happy, arms (or front legs) up in joy',
+};
+/** Owner rule: a painted object card must not contain readable text or lettering (vision check of the transparent PNG). */
+export const checkCardTextOperation = async ({ data }: { data: { image: string; deployment: string } }) => {
+  const res = await azure(`${safeName(data.deployment)}/chat/completions`, {
+    messages: [
+      { role: 'system', content: 'You inspect a cartoon prop picture for an animated video. Report whether ANY readable text, letters, numbers, words, logos with lettering or signage appear anywhere in it, even small or partial. Rivets, stripes, wood grain and unreadable scribbles on paper are not text.' },
+      { role: 'user', content: [{ type: 'text', text: 'Does this picture contain readable text or lettering? Reply JSON {"text": true|false, "what": "the text you can read, or empty"}.' }, { type: 'image_url', image_url: { url: `data:image/png;base64,${data.image}`, detail: 'low' } }] },
+    ],
+    max_completion_tokens: 2000, reasoning_effort: effortFor(data.deployment, 'none'),
+    response_format: { type: 'json_schema', json_schema: { name: 'card_text', strict: true, schema: { type: 'object', additionalProperties: false, required: ['text', 'what'], properties: { text: { type: 'boolean' }, what: { type: 'string' } } } } },
+  });
+  if (!res.ok) await fail(res, 'Text check');
+  const j = (await res.json()) as { choices?: { message?: { content?: string } }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+  // An unreadable verdict counts as text: an unchecked card is never shown as clean.
+  try { const v = JSON.parse(j.choices?.[0]?.message?.content ?? '') as { text: boolean; what: string }; return { text: !!v.text, what: String(v.what ?? '').slice(0, 120), tokens: (j.usage?.prompt_tokens ?? 0) + (j.usage?.completion_tokens ?? 0) }; }
+  catch { return { text: true, what: 'unreadable check', tokens: 0 }; }
 };
 /** Paints a transparent card: a standing character, an object, or (with a reference) the same character in another pose. */
 export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | undefined; pose?: 'reach' | 'shock' | 'happy' | 'rig' | undefined; reference?: string | undefined } }) => {
@@ -854,6 +890,19 @@ export const paintAdvancedCardOperation = async ({ data }: { data: { look: strin
       else if (res.status !== 400) await fail(res, 'Character pose');
     }
     throw Error('Character pose could not be painted');
+  }
+  if (data.kind === 'object' && data.reference) {
+    // State variant of a canonical object (leaking, failing, burst): painted FROM the canonical card so it is visibly the same object.
+    for (let i = 0; i < 2; i++) {
+      const fd = new FormData();
+      fd.append('image[]', new Blob([b64ToBytes(data.reference)], { type: 'image/png' }), 'object.png');
+      fd.append('prompt', `${style} Keep EXACTLY the same object as the reference image: same shape, material, colours, proportions, rivets and line style; only its state changes. Show it in this state: ${i ? softenPrompt(data.look) : data.look}. Absolutely no text, letters or numbers anywhere.`.slice(0, 3900));
+      fd.append('size', '1024x1536'); fd.append('quality', 'medium'); fd.append('background', 'transparent'); fd.append('output_format', 'png'); fd.append('n', '1');
+      const res = await azureOpenAIRequest(`${safeName(data.deployment)}/images/edits`, fd, true);
+      if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
+      else if (res.status !== 400) await fail(res, 'Object variant');
+    }
+    throw Error('Object variant could not be painted');
   }
   const tries = data.kind === 'object' ? [data.look, softenPrompt(data.look)] : [data.look, softenPrompt(data.look), 'a friendly cartoon storyteller in simple period clothes'];
   for (const look of tries) {

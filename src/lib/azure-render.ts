@@ -40,8 +40,9 @@ const RUN_ID = /^azure:(cartoon-preflight|cartoon-render-gpu|cartoon-render)-[a-
 /** Finishing an Advanced Video AI job (painted cards in the request) uses the Blender renderer unless switched off. */
 export function usesBlender(mode: 'preflight' | 'finish', input: unknown) {
   if (mode !== 'finish' || process.env['ADVANCED_BLENDER'] === 'off') return false;
-  const cards = (input as { manifest?: { cards?: unknown[] } })?.manifest?.cards;
-  return Array.isArray(cards) && cards.length > 0;
+  const manifest = (input as { manifest?: { cards?: unknown[]; advanced?: boolean } })?.manifest;
+  // People are 3D figures now, so an Advanced job may carry only object cards or none at all.
+  return manifest?.advanced === true || (Array.isArray(manifest?.cards) && manifest.cards.length > 0);
 }
 
 export const cartoonInputKey = (jobId: string, mode: 'preflight' | 'finish') => `cartoon-${jobId}/INPUT-${mode}-${Date.now().toString(36)}`;
@@ -127,6 +128,17 @@ export async function cartoonExecutions(jobId: string, mode: 'preflight' | 'fini
   const prefix = `cartoon-${jobId}/INPUT-${mode}-`;
   return list.map(e => ({ id: `azure:${e.name}`, status: e.properties.status ?? 'Unknown', startMs: Date.parse(e.properties.startTime ?? '') || 0, inputKey: e.properties.template?.containers?.[0]?.env?.find(v => v.name === 'CARTOON_INPUT_KEY')?.value ?? '' }))
     .filter(e => e.inputKey.startsWith(prefix)).sort((a, b) => b.startMs - a.startMs);
+}
+
+/** Stops every still-running Azure execution of one cartoon job (both stages); a cancelled job must not keep paid machines on. */
+export async function stopCartoonJobExecutions(jobId: string) {
+  let stopped = 0;
+  for (const mode of ['preflight', 'finish'] as const) {
+    for (const e of await cartoonExecutions(jobId, mode).catch(() => [])) {
+      if (/^(Running|Processing|Pending)$/i.test(e.status) && await stopAzureExecution(e.id).catch(() => false)) stopped++;
+    }
+  }
+  return stopped;
 }
 
 export async function stopAzureExecution(runId: string) {

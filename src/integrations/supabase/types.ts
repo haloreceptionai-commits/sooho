@@ -206,6 +206,36 @@ export type Database = {
         }
         Relationships: []
       }
+      video_step_locks: {
+        Row: {
+          expires_at: string
+          holder: string
+          stage: string
+          started_at: string
+          step: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          expires_at: string
+          holder: string
+          stage?: string
+          started_at?: string
+          step: string
+          user_id?: string
+          video_id: string
+        }
+        Update: {
+          expires_at?: string
+          holder?: string
+          stage?: string
+          started_at?: string
+          step?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           created_at: string
@@ -339,6 +369,21 @@ export type Database = {
       claim_generation_job: {
         Args: { p_hash: string; p_job: string; p_owner: string }
         Returns: number
+      }
+      claim_video_step: {
+        Args: {
+          _holder: string
+          _stage: string
+          _step: string
+          _ttl_seconds: number
+          _video_id: string
+        }
+        Returns: {
+          expires_at: string
+          holder: string
+          stage: string
+          started_at: string
+        }[]
       }
       complete_generation_step: {
         Args: {

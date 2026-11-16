@@ -231,6 +231,41 @@ def card_visible(cam, card):
     return abs(mid[0]) <= 0.92 and abs(mid[1]) <= 0.92 and (top[1] - bot[1]) / 2 >= 0.08
 
 
+def screen_box(cam, pos, h, w, t=0.5):
+    """Screen rectangle (x0, x1, y0, y1, depth) of an upright thing h tall and w wide standing at pos, or None if behind."""
+    bot = project(cam, [pos[0], pos[1], 0], t); top = project(cam, [pos[0], pos[1], h], t)
+    if not bot or not top: return None
+    half = w / 2 / max(bot[2], .3) / (18.0 / cam.get('lens', 35) * SIZE[0] / SIZE[1])
+    cx = (bot[0] + top[0]) / 2
+    return (cx - half, cx + half, min(bot[1], top[1]), max(bot[1], top[1]), (bot[2] + top[2]) / 2)
+
+
+def height_frac(cam, card, t=0.5):
+    """Share of the frame height a painted object fills (0..1), clipped to the frame."""
+    b = screen_box(cam, card['pos'], card['height'], card['height'] * .6, t)
+    if not b: return 0.0
+    return max(0.0, min(1.0, b[3]) - max(-1.0, b[2])) / 2
+
+
+PERSON_H, PERSON_W = 1.8, 0.8
+
+
+def blocked_share(cam, target, blockers, t=0.5):
+    """Largest share of the target's on-screen box covered by any nearer blocker box (target/blockers = (pos, h, w))."""
+    tb = screen_box(cam, target[0], target[1], target[2], t)
+    if not tb: return 0.0
+    tx0, tx1, ty0, ty1 = max(-1, tb[0]), min(1, tb[1]), max(-1, tb[2]), min(1, tb[3])
+    area = max(0.0, tx1 - tx0) * max(0.0, ty1 - ty0)
+    if area <= 0: return 0.0
+    worst = 0.0
+    for pos, h, w in blockers:
+        bb = screen_box(cam, pos, h, w, t)
+        if not bb or bb[4] >= tb[4]: continue  # only things in front of the target block it
+        ix = max(0.0, min(tx1, bb[1]) - max(tx0, bb[0])); iy = max(0.0, min(ty1, bb[3]) - max(ty0, bb[2]))
+        worst = max(worst, ix * iy / area)
+    return worst
+
+
 # ---------------------------------------------------------------- geometry helpers
 def basis(h):
     a = math.radians(h); return (math.cos(a), math.sin(a)), (math.sin(a), -math.cos(a))  # forward, right
@@ -259,6 +294,20 @@ def split_points(m, s, n_max=3, target=2.6):
         cuts.append(min(cand, key=lambda f: abs(f - ideal)))
     edges = [a] + sorted(set(cuts)) + [b]
     return [(x, y) for x, y in zip(edges, edges[1:]) if y - x >= 12] or [(a, b)]
+
+
+def split_sequence(m, s, n):
+    """Climax line: n equal setups (one per object state) at word boundaries, each at least 12 frames."""
+    a, b = s['start'], s['end']; n = max(1, min(n, (b - a) // 12))
+    starts = [round(w['start'] * FPS) for _, w, _ in spoken(m, a, b)]
+    cuts = []
+    for j in range(1, n):
+        ideal = a + (b - a) * j / n
+        cand = [f for f in starts if a + 12 <= f <= b - 12 and f not in cuts] or [round(ideal)]
+        cuts.append(min(cand, key=lambda f: abs(f - ideal)))
+    edges = [a] + sorted(set(cuts)) + [b]
+    out = [(x, y) for x, y in zip(edges, edges[1:]) if y - x >= 12]
+    return out or [(a, b)]
 
 
 # ---------------------------------------------------------------- the director
@@ -309,6 +358,8 @@ class Director:
 
     def segment(self, i, part, a, b, last=True):
         m = self.m; s = m['shots'][i]; st = self.locations[i]
+        seq = [str(x) for x in (s.get('sequence') or [])]
+        seq_card = f'obj-{seq[part]}.png' if seq and part < len(seq) else None
         ws = spoken(m, a, b); txt = text_of(ws); whole = text_of(spoken(m, s['start'], s['end']))
         new_place = part == 0 and (i == 0 or self.locations[i - 1] != st)
         zname = self.zone(st, keep=part > 0 and part % 2 == 1 and False)
@@ -320,14 +371,15 @@ class Director:
         if 'rain' in (s.get('fx') or []) or re.search(r'\b(rain\w*|storm\w*)\b', whole) or s.get('world') == 'storm_sea': lighting = 'rain'
         if st in ('office', 'saloon', 'workshop', 'room') and lighting == 'rain': lighting = 'day'
         # --- who is on screen
-        actors = [x for x in s.get('actors') or [] if not ANIMAL.search(x['id'].lower())][:3]
+        actors = [] if s.get('empty') else [x for x in s.get('actors') or [] if not ANIMAL.search(x['id'].lower())][:3]
         beasts = [x for x in s.get('actors') or [] if ANIMAL.search(x['id'].lower()) and f"{x['id']}.png" in self.cards]
-        if not actors and not beasts and s.get('actor') and not ANIMAL.search(str(s['actor']).lower()):
+        if s.get('empty'): beasts = []
+        if not actors and not beasts and not s.get('empty') and s.get('actor') and not ANIMAL.search(str(s['actor']).lower()):
             actors = [{'id': s['actor'], 'action': s.get('action', 'idle'), 'expression': s.get('expression', 'neutral')}]
         if not beasts and s.get('actor') and f"{s['actor']}.png" in self.cards and ANIMAL.search(str(s['actor']).lower()):
             beasts = [{'id': s['actor'], 'action': s.get('action', 'idle')}]
         animal_cards = [c['id'] for c in (m.get('cast') or []) if ANIMAL.search(c['id'].lower()) and f"{c['id']}.png" in self.cards]
-        named = bool(ANIMAL.search(txt or whole))
+        named = bool(ANIMAL.search(txt or whole)) and not s.get('empty')
         if named and animal_cards and not beasts: beasts = [{'id': k, 'action': 'run'} for k in animal_cards]
         verb = next((act for pat, act in VERB_ACTION if re.search(pat, txt or whole)), None)
         if verb is None and re.search(r'\b(kill\w*|hunt\w*|cull\w*)\b', txt or whole):  # killing means aiming only when weapons are in the story
@@ -356,11 +408,15 @@ class Director:
             if p.get('kind') == 'asset' and ref.startswith('card/') and f'obj-{ref[5:]}.png' in self.cards and all(o['image'] != f'obj-{ref[5:]}.png' for o in obj_cards):
                 obj_cards.append({'image': f'obj-{ref[5:]}.png', 'size': p.get('size') if p.get('size') in OBJECT_HEIGHT else 'medium', 'phrase': str(p.get('phrase') or ref[5:])})
         obj_cards = obj_cards[:3]
+        if seq_card:  # climax: each setup shows one state of the key event, in story order
+            obj_cards = [o for o in obj_cards if o['image'] == seq_card][:1]
         ctx = {'first_of_video': i == 0 and part == 0, 'new_place': new_place, 'part': part, 'story_object': bool(story_obj), 'props': bool(props) or bool(obj_cards),
                'moving': bool(moving), 'scale': bool(SCALE_WORDS.search(txt)) or herd, 'threat': verb in ('aim', 'load') or s.get('mood') == 'tense',
                'n_people': len(actors), 'n_subjects': len(actors) + len(beasts), 'emotion': verb in ('panic', 'fall', 'cheer') or s.get('expression') in ('shock', 'laugh', 'nervous'),
                'reveal': s.get('mood') == 'reveal', 'hint': HINT.get(s.get('shot')) if part == 0 else None}
         kind = self.camera_type(ctx)
+        if seq_card:  # intact = wide, failing = close insert, burst = low and shaking
+            kind = 'wide' if part == 0 else ('low' if part == len(seq) - 1 else 'insert')
         S = at(origin, F, R, 2.0, 0)  # subject mark
         cast = []; cards = []; crowd = None; effects = []; objects = []
         # --- staging
@@ -477,6 +533,41 @@ class Director:
                 cam2 = self.make_camera(k2, s, st, origin, head, F, R, C2, cast, beast_cards, objects, dur, moving, verb, travel_dir, txt, part, missing)
                 if all(card_visible(cam2, o) for o in missing):
                     cam, kind = cam2, k2; shown = [o['image'] for o in obj_specs if card_visible(cam, o)]; seen.update(shown); break
+        # Occlusion: nobody may hide the key object (or, in a close-up, the subject); move the person, else cut to an insert.
+        fixes = []
+        key = obj_specs[0] if obj_specs else None
+        def worst_block(target):
+            return max(blocked_share(cam, target, [(c['pos'], PERSON_H, PERSON_W) for c in cast if c is not target_ch], t) for t in (.2, .5, .8))
+        target_ch = None
+        if key:
+            target = (key['pos'], key['height'], key['height'] * .6)
+        elif cast and kind in ('close', 'xclose'):
+            target_ch = cast[0]; target = (target_ch['pos'], PERSON_H, PERSON_W)
+        else:
+            target = None
+        if target and worst_block(target) > 0.3:
+            for c in [c for c in cast if c is not target_ch and c['action'] not in ('walk', 'run')]:
+                best = None
+                for step in (1.2, -1.2, 2.2, -2.2):
+                    old = c['pos']; c['pos'] = at(old, F, R, 0, step)
+                    share = worst_block(target)
+                    if share <= 0.3: best = step; break
+                    c['pos'] = old
+                if best is not None: fixes.append(f"moved {c['id']} {abs(best)} m aside"); break
+            if worst_block(target) > 0.3 and key:
+                cam2 = self.make_camera('insert', s, st, origin, head, F, R, C, cast, beast_cards, objects, dur, moving, verb, travel_dir, txt, part, [key])
+                cam, kind = cam2, 'insert'; fixes.append('cut to a close-up of the object (blocked)')
+        # Wide shots: the key object fills at least 15% of the frame height, otherwise cut to a close-up of it.
+        if key and kind in ('wide', 'establish', 'high') and height_frac(cam, key) < 0.15:
+            cam2 = self.make_camera('insert', s, st, origin, head, F, R, C, cast, beast_cards, objects, dur, moving, verb, travel_dir, txt, part, [key])
+            if height_frac(cam2, key) >= 0.15:
+                fixes.append(f"wide shot showed the object at {height_frac(cam, key):.0%} of frame height: cut to a close-up")
+                cam, kind = cam2, 'insert'
+        if obj_specs:
+            shown = [o['image'] for o in obj_specs if card_visible(cam, o)]; seen.update(shown)
+        if seq_card and part == len(seq) - 1:  # the burst: shake and dust on the cut
+            cam['shake'] = [{'t': 0.0, 'amp': 0.07}, {'t': round(min(dur, .6), 3), 'amp': 0.02}]
+            if len(effects) < 6 and st in OUTDOOR: effects.append({'kind': 'dust', 'pos': at(S, F, R, 2.0, 0, 0), 'start': 0.05, 'scale': 1.4, 'seed': i * 7 + 5})
         if IMPACT.search(txt):
             hits = [w for _, w, t in ws if IMPACT.search(str(t).lower())]
             t = max(0.0, min(dur, (hits[0]['start'] * FPS - a) / FPS)) if hits else min(dur, .15)
@@ -491,7 +582,10 @@ class Director:
         if prop_specs: shot['props'] = prop_specs
         self.history.append(kind); self.last_zone = (st, zname)
         return validate_shot(shot), {'camera_type': kind, 'set': st, 'zone': zname, 'verb': verb, 'words': txt, 'location': s.get('location'),
-                                     'objects': [o['phrase'] for o in obj_cards], 'cards_shown': shown}
+                                     'objects': [o['phrase'] for o in obj_cards], 'cards_shown': shown,
+                                     'key_height': round(height_frac(cam, key), 3) if key else None, 'fixes': fixes,
+                                     'cast': [c['id'] for c in cast], 'cast_reasons': {c['id']: (s.get('cast_reasons') or {}).get(c['id'], '') for c in cast},
+                                     'sequence_step': seq[part] if seq_card else None}
 
     def make_camera(self, kind, s, st, origin, head, F, R, C, cast, cards, objects, dur, moving, verb, tdir, txt, part, obj_cards=()):
         side = 1 if (len(self.history) % 2 == 0) else -1
@@ -617,7 +711,9 @@ def plan(m, cards=()):
     """All segments of the video: [{'shot_index', 'start', 'end', 'shot', 'notes'}] covering every frame exactly once."""
     d = Director(m, cards); out = []
     for i, s in enumerate(m['shots']):
-        parts = split_points(m, s)
+        parts = split_sequence(m, s, len(s['sequence'])) if s.get('sequence') else split_points(m, s)
+        if s.get('sequence') and len(parts) < len(s['sequence']):  # too short for every state: keep the start and the burst
+            s['sequence'] = (s['sequence'][:max(1, len(parts) - 1)] + s['sequence'][-1:])[:len(parts)] if len(parts) > 1 else s['sequence'][-1:]
         for part, (a, b) in enumerate(parts):
             shot, notes = d.segment(i, part, a, b, last=part == len(parts) - 1)
             out.append({'shot_index': i, 'start': a, 'end': b, 'shot': shot, 'notes': notes})

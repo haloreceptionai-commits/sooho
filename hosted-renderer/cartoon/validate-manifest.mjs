@@ -55,7 +55,7 @@ export function validateManifest(m) {
       if(!Array.isArray(s.props)||s.props.length>4||s.props.some(p=>!V.props.includes(p.kind)||!V.places.includes(p.place)||!V.prop_motions.includes(p.motion)))fail('Unsupported prop');
       if(s.props.filter(p=>p.place==='hand').length>1)fail('Only one hand prop');
       // Library objects must exist in the bundled CC0 catalog and are never hand-held cards.
-      if(s.props.some(p=>p.kind==='asset'?(p.place==='hand'||!(LIBRARY.has(p.asset)||(/^card\/[a-z0-9_]{1,30}$/.test(p.asset)&&m.cast.some(c=>c.card)))):p.asset!==undefined))fail('Unknown library object');
+      if(s.props.some(p=>p.kind==='asset'?(p.place==='hand'||!(LIBRARY.has(p.asset)||(/^card\/[a-z0-9_]{1,30}$/.test(p.asset)&&(m.advancedEdit===1||m.cast.some(c=>c.card))))):p.asset!==undefined))fail('Unknown library object');
       if(!Array.isArray(s.fx)||s.fx.length>3||s.fx.some(x=>!V.fx.includes(x)))fail('Unsupported effect');
       if(s.world==='map')validateMap(s,fail); else if(s.map!==undefined&&s.map!==null)fail('Map data outside the map world');
     }

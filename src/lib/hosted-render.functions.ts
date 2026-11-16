@@ -22,5 +22,11 @@ export const cancelHostedRender = createServerFn({ method: "POST" }).middleware(
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: cancelled, error } = await supabaseAdmin.rpc("cancel_render_job", { job_id: job.id, owner_id: context.userId });
     if (error) throw new Error("Could not stop hosted assembly");
-    return { cancelled };
+    // Cancelling also switches off any Azure machine still running for this job, so a cancelled render never keeps paid compute on.
+    let stopped = 0;
+    if (cancelled && job.run_id?.startsWith('azure:')) {
+      const { stopCartoonJobExecutions } = await import('@/lib/azure-render');
+      stopped = await stopCartoonJobExecutions(job.id).catch((e: unknown) => { console.error('Azure stop failed', e); return 0; });
+    }
+    return { cancelled, stopped };
   });

@@ -24,7 +24,7 @@ async function inkCard(key) {
   o.drawImage(art, 0, 0);
   return out;
 }
-const CARD_KEYS = manifest.cast.some(c => c.card) ? await (await fetch('./cards/index.json')).json() : [];
+const CARD_KEYS = manifest.cast.some(c => c.card) || manifest.advancedEdit === 1 ? await (await fetch('./cards/index.json')).json() : [];
 const CARDS = Object.fromEntries(await Promise.all(CARD_KEYS.map(async k => [k, await inkCard(k)])));
 const RIGS = {};
 if(manifest.advancedPerformance===1) for(const c of manifest.cast.filter(c=>c.card)) {
