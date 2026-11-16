@@ -7,7 +7,7 @@ import type { VideoInput, Settings } from './store';
 import type { ScriptCheckpoint } from './pipeline';
 import { writerCalls } from './shorts-writer/calls';
 import { directRunner } from './shorts-writer/calls.server';
-import { runShortsV4 } from './shorts-writer/stage';
+import { runExactScript, runShortsV4 } from './shorts-writer/stage';
 export interface ScriptAPI { call<T>(fn: () => Promise<T>): Promise<T> }
 const STEP_TIMEOUT_MS = 180000;
 const ROTATE: Record<string,string> = { wide:'low_angle', aerial:'top_down', close:'over_shoulder', top_down:'wide', macro:'close', pov:'wide', low_angle:'close', over_shoulder:'close' };
@@ -31,6 +31,12 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
     const advanced = input.engine === "advanced";
     await up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
+    if (input.exactScript?.trim()) {
+      const ex = await runExactScript({ script: input.exactScript, durationSec: input.durationSec, base: { topic: input.topic, format: input.format, durationSec: input.durationSec, archetype: 'Owner script', style: input.style, deployment: s.scriptDeployment, ...(advanced ? { kid: true } : {}) }, plan: (data) => api.call(() => generatePlan({ data })), progress: (detail) => await up({ detail }) });
+      const saved: ScriptCheckpoint = { plan: ex.plan, gate: ex.gate, report: ex.report, judgeOk: true, hookType: ex.hookType, moneyShot: ex.moneyShot };
+      await up({ hooks: { best: ex.hook, runnerUp: ex.hook }, checks: [], scriptCheckpoint: saved });
+      return saved;
+    }
     if (input.format === 'short' && process.env['SHORTS_WRITER_V4'] === 'on') try {
       // Shorts Writer v4 (owner's task): one checkpointed AI call per step, then scenes split word for word.
       const research = [input.reference ? `Inspiration video transcript (research only; never copy its lines): ${input.reference.transcript.slice(0, 4000)}` : '', input.topicSource ? `Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify independently.` : ''].filter(Boolean).join('\n') || undefined;
