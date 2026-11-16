@@ -27,6 +27,8 @@ import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroun
 
 import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
 import { ensureAnimalCast, paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
+import { claimStep, type StepClaim } from "@/lib/step-lock";
+import { toast } from "sonner";
 
 const b64ToBuf = (b64: string) => {
   const bin = atob(b64);
