@@ -21,5 +21,6 @@ for name,pin in pins['sounds'].items():
     with tempfile.TemporaryDirectory() as folder:
         source=Path(folder)/('in'+Path(pin['member'] or pin['url']).suffix);source.write_bytes(raw);target=root/'library'/(name+'.wav');target.parent.mkdir(exist_ok=True)
         subprocess.run(['ffmpeg','-v','error','-y','-i',str(source),'-ar','48000','-ac','1','-c:a','pcm_s16le',str(target)],check=True)
-        if hashlib.sha256(target.read_bytes()).hexdigest()!=pin['sha256']:raise ValueError(f'Sound source changed: {name}')
+        # The source bytes are the provenance pin; decoded PCM can differ by a few samples between ffmpeg builds.
+        if hashlib.sha256(target.read_bytes()).hexdigest()!=pin['sha256'] and hashlib.sha256(raw).hexdigest()!=pin.get('source_sha256'):raise ValueError(f'Sound source changed: {name}')
         print(target.name,'pinned')
