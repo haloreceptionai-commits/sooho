@@ -42,6 +42,7 @@ export const STORY_SHAPE_DIRECTION = `STORY SHAPE v3 (the owner's gold standard;
 5. REVEAL step by step: one visible physical action per line, in cause-and-effect order.
 6. PAYOFF LINE under 8 words that makes the viewer FEEL the twist ("That's exactly what he wanted." / "The signal itself was the power.").
 7. CLOSE with one line that echoes the hook's words so the video loops ("America had hung the spy on its own wall." / "He won by making the enemy look the wrong way.").
+CLARITY: a stranger must follow it heard ONCE. Write plain, complete everyday sentences like the gold examples (subject + verb + what happens); fragments ONLY in the pressure beat. No poetic metaphors ("truth can't breathe", "physics laughs"), no "we/us" narrator, no stage directions ("Close-up:", "Split view:"). Use words a 10-year-old knows; explain any needed term in the same line. Keep the exact opening hook line you are given unless it breaks these rules.
 Lines are short and stacked: most 3-12 words, one idea each; fragments for rhythm are allowed ("No wires. No battery. Nothing."). Never a lecture, never a summary ending, never a definition stuffed into a sentence. Every fact must still come from the checked facts; never invent people, quotes, numbers or danger. If the topic has no real person, the object or the problem it causes is the hero, and the stakes are the real consequence.
 
 GOLD EXAMPLE 1 (copy the SHAPE and rhythm, never the content):
