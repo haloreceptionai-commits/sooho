@@ -49,6 +49,13 @@ def build_uploaded_human(c, duration, fps):
     bpy.context.scene.frame_set(1)
     bpy.context.view_layer.update()
     meshes = [o for o in objects if o.type == 'MESH']
+    # These opaque palette FBXs encode transparency backwards for Blender's importer.
+    # Correct imported material instances only, not other scene assets.
+    for mat in {slot.material for o in meshes for slot in o.material_slots if slot.material}:
+        if mat.use_nodes:
+            bsdf = mat.node_tree.nodes.get('Principled BSDF')
+            if bsdf:
+                bsdf.inputs['Alpha'].default_value = 1
     points = [o.matrix_world @ Vector(v) for o in meshes for v in o.bound_box]
     low = min(v.z for v in points)
     high = max(v.z for v in points)
@@ -56,6 +63,12 @@ def build_uploaded_human(c, duration, fps):
     root.scale = (factor,) * 3
     root.location = (*c['pos'], -low * factor)
     root.rotation_euler.z = math.radians(c.get('yaw', 0))
+    for frame in range(1, round(duration * fps) + 1):
+        distance = (0.7 if action_name == 'walk' else 1.3 if action_name == 'run' else 0) * (frame - 1) / fps
+        angle = root.rotation_euler.z
+        root.location = (c['pos'][0] + math.sin(angle) * distance,
+                         c['pos'][1] - math.cos(angle) * distance, -low * factor)
+        root.keyframe_insert('location', frame=frame)
     root['human_model'] = model
     root['motion_clip'] = chosen.split('|')[-1]
     for o in meshes:
