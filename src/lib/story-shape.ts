@@ -67,12 +67,16 @@ const TENSION = /\b(no|not|never|nobody|nothing|without|yet|but|so|only|still|ev
 /** A line that keeps a loop open. */
 const LOOP = /\?["']?$|\b(yet|but|then|until|insane|impossible|nothing|nobody|no one|secret|mystery|strange|wrong|exactly what|the real|turns out|instead)\b|n't\b/i;
 
+/** Poetic metaphors, abstract "stakes" lines and a we/us narrator, none of which appear in the gold scripts. */
+const POETIC = /\b(we|us|our|ourselves)\b|\b(stakes? (is|are)|teeth|breathes?|laughs?|whispers?|screams?|chews?|bleeds?|dances?|sings?|swallows?)\b|^like an? \w+/i;
+
 /** Hook-only part of the shape check, used to rank and filter hook candidates. */
 export function hookShapeIssues(hook: string): string[] {
   const out: string[] = [];
   const n = words(hook).length;
   if (n < 8 || n > 12) out.push(`Shape hook: ${n} words (needs 8-12)`);
   if (/\?["']?\s*$/.test(hook)) out.push("Shape hook is a question; state the contradiction as a fact");
+  if (POETIC.test(hook)) out.push("Shape hook uses a metaphor or we/us narrator; state the literal strange fact");
   if (GIVEAWAY.test(hook)) out.push("Shape hook gives the answer away");
   else if (!TENSION.test(hook)) out.push("Shape hook has no contradiction");
   return out;
@@ -115,6 +119,16 @@ export function shapeIssues(script: string): ShapeReport {
   const hk = new Set(keyWords(hook));
   const echo = sents.length > 2 && keyWords(close).some((k) => hk.has(k) || hk.has(k.replace(/s$/, "")) || hk.has(`${k}s`));
   if (!echo) issues.push("Shape close: the final line doesn't echo the hook, so the video won't loop");
+  // Hook repeated: the close must echo the hook's words, not replay the whole line; no other line may restate it.
+  const hookKeys = keyWords(hook);
+  const same = (x: string) => { const k = new Set(keyWords(x)); return hookKeys.length > 0 && hookKeys.filter((w) => k.has(w)).length / hookKeys.length >= 0.7; };
+  const repeats = sents.slice(1).filter(same);
+  if (repeats.length) issues.push(`Shape repeat: "${repeats[0]!.slice(0, 60)}" replays the hook; the close should echo a few hook words with the twist, and no other line may restate it`);
+  // Choppy rhythm: gold scripts use at most 3 tiny fragments (the "No wires. No battery. Nothing." beat).
+  const tiny = sents.filter((x) => words(x).length <= 3 && !/\?["']?$/.test(x));
+  if (tiny.length > 3) issues.push(`Shape choppy: ${tiny.length} tiny fragments ("${tiny.slice(0, 3).join('", "')}"); keep at most 3, all in the pressure beat, and write the rest as full plain sentences`);
+  const poetic = sents.filter((x) => POETIC.test(x));
+  if (poetic.length) issues.push(`Shape clarity: "${poetic[0]!.slice(0, 60)}" is a metaphor or narrator aside a first-time viewer can't picture; say literally what happens`);
   if (/\b(in summary|in short|to sum up|overall|the new method|that is how|this is how)\b/i.test(sents[sents.length - 1] ?? "")) issues.push("Shape close ends on a summary; end on the twist that echoes the hook");
   return { issues, hookWords: hw, shortShare, longestGapSec, payoff, echo };
 }
