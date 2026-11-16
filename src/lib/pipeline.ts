@@ -157,13 +157,25 @@ export async function runVideo(id: string, input: VideoInput) {
   const resumable = !!prior?.cartoonCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '');
   if (prior?.hostedRender && !resumable) return;
   if (resumable) actions.updateVideo(id, { hostedRender: undefined, status: 'running', error: undefined, detail: 'Resuming saved cartoon…' });
+  // One paid browser run per video: a second window or Resume click never starts a second planning/painting run.
+  running.add(id);
+  let lock: StepClaim;
+  try { lock = await claimStep(id, 'generation', 'Starting'); }
+  catch (e) { running.delete(id); actions.updateVideo(id, { error: e instanceof Error ? e.message : 'Could not check for another run' }); return; }
+  if (!lock.ok) {
+    running.delete(id);
+    const since = new Date(lock.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    actions.updateVideo(id, { detail: `Already running in another window (${lock.stage}, since ${since}) · not started again` });
+    toast.info(`This video is already being made in another window (${lock.stage}, since ${since}). Nothing new was started.`);
+    return;
+  }
+  const held = lock;
   removed.delete(id);
   actions.updateVideo(id, { removed: false });
-  running.add(id);
   setVideoActive(id, true);
   keepAlive();
   const s = getState().settings;
-  const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); actions.updateVideo(id, p); };
+  const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); if (p.detail) held.setStage(p.detail); actions.updateVideo(id, p); };
   const advanced = input.engine === 'advanced';
   try {
     const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
@@ -543,6 +555,7 @@ export async function runVideo(id: string, input: VideoInput) {
     if (!removed.has(id)) up({ status: "failed", error: msg, detail: "Failed" });
   } finally {
     running.delete(id);
+    void held.release().catch(() => undefined);
     setVideoActive(id, false);
     keepAlive();
   }
