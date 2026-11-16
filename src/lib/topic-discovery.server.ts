@@ -5,7 +5,7 @@ import type { TopicUse } from './topics';
 import { sourcePassages } from './topic-passages';
 
 async function research(path: string, body: unknown) {
-  const key = process.env['PARALLEL_API_KEY'], auth = process.env['LOVABLE_API_KEY'];
+  const key = (process.env['PARALLEL_API_KEY_1'] || process.env['PARALLEL_API_KEY']), auth = process.env['LOVABLE_API_KEY'];
   if (!key || !auth) throw new Error('Connect Parallel to find source-backed topics.');
   const response = await fetch(`https://connector-gateway.lovable.dev/parallel/v1/${path}`, {
     method: 'POST', headers: { Authorization: `Bearer ${auth}`, 'X-Connection-Api-Key': key, 'Content-Type': 'application/json' },
