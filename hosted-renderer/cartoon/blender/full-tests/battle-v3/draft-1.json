@@ -1,0 +1,214 @@
+{
+  "title": "Cart Storm on the Castle Wall",
+  "sentences": [
+    {
+      "text": "Unguided rockets meet attackers with sudden mass fire today.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort soldiers roll a perforated cart onto the walls.",
+      "fact_ids": [
+        "cart",
+        "defense",
+        "history"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:perforated_cart:roll"
+      ]
+    },
+    {
+      "text": "Wooden cart holds a flat board full of holes.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Then crews stack rocket bundles under those drilled lines.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle commanders point defenders toward the gate below.",
+      "fact_ids": [
+        "defense",
+        "history"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Yet rockets miss single targets and reload painfully slow.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Multiple launchers answer by unleashing many shots together.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle soldiers light strings that trail from each tube.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:fuse_bundle:fire"
+      ]
+    },
+    {
+      "text": "Then fuses spark and crawl across the wooden deck.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:fuse_bundle:fire"
+      ]
+    },
+    {
+      "text": "Rocket arrows blast off over the ditch at once.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort defenders watch volleys spread across tight formations.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "But attackers press while crews work through slow reloads.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle crews wheel the cart to cover another lane.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:perforated_cart:roll"
+      ]
+    },
+    {
+      "text": "Then commanders signal another broadside toward the field.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Rocket salvos fire again in rapid succession.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort walls shake as smoke washes along the battlements.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Yet unguided bursts saturate space where precision cannot.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle ramparts anchor the cart beside crenel stones.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Then crews pause and clear hot sticks and ash.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle defenders hold positions while rockets sweep the approach.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Mass fire beats careful aim here.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Unguided rockets meet attackers with sudden fire.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    }
+  ]
+}

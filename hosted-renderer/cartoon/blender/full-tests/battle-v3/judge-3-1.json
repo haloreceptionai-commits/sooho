@@ -1,0 +1,202 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 8,
+        "cause_effect": 9,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      },
+      "B": {
+        "clarity": 6,
+        "cause_effect": 7,
+        "engagement": 6,
+        "kid_clear": false,
+        "opening": false
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 0,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence supports slow reloads for unguided rockets, but not \u201cgate approaches\u201d or \u201cfast bursts\u201d filling them; gate/approach cannot be drawn."
+      },
+      {
+        "index": 1,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Sources mention a wooden cart used in fort defense but not that it was perforated or rolled along the wall; drawable with castle + perforated cart rolling."
+      },
+      {
+        "index": 2,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence of a \u201claunch board packed with holes\u201d; picture lacks a launch-board object."
+      },
+      {
+        "index": 3,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for stacking rockets under \u201cdrilled lines\u201d; stacking action and drilled lines not drawable."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence says unguided rockets are inaccurate and slow to reload; targets/misses are not drawable with given objects."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Evidence says multiple rocket launchers fire many in rapid succession; depiction via multiple rocket arrows firing is possible."
+      },
+      {
+        "index": 6,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for commanders pointing to a packed gate; gate not drawable."
+      },
+      {
+        "index": 7,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence about fuses/strings/tubes; tubes not drawable."
+      },
+      {
+        "index": 8,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence about fuses crawling across a cart deck; \u201ccart deck\u201d not drawable."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Hwacha fired many rocket-powered arrows; blasting off is supported and drawable with rocket_arrow:fire."
+      },
+      {
+        "index": 10,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for defenders watching volleys across tight approaches; approaches not drawable."
+      },
+      {
+        "index": 11,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Reloads being slow is supported, but attackers pressing forward is not; reload struggle not drawable."
+      },
+      {
+        "index": 12,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence about moving the cart to cover another lane; lane not drawable."
+      },
+      {
+        "index": 13,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for signaling a broadside toward a field; broadside/field not drawable with given tokens."
+      },
+      {
+        "index": 14,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence doesn\u2019t mention ditches or slopes; these terrain features aren\u2019t drawable."
+      },
+      {
+        "index": 15,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for flames past merlons; merlons not drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence supports trading precision for area effects via multiple rockets; \u2018approaches\u2019 concept not drawable."
+      },
+      {
+        "index": 17,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for ramparts/crenels stabilizing a cart; those features aren\u2019t drawable."
+      },
+      {
+        "index": 18,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for \u2018saturating narrow lanes\u2019; lanes not drawable."
+      },
+      {
+        "index": 19,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence that volleys broke momentum for spears; spears/momentum not drawable."
+      },
+      {
+        "index": 20,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence that slow launchers make \u2018fast fields of fire\u2019; concept not drawable."
+      },
+      {
+        "index": 21,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence that slow rockets cause fast retreats; retreat outcome not supported and not drawable literally."
+      }
+    ],
+    "unsupported": [
+      "Perforated cart, launch board packed with holes, and drilled lines are not in the evidence.",
+      "Crews light strings from every tube; fuses spark and crawl across the cart deck are not evidenced.",
+      "Rolling the cart along the wall or to cover another lane is not evidenced.",
+      "Commanders pointing to a packed gate and signaling another broadside are not evidenced.",
+      "Unguided salvos over a ditch and lower slope are not evidenced.",
+      "Flames pouring past merlons and keeping a cart steady behind crenels are not evidenced.",
+      "Volleys breaking momentum for spears to ready is not evidenced.",
+      "Slow rockets driving fast retreats under fire is not evidenced.",
+      "Fort defenders watching volleys spread across tight approaches is not evidenced.",
+      "\u201cTo cover ground\u201d as the stated purpose of multiple launch is not in the provided quotes."
+    ],
+    "undrawable": [
+      "gate",
+      "approach/approaches",
+      "launch board",
+      "wooden frame",
+      "drilled lines",
+      "tube/tubes",
+      "cart deck",
+      "volley/volleys",
+      "broadside",
+      "ditch",
+      "lower slope",
+      "merlon/merlons",
+      "crenel/crenels",
+      "ramparts",
+      "lane/lanes",
+      "spear/spears",
+      "momentum",
+      "field",
+      "target/targets",
+      "launcher/launchers",
+      "retreat/retreats",
+      "cover ground",
+      "saturating",
+      "spread (as an area effect)",
+      "stack (rocket arrows)",
+      "signal (broadside)",
+      "press forward",
+      "wrestle (with reloads)",
+      "break momentum"
+    ]
+  }
+}
