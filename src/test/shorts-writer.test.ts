@@ -31,3 +31,8 @@ describe("shorts writer critic decisions", () => {
   it("never patches the locked hook", () => { const c = critic(); c.lines[0]!.clear = false; c.lines[2]!.new_fact = false; expect(flaggedLines(c)).toEqual([3]); });
   it("rewrites only flagged lines and can delete one", () => expect(applyRewrite(["H", "a", "b", "c"], [{ n: 1, text: "X" }, { n: 2, text: "" }, { n: 3, text: "B" }], [2, 3])).toEqual(["H", "B", "c"]));
 });
+
+describe("shorts writer clarity and curiosity floor", () => {
+  it("fails when clarity is below 8", () => expect(criticPasses(critic({ clarity: 7 }))).toBe(false));
+  it("fails when curiosity is below 8", () => expect(criticPasses(critic({ curiosity: 6 }))).toBe(false));
+});

@@ -58,9 +58,9 @@ export interface Critic { lines: CriticLine[]; hook_reveals_answer: boolean; end
 /** Lines (1-based) the critic flagged; the hook (line 1) is locked and never patched. */
 export const flaggedLines = (c: Critic) => c.lines.filter((l) => l.n > 1 && !(l.follows && l.clear && l.narration && l.new_fact)).map((l) => l.n);
 
-/** Acceptance per the owner's task: clear, narration only, hook hides the answer, ending doesn't copy the hook, coherence >= 8. */
+/** Acceptance per the owner's task: clear, narration only, hook hides the answer, ending doesn't copy the hook, coherence >= 8 (clarity and curiosity also >= 8 so every line works on first listen). */
 export function criticPasses(c: Critic): boolean {
-  return c.coherence >= 8 && !c.hook_reveals_answer && !c.ending_copies_hook && c.ending_makes_sense && c.real_twist
+  return c.coherence >= 8 && c.clarity >= 8 && c.curiosity >= 8 && !c.hook_reveals_answer && !c.ending_copies_hook && c.ending_makes_sense && c.real_twist
     && c.lines.every((l) => l.clear && l.narration);
 }
 
