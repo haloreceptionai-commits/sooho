@@ -11,6 +11,11 @@ from art_director import plan, text_of, spoken
 
 def run(manifest, cards, out, blender, seconds=1200):
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    # OS lease: a concurrent preview cannot start a second renderer. No cloud
+    # dispatch or paid operation exists on this path.
+    import fcntl
+    lock = open(out/'preview.lock','a')
+    fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     m = json.loads(Path(manifest).read_text())
     from composition_rules import emotion_line, preview_frames
     segments = plan(m, set(os.listdir(cards)))
@@ -29,7 +34,9 @@ def run(manifest, cards, out, blender, seconds=1200):
                 env={**os.environ, 'CARD_DIR':str(Path(cards).resolve()),'SHOT_ENGINE':'cycles','CYCLES_DEVICE':'CPU','NO_COMPOSITE':'1'}, stdout=log, stderr=log, timeout=min(180,remain))
         if result.returncode: raise RuntimeError(f'shot {i+1} failed; see {folder}/render.log')
         results.append({'number':i+1,'source_line':g['shot_index']+1,'line':full_line,'start':g['start']/30,'end':g['end']/30,'notes':g['notes'],'frame':str(folder / f"f_{shot['frames'][0]:05d}.png"),'qa':json.loads((folder/'composition-qa.json').read_text())})
-        (out/'results.json').write_text(json.dumps({'input_hash':hashlib.sha256(Path(manifest).read_bytes()).hexdigest(),'seconds':time.monotonic()-start,'azure_jobs':0,'paid_art_calls':0,'shots':results},indent=2))
+        assets = {p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(Path(cards).glob('*.png'))}
+        rules_hash=hashlib.sha256((Path(__file__).parent/'composition.py').read_bytes()).hexdigest()
+        (out/'results.json').write_text(json.dumps({'input_hash':hashlib.sha256(Path(manifest).read_bytes()).hexdigest(),'card_hashes':assets,'composition_hash':rules_hash,'seconds':time.monotonic()-start,'azure_jobs':0,'paid_art_calls':0,'shots':results},indent=2))
         print(f'Preview {i+1}/{len(segments)} complete',flush=True)
 
 
