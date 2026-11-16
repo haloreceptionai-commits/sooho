@@ -232,6 +232,7 @@ export interface PlanInput {
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
   kid?: boolean; // Advanced Video AI: words an 8-year-old knows, stricter story shape
+  shape?: boolean; // Story Shape v3 (owner's gold Shorts)
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
