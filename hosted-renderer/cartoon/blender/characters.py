@@ -17,6 +17,46 @@ def face_y(x,z):
     return -.27*math.sqrt(max(0,1-(x/.31)**2-(z/.36)**2))-.004
 
 
+def _mat(name,color,rough=.5):
+    return material(name,tuple(color),rough)
+
+
+def build_premium_face(c,headroot,skin,face,expr,ident):
+    """Reference-style cartoon face: big glossy eyes with iris and catch-light, soft brows, nose, ears, smile and hair."""
+    white=_mat(ident+' eye white',(.97,.97,.98),.2)
+    iris=_mat(ident+' iris',tuple(c.get('eyes',(.12,.36,.78))),.25);pupil=_mat(ident+' pupil',(.01,.01,.015),.2)
+    light=_mat(ident+' catchlight',(1,1,1),.1);hairm=_mat(ident+' hair',tuple(c.get('hair',(.33,.17,.07))),.55)
+    browm=_mat(ident+' brow',tuple(x*.8 for x in c.get('hair',(.33,.17,.07))),.6);lip=_mat(ident+' lip',(.62,.28,.25),.5)
+    blush=_mat(ident+' blush',(.95,.55,.48),.7);ink=_mat(ident+' face ink',(.05,.03,.03),.6)
+    squint=.6 if expr in ('smug','sad','determined') else 1.0
+    for side in (-1,1):
+        ex=side*.115;ez=.04
+        e=sphere('eye white',(ex,face_y(ex,ez)-.01,ez),(.082,.034,.088*squint),white);e.parent=headroot
+        i=sphere('iris',(ex,face_y(ex,ez)-.035,ez-.005),(.052,.012,.058*squint),iris);i.parent=headroot
+        sphere('pupil',(ex,face_y(ex,ez)-.043,ez-.005),(.026,.008,.03*squint),pupil).parent=headroot
+        sphere('catchlight',(ex+side*.016,face_y(ex,ez)-.047,ez+.022),(.013,.006,.015),light).parent=headroot
+        bz=.145+(.02 if expr in ('shock','worried') else -.015 if expr in ('angry','determined') else 0)
+        b=cube('eyebrow',(ex,face_y(ex,bz)-.012,bz),(.105,.024,.02),browm,.009);b.parent=headroot;b.rotation_euler.y=side*face['brow']
+        ear=sphere('ear',(side*.292,.01,-.02),(.045,.05,.085),skin);ear.parent=headroot
+        sphere('cheek',(side*.15,face_y(side*.15,-.08)-.004,-.08),(.07,.012,.045),blush).parent=headroot
+    sphere('nose',(0,face_y(0,-.045)-.03,-.045),(.042,.045,.045),skin).parent=headroot
+    mouth=None
+    if expr in ('shock','talk','worried','determined'):
+        mouth=sphere('mouth',(0,face_y(0,-.15)-.004,-.15),(face['width']*1.1,.02,face['height']*1.3),ink);mouth.parent=headroot
+        sphere('tongue',(0,face_y(0,-.158)-.018,-.16),(face['width']*.7,.012,face['height']*.7),lip).parent=headroot
+    else:
+        pts=[]
+        for j in range(13):
+            x=-face['width']*1.4+j*face['width']*1.4*2/12;z=-.15+(x/(face['width']*1.4))**2*face['curve']*1.3
+            pts.append((x,face_y(x,z)-.004,z))
+        for a,b in zip(pts,pts[1:]):rope('smile',a,b,.011,lip).parent=headroot
+    # hair: a cap, a swept fringe and sideburns
+    sphere('hair cap',(0,.05,.15),(.315,.285,.2),hairm).parent=headroot
+    f=sphere('hair fringe',(.05,-.13,.255),(.2,.075,.065),hairm);f.rotation_euler.y=.15;f.parent=headroot
+    for side in (-1,1):sphere('sideburn',(side*.285,-.02,.02),(.04,.07,.13),hairm).parent=headroot
+    return mouth
+
+
 def build_character(c,duration=3,fps=30):
     if c.get('model'):
         from uploaded_humans import build_uploaded_human
@@ -28,15 +68,19 @@ def build_character(c,duration=3,fps=30):
     trim=material(ident+' trim',tuple(c.get('trim',(.72,.55,.12))),.35)
     root=bpy.data.objects.new(ident,None);bpy.context.collection.objects.link(root)
     headroot=bpy.data.objects.new(ident+' head',None);bpy.context.collection.objects.link(headroot);headroot.parent=root
-    head=sphere('egg head',(0,0,0),(.31,.27,.36),skin);head.parent=headroot
+    premium=c.get('style','premium')=='premium'
+    head=sphere('egg head',(0,0,0),(.31,.27,.36) if not premium else (.3,.27,.34),skin);head.parent=headroot
     expr=c.get('expression','neutral');face=face_shape(expr)
-    for side in [-1,1]:
+    if premium:
+        mouth=build_premium_face(c,headroot,skin,face,expr,ident)
+    for side in ([] if premium else [-1,1]):
         eye=sphere('eye',(side*.105,face_y(side*.105,.035),.035),(.034,.014,face['eye']),black);eye.parent=headroot
         brow=cube('eyebrow',(side*.105,face_y(side*.105,.12),.12),(.095,.022,.018),black,.008);brow.parent=headroot
         brow.rotation_euler.y=side*face['brow']
         if expr=='smug' and side==1:eye.scale.z*=.5
-    mouth=None
-    if expr in ('shock','talk','worried','determined'):
+    if not premium: mouth=None
+    if premium: pass
+    elif expr in ('shock','talk','worried','determined'):
         mouth=sphere('mouth',(0,face_y(0,-.13),-.13),(face['width'],.016,face['height']),black);mouth.parent=headroot
         if expr=='determined':cube('clenched teeth',(0,face_y(0,-.13)-.018,-.13),(.14,.014,.022),skin,.004).parent=headroot
     else:
@@ -114,18 +158,36 @@ def build_character(c,duration=3,fps=30):
         body_details.extend([cube('uniform sash',(0,-.15,1.1),(.1,.03,.5),trim,.008),cube('uniform belt',(0,-.01,.86),(.44,.32,.06),black,.015)])
     if outfit=='royal':
         body_details.extend([cube('royal mantle',(0,.1,.85),(.54,.1,.7),trim,.04),cube('fur collar',(0,-.02,1.32),(.46,.32,.08),skin,.03),sphere('royal brooch',(0,-.16,1.2),(.03,.02,.03),trim)])
+    if premium and outfit not in ('armor','dress','robe','royal','labcoat'):
+        body_details.extend([cube('shirt collar L',(-.075,-.13,1.3),(.1,.05,.055),cloth,.012),cube('shirt collar R',(.075,-.13,1.3),(.1,.05,.055),cloth,.012),
+                             cube('placket',(0,-.158,1.08),(.03,.015,.4),skin if outfit=='labcoat' else cloth,.004)])
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[];anchors={}
+    pants=material(ident+' trousers',tuple(c.get('pants',(.42,.37,.2))),.85);shoe=material(ident+' shoes',(.35,.2,.1),.55)
     for side in ['left','right']:
         for joint in ['elbow','wrist','knee','ankle']:
-            o=sphere(side+' '+joint,(0,0,0),(.034,)*3,black);o.parent=root;joints[side+'_'+joint]=o
+            jm=black if not premium else (cloth if joint in ('elbow','wrist') else pants)
+            jr=.034 if not premium else (.043 if joint=='elbow' else .036 if joint=='wrist' else .06 if joint=='knee' else .05)
+            o=sphere(side+' '+joint,(0,0,0),(jr,)*3,jm);o.parent=root;joints[side+'_'+joint]=o
             if joint in ('wrist','ankle'):
                 anchor=bpy.data.objects.new(side+' '+joint+' attachment',None);bpy.context.collection.objects.link(anchor);anchor.parent=root;anchors[side+'_'+joint]=anchor
         for a,b in [('shoulder','elbow'),('elbow','wrist'),('hip','knee'),('knee','ankle')]:
             bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=.021,depth=1)
-            o=bpy.context.active_object;o.name=side+' '+a+'-'+b;o.data.materials.append(black);o.parent=root;segments.append((o,side+'_'+a,side+'_'+b))
-        sphere(side+' shoe',(0,-.05,-.025),(.058,.115,.03),black).parent=anchors[side+'_ankle']
+            o=bpy.context.active_object;o.name=side+' '+a+'-'+b
+            o.data.materials.append(black if not premium else (cloth if a in ('shoulder','elbow') else pants));o.parent=root
+            if premium:
+                for pl in o.data.polygons:pl.use_smooth=True
+                o['girth']=(.043 if a=='shoulder' else .038) if a in ('shoulder','elbow') else (.06 if a=='hip' else .052)
+            segments.append((o,side+'_'+a,side+'_'+b))
+        if premium:
+            sphere(side+' shoe',(0,-.07,.0),(.075,.14,.046),shoe).parent=anchors[side+'_ankle']
+            sphere(side+' shoe sole',(0,-.07,-.04),(.078,.145,.014),black).parent=anchors[side+'_ankle']
+            sphere(side+' hand',(0,0,.07),(.052,.034,.075),skin).parent=anchors[side+'_wrist']
+            th=sphere(side+' thumb',((-1 if side=='left' else 1)*.04,-.02,.05),(.018,.018,.04),skin);th.parent=anchors[side+'_wrist']
+            for fi in range(3):sphere(side+' finger',(-.026+fi*.026,0,.14),(.014,.014,.04),skin).parent=anchors[side+'_wrist']
+        else:
+            sphere(side+' shoe',(0,-.05,-.025),(.058,.115,.03),black).parent=anchors[side+'_ankle']
     held=c.get('held')
     if held:
         wrist=anchors['right_wrist']
@@ -156,6 +218,6 @@ def build_character(c,duration=3,fps=30):
         if mouth is not None and expr=='talk':
             shape=face_shape(expr,f/fps);mouth.scale=(shape['width'],.016,shape['height']);mouth.keyframe_insert('scale',frame=f+1)
         for o,a,b in segments:
-            av,bv=Vector(p[a]),Vector(p[b]);d=bv-av;o.location=(av+bv)*.5;o.rotation_euler=d.to_track_quat('Z','Y').to_euler();o.scale=(1,1,d.length)
+            av,bv=Vector(p[a]),Vector(p[b]);d=bv-av;o.location=(av+bv)*.5;o.rotation_euler=d.to_track_quat('Z','Y').to_euler();g=o.get('girth',.021)/.021;o.scale=(g,g,d.length)
             for prop in ['location','rotation_euler','scale']:o.keyframe_insert(prop,frame=f+1)
     return root

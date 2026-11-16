@@ -17,7 +17,7 @@ import math, re
 from shot_schema import validate_shot
 from shot_director import ZONES as BASE_ZONES, OBJ_CAMS
 from object_specs import OBJECTS
-from place_spec import compile_place, KITS as PLACE_KITS, LIGHTING as PLACE_LIGHT
+from place_spec import compile_place, KITS as PLACE_KITS, LIGHTING as PLACE_LIGHT, smooth_story_time
 
 FPS = 30
 SIZE = (720, 1280)  # upscaled to 1080x1920; measured same look as 810x1440 at ~45% less GPU time
@@ -352,6 +352,7 @@ def split_sequence(m, s, n):
 # ---------------------------------------------------------------- the director
 class Director:
     def __init__(self, m, cards=()):
+        smooth_story_time(m)   # one time of day per stretch of the story: no day/night flicker between neighbouring scenes
         self.m = m; self.cards = set(cards); self.locations = plan_locations(m, self.cards)
         self.history = []; self.zone_use = {}; self.cast_look = {}
         for i, c in enumerate(m.get('cast') or []):

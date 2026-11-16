@@ -132,3 +132,15 @@ All entries are CC0-1.0; licenses checked at import.
 - models/nature-kit/tree_palm.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `27bbb23d26ed788d84de6df2f7fab0acc3fe0ff16c7d08cdcfa1fffcb11de324`
 - models/nature-kit/tree_fat.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `84b262c5dda3a91ac6c95f9d8b23a0ebbb1951d678c0e1375d3e32623cc43ee2`
 - models/fantasy-town-kit/cart-high.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `4b0bce37e8645f3719a9032bf4d49048b7779ac891758ae6e2693238911c5eec`
+- models/q-ultimatedanimatedcharacter/Casual_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `152d6f237f33afe698eb5003440e2caf5b8089e3ae06e1fb98fb32e7f6e9588a`
+- models/q-ultimatedanimatedcharacter/Casual_Female.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `a45f3c351c141711463d77f836ec3255124b64bd557e6a21cf47717e6ebebda7`
+- models/q-ultimatedanimatedcharacter/Knight_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `4fdfb27bda95f5efb45095aca5e81fcae71cb0489ff36567599ff6dc6b35e295`
+- models/q-ultimatedanimatedcharacter/Soldier_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `d04c499d01e960f8ab4ad713ce29661b84ee46f9c9db1bf10c3a381ff264287b`
+- models/q-ultimatedanimatedcharacter/Pirate_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `c4325d4e0842a362eb9b2682bed8114b63c3ee3d58e8bafebdb1f15218a7fcc3`
+- models/q-ultimatedanimatedcharacter/Suit_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `8c96a8d4b43c4ea6889d3f3dbb250463a430787f2c923e5647c703c5f0ad5117`
+- models/q-ultimatedanimatedcharacter/Viking_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `7085fcdaf7a2b3968cdf3c58a7bb1ac4b8ae3385f55c47292322a64f658a401b`
+- models/q-ultimatedanimatedcharacter/Worker_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `5632e1baa6ace408cd5f194b4abecf206560a5f3299264c855ce3ddc68cf6966`
+- models/q-ultimatedanimatedcharacter/OldClassy_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `33f1798d136e528d66669b401e4e9e92401df1076752af1e0958d5d97cca5d47`
+- models/q-ultimatedanimatedcharacter/Doctor_Male_Young.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `70b74026ce0bd9780add26a341f982b42335e1af2cd203e639f73de86b266996`
+- models/q-ultimatedanimatedcharacter/Cowboy_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `6d1312cad120cb6dbcaf4bcc271796c3a2ebae96af668339b89d32edaca9939f`
+- models/q-ultimatedanimatedcharacter/Kimono_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html — CC0-1.0, SHA-256 `7e660a0b460404c61a2585a446c8237ab40d880a8f279ce7707057ef99fd39cc`

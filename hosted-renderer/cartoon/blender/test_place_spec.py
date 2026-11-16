@@ -81,3 +81,27 @@ class PlaceSpec(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class StoryTimeTests(unittest.TestCase):
+    def mk(self, times):
+        return {'shots': [{'place': {'terrain': 'plain', 'time': t, 'weather': 'clear', 'dressing': []}} for t in times]}
+
+    def test_isolated_flips_are_merged(self):
+        from place_spec import smooth_story_time
+        m = self.mk(['night'] * 4 + ['day'] + ['night'] * 4)
+        smooth_story_time(m)
+        self.assertEqual({s['place']['time'] for s in m['shots']}, {'night'})
+
+    def test_real_transition_is_kept(self):
+        from place_spec import smooth_story_time
+        m = self.mk(['day'] * 4 + ['dusk'] + ['night'] * 4)
+        smooth_story_time(m)
+        self.assertEqual([s['place']['time'] for s in m['shots']], ['day'] * 4 + ['dusk'] + ['night'] * 4)
+
+    def test_idempotent(self):
+        from place_spec import smooth_story_time
+        m = self.mk(['day', 'night', 'day', 'day', 'day', 'night', 'night', 'night'])
+        smooth_story_time(m); a = [s['place']['time'] for s in m['shots']]
+        smooth_story_time(m); self.assertEqual(a, [s['place']['time'] for s in m['shots']])
+

@@ -172,3 +172,35 @@ def validate_compiled(p):
         if not (isinstance(it.get('pos'), list) and len(it['pos']) == 3 and all(isinstance(v, (int, float)) and abs(v) < 200 for v in it['pos'])): raise ValueError('place item pos')
         if not 0.1 <= it.get('height', 1) <= 20 or not -720 <= it.get('yaw', 0) <= 720: raise ValueError('place item size')
     return p
+
+
+def smooth_story_time(manifest, min_run=3):
+    """Time of day is a story constant, not a per-shot coin flip: a run of fewer than `min_run` shots that disagrees with its
+    neighbours is merged into the longer neighbouring run. A short dawn/dusk run between two different times is kept (a real transition).
+    Idempotent; mutates the manifest's place specs and returns the list of changes for the log."""
+    shots = [s for s in manifest.get('shots', []) if isinstance(s.get('place'), dict)]
+    times = [s['place']['time'] for s in shots]
+    if len(times) < 2 * min_run: return []   # too few scenes to tell a transition from a flicker
+
+    def runs_of(ts):
+        out = []
+        for i, x in enumerate(ts):
+            if out and out[-1][0] == x: out[-1][2] += 1
+            else: out.append([x, i, 1])
+        return out
+
+    changed = True
+    while changed and len(times) > 1:
+        changed = False; runs = runs_of(times)
+        for k, (x, start, n) in enumerate(runs):
+            if n >= min_run or len(runs) == 1: continue
+            if x in ('dawn', 'dusk') and 0 < k < len(runs) - 1 and runs[k - 1][0] != runs[k + 1][0]: continue
+            nbrs = [r for r in (runs[k - 1] if k > 0 else None, runs[k + 1] if k < len(runs) - 1 else None) if r]
+            target = max(nbrs, key=lambda r: r[2])[0]
+            for j in range(start, start + n): times[j] = target
+            changed = True; break
+    log = []
+    for s, t in zip(shots, times):
+        if s['place']['time'] != t:
+            log.append({'from': s['place']['time'], 'to': t}); s['place'] = {**s['place'], 'time': t}
+    return log

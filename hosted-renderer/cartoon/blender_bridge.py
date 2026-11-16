@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / 'blender'))
 from animals import ANIMAL  # noqa: E402
 from shot_director import compile_one, ZONES  # noqa: E402
 from shot_schema import validate_shot  # noqa: E402
-from place_spec import compile_place, LIGHTING as PLACE_LIGHT  # noqa: E402
+from place_spec import compile_place, LIGHTING as PLACE_LIGHT, smooth_story_time  # noqa: E402
 
 # Old-engine worlds -> Blender set kits (+ forced lighting).
 WORLD = {'ship': ('ship_deck', None), 'storm_sea': ('ship_deck', 'rain'), 'town': ('village', None), 'market': ('street', None),
@@ -162,6 +162,7 @@ def render_range(manifest_path, web, out, first, last, card_dir):
     from PIL import Image
     from capture import fingerprint, atomic_json, valid_frame
     m = json.loads(Path(manifest_path).read_text()); out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    smooth_story_time(m)
     signature = fingerprint(Path(web))
     ck = out / 'checkpoint.json'
     saved = json.loads(ck.read_text()) if ck.exists() else {'input_hash': signature, 'frames': {}}

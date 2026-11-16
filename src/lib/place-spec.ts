@@ -33,7 +33,7 @@ export function placeJsonSchema() {
 export const PLACE_PROMPT = `
 ADVANCED 3D PLACE (required per scene; the engine builds it as a real 3D world, never a flat plane):
 - place.terrain: ${Object.entries(registry.terrains).map(([k, v]) => `${k} (${v.label})`).join("; ")}; or an existing set when the line is literally there: ${registry.kits.join(", ")}.
-- place.time: dawn/day/dusk/night from the sentence and facts (a night attack is night). place.weather: clear/fog/rain/wind.
+- place.time: dawn/day/dusk/night from the sentence and facts (a night attack is night). Time of day is a STORY CONSTANT: every scene in the same stretch of the story shares one time; change it only where the story itself jumps (for example "by morning"), going through dawn or dusk. Never alternate day and night between neighbouring scenes. place.weather: clear/fog/rain/wind.
 - place.dressing: up to 6 {id,count} from this list only, for things the line names or the place needs: ${PLACE_DRESSING.join(", ")}. Herds or groups use count up to 8 (e.g. burning oxen in a night attack = ox_burning with count 8).`;
 
 /** Lift objects that the 3D place can draw (oxen, torches, tents...) out of the painted-object list into place dressing. */
