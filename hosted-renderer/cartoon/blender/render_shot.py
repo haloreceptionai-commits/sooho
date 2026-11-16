@@ -370,6 +370,49 @@ def build_card(cd, cam, duration=3.0, fps=30):
     return ob
 
 
+BACKDROP_DEPTH = {'far': 48.0, 'mid': 24.0}
+
+
+def build_backdrop(shot, cam):
+    """World Pack layers: painted era-correct planes behind the ground, unlit (painted colours kept) and casting
+    no shadow. Static planes at two depths give parallax against the moving camera. Sized to cover the widest
+    camera view of the shot with margin so no edge is ever visible."""
+    folder = os.environ.get('CARD_DIR', ''); made = []
+    c = shot['camera']; frm = Vector(c['from']); at = Vector(c['look_at'])
+    fwd = at - frm; fwd.z = 0
+    if fwd.length < 1e-3: fwd = Vector((0, 1, 0))
+    fwd.normalize(); lens = min(c.get('lens', 35), c.get('lens', 35))
+    for b in shot.get('backdrop', []):
+        path = os.path.join(folder, b['image'])
+        if not folder or not os.path.isfile(path): continue
+        img = bpy.data.images.load(path, check_existing=True); w, h = img.size
+        D = BACKDROP_DEPTH[b['layer']]
+        cover = 2 * D * 18.0 / lens * 1.7          # 36 mm film: half-width 18 mm; 1.7 margin for pans/whips
+        H = max(cover * 1.78, 1.0); W = max(H * w / max(1, h), cover * 1.6)
+        bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0)); ob = bpy.context.object
+        ob.name = f"backdrop {b['layer']}"
+        ob.scale = (W, H, 1); ob.rotation_euler = (math.pi / 2, 0, 0)
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        p = frm + fwd * D; ob.location = (p.x, p.y, H / 2 - H * (0.18 if b['layer'] == 'far' else 0.08))
+        ob.rotation_euler = (0, 0, math.atan2(fwd.y, fwd.x) - math.pi / 2)
+        m = bpy.data.materials.new('backdrop'); m.use_nodes = True; nt = m.node_tree
+        for n in list(nt.nodes):
+            if n.type != 'OUTPUT_MATERIAL': nt.nodes.remove(n)
+        out = next(n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL')
+        tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = img; tex.extension = 'EXTEND'
+        em = nt.nodes.new('ShaderNodeEmission'); tr = nt.nodes.new('ShaderNodeBsdfTransparent'); mix = nt.nodes.new('ShaderNodeMixShader')
+        em.inputs['Strength'].default_value = 1.0
+        nt.links.new(tex.outputs['Color'], em.inputs['Color']); nt.links.new(tex.outputs['Alpha'], mix.inputs['Fac'])
+        nt.links.new(tr.outputs[0], mix.inputs[1]); nt.links.new(em.outputs[0], mix.inputs[2]); nt.links.new(mix.outputs[0], out.inputs['Surface'])
+        try: m.blend_method = 'HASHED'
+        except (AttributeError, TypeError): pass
+        ob.data.materials.append(m); ob.visible_shadow = False
+        try: ob.visible_diffuse = False; ob.visible_glossy = False
+        except AttributeError: pass
+        ob['backdrop'] = b['layer']; made.append(ob)
+    return made
+
+
 def build_props(shot):
     """Whitelisted offline CC0 models (shot_schema checks every id) standing in the scene."""
     from set_library import model
@@ -439,6 +482,7 @@ def main():
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     cards = [build_card(cd, sc.camera, shot['duration'], fps) for cd in shot.get('cards', [])]
+    build_backdrop(shot, sc.camera)
     if shot.get('composition'):
         from composition import enforce
         enforce(sc, shot, scenery, [c for c in cards if c is not None], roots, out)

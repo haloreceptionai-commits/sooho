@@ -4,7 +4,7 @@ from pathlib import Path
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Vector
-from composition_rules import visible_height, preview_frames
+from composition_rules import visible_height, preview_frames, clearance_frames
 
 
 def projected(scene, camera, obj):
@@ -16,7 +16,7 @@ def enforce(scene, shot, scenery, cards, roots, out):
     rules = shot.get('composition')
     if not rules: return
     n = round(shot['duration'] * shot.get('fps', 30))
-    frames = sorted(set([1, n] + [max(1, round(n * t / 8)) for t in range(1, 8)]))
+    frames = clearance_frames(n)
     heads = [o for r in roots for o in r.children_recursive if o.type == 'MESH' and (o.name.startswith('egg head') or o.get('human_head'))]
     hidden = set(); fixes = []; key = cards[0] if cards else None
     # Evaluate the same camera keys that rendering uses. Conservatively hide any
