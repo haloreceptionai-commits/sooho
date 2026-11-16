@@ -374,14 +374,15 @@ BACKDROP_DEPTH = {'far': 48.0, 'mid': 24.0}
 
 
 def apply_mood(mode):
-    """Engine sets light themselves for day; night/sunset/rain re-key the same sun and sky so people and
+    """Readable 'day for night' (frames must never read as black to the encoder QA, which rejects them).
+    Engine sets light themselves for day; night/sunset/rain re-key the same sun and sky so people and
     ground match the story time (the painted backdrop is dimmed to match in build_backdrop)."""
     if mode == 'day': return
     sc = bpy.context.scene; bg = sc.world.node_tree.nodes.get('Background')
     suns = [o for o in bpy.data.objects if o.type == 'LIGHT' and o.data.type == 'SUN']
     if mode == 'night':
-        for o in suns: o.data.energy = 0.35; o.data.color = (0.45, 0.58, 1.0); o.rotation_euler.x = math.radians(35)
-        if bg: bg.inputs['Strength'].default_value = 0.012
+        for o in suns: o.data.energy = 0.9; o.data.color = (0.5, 0.62, 1.0); o.rotation_euler.x = math.radians(35)
+        if bg: bg.inputs['Strength'].default_value = 0.03
         for x, y, e in ((-1.6, -1.2, 260), (2.2, 1.5, 140)):   # warm firelight on the cast, cool moon rim from the sun
             bpy.ops.object.light_add(type='POINT', location=(x, y, 1.6)); L = bpy.context.active_object.data
             L.energy = e; L.color = (1.0, 0.55, 0.25); L.shadow_soft_size = 0.4
@@ -393,7 +394,7 @@ def apply_mood(mode):
         if bg: bg.inputs['Strength'].default_value = 0.08
 
 
-MOOD_BACKDROP = {'day': ((1, 1, 1), 1.0), 'sunset': ((1.0, 0.75, 0.55), 0.85), 'night': ((0.35, 0.45, 0.8), 0.22), 'rain': ((0.7, 0.75, 0.82), 0.6)}
+MOOD_BACKDROP = {'day': ((1, 1, 1), 1.0), 'sunset': ((1.0, 0.75, 0.55), 0.85), 'night': ((0.55, 0.65, 1.0), 0.6), 'rain': ((0.7, 0.75, 0.82), 0.6)}
 
 
 def fade_ground(cam_xy, start, end, colour=None):
