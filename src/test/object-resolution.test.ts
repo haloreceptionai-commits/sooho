@@ -17,7 +17,7 @@ describe('Stage 1 object resolution (owner rule: whole phrase, never a keyword)'
   it('turns an unmatched phrase into a painted card and drops the keyword-picked model', () => {
     const { scenes } = resolveSceneObjects([scene([{ id: 'molasses_tank', phrase: 'huge riveted steel molasses storage tank, 1919', size: 'huge' }],
       [{ kind: 'asset', asset: 'q-animatedtanks/Tank', place: 'background', motion: 'none' }, { kind: 'telescope', place: 'ground_left', motion: 'none' }])]);
-    const props = (scenes[0] as { props: { asset?: string; size?: string }[] }).props;
+    const props = (scenes[0] as unknown as { props: { asset?: string; size?: string }[] }).props;
     expect(props).toEqual([expect.objectContaining({ asset: 'card/molasses_tank', size: 'huge', place: 'background' })]);
   });
   it('reuses one card per object id across scenes and lists its scenes for painting', () => {

@@ -5,8 +5,8 @@ import { LIBRARY, nameMatch, words, type LibraryObject } from './object-library'
 
 export type ObjectSize = 'small' | 'medium' | 'large' | 'huge';
 export interface ShotObject { id: string; phrase: string; size: ObjectSize }
-type Prop = { kind: string; place: string; motion: string; asset?: string; phrase?: string; size?: ObjectSize };
-type Scene = { props?: Prop[]; objects?: ShotObject[]; location?: string; [k: string]: unknown };
+type Prop = { kind: string; place: string; motion: string; asset?: string | undefined; phrase?: string | undefined; size?: ObjectSize | undefined };
+type Scene = { props?: Prop[] | undefined; objects?: ShotObject[] | undefined; location?: string | undefined; [k: string]: unknown };
 export interface MissingObject { scene: number; phrase: string; reason: string }
 
 // Size/era/filler words describe an object but never decide which model it is.
@@ -73,7 +73,7 @@ export function resolveSceneObjects<T extends Scene>(scenes: T[], maxCards = 8, 
 }
 
 /** Painted object cards a resolved direction needs: id, the phrase to paint, and the scenes it appears in. */
-export function objectsToPaint(scenes: { props?: Prop[] }[]): { name: string; look: string; scenes: number[] }[] {
+export function objectsToPaint(scenes: { props?: Prop[] | undefined }[]): { name: string; look: string; scenes: number[] }[] {
   const m = new Map<string, { name: string; look: string; scenes: number[] }>();
   scenes.forEach((s, i) => (s.props ?? []).forEach(p => {
     if (p.kind !== 'asset' || !p.asset?.startsWith('card/')) return;
