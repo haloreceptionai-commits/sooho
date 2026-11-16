@@ -43,6 +43,8 @@ export function liftDressing<T extends { phrase?: string; id?: string }>(place: 
     const text = ` ${String(o.phrase ?? o.id ?? "").toLowerCase().replace(/[^a-z]+/g, " ")} `;
     const hit = PLACE_DRESSING.map(id => ({ id, len: Math.max(0, ...DRESSING[id]!.words.filter(w => text.includes(` ${w} `)).map(w => w.length)) }))
       .filter(h => h.len > 0 && !(DRESSING[h.id]!.water && place.terrain !== "river_crossing")).sort((a, b) => b.len - a.len)[0];
+    // Combination: cattle + fire words is the burning-ox herd, not a torch or a plain ox.
+    if (hit && /\b(ox|oxen|cattle|cows?|bulls?)\b/.test(text) && /\b(burning|flaming|fire|torch|torches|ablaze)\b/.test(text) && PLACE_DRESSING.includes("ox_burning")) hit.id = "ox_burning";
     if (!hit) { kept.push(o); continue; }
     if (!dressing.some(d => d.id === hit.id) && dressing.length < 6) dressing.push({ id: hit.id, count: /\b(herd|oxen|cattle|hundreds|thousands|torches|tents|spears|shields)\b/.test(text) ? 6 : 1 });
   }
