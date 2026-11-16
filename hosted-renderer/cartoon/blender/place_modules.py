@@ -219,7 +219,8 @@ def build_place(p, mode, duration=1.0, fps=30):
                   seed=hash(it['id']) % 97, frames=frames, fps=fps)
     w = bpy.context.scene.world.node_tree; nodes = w.nodes
     sky = nodes.new('ShaderNodeTexSky')
-    try: sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(30); sky.sun_rotation = math.radians(35)
+    elev = {'night': -3.5, 'sunset': 4, 'rain': 18}.get(mode, 30)   # night: sun below the horizon so the sky itself is dark; dusk/dawn: low and warm
+    try: sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(elev); sky.sun_rotation = math.radians(35)
     except Exception: pass
     w.links.new(sky.outputs[0], nodes['Background'].inputs['Color']); nodes['Background'].inputs['Strength'].default_value = .2
     bpy.ops.object.light_add(type='SUN', rotation=(math.radians(52), 0, math.radians(35)))

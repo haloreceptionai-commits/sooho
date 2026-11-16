@@ -382,9 +382,9 @@ def apply_mood(mode):
     sc = bpy.context.scene; bg = sc.world.node_tree.nodes.get('Background')
     suns = [o for o in bpy.data.objects if o.type == 'LIGHT' and o.data.type == 'SUN']
     if mode == 'night':
-        for o in suns: o.data.energy = 0.9; o.data.color = (0.5, 0.62, 1.0); o.rotation_euler.x = math.radians(35)
-        if bg: bg.inputs['Strength'].default_value = 0.03
-        for x, y, e in ((-1.6, -1.2, 260), (2.2, 1.5, 140)):   # warm firelight on the cast, cool moon rim from the sun
+        for o in suns: o.data.energy = 0.45; o.data.color = (0.42, 0.56, 1.0); o.rotation_euler.x = math.radians(35)   # moonlight: cold, dim, clearly not daytime
+        if bg: bg.inputs['Strength'].default_value = 0.07
+        for x, y, e in ((-1.6, -1.2, 170), (2.2, 1.5, 90)):   # warm firelight on the cast, cool moon rim from the sun
             bpy.ops.object.light_add(type='POINT', location=(x, y, 1.6)); L = bpy.context.active_object.data
             L.energy = e; L.color = (1.0, 0.55, 0.25); L.shadow_soft_size = 0.4
     elif mode == 'sunset':
