@@ -231,7 +231,7 @@ class Director:
         if ctx['hint']: prefs.insert(1 if prefs else 0, ctx['hint'])
         prefs += ['medium', 'orbit', 'low', 'close', 'wide', 'high']
         for p in prefs:
-            if p == prev or recent.count(p) >= 2: continue
+            if p == prev or recent.count(p) >= 2 or p in self.history[-2:]: continue
             if p == 'establish' and 'establish' in self.history[-3:]: continue
             if p in ('ots',) and ctx['n_people'] < 2: continue
             if p in ('close', 'xclose', 'ots') and ctx['n_subjects'] == 0: continue
