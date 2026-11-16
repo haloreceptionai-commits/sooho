@@ -143,6 +143,21 @@ export const directCartoonOperation = async ({ data }: { data: { scenes: string[
   return cartoonDirection.parse(sanitizeDirection({ cast: cast!, scenes: merged }, narration));
 };
 
+/** Objects the 3D library has no model for are composed from 3-16 simple shapes (box, cylinder, sphere, cone, torus), sized in metres,
+ *  so any topic gets a recognisable 3D prop instead of a flat painted card. Strictly validated by place-spec.assemblySpec. */
+export async function composePropsOp(d: { phrases: { phrase: string; size?: string }[]; deployment: string }) {
+  const vec = { type: 'array', items: { type: 'number' }, minItems: 3, maxItems: 3 };
+  const schema = { type: 'object', additionalProperties: false, required: ['items'], properties: { items: { type: 'array', items: { type: 'object', additionalProperties: false,
+    required: ['phrase', 'name', 'height', 'count', 'layout', 'parts'], properties: { phrase: { type: 'string' }, name: { type: 'string' }, height: { type: 'number' }, count: { type: 'integer' },
+      layout: { type: 'string', enum: ['near', 'far', 'row', 'cluster', 'line'] },
+      parts: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['shape', 'size', 'pos', 'color', 'glow'], properties: {
+        shape: { type: 'string', enum: ['box', 'cylinder', 'sphere', 'cone', 'torus'] }, size: vec, pos: vec, color: vec, glow: { type: 'number' } } } } } } } } };
+  const r = await azureJson<{ items: { phrase: string; name: string; height: number; count: number; layout: string; parts: unknown }[] }>(d.deployment,
+    `You are a 3D prop modeller for a cartoon explainer. For each object phrase, build a recognisable low-poly version from 3-16 primitive shapes. Rules: shape is box, cylinder, sphere, cone or torus; size is [x,y,z] full extents in an arbitrary unit (0.01-20); pos is the part centre [x,y,z] in the same unit, z up, the object stands on z=0 around x=0,y=0; color is [r,g,b] 0-1 linear (use believable material colours: wood brown, steel grey, brick red, canvas cream); glow 0 unless the part emits light (fire, lamp, screen: 4-10). height is the real-world height of the finished object in metres. count is how many appear (1 unless the phrase is plural). layout near/far/row/cluster/line. Keep proportions faithful: a water tower is a tank on legs, a catapult is a frame with an arm, a tent is a cone on a cylinder. name is 2-4 words.`,
+    d.phrases.map((p, i) => `${i + 1}. ${p.phrase}${p.size ? ` (${p.size})` : ''}`).join('\n'), 'compose_props', schema, 'Prop composer', 'low');
+  return r.items ?? [];
+}
+
 const directCartoonChunk = async (data: { scenes: string[]; deployment: string; advanced?: boolean | undefined }) => {
     const placeMod = await import('./place-spec');
     const prototypeActions=new Set(['aim','fire','load','place','inspect','strike','tap','throw']);
@@ -190,10 +205,29 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
       const { resolveSceneObjects } = await import('./object-resolution');
       const { requirePlaces, liftDressing } = placeMod;
       const places = requirePlaces(raw.scenes as { place?: unknown }[]);   // stops here, before any paid rendering
-      const located = edited.map((s, i) => {
-        const lifted = liftDressing(places[i]!, Array.isArray(raw.scenes[i]?.['objects']) ? raw.scenes[i]!['objects'] as { phrase?: string; id?: string }[] : []);
+      let located = edited.map((s, i) => {
+        const lifted = liftDressing(places[i]!, Array.isArray(raw.scenes[i]?.['objects']) ? raw.scenes[i]!['objects'] as { phrase?: string; id?: string; size?: string }[] : []);
         return { ...s, location: String(raw.scenes[i]?.['location'] ?? '').trim().slice(0, 160) || undefined, place: lifted.place, objects: lifted.objects };
       });
+      // Anything the 5,000-model library cannot match is composed from shapes (one batched call); a failure keeps the painted-card fallback.
+      try {
+        const need: { phrase: string; size?: string }[] = [];
+        for (const sc of located) for (const o of (sc.objects ?? []) as { phrase?: string; size?: string }[]) {
+          const phrase = String(o.phrase ?? '').trim();
+          if (phrase && need.length < 8 && !need.some(n => n.phrase === phrase)) need.push({ phrase, size: o.size });
+        }
+        if (need.length) {
+          const composed = await composePropsOp({ phrases: need, deployment: data.deployment });
+          const byPhrase = new Map(composed.map(c => [String(c.phrase).trim(), c]));
+          located = located.map(sc => {
+            const items = ((sc.objects ?? []) as { phrase?: string }[]).map(o => byPhrase.get(String(o.phrase ?? '').trim())).filter((c): c is NonNullable<typeof c> => Boolean(c));
+            if (!items.length) return sc;
+            const withAsm = placeMod.addAssemblies(sc.place as never, items.map(c => ({ name: c.name, parts: c.parts, height: c.height, count: c.count, layout: c.layout })));
+            const done = new Set(items.map(c => String(c.phrase).trim()));
+            return { ...sc, place: withAsm, objects: ((sc.objects ?? []) as { phrase?: string }[]).filter(o => !done.has(String(o.phrase ?? '').trim())) } as typeof sc;
+          });
+        }
+      } catch (e) { console.warn('Prop composer skipped', e instanceof Error ? e.message : e); }
       const resolved = resolveSceneObjects(located as never[], Math.max(0, Math.min(8, 24 - cast.length * 4)));
       if (resolved.missing.length) console.warn('Missing objects', JSON.stringify(resolved.missing));
       edited = resolved.scenes as typeof edited;

@@ -18,8 +18,16 @@ PALETTE = {  # low ground, rock, high ground colours per terrain (linear)
 }
 
 
-def terrain_mat(t):
-    low, rock, high = PALETTE[t]
+GROUND_PAL = {   # custom places: ground colour sets (low, rock/slope, high)
+    'grass': ((0.16, 0.30, 0.08), (0.28, 0.26, 0.20), (0.22, 0.34, 0.12)), 'sand': ((0.62, 0.46, 0.22), (0.45, 0.33, 0.20), (0.70, 0.52, 0.26)),
+    'snow': ((0.82, 0.86, 0.92), (0.32, 0.32, 0.36), (0.95, 0.97, 1.0)), 'rock': ((0.30, 0.28, 0.26), (0.22, 0.2, 0.19), (0.45, 0.42, 0.4)),
+    'dirt': ((0.33, 0.24, 0.14), (0.28, 0.22, 0.17), (0.4, 0.3, 0.18)), 'stone': ((0.55, 0.52, 0.47), (0.4, 0.38, 0.34), (0.62, 0.6, 0.55)),
+    'mud': ((0.18, 0.13, 0.08), (0.22, 0.17, 0.12), (0.2, 0.16, 0.1)), 'ice': ((0.7, 0.85, 0.95), (0.45, 0.6, 0.75), (0.9, 0.96, 1.0)),
+    'asphalt': ((0.1, 0.1, 0.11), (0.14, 0.14, 0.15), (0.18, 0.18, 0.19)), 'metal': ((0.35, 0.37, 0.4), (0.25, 0.27, 0.3), (0.5, 0.52, 0.56))}
+
+
+def terrain_mat(t, params=None):
+    low, rock, high = GROUND_PAL[(params or {}).get('ground', 'grass')] if t == 'custom' else PALETTE[t]
     m = bpy.data.materials.new('terrain'); m.use_nodes = True; nt = m.node_tree
     b = nt.nodes['Principled BSDF']; b.inputs['Roughness'].default_value = 0.95
     for k in ('Specular IOR Level', 'Specular'):
@@ -43,14 +51,26 @@ def terrain_mat(t):
     return m
 
 
-def build_terrain(t, seed, size=180.0, n=150):
+def build_terrain(t, seed, size=180.0, n=150, params=None):
     me = bpy.data.meshes.new('terrain'); bm = bmesh.new()
     bmesh.ops.create_grid(bm, x_segments=n, y_segments=n, size=size / 2)
-    for v in bm.verts: v.co.z = height(t, v.co.x, v.co.y, seed)
+    for v in bm.verts: v.co.z = height(t, v.co.x, v.co.y, seed, params)
     bm.to_mesh(me); bm.free()
     for p in me.polygons: p.use_smooth = True
     ob = bpy.data.objects.new('terrain', me); bpy.context.collection.objects.link(ob)
-    ob.data.materials.append(terrain_mat(t)); ob['place_terrain'] = t
+    ob.data.materials.append(terrain_mat(t, params)); ob['place_terrain'] = t
+    water = (params or {}).get('water', 'none') if t == 'custom' else 'none'
+    if water in ('sea', 'lake'):
+        from place_spec import COAST_Y
+        bpy.ops.mesh.primitive_plane_add(size=1, location=(0, COAST_Y + 60, -0.35)); w = bpy.context.object; w.name = 'sea'; w.scale = (size * 2, 120, 1)
+        m = bpy.data.materials.new('water'); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
+        b.inputs['Base Color'].default_value = (0.04, 0.2, 0.3, 1) if water == 'sea' else (0.08, 0.26, 0.28, 1); b.inputs['Roughness'].default_value = 0.06
+        w.data.materials.append(m)
+    elif water == 'river':
+        bpy.ops.mesh.primitive_plane_add(size=1, location=(0, RIVER_Y, -0.35)); w = bpy.context.object; w.name = 'river'; w.scale = (size, RIVER_HALF * 2 + 2.5, 1)
+        m = bpy.data.materials.new('water'); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
+        b.inputs['Base Color'].default_value = (0.05, 0.16, 0.2, 1); b.inputs['Roughness'].default_value = 0.08
+        w.data.materials.append(m)
     if t == 'coast':
         from place_spec import COAST_Y
         bpy.ops.mesh.primitive_plane_add(size=1, location=(0, COAST_Y + 60, -0.35)); w = bpy.context.object; w.name = 'sea'; w.scale = (size * 2, 120, 1)
@@ -175,14 +195,37 @@ def ox_coat(root):
                 seen.add(m.name)
 
 
+def build_assembly(it):
+    """An object the library lacks, composed from <=16 validated primitives (shape, size, position, colour, glow) and scaled to its real height."""
+    parts = it['asm']['parts']; shapes = {'box': 'cube', 'cylinder': 'cylinder', 'sphere': 'uv_sphere', 'cone': 'cone', 'torus': 'torus'}
+    root = bpy.data.objects.new('asm:' + it['asm']['name'], None); bpy.context.collection.objects.link(root)
+    top = max((q['pos'][2] + q['size'][2] / 2) for q in parts); bottom = min((q['pos'][2] - q['size'][2] / 2) for q in parts)
+    span = max(1e-3, top - bottom); k = it['height'] / span
+    for q in parts:
+        getattr(bpy.ops.mesh, f"primitive_{shapes[q['shape']]}_add")(location=(0, 0, 0))
+        o = bpy.context.object; o.scale = tuple(v / 2 if q['shape'] != 'torus' else v / 3 for v in q['size']); o.parent = root
+        o.location = (q['pos'][0], q['pos'][1], q['pos'][2] - bottom)
+        m = bpy.data.materials.new('asm part'); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
+        b.inputs['Base Color'].default_value = (*q['color'], 1); b.inputs['Roughness'].default_value = 0.7
+        if q.get('glow'):
+            b.inputs['Emission Color' if 'Emission Color' in b.inputs else 'Emission'].default_value = (*q['color'], 1); b.inputs['Emission Strength'].default_value = q['glow']
+        o.data.materials.append(m)
+        for pl in o.data.polygons: pl.use_smooth = q['shape'] in ('sphere', 'cylinder', 'cone')
+    root.scale = (k, k, k); root.location = it['pos']; root.rotation_euler.z = math.radians(it['yaw']); root['place_item'] = it['id']
+    return root
+
+
 def build_place(p, mode, duration=1.0, fps=30):
     from set_library import model, _MODEL_CACHE
-    if p['terrain'] not in PALETTE: return False
+    if p['terrain'] not in PALETTE and p['terrain'] != 'custom': return False
     frames = max(1, int(round(duration * fps)))
-    build_terrain(p['terrain'], p['seed'])
+    build_terrain(p['terrain'], p['seed'], params=p.get('params'))
     herd = 0
     for it in p['items']:
         x, y, z = it['pos']
+        if it['id'].startswith('asm:'): build_assembly(it); continue
+        if it['id'].startswith('lib:'):
+            root = model({'id': it['model'], 'pos': [x, y, z], 'height': it['height'], 'yaw': it['yaw']}); root['place_item'] = it['id']; continue
         is_ox = bool(it.get('horns') or it.get('animate'))
         if is_ox:
             _MODEL_CACHE.pop(it['model'], None)   # each animal needs its own armature, so import it fresh instead of copying

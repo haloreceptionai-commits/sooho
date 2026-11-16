@@ -18,6 +18,9 @@ MANIFEST = json.loads((ASSETS / 'manifest.json').read_text())
 def asset_path(identity, kind, role=None):
     matches = [e for e in MANIFEST if e['id'] == identity and e['kind'] == kind and (role is None or e.get('role') == role)]
     if len(matches) != 1:
+        if kind == 'model':   # any model of the full CC0 library (catalog-checked, never a caller path)
+            import library
+            if library.known(identity): return library.path(identity)
         raise ValueError(f'Unknown offline asset {kind}/{identity}/{role}')
     return str(ASSETS / matches[0]['path'])
 

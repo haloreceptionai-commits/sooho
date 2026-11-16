@@ -105,3 +105,37 @@ class StoryTimeTests(unittest.TestCase):
         smooth_story_time(m); a = [s['place']['time'] for s in m['shots']]
         smooth_story_time(m); self.assertEqual(a, [s['place']['time'] for s in m['shots']])
 
+
+
+class OpenWorldTests(unittest.TestCase):
+    ASM = {'name': 'water tower', 'parts': [{'shape': 'cylinder', 'size': [2, 2, 2], 'pos': [0, 0, 3], 'color': [.5, .4, .3], 'glow': 0}]}
+
+    def spec(self, dressing):
+        return {'terrain': 'custom', 'ground': 'asphalt', 'relief': 'flat', 'water': 'none', 'time': 'day', 'weather': 'clear', 'dressing': dressing}
+
+    def test_custom_place_with_library_and_assembled_objects_compiles(self):
+        import library
+        if not library.known('city-kit-commercial/building-a'): self.skipTest('object library not present')
+        s = self.spec([{'lib': 'city-kit-commercial/building-a', 'count': 3, 'height': 14, 'layout': 'line'}, {'asm': self.ASM, 'count': 1, 'height': 7, 'layout': 'far'}])
+        P.validate(s, 0)
+        out = P.compile_place(s, 2); P.validate_compiled(out)
+        self.assertEqual(sum(1 for i in out['items'] if i['id'] == 'lib:city-kit-commercial/building-a'), 3)
+        self.assertTrue(any(i['id'].startswith('asm:') for i in out['items']))
+        self.assertEqual(out['params']['ground'], 'asphalt')
+        for it in out['items']:
+            self.assertGreater((it['pos'][0] ** 2 + it['pos'][1] ** 2) ** .5, P.CLEAR - 0.5, it['id'])
+
+    def test_unknown_library_model_and_bad_assembly_are_rejected(self):
+        with self.assertRaisesRegex(P.PlaceError, 'not in the object library'): P.validate(self.spec([{'lib': 'nope/nothing', 'count': 1, 'height': 2}]), 0)
+        bad = {'name': 'x', 'parts': [{'shape': 'teapot', 'size': [1, 1, 1], 'pos': [0, 0, 0], 'color': [1, 1, 1]}]}
+        with self.assertRaisesRegex(P.PlaceError, 'bad part'): P.validate(self.spec([{'asm': bad, 'count': 1, 'height': 2}]), 0)
+        with self.assertRaises(P.PlaceError): P.validate({**self.spec([]), 'ground': 'lava'}, 0)
+
+    def test_ground_params_only_for_custom(self):
+        with self.assertRaisesRegex(P.PlaceError, 'custom'): P.validate({'terrain': 'plain', 'ground': 'sand', 'time': 'day', 'weather': 'clear', 'dressing': []}, 0)
+
+    def test_custom_relief_and_water_shape_the_ground(self):
+        p = {'relief': 'mountains', 'water': 'none'}
+        self.assertEqual(P.height('custom', 1, 1, 3, p), 0.0)
+        self.assertGreater(P.height('custom', 30, 30, 3, p), 8)
+        self.assertLess(P.height('custom', 0, 20, 3, {'relief': 'flat', 'water': 'sea'}), -0.5)
