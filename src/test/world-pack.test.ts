@@ -16,7 +16,7 @@ describe("world pack (any topic)", () => {
     const p = worldPack(scenes, ["In 1835 the Sun newspaper printed it."]);
     expect(p.year).toBe(1835);
     expect(p.places.map(x => x.slug)).toEqual(["moon_crater", "new_york_newspaper", "london_street"]);
-    expect(p.places[1].indoor).toBe(true);
+    expect(p.places[1]?.indoor).toBe(true);
     expect(backdropKeys(p)).toHaveLength(6);
   });
   it("backdrop paintings are capped at 8 per video", () => expect(BACKDROP_PAINT_CAP).toBe(8));

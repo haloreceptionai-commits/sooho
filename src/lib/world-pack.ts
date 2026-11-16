@@ -40,7 +40,7 @@ export function worldPack(scenes: { location?: string }[], narration: string[]):
     const p = by.get(slug) ?? { slug, location: loc, scenes: [], indoor: INDOOR.test(loc) };
     p.scenes.push(i); by.set(slug, p);
   });
-  const places = [...by.values()].sort((a, b) => b.scenes.length - a.scenes.length || a.scenes[0] - b.scenes[0]).slice(0, MAX_PLACES);
+  const places = [...by.values()].sort((a, b) => b.scenes.length - a.scenes.length || (a.scenes[0] ?? 0) - (b.scenes[0] ?? 0)).slice(0, MAX_PLACES);
   return { year: storyYear(narration), places };
 }
 
