@@ -30,11 +30,11 @@ SET_WORDS = {
     'workshop': 'invented inventor invention machine machines lab laboratory experiment experiments factory engineer engineers built device workshop scientist scientists tested',
     'saloon': 'bar saloon pub tavern drink drinks whisky beer',
     'room': 'home bedroom family kitchen wife husband child children son daughter',
-    'farm_field': 'farm farms farmer farmers crop crops wheat field fields harvest barn fence fences plough grain ranch cattle sheep land settlers soldier-settlers',
-    'outback': 'desert outback drought dry dust sand australia australian plains bush wilderness west western scrub nowhere',
+    'farm_field': 'farm farms farmer farmers crop crops wheat field fields harvest barn fence fences plough grain ranch cattle sheep land settlers soldier-settlers corn hay tractor',
+    'outback': 'desert outback drought dry dust sand australia australian plains bush wilderness west western scrub nowhere dam waterhole rabbits emus emu kangaroo',
     'forest': 'forest forests woods jungle trees hunting hunter hunters wild wolves',
     'market': 'market markets merchant merchants trade traders shop shops sold sell buy bought price prices store',
-    'battlefield': 'army armies soldier soldiers troops war battle battles gun guns machine-gun machine-guns ammunition rounds bullets military major artillery cannon fired attack attacked enemy campaign platoon',
+    'battlefield': 'army armies troops war battle battles battlefield camp camps tents military artillery cannon enemy campaign platoon front trenches siege',
     'street': 'city cities street streets crowd crowds public citizens people town-hall downtown',
     'village': 'village villages villagers town towns locals neighbours neighbors',
 }
@@ -52,7 +52,8 @@ VERB_ACTION = [  # first match wins; literal verbs in the spoken line drive the 
     (r'\b(carr\w*|haul\w*|deliver\w*|lift\w*|brought|bring\w*)\b', 'carry'),
     (r'\b(dug|dig\w*|smash\w*|hit|hits|hammer\w*|chop\w*|struck|strike\w*|built|build\w*)\b', 'swing'),
     (r'\b(pour\w*|spill\w*|fill\w*)\b', 'pour'),
-    (r'\b(fell|fall\w*|died|die|dies|dead|collaps\w*|crash\w*|kill\w*)\b', 'fall'),
+    (r'\b(kill\w*|hunt\w*|cull\w*)\b', 'aim'),
+    (r'\b(fell|fall\w*|died|die|dies|collaps\w*|crash\w*)\b', 'fall'),
     (r'\b(won|win|wins|celebrat\w*|cheer\w*|victory|triumph\w*|success\w*)\b', 'cheer'),
     (r'\b(panic\w*|terrif\w*|chaos|disaster|destroy\w*|ruin\w*|lost|failed|fail\w*|humiliat\w*)\b', 'panic'),
     (r'\b(point\w*|show\w*|explain\w*|discover\w*|found|notic\w*|look\w*|spott\w*|announc\w*|declar\w*|order\w*)\b', 'point'),
@@ -148,6 +149,8 @@ def plan_locations(m):
     out = []; held = 0.0; prev = None
     for i, s in enumerate(shots):
         txt = text_of(spoken(m, s['start'], s['end'])); sc = score_sets(txt)
+        for p in s.get('props') or []:
+            for k, v in score_sets(re.sub(r'[^a-z]+', ' ', str(p.get('asset') or p.get('kind') or '').lower())).items(): sc[k] = sc.get(k, 0) + 0.3 * v
         world = WORLD_SET.get(s.get('world'))
         if world and world != 'outback': sc[world] = sc.get(world, 0) + 0.6  # Visual Director's place is a hint, not a cage
         if prev: sc[prev] = sc.get(prev, 0) + (0.9 if held < 9 else -0.4)
@@ -255,9 +258,15 @@ class Director:
             actors = [{'id': s['actor'], 'action': s.get('action', 'idle'), 'expression': s.get('expression', 'neutral')}]
         if not beasts and s.get('actor') and f"{s['actor']}.png" in self.cards and ANIMAL.search(str(s['actor']).lower()):
             beasts = [{'id': s['actor'], 'action': s.get('action', 'idle')}]
+        animal_cards = [c['id'] for c in (m.get('cast') or []) if ANIMAL.search(c['id'].lower()) and f"{c['id']}.png" in self.cards]
+        named = bool(ANIMAL.search(txt or whole))
+        if named and animal_cards and not beasts: beasts = [{'id': k, 'action': 'run'} for k in animal_cards]
         verb = next((act for pat, act in VERB_ACTION if re.search(pat, txt or whole)), None)
+        beast_verb = verb if named and beasts else None
+        if beast_verb in ('run', 'walk', 'panic', 'fall'):  # "the emus scattered": the animals move, people react
+            verb = 'aim' if re.search(r'\b(gun\w*|fir\w*|shot|soldiers?|bullets?|kill\w*)\b', whole) and any(self.cast_look.get(x['id'], {}).get('outfit') == 'soldier' for x in actors) else 'point'
         herd = bool(HERD_WORDS.search(whole)) and bool(beasts)
-        moving = verb in ('run', 'walk') and (actors or beasts)
+        moving = (verb in ('run', 'walk') and bool(actors)) or (beast_verb in ('run', 'walk', 'panic') and bool(beasts))
         # --- story objects (only when the words name them) and whitelisted props
         story_obj = []
         for p in s.get('props') or []:
@@ -320,11 +329,11 @@ class Director:
                 h = 1.5 - 0.12 * (k // 2)
                 p0 = at(S, F, R, depth, side)
                 cd = {'image': f'{bid}.png', 'pos': p0, 'height': round(max(.8, h), 2)}
-                if moving or verb in ('panic',) or herd and verb in ('run', 'walk', None):
-                    span = (2.6 if verb == 'run' or verb == 'panic' else 1.2) * dur
+                if beast_verb in ('run', 'walk', 'panic') or (herd and not beast_verb == 'fall' and verb != 'aim'):
+                    span = (2.6 if beast_verb in ('run', 'panic') else 1.2) * dur
                     cd['pos'] = at(S, F, R, depth, side - travel_dir * span / 2)
                     cd['to'] = at(S, F, R, depth + 0.2 * (k % 3), side + travel_dir * span / 2)
-                    cd['hop'] = 0.18 if verb in ('run', 'panic') else 0.08
+                    cd['hop'] = 0.18 if beast_verb in ('run', 'panic') else 0.08
                 cards.append(cd)
         if CROWD_WORDS.search(whole) and st in OUTDOOR and kind in ('establish', 'wide', 'high', 'orbit', 'low'):
             cact = 'run' if verb in ('run', 'panic') else 'cheer' if verb == 'cheer' else 'stand'
