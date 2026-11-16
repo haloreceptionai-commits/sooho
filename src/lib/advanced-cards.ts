@@ -6,7 +6,7 @@
  * Every file is saved under the video's media folder as soon as it is made, so Resume never repays for finished cards.
  */
 import { supabase } from "@/integrations/supabase/client";
-import animalVocab from "../../hosted-renderer/cartoon/animals.json";
+import animalVocab from "../../hosted-renderer/cartoon/blender/animals.json";
 import { checkCardText, designAdvancedCards, paintAdvancedCard } from "@/lib/pipeline.functions";
 import { CARD_POSES, type cartoonDirection } from "@/lib/cartoon-job";
 import type { z } from "zod";
@@ -194,7 +194,7 @@ export function placeObjectCards(direction: Direction, painted: PaintedCards): {
   return { direction: { ...direction, scenes }, cards: painted.cards.filter(c => !c.id.startsWith("obj-") || used.has(c.id)) };
 }
 
-// One animal list shared with the renderer (hosted-renderer/cartoon/animals.json): a painted card must also be shown.
+// One animal list shared with the renderer (hosted-renderer/cartoon/blender/animals.json): a painted card must also be shown.
 const ANIMALS: string[] = animalVocab.animals;
 const PLURAL: Record<string, string> = animalVocab.plural;
 const animalIn = (word: string) => { const w = word.toLowerCase().replace(/[^a-z]/g, ""); const s = PLURAL[w] ?? (ANIMALS.includes(w) ? w : w.replace(/(es|s)$/, "")); return ANIMALS.includes(s) ? s : (ANIMALS.includes(w.replace(/s$/, "")) ? w.replace(/s$/, "") : null); };

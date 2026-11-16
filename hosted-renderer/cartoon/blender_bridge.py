@@ -3,12 +3,12 @@ declarative Blender shot (via the step-6 shot_director compiler), renders one fr
 GPU, upscales to 1080x1920 and burns in the same captions as the web engine. Output files and the
 checkpoint use capture.py's format and input hash, so joining, mixing and QA are unchanged.
 """
-from animals import ANIMAL
 import argparse, hashlib, json, math, os, re, subprocess, sys, tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'blender'))
+from animals import ANIMAL  # noqa: E402
 from shot_director import compile_one, ZONES  # noqa: E402
 from shot_schema import validate_shot  # noqa: E402
 
