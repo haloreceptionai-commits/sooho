@@ -1,0 +1,59 @@
+{
+ "topic": "Great Moon Hoax of 1835",
+ "script": "A newspaper sells bat men as morning truth in 1835 New York. Richard Adams Locke works in the Sun’s busy office. Rival papers stack on the wall. How do you sell the Moon for a penny? A small science column sits unsold. Richard Adams Locke types Sir John Herschel and a journal note. A page reads Great Moon Discoveries. Pennies trade for papers in seconds. An engraving shows winged Vespertilio-homo. Another plate shows tall crystal domes. A third shows a shore and herds. A rival marks a note: that journal ended 1832. Herschel maps stars far away, unaware. Front pages read August 25 to 31, 1835. A small notice hints it was fiction. Presses spin and coins fall into a box. Locke watches the stand empty fast. He sold a look. A newspaper sold the Moon for a penny.",
+ "score": 89,
+ "ready": false,
+ "blockers": [
+  "Shot mix: wide 26% (≥40), action 37% (~30), macro 26% (~20), faces 11% (≤30)",
+  "hard words: discoveries, engraving, vespertiliohomo",
+  "Shape loops: 30 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
+  "Viewer would swipe away at: \"Richard Adams Locke works in the Sun’s busy office.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"Rival papers stack on the wall.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"A small science column sits unsold.\" — make it a surprise, danger or new fact",
+  "Visual literalness: scenes 4 don't show what is said"
+ ],
+ "log": [
+  {
+   "attempt": 0,
+   "score": 80,
+   "blockers": [
+    "Shot mix: wide 18% (≥40), action 41% (~30), macro 27% (~20), faces 14% (≤30)",
+    "hard words: astronomy, discoveries, edinburgh, tomorrow, meanwhile",
+    "Shape loops: 24 seconds with no open question or reversal (gold scripts never go past ~18 seconds); Shape clarity: \"The headline screams GREAT LUNAR DISCOVERIES.\" is a metaphor or narrator aside a first-time viewer can't picture; say literally what happens",
+    "Read-aloud: \"Rivals shout scoops across the city.\"",
+    "Read-aloud: \"He wants one penny to buy the Moon.\"",
+    "Read-aloud: \"Tomorrow brings bat-winged men and crystal temples.\"",
+    "Viewer would swipe away at: \"Richard Adams Locke sits in the Sun’s noisy newsroom.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Rivals shout scoops across the city.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Richard Adams Locke tries dull astronomy notes and tiny discoveries.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 16 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 1,
+   "score": 89,
+   "blockers": [
+    "Shot mix: wide 26% (≥40), action 37% (~30), macro 26% (~20), faces 11% (≤30)",
+    "hard words: discoveries, engraving, vespertiliohomo",
+    "Shape loops: 30 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
+    "Viewer would swipe away at: \"Richard Adams Locke works in the Sun’s busy office.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Rival papers stack on the wall.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"A small science column sits unsold.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 4 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 2,
+   "score": 82,
+   "blockers": [
+    "Shot mix: wide 21% (≥40), action 42% (~30), macro 26% (~20), faces 11% (≤30)",
+    "hard words: discoveries, engraving, tomorrow",
+    "Shape loops: 31 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
+    "Viewer would swipe away at: \"The New York Sun prints in a crowded room.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Richard Adams Locke watches rival sheets flood the streets.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"A plain science note sits unsold.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 6, 12, 15, 16, 17 don't show what is said"
+   ]
+  }
+ ]
+}
