@@ -43,7 +43,7 @@ export function scriptIssues(lines: string[], facts: Fact[], sec: number): strin
   lines.forEach((l, i) => { const k = norm(l); if (!k) return; if (seen.has(k)) out.push(`line ${i + 1} repeats line ${seen.get(k)! + 1}`); else seen.set(k, i); });
   out.push(...hookIssues(lines[0] ?? "").map((x) => `Hook: ${x}`));
   const known = ` ${norm(facts.filter((f) => f.certain).map((f) => f.text).join(" "))} `;
-  const missingNames = [...new Set(lines.flatMap(nameTokens))].filter((w) => !known.includes(` ${w.toLowerCase().replace(/\.$/, "")}`));
+  const missingNames = [...new Set(lines.flatMap(nameTokens))].filter((w) => !known.includes(` ${w.toLowerCase().replace(/\.$/, "").slice(0, Math.max(4, w.length - 2))}`));
   if (missingNames.length) out.push(`names not in the certain facts: ${missingNames.slice(0, 6).join(", ")}`);
   const nums = [...new Set((text.match(/\b\d[\d,]*(?:\.\d+)?\b/g) ?? []).map((x) => x.replace(/,/g, "")))];
   const knownNums = new Set((known.match(/\b\d[\d,]*(?:\.\d+)?\b/g) ?? []).map((x) => x.replace(/,/g, "")));
