@@ -1,6 +1,7 @@
 import type { Hook, Plan } from '@/lib/pipeline.functions';
 import { hookIssues, hookTextIssues, sceneStarts, wc, type Anchors, type GateResult } from '@/lib/story-v2';
 import { advancedOpeningIssues, ADVANCED_STORY_DIRECTION } from './advanced-story';
+import { STORY_SHAPE_DIRECTION } from './story-shape';
 
 /** Invalid hooks are ineligible, regardless of the model's self-rated score. */
 export function eligibleHooks(hooks: Hook[], anchors: Anchors, facts: string, advanced = false): Hook[] {
@@ -67,7 +68,8 @@ export function preferAdvancedRepair(current: GateResult, next: GateResult): boo
 }
 
 /** Preserve the actual scene/cast/loop state, not just narration, for actionable repairs. */
-export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors, opts: { loop?: boolean; advanced?: boolean } = {}): string {
+export function repairBrief(plan: Plan, gate: GateResult, anchors: Anchors, opts: { loop?: boolean; advanced?: boolean; shape?: boolean } = {}): string {
+  if (opts.shape) return `${opts.advanced ? `${ADVANCED_STORY_DIRECTION}\n` : ''}${STORY_SHAPE_DIRECTION}\nREPAIR: fix every failed check below with a structural rewrite in the gold shape (not word swaps). Keep the checked facts, cast identities and literal visuals. Say "${anchors.subject}" in the first 8 words. Set script to the exact concatenation of the scene narrations.\nFailed checks:\n${gate.blockers.map(b => `- ${b}`).join('\n')}\nCurrent words: ${words}.\nPrevious COMPLETE plan:\n${JSON.stringify(plan)}`;
   const starts = sceneStarts(plan.scenes);
   const words = wc(plan.scenes.map(s => s.narration).join(' '));
   const heroCount = plan.scenes.filter(s => s.characters.includes(plan.hero.name)).length;
