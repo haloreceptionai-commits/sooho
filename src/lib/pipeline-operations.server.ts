@@ -1,3 +1,4 @@
+import { effortFor } from "@/lib/azure-effort";
 import { styleAnchor } from "@/lib/styles";
 import { FEW_SHOT } from "@/lib/story-v2";
 import { cartoonDirection, OUTFITS, VOCAB } from '@/lib/cartoon-job';
@@ -43,7 +44,7 @@ export async function azureJson<T>(deployment: string, system: string, user: str
   const res = await azure(`${safeName(deployment)}/chat/completions`, {
     messages: [{ role: "system", content: system }, { role: "user", content: user }],
     max_completion_tokens: 32000,
-    reasoning_effort: effort,
+    reasoning_effort: effortFor(deployment, effort),
     stream: true,
     response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
   });
@@ -309,7 +310,7 @@ export const checkContinuityOperation = async ({ data }: { data: { sheet: string
           { type: "image_url", image_url: { url: `data:image/jpeg;base64,${data.shot}`, detail: "low" } },
         ] },
       ],
-      max_completion_tokens: 2000, reasoning_effort: "none",
+      max_completion_tokens: 2000, reasoning_effort: effortFor(data.deployment, "none"),
       response_format: { type: "json_schema", json_schema: { name: "continuity", strict: true, schema: { type: "object", additionalProperties: false, required: ["score", "issue"], properties: { score: { type: "integer" }, issue: S } } } },
     });
     if (!res.ok) await fail(res, "Continuity check");

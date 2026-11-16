@@ -10,5 +10,3 @@ export function azureOpenAIRequest(path: string, body: unknown, multipart = fals
     body: multipart ? body as FormData : JSON.stringify(body),
   });
 }
-/** Newer Azure models (e.g. gpt-6.1-sol) reject reasoning effort "none"; use their lightest level instead. */
-export const effortFor = (deployment: string, effort: string) => (effort === 'none' && !/^gpt-5(\b|[-.]|$)/i.test(deployment) && !/^gpt-4/i.test(deployment) ? 'low' : effort);
