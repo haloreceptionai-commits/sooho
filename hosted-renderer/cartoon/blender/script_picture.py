@@ -44,7 +44,7 @@ def shape_errors(texts):
         gap = 0 if LOOP.search(t) else gap + 1
         if gap > 4: errors.append('shape: more than 4 sentences without a loop line'); break
     if not any(len(t.split()) <= 8 for t in texts[int(len(texts) * 0.6):]): errors.append('shape: no short payoff sentence near the end')
-    if texts and not (keys(texts[-1]) & keys(hook)): errors.append('shape: last sentence must echo the hook')
+    if texts and not (keys(' '.join(texts[-2:])) & keys(hook)): errors.append('shape: last two sentences must echo the hook')
     return errors
 
 from codex_planner import concept_menu, READER
