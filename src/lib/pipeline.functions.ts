@@ -183,7 +183,7 @@ const gradeSchema = {
 };
 
 export const judgeScript = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { first3: string; first15: string; full: string; truth: string; shots: string; deployment: string; advanced?: boolean }) => ({
+  .inputValidator((d: { first3: string; first15: string; full: string; truth: string; shots: string; deployment: string; advanced?: boolean; shape?: boolean }) => ({
     ...d, first3: d.first3.slice(0, 1200), first15: d.first15.slice(0, 3000), full: d.full.slice(0, 12000), truth: d.truth.slice(0, 3000), shots: d.shots.slice(0, 12000),
   }))
   .handler(async ({ data }) => { const { judgeScriptOperation } = await import('./pipeline-operations.server'); return judgeScriptOperation({ data }); });
@@ -212,7 +212,7 @@ const hookSchema = {
 };
 
 export const generateHooks = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { topic: string; facts: string; research: string; prefer?: string; deployment: string; advanced?: boolean }) => {
+  .inputValidator((d: { topic: string; facts: string; research: string; prefer?: string; deployment: string; advanced?: boolean; shape?: boolean }) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required");
     return { ...d, facts: (d.facts ?? "").slice(0, 4000), research: (d.research ?? "").slice(0, 3000), prefer: (d.prefer ?? "").slice(0, 200) };
   })
@@ -232,6 +232,7 @@ export interface PlanInput {
   hook?: string; // chosen opening line
   repair?: string; // validator issues from a previous draft
   kid?: boolean; // Advanced Video AI: words an 8-year-old knows, stricter story shape
+  shape?: boolean; // Story Shape v3 (owner's gold Shorts)
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }

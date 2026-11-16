@@ -53,28 +53,28 @@ function ScriptWriter() {
       setStage('Finding the hero and payoff…');
       const rs = await research({ data: { topic, facts: factText, deployment } });
       setStage('Writing 10 hooks…');
-      const candidates = await hooks({ data: { topic, facts: factText, research: JSON.stringify(rs), deployment } });
-      const ranked = eligibleHooks(candidates.all, rs.anchors, factText).sort((a, b) => (b.curiosity + b.clarity + b.visualness + b.speakability) - (a.curiosity + a.clarity + a.visualness + a.speakability));
+      const candidates = await hooks({ data: { topic, facts: factText, research: JSON.stringify(rs), deployment, shape: format === 'short' } });
+      const ranked = eligibleHooks(candidates.all, rs.anchors, factText, false, format === 'short').sort((a, b) => (b.curiosity + b.clarity + b.visualness + b.speakability) - (a.curiosity + a.clarity + a.visualness + a.speakability));
       const hook = ranked[0];
       if (!hook) throw Error('No opening passed the hook checks. Choose a clearer topic and try again.');
       const arch = ARCHETYPES.find(a => a.id === source?.archetype);
-      const base = { topic, format, durationSec: duration, style, deployment, facts: factText, research: JSON.stringify(rs), hook: hook.line, archetype: arch ? `${arch.name} — ${arch.formula}` : 'Best fit' };
+      const base = { topic, format, durationSec: duration, style, deployment, facts: factText, research: JSON.stringify(rs), hook: hook.line, shape: format === 'short', archetype: arch ? `${arch.name} — ${arch.formula}` : 'Best fit' };
       setStage('Writing narration and scenes…');
       let plan = autoFixPlan(await write({ data: base }));
       const evaluate = async (p: Plan) => {
         const full = p.scenes.map(s => s.narration).join(' ');
-        const report = validateStory({ scenes: p.scenes, anchors: rs.anchors, question: p.question, hero: p.hero, cast: p.characters, durationSec: duration });
+        const report = validateStory({ scenes: p.scenes, anchors: rs.anchors, question: p.question, hero: p.hero, cast: p.characters, durationSec: duration, shape: format === 'short' });
         const issues = [...hookIssues(splitSentences(full)[0] ?? '', rs.anchors, factText), ...hookTextIssues(p.hookText, p.scenes[0]?.narration ?? '')];
         for (const msg of issues) { const check = { id: 'HOOK', pass: false, msg }; report.checks.push(check); report.failed.push(check); }
         setStage('Reviewing story clarity and visual direction…');
-        const j = await judge({ data: { first3: `${p.hookText} ${spokenBy(p.scenes, 3.2)} ${p.scenes[0]?.image_prompt ?? ''}`, first15: spokenBy(p.scenes, 15), full, truth: JSON.stringify(rs), shots: p.scenes.map((s, i) => `${i}: ${s.narration} => ${s.image_prompt}`).join('\n'), deployment } });
+        const j = await judge({ data: { first3: `${p.hookText} ${spokenBy(p.scenes, 3.2)} ${p.scenes[0]?.image_prompt ?? ''}`, first15: spokenBy(p.scenes, 15), full, truth: JSON.stringify(rs), shots: p.scenes.map((s, i) => `${i}: ${s.narration} => ${s.image_prompt}`).join('\n'), deployment, shape: format === 'short' } });
         return storyScore(report, j, p.scenes.length);
       };
       let gate = await evaluate(plan);
       let draft = plan, draftGate = gate;
       for (let attempt = 1; attempt <= 2 && !gate.ready; attempt++) {
         setStage(`Improving the draft (${attempt}/2)…`);
-        const revised = autoFixPlan(await write({ data: { ...base, repair: repairBrief(draft, draftGate, rs.anchors) } }));
+        const revised = autoFixPlan(await write({ data: { ...base, repair: repairBrief(draft, draftGate, rs.anchors, { shape: format === 'short' }) } }));
         const next = await evaluate(revised);
         draft = revised; draftGate = next;
         if (preferRepair(gate, next)) { plan = revised; gate = next; }
