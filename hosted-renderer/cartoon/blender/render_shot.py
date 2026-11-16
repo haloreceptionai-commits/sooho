@@ -373,6 +373,91 @@ def build_card(cd, cam, duration=3.0, fps=30):
 BACKDROP_DEPTH = {'far': 48.0, 'mid': 24.0}
 
 
+def apply_mood(mode):
+    """Readable 'day for night' (frames must never read as black to the encoder QA, which rejects them).
+    Engine sets light themselves for day; night/sunset/rain re-key the same sun and sky so people and
+    ground match the story time (the painted backdrop is dimmed to match in build_backdrop)."""
+    if mode == 'day': return
+    sc = bpy.context.scene; bg = sc.world.node_tree.nodes.get('Background')
+    suns = [o for o in bpy.data.objects if o.type == 'LIGHT' and o.data.type == 'SUN']
+    if mode == 'night':
+        for o in suns: o.data.energy = 0.9; o.data.color = (0.5, 0.62, 1.0); o.rotation_euler.x = math.radians(35)
+        if bg: bg.inputs['Strength'].default_value = 0.03
+        for x, y, e in ((-1.6, -1.2, 260), (2.2, 1.5, 140)):   # warm firelight on the cast, cool moon rim from the sun
+            bpy.ops.object.light_add(type='POINT', location=(x, y, 1.6)); L = bpy.context.active_object.data
+            L.energy = e; L.color = (1.0, 0.55, 0.25); L.shadow_soft_size = 0.4
+    elif mode == 'sunset':
+        for o in suns: o.data.energy = 1.8; o.data.color = (1.0, 0.62, 0.36); o.rotation_euler.x = math.radians(78)
+        if bg: bg.inputs['Strength'].default_value = 0.12
+    elif mode == 'rain':
+        for o in suns: o.data.energy = 0.9; o.data.color = (0.75, 0.8, 0.9); o.data.angle = math.radians(25)
+        if bg: bg.inputs['Strength'].default_value = 0.08
+
+
+MOOD_BACKDROP = {'day': ((1, 1, 1), 1.0), 'sunset': ((1.0, 0.75, 0.55), 0.85), 'night': ((0.55, 0.65, 1.0), 0.6), 'rain': ((0.7, 0.75, 0.82), 0.6)}
+
+
+def fade_ground(cam_xy, start, end, colour=None):
+    """Soft floor-to-painting blend: large flat ground planes become transparent with distance from the camera,
+    so the painted backdrop's own ground continues the floor instead of meeting it at a hard line."""
+    for ob in bpy.data.objects:
+        if ob.type != 'MESH' or ob.get('backdrop') or not ob.data.materials: continue
+        d = ob.dimensions
+        if d.z > 0.05 or min(d.x, d.y) < 20: continue
+        for m in ob.data.materials:
+            if not m or not m.use_nodes or m.get('faded'): continue
+            nt = m.node_tree; out = next((n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL'), None)
+            if not out or not out.inputs['Surface'].links: continue
+            src = out.inputs['Surface'].links[0].from_socket
+            bsdf = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+            if colour and bsdf:  # floor takes the painting's own ground colour so the two read as one surface
+                for l in list(bsdf.inputs['Base Color'].links): nt.links.remove(l)
+                bsdf.inputs['Base Color'].default_value = (*colour, 1)
+                for name, v in (('Roughness', 1.0), ('Specular IOR Level', 0.0), ('Specular', 0.0)):
+                    if name in bsdf.inputs:
+                        for l in list(bsdf.inputs[name].links): nt.links.remove(l)
+                        bsdf.inputs[name].default_value = v
+            geo = nt.nodes.new('ShaderNodeNewGeometry'); dist = nt.nodes.new('ShaderNodeVectorMath'); dist.operation = 'DISTANCE'
+            sep = nt.nodes.new('ShaderNodeSeparateXYZ'); comb = nt.nodes.new('ShaderNodeCombineXYZ')
+            nt.links.new(geo.outputs['Position'], sep.inputs[0]); nt.links.new(sep.outputs[0], comb.inputs[0]); nt.links.new(sep.outputs[1], comb.inputs[1])
+            nt.links.new(comb.outputs[0], dist.inputs[0]); dist.inputs[1].default_value = (cam_xy[0], cam_xy[1], 0)
+            mr = nt.nodes.new('ShaderNodeMapRange'); mr.inputs['From Min'].default_value = start; mr.inputs['From Max'].default_value = end
+            mr.interpolation_type = 'SMOOTHSTEP'; nt.links.new(dist.outputs['Value'], mr.inputs['Value'])
+            tr = nt.nodes.new('ShaderNodeBsdfTransparent'); mix = nt.nodes.new('ShaderNodeMixShader')
+            nt.links.new(mr.outputs['Result'], mix.inputs['Fac']); nt.links.new(src, mix.inputs[1]); nt.links.new(tr.outputs[0], mix.inputs[2])
+            nt.links.new(mix.outputs[0], out.inputs['Surface'])
+            try: m.blend_method = 'HASHED'
+            except (AttributeError, TypeError): pass
+            m['faded'] = True
+
+
+def light_on_floor():
+    """Rough irradiance on flat ground from suns and the world (Nishita sky is about 5x its strength)."""
+    e = 0.0
+    for o in bpy.data.objects:
+        if o.type == 'LIGHT' and o.data.type == 'SUN': e += o.data.energy * max(0.0, math.cos(o.rotation_euler.x))
+    w = bpy.context.scene.world.node_tree.nodes.get('Background')
+    if w:
+        sky = any(n.type == 'TEX_SKY' for n in bpy.context.scene.world.node_tree.nodes)
+        e += w.inputs['Strength'].default_value * (5.0 if sky else 1.0)
+    return e
+
+
+def ground_colour(mat):
+    """Mean colour of the painting's lower quarter (its painted ground), in linear light."""
+    try:
+        img = next(n.image for n in mat.node_tree.nodes if n.type == 'TEX_IMAGE'); w, h = img.size
+        px = [0.0] * (w * h * 4); img.pixels.foreach_get(px)
+        rows = range(int(h * 0.05), int(h * 0.25)); step = max(1, w // 64); acc = [0.0, 0.0, 0.0]; n = 0
+        for y in rows[::max(1, len(rows) // 32)]:
+            for x in range(0, w, step):
+                i = (y * w + x) * 4
+                if px[i + 3] > 0.5: acc[0] += px[i]; acc[1] += px[i + 1]; acc[2] += px[i + 2]; n += 1
+        return tuple(min(1, c / n) for c in acc) if n else None
+    except Exception:
+        return None
+
+
 def build_backdrop(shot, cam):
     """World Pack layers: painted era-correct planes behind the ground, unlit (painted colours kept) and casting
     no shadow. Static planes at two depths give parallax against the moving camera. Sized to cover the widest
@@ -401,8 +486,11 @@ def build_backdrop(shot, cam):
         out = next(n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL')
         tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = img; tex.extension = 'EXTEND'
         em = nt.nodes.new('ShaderNodeEmission'); tr = nt.nodes.new('ShaderNodeBsdfTransparent'); mix = nt.nodes.new('ShaderNodeMixShader')
-        em.inputs['Strength'].default_value = 1.0
-        nt.links.new(tex.outputs['Color'], em.inputs['Color']); nt.links.new(tex.outputs['Alpha'], mix.inputs['Fac'])
+        tint, power = MOOD_BACKDROP.get(shot.get('lighting', 'day'), MOOD_BACKDROP['day'])
+        em.inputs['Strength'].default_value = power
+        mul = nt.nodes.new('ShaderNodeMixRGB'); mul.blend_type = 'MULTIPLY'; mul.inputs['Fac'].default_value = 1.0
+        mul.inputs['Color2'].default_value = (*tint, 1)
+        nt.links.new(tex.outputs['Color'], mul.inputs['Color1']); nt.links.new(mul.outputs[0], em.inputs['Color']); nt.links.new(tex.outputs['Alpha'], mix.inputs['Fac'])
         nt.links.new(tr.outputs[0], mix.inputs[1]); nt.links.new(em.outputs[0], mix.inputs[2]); nt.links.new(mix.outputs[0], out.inputs['Surface'])
         try: m.blend_method = 'HASHED'
         except (AttributeError, TypeError): pass
@@ -410,6 +498,16 @@ def build_backdrop(shot, cam):
         try: ob.visible_diffuse = False; ob.visible_glossy = False
         except AttributeError: pass
         ob['backdrop'] = b['layer']; made.append(ob)
+    if made:
+        # Keep real floor only where the cast stands and casts shadows, then hand over to the painted ground.
+        subject = (at - frm).length
+        far = next((o for o in made if o['backdrop'] == 'far'), made[0])
+        tint, power = MOOD_BACKDROP.get(shot.get('lighting', 'day'), MOOD_BACKDROP['day'])
+        col = ground_colour(far.data.materials[0])
+        if col:  # the painting is unlit; divide by the light the floor receives so both show the same brightness
+            irr = max(0.3, light_on_floor())
+            col = tuple(min(0.9, c * t * power / irr) for c, t in zip(col, tint))
+        fade_ground((frm.x, frm.y), subject + 1.0, subject + 6.0, col)
     return made
 
 
@@ -468,6 +566,7 @@ def main():
     sc.render.image_settings.file_format = 'PNG'
     if shot['set'] in SETS:
         SETS[shot['set']]()
+        apply_mood(shot.get('lighting', 'day'))
     else:
         build_set(shot['set'], shot.get('lighting', 'day'))
     scenery = set(o for o in bpy.data.objects if o.type == 'MESH')

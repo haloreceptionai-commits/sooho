@@ -51,7 +51,12 @@ function Create() {
   const [ownScript, setOwnScript] = useState("");
   const [selectedFact, setSelectedFact] = useState<DiscoveredTopic | undefined>();
   const used: TopicUse[] = [...history, ...videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }))];
-  const unavailable = topicUnavailable(topic, topicId, used);
+  // An owner script may remake a finished topic; only a video still in production blocks (no double spend).
+  const owned = format === "short" && !!ownScript.trim();
+  // Topic history keeps stale "running" marks, so an owner script checks only real videos still running.
+  const liveVideos: TopicUse[] = videos.filter((v) => v.status === "running" && !v.removed).map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }));
+  const blocking = (list: TopicUse[]) => (owned ? liveVideos : list);
+  const unavailable = topicUnavailable(topic, topicId, blocking(used));
   const score = scoreTopic(topic);
   const active = videos.filter((v) => v.status !== "done" && !v.removed).slice(0, 5);
   const recent = videos.filter((v) => v.status === "done").slice(0, 4);
@@ -63,7 +68,7 @@ function Create() {
     setChecking(true);
     try {
       const fresh = await checkHistory();
-      if (topicUnavailable(topic, topicId, [...fresh, ...used])) {
+      if (topicUnavailable(topic, topicId, blocking([...fresh, ...used]))) {
         toast.error("This topic already has a video or is being made. Pick a new topic.");
         return;
       }

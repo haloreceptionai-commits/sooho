@@ -11,4 +11,10 @@ ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=all
 WORKDIR /usr/src/app
 COPY blender ./blender
 COPY blender_bridge.py actor.js capture.py ./
+# Owner-uploaded rigged humans (Quaternius CC0), materialized and checksum-pinned at build: the project keeps only pointers.
+RUN mkdir -p blender/assets/humans \
+      && curl -fsSL -o blender/assets/humans/Casual.fbx https://sooha.io/__l5e/assets-v1/$(python3 -c "import json;print(json.load(open('blender/assets/humans/uploaded-woman.fbx.asset.json'))['asset_id'])")/uploaded-woman.fbx \
+      && curl -fsSL -o blender/assets/humans/Casual_Hoodie.fbx https://sooha.io/__l5e/assets-v1/$(python3 -c "import json;print(json.load(open('blender/assets/humans/uploaded-man.fbx.asset.json'))['asset_id'])")/uploaded-man.fbx \
+      && echo "c5466446edc71323f7cc717be8014ccbe133956a684aebf6b784f351253f39e5  blender/assets/humans/Casual.fbx" | sha256sum -c - \
+      && echo "55fd019ef45766267e4decf101899b8c4f6019d077cef9047a6de1b7a2120b41  blender/assets/humans/Casual_Hoodie.fbx" | sha256sum -c -
 CMD ["node", "actor.js"]

@@ -682,7 +682,8 @@ export function resumeInterrupted() {
 
 export function startVideo(input: VideoInput) {
   assertVideoEngine(input.engine);
-  const used = getState().videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }));
+  // An owner script may remake a finished topic; a video of it still running always blocks (no double spend).
+  const used = getState().videos.filter((v) => !input.exactScript || v.status === "running").map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }));
   if (topicUnavailable(input.topic, input.topicId, used)) throw new Error("This topic already has a video or is being made. Pick a new topic.");
   const id = actions.addVideo(input);
   void runVideo(id, input);
