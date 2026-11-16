@@ -27,7 +27,7 @@ SET_WORDS = {
     'rail_yard': 'train trains railway railways rail rails locomotive track tracks station railroad steam',
     'castle': 'castle castles king kings queen knight knights fortress siege palace throne kingdom empire emperor',
     'office': 'government minister ministers parliament office report reports letter letters newspaper newspapers officials official desk signed law laws politician politicians committee senate president meeting declared ordered permit announced press',
-    'workshop': 'invented inventor invention machine machines lab laboratory experiment experiments factory engineer engineers built device workshop scientist scientists tested',
+    'workshop': 'invented inventor invention lab laboratory experiment experiments factory engineer engineers built device workshop scientist scientists tested',
     'saloon': 'bar saloon pub tavern drink drinks whisky beer',
     'room': 'home bedroom family kitchen wife husband child children son daughter',
     'farm_field': 'farm farms farmer farmers crop crops wheat field fields harvest barn fence fences plough grain ranch cattle sheep land settlers soldier-settlers corn hay tractor',
@@ -232,6 +232,7 @@ class Director:
         prefs += ['medium', 'orbit', 'low', 'close', 'wide', 'high']
         for p in prefs:
             if p == prev or recent.count(p) >= 2: continue
+            if p == 'establish' and 'establish' in self.history[-3:]: continue
             if p in ('ots',) and ctx['n_people'] < 2: continue
             if p in ('close', 'xclose', 'ots') and ctx['n_subjects'] == 0: continue
             if p == 'insert' and not (ctx['story_object'] or ctx['props']): continue
@@ -317,6 +318,7 @@ class Director:
                     yaw = yaw_facing((-F[0] + R[0] * .25 * (1 if j % 2 else -1), -F[1] + R[1] * .25 * (1 if j % 2 else -1)))
             ch = {'id': x['id'], 'pos': pos, 'yaw': yaw, 'action': act, 'expression': expr, 'outfit': look['outfit'], 'hat': look['hat'],
                   'shirt': look['shirt'], 'hat_color': look['hat_color']}
+            if act in ('aim', 'load') and st in ('office', 'saloon', 'workshop', 'room'): act = 'point'; ch['action'] = act
             if act in ('aim', 'load') and look['outfit'] == 'soldier': ch['held'] = 'rifle'
             elif act == 'carry': ch['held'] = 'crate'
             elif act == 'swing': ch['held'] = 'tool'
