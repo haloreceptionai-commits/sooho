@@ -70,3 +70,49 @@ STYLE RULES:
 - Use ONLY facts marked certain in the fact sheet. No invented names, dates, numbers or quotes.`;
 
 export const GOLD_BLOCK = `GOLD EXAMPLE 1 (target quality; copy the quality, never the content):\n${GOLD_1}\n\nGOLD EXAMPLE 2:\n${GOLD_2}\n\n${WHY_GOLD}\n\n${BAD_GOOD}`;
+
+export const GOLD_3 = `A dead man tricked Hitler's army without firing a shot.
+1943. The Allies want to invade Sicily, but everyone, including the Germans, expects exactly that.
+So British intelligence finds the body of a man who died of pneumonia.
+They dress him as a Royal Marines officer and chain a briefcase to his wrist.
+Inside are forged letters saying the invasion will hit Greece and Sardinia instead.
+A submarine drops the body in the sea off the coast of Spain.
+A Spanish fisherman finds him, and the briefcase reaches the Germans.
+Hitler reads the letters, believes every word, and moves troops away from Sicily.
+Days later, the real invasion lands against almost no resistance.
+The Germans never doubted the papers, because a drowned officer had no reason to lie.
+The best lie is the one carried by someone who can't tell it.`;
+
+export const GOLD_TOPIC_WORDS: Record<string, RegExp> = {
+  GOLD_1: /\b(hannibal|carthage|carthaginian|oxen|ox|rome|roman|punic|cannae|alps)\b/i,
+  GOLD_2: /\b(seal|great seal|moscow|theremin|bug|spy|spies|soviet|ussr|embassy|ambassador|cold war)\b/i,
+  GOLD_3: /\b(mincemeat|sicily|hitler|nazi|german|world war|ww2|wwii|deception|decoy|british intelligence)\b/i,
+};
+
+/** Gold examples that share the requested topic are left out: the writer must see the standard, never a script to copy. */
+export function goldExamplesFor(topic = ''): string[] {
+  const all: [string, string][] = [['GOLD_1', GOLD_1], ['GOLD_2', GOLD_2], ['GOLD_3', GOLD_3]];
+  const kept = all.filter(([k]) => !GOLD_TOPIC_WORDS[k]!.test(topic));
+  return (kept.length >= 2 ? kept : all).map(([, v]) => v);
+}
+
+/** First lines of the gold examples for hook prompts, again without any that match the topic. */
+export function goldHooksFor(topic = ''): string[] {
+  return goldExamplesFor(topic).map((g) => g.split('\n')[0]!).slice(0, 2);
+}
+
+export function goldBlockFor(topic = ''): string {
+  const ex = goldExamplesFor(topic);
+  const shown = ex.map((g, i) => `GOLD EXAMPLE ${i + 1}${i === 0 ? ' (target quality; copy the quality, never the content, wording or facts)' : ''}:\n${g}`).join('\n\n');
+  return `${shown}\n\n${WHY_GOLD}\n\n${BAD_GOOD}\n\nNEVER reuse a sentence, fact or structure from these examples for a different topic; they show the standard, not a template.`;
+}
+
+export const RETENTION = `RETENTION RULES (a viewer decides in 2 seconds, then again every 5-8 seconds):
+- The first line is the strongest image or claim: no welcome, no context before it. Line 2 adds the stakes or the strangest detail within about 4 seconds.
+- Plant an OPEN LOOP in the first three lines (something the viewer needs answered, without asking it as a question) and close it only near the end.
+- A NEW TURN every 2-3 lines (a reversal, a surprising number, a "but", a consequence), so something changes about every 6-8 seconds.
+- Every line names something that can be SHOWN: a person doing a physical action, a concrete object, a place, a number with a visible effect. A line that is only opinion, summary or abstract explanation must be rewritten as an action or an object.
+- Build escalation: each step is bigger, riskier or stranger than the last. Put the most visual event (the trick working, the disaster, the reveal) in the final third.
+- Use concrete specifics (a number, a name, a material) instead of generalities. "Two thousand oxen" beats "many animals".
+- The last line lands the insight and makes the viewer want to replay (a reframe that makes the first line mean something new).
+- Never start more than two lines in a row with the same word, and never use filler ("interestingly", "it turns out", "in fact").`;

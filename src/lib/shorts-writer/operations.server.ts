@@ -1,6 +1,6 @@
 /** Shorts Writer v4 AI steps: each is its own strict-JSON Azure call (owner's task, Nov 16 2026). Server-only. */
 import { azureJson } from '@/lib/pipeline-operations.server';
-import { CORE, GOLD_BLOCK, STYLE } from './prompts';
+import { CORE, GOLD_BLOCK, RETENTION, STYLE, goldBlockFor, goldHooksFor } from './prompts';
 import { budget, type Critic, type Fact } from './checks';
 
 const S = { type: 'string' } as const, B = { type: 'boolean' } as const, N = { type: 'number' } as const;
@@ -46,15 +46,15 @@ export async function spineCheckOp(d: { spine: Spine; facts: Fact[]; deployment:
 
 export async function hooksOp(d: { topic: string; facts: Fact[]; spine: Spine; deployment: string; feedback?: string }) {
   const r = await azureJson<{ hooks: HookCandidate[] }>(d.deployment,
-    `Write 10 different hooks for a YouTube Short. Each: 8-12 words, speakable in about 3 seconds, a surprising contradiction between two concrete things, and it must NOT reveal the answer or mechanism. Test: does it make the viewer need the next sentence? No questions. No "Did you know". No hooks that explain the trick (bad: "Rail engineers left gaps so trains stayed on straight rails" gives the reason away). Good: "Hannibal was trapped, so he strapped fire to two thousand oxen." / "A gift with no battery spied on America for seven years." Write it as one plain spoken sentence with a subject and verb (never two clipped halves joined by a semicolon). A stranger must understand it with zero context: name a concrete subject (who/what) and a real contradiction, e.g. "The Australian army went to war against birds, and lost." Reject vague or garbled hooks like "Farmers called soldiers, and the crops kept disappearing." BAD: "New York Sun found life; Edinburgh Journal had already died." (no context, clipped) / "Rails lengthen 360 millimeters; engineers welded kilometers without expansion joints." (jargon, clipped) / "A cook dumped greasy water; the leeward sea turned glassy." (who? where?). Use only certain facts. For each, name the contradiction, say honestly whether it reveals the answer, and score curiosity 1-10.`,
+    `Write 10 different hooks for a YouTube Short. Each: 8-12 words, speakable in about 3 seconds, a surprising contradiction between two concrete things, and it must NOT reveal the answer or mechanism. Test: does it make the viewer need the next sentence? No questions. No "Did you know". No hooks that explain the trick (bad: "Rail engineers left gaps so trains stayed on straight rails" gives the reason away). Good (quality only, never copy): ${goldHooksFor(d.topic).map(h => `"${h}"`).join(" / ")} Write it as one plain spoken sentence with a subject and verb (never two clipped halves joined by a semicolon). A stranger must understand it with zero context: name a concrete subject (who/what) and a real contradiction, e.g. "The Australian army went to war against birds, and lost." Reject vague or garbled hooks like "Farmers called soldiers, and the crops kept disappearing." BAD: "New York Sun found life; Edinburgh Journal had already died." (no context, clipped) / "Rails lengthen 360 millimeters; engineers welded kilometers without expansion joints." (jargon, clipped) / "A cook dumped greasy water; the leeward sea turned glassy." (who? where?). Use only certain facts. For each, name the contradiction, say honestly whether it reveals the answer, and score curiosity 1-10.`,
     `Topic: ${d.topic}\nCERTAIN FACTS:\n${factList(d.facts)}\nSPINE:\n${JSON.stringify(d.spine)}${d.feedback ? `\n${d.feedback}` : ''}`,
     'hooks', obj({ hooks: arr(obj({ line: S, contradiction: S, reveals_answer: B, curiosity: N })) }), 'Hook writer', 'low');
   return r.hooks;
 }
 
-export async function pickHookOp(d: { hooks: string[]; spine: Spine; deployment: string }) {
+export async function pickHookOp(d: { hooks: string[]; spine: Spine; deployment: string; topic?: string }) {
   return azureJson<{ index: number; reason: string }>(d.deployment,
-    `You are a YouTube Shorts editor. Pick the ONE hook that most makes a cold viewer need the next sentence, is clearest on first listen with zero context (plain full sentence, no jargon, no clipped semicolon halves), and does not give away the answer. Compare against the gold hooks "Hannibal was trapped, so he strapped fire to two thousand oxen." and "A gift with no battery spied on America for seven years." Return its 0-based index.`,
+    `You are a YouTube Shorts editor. Pick the ONE hook that most makes a cold viewer need the next sentence, is clearest on first listen with zero context (plain full sentence, no jargon, no clipped semicolon halves), and does not give away the answer. Compare against the gold hooks ${goldHooksFor(d.topic).map(h => `"${h}"`).join(" and ")} Return its 0-based index.`,
     `SPINE:\n${JSON.stringify(d.spine)}\nHOOKS:\n${d.hooks.map((h, i) => `${i}: ${h}`).join('\n')}`,
     'hook_pick', obj({ index: N, reason: S }), 'Hook picker', 'none');
 }
@@ -62,7 +62,7 @@ export async function pickHookOp(d: { hooks: string[]; spine: Spine; deployment:
 export async function scriptOp(d: { topic: string; facts: Fact[]; spine: Spine; hook: string; durationSec: number; deployment: string; kid?: boolean }) {
   const b = budget(d.durationSec);
   return azureJson<{ lines: string[] }>(d.deployment,
-    `You write the voice-over for a ${d.durationSec}-second YouTube Short. ${CORE}\n${STYLE}\nLENGTH: ${b.minWords}-${b.targetMax} words (above ${b.maxWords} fails) in ${b.minLines}-${b.maxLines} lines (a machine counts). One line = one spoken thought (it may hold two very short sentences like "Readers loved it. Sales exploded.").${d.kid ? '\nAUDIENCE: use only words an 8-year-old knows; explain any needed term in the same line.' : ''}\n\n${GOLD_BLOCK}`,
+    `You write the voice-over for a ${d.durationSec}-second YouTube Short. ${CORE}\n${STYLE}\nLENGTH: ${b.minWords}-${b.targetMax} words (above ${b.maxWords} fails) in ${b.minLines}-${b.maxLines} lines (a machine counts). One line = one spoken thought (it may hold two very short sentences like "Readers loved it. Sales exploded.").${d.kid ? '\nAUDIENCE: use only words an 8-year-old knows; explain any needed term in the same line.' : ''}\n\n${RETENTION}\n\n${goldBlockFor(d.topic)}`,
     `Topic: ${d.topic}\nCERTAIN FACTS (the only facts you may use):\n${factList(d.facts)}\nSTORY SPINE:\n${JSON.stringify(d.spine)}${d.spine.shareable?.length ? `\nSHAREABLE FACTS (all must appear): ${d.spine.shareable.join(' | ')}` : ''}\nLOCKED HOOK (line 1, word for word): ${d.hook}\nReturn the script as lines.`,
     'script', obj({ lines: arr(S) }), 'Script writer', 'medium');
 }
@@ -75,10 +75,10 @@ Then: hook_reveals_answer (does line 1 give away the answer/mechanism?), ending_
     'critic', obj({ lines: arr(obj({ n: N, follows: B, clear: B, narration: B, new_fact: B, reason: S })), hook_reveals_answer: B, ending_makes_sense: B, ending_copies_hook: B, real_twist: B, boring_lines: arr(N), hook_makes_sense: B, more_than_two_dates: B, includes_shareable: B, ending_punch: B, weaknesses: arr(obj({ n: N, issue: S })), coherence: N, clarity: N, curiosity: N, summary: S }), 'Script critic', 'low');
 }
 
-export async function rewriteLinesOp(d: { lines: string[]; flagged: { n: number; reason: string }[]; problems: string[]; facts: Fact[]; spine: Spine; durationSec: number; deployment: string; kid?: boolean }) {
+export async function rewriteLinesOp(d: { topic?: string; lines: string[]; flagged: { n: number; reason: string }[]; problems: string[]; facts: Fact[]; spine: Spine; durationSec: number; deployment: string; kid?: boolean }) {
   const b = budget(d.durationSec);
   return azureJson<{ lines: { n: number; text: string }[] }>(d.deployment,
-    `You fix a YouTube Short script. Rewrite ONLY the flagged lines; every other line and line 1 (the locked hook) stay exactly as they are. ${CORE}\n${STYLE}\nA flagged line may be returned as an empty string to delete it, if the story reads better without it. Keep the whole script within ${b.minWords}-${b.targetMax} words.${d.kid ? ' Use only words an 8-year-old knows.' : ''}\n\n${GOLD_BLOCK}`,
+    `You fix a YouTube Short script. Rewrite ONLY the flagged lines; every other line and line 1 (the locked hook) stay exactly as they are. ${CORE}\n${STYLE}\nA flagged line may be returned as an empty string to delete it, if the story reads better without it. Keep the whole script within ${b.minWords}-${b.targetMax} words.${d.kid ? ' Use only words an 8-year-old knows.' : ''}\n\n${RETENTION}\n\n${goldBlockFor(d.topic)}`,
     `CERTAIN FACTS:\n${factList(d.facts)}\nSPINE:\n${JSON.stringify(d.spine)}\nSCRIPT:\n${d.lines.map((l, i) => `${i + 1}. ${l}`).join('\n')}\nFLAGGED LINES:\n${d.flagged.map((f) => `${f.n}: ${f.reason}`).join('\n')}${d.problems.length ? `\nOTHER PROBLEMS TO FIX THROUGH THE FLAGGED LINES:\n${d.problems.join('\n')}` : ''}\nReturn each flagged line number with its new text.`,
     'line_rewrite', obj({ lines: arr(obj({ n: N, text: S })) }), 'Line rewrite', 'low');
 }
