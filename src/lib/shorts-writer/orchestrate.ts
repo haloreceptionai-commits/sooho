@@ -43,7 +43,7 @@ function checkTargets(lines: string[], checks: string[]): { n: number; reason: s
   return out;
 }
 
-export async function writeShort(calls: WriterCalls, opts: { maxPatches?: number; maxSpines?: number; progress?: Progress } = {}): Promise<WriterResult> {
+export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; progress?: Progress }): Promise<WriterResult> {
   const maxPatches = opts.maxPatches ?? 3, maxSpines = opts.maxSpines ?? 2;
   const say = async (t: string) => { await opts.progress?.(t); };
   await say('Building the fact sheet…');
@@ -75,11 +75,8 @@ export async function writeShort(calls: WriterCalls, opts: { maxPatches?: number
     for (let p = 0; ; p++) {
       await say(p ? `Critic review after fix ${p}/${maxPatches}…` : 'Critic reading it as a viewer…');
       const critic = await calls.critic(lines, facts);
-      const checks = scriptIssues(lines, facts, 0); // placeholder replaced below
-      void checks;
-      round.drafts.push({ lines, critic, checks: [] });
+      round.drafts.push({ lines, critic, checks: scriptIssues(lines, facts, opts.durationSec) });
       const cur = round.drafts[round.drafts.length - 1]!;
-      cur.checks = (calls as WriterCalls & { checks?: (l: string[]) => string[] }).checks?.(lines) ?? [];
       const ready = criticPasses(critic) && !cur.checks.length;
       const result: WriterResult = { facts, rounds, lines, critic, checks: cur.checks, ready, hook, spine };
       if (!best || rank(result) > rank(best)) best = result;
