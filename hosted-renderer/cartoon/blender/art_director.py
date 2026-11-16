@@ -31,7 +31,7 @@ SET_WORDS = {
     'saloon': 'bar saloon pub tavern drink drinks whisky beer',
     'room': 'home bedroom family kitchen wife husband child children son daughter',
     'farm_field': 'farm farms farmer farmers crop crops wheat field fields harvest barn fence fences plough grain ranch cattle sheep land settlers soldier-settlers corn hay tractor road roads dusty countryside course marathon runners race',
-    'outback': 'desert outback drought dry dust sand australia australian plains bush wilderness west western scrub nowhere dam waterhole rabbits emus emu kangaroo',
+    'outback': 'desert outback drought sand australia australian plains bush wilderness west western scrub nowhere dam waterhole rabbits emus emu kangaroo',
     'forest': 'forest forests woods jungle trees hunting hunter hunters wild wolves',
     'market': 'market markets merchant merchants trade traders shop shops sold sell buy bought price prices store',
     'battlefield': 'army armies troops war battle battles battlefield camp camps tents military artillery cannon enemy campaign platoon front trenches siege',
