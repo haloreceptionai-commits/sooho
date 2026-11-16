@@ -26,22 +26,23 @@ SET_WORDS = {
     'ship_deck': 'ship ships sailor sailors sea seas ocean boat boats navy voyage deck sailed sail fleet harbour harbor port island crew',
     'rail_yard': 'train trains railway railways rail rails locomotive track tracks station railroad steam',
     'castle': 'castle castles king kings queen knight knights fortress siege palace throne kingdom empire emperor',
-    'office': 'government minister ministers parliament office report reports letter letters newspaper newspapers officials official desk signed law laws politician politicians committee senate president meeting declared ordered permit announced press',
+    'office': 'government minister ministers parliament office report reports letter letters newspaper newspapers desk signed law laws politician politicians committee senate president meeting permit press headquarters',
     'workshop': 'invented inventor invention lab laboratory experiment experiments factory engineer engineers built device workshop scientist scientists tested',
     'saloon': 'bar saloon pub tavern drink drinks whisky beer',
     'room': 'home bedroom family kitchen wife husband child children son daughter',
-    'farm_field': 'farm farms farmer farmers crop crops wheat field fields harvest barn fence fences plough grain ranch cattle sheep land settlers soldier-settlers corn hay tractor',
+    'farm_field': 'farm farms farmer farmers crop crops wheat field fields harvest barn fence fences plough grain ranch cattle sheep land settlers soldier-settlers corn hay tractor road roads dusty countryside course marathon runners race',
     'outback': 'desert outback drought dry dust sand australia australian plains bush wilderness west western scrub nowhere dam waterhole rabbits emus emu kangaroo',
     'forest': 'forest forests woods jungle trees hunting hunter hunters wild wolves',
     'market': 'market markets merchant merchants trade traders shop shops sold sell buy bought price prices store',
     'battlefield': 'army armies troops war battle battles battlefield camp camps tents military artillery cannon enemy campaign platoon front trenches siege',
-    'street': 'city cities street streets crowd crowds public citizens people town-hall downtown',
+    'street': 'city cities street streets crowd crowds public citizens town-hall downtown stadium olympic spectators finish-line boston london paris york louis',
     'village': 'village villages villagers town towns locals neighbours neighbors',
 }
 WORLD_SET = {'ship': 'ship_deck', 'storm_sea': 'ship_deck', 'town': 'village', 'market': 'market', 'bridge': 'street', 'modern_street': 'street',
              'lab': 'workshop', 'device_cutaway': 'workshop', 'landscape': 'outback', 'night_camp': 'battlefield', 'castle': 'castle',
              'mine': 'mine_tunnel', 'map': 'outback'}
 SET_INDEX = {k: set(v.split()) for k, v in SET_WORDS.items()}
+GATED = {'ship_deck', 'mine_tunnel', 'castle', 'rail_yard', 'saloon'}  # never chosen unless the story's words name them
 
 # ---------------------------------------------------------------- performance
 VERB_ACTION = [  # first match wins; literal verbs in the spoken line drive the body
@@ -144,7 +145,7 @@ def plan_locations(m):
     and a place is not held for more than ~9 s unless the words keep naming it (benchmark 12-22 changes/min)."""
     shots = m['shots']; all_text = text_of(spoken(m, 0, 10 ** 9))
     story = score_sets(all_text)
-    home = max(story, key=story.get) if story else WORLD_SET.get(shots[0].get('world'), 'village')
+    home = max(story, key=story.get) if story else 'farm_field' if WORLD_SET.get(shots[0].get('world')) in GATED | {'outback'} else WORLD_SET.get(shots[0].get('world'), 'village')
     seconds = sorted(story, key=lambda k: -story[k])
     out = []; held = 0.0; prev = None
     for i, s in enumerate(shots):
@@ -152,7 +153,9 @@ def plan_locations(m):
         for p in s.get('props') or []:
             for k, v in score_sets(re.sub(r'[^a-z]+', ' ', str(p.get('asset') or p.get('kind') or '').lower())).items(): sc[k] = sc.get(k, 0) + 0.3 * v
         world = WORLD_SET.get(s.get('world'))
-        if world and world != 'outback': sc[world] = sc.get(world, 0) + 0.6  # Visual Director's place is a hint, not a cage
+        if world == 'outback' and not story.get('outback'): world = 'farm_field'  # open country without desert words
+        if world in GATED and not story.get(world): world = None  # a ship/mine/castle needs the story to name one
+        if world: sc[world] = sc.get(world, 0) + 0.35  # Visual Director's place is only a tiebreaker
         if prev: sc[prev] = sc.get(prev, 0) + (0.9 if held < 9 else -0.4)
         for k in story: sc[k] = sc.get(k, 0) + 0.15 * story[k] / max(story.values())
         best = max(sc, key=lambda k: (sc[k], k == home)) if sc else home
