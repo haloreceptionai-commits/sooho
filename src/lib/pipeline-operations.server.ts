@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { azureOpenAIRequest } from './azure-openai.server';
 import { generateSpeech } from '@lovable.dev/ai-gateway';
 import { ADVANCED_STORY_DIRECTION } from './advanced-story';
-import { STORY_SHAPE_DIRECTION, STORY_SHAPE_JUDGE, lockShapeHook } from './story-shape';
+import { STORY_SHAPE_DIRECTION, STORY_SHAPE_JUDGE, hookShapeIssues, lockShapeHook } from './story-shape';
 
 // Scripts and images use the owner's Azure resource; narration remains Gemini.
 
@@ -333,6 +333,20 @@ const hookSchema = {
 
 export const generateHooksOperation = async ({ data }: { data: { topic: string; facts: string; research: string; prefer?: string; deployment: string; advanced?: boolean; shape?: boolean } }) => {
     const shapeHook = data.shape ? `\nSTORY SHAPE v3 OVERRIDE for every hook: 8-12 words, a CONTRADICTION that makes the viewer need the answer and HIDES the reason (no "because", "which is why" or mechanism). No mandatory year or place. Gold hooks: "A gift with no battery spied on America for seven years." / "Hannibal was trapped, so he strapped fire to two thousand oxen."` : '';
+    if (data.shape) {
+      // Shorts: the gold-shape hook prompt replaces the legacy type quotas (no direct questions, no mandatory place/time).
+      const sys = `You write the first 3 seconds of viral story Shorts. Write exactly 10 different hooks in the owner's gold shape.
+"line": 8-12 words, ONE plain statement (never a question), a CONTRADICTION that pairs the strange fact with what makes it impossible ("A gift with no battery spied on America for seven years." / "Hannibal was trapped, so he strapped fire to two thousand oxen."). It hides the reason: never "because", "which is why" or the mechanism. Say the subject in the first 8 words. Words a 10-year-old knows, no metaphors, no "we/us". Every number and name must come from the fact sheet.
+"visual" = a literal WIDE first frame showing the odd thing (never a face close-up). "text" = at most 6 words, states the oddity as a fact, must not repeat the spoken line's words. Score each 1-10 honestly on curiosity, clarity, visualness, speakability.${data.advanced ? `\n${ADVANCED_STORY_DIRECTION}` : ''}`;
+      const ask = (extra = '') => azureJson<{ hooks: Hook[] }>(data.deployment, sys, `Topic: ${data.topic}\nResearch (anchors, premise, question):\n${data.research}\nFact sheet:\n${data.facts}${extra}`, "hooks", hookSchema, "Hook writer");
+      let all = (await ask()).hooks;
+      const good = (h: Hook[]) => h.filter((x) => !hookShapeIssues(x.line).length);
+      if (good(all).length < 3) {
+        const bad = all.filter((x) => hookShapeIssues(x.line).length).slice(0, 5).map((x) => `"${x.line}": ${hookShapeIssues(x.line).join('; ')}`).join('\n');
+        all = [...good(all), ...(await ask(`\nYour previous hooks failed these checks; write 10 new ones that pass:\n${bad}`)).hooks];
+      }
+      return { all };
+    }
     const r = await azureJson<{ hooks: Hook[] }>(data.deployment,
       (data.advanced ? `Write exactly 10 original hooks, two each of paradox_image, shocking_number, mid_action, direct_question, contrarian. ${ADVANCED_STORY_DIRECTION}\nReturn line (4-12 words), visual (literal wide/action first frame), text (at most six words, fact not question, not repeating spoken wording), curiosity/clarity/visualness/speakability (honest 1-10). Each first three words must contain the subject or concrete act, with a specific fact by the end. No invented numbers or stakes; no mandatory year/place.` : `You write the first 3 seconds of viral story Shorts. Write exactly 10 hooks, 2 of each type: paradox_image, shocking_number, mid_action, direct_question, contrarian.
 HARD RULES for "line" (the first spoken sentence):
