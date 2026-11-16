@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { budget, criticPasses, flaggedLines, hookIssues, needsNewSpine, scriptIssues, type Critic } from "@/lib/shorts-writer/checks";
+import { budget, criticPasses, flaggedLines, hookIssues, needsNewSpine, scriptIssues, type Critic, dateIssues, spokenIssues } from "@/lib/shorts-writer/checks";
 import { applyRewrite } from "@/lib/shorts-writer/orchestrate";
 import { GOLD_1 } from "@/lib/shorts-writer/prompts";
 
@@ -50,4 +50,13 @@ describe("shorts writer closing reframe", () => {
 
 describe("shorts writer possessive names", () => {
   it("treats Hannibal's as the known name Hannibal", () => expect(scriptIssues(["Hannibal was trapped, so he strapped fire to two thousand oxen.", "Then Hannibal’s men moved at night."], facts, 60).join()).not.toContain("Hannibal"));
+});
+
+describe("owner update: dates, spoken lines, length", () => {
+  it("rejects day-of-month dates", () => expect(dateIssues(["They began on 2 November."]).join()).toContain("day-of-month"));
+  it("rejects 'on 12' style dates", () => expect(dateIssues(["It restarted on 12 and ran on."]).join()).toContain("day-of-month"));
+  it("allows two dates", () => expect(dateIssues(["In 1932 the farmers asked for help.", "By 1934 bounties replaced soldiers."])).toEqual([]));
+  it("rejects a third date", () => expect(dateIssues(["In 1932 it began.", "In 1933 it paused.", "In 1934 it ended."]).join()).toContain("3 dates"));
+  it("rejects semicolons", () => expect(spokenIssues(["Hook here.", "Emus trampled wheat; losses meant ruin."]).join()).toContain("line 2"));
+  it("60s Shorts aim for 145 words and fail above 150", () => { expect(budget(60).targetMax).toBe(145); expect(budget(60).maxWords).toBe(150); });
 });
