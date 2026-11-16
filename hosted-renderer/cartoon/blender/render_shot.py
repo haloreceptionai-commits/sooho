@@ -396,7 +396,7 @@ def apply_mood(mode):
 MOOD_BACKDROP = {'day': ((1, 1, 1), 1.0), 'sunset': ((1.0, 0.75, 0.55), 0.85), 'night': ((0.35, 0.45, 0.8), 0.22), 'rain': ((0.7, 0.75, 0.82), 0.6)}
 
 
-def fade_ground(cam_xy, start, end):
+def fade_ground(cam_xy, start, end, colour=None):
     """Soft floor-to-painting blend: large flat ground planes become transparent with distance from the camera,
     so the painted backdrop's own ground continues the floor instead of meeting it at a hard line."""
     for ob in bpy.data.objects:
@@ -408,6 +408,10 @@ def fade_ground(cam_xy, start, end):
             nt = m.node_tree; out = next((n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL'), None)
             if not out or not out.inputs['Surface'].links: continue
             src = out.inputs['Surface'].links[0].from_socket
+            bsdf = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+            if colour and bsdf:  # floor takes the painting's own ground colour so the two read as one surface
+                for l in list(bsdf.inputs['Base Color'].links): nt.links.remove(l)
+                bsdf.inputs['Base Color'].default_value = (*colour, 1)
             geo = nt.nodes.new('ShaderNodeNewGeometry'); dist = nt.nodes.new('ShaderNodeVectorMath'); dist.operation = 'DISTANCE'
             sep = nt.nodes.new('ShaderNodeSeparateXYZ'); comb = nt.nodes.new('ShaderNodeCombineXYZ')
             nt.links.new(geo.outputs['Position'], sep.inputs[0]); nt.links.new(sep.outputs[0], comb.inputs[0]); nt.links.new(sep.outputs[1], comb.inputs[1])
@@ -420,6 +424,21 @@ def fade_ground(cam_xy, start, end):
             try: m.blend_method = 'HASHED'
             except (AttributeError, TypeError): pass
             m['faded'] = True
+
+
+def ground_colour(mat):
+    """Mean colour of the painting's lower quarter (its painted ground), in linear light."""
+    try:
+        img = next(n.image for n in mat.node_tree.nodes if n.type == 'TEX_IMAGE'); w, h = img.size
+        px = [0.0] * (w * h * 4); img.pixels.foreach_get(px)
+        rows = range(int(h * 0.05), int(h * 0.25)); step = max(1, w // 64); acc = [0.0, 0.0, 0.0]; n = 0
+        for y in rows[::max(1, len(rows) // 32)]:
+            for x in range(0, w, step):
+                i = (y * w + x) * 4
+                if px[i + 3] > 0.5: acc[0] += px[i]; acc[1] += px[i + 1]; acc[2] += px[i + 2]; n += 1
+        return tuple(min(1, c / n) for c in acc) if n else None
+    except Exception:
+        return None
 
 
 def build_backdrop(shot, cam):
@@ -463,8 +482,10 @@ def build_backdrop(shot, cam):
         except AttributeError: pass
         ob['backdrop'] = b['layer']; made.append(ob)
     if made:
-        nearest = min(BACKDROP_DEPTH[o['backdrop']] for o in made)
-        fade_ground((frm.x, frm.y), nearest * 0.45, nearest * 0.9)
+        # Keep real floor only where the cast stands and casts shadows, then hand over to the painted ground.
+        subject = (at - frm).length
+        far = next((o for o in made if o['backdrop'] == 'far'), made[0])
+        fade_ground((frm.x, frm.y), subject + 1.0, subject + 6.0, ground_colour(far.data.materials[0]))
     return made
 
 
