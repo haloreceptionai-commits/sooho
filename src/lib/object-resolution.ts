@@ -32,7 +32,9 @@ const TEXTUAL = /\b(caption\w*|label\w*|reading|marked|sign|signs|signage|text|l
 const PEOPLE = /\b(person|people|man|men|woman|women|child|children|figure\w*|rescuers?|workers?|crowd\w*|soldiers?|judge|auditor|owner|portrait|silhouette of a (man|woman|person))\b/i;
 export function unpaintable(phrase: string): string | null {
   if (TEXTUAL.test(phrase)) return 'text or graphic, not a physical object';
-  if (PEOPLE.test(phrase)) return 'a person, not an object';
+  // Only the object itself counts: "tank towering above the small people" is still a tank.
+  const head = phrase.split(/\b(?:where|with|while|at|above|beside|near|next to|towering|surrounded|in front of|behind|under|over|for)\b/i)[0] ?? phrase;
+  if (PEOPLE.test(head)) return 'a person, not an object';
   return null;
 }
 export const objectSlug = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30);

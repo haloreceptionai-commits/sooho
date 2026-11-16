@@ -30,8 +30,8 @@ describe('Stage 1 object resolution (owner rule: whole phrase, never a keyword)'
     expect(missing).toEqual([{ scene: 0, phrase: 'iron anvil', reason: 'painted object limit reached' }]);
   });
   it('never paints text labels, captions or people as objects', () => {
-    const { scenes, missing } = resolveSceneObjects([scene([{ id: 'claim', phrase: "typed claim sheet labeled OWNER'S CLAIM", size: 'medium' }, { id: 'rescuers', phrase: 'covered stretchers with rescuers', size: 'large' }])]);
-    expect(objectsToPaint(scenes as never)).toEqual([]);
+    const { scenes, missing } = resolveSceneObjects([scene([{ id: 'claim', phrase: "typed claim sheet labeled OWNER'S CLAIM", size: 'medium' }, { id: 'rescuers', phrase: 'two rescuers carrying stretchers', size: 'large' }, { id: 'tank', phrase: 'steel tank towering above the small people', size: 'huge' }])]);
+    expect(objectsToPaint(scenes as never).map(o => o.name)).toEqual(['tank']);
     expect(missing.map(m => m.reason)).toEqual(['text or graphic, not a physical object', 'a person, not an object']);
   });
   it('paints the most recurring objects first and reuses a card when a new id names it', () => {
