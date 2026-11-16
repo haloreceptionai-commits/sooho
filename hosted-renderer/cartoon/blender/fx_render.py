@@ -2,7 +2,7 @@
 import math
 import bpy
 from mathutils import Vector
-from effects import particles, state, crowd_layout, crowd_bob, shake_offset, whip_blend
+from effects import particles, state, crowd_layout, crowd_bob, shake_offset, whip_blend, lightning_energy
 from set_detail import material
 
 def _glow(name, color, strength):
@@ -37,7 +37,8 @@ def mats():
         MATS.update(fire=_volume('fx fire', (.2, .08, .02), 10, (1, .3, .03), 2.2), core=_volume('fx core', (.3, .2, .05), 12, (1, .62, .12), 3.5), spark=_glow('fx spark', (1, .6, .15), 20),
                     # step-7 review: opaque spheres read as boulders, so smoke and dust are real volumes
                     smoke=_volume('fx smoke', (.12, .11, .1), 8), dust=_volume('fx dust', (.55, .45, .32), 5),
-                    debris=material('fx debris', (.2, .14, .09), .9), rain=material('fx rain', (.7, .78, .9), .1))
+                    debris=material('fx debris', (.2, .14, .09), .9), rain=material('fx rain', (.7, .78, .9), .1),
+                    ember=_glow('fx ember', (1, .35, .06), 9), snow=_glow('fx snow', (.92, .95, 1.0), 1.2))
     return MATS
 
 def _mesh(kind, role):
@@ -56,7 +57,7 @@ def build_effects(shot, fps):
         for p in particles(kind, e.get('seed', 0)):
             role = p['role']; o = _mesh(kind, role); o.name = f'fx {kind} {role}'
             o.data.materials.append(m['core'] if role == 'fireball' and p['i'] < 5 else m['fire'] if role in ('fireball', 'fire') else
-                                    m['spark'] if kind == 'sparks' else m['smoke'] if role == 'smoke' else m['dust'] if kind == 'dust' else m['rain'] if kind == 'rain' else m['debris'])
+                                    m['spark'] if kind == 'sparks' else m['ember'] if kind == 'embers' else m['snow'] if kind == 'snow' else m['smoke'] if role == 'smoke' else m['dust'] if kind == 'dust' else m['rain'] if kind == 'rain' else m['debris'])
             o.visible_shadow = role in ('debris', 'smoke', 'dust'); o.rotation_euler = (p['a'], p['u'], p['a'] * 2)
             for f in range(n):
                 x, y, z, s = state(kind, p, f / fps - e.get('start', 0), sc)
@@ -70,6 +71,11 @@ def build_effects(shot, fps):
                 o.keyframe_insert('hide_render', frame=f + 1); o.keyframe_insert('hide_viewport', frame=f + 1)
                 if role == 'debris': o.keyframe_insert('rotation_euler', frame=f + 1)
             count += 1
+        if kind == 'lightning':  # cold white flash that lights the whole set for a moment
+            ld = bpy.data.lights.new('fx flash', 'POINT'); ld.color = (.82, .88, 1.0); ld.shadow_soft_size = 2.0
+            lo = bpy.data.objects.new('fx flash', ld); bpy.context.collection.objects.link(lo); lo.location = base + Vector((0, 0, 9))
+            for f in range(n):
+                ld.energy = lightning_energy(f / fps - e.get('start', 0)); ld.keyframe_insert('energy', frame=f + 1)
         if kind in ('explosion', 'fire'):  # real light from the blast that lights the set and cast
             ld = bpy.data.lights.new('fx light', 'POINT'); ld.color = (1, .55, .2); lo = bpy.data.objects.new('fx light', ld)
             bpy.context.collection.objects.link(lo); lo.location = base + Vector((0, 0, .8))

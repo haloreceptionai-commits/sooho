@@ -5,8 +5,8 @@ time t are closed-form, so tests can check gravity, start timing and ground cont
 """
 import math, random
 
-KINDS = {'explosion', 'smoke', 'fire', 'sparks', 'dust', 'rain'}
-COUNTS = {'explosion': 90, 'smoke': 24, 'fire': 28, 'sparks': 60, 'dust': 36, 'rain': 260}
+KINDS = {'explosion', 'smoke', 'fire', 'sparks', 'dust', 'rain', 'embers', 'snow', 'lightning'}
+COUNTS = {'explosion': 90, 'smoke': 24, 'fire': 28, 'sparks': 60, 'dust': 36, 'rain': 260, 'embers': 40, 'snow': 220, 'lightning': 1}
 G = 9.81
 
 
@@ -58,10 +58,27 @@ def state(kind, p, t, scale=1.0):
     if kind == 'dust':
         k = 1 - math.exp(-t * 1.6); fade = max(0, 1 - max(0, t - 2) / 1.5)
         return (s * 1.8 * k * c * p['speed'], s * 1.8 * k * n * p['speed'], s * (.08 + .25 * k * p['size']), s * (.12 + .28 * k) * p['size'] * fade)
+    if kind == 'embers':   # glowing sparks that rise and drift sideways while they cool
+        life = 2.2; age = (t + p['delay'] * life) % life; k = age / life
+        return (s * (.25 * p['x'] + .9 * k * c * .5), s * (.25 * p['y'] + .9 * k * n * .5), s * (.1 + 2.6 * k), s * .035 * p['size'] * (1 - k) * (.7 + .3 * math.sin(23 * t + p['i'])))
+    if kind == 'snow':     # slow flakes that sway as they fall
+        span = 8 * s; z = 5 - ((t * 1.1 + p['delay'] * 5) % 5)
+        return (p['x'] * span / 2 + .25 * math.sin(t * 1.7 + p['a']), p['y'] * span / 2 + .25 * math.cos(t * 1.3 + p['a']), z, .028 * p['size'])
+    if kind == 'lightning':  # one hidden marker; the flash is a light (see fx_render), so no geometry to draw
+        return (0, 0, 0, 0)
     if kind == 'rain':
         span = 6 * s; fall = 7.0; z = 5 - ((t * fall + p['delay'] * 5) % 5)
         return (p['x'] * span / 2, p['y'] * span / 2, z, .012)
     raise ValueError(kind)
+
+
+def lightning_energy(t):
+    """Light energy (watts) t seconds after the strike: a hard flash, a short dip, then a weaker re-strike."""
+    if t < 0: return 0.0
+    if t < .08: return 90000.0 * (1 - t / .08 * .3)
+    if t < .16: return 8000.0
+    if t < .24: return 60000.0 * (1 - (t - .16) / .08)
+    return 0.0
 
 
 def shake_offset(t, hits, fps=30):

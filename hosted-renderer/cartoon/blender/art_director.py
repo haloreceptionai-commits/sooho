@@ -136,7 +136,8 @@ STORY_OBJECT_WORDS = {'money_bag': r'\b(money|paid|pay|cost|coins?|reward|bount\
                       'hand_drill': r'\b(drill\w*)\b', 'fuse_bundle': r'\b(fuse\w*)\b', 'rocket_arrow': r'\b(rocket\w*|arrow\w*)\b', 'gold_vein': r'\b(vein|ore|nugget\w*)\b'}
 FX_WORDS = [(r'\b(explo\w*|blast\w*|bomb\w*|dynamite|boom)\b', 'explosion'), (r'\b(fir(e|ed|es|ing)|shot|shoot\w*|guns?|bullets?|rounds|machine)\b', 'sparks'),
             (r'\b(burn\w*|flames?|blaze)\b', 'fire'), (r'\b(smoke\w*|smok\w*)\b', 'smoke'), (r'\b(dust\w*|stampede\w*|charg\w*|scatter\w*|ran|run\w*|fled|drought)\b', 'dust'),
-            (r'\b(rain\w*|storm\w*|flood\w*)\b', 'rain')]
+            (r'\b(rain\w*|storm\w*|flood\w*)\b', 'rain'), (r'\b(snow\w*|blizzard\w*|frozen|freez\w*|winter|ice)\b', 'snow'),
+            (r'\b(lightning|thunder\w*|bolt)\b', 'lightning'), (r'\b(torch\w*|campfire\w*|bonfire\w*|ember\w*|ablaze|on fire|wildfire\w*)\b', 'embers')]
 IMPACT = re.compile(r'\b(boom|bang|crash\w*|explo\w*|smash\w*|hit|fir(e|ed|ing)|shot|slam\w*|destroy\w*|collaps\w*)\b')
 SCALE_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|millions?|army|armies|entire|whole|all|every|herds?|flocks?|mobs?|swarms?|hordes?|crowds?|nation|country)\b')
 CROWD_WORDS = re.compile(r'\b(army|armies|soldiers|troops|crowds?|farmers|people|villagers|citizens|men|workers|miners|public|locals|settlers|residents)\b')
@@ -551,6 +552,10 @@ class Director:
                     effects.append({'kind': 'smoke', 'pos': r3(fx), 'start': round(min(dur - .2, t0 + .1), 3), 'scale': .5, 'seed': i * 7 + len(effects)})
             elif fk == 'rain':
                 if st in OUTDOOR: effects.append({'kind': 'rain', 'pos': at(S, F, R, 0, 0, 0), 'start': 0, 'scale': 1, 'seed': i})
+            elif fk == 'snow':
+                if st in OUTDOOR: effects.append({'kind': 'snow', 'pos': at(S, F, R, 0, 0, 0), 'start': 0, 'scale': 1, 'seed': i})
+            elif fk == 'lightning':
+                effects.append({'kind': 'lightning', 'pos': at(S, F, R, 4.0, 0, 0), 'start': round(t0, 3), 'scale': 1, 'seed': i})
             elif fk == 'dust':
                 if st in OUTDOOR and (moving or herd): effects.append({'kind': 'dust', 'pos': at(S, F, R, 0.8, 0, 0), 'start': round(t0, 3), 'scale': 1.2, 'seed': i * 7 + 3})
             else:
