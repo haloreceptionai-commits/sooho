@@ -5,7 +5,7 @@
 import { z } from "zod";
 import registry from "../../hosted-renderer/cartoon/blender/place-registry.json";
 import audit from "../../hosted-renderer/cartoon/blender/registry-audit.json";
-import { LIBRARY, nameMatch, searchLibrary } from "./object-library";
+import { LIBRARY, searchLibrary, words } from "./object-library";
 
 type Entry = { model: string; height: number; words: string[]; water?: boolean };
 const DRESSING = registry.dressing as Record<string, Entry>;
@@ -76,6 +76,17 @@ ADVANCED 3D PLACE (required per scene; the engine builds it as a real 3D world, 
 - place.time: dawn/day/dusk/night from the sentence and facts (a night attack is night). Time of day is a STORY CONSTANT: every scene in the same stretch of the story shares one time; change it only where the story itself jumps (for example "by morning"), going through dawn or dusk. Never alternate day and night between neighbouring scenes. place.weather: clear/fog/rain/wind.
 - place.dressing: up to 12 {id,count} from this list only, for registry things: ${PLACE_DRESSING.join(", ")}. Herds or groups use count up to 12 (e.g. burning oxen in a night attack = ox_burning with count 8).`;
 
+/** Colour/size/material adjectives never identify an object: a model called "lightRed" is not a red rocket. */
+const GENERIC = new Set(["red", "blue", "green", "yellow", "black", "white", "grey", "gray", "brown", "orange", "purple", "pink", "gold", "golden", "silver", "dark", "old", "new", "big", "small", "large", "tiny", "huge", "tall", "short", "heavy",
+  "steel", "wooden", "wood", "stone", "iron", "metal", "rusty", "ancient", "modern", "giant", "base", "large", "medium", "small", "detailed", "simple", "long", "round", "square"]);
+/** A modifier that changes WHAT the thing is ("water tower" is not a watchtower): such phrases are built from shapes instead of matched loosely. */
+const DISTINCT_MODIFIER = /\b(water|oil|power|clock|bell|radio|signal|gas|wind|control|fire|ice|sand)\s+\w+/;
+const headNoun = (phrase: string): string | undefined => {
+  const first = phrase.toLowerCase().split(/\b(?:on|in|with|of|at|near|by|from|for|under|over|beside|made)\b/)[0] ?? "";
+  const ws = words(first); return ws[ws.length - 1];
+};
+const nameWords = (id: string) => words(id.split("/")[1] ?? id);
+
 const SIZE_HEIGHT: Record<string, number> = { small: 0.7, medium: 1.6, large: 4.5, huge: 16 };
 const PLURAL = /\b(herd|herds|flock|crowd|row|rows|army|armies|hundreds|thousands|dozens|many|several|fleet|forest|rows of)\b/;
 
@@ -93,7 +104,8 @@ export function liftDressing<T extends { phrase?: string; id?: string; size?: st
   const wet = place.terrain === "river_crossing" || place.terrain === "coast" || (place.terrain === "custom" && (place.water ?? "none") !== "none");
   for (const o of objects) {
     const text = ` ${String(o.phrase ?? o.id ?? "").toLowerCase().replace(/[^a-z]+/g, " ")} `;
-    const hit = PLACE_DRESSING.map(id => ({ id, len: Math.max(0, ...DRESSING[id]!.words.filter(w => text.includes(` ${w} `)).map(w => w.length)) }))
+    const distinct = DISTINCT_MODIFIER.exec(text.trim());
+    const hit = distinct ? undefined : PLACE_DRESSING.map(id => ({ id, len: Math.max(0, ...DRESSING[id]!.words.filter(w => text.includes(` ${w} `)).map(w => w.length)) }))
       .filter(h => h.len > 0 && !(DRESSING[h.id]!.water && !wet)).sort((a, b) => b.len - a.len)[0];
     // Combination: cattle + fire words is the burning-ox herd, not a torch or a plain ox.
     if (hit && /\b(ox|oxen|cattle|cows?|bulls?)\b/.test(text) && /\b(burning|flaming|fire|torch|torches|ablaze)\b/.test(text) && PLACE_DRESSING.includes("ox_burning")) hit.id = "ox_burning";
@@ -102,7 +114,8 @@ export function liftDressing<T extends { phrase?: string; id?: string; size?: st
       continue;
     }
     const phrase = String(o.phrase ?? o.id ?? "");
-    const lib = phrase ? searchLibrary(phrase, 4).find(m => m.type === "model" && nameMatch(m, phrase)) : undefined;
+    const head = headNoun(phrase);
+    const lib = phrase && head && !distinct ? searchLibrary(phrase, 12).find(m => m.type === "model" && nameWords(m.id).includes(head) && !nameWords(m.id).every(w => GENERIC.has(w))) : undefined;
     if (!lib || dressing.length >= 12) { kept.push(o); continue; }
     const many = PLURAL.test(text);
     const h = sizeToHeight(o.size, text);
