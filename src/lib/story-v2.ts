@@ -165,7 +165,7 @@ export function validateStory(s: StoryInput): StoryReport {
   const micro = s.durationSec < MICRO_SEC;
   const legacyOnly = new Set(['V1', 'V2', 'V6', 'V7', 'V9', 'CLOCK', 'LOOPS']);
   // Shape v3 replaces these beat quotas (year/place/stakes by 8s, question by 8s, hero want, escalation, myth, clock, loop %).
-  const shapeQuota = new Set(['V2', 'V6', 'V7', 'V9', 'V10', 'CLOCK', 'LOOPS', 'V4']);
+  const shapeQuota = new Set(['V2', 'V6', 'V7', 'V9', 'CLOCK', 'LOOPS', 'V4']);
   const add = (id: string, pass: boolean, msg: string) => {
     if (s.shape && shapeQuota.has(id)) { checks.push({ id, pass: true, msg: `${id}: replaced by Story Shape v3` }); return; }
     if (s.shape && id === 'V1') { const ok = mentions(spokenBy(s.scenes, 8), s.anchors.subject); checks.push({ id, pass: ok, msg: ok ? 'V1 subject named by 8s' : `V1: by 8s the narration never names the subject ("${s.anchors.subject}")` }); return; }

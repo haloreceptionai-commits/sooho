@@ -34,7 +34,7 @@ By morning, Rome is chasing a herd of panicked oxen.
 Hannibal didn't win with strength. He won by making the enemy look the wrong way.`;
 
 /** Prompt block that overrides older beat quotas for Shorts. */
-export const STORY_SHAPE_DIRECTION = `STORY SHAPE v3 (the owner's gold standard; it OVERRIDES any older rule about a mandatory year/place in the hook, a stated hero want, a rival, try-fail rounds, a myth line, an "Ever ...?" analogy or a question by word 20):
+export const STORY_SHAPE_DIRECTION = `STORY SHAPE v3 (the owner's gold standard; it OVERRIDES any older rule about a mandatory year/place in the hook, a stated hero want, a rival, try-fail rounds, a myth line, an "Ever ...?" analogy, a question by word 20, "6-16 word sentences" or "no constant questions"):
 1. HOOK (8-12 words, about 3 seconds, no setup before it): a CONTRADICTION that makes the viewer need the answer ("A gift with no battery spied on America for seven years." / "Hannibal was trapped, so he strapped fire to two thousand oxen."). It states the strange fact and HIDES the explanation: never "because", "which is why" or the mechanism in the hook.
 2. SETUP in 2-4 short lines, told in the PRESENT TENSE as if it is happening now: who, where, the trap or the mystery ("Rome has his army cornered in a valley." / "He hangs it right behind his desk.").
 3. PRESSURE: show why it seems impossible ("Security sweeps the room. No wires. No battery. Nothing." / "Rome just has to wait.").
