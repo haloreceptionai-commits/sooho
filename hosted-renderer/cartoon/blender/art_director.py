@@ -1,3 +1,4 @@
+import os
 """Deterministic Advanced art director: turns a locked manifest into benchmark-paced Blender segments.
 
 Pure Python (no Blender). It reads each manifest shot plus the words actually spoken during it and
@@ -127,6 +128,22 @@ IMPACT = re.compile(r'\b(boom|bang|crash\w*|explo\w*|smash\w*|hit|fir(e|ed|ing)|
 SCALE_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|millions?|army|armies|entire|whole|all|every|herds?|flocks?|mobs?|swarms?|hordes?|crowds?|nation|country)\b')
 CROWD_WORDS = re.compile(r'\b(army|armies|soldiers|troops|crowds?|farmers|people|villagers|citizens|men|workers|miners|public|locals|settlers|residents)\b')
 HERD_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|herds?|flocks?|mobs?|swarms?|hordes?|groups?|packs?)\b')
+UPLOADED_HUMANS = os.environ.get('ADVANCED_HUMANS', 'uploaded') != 'egg'
+WOMAN = re.compile(r'\b(woman|women|wife|queen|mother|mom|girl|lady|ladies|daughter|princess|empress|sister|nurse|widow|actress|duchess|aunt|grandmother|she|her)\b')
+HUMAN_ACTION = {'walk': 'walk', 'run': 'run', 'panic': 'run', 'fall': 'fall'}
+
+
+def human_cast(ch, x, look):
+    """Owner rule: people are the owner's uploaded rigged humans, not engine egg-heads. Only verified clips play
+    (anything else stands); hand props are dropped because those rigs have no verified grip."""
+    words = ' '.join(str(x.get(k) or '') for k in ('id', 'name', 'role', 'description')).lower().replace('_', ' ').replace('-', ' ')
+    out = {k: v for k, v in ch.items() if k not in ('held',)}
+    out['model'] = 'uploaded-woman' if WOMAN.search(words) else 'uploaded-man'
+    out['action'] = HUMAN_ACTION.get(ch.get('action'), 'stand')
+    out['shirt'] = look['shirt']
+    return out
+
+
 NIGHT = re.compile(r'\b(night|midnight|dark|darkness|moon\w*)\b'); DUSK = re.compile(r'\b(sunset|dusk|evening)\b')
 
 GRAMMAR = ['establish', 'wide', 'medium', 'close', 'xclose', 'low', 'high', 'ots', 'track', 'orbit', 'insert']
@@ -455,7 +472,7 @@ class Director:
             if act in ('aim', 'load') and look['outfit'] == 'soldier': ch['held'] = 'rifle'
             elif act == 'carry': ch['held'] = 'crate'
             elif act == 'swing': ch['held'] = 'tool'
-            cast.append(ch)
+            cast.append(human_cast(ch, x, look) if UPLOADED_HUMANS else ch)
         if beasts:
             herd_n = max(0, (6 if herd else min(6, max(len(beasts), 1))) - len(obj_cards))
             ids = [b['id'] for b in beasts]
