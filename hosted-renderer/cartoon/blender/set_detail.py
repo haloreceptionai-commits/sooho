@@ -237,6 +237,7 @@ def ground_detail(name):
         x,y=rng.uniform(-12,12),rng.uniform(-3,20)
         if name in ('castle','battlefield') and abs(x)<2:continue
         if name in ('village','street') and abs(x)<2.5:continue
+        if name=='farm_field' and abs(x)<3 and -4<y<5:continue
         if name=='rail_yard' and abs(x)<1.2:continue
         h=rng.uniform(.07,.22);w=.025;j=len(verts)
         verts += [(x-w,y,.015),(x+w,y,.015),(x+rng.uniform(-.08,.08),y,h)]
@@ -339,9 +340,114 @@ def ocean():
     for p in o.data.polygons:p.use_smooth=True
 
 
+def _blades(name,rng,count,area,height,mats,skip=None,width=.03,lean=.08):
+    """One mesh of many thin triangles (crops, spinifex, ferns): thousands of blades cost a single object."""
+    verts=[];faces=[];idx=[]
+    for i in range(count):
+        x,y=rng.uniform(area[0],area[1]),rng.uniform(area[2],area[3])
+        if skip and skip(x,y):continue
+        h=rng.uniform(*height);j=len(verts)
+        verts+=[(x-width,y,.0),(x+width,y,.0),(x+rng.uniform(-lean,lean),y+rng.uniform(-lean,lean),h)]
+        faces.append((j,j+1,j+2));idx.append(rng.randrange(len(mats)))
+    me=bpy.data.meshes.new(name);me.from_pydata(verts,[],faces)
+    o=bpy.data.objects.new(name,me);bpy.context.collection.objects.link(o)
+    for m in mats:me.materials.append(m)
+    for poly,i in zip(me.polygons,idx):poly.material_index=i
+    return o
+
+
+def farm_field(surface):
+    rng=random.Random(811);wood=surface('wood',1.2)
+    wheat=[material('wheat '+str(i),c,.8) for i,c in enumerate([(.78,.6,.22),(.86,.7,.3),(.66,.5,.18)])]
+    # Golden crop rows behind and around the yard; the central yard stays clear for the cast.
+    _blades('wheat field',rng,26000,(-16,16,6,22),(.55,1.05),wheat,lambda x,y:abs(x+8)<3.5 and 8<y<14,.022,.12)
+    _blades('wheat field near',rng,9000,(-16,16,-18,-9),(.55,1.0),wheat,None,.022,.12)
+    soil=material('ploughed soil',(.24,.15,.08),.95)
+    for k in range(9):cube('furrow',(-12+k*3,14,.01),(.5,16,.04),soil,0)
+    # Red timber barn (seen from the reverse angle)
+    red=material('barn red',(.45,.08,.05),.85);white=material('barn trim',(.85,.82,.74),.7);roof=material('barn roof',(.18,.19,.2),.6,.3)
+    bx,by=8,-12
+    cube('barn body',(bx,by,1.9),(6,5,3.8),red,.04)
+    for side in [-1,1]:
+        r=cube('barn roof',(bx+side*1.6,by,4.55),(3.6,5.4,.14),roof,.02);r.rotation_euler.y=side*math.radians(-33)
+    mesh_object('barn gable',[(bx-3,by+2.52,3.8),(bx+3,by+2.52,3.8),(bx,by+2.52,5.6)],[(0,1,2)],red)
+    cube('barn door',(bx,by+2.53,1.3),(2.2,.06,2.6),white,.01)
+    for a,b in [((bx-1.1,by+2.56,.05),(bx+1.1,by+2.56,2.6)),((bx+1.1,by+2.56,.05),(bx-1.1,by+2.56,2.6))]:beam(a,b,.1,white)
+    # Classic water-pumping windmill: lattice tower, tail fan and blades
+    iron=material('windmill steel',(.5,.52,.55),.45,.6);wx,wy=10,12
+    for dx,dy in [(-.8,-.8),(.8,-.8),(-.8,.8),(.8,.8)]:beam((wx+dx,wy+dy,0),(wx+dx*.15,wy+dy*.15,7),.08,iron)
+    for z in [1.5,3,4.5,6]:
+        k=.8*(1-z/7*.85)
+        for a,b in [((-k,-k),(k,-k)),((k,-k),(k,k)),((k,k),(-k,k)),((-k,k),(-k,-k))]:beam((wx+a[0],wy+a[1],z),(wx+b[0],wy+b[1],z),.05,iron)
+    hub=(wx,wy-.35,7.2)
+    for j in range(14):
+        a=j/14*math.tau;bl=cube('windmill blade',(hub[0]+math.cos(a)*.9,hub[1],hub[2]+math.sin(a)*.9),(.26,.03,1.5),iron,.005);bl.rotation_euler.y=-a+math.pi/2
+    cube('windmill tail',(wx,wy+1.3,7.2),(.05,1.8,.9),iron,.005)
+    for x in range(-14,15,2):beam((x,-7.5,0),(x,-7.5,1.1),.09,wood)
+    beam((-14,-7.5,.9),(14,-7.5,.9),.05,wood);beam((-14,-7.5,.5),(14,-7.5,.5),.05,wood)
+
+
+def outback(surface):
+    rng=random.Random(1932)
+    earth=material('red outback earth',(.55,.25,.11),.95)
+    m=earth.node_tree;bs=m.nodes['Principled BSDF']
+    noise=m.nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=1.4;noise.inputs['Detail'].default_value=6
+    geo=m.nodes.new('ShaderNodeNewGeometry');m.links.new(geo.outputs['Position'],noise.inputs['Vector'])
+    ramp=m.nodes.new('ShaderNodeValToRGB');ramp.color_ramp.elements[0].color=(.42,.17,.07,1);ramp.color_ramp.elements[1].color=(.7,.38,.17,1)
+    m.links.new(noise.outputs['Fac'],ramp.inputs['Fac']);m.links.new(ramp.outputs['Color'],bs.inputs['Base Color'])
+    bpy.ops.mesh.primitive_plane_add(size=420,location=(0,4,0));g=bpy.context.active_object;g.name='outback ground';g.data.materials.append(earth)
+    spin=[material('spinifex '+str(i),c,.85) for i,c in enumerate([(.55,.5,.22),(.42,.42,.18),(.66,.58,.3)])]
+    for k in range(70):
+        x,y=rng.uniform(-18,18),rng.uniform(-16,26)
+        if abs(x)<3 and -3<y<5:continue
+        _blades('spinifex clump',random.Random(k),70,(x-.5,x+.5,y-.5,y+.5),(.25,.6),spin,None,.03,.3)
+    # Flat-topped mesas on the horizon in every direction
+    rock=material('mesa rock',(.5,.22,.1),.9)
+    cap=material('mesa cap',(.62,.32,.15),.9)
+    for i in range(11):
+        a=i/11*math.tau+.2;r=78+(i%3)*12;h=6+3*(i%4);w=22+(i%3)*9
+        # irregular sloped butte: a tapered many-sided cylinder plus a flat cap ledge
+        bpy.ops.mesh.primitive_cone_add(vertices=11,radius1=w/2,radius2=w/2*.78,depth=h,location=(r*math.cos(a),4+r*math.sin(a),h/2-.3))
+        o=bpy.context.active_object;o.name='butte';o.scale.y=.55;o.rotation_euler.z=a+i;o.data.materials.append(rock)
+        for v in o.data.vertices:v.co.x+=math.sin(v.co.y*1.7+i)*.9
+        bpy.ops.mesh.primitive_cylinder_add(vertices=11,radius=w/2*.8,depth=.7,location=(r*math.cos(a),4+r*math.sin(a),h-.1))
+        c=bpy.context.active_object;c.scale.y=.55;c.rotation_euler.z=a+i;c.data.materials.append(cap)
+    # Long wire fence (the famous rabbit/emu-proof fences) running across the plain
+    post=material('fence post',(.3,.22,.14),.9);wire=material('fence wire',(.55,.55,.56),.4,.8)
+    for y in range(-16,30,2):beam((-5.5,y,0),(-5.5,y,1.2),.07,post)
+    for z in (.4,.75,1.1):rope('fence wire',(-5.5,-16,z),(-5.5,28,z),.008,wire)
+
+
+def forest(surface):
+    rng=random.Random(4040);wood=surface('wood',1.2)
+    fern=[material('fern '+str(i),c,.85) for i,c in enumerate([(.1,.3,.08),(.16,.38,.1),(.2,.32,.06)])]
+    _blades('forest undergrowth',rng,9000,(-18,18,-14,22),(.15,.55),fern,lambda x,y:x*x+(y-2)**2<16,.04,.18)
+    moss=material('mossy log',(.25,.2,.12),.9)
+    for k,(x,y,a) in enumerate([(-5,9,.4),(6,10,-.7),(-8,-3,1.2),(7,-6,.2)]):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=14,radius=.28,depth=3.4,location=(x,y,.28));o=bpy.context.active_object
+        o.rotation_euler=(0,math.pi/2,a);o.data.materials.append(moss)
+    # Shafts of light through the canopy: soft spot lights
+    for x,y in [(-2,4),(3,7)]:
+        bpy.ops.object.light_add(type='SPOT',location=(x,y,9));l=bpy.context.active_object;l.data.energy=900;l.data.spot_size=.5;l.data.color=(1,.92,.7)
+
+
+def market(surface):
+    rng=random.Random(77);cloth=[material('bunting '+str(i),c,.8) for i,c in enumerate([(.7,.1,.08),(.95,.75,.15),(.12,.3,.6),(.2,.5,.2)])]
+    rope_m=material('bunting rope',(.3,.25,.2))
+    for y in (2.5,8.5):
+        a,b=(-6,y,4.2),(6,y,4.2);rope('bunting line',a,b,.01,rope_m)
+        for k in range(18):
+            x=-5.7+k*.67;mesh_object('pennant',[(x-.2,y,4.2),(x+.2,y,4.2),(x,y,3.75)],[(0,1,2)],cloth[k%4])
+    produce=[material('produce '+str(i),c,.7) for i,c in enumerate([(.8,.15,.08),(.9,.55,.1),(.3,.55,.15)])]
+    for sx,sy in [(-3.6,5.1),(3.8,5.4)]:
+        for k in range(14):
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=10,ring_count=6,radius=.09,location=(sx-.6+(k%7)*.18,sy-.55+(k//7)*.18,1.02))
+            bpy.context.active_object.data.materials.append(produce[(k+int(sx))%3])
+
+
 def practical_lights(name,mode):
     """Visible lamps generate real light; night must remain readable."""
-    if name not in ('castle','battlefield','village','street','ship_deck'):return
+    if name not in ('castle','battlefield','village','street','ship_deck','market','farm_field'):return
     iron=material('lamp frame',(.06,.065,.07),.38,.7)
     glow=material('lamp flame',(1,.39,.08),.3,0,8)
     positions=[(-2.4,5.4,2.1),(2.4,5.4,2.1)] if name=='castle' else [(-2,4,1.8),(2.5,7,1.8)]
@@ -360,6 +466,10 @@ def detail_set(name,surface):
     if name=='castle':castle(surface)
     if name=='battlefield':battlefield(surface)
     # Complete CC0 buildings replace the earlier partial kit facades.
-    if name in ('castle','battlefield','village','street','rail_yard'):ground_detail(name)
+    if name=='farm_field':farm_field(surface)
+    if name=='outback':outback(surface)
+    if name=='forest':forest(surface)
+    if name=='market':market(surface)
+    if name in ('castle','battlefield','village','street','rail_yard','farm_field','forest'):ground_detail(name)
     if name in ('office','saloon','workshop','room'):indoor_detail(name,surface)
     if name=='ship_deck':ocean();ship_details(surface)

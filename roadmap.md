@@ -34,5 +34,5 @@
 - [x] Shorts Writer v4 switched on (SHORTS_WRITER_V4=on) with automatic fallback to the backup writer
 - [x] Fixed empty cartoon direction + character-name repair; Emu War test video finished and saved
 - [x] Nov 16 owner: new Blender 3D engine connected to real Advanced videos; Emu War test video made and saved (47 s)
-- [ ] Next (owner): quality pass on the 3D engine — more set variety per story, faces/outfits, speed (render ~40 min; only ~2 graphics machines ran at once)
+- [x] Nov 16 owner: 3D engine quality pass — art director (places, camera grammar, walking/running, herds), GPU speed (draw 40 min -> 9 min). Next: show story objects (tank, flood) in 3D, fewer face-blocking close-ups
 - [ ] Pinned 'explosion' sound source changed upstream: full cartoon image rebuilds fail at fetch-sounds until re-pinned (the :blender image builds on :slim, unaffected)

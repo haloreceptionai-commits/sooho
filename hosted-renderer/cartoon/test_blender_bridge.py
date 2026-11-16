@@ -36,4 +36,10 @@ class Bridge(unittest.TestCase):
         self.assertEqual([w['text'] for w in words], ['the', 'army', 'went'])
         self.assertTrue(words[2]['key'] and words[2]['live'])
 
+    def test_art_director_segments_cover_every_frame_and_always_move(self):
+        m = manifest(); segs = b.segments(m, {'bird.png'})
+        self.assertEqual([f for _, a, z, _ in segs for f in range(a, z)], list(range(0, 120)))
+        for _, _, _, s in segs:
+            c = s['camera']; self.assertTrue(c.get('to', c['from']) != c['from'] or 'look_to' in c or 'whip_from' in c)
+
 if __name__ == '__main__': unittest.main()

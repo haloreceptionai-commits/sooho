@@ -77,7 +77,27 @@ def finish_palette(m):
     bs.inputs['Roughness'].default_value=.64
 
 
+_MODEL_CACHE = {}
+
+
+def _instance(spec):
+    """Repeat of an already-imported model: copy its objects (sharing mesh data) under a new root.
+    Re-importing the same GLB for every tree took most of the scene-build time."""
+    c = _MODEL_CACHE[spec['id']]
+    root = bpy.data.objects.new('asset:' + spec['id'], None); bpy.context.collection.objects.link(root)
+    mapping = {c['root']: root}
+    for o in c['order']:
+        n = o.copy(); bpy.context.collection.objects.link(n); mapping[o] = n
+    for o in c['order']:
+        n = mapping[o]; n.parent = mapping.get(o.parent); n.matrix_parent_inverse = o.matrix_parent_inverse.copy()
+        n.matrix_basis = o.matrix_basis.copy()
+    factor = spec['height'] / c['height']
+    root.scale = (factor,) * 3; root.location = spec['pos']; root.rotation_euler.z = math.radians(spec.get('yaw', 0))
+    return root
+
+
 def model(spec):
+    if spec['id'] in _MODEL_CACHE and 'surface' not in spec and not spec.get('ink'): return _instance(spec)
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=asset_path(spec['id'], 'model'))
     objects = set(bpy.data.objects) - before
@@ -117,6 +137,12 @@ def model(spec):
             wire = o.modifiers.new('masonry edges', 'BEVEL'); wire.width = 0.007; wire.segments = 1
         # Preserve the source model's smooth/flat shading rather than forcing
         # every detailed surface into coarse flat-shaded facets.
+    if 'surface' not in spec and not spec.get('ink') and spec['id'] not in _MODEL_CACHE:
+        order = []
+        def walk(parent):
+            for ch in [o for o in objects if o.parent == parent]: order.append(ch); walk(ch)
+        walk(root)
+        _MODEL_CACHE[spec['id']] = {'root': root, 'order': order, 'height': height}
     return root
 
 
@@ -138,7 +164,10 @@ def lighting(mode, indoor=False):
     # around a historical set, even when a photographic HDR lights it.
     light_path = nt.nodes.new('ShaderNodeLightPath')
     background = nt.nodes.new('ShaderNodeBackground')
-    visible_sky = nt.nodes.new('ShaderNodeTexSky');visible_sky.sky_type='NISHITA'
+    visible_sky = nt.nodes.new('ShaderNodeTexSky')
+    for kind in ('NISHITA', 'MULTIPLE_SCATTERING', 'HOSEK_WILKIE'):
+        try: visible_sky.sky_type = kind; break
+        except TypeError: pass
     visible_sky.sun_elevation=math.radians(30 if mode=='day' else 8)
     visible_sky.sun_rotation=math.radians(140);visible_sky.sun_disc=False
     nt.links.new(visible_sky.outputs[0],background.inputs['Color'])

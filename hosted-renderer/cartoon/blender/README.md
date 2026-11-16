@@ -3,7 +3,7 @@
 Headless Blender 4.2 LTS renders one declarative shot (JSON, checked by `shot_schema.py`) to frames.
 No AI-written code runs here. Production engine: Cycles on an Azure T4 (OptiX, GPU OpenImageDenoise),
 with sun/sky or lamp light, soft shadows, depth of field, AgX grade, mist-pass haze, bloom and vignette.
-Eevee is supported locally but the NVIDIA EGL path fails headless on Azure (EGL_BAD_PARAMETER).
+Eevee is supported locally but the NVIDIA EGL path fails headless on Azure T4 (EGL_BAD_PARAMETER; Vulkan ICD also unusable, measured Nov 16) — production uses Cycles GPU at 720x1280, 5 samples, two lanes.
 
 - Build image: `node tools/azure-build.mjs <tag> blender blender-renderer`
 - Test on Azure: `node tools/blender-job.mjs <tag> gpu-t4 run <blobPrefix> cycles [shotName|json]`
