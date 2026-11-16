@@ -9,6 +9,7 @@ import os
 import random
 import re
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import shot_director as D
 from codex_planner import concept_menu, READER
@@ -125,25 +126,41 @@ def judge_accepts(result, labels, sentence_count):
         return False
 
 
-def run(evidence_file, output, max_rounds=3):
+def run(evidence_file, output, max_rounds=3, stage='all', first_attempt=1):
     evidence = json.loads(Path(evidence_file).read_text())
     out = Path(output); out.mkdir(parents=True, exist_ok=True)
     benchmark_path = D.HERE.parent / 'benchmark/results' / (evidence['benchmark'] + '.shots.json')
     benchmark = ' '.join(w['w'] for w in json.loads(benchmark_path.read_text())['words'])
     base = author_prompt(evidence); prompt = base
-    for attempt in range(1, max_rounds + 1):
-        draft = azure_json(prompt)
+    for attempt in range(first_attempt, max_rounds + 1):
+        if attempt > 1:
+            previous = json.loads((out / f'draft-{attempt-1}.json').read_text())
+            previous_votes = [json.loads(p.read_text()) for p in sorted(out.glob(f'judge-{attempt-1}-*.json'))]
+            prompt = base + '\nRepair the latest draft, not an earlier draft: ' + json.dumps(previous)
+            prompt += '\nFix these actual check findings: ' + json.dumps({'errors': check(previous, evidence), 'votes': previous_votes})
+        draft_path = out / f'draft-{attempt}.json'
+        if stage == 'judge' and not draft_path.exists():
+            raise ValueError('Author stage must finish before judge stage')
+        draft = json.loads(draft_path.read_text()) if draft_path.exists() else azure_json(prompt)
         errors = check(draft, evidence)
-        (out / f'draft-{attempt}.json').write_text(json.dumps(draft, indent=2))
+        draft_path.write_text(json.dumps(draft, indent=2))
+        if stage == 'author':
+            return {'accepted': False, 'pending': 'judges', 'errors': errors, 'attempt': attempt}
         votes = []
         if not errors:
-            for vote in range(3):
+            def judge(vote):
+                saved = out / f'judge-{attempt}-{vote}.json'
+                if saved.exists():
+                    return json.loads(saved.read_text())
                 question, labels = judge_prompt(draft, evidence, benchmark, attempt * 10 + vote)
                 result = azure_json(question)
                 passed = judge_accepts(result, labels, len(draft['sentences']))
-                votes.append({'labels': labels, 'passed': passed, 'result': result})
-                (out / f'judge-{attempt}-{vote}.json').write_text(json.dumps(votes[-1], indent=2))
+                response = {'labels': labels, 'passed': passed, 'result': result}
+                saved.write_text(json.dumps(response, indent=2))
                 print(f'{evidence["id"]} draft {attempt} vote {vote+1}: {passed}', flush=True)
+                return response
+            with ThreadPoolExecutor(max_workers=3) as pool:
+                votes = list(pool.map(judge, range(3)))
         accepted = not errors and len(votes) == 3 and all(v['passed'] for v in votes)
         audit = {'accepted': accepted, 'attempt': attempt, 'errors': errors, 'votes': votes,
                  'word_count': len(text_of(draft).split()), 'evidence': evidence,
@@ -152,6 +169,8 @@ def run(evidence_file, output, max_rounds=3):
         (out / 'script-audit.json').write_text(json.dumps(audit, indent=2))
         if accepted:
             (out / 'narration.txt').write_text(text_of(draft))
+            return audit
+        if stage == 'judge':
             return audit
         prompt = base + '\nRepair the latest draft, not an earlier draft: ' + json.dumps(draft)
         prompt += '\nFix these actual check findings: ' + json.dumps({'errors': errors, 'votes': votes})
@@ -162,5 +181,9 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(); parser.add_argument('evidence'); parser.add_argument('output')
     parser.add_argument('--rounds', type=int, default=3)
+    parser.add_argument('--stage', choices=['all', 'author', 'judge'], default='all')
+    parser.add_argument('--attempt', type=int, default=1)
     args = parser.parse_args()
-    raise SystemExit(0 if run(args.evidence, args.output, min(3, max(1, args.rounds)))['accepted'] else 2)
+    audit = run(args.evidence, args.output, min(3, max(1, args.rounds)), args.stage, args.attempt)
+    print(json.dumps({k: audit[k] for k in ('accepted', 'attempt', 'errors')}))
+    raise SystemExit(0 if audit['accepted'] or audit.get('pending') else 2)
