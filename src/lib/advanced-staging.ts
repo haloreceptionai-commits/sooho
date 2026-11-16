@@ -6,6 +6,14 @@
 import type { z } from 'zod';
 import type { cartoonDirection } from './cartoon-job';
 import { VOCAB } from './cartoon-job';
+import { phraseWords } from './object-resolution';
+
+const COLOURS = new Set(['brown', 'black', 'white', 'grey', 'gray', 'red', 'blue', 'green', 'yellow', 'orange', 'dark', 'light', 'thick', 'glossy']);
+/** A state variant must describe the same physical thing: at least two shared descriptive words (colours don't count). */
+export function sameThing(canonicalPhrase: string, variantPhrase: string): boolean {
+  const a = new Set(phraseWords(canonicalPhrase).filter(w => !COLOURS.has(w)));
+  return phraseWords(variantPhrase).filter(w => !COLOURS.has(w) && a.has(w)).length >= 2;
+}
 
 type Direction = z.infer<typeof cartoonDirection>;
 type Scene = Direction['scenes'][number];
@@ -43,7 +51,9 @@ export function applyStaging(direction: Direction, narration: string[], answer: 
   const used = new Set<string>(); const families: NonNullable<Direction['families']> = [];
   for (const f of answer.families ?? []) {
     if (!objects.has(f.canonical) || used.has(f.canonical)) continue;
-    const variants = (f.variants ?? []).filter(v => objects.has(v.id) && v.id !== f.canonical && !used.has(v.id)).slice(0, 4).map(v => ({ id: v.id, state: String(v.state ?? '').slice(0, 60) }));
+    const cp = objects.get(f.canonical)?.phrase ?? f.canonical.replace(/_/g, ' ');
+    for (const v of f.variants ?? []) if (objects.has(v.id) && !sameThing(cp, objects.get(v.id)?.phrase ?? v.id)) log.push(`object ${v.id} kept separate: not the same physical thing as ${f.canonical}`);
+    const variants = (f.variants ?? []).filter(v => objects.has(v.id) && v.id !== f.canonical && !used.has(v.id) && sameThing(cp, objects.get(v.id)?.phrase ?? v.id)).slice(0, 4).map(v => ({ id: v.id, state: String(v.state ?? '').slice(0, 60) }));
     if (!variants.length) continue;
     used.add(f.canonical); variants.forEach(v => used.add(v.id));
     families.push({ canonical: f.canonical, variants });

@@ -41,6 +41,11 @@ describe('Advanced staging (owner Stage 1.5 rules)', () => {
     expect(out.scenes[2]!.props!.slice(0, 3).map(p => p.asset)).toEqual(['card/steel_tank', 'card/seam_failure', 'card/molasses_wave']);
     expect(cartoonDirection.safeParse(out).success).toBe(true);
   });
+  it('never groups a different thing (buildings) as a state of the wave', () => {
+    const d = cartoonDirection.parse({ ...direction, scenes: direction.scenes.map((sc, i) => i === 1 ? { ...sc, props: [{ ...card('damaged_row_buildings', 'large'), phrase: 'damaged brick row buildings with brown coating and bent storefronts' }] } : i === 0 ? { ...sc, props: [{ ...card('molasses_wave', 'large'), phrase: 'broad streets buried in thick brown molasses surge after tank rupture' }] } : i === 2 ? { ...sc, props: [{ ...card('steel_tank'), phrase: 'enormous riveted steel molasses storage tank near brick buildings' }] } : i === 4 ? { ...sc, props: [{ ...card('seam_failure', 'large'), phrase: 'torn riveted steel at molasses tank with brown residue tracing failure' }] } : sc) });
+    const r = applyStaging(d, narration, { ...answer, families: [{ canonical: 'molasses_wave', variants: [{ id: 'damaged_row_buildings', state: 'aftermath' }] }, { canonical: 'steel_tank', variants: [{ id: 'seam_failure', state: 'failing' }] }] });
+    expect(r.families).toEqual([{ canonical: 'steel_tank', variants: [{ id: 'seam_failure', state: 'failing' }] }]);
+  });
   it('paints character cards only for animals and caps object paintings at 8', () => {
     expect(paintedCastIds(['ogden', 'owner', 'emu', 'war_horse'])).toEqual(['emu', 'war_horse']);
     expect(OBJECT_PAINT_CAP).toBe(8);
