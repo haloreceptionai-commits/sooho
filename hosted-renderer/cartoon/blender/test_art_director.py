@@ -103,5 +103,48 @@ class ArtDirector(unittest.TestCase):
             self.assertTrue(all(any(c['image'] == 'obj-molasses_tank.png' and c['height'] == 6.0 for c in g['shot']['cards']) for g in mine))
 
 
+    def card(self, name, size):
+        return {'kind': 'asset', 'asset': f'card/{name}', 'place': 'background', 'motion': 'none', 'phrase': name.replace('_', ' '), 'size': size}
+
+    def test_empty_shot_has_no_people(self):
+        m = manifest(['Boston molasses killed twenty one people.'], secs=3)
+        m['shots'][0]['empty'] = True
+        for g in A.plan(m): self.assertEqual(g['shot']['cast'], [])
+
+    def test_climax_is_shown_as_a_sequence_in_order(self):
+        m = manifest(['Then at midday the steel tank burst on Commercial Street.'], secs=4.5)
+        sh = m['shots'][0]; sh['location'] = 'Commercial Street, Boston, outdoors'
+        sh['props'] = [self.card('steel_tank', 'huge'), self.card('seam_failure', 'large'), self.card('molasses_wave', 'large')]
+        sh['sequence'] = ['steel_tank', 'seam_failure', 'molasses_wave']
+        segs = A.plan(m, {'obj-steel_tank.png', 'obj-seam_failure.png', 'obj-molasses_wave.png'})
+        self.assertEqual([g['notes']['sequence_step'] for g in segs], ['steel_tank', 'seam_failure', 'molasses_wave'])
+        for g, want in zip(segs, ['obj-steel_tank.png', 'obj-seam_failure.png', 'obj-molasses_wave.png']):
+            self.assertEqual([c['image'] for c in g['shot']['cards']], [want])
+            self.assertIn(want, g['notes']['cards_shown'])
+        self.assertIn('shake', segs[-1]['shot']['camera'])
+
+    def test_short_climax_keeps_the_burst(self):
+        m = manifest(['The tank burst.'], secs=0.9)
+        sh = m['shots'][0]
+        sh['props'] = [self.card('steel_tank', 'huge'), self.card('seam_failure', 'large'), self.card('molasses_wave', 'large')]
+        sh['sequence'] = ['steel_tank', 'seam_failure', 'molasses_wave']
+        segs = A.plan(m, {'obj-steel_tank.png', 'obj-seam_failure.png', 'obj-molasses_wave.png'})
+        self.assertEqual(segs[-1]['notes']['sequence_step'], 'molasses_wave')
+
+    def test_key_object_is_never_hidden_or_tiny_in_wide_shots(self):
+        lines = ['The tank stood by the street.', 'Neighbors watched the tank.', 'Men walked past the tank.', 'The tank kept leaking.', 'Everyone looked up at the tank.']
+        m = manifest(lines, secs=2.4)
+        for sh in m['shots']:
+            sh['location'] = 'Commercial Street, Boston, outdoors'
+            sh['props'] = [self.card('seam_drip', 'medium')]
+            sh['actors'] = [{'id': 'major', 'action': 'idle', 'expression': 'neutral', 'slot': 'center', 'facing': 0}, {'id': 'neighbor', 'action': 'idle', 'expression': 'neutral', 'slot': 'left', 'facing': 0}]
+        m['cast'] = [{'id': 'major', 'outfit': 'soldier'}, {'id': 'neighbor', 'outfit': 'villager'}]
+        for g in A.plan(m, {'obj-seam_drip.png'}):
+            cam = g['shot']['camera']; key = next(c for c in g['shot']['cards'] if c['image'] == 'obj-seam_drip.png')
+            people = [(c['pos'], A.PERSON_H, A.PERSON_W) for c in g['shot']['cast']]
+            self.assertLessEqual(A.blocked_share(cam, (key['pos'], key['height'], key['height'] * .6), people), 0.3, g['notes'])
+            if g['notes']['camera_type'] in ('wide', 'establish', 'high'): self.assertGreaterEqual(A.height_frac(cam, key), 0.15, g['notes'])
+
+
 if __name__ == '__main__':
     unittest.main()
