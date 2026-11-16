@@ -1,0 +1,55 @@
+{
+ "topic": "Why old railway tracks had gaps",
+ "script": "Rail joints make a straight rail snake in summer heat. North America, 1890s. Talbot runs to a sudden buckle. Solid steel jerks a spike sideways. How do you stop rails from growing into snakes? The foreman rams two rail ends tight. Noon heat loads the rails; the track buckles. Talbot shows a tiny gap at the joint. Joint bars, called fishplates, have slotted holes. Heat a steel strip and clamp both ends; it bows. Leave a small end gap; it stays straight. Talbot and the team leave about one eighth to one quarter inch. Bolts guide the line while the ends can slide. Not for drainage, not to save metal. It is for heat that makes rails grow. A wheel hits the joint with a clear clack. Later, rails are welded and set to a neutral heat. The clack fades, but the rails stay straight. So the straight line stays straight.",
+ "score": 87,
+ "ready": false,
+ "blockers": [
+  "Shot mix: wide 32% (≥40), action 42% (~30), macro 21% (~20), faces 5% (≤30)",
+  "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 35 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
+  "Viewer would swipe away at: \"North America, 1890s.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"Joint bars, called fishplates, have slotted holes.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"Talbot and the team leave about one eighth to one quarter inch.\" — make it a surprise, danger or new fact",
+  "Visual literalness: scenes 1, 9, 13, 17, 18 don't show what is said"
+ ],
+ "log": [
+  {
+   "attempt": 0,
+   "score": 85,
+   "blockers": [
+    "V5 anticlimax: the final line ends on an absence (\"So the rail never had to.\")",
+    "Shot mix: wide 27% (≥40), action 32% (~30), macro 32% (~20), faces 9% (≤30)",
+    "hard words: sideways, quarterinch, clicketyclack, expansion, fastenings; fragments with no verb: \"Summer hits.\", \"Not for drainage.\"",
+    "Shape loops: 20 seconds with no open question or reversal (gold scripts never go past ~18 seconds); Shape choppy: 6 tiny fragments (\"Tracks don't bend.\", \"Until they do.\", \"Summer hits.\"); keep at most 3, all in the pressure beat, and write the rest as full plain sentences",
+    "Viewer would swipe away at: \"Railway engineers rush to a sun‑baked line.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Talbot walks the track with his crew.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"The heat is brutal over the steel.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 11 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 1,
+   "score": 86,
+   "blockers": [
+    "Shot mix: wide 26% (≥40), action 42% (~30), macro 26% (~20), faces 5% (≤30)",
+    "hard words: oneeighth, onequarter, alignment",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 35 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
+    "Viewer would swipe away at: \"North America, 1890s.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Talbot and his crew see a bend.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"The rail looks solid, but it moves.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 1, 9, 13 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 2,
+   "score": 87,
+   "blockers": [
+    "Shot mix: wide 32% (≥40), action 42% (~30), macro 21% (~20), faces 5% (≤30)",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 35 seconds with no open question or reversal (gold scripts never go past ~18 seconds)",
+    "Viewer would swipe away at: \"North America, 1890s.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Joint bars, called fishplates, have slotted holes.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Talbot and the team leave about one eighth to one quarter inch.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 1, 9, 13, 17, 18 don't show what is said"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,58 @@
+{
+ "topic": "Benjamin Franklin calming waves with oil",
+ "script": "Oil film snaps a windy pond silent in London. 1773. Clapham Common pond. Benjamin Franklin holds a small vial. Royal Society gentlemen watch from the bank, doubtful. Gusts roughen the whole surface. How? Franklin uncorks the vial and tips a teaspoon. The oil touches the pond and races outward. A glassy patch grows beside the choppy water. It spreads several yards across the pond. Sailors even carry oil to pour near surf. The gentlemen scoff and call it sailor talk. Here, the calm edge draws a clear line. The oil film cuts the surface pull, or tension. The smallest ripples fail, so bigger chop cannot build. It’s like a drop of soap stilling sink ripples. Franklin writes the Royal Society with what he saw. He credits a sea captain and Cavallo for urging tests. The pond goes quiet where the film has spread. A tiny film outmuscles wind on water. A teaspoon of oil snaps a windy pond silent.",
+ "score": 91,
+ "ready": false,
+ "blockers": [
+  "Shot mix: wide 30% (≥40), action 25% (~30), macro 30% (~20), faces 15% (≤30)",
+  "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 34 seconds with no open question or reversal (gold scripts never go past ~18 seconds); Shape repeat: \"A teaspoon of oil snaps a windy pond silent.\" says an earlier line again; the close should echo a few hook words with the twist, never replay a line",
+  "Viewer would swipe away at: \"Royal Society gentlemen watch from the bank, doubtful.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"Gusts roughen the whole surface.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"Sailors even carry oil to pour near surf.\" — make it a surprise, danger or new fact",
+  "Visual literalness: scenes 13, 19 don't show what is said"
+ ],
+ "log": [
+  {
+   "attempt": 0,
+   "score": 80,
+   "blockers": [
+    "Shot mix: wide 30% (≥40), action 20% (~30), macro 30% (~20), faces 20% (≤30)",
+    "hard words: amid, difference, capillary",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape repeat: \"A teaspoon of oil snaps a windy pond silent in London.\" says an earlier line again; the close should echo a few hook words with the twist, never replay a line",
+    "Read-aloud: \"Wind keeps the surface chewing and hard to measure.\"",
+    "Read-aloud: \"Here, the difference is sharp, right at the line.\"",
+    "Read-aloud: \"Oil lowers surface tension; the smallest waves starve.\"",
+    "Viewer would swipe away at: \"Wind keeps the surface chewing and hard to measure.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Benjamin Franklin had seen wake calm around oared boats.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Sailors said oil tamed surf; stories weren’t proof.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 13, 14, 19 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 1,
+   "score": 91,
+   "blockers": [
+    "Shot mix: wide 30% (≥40), action 25% (~30), macro 30% (~20), faces 15% (≤30)",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 34 seconds with no open question or reversal (gold scripts never go past ~18 seconds); Shape repeat: \"A teaspoon of oil snaps a windy pond silent.\" says an earlier line again; the close should echo a few hook words with the twist, never replay a line",
+    "Viewer would swipe away at: \"Royal Society gentlemen watch from the bank, doubtful.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Gusts roughen the whole surface.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Sailors even carry oil to pour near surf.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 13, 19 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 2,
+   "score": 84,
+   "blockers": [
+    "hard words: whitecaps, gentleman, outmuscles",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 36 seconds with no open question or reversal (gold scripts never go past ~18 seconds); Shape repeat: \"A teaspoon of oil snaps a windy pond silent.\" says an earlier line again; the close should echo a few hook words with the twist, never replay a line",
+    "Read-aloud: \"1773.\"",
+    "Read-aloud: \"Here, the calm edge draws a clear line.\"",
+    "Viewer would swipe away at: \"Benjamin Franklin stands at Clapham Common with a small vial.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"1773.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Whitecaps ruffle the whole pond.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 12, 13, 14, 19 don't show what is said"
+   ]
+  }
+ ]
+}
