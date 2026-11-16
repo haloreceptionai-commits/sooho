@@ -18,7 +18,7 @@ export const placeSpec = z.object({
   terrain: z.enum(PLACE_TERRAINS), time: z.enum(PLACE_TIMES), weather: z.enum(PLACE_WEATHER),
   dressing: z.array(z.object({ id: z.enum(PLACE_DRESSING), count: z.number().int().min(1).max(8) })).max(6),
 }).superRefine((p, ctx) => {
-  if (p.dressing.some(d => DRESSING[d.id]?.water) && p.terrain !== "river_crossing") ctx.addIssue({ code: "custom", message: "Boats and bridges need a river crossing" });
+  if (p.dressing.some(d => DRESSING[d.id]?.water) && p.terrain !== "river_crossing" && p.terrain !== "coast") ctx.addIssue({ code: "custom", message: "Boats, ships, docks and bridges need a river crossing or a coast" });
 });
 export type PlaceSpec = z.infer<typeof placeSpec>;
 
@@ -42,7 +42,7 @@ export function liftDressing<T extends { phrase?: string; id?: string }>(place: 
   for (const o of objects) {
     const text = ` ${String(o.phrase ?? o.id ?? "").toLowerCase().replace(/[^a-z]+/g, " ")} `;
     const hit = PLACE_DRESSING.map(id => ({ id, len: Math.max(0, ...DRESSING[id]!.words.filter(w => text.includes(` ${w} `)).map(w => w.length)) }))
-      .filter(h => h.len > 0 && !(DRESSING[h.id]!.water && place.terrain !== "river_crossing")).sort((a, b) => b.len - a.len)[0];
+      .filter(h => h.len > 0 && !(DRESSING[h.id]!.water && place.terrain !== "river_crossing" && place.terrain !== "coast")).sort((a, b) => b.len - a.len)[0];
     // Combination: cattle + fire words is the burning-ox herd, not a torch or a plain ox.
     if (hit && /\b(ox|oxen|cattle|cows?|bulls?)\b/.test(text) && /\b(burning|flaming|fire|torch|torches|ablaze)\b/.test(text) && PLACE_DRESSING.includes("ox_burning")) hit.id = "ox_burning";
     if (!hit) { kept.push(o); continue; }

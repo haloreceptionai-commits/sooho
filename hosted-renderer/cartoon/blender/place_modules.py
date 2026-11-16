@@ -10,6 +10,11 @@ PALETTE = {  # low ground, rock, high ground colours per terrain (linear)
     'plain': ((0.36, 0.33, 0.16), (0.32, 0.28, 0.22), (0.30, 0.34, 0.14)),
     'river_crossing': ((0.18, 0.30, 0.10), (0.30, 0.27, 0.22), (0.20, 0.32, 0.12)),
     'camp': ((0.33, 0.28, 0.17), (0.30, 0.26, 0.21), (0.24, 0.32, 0.13)),
+    'desert': ((0.62, 0.46, 0.22), (0.45, 0.33, 0.2), (0.7, 0.52, 0.26)),
+    'snow_mountain': ((0.82, 0.86, 0.92), (0.32, 0.32, 0.36), (0.95, 0.97, 1.0)),
+    'jungle': ((0.07, 0.22, 0.05), (0.25, 0.22, 0.15), (0.1, 0.28, 0.07)),
+    'ancient_city': ((0.55, 0.5, 0.42), (0.4, 0.37, 0.32), (0.3, 0.34, 0.16)),
+    'coast': ((0.74, 0.65, 0.45), (0.35, 0.32, 0.28), (0.25, 0.4, 0.15)),
 }
 
 
@@ -46,6 +51,12 @@ def build_terrain(t, seed, size=180.0, n=150):
     for p in me.polygons: p.use_smooth = True
     ob = bpy.data.objects.new('terrain', me); bpy.context.collection.objects.link(ob)
     ob.data.materials.append(terrain_mat(t)); ob['place_terrain'] = t
+    if t == 'coast':
+        from place_spec import COAST_Y
+        bpy.ops.mesh.primitive_plane_add(size=1, location=(0, COAST_Y + 60, -0.35)); w = bpy.context.object; w.name = 'sea'; w.scale = (size * 2, 120, 1)
+        m = bpy.data.materials.new('water'); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
+        b.inputs['Base Color'].default_value = (0.04, 0.2, 0.3, 1); b.inputs['Roughness'].default_value = 0.06
+        w.data.materials.append(m)
     if t == 'river_crossing':
         bpy.ops.mesh.primitive_plane_add(size=1, location=(0, RIVER_Y, -0.35)); w = bpy.context.object; w.name = 'river'
         w.scale = (size, RIVER_HALF * 2 + 2.5, 1)
@@ -172,20 +183,21 @@ def build_place(p, mode, duration=1.0, fps=30):
     herd = 0
     for it in p['items']:
         x, y, z = it['pos']
-        is_ox = bool(it.get('horns'))
+        is_ox = bool(it.get('horns') or it.get('animate'))
         if is_ox:
             _MODEL_CACHE.pop(it['model'], None)   # each animal needs its own armature, so import it fresh instead of copying
         before = set(bpy.data.actions); mark = set(bpy.data.objects)
         root = model({'id': it['model'], 'pos': [x, y, z], 'height': it['height'], 'yaw': it['yaw']})
         root['place_item'] = it['id']
         if is_ox:
-            ox_coat(root)
+            if it.get('horns'): ox_coat(root)
             new_actions = [a for a in bpy.data.actions if a not in before]
             k = herd; herd += 1
-            moves = frames > 1 and it['id'] in ('ox', 'ox_burning') and it.get('herd', True)
+            moves = frames > 1 and it.get('herd', True)
             if moves:
-                animate_ox(root, new_actions, it['yaw'], frames, fps, phase=_wobble(k, 1), speed_mps=3.2 + 1.6 * _wobble(k, 2))
+                animate_ox(root, new_actions, it['yaw'], frames, fps, phase=_wobble(k, 1), speed_mps=(3.2 + 1.6 * _wobble(k, 2)) if it.get('animate', 'Run') == 'Run' else 0.9, clip=it.get('animate', 'Run'))
             yaw = math.radians(it['yaw']); h = it['height']
+            if not it.get('horns'): continue
             fx, fy = math.sin(yaw), -math.cos(yaw)   # farm-animal models face -Y before the yaw rotation (head bone measured at y=-0.71)
             horn_objs = []
             for sx in (-1, 1):

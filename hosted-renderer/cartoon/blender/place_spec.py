@@ -53,7 +53,7 @@ def validate(spec, scene=None, era=None):
         if d['id'] not in ok: raise PlaceError(f"{where} needs '{d['id']}', which has not passed its local render check")
         c = d.get('count', 1)
         if not isinstance(c, int) or not 1 <= c <= MAX_COUNT: raise PlaceError(f'{where}: count 1-{MAX_COUNT}')
-        if DRESSING[d['id']].get('water') and t != 'river_crossing': raise PlaceError(f"{where}: '{d['id']}' needs water, but the place is {t}")
+        if DRESSING[d['id']].get('water') and t not in ('river_crossing', 'coast'): raise PlaceError(f"{where}: '{d['id']}' needs water, but the place is {t}")
     return spec
 
 
@@ -76,6 +76,7 @@ def ramp(d, start, width):
 
 
 RIVER_Y, RIVER_HALF = 12.0, 3.5
+COAST_Y = 11.0       # the sea starts this far from the cast (the beach slopes down to it)
 
 
 def height(terrain, x, y, seed=0):
@@ -90,6 +91,18 @@ def height(terrain, x, y, seed=0):
         bank = abs(y - RIVER_Y)
         if bank < RIVER_HALF + 1.5: return -1.1 * (1 - ramp(bank, RIVER_HALF - 0.8, 2.3)) if r > CLEAR - 0.5 else 0.0
         return ramp(r, 26, 30) * (8 + 8 * big) + ramp(r, CLEAR + 2, 8) * n * 0.5
+    if terrain == 'snow_mountain':
+        return ramp(abs(x), 8, 20) * (26 + 20 * big) + ramp(r, CLEAR + 2, 6) * n * 0.9
+    if terrain == 'desert':
+        dunes = math.sin(x * 0.11 + big * 6) * math.cos(y * 0.09 + n * 3)
+        return ramp(r, CLEAR + 2, 14) * (1.6 + 1.6 * dunes) + ramp(r, 45, 35) * (7 + 6 * big)
+    if terrain == 'jungle':
+        return ramp(r, CLEAR + 2, 10) * (1.2 * n) + ramp(r, 38, 30) * (9 + 7 * big)
+    if terrain == 'ancient_city':
+        return ramp(r, 60, 30) * (9 + 7 * big)
+    if terrain == 'coast':
+        if r <= CLEAR - 0.5: return 0.0
+        return -1.4 * ramp(y, COAST_Y - 1.0, 4.0) + ramp(r, 50, 30) * (3 + 3 * big) * (1 - ramp(y, 0, 6)) + ramp(r, CLEAR + 2, 8) * n * 0.25
     if terrain == 'camp':
         return ramp(r, 30, 30) * (6 + 6 * big) + ramp(r, CLEAR + 2, 8) * n * 0.4
     return ramp(r, 55, 30) * (4 + 5 * big) + ramp(r, CLEAR + 2, 8) * n * 0.35  # plain
@@ -120,21 +133,28 @@ def compile_place(spec, seed=0):
         e = DRESSING[d['id']]
         for c in range(d.get('count', 1)):
             k += 1
-            if e.get('water') and t == 'river_crossing':
+            if e.get('water') and t == 'coast':
+                x, y = {'ship': (-9 + 9 * c, COAST_Y + 9), 'dock': (4.5, COAST_Y + 0.8), 'boat': (-3 + 4 * c, COAST_Y + 4)}.get(d['id'], (0.0, COAST_Y + 3))
+                z = -0.5 if d['id'] != 'dock' else -0.35
+            elif e.get('water') and t == 'river_crossing':
                 x, y = (-4 + 4 * c, RIVER_Y + 0.4) if d['id'] == 'boat' else (0.0, RIVER_Y)
                 z = -0.45 if d['id'] == 'boat' else 0.0
             elif e.get('far'):
-                x, y = _spot(t, k, seed, True); z = height(t, x, y, seed)
+                x, y = _spot(t, k, seed, True)
+                if e['height'] >= 8 and t != 'mountain_pass':   # landmarks (pyramid, tower) stand well ahead of the cast, never beside or behind the lens
+                    sx = -1 if _rand(seed, f'lx{k}') < 0.5 else 1
+                    x, y = sx * (9 + 13 * _rand(seed, f'lm{k}')), 24 + 14 * _rand(seed, f'ly{k}')
+                z = height(t, x, y, seed)
             else:
-                if d['id'] in ('ox', 'ox_burning') and d.get('count', 1) > 1:   # a herd: rows behind the cast
+                if (e.get('horns') or e.get('animate')) and d.get('count', 1) > 1:   # a herd or cavalry: rows behind the cast
                     x, y = -4 + (c % 4) * 2.6, 7.5 + (c // 4) * 2.8
                 else:
                     x, y = NEAR[near_i % len(NEAR)]; near_i += 1
                 z = height(t, x, y, seed)
             item = {'id': d['id'], 'model': e['model'], 'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': e['height'],
                     'yaw': round(_rand(seed, f'yaw{k}') * 360 - 180, 1)}
-            if d['id'] in ('ox', 'ox_burning'): item['yaw'] = 0.0 if d.get('count', 1) > 1 else item['yaw']
-            for f in ('horns', 'fire'):
+            if e.get('horns') or e.get('animate'): item['yaw'] = 0.0 if d.get('count', 1) > 1 else item['yaw']
+            for f in ('horns', 'fire', 'animate'):
                 if e.get(f): item[f] = e[f]
             out['items'].append(item)
     return out
@@ -147,7 +167,7 @@ def validate_compiled(p):
     items = p.get('items', [])
     if not isinstance(items, list) or len(items) > 40: raise ValueError('up to 40 place items')
     for it in items:
-        if set(it) - {'id', 'model', 'pos', 'height', 'yaw', 'horns', 'fire'} or it.get('id') not in DRESSING: raise ValueError('invalid place item')
+        if set(it) - {'id', 'model', 'pos', 'height', 'yaw', 'horns', 'fire', 'animate'} or it.get('id') not in DRESSING: raise ValueError('invalid place item')
         if it['model'] != DRESSING[it['id']]['model']: raise ValueError('place item model mismatch')
         if not (isinstance(it.get('pos'), list) and len(it['pos']) == 3 and all(isinstance(v, (int, float)) and abs(v) < 200 for v in it['pos'])): raise ValueError('place item pos')
         if not 0.1 <= it.get('height', 1) <= 20 or not -720 <= it.get('yaw', 0) <= 720: raise ValueError('place item size')
