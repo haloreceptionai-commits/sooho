@@ -75,6 +75,7 @@ export interface Settings {
   soundEffects: boolean;
   imageQuality: "low" | "medium" | "high";
   styleV?: number;
+  modelV?: number; // 1 = script model moved to gpt-6.1-sol at the owner's request
 }
 
 export interface State {
@@ -87,13 +88,14 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 export const DEFAULT_SETTINGS: Settings = {
   channelName: "Chronicle History",
   azureEndpoint: "https://robiulalamsuleman-5258-resource.services.ai.azure.com/",
-  scriptDeployment: "gpt-5",
+  scriptDeployment: "gpt-6.1-sol",
   ttsDeployment: "gpt-realtime",
   imageDeployment: "gpt-image-1-mini",
   videoDeployment: "gpt-5.1-codex",
   defaultVoice: "onyx",
   defaultStyle: "3D animated cartoon",
   styleV: 2,
+  modelV: 1,
   burnCaptions: true,
   soundEffects: true,
   imageQuality: "medium",
@@ -116,7 +118,7 @@ export function hydrateStore() {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<State>;
       state = {
-        settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } return st; })(),
+        settings: (() => { const st = { ...DEFAULT_SETTINGS, ...parsed.settings }; if ((st.styleV ?? 0) < 2) { st.defaultStyle = DEFAULT_SETTINGS.defaultStyle; st.styleV = 2; } if ((st.modelV ?? 0) < 1) { if (st.scriptDeployment === 'gpt-5') st.scriptDeployment = 'gpt-6.1-sol'; st.modelV = 1; } return st; })(),
         // A cached record does not establish whether another tab is still generating.
         videos: parsed.videos ?? [],
       };

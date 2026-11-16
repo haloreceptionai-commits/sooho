@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { styleAnchor } from "@/lib/styles";
+import { effortFor } from "@/lib/azure-effort";
 import { FEW_SHOT } from "@/lib/story-v2";
 import { cartoonDirection, OUTFITS, VOCAB } from '@/lib/cartoon-job';
 import { z } from 'zod';
@@ -42,7 +43,7 @@ async function azureJson<T>(deployment: string, system: string, user: string, na
   const res = await azure(`${safeName(deployment)}/chat/completions`, {
     messages: [{ role: "system", content: system }, { role: "user", content: user }],
     max_completion_tokens: 32000,
-    reasoning_effort: "none",
+    reasoning_effort: effortFor(deployment, "none"),
     stream: true,
     response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
   });
