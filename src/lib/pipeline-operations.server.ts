@@ -852,6 +852,7 @@ Rules:
   if (!Array.isArray(r.scenes) || r.scenes.length !== data.scenes.length || r.scenes.some(x => typeof x !== 'string' || !x.trim())) throw Error('Kid editor changed the scene count');
   return { scenes: r.scenes.map(x => x.trim().replace(/\s+/g, ' ')) };
 };
+export const ADVANCED_BACKDROP_STYLE = 'Painted background plate for a 3D cartoon history Short, one locked house style: soft painterly gouache with clean simplified shapes, gentle atmospheric perspective, muted natural palette, no outlines on distant forms, accurate architecture, vehicles and landscape for the stated place and year. No people, no animals, no characters. Absolutely no text, letters, numbers, signs, posters or logos anywhere.';
 export const ADVANCED_OBJECT_STYLE = 'Bold 2D cartoon prop for a viral history Short: thick clean dark ink outline, flat bright colours with soft cel shading, the whole object visible and centered, seen from the front, nothing else in the picture, transparent background, no ground, no shadow, no people. Absolutely no text, letters, numbers, labels, logos or signage painted on it.';
 const POSE_TEXT: Record<'reach' | 'shock' | 'happy', string> = {
   reach: 'now pointing forward with one arm stretched out (or the animal leaning forward with one leg raised), mouth open as if saying something important',
@@ -875,7 +876,17 @@ export const checkCardTextOperation = async ({ data }: { data: { image: string; 
   catch { return { text: true, what: 'unreadable check', tokens: 0 }; }
 };
 /** Paints a transparent card: a standing character, an object, or (with a reference) the same character in another pose. */
-export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | undefined; pose?: 'reach' | 'shock' | 'happy' | 'rig' | undefined; reference?: string | undefined } }) => {
+export const paintAdvancedCardOperation = async ({ data }: { data: { look: string; deployment: string; kind?: 'character' | 'object' | 'backdrop-far' | 'backdrop-mid' | undefined; pose?: 'reach' | 'shock' | 'happy' | 'rig' | undefined; reference?: string | undefined } }) => {
+  if (data.kind === 'backdrop-far' || data.kind === 'backdrop-mid') {
+    // World Pack backdrop: one locked painted style for every story; far layer opaque, mid layer a transparent cut-out.
+    const far = data.kind === 'backdrop-far';
+    for (const look of [data.look, softenPrompt(data.look)]) {
+      const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: `${ADVANCED_BACKDROP_STYLE} ${far ? 'Full opaque painting edge to edge, horizon in the lower third.' : 'Transparent background except the painted features at the left and right edges.'} Place: ${look}`.slice(0, 3900), size: '1024x1536', quality: 'medium', background: far ? 'opaque' : 'transparent', output_format: 'png', n: 1 });
+      if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b }; }
+      else if (res.status !== 400) await fail(res, 'Backdrop');
+    }
+    throw Error('Backdrop could not be painted');
+  }
   const style = data.kind === 'object' ? ADVANCED_OBJECT_STYLE : ADVANCED_CARD_STYLE;
   if (data.pose && data.reference) {
     // Same design in a new pose: the standing card is the reference so face, colours and outfit stay identical.

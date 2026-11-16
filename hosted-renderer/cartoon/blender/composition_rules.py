@@ -15,3 +15,8 @@ def budget_ceiling(upper):
 def preview_frames(n,burst=False):
     if n<1:raise ValueError('empty shot')
     return [max(1,round(n*(.75 if burst else .5)))]
+
+def clearance_frames(n, cap=120):
+    """Whole-shot clearance: every frame (first and last always included); very long shots every 2nd/3rd frame."""
+    n = max(1, int(n)); step = max(1, -(-n // cap))
+    return sorted(set(list(range(1, n + 1, step)) + [n]))

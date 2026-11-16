@@ -8,7 +8,7 @@ from effects import KINDS as EFFECT_KINDS
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day', 'neutral'}
 PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -24,6 +24,11 @@ def validate_shot(s):
         r = s['composition']
         if not isinstance(r, dict) or set(r) != {'face_max', 'wave_min', 'emotion'}: raise ValueError('invalid composition rules')
         if r['face_max'] != .4 or r['wave_min'] not in (0, .25) or not isinstance(r['emotion'], bool): raise ValueError('invalid composition limits')
+    bd = s.get('backdrop', [])
+    if not isinstance(bd, list) or len(bd) > 2: raise ValueError('up to 2 backdrop layers')
+    for b in bd:
+        if not isinstance(b, dict) or set(b) != {'image', 'layer'} or b['layer'] not in ('far', 'mid') or not re.fullmatch(r'bg-[a-z0-9_]{1,20}-(far|mid)\.png', str(b['image'])) or not str(b['image']).endswith(f"-{b['layer']}.png"):
+            raise ValueError('invalid backdrop layer')
     if s.get('set') not in SETS: raise ValueError(f'unknown set {s.get("set")!r}')
     if s.get('lighting', 'day') not in {'day', 'sunset', 'night', 'rain'}: raise ValueError('lighting day|sunset|night|rain')
     d = s.get('duration')

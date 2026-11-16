@@ -1,3 +1,4 @@
+import { backdropKeys, worldPack } from "@/lib/world-pack";
 import { z } from 'zod';
 import vocab from '../../hosted-renderer/cartoon/vocabulary.json';
 
@@ -68,7 +69,7 @@ export const cartoonStart = z.object({
   gate: z.object({ score: z.number().min(0).max(100), ready: z.boolean(), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),
   // Advanced Video AI: painted image-model character cards replace the drawn outfits for cast marked card=true.
   // Card files: '<castId>' (standing), '<castId>-<pose>' (reach/shock/happy) and 'obj-<name>' painted story objects.
-  advanced: z.boolean().optional(), cards: z.array(z.object({ id: cardKey, path: z.string().min(1).max(500) })).max(24).optional(),
+  advanced: z.boolean().optional(), cards: z.array(z.object({ id: cardKey, path: z.string().min(1).max(500) })).max(32).optional(),
   hookType: z.string().max(100), report: z.object({ revealSec: z.number(), shotMix: z.record(z.number()) }), captions: z.boolean(), sfx: z.boolean(),
 }).superRefine((d, ctx) => {
   if (d.format !== 'long' && (d.script.length > 4000 || d.narration.length > 120)) ctx.addIssue({ code: 'custom', message: 'Shorts are limited to 120 scenes' });
@@ -79,7 +80,7 @@ export const cartoonStart = z.object({
   const carded = d.direction.cast.filter(c => c.card).map(c => c.id);
   const keys = new Set((d.cards ?? []).map(c => c.id));
   const objectCards = new Set(d.direction.scenes.flatMap(s => (s.props ?? []).filter(p => p.asset?.startsWith('card/')).map(p => `obj-${p.asset!.slice(5)}`)));
-  const allowed = new Set([...carded.flatMap(c => [c, `${c}-rig`, ...CARD_POSES.map(p => `${c}-${p}`)]), ...objectCards]);
+  const allowed = new Set([...backdropKeys(worldPack(d.direction.scenes, d.narration)), ...carded.flatMap(c => [c, `${c}-rig`, ...CARD_POSES.map(p => `${c}-${p}`)]), ...objectCards]);
   if (carded.some(c => !keys.has(c)) || [...objectCards].some(k => !keys.has(k)) || [...keys].some(k => !allowed.has(k)) || (keys.size && !d.advanced)) ctx.addIssue({ code: 'custom', message: 'Character cards must match the cast' });
   if (d.direction.scenes.some(s => !cast.has(s.actor) || (s.actors ?? []).some(a => !cast.has(a.actor)))) ctx.addIssue({ code: 'custom', message: 'Unknown cartoon actor' });
   if (d.direction.scenes.some((s, i) => (s.cues ?? []).some(c => c.word >= (d.narration[i] ?? '').split(/\s+/).filter(Boolean).length))) ctx.addIssue({ code: 'custom', message: 'Sound cue points past its sentence' });
