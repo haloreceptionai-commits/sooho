@@ -1,0 +1,592 @@
+{
+  "accepted": false,
+  "attempt": 1,
+  "errors": [],
+  "votes": [
+    {
+      "labels": {
+        "benchmark": "A",
+        "candidate": "B"
+      },
+      "passed": false,
+      "result": {
+        "scores": {
+          "A": {
+            "clarity": 6,
+            "cause_effect": 7,
+            "engagement": 9,
+            "kid_clear": true,
+            "opening": true
+          },
+          "B": {
+            "clarity": 9,
+            "cause_effect": 9,
+            "engagement": 7,
+            "kid_clear": true,
+            "opening": true
+          }
+        },
+        "candidate_sentences": [
+          {
+            "index": 1,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Wooden cart is supported, but \u201cunder high stone walls\u201d is not in evidence; \u201cstone/high/under\u201d cannot be literally drawn with the provided castle walls."
+          },
+          {
+            "index": 2,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "No source support for a \u201claunch frame\u201d or moving it to a \u201cbattlement edge\u201d; neither \u201claunch frame\u201d nor \u201cbattlement edge\u201d are drawable items."
+          },
+          {
+            "index": 3,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "\u201cUp to two hundred rocket arrows\u201d is supported (hwacha up to 200), but an exact quantity like \u201ctwo hundred\u201d cannot be literally depicted."
+          },
+          {
+            "index": 4,
+            "evidence_ok": false,
+            "picture_ok": true,
+            "reason": "No evidence mentions a cloth coat cover; however a covered cart with a coat and the action \u201crips off\u201d is drawable (obj:covered_cart:open)."
+          },
+          {
+            "index": 5,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "No source for \u201cset across the board in tight rows\u201d; \u201cboard/rows\u201d not in drawable vocab."
+          },
+          {
+            "index": 6,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Sources do not describe string bundles to rocket tails; \u201crocket tails\u201d not drawable though fuses/strings and lighting are."
+          },
+          {
+            "index": 7,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "No evidence for fuse sparks \u201cracing\u201d or stepping back from a \u201cframe\u201d; \u201cframe\u201d and the action \u201cstep back\u201d are not drawable."
+          },
+          {
+            "index": 8,
+            "evidence_ok": false,
+            "picture_ok": true,
+            "reason": "Evidence says rapid succession, not explicitly \u201ctogether\u201d; still, multiple rockets blasting off from a cart can be drawn (obj:rocket_arrow:fire)."
+          },
+          {
+            "index": 9,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "No evidence on \u201cswarm beyond the fort wall\u201d; \u201cswarm/beyond\u201d relational depiction isn\u2019t in vocab."
+          },
+          {
+            "index": 10,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "No evidence for smoke over a slope; neither \u201csmoke\u201d nor \u201cslope\u201d are drawable."
+          },
+          {
+            "index": 11,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Inaccuracy is supported, but \u201ceach wobbles\u201d and \u201ckeep aim broad\u201d are not; \u201cwobbles/broad aim\u201d not drawable as actions."
+          },
+          {
+            "index": 12,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "MRLs cover area by firing many rockets quickly is supported; \u201ccover a wide path\u201d not literally drawable."
+          },
+          {
+            "index": 13,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "\u201cSlow to reload\u201d is supported; the rest (\u201cswarm/empties the frame\u201d) contains undrawable terms and no reload action exists."
+          },
+          {
+            "index": 14,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Stationed in fortresses is supported; but the action \u201cstation along walls\u201d is not drawable as an action (though carts and walls are)."
+          },
+          {
+            "index": 15,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "No evidence for \u201cnear the gate\u201d or \u201cranks\u201d; \u201cranks/gate\u201d not drawable."
+          },
+          {
+            "index": 16,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "No evidence for tactics phrased as \u201canother wave when lines press the approach\u201d; \u201cwave/lines/press/approach\u201d not drawable."
+          },
+          {
+            "index": 17,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rockets are less accurate than guns is supported; \u201cchoose bursts\u201d and comparative aim are not drawable."
+          },
+          {
+            "index": 18,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Questioning (\u201cask why\u201d) is narrative, not evidenced; \u201cask\u201d action not in vocab."
+          },
+          {
+            "index": 19,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Reasoning (misses and slow reload) is supported; the causal explanation cannot be literally pictured."
+          },
+          {
+            "index": 20,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Use against tight groups is supported; \u201csalvos/hit at once/tight groups\u201d cannot be literally depicted with available objects/actions."
+          }
+        ],
+        "unsupported": [
+          "Castle workers wheel a launch frame toward the battlement edge.",
+          "Soldiers rip off a cloth coat and uncover the launcher.",
+          "Soldiers set rockets across the board in tight rows.",
+          "Crews light strings running to the rocket tails at once.",
+          "Fuse sparks race as soldiers step back from the frame.",
+          "Rocket arrows blast off together from the cart's face.",
+          "Rocket arrows fly in a swarm beyond the fort wall.",
+          "Castle defenders watch as smoke rolls over the slope.",
+          "Fort crews keep aim broad because each unguided rocket wobbles.",
+          "Fort walls overlook tightly packed ranks moving near the gate.",
+          "Castle crews fire another wave when lines press the approach.",
+          "Soldiers ask why many rockets fly together."
+        ],
+        "undrawable": [
+          "battlement edge",
+          "launch frame",
+          "launcher",
+          "board",
+          "rows",
+          "rocket tails",
+          "race (sparks race)",
+          "step back",
+          "frame (as a device)",
+          "cart\u2019s face",
+          "swarm",
+          "smoke",
+          "slope",
+          "wobbles",
+          "broad aim",
+          "cover a wide path",
+          "reload/reloading",
+          "station (as an action)",
+          "ranks",
+          "gate",
+          "another wave (of fire)",
+          "lines (as formations)",
+          "press the approach",
+          "bursts (tactic)",
+          "ask (why)",
+          "miss (as an action/outcome)",
+          "salvos",
+          "hit (tight groups)",
+          "stone (as material of walls)"
+        ]
+      }
+    },
+    {
+      "labels": {
+        "candidate": "A",
+        "benchmark": "B"
+      },
+      "passed": false,
+      "result": {
+        "scores": {
+          "A": {
+            "clarity": 9,
+            "cause_effect": 9,
+            "engagement": 7,
+            "kid_clear": true,
+            "opening": true
+          },
+          "B": {
+            "clarity": 8,
+            "cause_effect": 8,
+            "engagement": 9,
+            "kid_clear": true,
+            "opening": true
+          }
+        },
+        "candidate_sentences": [
+          {
+            "index": 0,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Wooden cart used in fortress defense is supported by sources; castle set and rolling cart are drawable."
+          },
+          {
+            "index": 1,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Evidence does not mention wheeling a launch frame to a battlement edge; 'launch frame' itself is not a drawable object (only a cart is)."
+          },
+          {
+            "index": 2,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Hwacha could fire up to 200 rocket arrows; rockets firing is drawable."
+          },
+          {
+            "index": 3,
+            "evidence_ok": false,
+            "picture_ok": true,
+            "reason": "A cloth coat cover is an invented detail not supported by evidence (explicitly cautioned against); covered cart with 'coat' is drawable."
+          },
+          {
+            "index": 4,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Arrangement 'across the board in tight rows' is not in evidence; 'board' and a loading action are not drawable."
+          },
+          {
+            "index": 5,
+            "evidence_ok": false,
+            "picture_ok": true,
+            "reason": "Fuses/strings to rocket tails are not evidenced; lighting a fuse bundle is drawable."
+          },
+          {
+            "index": 6,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "'Sparks race' and 'step back from the frame' are not evidenced; 'step back' action and 'frame' object are not drawable."
+          },
+          {
+            "index": 7,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Simultaneous launch from the cart aligns with multiple-rocket salvos; rockets blasting off are drawable."
+          },
+          {
+            "index": 8,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rockets flying beyond a fort wall is consistent with fortress defense use; rockets in flight and castle wall are drawable."
+          },
+          {
+            "index": 9,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "'Smoke rolls over the slope' is not evidenced; neither 'smoke' nor 'slope' are drawable in the castle set."
+          },
+          {
+            "index": 10,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Unguided rockets being inaccurate supports 'keep aim broad'; but 'wobbles' motion isn't drawable."
+          },
+          {
+            "index": 11,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Firing many to cover a wide area matches multiple-rocket launcher rationale; many rockets firing is drawable."
+          },
+          {
+            "index": 12,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "'Slow to reload' is supported; but reload action and 'frame' are not drawable."
+          },
+          {
+            "index": 13,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Stationed in fortresses supports carts along walls; multiple carts by fort walls can be depicted."
+          },
+          {
+            "index": 14,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "'Tightly packed ranks' is supported, but 'near the gate' is not evidenced; 'gate' object is not drawable."
+          },
+          {
+            "index": 15,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Follow-up salvo as lines approach is consistent with defensive salvos vs tight formations; rockets firing again is drawable."
+          },
+          {
+            "index": 16,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rockets less accurate than guns is supported; but choosing 'bursts' and showing 'gun aim' are not drawable."
+          },
+          {
+            "index": 17,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "This is a dialogue/statement, not a factual claim needing evidence; however 'ask' action is not drawable."
+          },
+          {
+            "index": 18,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Reasoning matches evidence (inaccuracy, slow reload); but 'miss' and 'reloading takes time' are not visually drawable in one shot."
+          },
+          {
+            "index": 19,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Using salvos against tight groups aligns with sources; 'salvos' and 'hit' are not directly drawable actions/objects."
+          }
+        ],
+        "unsupported": [
+          "Castle workers wheel a launch frame toward the battlement edge.",
+          "Soldiers rip off a cloth coat and uncover the launcher.",
+          "Soldiers set rockets across the board in tight rows.",
+          "Crews light strings running to the rocket tails at once.",
+          "Fuse sparks race as soldiers step back from the frame.",
+          "Castle defenders watch as smoke rolls over the slope.",
+          "Fort walls overlook tightly packed ranks moving near the gate.",
+          "Castle crews fire another wave when lines press the approach."
+        ],
+        "undrawable": [
+          "battlement edge",
+          "launch frame",
+          "board",
+          "rocket tails",
+          "step back",
+          "frame",
+          "smoke",
+          "slope",
+          "aim broad",
+          "wobbles",
+          "reload",
+          "reloading",
+          "gate",
+          "ranks",
+          "lines (as formations)",
+          "approach (as terrain feature)",
+          "bursts",
+          "ask",
+          "salvos",
+          "hit",
+          "wave (as a volley)"
+        ]
+      }
+    },
+    {
+      "labels": {
+        "candidate": "A",
+        "benchmark": "B"
+      },
+      "passed": false,
+      "result": {
+        "scores": {
+          "A": {
+            "clarity": 8,
+            "cause_effect": 8,
+            "engagement": 6,
+            "kid_clear": true,
+            "opening": true
+          },
+          "B": {
+            "clarity": 6,
+            "cause_effect": 7,
+            "engagement": 9,
+            "kid_clear": true,
+            "opening": true
+          }
+        },
+        "candidate_sentences": [
+          {
+            "index": 1,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Cart-based launcher used in fortress defense is supported; drawable with set:castle and obj:perforated_cart:roll and cast crews."
+          },
+          {
+            "index": 2,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Fortress context and cart launcher are consistent, but 'launch frame' and 'battlement edge' are not literal drawable vocabulary."
+          },
+          {
+            "index": 3,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Up to 200 rocket arrows is directly supported; rockets firing are drawable with obj:rocket_arrow:fire."
+          },
+          {
+            "index": 4,
+            "evidence_ok": false,
+            "picture_ok": true,
+            "reason": "Cloth coat cover is not in the provided evidence and is cautioned against; drawable via obj:covered_cart:open."
+          },
+          {
+            "index": 5,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Loading 'across the board in tight rows' not in evidence; 'board' and arranged rows are not in drawable vocabulary."
+          },
+          {
+            "index": 6,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Fuses/strings to rocket tails not supported by quoted evidence; 'rocket tails' not drawable explicitly."
+          },
+          {
+            "index": 7,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Fuse sparks and stepping back from a 'frame' not in evidence; 'step back' and 'frame' not drawable."
+          },
+          {
+            "index": 8,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Mass launch is consistent with the system; drawable with rockets blasting off from cart."
+          },
+          {
+            "index": 9,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rockets flying from a fort fits defensive use; drawable with set:castle and obj:rocket_arrow:fire."
+          },
+          {
+            "index": 10,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Watching defenders is fine, but 'smoke rolls over the slope' is an added scene detail not evidenced and 'smoke/slope' are not drawable."
+          },
+          {
+            "index": 11,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Unguided rockets being inaccurate is supported; 'keep aim broad' and 'wobbles' are not drawable actions."
+          },
+          {
+            "index": 12,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Firing many to cover area aligns with MRL purpose; 'cover a wide path' is not drawable as a literal action."
+          },
+          {
+            "index": 13,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Slow to reload is supported; 'swarm empties the frame' not drawable literally."
+          },
+          {
+            "index": 14,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Stationed in fortresses supports carts along walls; drawable with carts near walls and commanders present."
+          },
+          {
+            "index": 15,
+            "evidence_ok": false,
+            "picture_ok": false,
+            "reason": "Tightly packed attackers is supported, but 'near the gate' isn't in the evidence; 'gate/ranks/overlook' not drawable."
+          },
+          {
+            "index": 16,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Defensive salvos against advancing lines are consistent; 'another wave' and 'lines press the approach' not drawable."
+          },
+          {
+            "index": 17,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rockets less accurate than guns is supported; 'choose bursts' not drawable as an action."
+          },
+          {
+            "index": 18,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Many rockets flying together is consistent; 'ask' is not a supported drawable action."
+          },
+          {
+            "index": 19,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Unguided rockets miss and reload is slow are supported; 'miss'/'reloading takes time' not drawable."
+          },
+          {
+            "index": 20,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Using salvos to hit tight groups aligns with MRL against dense targets; 'salvos/tight groups' not literal drawable terms."
+          }
+        ],
+        "unsupported": [
+          "Soldiers rip off a cloth coat and uncover the launcher.",
+          "Soldiers set rockets across the board in tight rows.",
+          "Crews light strings running to the rocket tails at once.",
+          "Fuse sparks race as soldiers step back from the frame.",
+          "Castle defenders watch as smoke rolls over the slope.",
+          "Fort walls overlook tightly packed ranks moving near the gate."
+        ],
+        "undrawable": [
+          "launch frame",
+          "battlement edge",
+          "board",
+          "rocket tails",
+          "step back",
+          "frame (as a launcher part)",
+          "cart's face",
+          "swarm",
+          "smoke",
+          "slope",
+          "keep aim broad",
+          "wobbles",
+          "cover a wide path",
+          "reload",
+          "swarm empties the frame",
+          "overlook",
+          "ranks",
+          "gate",
+          "another wave",
+          "lines press the approach",
+          "choose bursts",
+          "ask",
+          "miss",
+          "salvos",
+          "tight groups"
+        ]
+      }
+    }
+  ],
+  "word_count": 191,
+  "evidence": {
+    "id": "battle",
+    "benchmark": "cart",
+    "topic": "Korean rocket carts in the invasion-era fortress defense; no claimed one-cart victory",
+    "facts": [
+      {
+        "id": "cart",
+        "url": "https://en.wikipedia.org/wiki/Hwacha",
+        "quote": "The overall design resembled a wooden cart with a launch pad attached; depending on the specific version and type, it could fire up to 200 singijeon (rocket-powered) arrows, or several dozen iron-headed arrows or bolts out of gun barrels."
+      },
+      {
+        "id": "history",
+        "url": "https://en.wikipedia.org/wiki/Hwacha",
+        "quote": "These weapons were most notably deployed in the defense against the two Japanese invasions of the Korean Peninsula in 1592\u201398."
+      },
+      {
+        "id": "rockets",
+        "url": "https://en.wikipedia.org/wiki/Multiple_rocket_launcher",
+        "quote": "Unguided rocket artillery is notoriously inaccurate and slow to reload compared to gun artillery. A multiple rocket launcher helps compensate for this with its ability to launch multiple rockets in rapid succession"
+      },
+      {
+        "id": "defense",
+        "url": "https://history-maps.com/museum/hwacha",
+        "quote": "Stationed in fortresses, hwachas were used defensively against tightly packed samurai formations.",
+        "note": "Avoid disputed army sizes, precise kills, invented rain/coats/hand-slaps, 82 historically claimed rockets, or no-miss victory."
+      }
+    ]
+  },
+  "duration_measured": false,
+  "production_enabled": false
+}

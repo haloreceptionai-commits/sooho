@@ -1,0 +1,170 @@
+{
+  "labels": {
+    "candidate": "A",
+    "benchmark": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 8,
+        "cause_effect": 8,
+        "engagement": 6,
+        "kid_clear": true,
+        "opening": true
+      },
+      "B": {
+        "clarity": 9,
+        "cause_effect": 8,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 1,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Supported by heat (rails expand) and gaps (joints/gaps accommodate expansion). Drawable: rail_yard + rail_joint:expand can show rails lengthening/closing gaps, though 'save' isn't picturable."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Heat evidence says hot rails expand. Drawable: rail_joint:expand (get longer)."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Forces and sleeper/ballast resistance are supported, but 'push/fight' actions and 'sleepers' aren't drawable literally."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Heat causes buckling when restraint is overcome (forces). Drawable: rail_joint:buckle."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Gaps at joints are supported. Drawable: rail_joint with a gap in rail_yard."
+      },
+      {
+        "index": 6,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Gaps close in summer (gaps + heat). Drawable: rail_joint:expand 'nearly closes'."
+      },
+      {
+        "index": 7,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Gaps open in winter (gaps). Drawable: rail_joint:expand with 'shorter' to show widening gap."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Sleepers/ballast resist forces is supported, but 'sleepers' and 'ballast' aren't drawable; 'stay straighter/resist' not literal actions."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Heat/forces can lead to buckling. Drawable: rail_joint:buckle."
+      },
+      {
+        "index": 10,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Gaps accommodate heat expansion reducing harm; supported by gaps + heat. Drawable: show joints with gaps and closing under heat (expand)."
+      },
+      {
+        "index": 11,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Past use of gaps supported. Drawable: joints with gaps in rail_yard."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Many stretches today still maintain gaps at joints. Drawable: joints/gaps shown."
+      },
+      {
+        "index": 13,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Modern CWR 'stitched strings' supported, but 'stitched strings' cannot be shown literally with provided objects/actions."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Fastenings managing heat supported, but the noun 'fastenings' isn't drawable literally (only clips/anchors are listed)."
+      },
+      {
+        "index": 15,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "CWR compression keeping near original length is supported, but 'compression' and 'fastenings' aren't drawable literally."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Heat/forces remain, but 'push outward' is not a provided literal action."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Fastenings limiting expansion supported, but 'fastenings' noun and 'expand less' phrasing can't be shown literally."
+      },
+      {
+        "index": 18,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Ends moving at joints is consistent with gaps, but 'move safely' is not a provided action; 'rail ends' exist as words, action does not."
+      },
+      {
+        "index": 19,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Older joints had gaps (supported), but the action 'ask' is not drawable."
+      },
+      {
+        "index": 20,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Gaps absorb thermal growth to prevent buckling is supported by gaps+heat+forces. Drawable: show gap closing/opening to accommodate length change."
+      }
+    ],
+    "unsupported": [],
+    "undrawable": [
+      "sun",
+      "sleepers",
+      "ballast",
+      "fastenings",
+      "stitched strings",
+      "compression",
+      "slide",
+      "shrink",
+      "push",
+      "push outward",
+      "fight",
+      "waits",
+      "resist",
+      "widens",
+      "move",
+      "ask",
+      "absorb",
+      "save",
+      "manage",
+      "stay straighter"
+    ]
+  }
+}
