@@ -55,17 +55,90 @@ def build_terrain(t, seed, size=180.0, n=150):
     return ob
 
 
-def flame(loc, size=0.25, m=None):
-    if m is None:
-        m = bpy.data.materials.get('flame') or bpy.data.materials.new('flame'); m.use_nodes = True
-        e = m.node_tree.nodes['Principled BSDF']; e.inputs['Base Color'].default_value = (1, 0.3, 0.03, 1)
-        e.inputs['Emission Color' if 'Emission Color' in e.inputs else 'Emission'].default_value = (1, 0.28, 0.02, 1)
-        e.inputs['Emission Strength'].default_value = 4.5
-    bpy.ops.mesh.primitive_cone_add(radius1=size * 0.5, depth=size * 1.6, location=(loc[0], loc[1], loc[2] + size * 0.8))
-    ob = bpy.context.object; ob.data.materials.append(m)
+def _flame_mats():
+    out = []
+    for name, col, strength in (('flame_outer', (1, 0.1, 0.0), 1.1), ('flame_core', (1, 0.45, 0.04), 2.2)):
+        m = bpy.data.materials.get(name)
+        if m is None:
+            m = bpy.data.materials.new(name); m.use_nodes = True
+            e = m.node_tree.nodes['Principled BSDF']; e.inputs['Base Color'].default_value = (*col, 1)
+            e.inputs['Emission Color' if 'Emission Color' in e.inputs else 'Emission'].default_value = (*col, 1)
+            e.inputs['Emission Strength'].default_value = strength
+        out.append(m)
+    return out
+
+
+def _wobble(seed, k):
+    """Deterministic 0..1 noise for flicker (no random module: same frames on every machine)."""
+    return (math.sin(seed * 12.9898 + k * 78.233) * 43758.5453) % 1.0
+
+
+def flame(loc, size=0.25, seed=0, frames=1, fps=30, energy=None):
+    """Layered, flickering fire: outer teardrop, hot core, point light that flickers with it, rising embers."""
+    outer_m, core_m = _flame_mats()
+    parts = []
+    for layer, (mat, sc) in enumerate(((outer_m, 1.0), (core_m, 0.55))):
+        bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=size * 0.3 * sc, radius2=size * 0.02, depth=size * 1.5 * sc,
+                                        location=(loc[0], loc[1], loc[2] + size * (0.75 if layer == 0 else 0.5) * sc + size * 0.1))
+        ob = bpy.context.object; ob.data.materials.append(mat)
+        for p in ob.data.polygons: p.use_smooth = True
+        parts.append((ob, sc))
     bpy.ops.object.light_add(type='POINT', location=(loc[0], loc[1], loc[2] + size * 1.4))
-    L = bpy.context.object.data; L.energy = 60 * size / 0.25; L.color = (1, 0.55, 0.2); L.shadow_soft_size = 0.2
-    return ob
+    light = bpy.context.object; L = light.data
+    base = (energy if energy is not None else 260 * size / 0.2)
+    L.energy = base; L.color = (1, 0.5, 0.16); L.shadow_soft_size = 0.25
+    step = max(1, fps // 10)
+    for f in range(1, max(2, frames) + 1, step):
+        k = f // step
+        w1, w2, w3 = _wobble(seed, k), _wobble(seed + 7, k), _wobble(seed + 13, k)
+        for ob, sc in parts:
+            ob.scale = (0.8 + 0.4 * w1, 0.8 + 0.4 * w2, 0.85 + 0.35 * w3)
+            ob.keyframe_insert('scale', frame=f)
+        L.energy = base * (0.75 + 0.5 * w3); L.keyframe_insert('energy', frame=f)
+    # embers: small emissive sparks that rise and fade out
+    for e in range(5):
+        bpy.ops.mesh.primitive_ico_sphere_add(radius=size * 0.04, subdivisions=1, location=(loc[0], loc[1], loc[2] + size))
+        em = bpy.context.object; em.data.materials.append(core_m)
+        dx, dy = (_wobble(seed, e) - 0.5) * size * 1.5, (_wobble(seed + 3, e) - 0.5) * size * 1.5
+        life = max(8, int(fps * (0.6 + 0.5 * _wobble(seed + 5, e)))); t0 = 1 + int(_wobble(seed + 9, e) * life)
+        for f in range(1, max(2, frames) + 1, max(1, life // 2)):
+            u = ((f + t0) % life) / life
+            em.location = (loc[0] + dx * u, loc[1] + dy * u, loc[2] + size + size * 3.0 * u)
+            em.scale = (1 - u,) * 3
+            em.keyframe_insert('location', frame=f); em.keyframe_insert('scale', frame=f)
+    return parts[0][0]
+
+
+def animate_ox(root, new_actions, yaw, frames, fps, phase, speed_mps, clip='Run'):
+    """Play the cow's own Run/Walk clip on its armature (looped, phase-shifted per animal) and carry the root forward."""
+    rig = next((o for o in bpy.data.objects if o.type == 'ARMATURE' and o.parent is not None and _under(o, root)), None)
+    act = next((a for a in new_actions if f'{clip}_' in a.name), None)
+    if rig is None or act is None: return False
+    rig.animation_data_create()
+    for t in list(rig.animation_data.nla_tracks): rig.animation_data.nla_tracks.remove(t)
+    rig.animation_data.action = None
+    length = max(1, int(act.frame_range[1] - act.frame_range[0]))
+    track = rig.animation_data.nla_tracks.new()
+    strip = track.strips.new(act.name, 1 - int(phase * length), act)
+    strip.repeat = (frames + length) / length + 1
+    strip.scale = (fps / 30.0) if clip == 'Run' else 1.0
+    # forward = the direction the farm-animal model faces after the yaw rotation (checked against the rendered still)
+    a = math.radians(yaw); fx, fy = -math.sin(a) * -1, math.cos(a)
+    x, y, z = root.location
+    root.location = (x, y, z); root.keyframe_insert('location', frame=1)
+    dist = speed_mps * frames / fps
+    root.location = (x + fx * dist, y + fy * dist, z); root.keyframe_insert('location', frame=max(2, frames))
+    if root.animation_data and root.animation_data.action:
+        for fc in root.animation_data.action.fcurves:
+            for kp in fc.keyframe_points: kp.interpolation = 'LINEAR'
+    return True
+
+
+def _under(o, root):
+    while o is not None:
+        if o is root: return True
+        o = o.parent
+    return False
 
 
 def ox_coat(root):
@@ -91,28 +164,47 @@ def ox_coat(root):
                 seen.add(m.name)
 
 
-def build_place(p, mode):
-    from set_library import model
+def build_place(p, mode, duration=1.0, fps=30):
+    from set_library import model, _MODEL_CACHE
     if p['terrain'] not in PALETTE: return False
+    frames = max(1, int(round(duration * fps)))
     build_terrain(p['terrain'], p['seed'])
+    herd = 0
     for it in p['items']:
         x, y, z = it['pos']
+        is_ox = bool(it.get('horns'))
+        if is_ox:
+            _MODEL_CACHE.pop(it['model'], None)   # each animal needs its own armature, so import it fresh instead of copying
+        before = set(bpy.data.actions); mark = set(bpy.data.objects)
         root = model({'id': it['model'], 'pos': [x, y, z], 'height': it['height'], 'yaw': it['yaw']})
         root['place_item'] = it['id']
-        if it.get('horns'):
+        if is_ox:
             ox_coat(root)
+            new_actions = [a for a in bpy.data.actions if a not in before]
+            k = herd; herd += 1
+            moves = frames > 1 and it['id'] in ('ox', 'ox_burning') and it.get('herd', True)
+            if moves:
+                animate_ox(root, new_actions, it['yaw'], frames, fps, phase=_wobble(k, 1), speed_mps=3.2 + 1.6 * _wobble(k, 2))
             yaw = math.radians(it['yaw']); h = it['height']
-            fx, fy = -math.cos(yaw), -math.sin(yaw)   # the farm-animal models face -X before yaw
+            fx, fy = math.sin(yaw), -math.cos(yaw)   # farm-animal models face -Y before the yaw rotation (head bone measured at y=-0.71)
+            horn_objs = []
             for sx in (-1, 1):
                 rx, ry = -fy * sx * 0.16, fx * sx * 0.16
-                tip = (x + fx * 0.78 * h / 1.5 + rx, y + fy * 0.78 * h / 1.5 + ry, z + h * 0.9)
+                tip = (x + fx * 0.74 * h / 1.5 + rx * h / 1.5, y + fy * 0.74 * h / 1.5 + ry * h / 1.5, z + h * 0.93)
                 m = bpy.data.materials.get('horn') or bpy.data.materials.new('horn'); m.use_nodes = True
                 m.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.85, 0.8, 0.65, 1)
                 bpy.ops.mesh.primitive_cone_add(radius1=0.05, depth=0.35, location=tip, rotation=(sx * math.radians(55), 0, yaw))
-                bpy.context.object.data.materials.append(m)
-                if it.get('fire') == 'horns': flame((tip[0] + rx * 0.8, tip[1] + ry * 0.8, tip[2] + 0.12), 0.2)
+                horn = bpy.context.object; horn.data.materials.append(m); horn_objs.append(horn)
+                if it.get('fire') == 'horns':
+                    before_f = set(bpy.data.objects)
+                    flame((tip[0] + rx * 0.8, tip[1] + ry * 0.8, tip[2] + 0.12), 0.2, seed=k * 2 + (sx > 0), frames=frames, fps=fps)
+                    horn_objs += [o for o in set(bpy.data.objects) - before_f]
+            for o in horn_objs:   # carry horns and flames with the animal
+                o.parent = root; o.matrix_parent_inverse = root.matrix_world.inverted()
         elif it.get('fire') == 'top':
-            flame((x, y, z + it['height'] * (0.95 if it['id'] == 'torch' else 0.3)), 0.2 if it['id'] == 'torch' else 0.45)
+            before_f = set(bpy.data.objects)
+            flame((x, y, z + it['height'] * (0.95 if it['id'] == 'torch' else 0.3)), 0.2 if it['id'] == 'torch' else 0.45,
+                  seed=hash(it['id']) % 97, frames=frames, fps=fps)
     w = bpy.context.scene.world.node_tree; nodes = w.nodes
     sky = nodes.new('ShaderNodeTexSky')
     try: sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(30); sky.sun_rotation = math.radians(35)
