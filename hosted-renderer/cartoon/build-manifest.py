@@ -170,10 +170,16 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
         out.append({'start':a,'end':b,'world':d['world'],'light':d['light'],'shot':k,'move':mv,'mood':mood,
           'shake':.6 if mv=='shake' else (.25 if 'lightning' in (d.get('fx') or []) else 0),
           'speaker':speaker if speaker in ids else None,'keyword':keyword,'props':props,'fx':d.get('fx') or [],
-          'camera':camera,'actors':actors,'events':mine,**({'location':str(d['location'])[:160]} if d.get('location') else {}),
+          'camera':camera,'actors':actors,'events':mine,**({'location':str(d['location'])[:160]} if d.get('location') else {}),**({'place':_place(d['place'],len(out))} if ADVANCED and d.get('place') else {}),
           **({'sequence':[str(x)[:30] for x in d['sequence']][:4]} if d.get('sequence') else {}),**({'empty':True} if d.get('empty') is True else {}),
           **({'cast_reasons':{a['actor']:str(a.get('reason',''))[:160] for a in (d.get('actors') or []) if a.get('reason')}} if any(a.get('reason') for a in (d.get('actors') or [])) else {})})
     return out
+
+def _place(spec,i):
+    # v3 Advanced place spec: validated against the shared registry; an undrawable place stops the job here, before rendering.
+    import sys as _s;_s.path.insert(0,str(Path(__file__).parent/'blender'))
+    from place_spec import validate
+    return validate(dict(spec),i)
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--request',required=True);p.add_argument('--alignment',required=True);p.add_argument('--voice',required=True);p.add_argument('--out',required=True)

@@ -1,0 +1,33 @@
+{
+  "_doc": "Advanced place registry, shared by the Visual Director (src/lib/place-spec.ts), the worker (build-manifest.py) and the renderer (place_spec.py). A dressing entry is usable only when registry-audit.json holds a passing local render check for its exact definition (registry_check.py).",
+  "version": 1,
+  "terrains": {
+    "mountain_pass": {"label": "narrow pass or road between steep mountains", "base": ["cliff", "cliff", "tall_rock", "tall_rock", "pine", "pine", "rocks"]},
+    "valley": {"label": "green valley between hills", "base": ["tree", "pine", "pine", "rocks", "tree"]},
+    "plain": {"label": "open plain, steppe or flat battlefield", "base": ["rocks", "rocks", "small_pine"]},
+    "river_crossing": {"label": "river with banks, ford or crossing point", "base": ["boat", "rocks", "pine", "tree"]},
+    "camp": {"label": "army camp with tents and fires", "base": ["tent", "tent", "small_tent", "campfire", "banner", "pine"]}
+  },
+  "kits": ["castle", "village", "battlefield", "street", "market", "office", "workshop", "saloon", "room", "mine_tunnel", "rail_yard", "ship_deck", "farm_field", "forest", "outback"],
+  "times": ["dawn", "day", "dusk", "night"],
+  "weather": ["clear", "fog", "rain", "wind"],
+  "dressing": {
+    "ox": {"model": "q-farmanimal/Cow", "height": 1.5, "horns": true, "words": ["ox", "oxen", "cattle", "cow", "cows", "bull", "bulls"]},
+    "ox_burning": {"model": "q-farmanimal/Cow", "height": 1.5, "horns": true, "fire": "horns", "words": ["burning oxen", "flaming oxen", "fire on horns", "torches on horns", "burning ox", "burning horns"]},
+    "torch": {"model": "q-survival/Torch", "height": 1.3, "fire": "top", "words": ["torch", "torches", "firebrand"]},
+    "spear": {"model": "mini-characters/weapon-spear", "height": 2.1, "words": ["spear", "spears", "javelin", "pike"]},
+    "shield": {"model": "mini-characters/shield-round", "height": 0.9, "words": ["shield", "shields"]},
+    "tent": {"model": "nature-kit/tent_detailedOpen", "height": 2.6, "words": ["tent", "tents"]},
+    "small_tent": {"model": "nature-kit/tent_smallClosed", "height": 1.8, "words": []},
+    "banner": {"model": "castle-kit/flag-banner-long", "height": 3.4, "words": ["banner", "banners", "standard", "flag"]},
+    "campfire": {"model": "nature-kit/campfire_stones", "height": 0.5, "fire": "top", "words": ["campfire", "campfires", "bonfire", "fires"]},
+    "cliff": {"model": "nature-kit/cliff_large_rock", "height": 9.0, "far": true, "words": ["cliff", "cliffs"]},
+    "tall_rock": {"model": "nature-kit/rock_tallA", "height": 4.5, "far": true, "words": ["boulder", "boulders"]},
+    "rocks": {"model": "q-stylizednaturemegakit/Rock_Medium_1", "height": 1.2, "words": ["rocks", "stones"]},
+    "pine": {"model": "nature-kit/tree_pineRoundA", "height": 6.0, "far": true, "words": ["pine", "pines"]},
+    "small_pine": {"model": "nature-kit/tree_pineSmallB", "height": 3.0, "far": true, "words": []},
+    "tree": {"model": "nature-kit/tree_oak", "height": 5.5, "far": true, "words": ["tree", "trees"]},
+    "boat": {"model": "pirate-kit/boat-row-small", "height": 1.0, "water": true, "words": ["boat", "boats", "raft", "rafts"]},
+    "bridge": {"model": "nature-kit/bridge_wood", "height": 1.6, "water": true, "words": ["bridge"]}
+  }
+}

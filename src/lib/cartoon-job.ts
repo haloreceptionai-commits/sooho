@@ -1,5 +1,6 @@
 import { backdropKeys, worldPack } from "@/lib/world-pack";
 import { z } from 'zod';
+import { placeSpec } from "@/lib/place-spec";
 import vocab from '../../hosted-renderer/cartoon/vocabulary.json';
 
 export const CARTOON_LIFETIME_MS = 48 * 60 * 60_000;
@@ -36,6 +37,8 @@ export const cartoonScene = z.object({
     phrase: z.string().max(160).optional(), size: z.enum(['small', 'medium', 'large', 'huge']).optional() })).max(4).optional(),
   // Advanced: free-text real place for the line ("Commercial Street, Boston's North End, 1919"); the 3D planner never forces a kit.
   location: z.string().max(160).optional(),
+  // Advanced manifest v3: structured real 3D place (terrain/time/weather/dressing from place-registry.json); older jobs omit it.
+  place: placeSpec.optional(),
   // Advanced: the story's key event shown as a sequence of painted object states (intact -> failing -> burst), one setup each.
   sequence: z.array(objectId).min(2).max(4).optional(),
   // Advanced: nobody from the cast is part of the story yet at this moment, so the shot shows only the place and objects.

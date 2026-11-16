@@ -98,3 +98,36 @@ def build(spec):
 
 if __name__ == '__main__':
     build(json.loads((HERE / 'asset-spec.json').read_text()))
+
+def add_models(ids):
+    """Additive import (no network): copy more library GLBs into the pinned subset and append their entries.
+    Only packs whose shipped License.txt says CC0 are accepted."""
+    entries = json.loads((OUT / 'manifest.json').read_text()); have = {e['id'] for e in entries}
+    for model in ids:
+        if model in have: continue
+        pack = model.split('/')[0]
+        lic = LIBRARY / pack / 'License.txt'
+        if 'CC0' not in lic.read_text(errors='ignore'): raise RuntimeError(f'{pack}: CC0 could not be verified')
+        dest = OUT / 'licenses' / f'{pack}.txt'; dest.parent.mkdir(exist_ok=True); shutil.copyfile(lic, dest)
+        source = LIBRARY / f'{model}.glb'
+        if source.read_bytes()[:4] != b'glTF': raise RuntimeError(f'{model}: invalid GLB')
+        target = OUT / 'models' / f'{model}.glb'; target.parent.mkdir(parents=True, exist_ok=True); shutil.copyfile(source, target)
+        url = f'https://quaternius.com/packs/{pack[2:]}.html' if pack.startswith('q-') else f'https://kenney.nl/assets/{pack}'
+        entries.append({'id': model, 'kind': 'model', 'path': str(target.relative_to(OUT)), 'sha256': digest(target), 'source': url, 'license': 'CC0-1.0'})
+        data = source.read_bytes(); gltf = json.loads(data[20:20 + struct.unpack_from('<I', data, 12)[0]])
+        for image in gltf.get('images', []):
+            uri = image.get('uri')
+            if not uri or uri.startswith('data:'): continue
+            src_image = (source.parent / uri).resolve()
+            if not src_image.is_relative_to(LIBRARY.resolve()): raise ValueError('external model image')
+            dst = target.parent / uri; dst.parent.mkdir(parents=True, exist_ok=True); shutil.copyfile(src_image, dst)
+            rel = str(dst.relative_to(OUT))
+            if not any(e['path'] == rel for e in entries):
+                entries.append({'id': pack + '/' + uri, 'kind': 'model-texture', 'path': rel, 'sha256': digest(dst), 'source': url, 'license': 'CC0-1.0'})
+        print('added', model)
+    (OUT / 'manifest.json').write_text(json.dumps(entries, indent=2) + '\n')
+    spec = json.loads((HERE / 'asset-spec.json').read_text())
+    spec['models'] = spec['models'] + [m for m in ids if m not in spec['models']]
+    (HERE / 'asset-spec.json').write_text(json.dumps(spec, indent=2) + '\n')
+    (OUT / 'CREDITS.md').write_text('# Offline Blender assets\n\nAll entries are CC0-1.0; licenses checked at import.\n\n' +
+        '\n'.join(f'- {e["path"]}: {e["source"]} — {e["license"]}, SHA-256 `{e["sha256"]}`' for e in entries) + '\n')

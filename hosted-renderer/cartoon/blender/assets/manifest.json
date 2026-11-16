@@ -765,5 +765,133 @@
     "sha256": "5f98aa01d43a49cd899299751a978b3e5559a76300198b5dd2d9c68ecc4ad130",
     "source": "https://polyhaven.com/a/kloofendal_overcast_puresky",
     "license": "CC0-1.0"
+  },
+  {
+    "id": "q-farmanimal/Cow",
+    "kind": "model",
+    "path": "models/q-farmanimal/Cow.glb",
+    "sha256": "5bdb18da23e114c717a8739e7defc75b6bf3d1dd54e928c141a0286bf14aa4a8",
+    "source": "https://quaternius.com/packs/farmanimal.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "q-survival/Torch",
+    "kind": "model",
+    "path": "models/q-survival/Torch.glb",
+    "sha256": "62c1f1e63e889716480ac5484e342e82650461aab9a0158b65e2c3516a522d3c",
+    "source": "https://quaternius.com/packs/survival.html",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "mini-characters/weapon-spear",
+    "kind": "model",
+    "path": "models/mini-characters/weapon-spear.glb",
+    "sha256": "2576c07d71b86f59c579824cc4592c2988a63be767ef6e3f71c66dbea2a6a615",
+    "source": "https://kenney.nl/assets/mini-characters",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "mini-characters/Textures/colormap.png",
+    "kind": "model-texture",
+    "path": "models/mini-characters/Textures/colormap.png",
+    "sha256": "3aba07b39c13e9fa9a02cba6246fdd9d711bb15702e00e10ad84595b25452f95",
+    "source": "https://kenney.nl/assets/mini-characters",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "mini-characters/shield-round",
+    "kind": "model",
+    "path": "models/mini-characters/shield-round.glb",
+    "sha256": "dda06a4c532a12521a3cc22b7e3a07982f4c981fdd3db7de64c61a6bd4ac583e",
+    "source": "https://kenney.nl/assets/mini-characters",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/tent_detailedOpen",
+    "kind": "model",
+    "path": "models/nature-kit/tent_detailedOpen.glb",
+    "sha256": "d54d9665d07e0ff9680e56731c9f5338fc25d93788504d63b8375f54e6444193",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/tent_smallClosed",
+    "kind": "model",
+    "path": "models/nature-kit/tent_smallClosed.glb",
+    "sha256": "326bb7909d67a587149be7f048f39257daadc899d80b5f956090571881b096e0",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/campfire_stones",
+    "kind": "model",
+    "path": "models/nature-kit/campfire_stones.glb",
+    "sha256": "54869db23243a3f4905bc00bd4cd93b1037b28556ab3ef93e7a893a093791e35",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/cliff_large_rock",
+    "kind": "model",
+    "path": "models/nature-kit/cliff_large_rock.glb",
+    "sha256": "f9bf79cd3a76bbe11f4887053655585e467e14f2528678215a820896669e4e8e",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/rock_tallA",
+    "kind": "model",
+    "path": "models/nature-kit/rock_tallA.glb",
+    "sha256": "88250f236a3b75f8b55c1d8afb6af020f8a91b1e81f9fb51f7ef513420d45a2d",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/rock_tallE",
+    "kind": "model",
+    "path": "models/nature-kit/rock_tallE.glb",
+    "sha256": "21f135fa85c5fde5f1136ceefe7f9c9103f292109a5b1d77a6675e97d7a782fb",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/stone_tallB",
+    "kind": "model",
+    "path": "models/nature-kit/stone_tallB.glb",
+    "sha256": "4dc2798870b56fe4028f47418994c8b7c336baf7045bf034fe8117cb7e635ba1",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/tree_pineRoundA",
+    "kind": "model",
+    "path": "models/nature-kit/tree_pineRoundA.glb",
+    "sha256": "7dc9711f31585eafdcb965d0649c30af5e19f2def1955f7a915081d30759ef8e",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/tree_pineSmallB",
+    "kind": "model",
+    "path": "models/nature-kit/tree_pineSmallB.glb",
+    "sha256": "59392aa6604adb9dccd4fb76df5ed12ae8ac7d7391eb7e04bc84fffe9f9b36c8",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "pirate-kit/boat-row-small",
+    "kind": "model",
+    "path": "models/pirate-kit/boat-row-small.glb",
+    "sha256": "846d9b17a73f80e03f7201d3bf0ad1b1bbb49e114b99697740d3426e4f42482d",
+    "source": "https://kenney.nl/assets/pirate-kit",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "nature-kit/bridge_wood",
+    "kind": "model",
+    "path": "models/nature-kit/bridge_wood.glb",
+    "sha256": "3da4c208b0f72b7f2ba42db521b62ec4b0278050c75256a6982c40d21aab5701",
+    "source": "https://kenney.nl/assets/nature-kit",
+    "license": "CC0-1.0"
   }
 ]
