@@ -233,6 +233,7 @@ export interface PlanInput {
   repair?: string; // validator issues from a previous draft
   kid?: boolean; // Advanced Video AI: words an 8-year-old knows, stricter story shape
   shape?: boolean; // Story Shape v3 (owner's gold Shorts)
+  lockedNarration?: string[]; // Shorts Writer v4 approved lines
 }
 export type Camera = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "punch_in" | "orbit" | "hold";
 export interface PlanCharacter { name: string; role: string; look: string }
@@ -291,6 +292,7 @@ const planSchema = {
 export const generatePlan = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: PlanInput) => {
     if (!d.topic?.trim() || d.topic.length > 300) throw new Error("Topic is required (max 300 chars)");
+    if (d.lockedNarration && (d.lockedNarration.length > 80 || d.lockedNarration.join(' ').length > 6000)) throw new Error("Narration too long");
     return { ...d, durationSec: Math.max(10, Math.min(1200, Math.round(d.durationSec))) };
   })
   .handler(async ({ data }) => { const { generatePlanOperation } = await import('./pipeline-operations.server'); return generatePlanOperation({ data }); });

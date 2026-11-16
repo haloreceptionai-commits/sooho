@@ -15,6 +15,9 @@ import { factCheck, researchStory, generateHooks, generatePlan, judgeScript, typ
 import { hookIssues, hookTextIssues, splitSentences, spokenBy, validateStory, storyScore, wc, type GateResult } from '@/lib/story-v2';
 import { motionPrompt, scriptExport, scriptTimeline } from '@/lib/script-writer';
 import { autoFixPlan, eligibleHooks, preferRepair, repairBrief } from '@/lib/script-repair';
+import { shortsWriterEnabled, shortsWriterStep } from '@/lib/shorts-writer/shorts-writer.functions';
+import { writerCalls } from '@/lib/shorts-writer/calls';
+import { runShortsV4 } from '@/lib/shorts-writer/stage';
 
 export const Route = createFileRoute('/_authenticated/script-writer')({
   head: () => ({ meta: [
@@ -40,12 +43,20 @@ function ScriptWriter() {
   const [stage, setStage] = useState('');
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ plan: Plan; facts: FactSheet; gate: GateResult; style: string; format: 'short' | 'long' }>();
-  const checkFacts = useServerFn(factCheck), research = useServerFn(researchStory), hooks = useServerFn(generateHooks), write = useServerFn(generatePlan), judge = useServerFn(judgeScript);
+  const checkFacts = useServerFn(factCheck), research = useServerFn(researchStory), hooks = useServerFn(generateHooks), write = useServerFn(generatePlan), judge = useServerFn(judgeScript), step_ = useServerFn(shortsWriterStep), enabledV4 = useServerFn(shortsWriterEnabled);
   const generate = async () => {
     if (stage || !topic.trim()) return;
     setError('');
     try {
       const deployment = settings.scriptDeployment;
+      if (format === 'short' && await enabledV4()) {
+        const source = FACT_TOPICS.find(t => t.id === topicId);
+        const calls = writerCalls((step, args) => step_({ data: { step: step as never, args } }), { topic: topic.trim(), deployment, durationSec: duration, research: source ? `Research starting point: ${source.fact} — ${source.source}. Verify independently.` : undefined });
+        const v4 = await runShortsV4({ calls, durationSec: duration, base: { topic: topic.trim(), format, durationSec: duration, archetype: 'Best fit', style, deployment }, plan: (data) => write({ data }), progress: (d) => setStage(d) });
+        const facts: FactSheet = { claims: v4.writer.facts.filter(f => f.certain).map(f => ({ claim: f.text, date: '', confidence: 'high', sources: [] })), myth: '', reality: '', hedge: '' };
+        setResult({ plan: v4.plan, facts, gate: v4.gate, style, format });
+        return;
+      }
       setStage('Checking facts…');
       const facts = await checkFacts({ data: { topic: topic.trim(), deployment } });
       const source = FACT_TOPICS.find(t => t.id === topicId);
