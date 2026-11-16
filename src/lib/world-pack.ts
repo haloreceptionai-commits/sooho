@@ -12,7 +12,9 @@ export const BACKDROP_PAINT_CAP = 8;    // paid backdrop paintings per video (3 
 export function placeSlug(location: string): string {
   const words = location.toLowerCase().replace(/\b(1[0-9]{3}|20[0-9]{2})s?\b/g, " ").match(/[a-z0-9]+/g) ?? [];
   const stop = new Set(["a", "an", "the", "of", "in", "on", "at", "and", "with", "near", "by", "to"]);
-  return words.filter(w => !stop.has(w)).slice(0, 4).join("_").slice(0, 20).replace(/_+$/, "");
+  const kept: string[] = [];
+  for (const w of words.filter(w => !stop.has(w)).slice(0, 4)) { if ([...kept, w].join("_").length > 20) break; kept.push(w); }
+  return kept.join("_");
 }
 
 /** The story's year: the year spoken most often in the narration (earliest on ties), or null. */

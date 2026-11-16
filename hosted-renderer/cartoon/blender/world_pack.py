@@ -16,7 +16,11 @@ def place_slug(location):
     t = YEAR.sub(' ', str(location or '').lower())
     t = re.sub(r'\b(1[0-9]{3}|20[0-9]{2})s\b', ' ', t)
     words = [w for w in re.findall(r'[a-z0-9]+', t) if w not in STOP][:4]
-    return '_'.join(words)[:20].rstrip('_')
+    kept = []
+    for w in words:
+        if len('_'.join(kept + [w])) > 20: break
+        kept.append(w)
+    return '_'.join(kept)
 
 
 def story_year(text):
