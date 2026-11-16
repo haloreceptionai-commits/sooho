@@ -43,8 +43,10 @@ function checkTargets(lines: string[], checks: string[]): { n: number; reason: s
   return out;
 }
 
-export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; progress?: Progress | undefined }): Promise<WriterResult> {
-  const maxPatches = opts.maxPatches ?? 3, maxSpines = opts.maxSpines ?? 2;
+export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; budgetMs?: number; progress?: Progress | undefined }): Promise<WriterResult> {
+  // Speed: the whole script must be ready in under ~2 minutes, so extra passes only start while time remains.
+  const maxPatches = opts.maxPatches ?? 2, maxSpines = opts.maxSpines ?? 2, budget = opts.budgetMs ?? 105_000, t0 = Date.now();
+  const left = () => budget - (Date.now() - t0);
   const say = async (t: string) => { await opts.progress?.(t); };
   await say('Building the fact sheet…');
   const facts = await calls.facts();
@@ -54,10 +56,10 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
   for (let s = 0; s < maxSpines; s++) {
     await say(s ? 'Coherence below 8 — planning a different story spine…' : 'Planning the story spine…');
     let spine = await calls.spine(facts, rounds.map((r) => r.spine));
-    let sc = await calls.spineCheck(spine, facts);
-    if (!sc.ok) { spine = await calls.spine(facts, [...rounds.map((r) => r.spine), spine]); sc = await calls.spineCheck(spine, facts); }
     await say('Writing 10 hooks…');
-    let hooks = await calls.hooks(facts, spine);
+    // Spine check runs alongside the hooks instead of before them.
+    const [sc0, hooks0] = await Promise.all([calls.spineCheck(spine, facts), calls.hooks(facts, spine)]);
+    const sc = sc0; let hooks = hooks0;
     let valid = hooks.filter((h) => !h.reveals_answer && !hookIssues(h.line).length);
     if (!valid.length) {
       const fb = `Previous hooks failed: ${hooks.slice(0, 5).map((h) => `"${h.line}" (${[...hookIssues(h.line), h.reveals_answer ? 'reveals the answer' : ''].filter(Boolean).join('; ')})`).join(' / ')}. Write 10 new ones that pass.`;
@@ -81,7 +83,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
       const result: WriterResult = { facts, rounds, lines, critic, checks: cur.checks, ready, hook, spine };
       if (!best || rank(result) > rank(best)) best = result;
       if (ready) return result;
-      if (p >= maxPatches) break;
+      if (p >= maxPatches || left() < 35_000) break;
       const flagged = flaggedLines(critic).map((n) => ({ n, reason: critic.lines.find((l) => l.n === n)?.reason || 'a viewer would lose interest here; add stakes or a turn' }));
       const targets = [...flagged, ...checkTargets(lines, cur.checks).filter((t) => !flagged.some((f) => f.n === t.n))];
       const problems = [...cur.checks, critic.ending_copies_hook ? 'The last line copies the hook; reframe the theme in new words.' : '', !critic.ending_makes_sense ? 'The ending does not make sense.' : '', !critic.real_twist ? 'The story has no real twist; make the assumption flip clear.' : '', critic.hook_reveals_answer ? 'The hook reveals the answer (it is locked, so hide the mechanism until the twist).' : ''].filter(Boolean);
@@ -93,7 +95,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
       const fix = await calls.rewrite(lines, targets, problems, facts, spine);
       lines = applyRewrite(lines, fix.lines, targets.map((t) => t.n));
     }
-    if (best && !needsNewSpine(best.critic)) break;
+    if (best && (!needsNewSpine(best.critic) || left() < 80_000)) break;
   }
   return best!;
 }
