@@ -225,7 +225,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
         const need: { phrase: string; size?: string }[] = [];
         for (const sc of located) for (const o of (sc.objects ?? []) as { phrase?: string; size?: string }[]) {
           const phrase = String(o.phrase ?? '').trim();
-          if (phrase && need.length < 8 && !need.some(n => n.phrase === phrase)) need.push({ phrase, size: o.size });
+          if (phrase && need.length < 8 && !need.some(n => n.phrase === phrase)) need.push(o.size ? { phrase, size: o.size } : { phrase });
         }
         if (need.length) {
           const composed = await composePropsOp({ phrases: need, deployment: data.deployment });

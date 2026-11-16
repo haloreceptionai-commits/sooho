@@ -77,7 +77,7 @@ function Videos() {
   }, [playing]);
 
   const done = videos.filter((v) => v.status === "done" && (filter === "all" || v.input.format === filter));
-  const inProgress = videos.filter((v) => v.status !== "done" && !v.removed);
+  const inProgress = videos.filter((v) => v.status !== "done" && !v.removed && v.id !== "g0anuaym"); // Owner dismissed this replaced Hannibal attempt; record kept.
 
   return (
     <Page eyebrow="Library" title="My videos" desc="Every finished video, ready to watch and download."
