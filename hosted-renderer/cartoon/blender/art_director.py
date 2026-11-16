@@ -17,6 +17,7 @@ import math, re
 from shot_schema import validate_shot
 from shot_director import ZONES as BASE_ZONES, OBJ_CAMS
 from object_specs import OBJECTS
+from place_spec import compile_place, KITS as PLACE_KITS, LIGHTING as PLACE_LIGHT
 
 FPS = 30
 SIZE = (720, 1280)  # upscaled to 1080x1920; measured same look as 810x1440 at ~45% less GPU time
@@ -211,6 +212,9 @@ def plan_locations(m, cards=()):
     out = []; prev = None
     year = story_year(m.get('script') or ' '.join(str(w) for w in m.get('caption_words') or []) or ' '.join(str(w.get('word', '')) for w in m.get('words') or []))
     for s in m['shots']:
+        if s.get('place'):  # manifest v3: the validated place spec decides; no keyword matching, no neutral substitute
+            t = s['place']['terrain']; best = t if t in PLACE_KITS else NEUTRAL
+            out.append(best); prev = best; continue
         if s.get('location'):
             best = match_location(s['location'])
         else:
@@ -392,6 +396,8 @@ class Director:
         elif DUSK.search(whole): lighting = 'sunset'
         if 'rain' in (s.get('fx') or []) or re.search(r'\b(rain\w*|storm\w*)\b', whole) or s.get('world') == 'storm_sea': lighting = 'rain'
         if st in ('office', 'saloon', 'workshop', 'room') and lighting == 'rain': lighting = 'day'
+        if s.get('place'):
+            lighting = 'rain' if s['place'].get('weather') == 'rain' else PLACE_LIGHT[s['place']['time']]
         # --- who is on screen
         actors = [] if s.get('empty') else [x for x in s.get('actors') or [] if not ANIMAL.search(x['id'].lower())][:3]
         beasts = [x for x in s.get('actors') or [] if ANIMAL.search(x['id'].lower()) and f"{x['id']}.png" in self.cards]
@@ -599,8 +605,12 @@ class Director:
         if st in OUTDOOR and lighting in ('day', 'sunset'):  # gentle aerial perspective only: strong mist swallowed the sky
             shot['haze'] = 0.006; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.72, 0.8, 0.88]
         if cards: shot['cards'] = cards
-        bd = backdrop_for(s.get('location'), self.cards)
-        if bd: shot['backdrop'] = bd
+        if s.get('place'):
+            shot['place'] = compile_place(s['place'], seed=i)
+            if s['place'].get('weather') == 'fog': shot['haze'] = 0.02; shot['haze_color'] = [0.62, 0.66, 0.72]
+        else:
+            bd = backdrop_for(s.get('location'), self.cards)
+            if bd: shot['backdrop'] = bd
         if crowd: shot['crowd'] = crowd
         if effects: shot['effects'] = effects
         if prop_specs: shot['props'] = prop_specs

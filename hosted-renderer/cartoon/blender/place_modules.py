@@ -68,20 +68,6 @@ def flame(loc, size=0.25, m=None):
     return ob
 
 
-def horns(root, h):
-    """Engine-owned horns on the cow head (+Y is the model's front after import)."""
-    m = bpy.data.materials.get('horn') or bpy.data.materials.new('horn'); m.use_nodes = True
-    m.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.85, 0.8, 0.65, 1)
-    tips = []
-    for sx in (-1, 1):
-        bpy.ops.mesh.primitive_cone_add(radius1=0.06, depth=0.42, location=(sx * 0.16, 0, 0))
-        ob = bpy.context.object; ob.rotation_euler = (0, sx * math.radians(60), 0); ob.data.materials.append(m)
-        ob.parent = root; ob.matrix_parent_inverse = root.matrix_world.inverted()
-        ob.location = root.matrix_world @ __import__('mathutils').Vector((sx * 0.16 / max(root.scale.x, 1e-6), 0.55 / max(root.scale.y, 1e-6), (h * 0.92) / max(root.scale.z, 1e-6)))
-        tips.append(ob)
-    return tips
-
-
 def build_place(p, mode):
     from set_library import model
     if p['terrain'] not in PALETTE: return False
