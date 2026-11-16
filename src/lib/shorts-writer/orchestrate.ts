@@ -45,7 +45,7 @@ function checkTargets(lines: string[], checks: string[]): { n: number; reason: s
 
 export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; budgetMs?: number; progress?: Progress | undefined }): Promise<WriterResult> {
   // Speed: the whole script must be ready in under ~2 minutes, so extra passes only start while time remains.
-  const maxPatches = opts.maxPatches ?? 2, maxSpines = opts.maxSpines ?? 2, budget = opts.budgetMs ?? 105_000, t0 = Date.now();
+  const maxPatches = opts.maxPatches ?? 2, maxSpines = opts.maxSpines ?? 2, budget = opts.budgetMs ?? 80_000, t0 = Date.now();
   const left = () => budget - (Date.now() - t0);
   const say = async (t: string) => { await opts.progress?.(t); };
   await say('Building the fact sheet…');
