@@ -10,13 +10,14 @@ import { checkCardText, designAdvancedCards, paintAdvancedCard } from "@/lib/pip
 import { CARD_POSES, type cartoonDirection } from "@/lib/cartoon-job";
 import type { z } from "zod";
 import { objectsToPaint } from "@/lib/object-resolution";
+import { BACKDROP_LAYERS, BACKDROP_PAINT_CAP, backdropBrief, worldPack } from "@/lib/world-pack";
 
 type Direction = z.infer<typeof cartoonDirection>;
 type Retry = <T>(fn: () => Promise<T>) => Promise<T>;
 export interface PaintedObject { name: string; scenes: number[] }
 export interface PaintedCards { cards: { id: string; path: string }[]; objects: PaintedObject[]; log: string[] }
 interface Design { cards: { id: string; look: string }[]; objects: (PaintedObject & { look: string })[] }
-interface ObjectChecks { paid: number; objects: Record<string, { ok: boolean; what?: string; from?: string }>; log: string[] }
+interface ObjectChecks { paid: number; backdropsPaid?: number; objects: Record<string, { ok: boolean; what?: string; from?: string }>; log: string[] }
 export const OBJECT_PAINT_CAP = 8;
 
 const toBytes = (b64: string) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
@@ -129,6 +130,25 @@ export async function paintAdvancedCards(direction: Direction, narration: string
   };
   await Promise.all(objects.filter(o => !variantOf.has(o.name)).map(one));
   await Promise.all(objects.filter(o => variantOf.has(o.name)).map(one));
+  // --- World Pack backdrops: era-correct painted layers for the story's own places (any topic), text-checked, capped.
+  const pack = worldPack(direction.scenes, narration);
+  await Promise.all(pack.places.flatMap(place => BACKDROP_LAYERS.map(async layer => {
+    const id = `bg-${place.slug}-${layer}`, file = `card-${id}.png`, rec = checks.objects[id];
+    if (have.has(file) && rec?.ok !== false) { cards.push({ id, path: `${root}/${file}` }); return; }
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if ((checks.backdropsPaid ?? 0) >= BACKDROP_PAINT_CAP) { note(`${id}: not painted, backdrop limit of ${BACKDROP_PAINT_CAP} reached`); break; }
+      checks.backdropsPaid = (checks.backdropsPaid ?? 0) + 1; await saveChecks();
+      const r = await limit(() => retry(() => paintAdvancedCard({ data: { look: backdropBrief(place, pack.year, layer), kind: `backdrop-${layer}`, deployment: settings.imageDeployment } }))).catch((e: unknown) => { note(`${id}: painting failed (${e instanceof Error ? e.message : e})`); return null; });
+      if (!r) break;
+      if (await textFree(id, r.image)) {
+        await save(file, toBytes(r.image), "image/png", true); checks.objects[id] = { ok: true };
+        cards.push({ id, path: `${root}/${file}` }); note(`${id}: painted for "${place.location}"${pack.year ? ` in ${pack.year}` : ""}, no text`); break;
+      }
+      checks.objects[id] = { ok: false };
+      if (attempt) note(`${id}: missing, still has text after one regeneration; place shown plain`);
+    }
+    await saveChecks();
+  })));
   const painted = new Set(cards.map(c => c.id));
   return { cards: cards.sort((a, b) => a.id.localeCompare(b.id)), objects: objects.filter(o => painted.has(`obj-${o.name}`)).map(({ name, scenes }) => ({ name, scenes })), log: checks.log };
 }
