@@ -78,6 +78,7 @@ def compile_shot(m, i, cards=()):
         side = -1 if mv == 'pan_left' else 1; L = math.hypot(toward[0], toward[1]) or 1
         cam['to'] = [round(f[0] - toward[1] / L * 0.8 * side, 3), round(f[1] + toward[0] / L * 0.8 * side, 3), f[2]]
     elif mv == 'whip': cam['whip_from'] = [round(f[0] + 1.5, 3), f[1], f[2]]
+    else: cam['to'] = [round(f[k] + toward[k] * 0.08, 3) for k in range(3)]  # 'static' still drifts: a frozen picture fails video QA
     if st == 'mine_tunnel':
         for k in ('from', 'to', 'whip_from'):
             if k in cam: cam[k][0] = max(-0.9, min(0.9, cam[k][0]))

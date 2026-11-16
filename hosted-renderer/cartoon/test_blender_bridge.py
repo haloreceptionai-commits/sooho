@@ -27,6 +27,10 @@ class Bridge(unittest.TestCase):
         self.assertIn('to', s0['camera'])
         self.assertTrue(s1['camera']['shake'])
         self.assertEqual(sorted(e['kind'] for e in s1['effects']), ['rain', 'smoke'])
+    def test_static_shots_still_move_so_qa_never_sees_a_frozen_picture(self):
+        m = manifest(); m['shots'][0]['move'] = 'static'
+        s = b.compile_shot(m, 0, set())
+        self.assertNotEqual(s['camera']['to'], s['camera']['from'])
     def test_captions_match_web_engine_groups_of_three(self):
         words = b.caption_at(manifest(), 30)  # t=1.0s -> word index 2 ("went")
         self.assertEqual([w['text'] for w in words], ['the', 'army', 'went'])
