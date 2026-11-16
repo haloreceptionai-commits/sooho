@@ -6,6 +6,7 @@
  * Every file is saved under the video's media folder as soon as it is made, so Resume never repays for finished cards.
  */
 import { supabase } from "@/integrations/supabase/client";
+import animalVocab from "../../hosted-renderer/cartoon/animals.json";
 import { checkCardText, designAdvancedCards, paintAdvancedCard } from "@/lib/pipeline.functions";
 import { CARD_POSES, type cartoonDirection } from "@/lib/cartoon-job";
 import type { z } from "zod";
@@ -193,10 +194,9 @@ export function placeObjectCards(direction: Direction, painted: PaintedCards): {
   return { direction: { ...direction, scenes }, cards: painted.cards.filter(c => !c.id.startsWith("obj-") || used.has(c.id)) };
 }
 
-const ANIMALS = ("pig cow horse sheep goat duck hen chicken rooster dog cat mouse rat rabbit fox wolf bear lion tiger monkey ape frog fish shark whale dolphin " +
-  "bird owl crow raven eagle hawk parrot penguin pigeon goose swan snake lizard turtle tortoise crocodile alligator deer moose elk camel elephant zebra giraffe " +
-  "donkey mule ox bull buffalo bison emu ostrich kangaroo koala seal walrus crab octopus squid bee ant spider beetle bat hippo rhino llama yak").split(" ");
-const PLURAL: Record<string, string> = { geese: "goose", mice: "mouse", oxen: "ox", sheep: "sheep", fish: "fish", deer: "deer", moose: "moose", wolves: "wolf", calves: "cow" };
+// One animal list shared with the renderer (hosted-renderer/cartoon/animals.json): a painted card must also be shown.
+const ANIMALS: string[] = animalVocab.animals;
+const PLURAL: Record<string, string> = animalVocab.plural;
 const animalIn = (word: string) => { const w = word.toLowerCase().replace(/[^a-z]/g, ""); const s = PLURAL[w] ?? (ANIMALS.includes(w) ? w : w.replace(/(es|s)$/, "")); return ANIMALS.includes(s) ? s : (ANIMALS.includes(w.replace(/s$/, "")) ? w.replace(/s$/, "") : null); };
 
 /**

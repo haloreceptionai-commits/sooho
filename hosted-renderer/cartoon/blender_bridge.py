@@ -3,6 +3,7 @@ declarative Blender shot (via the step-6 shot_director compiler), renders one fr
 GPU, upscales to 1080x1920 and burns in the same captions as the web engine. Output files and the
 checkpoint use capture.py's format and input hash, so joining, mixing and QA are unchanged.
 """
+from animals import ANIMAL
 import argparse, hashlib, json, math, os, re, subprocess, sys, tempfile
 from pathlib import Path
 
@@ -30,7 +31,6 @@ OUTFIT = {'soldier': ('soldier', 'helmet'), 'veteran': ('soldier', 'helmet'), 'k
 PROP = {'magnifier': ('magnifier', 'swing'), 'coins': ('money_bag', 'hold'), 'gold_piece': ('money_bag', 'hold'), 'chest': ('money_bag', 'hold'),
         'cart': ('covered_cart', 'hold'), 'pan': ('gold_pan', 'pour'), 'cannon': ('gold_shotgun', 'fire')}
 FX = {'smoke': 'smoke', 'fire': 'fire', 'dust': 'dust', 'burst': 'explosion', 'sparkle': 'sparks', 'rain': 'rain', 'splash': 'dust'}
-ANIMAL = re.compile(r'(emu|bird|dog|cat|horse|cow|pig|sheep|goat|rat|mouse|wolf|bear|lion|tiger|fox|camel|elephant|monkey|ape|whale|fish|shark|duck|goose|chicken|hen|parrot|owl|eagle|crow|pigeon|rabbit|deer|seal|snake|frog|insect|bee|animal|creature|beast)')
 SHIRTS = [[0.72, 0.42, 0.22], [0.2, 0.32, 0.6], [0.55, 0.2, 0.2], [0.3, 0.5, 0.3]]
 SCALE = (810, 1440)  # rendered size, upscaled to 1080x1920 (about 1.8x faster on the T4)
 

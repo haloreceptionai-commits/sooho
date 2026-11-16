@@ -11,6 +11,7 @@ decides, with fixed rules only:
 Everything compiles to shot_schema-validated JSON; nothing the language model wrote is executed.
 """
 from world_pack import backdrop_for, kit_fits_era, story_year
+from animals import ANIMAL
 import math, re
 from shot_schema import validate_shot
 from shot_director import ZONES as BASE_ZONES, OBJ_CAMS
@@ -98,7 +99,6 @@ OUTFIT = {'soldier': ('soldier', 'helmet'), 'veteran': ('soldier', 'helmet'), 'k
           'worker': ('worker', 'beanie'), 'blacksmith': ('worker', 'none'), 'farmer': ('worker', 'none'), 'peasant': ('worker', 'none'), 'villager': ('worker', 'beanie')}
 SHIRTS = [[0.72, 0.42, 0.22], [0.2, 0.32, 0.6], [0.55, 0.2, 0.2], [0.3, 0.5, 0.3]]
 HAT_COLORS = [[0.32, 0.19, 0.06], [0.22, 0.27, 0.16], [0.1, 0.1, 0.12], [0.5, 0.12, 0.08]]
-ANIMAL = re.compile(r'(emu|bird|dog|cat|horse|cow|pig|sheep|goat|rat|mouse|wolf|bear|lion|tiger|fox|camel|elephant|monkey|ape|whale|fish|shark|duck|goose|chicken|hen|parrot|owl|eagle|crow|pigeon|rabbit|deer|seal|snake|frog|insect|bee|animal|creature|beast)')
 
 # ---------------------------------------------------------------- props (whitelisted offline models only)
 PROP_MODEL = {'barrel': ('pirate-kit/barrel', .9), 'oil_jar': ('pirate-kit/barrel', .8), 'pot': ('pirate-kit/barrel', .6), 'chest': ('pirate-kit/chest', .7),
