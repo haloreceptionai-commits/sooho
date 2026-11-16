@@ -53,7 +53,9 @@ function Create() {
   const used: TopicUse[] = [...history, ...videos.map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }))];
   // An owner script may remake a finished topic; only a video still in production blocks (no double spend).
   const owned = format === "short" && !!ownScript.trim();
-  const blocking = (list: TopicUse[]) => (owned ? list.filter((u) => u.status && u.status !== "done" && u.status !== "failed") : list);
+  // Topic history keeps stale "running" marks, so an owner script checks only real videos still running.
+  const liveVideos: TopicUse[] = videos.filter((v) => v.status === "running" && !v.removed).map((v) => ({ topic: v.input.topic, topicId: v.input.topicId, status: v.status }));
+  const blocking = (list: TopicUse[]) => (owned ? liveVideos : list);
   const unavailable = topicUnavailable(topic, topicId, blocking(used));
   const score = scoreTopic(topic);
   const active = videos.filter((v) => v.status !== "done" && !v.removed).slice(0, 5);
