@@ -46,6 +46,7 @@ def main():
     if hasattr(scene, 'use_nodes'):
         scene.use_nodes = False
     camera = scene.camera
+    camera.data.type = 'ORTHO'
     camera.data.lens = 48
     camera.data.dof.use_dof = False
     poses = [('standing', -65, 65, 0), ('reaching', -20, 65, -30)]
@@ -60,8 +61,16 @@ def main():
             forearm.rotation_euler = (math.radians(elbow if side == 'L' else 0), 0, 0)
         scene.frame_set(1)
         bpy.context.view_layer.update()
-        camera.location = (2.5, -4.8, 2.1)
-        camera.rotation_euler = (Vector((0, 0, 0.95)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
+        deps = bpy.context.evaluated_depsgraph_get()
+        points = [obj.matrix_world @ Vector(v) for obj in bpy.data.objects
+                  if obj.name in ('GEO-snow-head', 'GEO-snow-hair_base', 'GEO-snow-shirt', 'GEO-snow-pants', 'GEO-snow-shoes_base')
+                  for v in obj.evaluated_get(deps).bound_box]
+        lo = min(v.z for v in points)
+        hi = max(v.z for v in points)
+        center = Vector((0, 0, (lo + hi) / 2))
+        camera.data.ortho_scale = (hi - lo) * 1.35
+        camera.location = center + Vector((2.5, -6, 1.1))
+        camera.rotation_euler = (center - camera.location).to_track_quat('-Z', 'Y').to_euler()
         scene.render.filepath = os.path.join(out, name + '.png')
         bpy.ops.render.render(write_still=True)
         evidence.append({'pose': name, 'file': name + '.png'})
