@@ -190,7 +190,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const confidence = facts.claims.length ? facts.claims.filter((c) => c.confidence !== "low").length / facts.claims.length : 0;
     up({ progress: 4, facts: { myth: facts.myth, reality: facts.reality, claims: facts.claims.length, confidence }, detail: "Finding the hero, question and payoff…" });
     // 2) research: anchors, premise, impossible question, payoff, money shot
-    const rs = await withRetry(() => researchStory({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment, advanced, shape: input.format === 'short' } }));
+    const rs = await withRetry(() => researchStory({ data: { topic: input.topic, facts: factText, deployment: s.scriptDeployment, advanced } }));
     if (!rs.oneImage.ok) throw new Error("Pick a more visual topic: the odd thing in this story can't be shown in one picture.");
     const researchText = [
       `Anchors: subject "${rs.anchors.subject}", year "${rs.anchors.year}", place "${rs.anchors.place}", org "${rs.anchors.org}", stakes "${rs.anchors.stakes}"`,
@@ -242,7 +242,7 @@ export async function runVideo(id: string, input: VideoInput) {
         first15: `Narration: "${spokenBy(story.scenes, 15)}" ${firstShots(15)}`,
         full, truth: `${researchText}\nHook: ${hb.line}`,
         shots: p.scenes.map((x, i) => `${i}: ${x.narration} => ${x.image_prompt.slice(0, 220)}`).join("\n"),
-        deployment: s.scriptDeployment, advanced,
+        deployment: s.scriptDeployment, advanced, shape: input.format === 'short',
       } })).catch((e: unknown) => { console.warn("Judges unavailable:", e); return null; });
       if (judge?.filler.length && judge.filler.length > 2) report.failed.push({ id: "V8j", pass: false, msg: `V8 new info (judge): "${judge.filler.slice(0, 2).join('", "')}" add nothing new` });
       const gate = storyScore(report, judge, p.scenes.length, { strict: advanced });
