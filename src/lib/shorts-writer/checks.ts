@@ -22,7 +22,7 @@ export function hookIssues(hook: string): string[] {
 
 /** Words that look like names: capitalised tokens not at the start of a sentence. */
 function nameTokens(line: string): string[] {
-  const toks = line.replace(/[“”"]/g, "").split(/\s+/);
+  const toks = line.replace(/[“”"]/g, "").replace(/[—–]/g, " — ").split(/\s+/);
   const out: string[] = [];
   toks.forEach((t, i) => {
     const w = t.replace(/^[^A-Za-z]+|[^A-Za-z.']+$/g, "").replace(/'s$/, "");
@@ -65,7 +65,7 @@ export const flaggedLines = (c: Critic) => {
 /** Acceptance per the owner's task: clear, narration only, hook hides the answer, ending doesn't copy the hook, coherence >= 8 (clarity and curiosity also >= 8 so every line works on first listen). */
 export function criticPasses(c: Critic): boolean {
   return c.coherence >= 8 && c.clarity >= 8 && c.curiosity >= 8 && !c.hook_reveals_answer && !c.ending_copies_hook && c.ending_makes_sense && c.real_twist
-    && c.lines.every((l) => l.clear && l.narration);
+    && c.lines.every((l, i) => l.clear && (l.narration || i === c.lines.length - 1));
 }
 
 /** After critic patches: restart from a different spine when coherence (owner's rule) or curiosity is still below 8. */

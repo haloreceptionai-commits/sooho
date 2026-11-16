@@ -42,3 +42,8 @@ describe("shorts writer patch targets", () => {
   it("does not demand a new fact from the closing reframe", () => { const c = critic(); c.lines[2]!.new_fact = false; expect(flaggedLines(c)).toEqual([]); });
   it("restarts the spine when curiosity stays below 8", () => expect(needsNewSpine(critic({ curiosity: 7 }))).toBe(true));
 });
+
+describe("shorts writer closing reframe", () => {
+  it("accepts a closing reframe line marked as not narration", () => { const c = critic(); c.lines[2]!.narration = false; expect(criticPasses(c)).toBe(true); });
+  it("splits names joined by a dash", () => expect(scriptIssues(["Hannibal was trapped, so he strapped fire to two thousand oxen.", "Rome waited—so Hannibal moved."], facts, 60).join()).not.toContain("Rome"));
+});
