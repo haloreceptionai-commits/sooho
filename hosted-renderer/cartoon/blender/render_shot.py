@@ -347,13 +347,19 @@ def main():
     sc.world.use_nodes = True
     engine = os.environ.get('SHOT_ENGINE') or shot.get('engine', 'eevee')
     if engine == 'eevee':
-        sc.render.engine = 'BLENDER_EEVEE_NEXT'; ee = sc.eevee
+        # Blender 4.2 calls it EEVEE_NEXT; 4.5+/5.x renamed it back to EEVEE. Optional knobs differ by version.
+        names = [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items]
+        sc.render.engine = 'BLENDER_EEVEE_NEXT' if 'BLENDER_EEVEE_NEXT' in names else 'BLENDER_EEVEE'; ee = sc.eevee
         ee.taa_render_samples = shot.get('samples', 16)
-        ee.use_shadows = True; ee.shadow_ray_count = 2; ee.shadow_step_count = 8
-        ee.use_raytracing = True; ee.ray_tracing_method = 'SCREEN'
-        ee.use_volumetric_shadows = True; ee.volumetric_tile_size = '8'; ee.volumetric_samples = 48
-        ee.use_gtao = True; ee.fast_gi_method = 'GLOBAL_ILLUMINATION'
+        for k, v in (('use_shadows', True), ('shadow_ray_count', 1), ('shadow_step_count', 6), ('use_raytracing', True),
+                     ('ray_tracing_method', 'SCREEN'), ('use_volumetric_shadows', True), ('volumetric_tile_size', '8'),
+                     ('volumetric_samples', 32), ('use_gtao', True), ('fast_gi_method', 'GLOBAL_ILLUMINATION'), ('shadow_resolution_scale', 1.0)):
+            try: setattr(ee, k, v)
+            except (AttributeError, TypeError): pass
+        try: ee.ray_tracing_options.resolution_scale = '2'
+        except (AttributeError, TypeError): pass
         sc.render.film_transparent = False
+        print('EEVEE', sc.render.engine, bpy.app.version_string, flush=True)
     else:
         sc.render.engine = 'CYCLES'; cy = sc.cycles
         cy.device = os.environ.get('CYCLES_DEVICE', 'CPU')
