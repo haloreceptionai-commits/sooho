@@ -25,7 +25,8 @@ def check(i, out):
     made = [o for o in set(bpy.data.objects) - before if o.type == 'MESH' and o.name != 'terrain']
     pts = [o.matrix_world @ Vector(c) for o in made for c in o.bound_box]
     lo = min(p.z for p in pts); hi = max(p.z for p in pts); h = e['height']
-    d = max(4.0, h * 2.4)
+    span = max(h, max(p.x for p in pts) - min(p.x for p in pts), max(p.y for p in pts) - min(p.y for p in pts))
+    d = max(4.0, span * 2.6)
     bpy.ops.object.camera_add(location=(d * 0.6, -d, h * 0.6)); cam = bpy.context.object; sc.camera = cam
     direction = Vector((0, 0, h * 0.5)) - cam.location; cam.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
     cam.data.lens = 35
