@@ -45,7 +45,13 @@ export type PlaceSpec = z.infer<typeof placeSpec>;
 
 /** JSON schema fragment for the Visual Director. Strict: every field is required and enum-limited, so the model cannot name an undrawable place.
  *  Library models and assembled objects are added afterwards from the scene's named objects (liftDressing / composed props), never invented here. */
-export function placeJsonSchema() {
+export function placeJsonSchema(compact = false) {
+  if (compact) {   // lighter fallback request: named terrains only, at most 6 registry props, no custom-place fields
+    return { type: "object", additionalProperties: false, required: ["terrain", "time", "weather", "dressing"], properties: {
+      terrain: { type: "string", enum: PLACE_TERRAINS.filter(t => t !== "custom") }, time: { type: "string", enum: PLACE_TIMES }, weather: { type: "string", enum: PLACE_WEATHER },
+      dressing: { type: "array", maxItems: 6, items: { type: "object", additionalProperties: false, required: ["id", "count"], properties: { id: { type: "string", enum: PLACE_DRESSING }, count: { type: "integer" } } } },
+    } };
+  }
   return { type: "object", additionalProperties: false, required: ["terrain", "ground", "relief", "water", "time", "weather", "dressing"], properties: {
     terrain: { type: "string", enum: PLACE_TERRAINS },
     ground: { type: "string", enum: PLACE_GROUNDS }, relief: { type: "string", enum: PLACE_RELIEFS }, water: { type: "string", enum: PLACE_WATERS },
@@ -126,3 +132,8 @@ export function requirePlaces(scenes: { place?: unknown }[]): PlaceSpec[] {
     return r.data;
   });
 }
+
+/** Short place instructions for the lighter fallback request (named terrains and registry props only). */
+export const PLACE_PROMPT_COMPACT = `
+ADVANCED 3D PLACE (required per scene): place.terrain is the closest of: ${Object.entries(registry.terrains).map(([k, v]) => `${k} (${v.label})`).join("; ")}; or an existing set when the line is literally there: ${registry.kits.join(", ")}.
+place.time is dawn/day/dusk/night and stays the same across neighbouring scenes unless the story itself jumps. place.weather is clear/fog/rain/wind. place.dressing: up to 6 {id,count} from: ${PLACE_DRESSING.join(", ")}.`;

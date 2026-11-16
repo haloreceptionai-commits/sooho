@@ -49,7 +49,7 @@ export async function azureJson<T>(deployment: string, system: string, user: str
     response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
   });
   if (!res.ok || !res.body) await fail(res, what);
-  let content = "", refusal = "", buf = "";
+  let content = "", refusal = "", buf = "", finish = "";
   if (!res.body) throw Error(`${what} returned no body`);
   const reader = res.body.getReader();
   const dec = new TextDecoder();
@@ -64,14 +64,15 @@ export async function azureJson<T>(deployment: string, system: string, user: str
       const payload = line.slice(5).trim();
       if (payload === "[DONE]") continue;
       try {
-        const j = JSON.parse(payload) as { choices?: { delta?: { content?: string; refusal?: string } }[] };
+        const j = JSON.parse(payload) as { choices?: { delta?: { content?: string; refusal?: string }; finish_reason?: string | null }[] };
+        finish = j.choices?.[0]?.finish_reason ?? finish;
         content += j.choices?.[0]?.delta?.content ?? "";
         refusal += j.choices?.[0]?.delta?.refusal ?? "";
       } catch { /* keep-alive */ }
     }
   }
   if (refusal) throw new Error(`${what} refused: ${refusal}`);
-  try { return JSON.parse(content) as T; } catch { throw new Error(`${what} returned an unreadable answer`); }
+  try { return JSON.parse(content) as T; } catch { throw new Error(`${what} returned an unreadable answer (finish: ${finish || 'unknown'}, ${content.length} characters${finish === 'length' ? ', ran out of room' : ''})`); }
 }
 
 // ---------------- Fact check ----------------
@@ -185,10 +186,20 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
       scene.properties['objects'] = { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'phrase', 'size'], properties: { id: { type: 'string' }, phrase: { type: 'string' }, size: { type: 'string', enum: ['small', 'medium', 'large', 'huge'] } } } };
     }
     // Self-healing: some newer models (gpt-6.1-sol) can return empty direction; retry with more thinking, then the proven gpt-5 deployment.
-    const ask = (dep: string, effort: 'none' | 'medium') => azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(dep, data.advanced ? VISUAL_DIRECTOR + ADVANCED_DIRECTION + placeMod.PLACE_PROMPT : VISUAL_DIRECTOR,
+    let placePrompt = placeMod.PLACE_PROMPT;   // swapped for the compact version if the full request cannot be read back
+    const ask = (dep: string, effort: 'none' | 'medium') => azureJson<{ cast: unknown[]; scenes: Record<string, unknown>[] }>(dep, data.advanced ? VISUAL_DIRECTOR + ADVANCED_DIRECTION + placePrompt : VISUAL_DIRECTOR,
       data.scenes.map((s, i) => `${i}: ${s}\nScene-matched models: ${searchLibrary(s, 5).filter(o => objects.some(a => a.id === o.id)).map(o => `${o.id}${o.clips?.length ? ' [rigged]' : ''}`).join(', ') || 'use faithful built-in props'}`).join('\n') + (objects.length ? `\n\nLibrary objects for this story (use kind=asset with asset=<id>):\n${objects.map(o => `${o.id} — ${o.name}${o.type === 'sprite' ? ' (flat animal art)' : o.clips?.length ? ' (animated: idle/walk/run)' : ''}`).join('\n')}` : ''), 'cartoon_direction', schema, 'Visual director', effort);
     const empty = (r: { cast: unknown[]; scenes: unknown[] }) => !r.cast?.length || !r.scenes?.length;
-    let raw = await ask(data.deployment, 'none');
+    let raw: Awaited<ReturnType<typeof ask>>;
+    try { raw = await ask(data.deployment, 'none'); }
+    catch (e) {
+      // The full open-world request can be too large to read back; retry once with the lighter named-terrain request instead of failing the video.
+      if (!data.advanced || !/unreadable|ran out of room/.test(e instanceof Error ? e.message : String(e))) throw e;
+      console.warn('Visual director full request failed, retrying compact:', e instanceof Error ? e.message : e);
+      const sc = schema.properties.scenes.items as unknown as { properties: Record<string, unknown> };
+      sc.properties['place'] = placeMod.placeJsonSchema(true); placePrompt = placeMod.PLACE_PROMPT_COMPACT;
+      raw = await ask(data.deployment, 'none');
+    }
     if (empty(raw)) raw = await ask(data.deployment, 'medium');
     if (empty(raw) && data.deployment !== 'gpt-5') raw = await ask('gpt-5', 'none').catch(() => raw);
     // Empty speaker means narration (no lip sync); trim lists to engine limits before strict validation.
