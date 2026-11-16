@@ -23,7 +23,7 @@
     "campfire": {"model": "nature-kit/campfire_stones", "height": 0.5, "fire": "top", "words": ["campfire", "campfires", "bonfire", "fires"]},
     "cliff": {"model": "nature-kit/cliff_large_rock", "height": 9.0, "far": true, "words": ["cliff", "cliffs"]},
     "tall_rock": {"model": "nature-kit/rock_tallA", "height": 4.5, "far": true, "words": ["boulder", "boulders"]},
-    "rocks": {"model": "nature-kit/rock_largeA", "height": 1.2, "words": ["rocks", "stones"]},
+    "rocks": {"model": "q-stylizednaturemegakit/Rock_Medium_1", "height": 1.2, "words": ["rocks", "stones"]},
     "pine": {"model": "nature-kit/tree_pineRoundA", "height": 6.0, "far": true, "words": ["pine", "pines"]},
     "small_pine": {"model": "nature-kit/tree_pineSmallB", "height": 3.0, "far": true, "words": []},
     "tree": {"model": "nature-kit/tree_oak", "height": 5.5, "far": true, "words": ["tree", "trees"]},

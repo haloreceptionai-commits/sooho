@@ -12,7 +12,7 @@ REGISTRY = json.loads((HERE / 'place-registry.json').read_text())
 TERRAINS = set(REGISTRY['terrains']); KITS = set(REGISTRY['kits'])
 TIMES = REGISTRY['times']; WEATHER = REGISTRY['weather']; DRESSING = REGISTRY['dressing']
 LIGHTING = {'dawn': 'sunset', 'day': 'day', 'dusk': 'sunset', 'night': 'night'}
-CLEAR = 3.2          # metres around the cast that stay flat and free of dressing
+CLEAR = 6.0          # metres around the world origin kept flat and free of dressing (cast zones sit up to ~3 m off origin)
 MAX_ITEMS = 6; MAX_COUNT = 8
 
 
@@ -75,7 +75,7 @@ def ramp(d, start, width):
     t = max(0.0, min(1.0, (d - start) / width)); return t * t * (3 - 2 * t)
 
 
-RIVER_Y, RIVER_HALF = 7.0, 3.5
+RIVER_Y, RIVER_HALF = 12.0, 3.5
 
 
 def height(terrain, x, y, seed=0):
@@ -96,14 +96,14 @@ def height(terrain, x, y, seed=0):
 
 
 # Placement rings: near items stand just outside the cast area, far items frame the horizon.
-NEAR = [(-3.6, 1.0), (3.8, 1.6), (-4.4, 4.2), (4.6, 4.8), (-2.2, 5.6), (2.4, 6.4), (-5.6, -1.8), (5.8, -2.4)]
+NEAR = [(-6.6, 1.0), (6.8, 1.8), (-6.2, 5.2), (6.6, 5.6), (-3.4, 7.6), (3.6, 8.0), (-7.4, -2.2), (7.6, -2.8)]
 
 
 def _spot(terrain, k, seed, far):
     a = _rand(seed, f'a{k}') * 2 * math.pi
     if terrain == 'mountain_pass' and far:   # along the walls of the pass
         sx = -1 if k % 2 else 1; return (sx * (9 + 6 * _rand(seed, f'd{k}')), -18 + 46 * _rand(seed, f'y{k}'))
-    d = (10 + 16 * _rand(seed, f'd{k}')) if far else (CLEAR + 1.2 + 3.5 * _rand(seed, f'd{k}'))
+    d = (10 + 16 * _rand(seed, f'd{k}')) if far else (CLEAR + 0.8 + 3.5 * _rand(seed, f'd{k}'))
     x, y = math.cos(a) * d, math.sin(a) * d
     if terrain == 'river_crossing' and abs(y - RIVER_Y) < RIVER_HALF + 1.2: y = RIVER_Y + (RIVER_HALF + 2) * (1 if y > RIVER_Y else -1)
     return (x, y)
@@ -127,7 +127,7 @@ def compile_place(spec, seed=0):
                 x, y = _spot(t, k, seed, True); z = height(t, x, y, seed)
             else:
                 if d['id'] in ('ox', 'ox_burning') and d.get('count', 1) > 1:   # a herd: rows behind the cast
-                    x, y = -4 + (c % 4) * 2.6, 6 + (c // 4) * 2.8
+                    x, y = -4 + (c % 4) * 2.6, 7.5 + (c // 4) * 2.8
                 else:
                     x, y = NEAR[near_i % len(NEAR)]; near_i += 1
                 z = height(t, x, y, seed)
