@@ -28,7 +28,6 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
-- The isolated Blender benchmark suite keeps evidence-bound script audits and full-video release gates separate from production; only complete aligned renders, benchmark parity, recovery checks and owner approval may enable a renderer, because preparatory tests are not launch evidence.
 - Video records sync to the cloud `videos` table (jsonb `data`) and files to the private `videos` bucket under `<user_id>/`; localStorage/IndexedDB are only caches; no DELETE policy or delete UI exists; why: the owner's library must survive any browser and never lose videos.
 - Access: single owner account, public signup disabled; all pages live under `_authenticated/` and every server fn uses requireSupabaseAuth; why: private dashboard that spends paid AI credits.
 - Pipeline: browser orchestration generates script/media then checkpoints private assets and submits one Apify hosted Actor; hosted-renderer/prepare.ts bundles the unchanged canvas renderer for that Actor. It assembles with Atlas pacing/captions/music/foley and uploads directly to private storage; token-scoped callbacks complete the cloud record. Why: preserve the approved edit while assembly survives browser closure; pre-assembly generation still needs an open browser.
