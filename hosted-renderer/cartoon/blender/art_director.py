@@ -425,7 +425,7 @@ class Director:
             if len(self.history) % 2: a_, b_ = b_, a_
             d = [b_[0] - a_[0], b_[1] - a_[1]]; L = math.hypot(*d) or 1; u = [d[0] / L, d[1] / L]; perp = [-u[1], u[0]]
             sgn = side
-            cam = {'from': r3([a_[0] - u[0] * 1.8 + perp[0] * 1.0 * sgn - F[0] * .4, a_[1] - u[1] * 1.8 + perp[1] * 1.0 * sgn - F[1] * .4, 1.62]),
+            cam = {'from': r3([a_[0] - u[0] * 1.8 + perp[0] * 1.25 * sgn - F[0] * .4, a_[1] - u[1] * 1.8 + perp[1] * 1.25 * sgn - F[1] * .4, 1.62]),
                    'look_at': r3([b_[0], b_[1], 1.55]), 'lens': 38, 'fstop': 2.8}
         elif kind == 'track':
             mover = next((c for c in cast if c['action'] in ('walk', 'run')), None)

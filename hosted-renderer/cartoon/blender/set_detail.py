@@ -395,7 +395,7 @@ def outback(surface):
     geo=m.nodes.new('ShaderNodeNewGeometry');m.links.new(geo.outputs['Position'],noise.inputs['Vector'])
     ramp=m.nodes.new('ShaderNodeValToRGB');ramp.color_ramp.elements[0].color=(.42,.17,.07,1);ramp.color_ramp.elements[1].color=(.7,.38,.17,1)
     m.links.new(noise.outputs['Fac'],ramp.inputs['Fac']);m.links.new(ramp.outputs['Color'],bs.inputs['Base Color'])
-    bpy.ops.mesh.primitive_plane_add(size=120,location=(0,4,0));g=bpy.context.active_object;g.name='outback ground';g.data.materials.append(earth)
+    bpy.ops.mesh.primitive_plane_add(size=420,location=(0,4,0));g=bpy.context.active_object;g.name='outback ground';g.data.materials.append(earth)
     spin=[material('spinifex '+str(i),c,.85) for i,c in enumerate([(.55,.5,.22),(.42,.42,.18),(.66,.58,.3)])]
     for k in range(70):
         x,y=rng.uniform(-18,18),rng.uniform(-16,26)
