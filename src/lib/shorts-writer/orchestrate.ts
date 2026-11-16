@@ -10,11 +10,12 @@ export interface WriterCalls {
   hooks(facts: Fact[], spine: Spine, feedback?: string): Promise<HookCandidate[]>;
   pickHook(hooks: string[], spine: Spine): Promise<{ index: number; reason: string }>;
   script(facts: Fact[], spine: Spine, hook: string): Promise<{ lines: string[] }>;
-  critic(lines: string[], facts: Fact[]): Promise<Critic>;
+  critic(lines: string[], facts: Fact[], shareable: string[]): Promise<Critic>;
+  verifyNumbers(numbers: string[], lines: string[]): Promise<{ number: string; text: string; certain: boolean }[]>;
   rewrite(lines: string[], flagged: { n: number; reason: string }[], problems: string[], facts: Fact[], spine: Spine): Promise<{ lines: { n: number; text: string }[] }>;
 }
 
-export interface WriterRound { spine: Spine; spineCheck: { ok: boolean; broken_links: string[]; unsupported: string[] }; hooks: HookCandidate[]; hook: string; hookReason: string; drafts: { lines: string[]; critic: Critic; checks: string[] }[] }
+export interface WriterRound { spine: Spine; spineCheck: { ok: boolean; broken_links: string[]; unsupported: string[] }; hooks: HookCandidate[]; hook: string; hookReason: string; hookSwapped?: boolean; drafts: { lines: string[]; critic: Critic; checks: string[] }[] }
 export interface WriterResult { facts: Fact[]; rounds: WriterRound[]; lines: string[]; critic: Critic; checks: string[]; ready: boolean; hook: string; spine: Spine }
 
 export type Progress = (detail: string) => void | Promise<void>;
@@ -35,8 +36,12 @@ function checkTargets(lines: string[], checks: string[]): { n: number; reason: s
     const m = c.match(/^(names|dates\/numbers) not in the certain facts: (.+)$/);
     if (m) {
       const bad = m[2]!.split(', ');
-      lines.forEach((l, i) => { if (i > 0 && bad.some((b) => l.includes(b))) out.push({ n: i + 1, reason: `${c}; use only certain facts or say it generically` }); });
+      lines.forEach((l, i) => { if (i > 0 && bad.some((b) => l.replace(/,/g, '').includes(b))) out.push({ n: i + 1, reason: `${c}; use only certain facts or say it generically` }); });
     }
+    const sp = c.match(/^semicolon\/colon in line ([\d, ]+)/);
+    if (sp) sp[1]!.split(',').map((x) => Number(x.trim())).filter((n) => n > 1).forEach((n) => out.push({ n, reason: 'rewrite as one complete spoken sentence, no semicolon or colon' }));
+    if (/dates|day-of-month/.test(c) && !c.includes('not in the certain facts')) lines.forEach((l, i) => { if (i > 0 && /\b(1[0-9]{3}|20[0-9]{2})\b|January|February|March|April|May|June|July|August|September|October|November|December|\bon \d{1,2}\b/.test(l)) out.push({ n: i + 1, reason: `${c}; keep at most 2 dates in the script (a year or a single month), drop the rest` }); });
+    if (c.startsWith('closing line')) out.push({ n: lines.length, reason: `${c}; under 15 words, a punchy reframe` });
     const rep = c.match(/^line (\d+) repeats/);
     if (rep) out.push({ n: Number(rep[1]), reason: c });
   }
@@ -74,7 +79,16 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
     await say('Writing the narration…');
     let lines = (await calls.script(facts, spine, hook)).lines.map(clean).filter(Boolean);
     if (clean(lines[0] ?? '') !== hook) lines = [hook, ...lines.filter((l) => clean(l) !== hook)];
-    // One quick hard-fix before the critic: length, unknown names/numbers, repeats.
+    // Famous numbers missing from the sheet are verified and added with a confidence label instead of blocking the script.
+    const verify = async () => {
+      const miss = scriptIssues(lines, facts, opts.durationSec).find((c) => c.startsWith('dates/numbers not in the certain facts'));
+      if (!miss) return;
+      await say('Verifying numbers…');
+      const found = await calls.verifyNumbers(miss.split(': ')[1]!.split(', '), lines).catch(() => []);
+      found.forEach((f, i) => facts.push({ id: `v${facts.length + i + 1}`, text: f.text, certain: f.certain, headline: true }));
+    };
+    await verify();
+    // One quick hard-fix before the critic: length, dates, punctuation, unknown names/numbers, repeats.
     const pre = scriptIssues(lines, facts, opts.durationSec);
     if (pre.length) {
       await say('Fixing length and facts…');
@@ -84,17 +98,24 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
     }
     for (let p = 0; ; p++) {
       await say(p ? `Critic review after fix ${p}/${maxPatches}…` : 'Critic reading it as a viewer…');
-      const critic = await calls.critic(lines, facts);
+      const critic = await calls.critic(lines, facts, spine.shareable ?? []);
       round.drafts.push({ lines, critic, checks: scriptIssues(lines, facts, opts.durationSec) });
       const cur = round.drafts[round.drafts.length - 1]!;
       const ready = criticPasses(critic) && !cur.checks.length;
-      const result: WriterResult = { facts, rounds, lines, critic, checks: cur.checks, ready, hook, spine };
+      const result: WriterResult = { facts, rounds, lines, critic, checks: cur.checks, ready, hook: lines[0] ?? hook, spine };
       if (!best || rank(result) > rank(best)) best = result;
       if (ready) return result;
       if (p >= maxPatches || left() < 35_000) break;
-      const flagged = flaggedLines(critic).map((n) => ({ n, reason: critic.lines.find((l) => l.n === n)?.reason || 'a viewer would lose interest here; add stakes or a turn' }));
+      if (critic.hook_makes_sense === false && !round.hookSwapped) {
+        const next = valid.map((h) => clean(h.line)).find((h) => h !== lines[0]);
+        if (next) { lines = [next, ...lines.slice(1)]; round.hook = next; round.hookSwapped = true; }
+      }
+      const yesNo = [critic.more_than_two_dates ? 'More than 2 dates: keep at most 2 (year or single month), no day-of-month.' : '', critic.includes_shareable === false ? `Missing shareable facts; work all of them in: ${(spine.shareable ?? []).join(' | ')}` : '', critic.ending_punch === false ? 'The closing line needs a punch (contrast, irony or lesson) in under 15 words.' : ''].filter(Boolean);
+      const flagged0 = flaggedLines(critic).map((n) => ({ n, reason: critic.lines.find((l) => l.n === n)?.reason || 'a viewer would lose interest here; add stakes or a turn' }));
+      const flagged = [...flagged0, ...(critic.weaknesses ?? []).filter((w) => w.n > 1 && w.n <= lines.length && !flagged0.some((f) => f.n === w.n)).map((w) => ({ n: w.n, reason: w.issue }))];
+      if (critic.ending_punch === false && !flagged.some((f) => f.n === lines.length)) flagged.push({ n: lines.length, reason: 'closing line: punchy reframe under 15 words' });
       const targets = [...flagged, ...checkTargets(lines, cur.checks).filter((t) => !flagged.some((f) => f.n === t.n))];
-      const problems = [...cur.checks, critic.ending_copies_hook ? 'The last line copies the hook; reframe the theme in new words.' : '', !critic.ending_makes_sense ? 'The ending does not make sense.' : '', !critic.real_twist ? 'The story has no real twist; make the assumption flip clear.' : '', critic.hook_reveals_answer ? 'The hook reveals the answer (it is locked, so hide the mechanism until the twist).' : ''].filter(Boolean);
+      const problems = [...yesNo, ...cur.checks, critic.ending_copies_hook ? 'The last line copies the hook; reframe the theme in new words.' : '', !critic.ending_makes_sense ? 'The ending does not make sense.' : '', !critic.real_twist ? 'The story has no real twist; make the assumption flip clear.' : '', critic.hook_reveals_answer ? 'The hook reveals the answer (it is locked, so hide the mechanism until the twist).' : ''].filter(Boolean);
       if (critic.ending_copies_hook || !critic.ending_makes_sense) { const n = lines.length; if (!targets.some((t) => t.n === n)) targets.push({ n, reason: 'closing line: reframe in new words' }); }
       if (!critic.real_twist) { const a = Math.max(2, Math.round(lines.length * 0.6)), b = Math.min(lines.length - 1, Math.round(lines.length * 0.8)); for (let n = a; n <= b; n++) if (!targets.some((t) => t.n === n)) targets.push({ n, reason: `twist zone: make this flip land plainly: ${spine.twist}` }); }
       if (!targets.length && cur.checks.some((c) => c.startsWith('word count') || c.includes(' lines (needs'))) lines.forEach((_, i) => { if (i > 0) targets.push({ n: i + 1, reason: cur.checks.join('; ') }); });
@@ -102,6 +123,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
       await say(`Rewriting ${targets.length} weak line${targets.length === 1 ? '' : 's'}…`);
       const fix = await calls.rewrite(lines, targets, problems, facts, spine);
       lines = applyRewrite(lines, fix.lines, targets.map((t) => t.n));
+      await verify();
     }
     if (best && (!needsNewSpine(best.critic) || left() < 80_000)) break;
   }
