@@ -295,7 +295,7 @@ def look(scene, shot):
             except TypeError: pass
     haze = shot.get('haze', 0)
     sc = scene
-    if not hasattr(sc, 'node_tree'): return  # Blender 5 moved the compositor; grade only (local previews)
+    if not hasattr(sc, 'node_tree') or os.environ.get('NO_COMPOSITE') == '1': return  # Blender 5 moved the compositor / speed test
     sc.use_nodes = True; nt = sc.node_tree
     for nd in list(nt.nodes): nt.nodes.remove(nd)
     rl = nt.nodes.new('CompositorNodeRLayers'); comp = nt.nodes.new('CompositorNodeComposite')
