@@ -162,7 +162,7 @@ const directCartoonChunk = async (data: { scenes: string[]; deployment: string; 
     } };
     if (data.advanced) {
       // Advanced: a free-text real place and the line's key objects as descriptive phrases (resolved after direction).
-      const scene = (schema.properties.scenes.items as { required: string[]; properties: Record<string, unknown> });
+      const scene = schema.properties.scenes.items as unknown as { required: string[]; properties: Record<string, unknown> };
       scene.required.push('location', 'objects');
       scene.properties['location'] = { type: 'string' };
       scene.properties['objects'] = { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'phrase', 'size'], properties: { id: { type: 'string' }, phrase: { type: 'string' }, size: { type: 'string', enum: ['small', 'medium', 'large', 'huge'] } } } };
