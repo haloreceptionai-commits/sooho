@@ -23,3 +23,16 @@ describe("shape mode in the story validator", () => {
   it("drops the hero-want quota in shape mode", () => expect(shaped.checks.find((c) => c.id === "V6")?.pass).toBe(true));
   it("keeps the hero-want quota without shape mode", () => expect(validateStory(base).checks.find((c) => c.id === "V6")?.pass).toBe(false));
 });
+
+describe("story shape line quality", () => {
+  it("rejects a script that says the same line twice", () => {
+    const t = `${GOLD_HANNIBAL}\nHannibal was trapped, so he strapped fire to two thousand oxen.`;
+    expect(shapeIssues(t).issues.some((i) => i.startsWith("Shape repeat"))).toBe(true);
+  });
+  it("rejects poetic metaphors and a we/us narrator", () => {
+    expect(shapeIssues(`${GOLD_THEREMIN}\nThe storm's teeth vanish beside our bow.`).issues.some((i) => i.startsWith("Shape clarity"))).toBe(true);
+  });
+  it("rejects more than three tiny fragments", () => {
+    expect(shapeIssues(`${GOLD_THEREMIN}\nCoins drop. Crowds cheer.`).issues.some((i) => i.startsWith("Shape choppy"))).toBe(true);
+  });
+});
