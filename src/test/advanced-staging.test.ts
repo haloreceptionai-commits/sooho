@@ -4,7 +4,8 @@ import { paintedCastIds, OBJECT_PAINT_CAP } from '@/lib/advanced-cards';
 import { cartoonDirection } from '@/lib/cartoon-job';
 
 const narration = ["Boston's molasses killed twenty-one people,", 'but its owner blamed anarchists.', 'The tank burst on Commercial Street.', 'In nineteen twenty-five, Hugh W. Ogden', 'answered that question for the court.'];
-const card = (id: string, size: 'huge' | 'large' = 'huge') => ({ kind: 'asset' as const, place: 'background' as const, motion: 'none' as const, asset: `card/${id}`, phrase: id.replace(/_/g, ' '), size });
+const PHRASE: Record<string, string> = { steel_tank: 'riveted steel molasses storage tank', seam_failure: 'torn riveted steel wall of the molasses tank' };
+const card = (id: string, size: 'huge' | 'large' = 'huge') => ({ kind: 'asset' as const, place: 'background' as const, motion: 'none' as const, asset: `card/${id}`, phrase: PHRASE[id] ?? id.replace(/_/g, ' '), size });
 const actor = (a: string, slot: 'left' | 'center' | 'right') => ({ actor: a, action: 'idle' as const, expression: 'neutral' as const, slot, facing: 0 });
 const direction = cartoonDirection.parse({
   cast: [{ id: 'ogden', seed: 1, outfit: 'scholar' }, { id: 'owner', seed: 2, outfit: 'merchant' }],
