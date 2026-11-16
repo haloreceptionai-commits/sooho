@@ -6,7 +6,7 @@
  */
 export const BACKDROP_LAYERS = ["far", "mid"] as const;
 export const MAX_PLACES = 3;            // painted places per video
-export const BACKDROP_PAINT_CAP = 6;    // paid backdrop paintings per video (places x layers)
+export const BACKDROP_PAINT_CAP = 8;    // paid backdrop paintings per video (3 places x 2 layers + 2 text regenerations)
 
 /** Stable short id for a free-text location (same algorithm as world_pack.py:place_slug). */
 export function placeSlug(location: string): string {
