@@ -38,7 +38,7 @@ const MONTHS = 'January|February|March|April|May|June|July|August|September|Octo
 export function dateIssues(lines: string[]): string[] {
   const text = lines.join(' ');
   const out: string[] = [];
-  const day = text.match(new RegExp(`\\b(?:\\d{1,2}(?:st|nd|rd|th)?\\s+(?:${MONTHS})\\b|(?:${MONTHS})\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?\\b(?!\\d)|\\bon (?:the )?\\d{1,2}(?:st|nd|rd|th)?\\b(?!\\s*(?:%|percent|[a-z])))`, 'gi'));
+  const day = text.match(new RegExp(`\\b(?:\\d{1,2}(?:st|nd|rd|th)?\\s+(?:${MONTHS})\\b|(?:${MONTHS})\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?\\b(?!\\d)|\\bon (?:the )?\\d{1,2}(?:st|nd|rd|th)?\\b(?!\\s*(?:%|percent|km|miles|feet|metres|meters|men|people|soldiers|birds|emus|bullets|rounds|years|days|hours|minutes|weeks|months|of)\\b|\\s*%))`, 'gi'));
   if (day) out.push(`day-of-month dates are not allowed: ${[...new Set(day)].slice(0, 4).join(', ')}`);
   const years = text.match(/\b(1[0-9]{3}|20[0-9]{2})\b(?!\s*(?:km|miles|feet|metres|meters|men|people|soldiers|birds|emus|rounds|bullets|copies|words))/gi) ?? [];
   const months = text.match(new RegExp(`\\b(?:${MONTHS})\\b`, 'g')) ?? [];

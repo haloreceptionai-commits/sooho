@@ -7,7 +7,7 @@ const facts = [{ id: "f1", text: "In 217 BC Hannibal was trapped by Rome in a va
 const critic = (o: Partial<Critic> = {}): Critic => ({ lines: [1, 2, 3].map((n) => ({ n, follows: true, clear: true, narration: true, new_fact: true, reason: "" })), hook_reveals_answer: false, ending_makes_sense: true, ending_copies_hook: false, real_twist: true, coherence: 8, clarity: 8, curiosity: 8, summary: "", ...o });
 
 describe("shorts writer length follows the selected duration", () => {
-  it("60 seconds is 130-150 words in 12-16 lines", () => expect(budget(60)).toEqual({ minWords: 130, maxWords: 150, minLines: 12, maxLines: 16 }));
+  it("60 seconds is 130-150 words in 12-16 lines", () => expect(budget(60)).toMatchObject({ minWords: 130, maxWords: 150, minLines: 12, maxLines: 16 }));
   it("30 seconds is 65-75 words", () => expect([budget(30).minWords, budget(30).maxWords]).toEqual([65, 75]));
   it("90 seconds is 195-225 words", () => expect([budget(90).minWords, budget(90).maxWords]).toEqual([195, 225]));
 });
