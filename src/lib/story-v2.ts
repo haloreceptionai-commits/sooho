@@ -4,6 +4,7 @@
 
 import { hardWords } from "@/lib/sound-words";
 import { rareWords, KID_SWAPS } from "@/lib/plain-words";
+import { shapeIssues } from "@/lib/story-shape";
 
 export const WPS = 153 / 60;
 /** Spoken numbers ("nineteen sixty-five") are plain speech, never "hard words". */
@@ -70,6 +71,8 @@ export interface StoryInput {
   durationSec: number;
   /** Advanced Video AI: every narrated word must be one an 8-year-old knows (names and places excepted). */
   kid?: boolean;
+  /** Story Shape v3 (owner's gold Shorts): contradiction hook, stacked lines, loops, payoff, hook echo. Replaces beat quotas. */
+  shape?: boolean;
 }
 /** Loop Shorts under 25 s have no room for escalation, myth, money-shot return or chapter timing. */
 export const MICRO_SEC = 25;
@@ -123,9 +126,9 @@ export function hookIssues(line: string, anchors?: Anchors, factText = ""): stri
   if (DATE_LEAD.test(line.trim())) out.push("Hook opens with a date; start with the crisis or the odd action, put the year later");
   if (/^[A-Z][a-z]+(\s+[A-Z][a-z]+)?\s+(was|is)\s+(a|an|the)\b/.test(line.trim())) out.push("Hook opens like a biography; start with the crisis or the odd action");
   if (/\?\s*$/.test(line) && !anchors) out.push("Hook is an unanswerable question");
+  // Gold-script rule: the hook states the contradiction and hides the reason.
+  if (/\b(because|which is why|that'?s why|in order to|so that|due to)\b/i.test(line)) out.push("Hook gives the answer away; state the strange fact and hide the reason");
   if (anchors) {
-    const anchored = mentions(line, anchors.year) || mentions(line, anchors.place) || /\b(1[0-9]{3}|20[0-9]{2})\b/.test(line);
-    if (!anchored) out.push("Hook has no place or time anchor");
     if (!mentions(line, anchors.subject)) out.push(`Hook doesn't name the subject ("${anchors.subject}")`);
   }
   const nums = line.match(/\b\d[\d,.]*\b/g) ?? [];
@@ -161,7 +164,11 @@ export function validateStory(s: StoryInput): StoryReport {
   const checks: Check[] = [];
   const micro = s.durationSec < MICRO_SEC;
   const legacyOnly = new Set(['V1', 'V2', 'V6', 'V7', 'V9', 'CLOCK', 'LOOPS']);
+  // Shape v3 replaces these beat quotas (year/place/stakes by 8s, question by 8s, hero want, escalation, myth, clock, loop %).
+  const shapeQuota = new Set(['V2', 'V6', 'V7', 'V9', 'V10', 'CLOCK', 'LOOPS', 'V4']);
   const add = (id: string, pass: boolean, msg: string) => {
+    if (s.shape && shapeQuota.has(id)) { checks.push({ id, pass: true, msg: `${id}: replaced by Story Shape v3` }); return; }
+    if (s.shape && id === 'V1') { const ok = mentions(spokenBy(s.scenes, 8), s.anchors.subject); checks.push({ id, pass: ok, msg: ok ? 'V1 subject named by 8s' : `V1: by 8s the narration never names the subject ("${s.anchors.subject}")` }); return; }
     if (s.kid && legacyOnly.has(id)) { checks.push({ id, pass: true, msg: `${id}: Advanced uses factual cause and effect instead of an event quota` }); return; }
     checks.push(micro && MICRO_SKIP.has(id) ? { id, pass: true, msg: `${id} not used for loop Shorts` } : { id, pass, msg });
   };
@@ -269,8 +276,8 @@ export function validateStory(s: StoryInput): StoryReport {
   const labels = sents.filter((x) => LABEL.test(x));
   const frags = sents.filter((x) => !LABEL.test(x) && (wc(x) < 3 || (wc(x) <= 4 && !VERBISH.test(x))) && !/\?["']?$/.test(x));
   const budget = s.durationSec * 2.6;
-  const longOk = longS <= Math.max(1, Math.round(words / 150)); // long-form allows an occasional longer sentence
-  const langOk = longOk && hard.length <= 2 && !labels.length && frags.length <= 2 && words <= budget * 1.25 && words >= budget * 0.8;
+  const longOk = s.shape ? true : longS <= Math.max(1, Math.round(words / 150)); // long-form allows an occasional longer sentence
+  const langOk = longOk && hard.length <= 2 && !labels.length && (s.shape || frags.length <= 2) && words <= budget * 1.25 && words >= budget * 0.8;
   if (s.kid) {
     const allow = [...Object.values(s.anchors), s.hero.name, ...s.cast.map((c) => c.name)];
     const rare = rareWords(all, allow);
@@ -279,6 +286,10 @@ export function validateStory(s: StoryInput): StoryReport {
   }
   add("LANG", langOk, langOk ? "Plain short sentences" : [!longOk ? `${longS} sentences over 12 words` : "", hard.length > 2 ? `hard words: ${hard.slice(0, 6).join(", ")}` : "", labels.length ? `beat labels spoken aloud: "${labels[0]!.slice(0, 40)}"` : "", frags.length > 2 ? `fragments with no verb: "${frags.slice(0, 2).join('", "')}"` : "", words > budget * 1.25 ? `too long: ${words} words (max ${Math.round(budget * 1.25)})` : "", words < budget * 0.8 ? `too short: ${words} words` : ""].filter(Boolean).join("; "));
 
+  if (s.shape) {
+    const sh = shapeIssues(all).issues;
+    add("SHAPE", !sh.length, sh.length ? sh.join("; ") : "Story Shape v3: contradiction hook, stacked lines, loops, payoff and hook echo");
+  }
   // RETAIN (long-form only): a fresh open question at least every ~75s so viewers always wait for an answer
   if (s.durationSec >= 120) {
     const r = retentionIssues(s.scenes, s.durationSec);
