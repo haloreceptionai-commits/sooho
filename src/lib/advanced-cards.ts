@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { designAdvancedCards, paintAdvancedCard } from "@/lib/pipeline.functions";
 import { CARD_POSES, type cartoonDirection } from "@/lib/cartoon-job";
 import type { z } from "zod";
+import { objectsToPaint } from "@/lib/object-resolution";
 
 type Direction = z.infer<typeof cartoonDirection>;
 type Retry = <T>(fn: () => Promise<T>) => Promise<T>;
@@ -38,7 +39,9 @@ export async function paintAdvancedCards(direction: Direction, narration: string
     design = await retry(() => designAdvancedCards({ data: { scenes, ids, deployment: settings.scriptDeployment } }));
     await bucket.upload(`${root}/cards.json`, new Blob([JSON.stringify(design)], { type: "application/json" }), { contentType: "application/json", upsert: true });
   }
-  const d = design;
+  // Phrase-defined objects from the shot plan replace the designer's own object list (owner rule: paint what the shot names).
+  const fromShots = objectsToPaint(direction.scenes).slice(0, Math.max(0, 24 - ids.length * (1 + CARD_POSES.length)));
+  const d: Design = fromShots.length ? { ...design, objects: fromShots } : design;
   // At most 5 paintings at once: the Azure image quota rejects bigger bursts (seen as 429 errors in testing).
   let active = 0; const queue: (() => void)[] = [];
   const limit = async <T,>(fn: () => Promise<T>): Promise<T> => {
@@ -110,6 +113,16 @@ async function validateRigAtlas(base64:string){
 /** Puts each painted story object into the scenes where it is said (on the ground beside the cast) and keeps only cards in use. */
 export function placeObjectCards(direction: Direction, painted: PaintedCards): { direction: Direction; cards: PaintedCards["cards"] } {
   const used = new Set<string>();
+  const have = new Set(painted.cards.map(c => c.id));
+  if (direction.scenes.some(sc => (sc.props ?? []).some(p => p.asset?.startsWith("card/")))) {
+    // Shot-plan objects are already placed; drop only the ones whose painting failed (never swap in a different object).
+    const scenes = direction.scenes.map(sc => ({ ...sc, props: (sc.props ?? []).filter(p => {
+      if (!p.asset?.startsWith("card/")) return true;
+      const key = `obj-${p.asset.slice(5)}`; if (!have.has(key)) { console.warn("Missing painted object:", p.phrase ?? key); return false; }
+      used.add(key); return true;
+    }) }));
+    return { direction: { ...direction, scenes }, cards: painted.cards.filter(c => !c.id.startsWith("obj-") || used.has(c.id)) };
+  }
   const scenes = direction.scenes.map((sc, i) => {
     const props = [...(sc.props ?? [])];
     for (const o of painted.objects) {
