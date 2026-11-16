@@ -58,7 +58,8 @@ function Create() {
   const blocking = (list: TopicUse[]) => (owned ? liveVideos : list);
   const unavailable = topicUnavailable(topic, topicId, blocking(used));
   const score = scoreTopic(topic);
-  const active = videos.filter((v) => v.status !== "done" && !v.removed).slice(0, 5);
+  // Owner dismissed this replaced Hannibal attempt; preserve its saved record and checkpoints.
+  const active = videos.filter((v) => v.status !== "done" && !v.removed && v.id !== "g0anuaym").slice(0, 5);
   const recent = videos.filter((v) => v.status === "done").slice(0, 4);
   const busy = videos.some((v) => v.status === "running");
 
