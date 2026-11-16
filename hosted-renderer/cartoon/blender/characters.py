@@ -1,7 +1,7 @@
 """Engine-owned egg-head cast; connected joints and wrist-parented props."""
 import math
 import bpy
-from mathutils import Vector
+from mathutils import Vector, Euler
 from character_motion import pose, face_shape
 from set_detail import material, cube, rope
 
@@ -87,12 +87,17 @@ def build_character(c,duration=3,fps=30):
             if held=='tool':
                 cube('held handle',(0,0,.22),(.045,.045,.55),hatmat,.01).parent=wrist
                 cube('tool head',(0,0,.46),(.4,.09,.08),black,.025).parent=wrist
+            if held=='rifle':
+                # wooden stock behind the grip, dark barrel forward along the aiming direction
+                cube('rifle stock',(0,.16,-.02),(.06,.34,.11),hatmat,.01).parent=wrist
+                cube('rifle body',(0,-.12,.0),(.055,.32,.07),hatmat,.008).parent=wrist
+                cube('rifle barrel',(0,-.48,.015),(.028,.5,.028),black,.004).parent=wrist
             if held=='cup':
                 bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.1,depth=.16,location=(0,0,.06));o=bpy.context.active_object;o.data.materials.append(hatmat);o.parent=wrist
                 sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist
     action=c.get('action','stand');base=Vector((*c['pos'],0));yaw=math.radians(c.get('yaw',0));scale=c.get('scale',1)
     for f in range(round(duration*fps)):
-        p=pose(action,f/fps);root.location=base+Vector(p['root'])*scale;root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)
+        p=pose(action,f/fps);off=Vector(p['root']);off.rotate(Euler((0,0,yaw)));root.location=base+off*scale;root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)
         root.keyframe_insert('location',frame=f+1);root.keyframe_insert('rotation_euler',frame=f+1)
         headroot.location=p['head'];headroot.keyframe_insert('location',frame=f+1)
         body.location=(0,0,p['hips'][2]+.22);body.keyframe_insert('location',frame=f+1)

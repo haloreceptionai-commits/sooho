@@ -277,9 +277,12 @@ def camera(shot, fps):
     cam_d.dof.use_dof = True; cam_d.dof.focus_object = target; cam_d.dof.aperture_fstop = c.get('fstop', 2.8)
     n = round(shot['duration'] * fps)
     a, b = Vector(c['from']), Vector(c.get('to', c['from']))
+    la, lb = Vector(c['look_at']), Vector(c.get('look_to', c['look_at']))
     for f in range(n):
         cam.location = a.lerp(b, ease(f / max(1, n - 1)))
         cam.keyframe_insert('location', frame=f + 1)
+        if 'look_to' in c:  # tracking / panning: the aim point travels with the subject
+            target.location = la.lerp(lb, ease(f / max(1, n - 1))); target.keyframe_insert('location', frame=f + 1)
     camera_moves(cam, target, shot, fps)
     return n
 
@@ -318,24 +321,44 @@ def look(scene, shot):
     nt.links.new(img, comp.inputs['Image'])
 
 
-def build_card(cd, cam_from):
-    """A painted transparent character card standing on the ground, turned to the camera."""
+def build_card(cd, cam, duration=3.0, fps=30):
+    """A painted transparent character card standing on the ground. It always turns to the (moving) camera
+    and, with 'to', runs across the set with a small hop per stride."""
     folder = os.environ.get('CARD_DIR', '')
     path = os.path.join(folder, cd['image'])
     if not folder or not os.path.isfile(path): return None
-    img = bpy.data.images.load(path); w, h = img.size
+    img = bpy.data.images.load(path, check_existing=True); w, h = img.size
     H = cd.get('height', 1.6); W = H * w / max(1, h)
     x, y = cd['pos']
-    bpy.ops.mesh.primitive_plane_add(size=1, location=(x, y, H / 2)); ob = bpy.context.object
-    ob.scale = (W, H, 1)
-    ob.rotation_euler = (math.pi / 2, 0, math.atan2(cam_from[1] - y, cam_from[0] - x) + math.pi / 2)
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0)); ob = bpy.context.object
+    ob.scale = (W, H, 1); ob.rotation_euler = (math.pi / 2, 0, 0)
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    for v in ob.data.vertices: v.co.z += H / 2  # feet on the ground, face along -Y
+    ob.location = (x, y, 0)
+    tr = ob.constraints.new('LOCKED_TRACK'); tr.target = cam; tr.track_axis = 'TRACK_NEGATIVE_Y'; tr.lock_axis = 'LOCK_Z'
+    if cd.get('to'):
+        n = max(1, round(duration * fps)); a, b = Vector((x, y, 0)), Vector((*cd['to'], 0)); hop = cd.get('hop', 0.1)
+        for f in range(n):
+            t = f / max(1, n - 1); p = a.lerp(b, t)
+            p.z = hop * abs(math.sin(f / fps * math.pi * 3.2 + (x * 3.1)))
+            ob.location = p; ob.keyframe_insert('location', frame=f + 1)
     m = bpy.data.materials.new('card'); m.use_nodes = True
     nt = m.node_tree; bsdf = nt.nodes.get('Principled BSDF'); tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = img
     nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color']); nt.links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
     bsdf.inputs['Roughness'].default_value = 0.8
-    m.blend_method = 'HASHED'
+    try: m.blend_method = 'HASHED'
+    except (AttributeError, TypeError): pass
+    try: m.surface_render_method = 'DITHERED'
+    except (AttributeError, TypeError): pass
     ob.data.materials.append(m); ob.visible_shadow = True
     return ob
+
+
+def build_props(shot):
+    """Whitelisted offline CC0 models (shot_schema checks every id) standing in the scene."""
+    from set_library import model
+    for p in shot.get('props', []):
+        model({'id': p['id'], 'pos': [p['pos'][0], p['pos'][1], 0], 'height': p.get('height', 1), 'yaw': p.get('yaw', 0)})
 
 
 def main():
@@ -394,10 +417,11 @@ def main():
     if object_roots:
         qa=verify_objects(object_roots,shot['duration'],fps)
         with open(os.path.join(out,'object-qa.json'),'w') as file:json.dump(qa,file,indent=2)
-    for cd in shot.get('cards', []): build_card(cd, shot['camera']['from'])
+    build_props(shot)
     fx = build_effects(shot, fps); crowd = build_crowd(shot, fps); print('FX', fx, 'CROWD', crowd, flush=True)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
+    for cd in shot.get('cards', []): build_card(cd, sc.camera, shot['duration'], fps)
     sc.render.filepath = os.path.join(out, 'f_#####')
     only = shot.get('frames')  # optional subset for stills/tests
     t0 = time.time()
