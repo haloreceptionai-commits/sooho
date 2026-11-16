@@ -7,8 +7,8 @@
 - [~] 6. Shot director rewrite — Codex plans gated by shot_director.py (100% spoken-concept coverage, 1-2 shots per sentence, backdrop-change band, no unspoken props or unrelated places); new rail_joint and money_bag objects. Both plans accepted; blind still review mine 16-17/31 (fit 5.97), rail 13/24 (fit 6.58). See blender/director-plans/step6-audit.json. Production unchanged.
 - [~] 7-10. Step 7 built (explosion, smoke, fire, sparks, dust, rain, 380-person crowds, whip pan, shake); blind judge recognises both test shots 3/3 but quality 6/10 vs benchmark 9. Step 8 built: frame-locked sound cues, 16 pinned CC0 sounds, tunnel echo, distance/pan, voice-safe -14 LUFS master; explosion and narrated pickaxe clips pass blind listening 3/3, crowd clip 2/3 (needs a real crowd-cheer recording). Steps 9-10 not started. Owner asked Nov 15 20:05 to do steps 7 to 10 together (effects/cameras/crowds, sound, scripts, three 60s videos + review)
 - [ ] 8. Sound matched to picture
-- [ ] 9. Script and picture together
-- [ ] 10. Full 3-video test, speed and launch
+- [~] 9. Script and picture together — owner requested steps 9 and 10 together Nov 16; build vocabulary-bound evidence-backed scripts, sentence picture checks and blind benchmark comparison; do not declare acceptance without actual judge results.
+- [~] 10. Full 3-video test, speed and launch — prepare rail, history battle and mine-trick 60-second tests alongside step 9. Keep production disabled until full motion/audio, benchmark parity, saved recovery and owner review pass; unresolved earlier quality and crowd-sound gates remain blockers, not waivers.
 
 # Roadmap — Advanced Video AI v2
 - [x] Accelerate and verify topic discovery: Parallel fast searches + two parallel exact-passage reviews replace oversized full-page reviews. Real owner search returned six facts in 48.4 seconds; saving, selection and saved reload verified; 13 tests passed. Instant fresh research is not promised.
