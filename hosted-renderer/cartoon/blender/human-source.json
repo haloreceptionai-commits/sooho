@@ -1,0 +1,12 @@
+{
+  "name": "Snow v4 character evaluation",
+  "publisher": "Blender Studio / Blender Foundation",
+  "page": "https://studio.blender.org/characters/snow/v4/",
+  "download": "https://studio.blender.org/download-source/files/ba/0f/ba0fe6d810333b1d73c1c359e4dc03cb-6.zip",
+  "archive_sha256": "98d58ef3a07083ede14140bc462cccb55d317062846aa0eb652d2e4a7ac422a6",
+  "license": "CC-BY, as stated on official source page",
+  "required_credit": "Snow Rig (CC) Blender Foundation | studio.blender.org",
+  "entry": "Snow/snow_v4.2.blend",
+  "status": "evaluation-only",
+  "embedded_scripts": "disabled"
+}
