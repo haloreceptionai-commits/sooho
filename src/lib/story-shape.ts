@@ -120,10 +120,10 @@ export function shapeIssues(script: string): ShapeReport {
   const echo = sents.length > 2 && keyWords(close).some((k) => hk.has(k) || hk.has(k.replace(/s$/, "")) || hk.has(`${k}s`));
   if (!echo) issues.push("Shape close: the final line doesn't echo the hook, so the video won't loop");
   // Hook repeated: the close must echo the hook's words, not replay the whole line; no other line may restate it.
-  const hookKeys = keyWords(hook);
-  const same = (x: string) => { const k = new Set(keyWords(x)); return hookKeys.length > 0 && hookKeys.filter((w) => k.has(w)).length / hookKeys.length >= 0.7; };
-  const repeats = sents.slice(1).filter(same);
-  if (repeats.length) issues.push(`Shape repeat: "${repeats[0]!.slice(0, 60)}" replays the hook; the close should echo a few hook words with the twist, and no other line may restate it`);
+  const overlap = (a: string, b: string) => { const ka = [...new Set(keyWords(a))], kb = new Set(keyWords(b)); return ka.length >= 3 ? ka.filter((w) => kb.has(w)).length / ka.length : 0; };
+  let repeat: string | null = null;
+  sents.forEach((a, i) => sents.slice(i + 1).forEach((b) => { if (!repeat && overlap(a, b) >= 0.7 && overlap(b, a) >= 0.7) repeat = b; }));
+  if (repeat) issues.push(`Shape repeat: "${(repeat as string).slice(0, 60)}" says an earlier line again; the close should echo a few hook words with the twist, never replay a line`);
   // Choppy rhythm: gold scripts use at most 3 tiny fragments (the "No wires. No battery. Nothing." beat).
   const tiny = sents.filter((x) => words(x).length <= 3 && !/\?["']?$/.test(x));
   if (tiny.length > 3) issues.push(`Shape choppy: ${tiny.length} tiny fragments ("${tiny.slice(0, 3).join('", "')}"); keep at most 3, all in the pressure beat, and write the rest as full plain sentences`);
