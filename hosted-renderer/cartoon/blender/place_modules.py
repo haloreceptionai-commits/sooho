@@ -102,15 +102,15 @@ def build_place(p, mode):
         if it.get('horns'):
             ox_coat(root)
             yaw = math.radians(it['yaw']); h = it['height']
-            fx, fy = -math.sin(yaw), math.cos(yaw)   # model front
+            fx, fy = -math.cos(yaw), -math.sin(yaw)   # the farm-animal models face -X before yaw
             for sx in (-1, 1):
-                rx, ry = math.cos(yaw) * sx * 0.22, math.sin(yaw) * sx * 0.22
-                tip = (x + fx * 0.75 + rx, y + fy * 0.75 + ry, z + h * 0.98)
+                rx, ry = -fy * sx * 0.16, fx * sx * 0.16
+                tip = (x + fx * 0.78 * h / 1.5 + rx, y + fy * 0.78 * h / 1.5 + ry, z + h * 0.9)
                 m = bpy.data.materials.get('horn') or bpy.data.materials.new('horn'); m.use_nodes = True
                 m.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.85, 0.8, 0.65, 1)
-                bpy.ops.mesh.primitive_cone_add(radius1=0.05, depth=0.35, location=tip, rotation=(0, sx * math.radians(55), yaw))
+                bpy.ops.mesh.primitive_cone_add(radius1=0.05, depth=0.35, location=tip, rotation=(sx * math.radians(55), 0, yaw))
                 bpy.context.object.data.materials.append(m)
-                if it.get('fire') == 'horns': flame((tip[0] + sx * 0.12, tip[1], tip[2] + 0.1), 0.22)
+                if it.get('fire') == 'horns': flame((tip[0] + rx * 0.8, tip[1] + ry * 0.8, tip[2] + 0.12), 0.2)
         elif it.get('fire') == 'top':
             flame((x, y, z + it['height'] * (0.95 if it['id'] == 'torch' else 0.3)), 0.2 if it['id'] == 'torch' else 0.45)
     w = bpy.context.scene.world.node_tree; nodes = w.nodes

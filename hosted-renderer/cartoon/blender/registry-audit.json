@@ -73,7 +73,7 @@
   ],
   "ground": 0.0,
   "hash": "36fc2629365ba8f6",
-  "height": 1.611,
+  "height": 1.5,
   "meshes": 4,
   "pass": true
  },
@@ -81,12 +81,12 @@
   "frame_box": [
    0.262,
    0.39,
-   0.696,
-   0.661
+   0.687,
+   0.648
   ],
   "ground": 0.0,
   "hash": "25d723c8dbe2dd1b",
-  "height": 1.922,
+  "height": 1.79,
   "meshes": 6,
   "pass": true
  },
