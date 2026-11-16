@@ -130,6 +130,17 @@ export async function cartoonExecutions(jobId: string, mode: 'preflight' | 'fini
     .filter(e => e.inputKey.startsWith(prefix)).sort((a, b) => b.startMs - a.startMs);
 }
 
+/** Stops every still-running Azure execution of one cartoon job (both stages); a cancelled job must not keep paid machines on. */
+export async function stopCartoonJobExecutions(jobId: string) {
+  let stopped = 0;
+  for (const mode of ['preflight', 'finish'] as const) {
+    for (const e of await cartoonExecutions(jobId, mode).catch(() => [])) {
+      if (/^(Running|Processing|Pending)$/i.test(e.status) && await stopAzureExecution(e.id).catch(() => false)) stopped++;
+    }
+  }
+  return stopped;
+}
+
 export async function stopAzureExecution(runId: string) {
   const m = RUN_ID.exec(runId);
   if (!m) return false;
