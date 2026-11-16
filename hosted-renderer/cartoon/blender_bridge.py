@@ -164,7 +164,7 @@ def render_range(manifest_path, web, out, first, last, card_dir):
     cards = set(os.listdir(card_dir)) if card_dir and os.path.isdir(card_dir) else set()
     blender = os.environ.get('BLENDER_BIN', '/opt/blender/blender')
     lock = threading.Lock(); eng = engine_env()
-    samples = int(os.environ.get('BLENDER_SAMPLES', '16' if eng['SHOT_ENGINE'] == 'eevee' else '10'))
+    samples = int(os.environ.get('BLENDER_SAMPLES', '16' if eng['SHOT_ENGINE'] == 'eevee' else '5'))  # Cycles + denoiser: 5 samples measured identical to 10
     jobs = []
     for k, (i, a, b, shot) in enumerate(segments(m, cards)):
         want = [f for f in range(max(first, a), min(last, b - 1) + 1) if not valid_frame(out / f'f{f:06d}.jpg', saved['frames'].get(str(f)))]
