@@ -21,3 +21,12 @@ describe("world pack (any topic)", () => {
   });
   it("backdrop paintings are capped at 8 per video", () => expect(BACKDROP_PAINT_CAP).toBe(8));
 });
+describe("ancient dates", () => {
+  it("reads BC years as negative and labels them", async () => {
+    const { storyYear, yearLabel, placeSlug } = await import("@/lib/world-pack");
+    expect(storyYear(["217 BC. Rome has his army cornered."])).toBe(-217);
+    expect(yearLabel(-217)).toBe("217 BC");
+    expect(storyYear(["In AD 79 Vesuvius erupted."])).toBe(79);
+    expect(placeSlug("Narrow mountain pass in ancient Italy, 217 BC")).toBe(placeSlug("Narrow mountain pass in ancient Italy"));
+  });
+});

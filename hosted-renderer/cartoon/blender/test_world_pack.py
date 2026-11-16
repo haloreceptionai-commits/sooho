@@ -16,6 +16,9 @@ class WorldPackTest(unittest.TestCase):
     def test_year(self):
         self.assertEqual(story_year('In 1919 ... 1925 ... 1919'), 1919)
         self.assertIsNone(story_year('no year'))
+        self.assertEqual(story_year('217 BC. Rome waits.'), -217)
+        self.assertEqual(place_slug('Narrow mountain pass, 217 BC'), place_slug('Narrow mountain pass'))
+        self.assertFalse(kit_fits_era('castle', -217))
 
     def test_medieval_kit_never_used_for_modern_era(self):
         self.assertFalse(kit_fits_era('street', 1919)); self.assertTrue(kit_fits_era('street', 1600)); self.assertTrue(kit_fits_era('street', None))

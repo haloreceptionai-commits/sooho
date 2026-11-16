@@ -10,7 +10,7 @@ import { checkCardText, designAdvancedCards, paintAdvancedCard } from "@/lib/pip
 import { CARD_POSES, type cartoonDirection } from "@/lib/cartoon-job";
 import type { z } from "zod";
 import { objectsToPaint } from "@/lib/object-resolution";
-import { BACKDROP_LAYERS, BACKDROP_PAINT_CAP, backdropBrief, worldPack } from "@/lib/world-pack";
+import { BACKDROP_LAYERS, BACKDROP_PAINT_CAP, backdropBrief, worldPack, yearLabel } from "@/lib/world-pack";
 
 type Direction = z.infer<typeof cartoonDirection>;
 type Retry = <T>(fn: () => Promise<T>) => Promise<T>;
@@ -142,7 +142,7 @@ export async function paintAdvancedCards(direction: Direction, narration: string
       if (!r) break;
       if (await textFree(id, r.image)) {
         await save(file, toBytes(r.image), "image/png", true); checks.objects[id] = { ok: true };
-        cards.push({ id, path: `${root}/${file}` }); note(`${id}: painted for "${place.location}"${pack.year ? ` in ${pack.year}` : ""}, no text`); break;
+        cards.push({ id, path: `${root}/${file}` }); note(`${id}: painted for "${place.location}"${pack.year !== null ? ` in ${yearLabel(pack.year)}` : ""}, no text`); break;
       }
       checks.objects[id] = { ok: false };
       if (attempt) note(`${id}: missing, still has text after one regeneration; place shown plain`);
