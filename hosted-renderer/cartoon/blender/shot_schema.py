@@ -8,7 +8,7 @@ from effects import KINDS as EFFECT_KINDS
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day', 'neutral'}
 PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -29,6 +29,10 @@ def validate_shot(s):
     for b in bd:
         if not isinstance(b, dict) or set(b) != {'image', 'layer'} or b['layer'] not in ('far', 'mid') or not re.fullmatch(r'bg-[a-z0-9_]{1,20}-(far|mid)\.png', str(b['image'])) or not str(b['image']).endswith(f"-{b['layer']}.png"):
             raise ValueError('invalid backdrop layer')
+    if 'place' in s:
+        from place_spec import validate_compiled
+        validate_compiled(s['place'])
+        if s.get('backdrop'): raise ValueError('a 3D place never carries painted backdrops')
     if s.get('set') not in SETS: raise ValueError(f'unknown set {s.get("set")!r}')
     if s.get('lighting', 'day') not in {'day', 'sunset', 'night', 'rain'}: raise ValueError('lighting day|sunset|night|rain')
     d = s.get('duration')

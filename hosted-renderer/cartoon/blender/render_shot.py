@@ -19,6 +19,7 @@ from story_objects import build_object
 from verify_characters import verify_characters
 from verify_objects import verify_objects
 from fx_render import build_effects, build_crowd, camera_moves
+from place_spec import KITS as KIT_TERRAINS
 
 
 def mat(name, color, rough=0.6, metal=0.0, emit=None, strength=0.0):
@@ -564,7 +565,14 @@ def main():
     W, H = shot.get('size', [1080, 1920]); sc.render.resolution_x = W; sc.render.resolution_y = H
     sc.render.resolution_percentage = 100; fps = shot.get('fps', 30); sc.render.fps = fps
     sc.render.image_settings.file_format = 'PNG'
-    if shot['set'] in SETS:
+    place = shot.get('place')
+    if place and place['terrain'] not in KIT_TERRAINS:
+        from place_modules import build_place
+        build_place(place, shot.get('lighting', 'day'))
+        apply_mood(shot.get('lighting', 'day'))
+    elif place:
+        build_set(place['terrain'], shot.get('lighting', 'day'))
+    elif shot['set'] in SETS:
         SETS[shot['set']]()
         apply_mood(shot.get('lighting', 'day'))
     else:
@@ -581,7 +589,7 @@ def main():
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     cards = [build_card(cd, sc.camera, shot['duration'], fps) for cd in shot.get('cards', [])]
-    build_backdrop(shot, sc.camera)
+    if not place: build_backdrop(shot, sc.camera)  # v3 places are real 3D; painted backdrops are legacy only
     if shot.get('composition'):
         from composition import enforce
         enforce(sc, shot, scenery, [c for c in cards if c is not None], roots, out)
