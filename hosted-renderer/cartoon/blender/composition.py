@@ -17,7 +17,7 @@ def enforce(scene, shot, scenery, cards, roots, out):
     if not rules: return
     n = round(shot['duration'] * shot.get('fps', 30))
     frames = sorted(set([1, n] + [max(1, round(n * t / 8)) for t in range(1, 8)]))
-    heads = [o for r in roots for o in r.children_recursive if o.type == 'MESH' and o.name.startswith('egg head')]
+    heads = [o for r in roots for o in r.children_recursive if o.type == 'MESH' and (o.name.startswith('egg head') or o.get('human_head'))]
     hidden = set(); fixes = []; key = cards[0] if cards else None
     # Evaluate the same camera keys that rendering uses. Conservatively hide any
     # scenery mesh intersecting the key's silhouette, not just its center ray.

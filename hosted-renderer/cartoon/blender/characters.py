@@ -18,6 +18,9 @@ def face_y(x,z):
 
 
 def build_character(c,duration=3,fps=30):
+    if c.get('model'):
+        from uploaded_humans import build_uploaded_human
+        return build_uploaded_human(c,duration,fps)
     ident=c.get('id','cast');black=material('cast ink',(.012,.013,.015),.65)
     skin=material('cast ivory',(.94,.93,.88),.58)
     cloth=material(ident+' cloth',tuple(c.get('shirt',(.13,.36,.3))),.88)

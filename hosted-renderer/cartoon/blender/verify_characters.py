@@ -12,6 +12,14 @@ def verify_characters(roots,duration,fps):
     for frame in range(1,round(duration*fps)+1):
         scene.frame_set(frame);bpy.context.view_layer.update()
         for root in roots:
+            if root.get('human_model'):
+                for obj in root.children_recursive:
+                    if obj.type == 'MESH':
+                        evaluated = obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
+                        if any(not math.isfinite(v) for vert in evaluated.data.vertices for v in vert.co):
+                            raise RuntimeError('invalid skinned human geometry')
+                        checks += 1
+                continue
             descendants=[obj for obj in bpy.data.objects if obj.parent==root]
             for side in ['left','right']:
                 joint=next((o for o in descendants if o.name.startswith(side+' wrist') and o.type=='MESH'),None)
