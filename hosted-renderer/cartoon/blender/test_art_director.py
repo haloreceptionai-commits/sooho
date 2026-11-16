@@ -69,5 +69,37 @@ class ArtDirector(unittest.TestCase):
             for p in g['shot'].get('props', []): self.assertIn(p['id'], PROP_IDS)
 
 
+    # ---- Stage 1 owner rules (Nov 16 2026)
+    def test_location_names_the_kit_or_neutral(self):
+        self.assertEqual(A.match_location("Commercial Street in Boston's North End, 1919"), 'street')
+        self.assertEqual(A.match_location('a Boston courtroom, 1925'), 'neutral')
+        self.assertEqual(A.match_location('molasses tank yard by the harbor'), 'neutral')
+        self.assertEqual(A.match_location('a dusty country road outside St. Louis, 1904'), 'farm_field')
+
+    def test_free_text_location_overrides_world(self):
+        m = manifest(['The tank burst.', 'The judge ruled.'], world='town')
+        m['shots'][0]['location'] = 'Commercial Street, Boston'; m['shots'][1]['location'] = 'a Boston courtroom'
+        self.assertEqual(A.plan_locations(m), ['street', 'neutral'])
+
+    def test_no_closest_wrong_kit_without_a_match(self):
+        m = manifest(['It happened around midday.'], world='lab')
+        self.assertEqual(A.plan_locations(m), ['neutral'])
+
+    def test_keyword_never_adds_a_model(self):
+        m = manifest(['The steel tank full of oil and water leaked.'], secs=3)
+        for g in A.plan(m): self.assertNotIn('props', g['shot'])
+
+    def test_painted_object_is_placed_and_shown(self):
+        m = manifest(['The huge tank stood over the street.', 'Then the tank burst.'], secs=5.5)
+        for sh in m['shots']:
+            sh['location'] = 'Commercial Street, Boston'
+            sh['props'] = [{'kind': 'asset', 'asset': 'card/molasses_tank', 'place': 'background', 'motion': 'none', 'phrase': 'huge riveted steel molasses storage tank', 'size': 'huge'}]
+        segs = A.plan(m, {'obj-molasses_tank.png'})
+        for i in range(2):
+            mine = [g for g in segs if g['shot_index'] == i]
+            self.assertTrue(any('obj-molasses_tank.png' in g['notes']['cards_shown'] for g in mine), [g['notes'] for g in mine])
+            self.assertTrue(all(any(c['image'] == 'obj-molasses_tank.png' and c['height'] == 6.0 for c in g['shot']['cards']) for g in mine))
+
+
 if __name__ == '__main__':
     unittest.main()
