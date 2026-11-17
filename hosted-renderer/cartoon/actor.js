@@ -27,14 +27,26 @@ async function notify(event) {
 }
 class Cancelled extends Error {}
 async function guard(progress) { const state=await notify({type:'progress',progress});if(!state.accepted)throw new Cancelled('Cartoon cancelled or expired'); }
-async function run(command,args) {
-  const child=spawn(command,args,{stdio:['ignore','pipe','pipe']});
+async function run(command,args,env) {
+  const child=spawn(command,args,{stdio:['ignore','pipe','pipe'],env:env?{...process.env,...env}:process.env});
   let errors='';child.stdout.on('data',v=>process.stdout.write(v));child.stderr.on('data',v=>{errors=(errors+v).slice(-2000);process.stderr.write(v);});
   let stopped=false;
   // Only a real cancel/expiry stops the stage; a missed heartbeat (network blip) is ignored and retried next minute.
   const heartbeat=setInterval(()=>{guard(0).catch(e=>{if(e instanceof Cancelled||/rejected \[4/.test(String(e?.message))){stopped=true;child.kill('SIGTERM');}else console.warn('heartbeat missed',e?.message);});},60000);
   try { await new Promise((resolve,reject)=>{child.on('error',reject);child.on('exit',code=>code===0&&!stopped?resolve():reject(Error(stopped?'Cartoon cancelled':`Worker stage failed: ${errors}`)));}); }
   finally { clearInterval(heartbeat); }
+}
+// Self-healing stage runner: a stage that crashes is retried with a short back-off (and, where given, a gentler setting each time) before the machine gives up;
+// only a real cancel/expiry stops it at once. Frames and saved inputs are checkpointed, so a retry never repeats finished work.
+async function heal(command,args,{tries=3,ladder=[]}={}) {
+  let last;
+  for(let i=0;i<tries;i++){
+    try{return await run(command,args,ladder[i]);}
+    catch(e){last=e;if(e instanceof Cancelled||/cancelled/i.test(String(e?.message)))throw e;
+      console.error(JSON.stringify({stage_retry:i+1,of:tries,stage:path.basename(String(args[0]||command)),error:String(e?.message).slice(-300)}));
+      if(i+1<tries)await new Promise(r=>setTimeout(r,4000*(i+1)));}
+  }
+  throw last;
 }
 async function uploadFiles(files) {
   const grants=await notify({type:'assets',files:files.map(name=>({name}))});
@@ -55,7 +67,7 @@ try {
     const url=new URL(input.voiceUrl);if(url.protocol!=='https:'||!url.pathname.includes('/storage/v1/object/sign/videos/'))throw Error('Invalid voice grant');
     const response=await netFetch(url);if(!response.ok)throw Error('Locked narration could not load');
     await writeFile(path.join(work,'original-voice'),Buffer.from(await response.arrayBuffer()));
-    await run('ffmpeg',['-v','error','-y','-i',path.join(work,'original-voice'),'-ar','48000','-ac','1','-c:a','pcm_s16le',path.join(work,'voice.wav')]);
+    await heal('ffmpeg',['-v','error','-y','-i',path.join(work,'original-voice'),'-ar','48000','-ac','1','-c:a','pcm_s16le',path.join(work,'voice.wav')]);
     await writeFile(path.join(work,'script.txt'),input.manifest.script);
     // Advanced Video AI: fetch each painted character card once and keep it with the durable inputs.
     // Keys: cast id (standing), '<id>-<pose>' and 'obj-<name>'; the app validated them against the cast and props.
@@ -70,10 +82,10 @@ try {
     }
     await writeFile(path.join(work,'request.json'),JSON.stringify(input.manifest));
     timing('voice-fetch-decode',stageStart);stageStart=Date.now();
-    await run(python,[path.join(root,'acoustic.py'),'--audio',path.join(work,'voice.wav'),'--weights',process.env.CARTOON_WEIGHTS || '/opt/cartoon/weights.pth','--script',path.join(work,'script.txt'),'--out',work]);
+    await heal(python,[path.join(root,'acoustic.py'),'--audio',path.join(work,'voice.wav'),'--weights',process.env.CARTOON_WEIGHTS || '/opt/cartoon/weights.pth','--script',path.join(work,'script.txt'),'--out',work]);
     timing('alignment',stageStart);stageStart=Date.now();
-    await run(python,[path.join(root,'build-manifest.py'),'--request',path.join(work,'request.json'),'--alignment',path.join(work,'alignment.json'),'--voice',path.join(work,'voice.wav'),'--out',path.join(work,'manifest.json')]);
-    await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','preflight','--twist-frame','0']);
+    await heal(python,[path.join(root,'build-manifest.py'),'--request',path.join(work,'request.json'),'--alignment',path.join(work,'alignment.json'),'--voice',path.join(work,'voice.wav'),'--out',path.join(work,'manifest.json')]);
+    await heal(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','preflight','--twist-frame','0']);
     timing('manifest-preview',stageStart);stageStart=Date.now();
     const sheets=(await readdir(path.join(work,'render/sheets'))).filter(n=>n.endsWith('.jpg'));
     for(const n of sheets)await writeFile(path.join(work,n),await readFile(path.join(work,'render/sheets',n)));
@@ -93,7 +105,7 @@ try {
     if(!locked||locked.jobId!==input.jobId||locked.hash!==input.approvedHash||locked.requestHash!==hash(Buffer.from(canonical(input.manifest))))throw Error('Owner review does not match locked inputs');
     for(const n of ['voice.wav','manifest.json','alignment.json']){const bytes=await store.getValue(n.replaceAll('.','-'));if(!Buffer.isBuffer(bytes))throw Error('Missing durable inputs');await writeFile(path.join(work,n),bytes);}
     for(const c of locked.request.cards||[]){const bytes=await store.getValue(`card-${c.id}`);if(!Buffer.isBuffer(bytes))throw Error('Missing character card');await mkdir(path.join(work,'cards'),{recursive:true});await writeFile(path.join(work,'cards',`${c.id}.png`),bytes);}
-    await run('node',[path.join(root,'prepare-scene.mjs'),path.join(work,'manifest.json'),path.join(work,'render/prepared')]);
+    await heal('node',[path.join(root,'prepare-scene.mjs'),path.join(work,'manifest.json'),path.join(work,'render/prepared')]);
     await mkdir(path.join(work,'render'),{recursive:true});
     await writeFile(path.join(work,'render/review-approved.json'),JSON.stringify({...locked.review,approved:true}));
     const m=JSON.parse(await readFile(path.join(work,'manifest.json'),'utf8'));
@@ -110,17 +122,18 @@ try {
     const hasPart=async first=>Boolean(await store.getValue(`part-${first}`));
     // Claims are scoped to this attempt (each restart rotates the token), so a crashed attempt's claims never block recovery.
     const attempt=hash(Buffer.from(input.callbackToken)).slice(0,12);
-    let blenderFailures=0;
     async function renderBatch([first,last]){
       const dir=path.join(framesDir,`batch-${first}`);await mkdir(dir,{recursive:true});
       // Advanced Video AI on GPU machines draws with the Blender 3D engine; any Blender failure falls back to the
       // web engine for that batch (same frame format and input hash), so a video never stops on the new renderer.
-      let drawn=false;
+      // The Blender engine is the Advanced renderer: a failing batch is retried with gentler settings (fewer samples and lanes, then a safe scene without
+      // the extra dressing and overlays) instead of falling back to the old web engine. Only non-Advanced videos use the web engine.
       if(process.env.CARTOON_RENDERER==='blender'){
-        try{await run(python,[path.join(root,'blender_bridge.py'),'--manifest',path.join(work,'manifest.json'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last),'--cards',path.join(work,'cards')]);drawn=true;}
-        catch(e){if(e instanceof Cancelled||/cancelled/i.test(String(e?.message)))throw e;console.error('Blender batch failed, using web engine',String(e?.message).slice(-600));blenderFailures++;}
+        const args=[path.join(root,'blender_bridge.py'),'--manifest',path.join(work,'manifest.json'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last),'--cards',path.join(work,'cards')];
+        await heal(python,args,{tries:3,ladder:[undefined,{BLENDER_SAMPLES:'3',BLENDER_LANES:'1'},{BLENDER_SAMPLES:'3',BLENDER_LANES:'1',BLENDER_SAFE:'1',UI_OVERLAYS:'0'}]});
+      } else {
+        await heal(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)],{tries:2});
       }
-      if(!drawn)await run(python,[path.join(root,'capture.py'),'--web',path.join(work,'render/prepared/web'),'--out',dir,'--first',String(first),'--last',String(last)]);
       const part=JSON.parse(await readFile(path.join(dir,'checkpoint.json'),'utf8'));
       const frames={};
       const ids=[];for(let f=first;f<=last;f++)ids.push(f);

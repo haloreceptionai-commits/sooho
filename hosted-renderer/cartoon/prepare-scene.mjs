@@ -7,8 +7,14 @@ import { mkdir } from 'node:fs/promises';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const [input,destination]=process.argv.slice(2);
 if(!input||!destination)throw Error('Manifest and scratch destination required');
-const m=JSON.parse(await readFile(input,'utf8'));
-validateManifest(m);
+let m=JSON.parse(await readFile(input,'utf8'));
+// Self-healing: a manifest that fails validation is repaired (details dropped, never the video), re-validated and saved back for every later stage.
+try{validateManifest(m);}catch(first){
+  const {repairManifest}=await import('./repair-manifest.mjs');
+  const {manifest,repairs}=repairManifest(m);
+  console.log(JSON.stringify({manifest_repaired:String(first.message).slice(0,160),repairs}));
+  validateManifest(manifest);m=manifest;await writeFile(input,JSON.stringify(m));
+}
 if(!['cartoon-v1','cartoon-v2'].includes(m.version)||m.fps!==30||!((m.width===1080&&m.height===1920)||(m.width===1920&&m.height===1080))||!m.shots?.length)throw Error('Invalid manifest');
 const result=spawnSync(process.execPath,[path.join(root,'prepare.mjs'),destination],{stdio:'inherit'});
 if(result.status!==0)throw Error('Pinned preparation failed');

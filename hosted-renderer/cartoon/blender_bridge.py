@@ -209,6 +209,9 @@ def render_range(manifest_path, web, out, first, last, card_dir):
     def run(job):
         k, i, a, shot, want = job
         shot = dict(shot); shot['engine'] = eng['SHOT_ENGINE']; shot['samples'] = samples
+        if os.environ.get('BLENDER_SAFE') == '1':   # last-resort retry: the same shot without the extra dressing, effects and overlays
+            if shot.get('place'): shot['place'] = {**shot['place'], 'items': []}
+            shot['effects'] = []; shot['overlay'] = []
         n = round(shot['duration'] * 30)
         local = {f: min(n, f - a + 1) for f in want}
         shot['frames'] = sorted(set(local.values()))
