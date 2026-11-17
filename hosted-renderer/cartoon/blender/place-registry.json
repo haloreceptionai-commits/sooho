@@ -1,6 +1,6 @@
 {
  "_doc": "Advanced place registry, shared by the Visual Director (src/lib/place-spec.ts), the worker (build-manifest.py) and the renderer (place_spec.py). A dressing entry is usable only when registry-audit.json holds a passing local render check for its exact definition (registry_check.py).",
- "version": 2,
+ "version": 3,
  "terrains": {
   "mountain_pass": {
    "label": "narrow pass or road between steep mountains",
@@ -563,6 +563,2221 @@
     "carts",
     "wagon",
     "wagons"
+   ]
+  }
+ },
+ "recipes": {
+  "town_street": {
+   "label": "a small town or city street with buildings, sidewalks, street lights and parked cars",
+   "terrain": "custom",
+   "ground": "stone",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "road",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         7,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         -9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         7,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         -4.6,
+         -9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         -4.6,
+         9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         4.6,
+         -9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         4.6,
+         9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -16.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -12.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -9.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -5.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -2.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         1.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         5.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         8.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.14,
+     "layout": "near",
+     "at": [
+      0,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "city-kit-suburban/building-type-a",
+     "count": 1,
+     "height": 7.5,
+     "layout": "near",
+     "at": [
+      -9.5,
+      7
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "city-kit-suburban/building-type-c",
+     "count": 1,
+     "height": 7.5,
+     "layout": "near",
+     "at": [
+      9.5,
+      9.5
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "city-kit-commercial/building-a",
+     "count": 1,
+     "height": 11,
+     "layout": "near",
+     "at": [
+      -9.8,
+      18
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "city-kit-suburban/building-type-e",
+     "count": 1,
+     "height": 7.5,
+     "layout": "near",
+     "at": [
+      9.5,
+      20
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "city-kit-commercial/building-c",
+     "count": 1,
+     "height": 12,
+     "layout": "near",
+     "at": [
+      -9.8,
+      29
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "city-kit-suburban/building-type-d",
+     "count": 1,
+     "height": 7.5,
+     "layout": "near",
+     "at": [
+      9.5,
+      31
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 3,
+     "height": 4.6,
+     "layout": "near",
+     "at": [
+      -4.6,
+      6
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      9
+     ]
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 3,
+     "height": 4.6,
+     "layout": "near",
+     "at": [
+      4.6,
+      10
+     ],
+     "yaw": -90,
+     "step": [
+      0,
+      9
+     ]
+    },
+    {
+     "lib": "car-kit/sedan",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      1.7,
+      14
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/taxi",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      -1.7,
+      24
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "nature-kit/tree_default",
+     "count": 2,
+     "height": 5.0,
+     "layout": "near",
+     "at": [
+      -5.6,
+      12
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      12
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_default",
+     "count": 2,
+     "height": 5.0,
+     "layout": "near",
+     "at": [
+      5.6,
+      16
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      12
+     ]
+    }
+   ]
+  },
+  "road": {
+   "label": "an open road or highway with lane markings, cars, trees and fields",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "hills",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "road",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         8,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         -9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         8,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -16.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -12.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -9.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -5.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -2.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         1.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         5.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         8.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         12.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         15.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.07,
+     "layout": "near",
+     "at": [
+      0,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/sedan",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      2.0,
+      10
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/truck",
+     "count": 1,
+     "height": 2.6,
+     "layout": "near",
+     "at": [
+      -2.0,
+      20
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "car-kit/taxi",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      2.0,
+      30
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 4,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -9,
+      8
+     ],
+     "yaw": 0,
+     "step": [
+      -1,
+      9
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 4,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      9,
+      12
+     ],
+     "yaw": 0,
+     "step": [
+      1,
+      9
+     ]
+    },
+    {
+     "lib": "nature-kit/plant_bush",
+     "count": 5,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      -5.8,
+      6
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      6
+     ]
+    },
+    {
+     "lib": "nature-kit/plant_bush",
+     "count": 5,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      5.8,
+      9
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      6
+     ]
+    }
+   ]
+  },
+  "garden": {
+   "label": "a garden or backyard with a fence, flower beds, a bench and trees",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "lib": "nature-kit/fence_simple",
+     "count": 12,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      -9.6,
+      14
+     ],
+     "yaw": 0,
+     "step": [
+      1.75,
+      0
+     ]
+    },
+    {
+     "lib": "nature-kit/flower_redA",
+     "count": 5,
+     "height": 0.55,
+     "layout": "near",
+     "at": [
+      -3.6,
+      5.2
+     ],
+     "yaw": 0,
+     "step": [
+      0.55,
+      0.15
+     ]
+    },
+    {
+     "lib": "nature-kit/flower_yellowB",
+     "count": 5,
+     "height": 0.55,
+     "layout": "near",
+     "at": [
+      -2.2,
+      6.4
+     ],
+     "yaw": 0,
+     "step": [
+      0.5,
+      -0.1
+     ]
+    },
+    {
+     "lib": "nature-kit/flower_purpleC",
+     "count": 6,
+     "height": 0.55,
+     "layout": "near",
+     "at": [
+      2.6,
+      5.6
+     ],
+     "yaw": 0,
+     "step": [
+      0.5,
+      0.12
+     ]
+    },
+    {
+     "lib": "furniture-kit/benchCushion",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      4.6,
+      4.0
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 1,
+     "height": 7.5,
+     "layout": "near",
+     "at": [
+      -6.5,
+      11
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/tree_default",
+     "count": 1,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      7,
+      12
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/plant_bush",
+     "count": 6,
+     "height": 1.3,
+     "layout": "near",
+     "at": [
+      -4.4,
+      13
+     ],
+     "yaw": 0,
+     "step": [
+      1.8,
+      0.2
+     ]
+    },
+    {
+     "lib": "nature-kit/stump_old",
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      3.4,
+      7.4
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "school": {
+   "label": "a classroom with a blackboard, desks, chairs and bookcases",
+   "terrain": "room",
+   "base": [
+    {
+     "asm": {
+      "name": "blackboard",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         4.4,
+         0.1,
+         1.7
+        ],
+        "pos": [
+         0,
+         0,
+         1.7
+        ],
+        "color": [
+         0.1,
+         0.27,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.6,
+         0.14,
+         0.08
+        ],
+        "pos": [
+         0,
+         0,
+         2.58
+        ],
+        "color": [
+         0.45,
+         0.3,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.6,
+         0.14,
+         0.08
+        ],
+        "pos": [
+         0,
+         0,
+         0.82
+        ],
+        "color": [
+         0.45,
+         0.3,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.8
+        ],
+        "pos": [
+         -2.0,
+         0,
+         0.4
+        ],
+        "color": [
+         0.4,
+         0.3,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.8
+        ],
+        "pos": [
+         2.0,
+         0,
+         0.4
+        ],
+        "color": [
+         0.4,
+         0.3,
+         0.2
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.62,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/desk",
+     "count": 4,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      -2.4,
+      4.4
+     ],
+     "yaw": 180,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/chairDesk",
+     "count": 4,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -2.4,
+      3.6
+     ],
+     "yaw": 0,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/desk",
+     "count": 4,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      -2.4,
+      2.4
+     ],
+     "yaw": 180,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/chairDesk",
+     "count": 4,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -2.4,
+      1.7
+     ],
+     "yaw": 0,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/bookcaseClosedWide",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      3.4,
+      6.6
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -3.4,
+      6.6
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "house": {
+   "label": "a living room or home interior with a sofa, a TV, a rug, lamps and plants",
+   "terrain": "room",
+   "base": [
+    {
+     "asm": {
+      "name": "rug",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.4,
+         2.2,
+         0.03
+        ],
+        "pos": [
+         0,
+         0,
+         0.015
+        ],
+        "color": [
+         0.62,
+         0.18,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.9,
+         1.7,
+         0.035
+        ],
+        "pos": [
+         0,
+         0,
+         0.02
+        ],
+        "color": [
+         0.9,
+         0.78,
+         0.5
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.038,
+     "layout": "near",
+     "at": [
+      0,
+      4.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/loungeSofa",
+     "count": 1,
+     "height": 0.95,
+     "layout": "near",
+     "at": [
+      0,
+      6.2
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/cabinetTelevision",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      3.0,
+      5.4
+     ],
+     "yaw": 270
+    },
+    {
+     "lib": "furniture-kit/televisionModern",
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      3.0,
+      5.4
+     ],
+     "yaw": 270
+    },
+    {
+     "lib": "furniture-kit/tableCoffee",
+     "count": 1,
+     "height": 0.45,
+     "layout": "near",
+     "at": [
+      0,
+      4.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/lampRoundFloor",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      -2.6,
+      6.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -3.2,
+      4.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/bookcaseClosedWide",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      -3.3,
+      3.0
+     ],
+     "yaw": 90
+    }
+   ]
+  },
+  "party": {
+   "label": "a birthday or party room with a table, a cake, balloons, presents and string lights",
+   "terrain": "room",
+   "base": [
+    {
+     "lib": "furniture-kit/tableRound",
+     "count": 1,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      0,
+      5.0
+     ]
+    },
+    {
+     "lib": "food-kit/cake-birthday",
+     "count": 1,
+     "height": 0.35,
+     "layout": "near",
+     "at": [
+      0,
+      5.0
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "balloons",
+      "parts": [
+       {
+        "shape": "sphere",
+        "size": [
+         0.55,
+         0.55,
+         0.68
+        ],
+        "pos": [
+         -0.7,
+         0,
+         3.0
+        ],
+        "color": [
+         0.95,
+         0.2,
+         0.25
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.015,
+         0.015,
+         1.1
+        ],
+        "pos": [
+         -0.7,
+         0,
+         2.1
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.55,
+         0.55,
+         0.68
+        ],
+        "pos": [
+         0,
+         0.2,
+         3.4
+        ],
+        "color": [
+         0.2,
+         0.5,
+         0.95
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.015,
+         0.015,
+         1.1
+        ],
+        "pos": [
+         0,
+         0.2,
+         2.5
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.55,
+         0.55,
+         0.68
+        ],
+        "pos": [
+         0.7,
+         -0.1,
+         3.1
+        ],
+        "color": [
+         0.98,
+         0.85,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.015,
+         0.015,
+         1.1
+        ],
+        "pos": [
+         0.7,
+         -0.1,
+         2.2
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.55,
+         0.55,
+         0.68
+        ],
+        "pos": [
+         0.2,
+         0.3,
+         2.8
+        ],
+        "color": [
+         0.3,
+         0.8,
+         0.4
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.015,
+         0.015,
+         1.1
+        ],
+        "pos": [
+         0.2,
+         0.3,
+         1.9
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.39,
+     "layout": "near",
+     "at": [
+      -2.8,
+      5.8
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "balloons",
+      "parts": [
+       {
+        "shape": "sphere",
+        "size": [
+         0.55,
+         0.55,
+         0.68
+        ],
+        "pos": [
+         -0.6,
+         0,
+         3.1
+        ],
+        "color": [
+         0.9,
+         0.4,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.015,
+         0.015,
+         1.1
+        ],
+        "pos": [
+         -0.6,
+         0,
+         2.2
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.55,
+         0.55,
+         0.68
+        ],
+        "pos": [
+         0.1,
+         0.2,
+         3.5
+        ],
+        "color": [
+         0.2,
+         0.85,
+         0.85
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.015,
+         0.015,
+         1.1
+        ],
+        "pos": [
+         0.1,
+         0.2,
+         2.6
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.55,
+         0.55,
+         0.68
+        ],
+        "pos": [
+         0.7,
+         0,
+         2.9
+        ],
+        "color": [
+         0.98,
+         0.5,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.015,
+         0.015,
+         1.1
+        ],
+        "pos": [
+         0.7,
+         0,
+         2.0
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.39,
+     "layout": "near",
+     "at": [
+      2.8,
+      6.0
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "holiday-kit/present-a-cube",
+     "count": 3,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      -2.0,
+      3.2
+     ],
+     "yaw": 0,
+     "step": [
+      0.7,
+      0.2
+     ]
+    },
+    {
+     "lib": "holiday-kit/present-b-round",
+     "count": 2,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      2.0,
+      3.0
+     ],
+     "yaw": 0,
+     "step": [
+      0.6,
+      0.3
+     ]
+    },
+    {
+     "asm": {
+      "name": "party lights",
+      "parts": [
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         -3.0,
+         0,
+         2.7
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         -2.5,
+         0,
+         2.8200000000000003
+        ],
+        "color": [
+         1,
+         0.85,
+         0.2
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         -2.0,
+         0,
+         2.7
+        ],
+        "color": [
+         0.3,
+         0.8,
+         1
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         -1.5,
+         0,
+         2.8200000000000003
+        ],
+        "color": [
+         0.5,
+         1,
+         0.4
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         -1.0,
+         0,
+         2.7
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         -0.5,
+         0,
+         2.8200000000000003
+        ],
+        "color": [
+         1,
+         0.85,
+         0.2
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         0.0,
+         0,
+         2.7
+        ],
+        "color": [
+         0.3,
+         0.8,
+         1
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         0.5,
+         0,
+         2.8200000000000003
+        ],
+        "color": [
+         0.5,
+         1,
+         0.4
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         1.0,
+         0,
+         2.7
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         1.5,
+         0,
+         2.8200000000000003
+        ],
+        "color": [
+         1,
+         0.85,
+         0.2
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         2.0,
+         0,
+         2.7
+        ],
+        "color": [
+         0.3,
+         0.8,
+         1
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         2.5,
+         0,
+         2.8200000000000003
+        ],
+        "color": [
+         0.5,
+         1,
+         0.4
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.22,
+         0.22,
+         0.22
+        ],
+        "pos": [
+         3.0,
+         0,
+         2.7
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 6.0
+       },
+       {
+        "shape": "box",
+        "size": [
+         6.4,
+         0.02,
+         0.02
+        ],
+        "pos": [
+         0,
+         0,
+         2.92
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.34,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "banner",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.4,
+         0.05,
+         0.7
+        ],
+        "pos": [
+         0,
+         0,
+         3.3
+        ],
+        "color": [
+         0.98,
+         0.8,
+         0.25
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.05,
+         0.5
+        ],
+        "pos": [
+         -1.6,
+         0,
+         3.0
+        ],
+        "color": [
+         0.3,
+         0.2,
+         0.1
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.05,
+         0.5
+        ],
+        "pos": [
+         1.6,
+         0,
+         3.0
+        ],
+        "color": [
+         0.3,
+         0.2,
+         0.1
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      0,
+      6.9
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "garage": {
+   "label": "a garage or workshop with a car, a workbench, shelves, tires and tools",
+   "terrain": "workshop",
+   "base": [
+    {
+     "lib": "car-kit/sedan",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      0.2,
+      4.8
+     ],
+     "yaw": 160
+    },
+    {
+     "lib": "survival-kit/workbench",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -3.0,
+      5.6
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "q-ultimatehomeinterior/Shelf_Large",
+     "count": 1,
+     "height": 2.2,
+     "layout": "near",
+     "at": [
+      3.2,
+      6.4
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "car-kit/wheel-default",
+     "count": 3,
+     "height": 0.75,
+     "layout": "near",
+     "at": [
+      -3.2,
+      3.0
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      0.6
+     ]
+    },
+    {
+     "lib": "pirate-kit/barrel",
+     "count": 2,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      3.3,
+      3.4
+     ],
+     "yaw": 0,
+     "step": [
+      0.6,
+      0.3
+     ]
+    },
+    {
+     "asm": {
+      "name": "toolbox",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.45,
+         0.35
+        ],
+        "pos": [
+         0,
+         0,
+         0.18
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.1
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.8,
+         0.08,
+         0.05
+        ],
+        "pos": [
+         0,
+         0,
+         0.42
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.22
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.44,
+     "layout": "near",
+     "at": [
+      -2.2,
+      6.0
+     ],
+     "yaw": 30
+    }
+   ]
+  },
+  "sky": {
+   "label": "open sky above the clouds, for flight, weather and space-edge scenes",
+   "terrain": "custom",
+   "ground": "ice",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "lib": "q-modularplatformer/Cloud1",
+     "count": 1,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      -9,
+      12
+     ]
+    },
+    {
+     "lib": "q-modularplatformer/Cloud3",
+     "count": 1,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      8,
+      16
+     ]
+    },
+    {
+     "lib": "q-modularplatformer/Cloud2",
+     "count": 1,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      -4,
+      24
+     ]
+    },
+    {
+     "lib": "q-modularplatformer/Cloud4",
+     "count": 1,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      5,
+      6.5
+     ]
+    },
+    {
+     "asm": {
+      "name": "airplane",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.9,
+         0.9,
+         7.5
+        ],
+        "pos": [
+         0,
+         0,
+         0
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.98
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         9,
+         0.5,
+         0.12
+        ],
+        "pos": [
+         0,
+         -0.2,
+         0
+        ],
+        "color": [
+         0.85,
+         0.2,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.2,
+         1.4,
+         0.1
+        ],
+        "pos": [
+         -0.0,
+         3.3,
+         0.6
+        ],
+        "color": [
+         0.85,
+         0.2,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.12,
+         1.1,
+         1.1
+        ],
+        "pos": [
+         0,
+         3.4,
+         0.9
+        ],
+        "color": [
+         0.85,
+         0.2,
+         0.2
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 7.5,
+     "layout": "near",
+     "at": [
+      3,
+      20
+     ],
+     "yaw": 90
+    }
    ]
   }
  }

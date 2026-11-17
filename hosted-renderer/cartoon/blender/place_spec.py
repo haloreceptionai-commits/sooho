@@ -11,6 +11,7 @@ import library
 HERE = Path(__file__).parent
 REGISTRY = json.loads((HERE / 'place-registry.json').read_text())
 TERRAINS = set(REGISTRY['terrains']) | {'custom'}; KITS = set(REGISTRY['kits'])
+RECIPES = REGISTRY.get('recipes', {})
 TIMES = REGISTRY['times']; WEATHER = REGISTRY['weather']; DRESSING = REGISTRY['dressing']
 LIGHTING = {'dawn': 'sunset', 'day': 'day', 'dusk': 'sunset', 'night': 'night'}
 CLEAR = 6.0          # metres around the world origin kept flat and free of dressing (cast zones sit up to ~3 m off origin)
@@ -28,6 +29,19 @@ class PlaceError(ValueError):
     pass
 
 
+def resolve(spec):
+    """A scene recipe (town_street, road, garden, school, house, party, garage, sky) is a named, ready-made composition: it becomes its real terrain/kit
+    plus its base set dressing, in front of whatever story objects the planner added. Idempotent; other places pass through unchanged."""
+    r = RECIPES.get(spec.get('terrain')) if isinstance(spec, dict) else None
+    if not r: return spec
+    out = {k: v for k, v in spec.items() if k not in ('ground', 'relief', 'water')}
+    out['terrain'] = r['terrain']
+    for k in ('ground', 'relief', 'water'):
+        if k in r: out[k] = r[k]
+    out['dressing'] = list(r['base']) + list(spec.get('dressing', []))
+    return out
+
+
 def entry_hash(i):
     return hashlib.sha256(json.dumps(DRESSING[i], sort_keys=True).encode()).hexdigest()[:16]
 
@@ -38,10 +52,13 @@ def audited():
     return {i for i, r in audit.items() if i in DRESSING and r.get('pass') and r.get('hash') == entry_hash(i)}
 
 
-def validate(spec, scene=None, era=None):
+def validate(spec, scene=None, era=None, _recipe=False):
     """Raise PlaceError with an owner-readable message when the place cannot be built."""
     where = f'Scene {scene + 1}' if scene is not None else 'This scene'
     if not isinstance(spec, dict): raise PlaceError(f'{where} has no place description')
+    if spec.get('terrain') in RECIPES:
+        if len(spec.get('dressing', [])) > MAX_ITEMS: raise PlaceError(f'{where}: up to {MAX_ITEMS} kinds of set dressing')
+        validate(resolve(spec), scene, era, _recipe=True); return spec
     extra = set(spec) - {'terrain', 'time', 'weather', 'dressing', 'seed', 'ground', 'relief', 'water'}
     if extra: raise PlaceError(f'{where}: unknown place fields {sorted(extra)}')
     t = spec.get('terrain')
@@ -57,18 +74,18 @@ def validate(spec, scene=None, era=None):
     if spec.get('weather', 'clear') not in WEATHER: raise PlaceError(f"{where}: weather must be one of {WEATHER}")
     if not isinstance(spec.get('seed', 0), int): raise PlaceError(f'{where}: bad seed')
     items = spec.get('dressing', [])
-    if not isinstance(items, list) or len(items) > MAX_ITEMS: raise PlaceError(f'{where}: up to {MAX_ITEMS} kinds of set dressing')
+    if not isinstance(items, list) or len(items) > (40 if _recipe else MAX_ITEMS): raise PlaceError(f'{where}: up to {MAX_ITEMS} kinds of set dressing')
     ok = audited()
     for d in items:
         if not isinstance(d, dict): raise PlaceError(f'{where}: bad set dressing')
         c = d.get('count', 1)
         if not isinstance(c, int) or not 1 <= c <= MAX_COUNT: raise PlaceError(f'{where}: count 1-{MAX_COUNT}')
         if 'lib' in d:      # any model of the CC0 library, sized in real metres
-            if set(d) - {'lib', 'count', 'height', 'layout'}: raise PlaceError(f'{where}: bad library dressing')
+            if set(d) - {'lib', 'count', 'height', 'layout', 'at', 'step', 'yaw'}: raise PlaceError(f'{where}: bad library dressing')
             if not library.known(d['lib']): raise PlaceError(f"{where} needs the model '{d['lib']}', which is not in the object library")
             _size_layout(d, where)
         elif 'asm' in d:    # something the library lacks, composed from simple shapes
-            if set(d) - {'asm', 'count', 'height', 'layout'}: raise PlaceError(f'{where}: bad assembled dressing')
+            if set(d) - {'asm', 'count', 'height', 'layout', 'at', 'step', 'yaw'}: raise PlaceError(f'{where}: bad assembled dressing')
             _check_assembly(d['asm'], where); _size_layout(d, where)
         else:
             if set(d) - {'id', 'count'}: raise PlaceError(f'{where}: bad set dressing')
@@ -81,7 +98,11 @@ def validate(spec, scene=None, era=None):
 
 def _size_layout(d, where):
     h = d.get('height', 1.0)
-    if isinstance(h, bool) or not isinstance(h, (int, float)) or not 0.1 <= h <= 60: raise PlaceError(f'{where}: height must be 0.1-60 metres')
+    if isinstance(h, bool) or not isinstance(h, (int, float)) or not 0.02 <= h <= 60: raise PlaceError(f'{where}: height must be 0.02-60 metres')
+    for key in ('at', 'step'):
+        v = d.get(key)
+        if v is not None and not (isinstance(v, list) and len(v) == 2 and all(isinstance(x, (int, float)) and not isinstance(x, bool) and abs(x) <= 60 for x in v)): raise PlaceError(f'{where}: {key} needs [x, y] metres')
+    if d.get('yaw') is not None and (isinstance(d['yaw'], bool) or not isinstance(d['yaw'], (int, float)) or abs(d['yaw']) > 720): raise PlaceError(f'{where}: bad yaw')
     if d.get('layout', 'near') not in LAYOUTS: raise PlaceError(f'{where}: layout must be one of {LAYOUTS}')
 
 
@@ -204,21 +225,30 @@ def _kit_xy(layout, c, count, k, seed, h):
     return KIT_SPOTS[i]
 
 
+def _at(d, c):
+    """Exact spot of copy c when the recipe pins it ('at' plus 'step' per copy), else None."""
+    a = d.get('at')
+    if not a: return None
+    s = d.get('step') or [0, 0]
+    return a[0] + s[0] * c, a[1] + s[1] * c
+
+
 def _place_open(out, d, t, seed, params, k0, H):
     """Library model or assembled shape object, any number of copies, in real-world metres."""
     for c in range(d.get('count', 1)):
         h = float(d.get('height', 1.0))
-        x, y = _open_xy(d.get('layout', 'near'), c, d.get('count', 1), k0, seed, t, h)
+        x, y = _at(d, c) or _open_xy(d.get('layout', 'near'), c, d.get('count', 1), k0, seed, t, h)
         water = (params or {}).get('water', 'none') != 'none' or t in ('coast', 'river_crossing')
         z = H(x, y)
         if water and z < -0.2: z = -0.4          # standing in the water: boats and piers float, not sink
-        item = {'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': round(h, 3), 'yaw': round(_rand(seed, f'oy{k0}:{c}') * 360 - 180, 1)}
+        item = {'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': round(h, 3), 'yaw': float(d['yaw']) if d.get('yaw') is not None else round(_rand(seed, f'oy{k0}:{c}') * 360 - 180, 1)}
         if 'lib' in d: item.update({'id': 'lib:' + d['lib'], 'model': d['lib']})
         else: item.update({'id': 'asm:' + d['asm']['name'][:30], 'asm': d['asm']})
         out['items'].append(item)
 
 
 def compile_place(spec, seed=0):
+    spec = resolve(spec)
     """Fixed layout: [{'id','model','pos':[x,y,z],'height','yaw', ...}] plus lighting/haze for the shot."""
     t = spec['terrain']; seed = int(spec.get('seed', seed))
     out = {'terrain': t, 'time': spec['time'], 'weather': spec.get('weather', 'clear'), 'seed': seed, 'items': []}
@@ -240,8 +270,8 @@ def compile_place(spec, seed=0):
                     out['items'].append(item)
         for k, d in enumerate([d for d in dress if d.get('layout') != 'table']):
             for c in range(d.get('count', 1)):
-                h = float(d.get('height', 1.0)); x, y = _kit_xy(d.get('layout', 'near'), c, d.get('count', 1), k, seed, h)
-                item = {'pos': [round(x, 3), round(y, 3), 0.0], 'height': round(h, 3), 'yaw': round(_rand(seed, f'ky{k}:{c}') * 70 - 35 + (180 if x < 0 else 180), 1)}
+                h = float(d.get('height', 1.0)); x, y = _at(d, c) or _kit_xy(d.get('layout', 'near'), c, d.get('count', 1), k, seed, h)
+                item = {'pos': [round(x, 3), round(y, 3), 0.0], 'height': round(h, 3), 'yaw': float(d['yaw']) if d.get('yaw') is not None else round(_rand(seed, f'ky{k}:{c}') * 70 - 35 + 180, 1)}
                 if 'lib' in d: item.update({'id': 'lib:' + d['lib'], 'model': d['lib']})
                 else: item.update({'id': 'asm:' + d['asm']['name'][:30], 'asm': d['asm']})
                 out['items'].append(item)
@@ -292,7 +322,7 @@ def validate_compiled(p):
     if not isinstance(p, dict) or set(p) - {'terrain', 'time', 'weather', 'seed', 'items', 'params'}: raise ValueError('invalid place')
     if p.get('terrain') not in TERRAINS | KITS or p.get('time') not in TIMES or p.get('weather') not in WEATHER: raise ValueError('invalid place')
     items = p.get('items', [])
-    if not isinstance(items, list) or len(items) > 40: raise ValueError('up to 40 place items')
+    if not isinstance(items, list) or len(items) > 90: raise ValueError('up to 90 place items')
     for it in items:
         if set(it) - {'id', 'model', 'pos', 'height', 'yaw', 'horns', 'fire', 'animate', 'asm'}: raise ValueError('invalid place item')
         iid = it.get('id')
@@ -305,7 +335,7 @@ def validate_compiled(p):
             if it['model'] != DRESSING[iid]['model']: raise ValueError('place item model mismatch')
         else: raise ValueError('invalid place item')
         if not (isinstance(it.get('pos'), list) and len(it['pos']) == 3 and all(isinstance(v, (int, float)) and abs(v) < 200 for v in it['pos'])): raise ValueError('place item pos')
-        if not 0.1 <= it.get('height', 1) <= 60 or not -720 <= it.get('yaw', 0) <= 720: raise ValueError('place item size')
+        if not 0.02 <= it.get('height', 1) <= 60 or not -720 <= it.get('yaw', 0) <= 720: raise ValueError('place item size')
     pr = p.get('params')
     if pr is not None and (not isinstance(pr, dict) or pr.get('ground') not in GROUNDS or pr.get('relief') not in RELIEFS or pr.get('water') not in WATERS): raise ValueError('invalid place params')
     return p

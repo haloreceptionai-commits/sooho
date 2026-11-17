@@ -139,3 +139,11 @@ class OpenWorldTests(unittest.TestCase):
         self.assertEqual(P.height('custom', 1, 1, 3, p), 0.0)
         self.assertGreater(P.height('custom', 30, 30, 3, p), 8)
         self.assertLess(P.height('custom', 0, 20, 3, {'relief': 'flat', 'water': 'sea'}), -0.5)
+
+
+class RecipeTests(unittest.TestCase):
+    def test_every_recipe_compiles_and_validates(self):
+        import place_spec as P
+        for k in P.RECIPES:
+            s = {'terrain': k, 'time': 'day', 'weather': 'clear', 'dressing': []}
+            P.validate(s); P.validate_compiled(P.compile_place(s))

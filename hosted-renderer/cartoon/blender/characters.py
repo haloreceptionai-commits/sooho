@@ -91,6 +91,11 @@ def build_character(c,duration=3,fps=30):
         return build_uploaded_human(c,duration,fps)
     ident=c.get('id','cast');black=material('cast ink',(.012,.013,.015),.65)
     skin=material('cast skin '+ident,tuple(c.get('skin',(.94,.93,.88))),.58)
+    if c.get('style','benchmark')=='benchmark':   # house style: pure white, self-lit faces and hands, never grey under any light
+        nd=skin.node_tree.nodes.get('Principled BSDF')
+        if nd:
+            nd.inputs['Base Color'].default_value=(1,1,1,1)
+            nd.inputs['Emission Color' if 'Emission Color' in nd.inputs else 'Emission'].default_value=(1,1,1,1); nd.inputs['Emission Strength'].default_value=0.75
     cloth=material(ident+' cloth',tuple(c.get('shirt',(.13,.36,.3))),.88)
     hatmat=material(ident+' hat',tuple(c.get('hat_color',(.32,.19,.06))),.85)
     trim=material(ident+' trim',tuple(c.get('trim',(.72,.55,.12))),.35)

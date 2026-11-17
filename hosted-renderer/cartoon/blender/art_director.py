@@ -260,7 +260,7 @@ OUTFIT = {'soldier': ('armor', 'helmet'), 'veteran': ('armor', 'helmet'), 'knigh
 FACIAL = {'king': 'beard', 'general': 'mustache', 'emperor': 'beard', 'scholar': 'goatee', 'elder': 'beard', 'priest': 'beard', 'monk': 'none', 'pirate': 'beard',
           'viking': 'beard', 'merchant': 'mustache', 'cowboy': 'mustache', 'blacksmith': 'beard', 'centurion': 'mustache', 'sultan': 'goatee', 'sailor': 'mustache', 'captain': 'mustache',
           'pharaoh': 'goatee', 'inventor': 'mustache', 'president': 'mustache', 'scientist': 'goatee', 'doctor': 'mustache', 'soldier': 'mustache', 'veteran': 'mustache'}
-SKINS = [[.93, .8, .68], [.78, .6, .46], [.62, .46, .34], [.88, .72, .58], [.5, .35, .26], [.94, .86, .78]]
+SKINS = [[1.0, 1.0, 1.0]]   # house style: every face is pure white (the benchmark's egg characters)
 TRIMS = {'armor': [.75, .55, .2], 'royal': [.85, .65, .15], 'robe': [.7, .6, .2], 'dress': [.85, .7, .3], 'tunic': [.8, .7, .35], 'uniform': [.8, .65, .2], 'worker': [.9, .75, .1]}
 SHIRTS = [[0.72, 0.42, 0.22], [0.2, 0.32, 0.6], [0.55, 0.2, 0.2], [0.3, 0.5, 0.3]]
 HAT_COLORS = [[0.32, 0.19, 0.06], [0.22, 0.27, 0.16], [0.1, 0.1, 0.12], [0.5, 0.12, 0.08]]
@@ -802,6 +802,9 @@ class Director:
         """Depth, story lighting and an in-world label (benchmark rulebook): a blurred foreground object near the lens, a cooler key at the pivot,
         and a painted sign carrying the year or number the line names."""
         n = max(2, len(self.m['shots'])); shot['tint'] = story_tint(i / (n - 1), shot['lighting'])
+        if (shot.get('place') or {}).get('terrain') in KITSET:   # indoors the lens stays under the ceiling (a 5 m 'high' shot would look at the roof planks)
+            for key in ('from', 'to'):
+                if key in cam and cam[key][2] > 2.3: cam[key] = [cam[key][0], cam[key][1], 2.3]
         limit_pitch(cam)
         place = shot.get('place')
         if place: clear_lens_items(place, cam)
@@ -815,9 +818,9 @@ class Director:
             pool = FG_INDOOR if indoor else FG_OUTDOOR; mid = pool[(i * 5 + part) % len(pool)]
             if library.known(mid):
                 fw = 0.675 * 1.9                                                          # frame width at the object's distance
-                x, y = f[0] + fx * 1.9 + rx * side * 0.40 * fw, f[1] + fy * 1.9 + ry * side * 0.40 * fw
+                x, y = f[0] + fx * 1.9 + rx * side * 0.47 * fw, f[1] + fy * 1.9 + ry * side * 0.47 * fw
                 z = 0.0 if indoor else max(0.0, terrain_height(place['terrain'], x, y, place.get('seed', 0), place.get('params')))
-                place['items'].append({'id': 'lib:' + mid, 'model': mid, 'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': 0.5, 'yaw': float((i * 53) % 360 - 180)})
+                place['items'].append({'id': 'lib:' + mid, 'model': mid, 'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': 0.3, 'yaw': float((i * 53) % 360 - 180)})
                 cam['fstop'] = min(cam.get('fstop', 3.4), 3.4)                         # shallow enough for the foreground to blur
         m = LABEL_RE.search(txt or '')
         spoken = None if m else spoken_number(txt or '')

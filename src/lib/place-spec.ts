@@ -16,7 +16,8 @@ export const PLACE_RELIEFS = ["flat", "hills", "mountains", "canyon", "dunes"] a
 export const PLACE_WATERS = ["none", "sea", "lake", "river"] as const;
 export const PLACE_LAYOUTS = ["near", "far", "row", "cluster", "line"] as const;
 export const PLACE_SHAPES = ["box", "cylinder", "sphere", "cone", "torus"] as const;
-export const PLACE_TERRAINS = [...Object.keys(registry.terrains), "custom", ...registry.kits] as [string, ...string[]];
+const RECIPES = ((registry as { recipes?: Record<string, { label: string }> }).recipes ?? {});
+export const PLACE_TERRAINS = [...Object.keys(registry.terrains), ...Object.keys(RECIPES), "custom", ...registry.kits] as [string, ...string[]];
 export const PLACE_TIMES = registry.times as [string, ...string[]];
 export const PLACE_WEATHER = registry.weather as [string, ...string[]];
 /** Dressing ids that passed the local render check (the Python side also re-checks the definition hash). */
@@ -70,7 +71,7 @@ export function normalizePlace(raw: unknown): unknown {
 
 export const PLACE_PROMPT = `
 ADVANCED 3D PLACE (required per scene; the engine builds it as a real 3D world, never a flat plane). It works for ANY topic:
-- place.terrain: pick the closest named place: ${Object.entries(registry.terrains).map(([k, v]) => `${k} (${v.label})`).join("; ")}; or an existing set when the line is literally there: ${registry.kits.join(", ")}.
+- place.terrain: pick the closest named place: ${Object.entries({ ...registry.terrains, ...RECIPES }).map(([k, v]) => `${k} (${v.label})`).join("; ")} (the ready scenes town_street, road, garden, school, house, party, garage and sky already come furnished and accurate; add only the story objects on top); or an existing set when the line is literally there: ${registry.kits.join(", ")}.
   For ANYTHING else (a city street, a space base, a factory yard, a volcano, an arctic base, a battlefield in a swamp, a lab exterior...) use terrain "custom" and describe it: ground (${PLACE_GROUNDS.join("/")}), relief (${PLACE_RELIEFS.join("/")}) and water (${PLACE_WATERS.join("/")}). For named terrains set ground "grass", relief "hills", water "none" (ignored).
 - Whatever the line names or the place needs (buildings, vehicles, machines, furniture, animals, weapons, monuments) goes in the scene's "objects" list with a short descriptive phrase and a size: the engine finds the matching 3D model in a library of 5,000 models, or builds one from shapes. Be specific ("a steel water tower", "a red rocket on a launch pad", "a stone watchtower").
 - place.time: dawn/day/dusk/night from the sentence and facts (a night attack is night). Time of day is a STORY CONSTANT: every scene in the same stretch of the story shares one time; change it only where the story itself jumps (for example "by morning"), going through dawn or dusk. Never alternate day and night between neighbouring scenes. place.weather: clear/fog/rain/wind.
@@ -161,5 +162,5 @@ export function requirePlaces(scenes: { place?: unknown }[]): PlaceSpec[] {
 
 /** Short place instructions for the lighter fallback request (named terrains and registry props only). */
 export const PLACE_PROMPT_COMPACT = `
-ADVANCED 3D PLACE (required per scene): place.terrain is the closest of: ${Object.entries(registry.terrains).map(([k, v]) => `${k} (${v.label})`).join("; ")}; or an existing set when the line is literally there: ${registry.kits.join(", ")}.
+ADVANCED 3D PLACE (required per scene): place.terrain is the closest of: ${Object.entries({ ...registry.terrains, ...RECIPES }).map(([k, v]) => `${k} (${v.label})`).join("; ")}; or an existing set when the line is literally there: ${registry.kits.join(", ")}.
 place.time is dawn/day/dusk/night and stays the same across neighbouring scenes unless the story itself jumps. place.weather is clear/fog/rain/wind. place.dressing: up to 6 {id,count} from: ${PLACE_DRESSING.join(", ")}.`;
