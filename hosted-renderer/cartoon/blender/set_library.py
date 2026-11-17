@@ -234,7 +234,10 @@ def build_set(name, mode='day', shell=None):
     kit = KITS[name]
     if shell:   # a recipe's own room: its colours, its lights, no legacy cabin decor
         from shell import build_shell
-        build_shell(shell); lighting(mode, True); return
+        build_shell(shell); lighting(mode, True)
+        for ob in bpy.data.objects:   # the legacy cabin lights are far too hot for a white room: keep them as soft fill
+            if ob.type == 'LIGHT' and ob.data.type in ('AREA', 'POINT') and ob.name != 'Area' or (ob.type == 'LIGHT' and ob.data.type in ('AREA', 'POINT')): ob.data.energy *= 0.3
+        return
     for b in kit.get('structure', []):
         if b['name'] != 'ocean':box(b['name'], b['pos'], b['size'], b['surface'])
     for item in kit['models']: model(item)

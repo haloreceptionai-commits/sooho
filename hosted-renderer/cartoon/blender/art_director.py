@@ -848,6 +848,7 @@ class Director:
             for key in ('from', 'to'):
                 if key in cam and cam[key][2] > 2.3: cam[key] = [cam[key][0], cam[key][1], 2.3]
             limit_pitch(cam, 24.0, 15.0)   # a room is seen level, never looked down at the floor
+            if shot['place'].get('shell'): shot['haze'] = 0   # indoors there is no distance haze: it only turns the room milky
             if shot['place'].get('shell') and kind in ('wide', 'establish', 'high', 'orbit', 'track'):   # establish the whole furnished room from its open front
                 dx = round(max(-1.0, min(1.0, cam['from'][0])) * 0.6, 3)
                 cam['from'] = [dx, -4.4, 1.5]; cam['to'] = [dx * 0.5, -3.6, 1.5]; cam['look_at'] = [0.0, 5.0, 0.85]; cam['look_to'] = [0.0, 5.0, 0.85]; cam['lens'] = 28

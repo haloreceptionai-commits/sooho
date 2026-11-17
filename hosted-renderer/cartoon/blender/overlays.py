@@ -43,7 +43,7 @@ def add_overlays(nt, img, shot, fps):
         mix = nt.nodes.new('CompositorNodeMixRGB'); mix.blend_type = 'ADD'; mix.inputs[2].default_value = (1.0, .45, .12, 1)
         mask = nt.nodes.new('CompositorNodeEllipseMask'); mask.x = .05; mask.y = .85; mask.width = .8; mask.height = .8
         blur = nt.nodes.new('CompositorNodeBlur'); blur.filter_type = 'FAST_GAUSS'; blur.use_relative = True; blur.factor_x = .4; blur.factor_y = .4
-        mul = nt.nodes.new('CompositorNodeMath'); mul.operation = 'MULTIPLY'; mul.inputs[1].default_value = .35
+        mul = nt.nodes.new('CompositorNodeMath'); mul.operation = 'MULTIPLY'; mul.inputs[1].default_value = .7
         nt.links.new(mask.outputs[0], blur.inputs[0]); nt.links.new(blur.outputs[0], mul.inputs[0]); nt.links.new(mul.outputs[0], mix.inputs[0])
         nt.links.new(img, mix.inputs[1]); img = mix.outputs[0]
     if 'flash' in names:   # white flash that burns out in the first 6 frames (a cut, a bang, a reveal)
