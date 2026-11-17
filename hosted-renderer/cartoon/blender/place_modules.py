@@ -307,12 +307,31 @@ def build_assembly(it):
         o.location = (q['pos'][0], q['pos'][1], q['pos'][2] - bottom)
         m = bpy.data.materials.new('asm part'); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
         b.inputs['Base Color'].default_value = (*q['color'], 1); b.inputs['Roughness'].default_value = 0.7
+        if q.get('glass'):   # transparent glass: beakers, flasks, test tubes, windows
+            for name, val in (('Transmission Weight', 1.0), ('Transmission', 1.0)):
+                if name in b.inputs: b.inputs[name].default_value = val
+            b.inputs['Roughness'].default_value = 0.03
+            if 'IOR' in b.inputs: b.inputs['IOR'].default_value = 1.45
+            o.visible_shadow = False
         if q.get('glow'):
             b.inputs['Emission Color' if 'Emission Color' in b.inputs else 'Emission'].default_value = (*q['color'], 1); b.inputs['Emission Strength'].default_value = q['glow']
         o.data.materials.append(m)
         for pl in o.data.polygons: pl.use_smooth = q['shape'] in ('sphere', 'cylinder', 'cone')
     root.scale = (k, k, k); root.location = it['pos']; root.rotation_euler.z = math.radians(it['yaw']); root['place_item'] = it['id']
     return root
+
+
+def build_kit_items(p):
+    """Props placed on the floor of an indoor set (lab, workshop, room, office): library models and shape-built objects."""
+    from set_library import model
+    n = 0
+    for it in p.get('items', []):
+        x, y, z = it['pos']
+        if it['id'].startswith('asm:'): build_assembly(it); n += 1
+        elif it['id'].startswith('lib:'):
+            try: root = model({'id': it['model'], 'pos': [x, y, z], 'height': it['height'], 'yaw': it['yaw']}); root['place_item'] = it['id']; n += 1
+            except Exception as e: print('kit item skipped', it['id'], str(e)[:100], flush=True)
+    return n
 
 
 def build_place(p, mode, duration=1.0, fps=30):

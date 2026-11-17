@@ -18,7 +18,7 @@ MAX_ITEMS = 12; MAX_COUNT = 12
 GROUNDS = ('grass', 'sand', 'snow', 'rock', 'dirt', 'stone', 'mud', 'ice', 'asphalt', 'metal')
 RELIEFS = ('flat', 'hills', 'mountains', 'canyon', 'dunes')
 WATERS = ('none', 'sea', 'lake', 'river')
-LAYOUTS = ('near', 'far', 'row', 'cluster', 'line')
+LAYOUTS = ('near', 'far', 'row', 'cluster', 'line', 'table')
 SHAPES = ('box', 'cylinder', 'sphere', 'cone', 'torus')
 CUSTOM_BASE = {'grass': ['tree', 'rocks', 'bush'], 'sand': ['rocks', 'cactus'], 'snow': ['pine', 'rocks'], 'rock': ['tall_rock', 'rocks'], 'dirt': ['rocks', 'stump'],
                'stone': [], 'mud': ['fern', 'log'], 'ice': ['rocks'], 'asphalt': [], 'metal': []}
@@ -90,12 +90,13 @@ def _check_assembly(a, where):
     parts = a.get('parts')
     if not isinstance(a.get('name'), str) or not 1 <= len(a['name']) <= 40 or not isinstance(parts, list) or not 1 <= len(parts) <= 16: raise PlaceError(f'{where}: an assembled object has 1-16 parts')
     for p in parts:
-        if not isinstance(p, dict) or set(p) - {'shape', 'size', 'pos', 'color', 'glow'} or p.get('shape') not in SHAPES: raise PlaceError(f'{where}: bad part')
+        if not isinstance(p, dict) or set(p) - {'shape', 'size', 'pos', 'color', 'glow', 'glass'} or p.get('shape') not in SHAPES: raise PlaceError(f'{where}: bad part')
         for key in ('size', 'pos', 'color'):
             v = p.get(key)
             if not (isinstance(v, list) and len(v) == 3 and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in v)): raise PlaceError(f'{where}: part {key} needs 3 numbers')
         if any(not 0.01 <= x <= 20 for x in p['size']) or any(abs(x) > 20 for x in p['pos']) or any(not 0 <= x <= 1 for x in p['color']): raise PlaceError(f'{where}: part numbers out of range')
         if not isinstance(p.get('glow', 0), (int, float)) or not 0 <= p.get('glow', 0) <= 20: raise PlaceError(f'{where}: glow 0-20')
+        if not isinstance(p.get('glass', False), bool): raise PlaceError(f'{where}: glass is true or false')
 
 
 def _rand(seed, k):
@@ -192,6 +193,17 @@ def _open_xy(layout, c, count, k, seed, t, h):
     return x, y
 
 
+KIT_SPOTS = [(-2.4, 2.6), (2.4, 2.8), (-2.2, 4.6), (2.3, 4.8), (0.0, 6.0), (-3.2, 3.6), (3.2, 3.7), (-1.0, 2.0), (1.1, 2.2), (-3.0, 5.6), (3.0, 5.7), (0.0, 3.4)]
+
+
+def _kit_xy(layout, c, count, k, seed, h):
+    """Spots on the floor of an indoor kit (about 7 m wide): row = a line along the back, line = along the side walls, others = fixed floor spots."""
+    if layout == 'row': return (c - (count - 1) / 2) * max(0.9, min(1.6, h * 0.8)), 5.6
+    if layout == 'line': return (2.9 if c % 2 else -2.9), 2.2 + c * max(1.0, h * 0.9)
+    i = (k * 3 + c) % len(KIT_SPOTS)
+    return KIT_SPOTS[i]
+
+
 def _place_open(out, d, t, seed, params, k0, H):
     """Library model or assembled shape object, any number of copies, in real-world metres."""
     for c in range(d.get('count', 1)):
@@ -210,7 +222,30 @@ def compile_place(spec, seed=0):
     """Fixed layout: [{'id','model','pos':[x,y,z],'height','yaw', ...}] plus lighting/haze for the shot."""
     t = spec['terrain']; seed = int(spec.get('seed', seed))
     out = {'terrain': t, 'time': spec['time'], 'weather': spec.get('weather', 'clear'), 'seed': seed, 'items': []}
-    if t in KITS: return out
+    BENCH = {'name': 'lab bench', 'parts': [{'shape': 'box', 'size': [3.6, 1.0, .09], 'pos': [0, 0, .86], 'color': [.46, .31, .17], 'glow': 0}] + [
+        {'shape': 'box', 'size': [.12, .12, .82], 'pos': [sx * 1.7, sy * .42, .41], 'color': [.36, .24, .13], 'glow': 0} for sx in (-1, 1) for sy in (-1, 1)]}
+    if t in KITS:   # an indoor set (lab/workshop, room, office...) can be furnished: library and assembled props stand on its floor
+        dress = [d for d in spec.get('dressing', []) if 'lib' in d or 'asm' in d]
+        tabled = [d for d in dress if d.get('layout') == 'table']
+        if tabled:   # one bench in front of the back wall, props evenly spaced on top
+            total = sum(d.get('count', 1) for d in tabled)
+            out['items'].append({'id': 'asm:lab bench', 'asm': BENCH, 'pos': [-0.4, 1.9, 0.0], 'height': 0.9, 'yaw': 180.0})
+            slot = 0
+            for d in tabled:
+                for c in range(d.get('count', 1)):
+                    x = -0.4 + (slot - (total - 1) / 2) * min(0.8, 3.0 / max(total, 1)); slot += 1
+                    item = {'pos': [round(x, 3), 1.9, 0.9], 'height': round(float(d.get('height', .4)), 3), 'yaw': 180.0}
+                    if 'lib' in d: item.update({'id': 'lib:' + d['lib'], 'model': d['lib']})
+                    else: item.update({'id': 'asm:' + d['asm']['name'][:30], 'asm': d['asm']})
+                    out['items'].append(item)
+        for k, d in enumerate([d for d in dress if d.get('layout') != 'table']):
+            for c in range(d.get('count', 1)):
+                h = float(d.get('height', 1.0)); x, y = _kit_xy(d.get('layout', 'near'), c, d.get('count', 1), k, seed, h)
+                item = {'pos': [round(x, 3), round(y, 3), 0.0], 'height': round(h, 3), 'yaw': round(_rand(seed, f'ky{k}:{c}') * 70 - 35 + (180 if x < 0 else 180), 1)}
+                if 'lib' in d: item.update({'id': 'lib:' + d['lib'], 'model': d['lib']})
+                else: item.update({'id': 'asm:' + d['asm']['name'][:30], 'asm': d['asm']})
+                out['items'].append(item)
+        return out
     params = None
     if t == 'custom':
         params = {'ground': spec.get('ground', 'grass'), 'relief': spec.get('relief', 'hills'), 'water': spec.get('water', 'none')}; out['params'] = params

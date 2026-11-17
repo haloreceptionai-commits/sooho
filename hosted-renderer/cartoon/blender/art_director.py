@@ -81,7 +81,7 @@ VERB_ACTION = [  # first match wins; literal verbs in the spoken line drive the 
     (r'\b(carr\w*|haul\w*|deliver\w*|lift\w*|brought|bring\w*)\b', 'carry'),
     (r'\b(dug|dig\w*|smash\w*|hit|hits|hammer\w*|chop\w*|struck|strike\w*|built|build\w*)\b', 'swing'),
     (r'\b(pour\w*|spill\w*|fill\w*)\b', 'pour'),
-    (r'\b(fell|fall\w*|died|die|dies|collaps\w*|crash\w*)\b', 'fall'),
+    (r'\b(fell|collaps\w*|fainted|tripped|slipped)\b', 'fall'),
     (r'\b(won|win|wins|celebrat\w*|cheer\w*|victory|triumph\w*|success\w*)\b', 'cheer'),
     (r'\b(panic\w*|terrif\w*|chaos|disaster|destroy\w*|ruin\w*|lost|failed|fail\w*|humiliat\w*)\b', 'panic'),
     (r'\b(point\w*|show\w*|explain\w*|discover\w*|found|notic\w*|look\w*|spott\w*|announc\w*|declar\w*|order\w*)\b', 'point'),

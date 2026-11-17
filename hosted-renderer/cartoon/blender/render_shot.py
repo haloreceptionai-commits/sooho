@@ -568,10 +568,12 @@ def main():
     place = shot.get('place')
     if place and place['terrain'] not in KIT_TERRAINS:
         from place_modules import build_place
-        build_place(place, shot.get('lighting', 'day'))
+        build_place(place, shot.get('lighting', 'day'), shot['duration'], fps)
         apply_mood(shot.get('lighting', 'day'))
     elif place:
         build_set(place['terrain'], shot.get('lighting', 'day'))
+        from place_modules import build_kit_items
+        build_kit_items(place)
     elif shot['set'] in SETS:
         SETS[shot['set']]()
         apply_mood(shot.get('lighting', 'day'))

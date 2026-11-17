@@ -59,6 +59,19 @@ def surface(name, metres=2):
     return m
 
 
+def natural_foliage(m):
+    """The kit palette renders leaves and grass teal; shift them to natural greens (same brightness) so worlds look like the benchmark."""
+    name = (m.name or '').lower()
+    if not m.use_nodes or m.get('foliage_fixed') or not any(k in name for k in ('leaf', 'leafs', 'grass', 'plant', 'bush', 'fern', 'foliage', 'pine', 'palm')): return
+    if any(k in name for k in ('wood', 'bark', 'trunk', 'stem')): return
+    bs = m.node_tree.nodes.get('Principled BSDF')
+    if not bs or bs.inputs['Base Color'].links: return
+    r, g, b, a = bs.inputs['Base Color'].default_value
+    if not (g > r and b > r * 1.5): return                       # only the teal range
+    k = max(0.55, min(1.2, g / 0.8))
+    bs.inputs['Base Color'].default_value = (0.20 * k, 0.60 * k, 0.12 * k, a); m['foliage_fixed'] = True
+
+
 def finish_palette(m):
     """Retain original colour identities, add grain instead of plastic flats."""
     if not m.use_nodes or m.get('set_finish'):return
@@ -122,7 +135,7 @@ def model(spec):
     root.scale = (factor,) * 3; root.location = spec['pos']; root.rotation_euler.z = math.radians(spec.get('yaw', 0))
     print('ASSET_BOUNDS',spec['id'],[round(float(v),3) for v in (high-low)*factor], 'yaw',spec.get('yaw',0),flush=True)
     for o in meshes:
-        for old in o.data.materials:finish_palette(old)
+        for old in o.data.materials:natural_foliage(old);finish_palette(old)
         # Reuse the real model geometry; assign scanned surfaces to appropriate
         # material groups rather than flattening every prop to one wood colour.
         if 'surface' in spec:
