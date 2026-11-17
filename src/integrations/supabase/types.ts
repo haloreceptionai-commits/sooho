@@ -263,6 +263,27 @@ export type Database = {
         }
         Relationships: []
       }
+      workspaces: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       youtube_connections: {
         Row: {
           auto_reply: boolean
@@ -272,6 +293,7 @@ export type Database = {
           refresh_token: string
           updated_at: string
           user_id: string
+          workspace_id: string
         }
         Insert: {
           auto_reply?: boolean
@@ -281,6 +303,7 @@ export type Database = {
           refresh_token: string
           updated_at?: string
           user_id: string
+          workspace_id: string
         }
         Update: {
           auto_reply?: boolean
@@ -290,8 +313,17 @@ export type Database = {
           refresh_token?: string
           updated_at?: string
           user_id?: string
+          workspace_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "youtube_connections_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       youtube_replies: {
         Row: {
@@ -302,6 +334,7 @@ export type Database = {
           reply: string
           user_id: string
           video_id: string | null
+          workspace_id: string | null
         }
         Insert: {
           author?: string | null
@@ -311,6 +344,7 @@ export type Database = {
           reply: string
           user_id: string
           video_id?: string | null
+          workspace_id?: string | null
         }
         Update: {
           author?: string | null
@@ -320,8 +354,17 @@ export type Database = {
           reply?: string
           user_id?: string
           video_id?: string | null
+          workspace_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "youtube_replies_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -397,6 +440,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      ensure_default_workspace: { Args: never; Returns: string }
       expire_render_jobs: { Args: never; Returns: undefined }
       handoff_generation_job: {
         Args: {

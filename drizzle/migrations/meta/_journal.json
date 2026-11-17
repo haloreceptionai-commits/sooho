@@ -183,6 +183,13 @@
       "when": 1794844127063,
       "tag": "0025_video_step_locks",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794939402941,
+      "tag": "0026_add_workspaces_and_workspace_youtube_connections",
+      "breakpoints": true
     }
   ]
 }
