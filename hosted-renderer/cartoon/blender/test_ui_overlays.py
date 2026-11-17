@@ -44,6 +44,12 @@ class PlanTests(unittest.TestCase):
         st = [e for e in ev if e['kind'] == 'sticker']
         for a, b in zip(st, st[1:]): self.assertGreaterEqual(b['start'] - a['start'], U.GAP['sticker'] * U.FPS)
 
+    def test_subscribe_cuts_a_long_running_element_short_but_never_the_other_way_round(self):
+        ev = U.plan(words('level up now please subscribe', step=.5))     # level up starts at 0.0 s, subscribe at 1.5 s
+        self.assertEqual([e['kind'] for e in ev], ['levelup', 'subscribe']); self.assertEqual(ev[0]['end'], ev[1]['start'])
+        ev = U.plan(words('please subscribe now level up', step=.5))
+        self.assertEqual([e['kind'] for e in ev], ['subscribe'])          # subscribe is already on screen: the lesser element waits
+
     def test_stickers_alternate_sides(self):
         m = words('dead ' + 'x ' * 12 + 'fire ' + 'x ' * 12 + 'rich', step=.3)
         self.assertEqual([e['side'] for e in U.plan(m) if e['kind'] == 'sticker'], [-1, 1, -1])

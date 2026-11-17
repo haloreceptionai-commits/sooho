@@ -375,7 +375,10 @@ def plan(m, fps=FPS):
         k = ev['kind']
         if k == 'subscribe' and any(o['kind'] == 'subscribe' for o in out): continue
         if k in last and ev['start'] - last[k] < GAP[k] * fps: continue
-        if out and ev['start'] < out[-1]['end']: continue          # one element on screen at a time
+        if out and ev['start'] < out[-1]['end']:                   # one element on screen at a time
+            prev = out[-1]
+            if PRIORITY.index(k) < PRIORITY.index(prev['kind']) and ev['start'] - prev['start'] >= 24: prev['end'] = ev['start']   # a more important element cuts a long-running one short
+            else: continue
         out.append(ev); last[k] = ev['start']
     sides = 0
     for ev in out:
