@@ -47,6 +47,7 @@ export interface Video {
   seedanceClips?: Record<string, { id?: string; path?: string; error?: string }>;
   assemblyCheckpoint?: import("@/lib/pipeline").SeedanceCheckpoint;
   assemblyClips?: { path: string; scenes: number[] }[];
+  workspaceId?: string | undefined; // the workspace (channel) this video belongs to; older videos belong to the first workspace
   hostedRender?: { id: string; status: string } | undefined;
   generationJob?: { id: string; status: string } | undefined;
   cartoonCheckpoint?: import('@/lib/cartoon-job').CartoonStart;
@@ -87,6 +88,10 @@ export interface State {
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
+
+// Set by lib/workspaces.ts (which imports this file) so a new video is stamped with the workspace that is open.
+let activeWorkspace: () => string | null = () => null;
+export const bindActiveWorkspace = (fn: () => string | null) => { activeWorkspace = fn; };
 
 export const DEFAULT_SETTINGS: Settings = {
   channelName: "Chronicle History",
@@ -162,7 +167,8 @@ export const getState = () => state;
 export const actions = {
   addVideo(input: VideoInput) {
     const id = uid();
-    const v: Video = { id, title: input.topic, description: "", input, status: "running", stage: "script", progress: 1, detail: "Writing script…", createdAt: Date.now() };
+    const workspaceId = activeWorkspace() ?? undefined;
+    const v: Video = { id, title: input.topic, description: "", input, status: "running", stage: "script", progress: 1, detail: "Writing script…", createdAt: Date.now(), ...(workspaceId ? { workspaceId } : {}) };
     setState((s) => ({ ...s, videos: [v, ...s.videos] }));
     void flushVideo(id);
     return id;

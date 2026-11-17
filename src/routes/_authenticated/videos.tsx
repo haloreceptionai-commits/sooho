@@ -4,6 +4,7 @@ import { Play, Download, Film, Smartphone, Clapperboard, Plus, Copy, Upload } fr
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { actions, timeAgo, useStore, type Video } from "@/lib/store";
+import { useActiveWorkspace, useWorkspaceVideos } from "@/lib/workspaces";
 import { getVideoFile, saveVideoFile } from "@/lib/video-db";
 import { fmt } from "@/lib/story-engine";
 import { Page, Panel, Empty, btnPrimary, btnOutline, btnDark } from "@/components/page";
@@ -61,7 +62,8 @@ async function importVideo(file: File) {
 }
 
 function Videos() {
-  const videos = useStore((s) => s.videos);
+  const videos = useWorkspaceVideos();
+  const { active } = useActiveWorkspace();
   const [filter, setFilter] = useState<"all" | "long" | "short">("all");
   const [playing, setPlaying] = useState<Video | null>(null);
   const [src, setSrc] = useState<string | null>(null);
@@ -80,7 +82,7 @@ function Videos() {
   const inProgress = videos.filter((v) => v.status !== "done" && !v.removed && v.id !== "g0anuaym"); // Owner dismissed this replaced Hannibal attempt; record kept.
 
   return (
-    <Page eyebrow="Library" title="My videos" desc="Every finished video, ready to watch and download."
+    <Page eyebrow={active?.name ?? "Library"} title="My videos" desc="Every finished video, ready to watch and download."
       actions={<div className="flex gap-2">
         <label className={`${btnOutline} cursor-pointer`}><Upload className="h-4 w-4" /> Import video
           <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void importVideo(f); }} />

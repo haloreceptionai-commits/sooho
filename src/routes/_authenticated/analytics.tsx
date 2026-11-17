@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Eye, ThumbsUp, MessageCircle, Users, PlaySquare, TrendingUp, RefreshCw, Bot, Send, Heart } from "lucide-react";
+import { useActiveWorkspace } from "@/lib/workspaces";
 import { youtubeAnalytics, youtubeReplyNow, youtubeSetAutoReply } from "@/lib/youtube.functions";
 import { Page, Panel, btnDark, btnOutline } from "@/components/page";
 
@@ -41,7 +42,8 @@ function Kpi({ icon: Icon, label, value, sub }: { icon: typeof Eye; label: strin
 function AnalyticsPage() {
   const load = useServerFn(youtubeAnalytics), replyNow = useServerFn(youtubeReplyNow), setAuto = useServerFn(youtubeSetAutoReply);
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ["yt-analytics"], queryFn: () => load(), retry: false, staleTime: 60_000 });
+  const { id: workspaceId, active } = useActiveWorkspace();
+  const q = useQuery({ queryKey: ["yt-analytics", workspaceId], queryFn: () => load({ data: { workspaceId: workspaceId! } }), enabled: !!workspaceId, retry: false, staleTime: 60_000 });
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"pending" | "replied">("pending");
 
@@ -55,9 +57,9 @@ function AnalyticsPage() {
       top: [...v].sort((a, b) => b.views - a.views), max: Math.max(1, ...v.map((x) => x.views)) };
   }, [q.data]);
 
-  if (q.isLoading) return <Page eyebrow="YouTube" title="Analytics"><Panel className="p-10 text-center text-sm text-muted-foreground">Loading your channel…</Panel></Page>;
+  if (!workspaceId || q.isLoading) return <Page eyebrow={active?.name ?? "YouTube"} title="Analytics"><Panel className="p-10 text-center text-sm text-muted-foreground">Loading your channel…</Panel></Page>;
   if (q.error) return (
-    <Page eyebrow="YouTube" title="Analytics">
+    <Page eyebrow={active?.name ?? "YouTube"} title="Analytics">
       <Panel className="p-10 text-center"><p className="text-sm text-muted-foreground">{String((q.error as Error).message)}</p>
         <Link to="/settings" className={`${btnDark} mt-4`}>Open Settings</Link></Panel>
     </Page>
@@ -68,17 +70,17 @@ function AnalyticsPage() {
 
   const runReplies = async () => {
     setBusy(true);
-    try { const r = await replyNow(); toast.success(`Replied to ${r.replied} comment${r.replied === 1 ? "" : "s"}${r.skipped ? `, skipped ${r.skipped} spam` : ""}`); await qc.invalidateQueries({ queryKey: ["yt-analytics"] }); }
+    try { const r = await replyNow({ data: { workspaceId: workspaceId! } }); toast.success(`Replied to ${r.replied} comment${r.replied === 1 ? "" : "s"}${r.skipped ? `, skipped ${r.skipped} spam` : ""}`); await qc.invalidateQueries({ queryKey: ["yt-analytics", workspaceId] }); }
     catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
   const toggle = async () => {
-    await setAuto({ data: { on: !d.autoReply } });
+    await setAuto({ data: { on: !d.autoReply, workspaceId: workspaceId! } });
     toast.success(d.autoReply ? "Auto-reply turned off" : "Auto-reply on — new comments get a kind reply every 10 minutes");
     await qc.invalidateQueries({ queryKey: ["yt-analytics"] });
   };
 
   return (
-    <Page eyebrow="YouTube" title="Analytics" desc={`${d.channel.title} · last ${d.videos.length} uploads`}
+    <Page eyebrow={active?.name ?? "YouTube"} title="Analytics" desc={`${d.channel.title} · last ${d.videos.length} uploads`}
       actions={<button className={btnOutline} onClick={() => void q.refetch()} disabled={q.isFetching}><RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} /> Refresh</button>}>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi icon={Users} label="Subscribers" value={fmt(d.channel.subscribers)} />

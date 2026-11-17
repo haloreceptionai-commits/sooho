@@ -15,7 +15,7 @@ const SCHEMA = {
 };
 
 /** Replies to up to `limit` unanswered comments; each comment is answered at most once (DB primary key). */
-export async function replyToPending(userId: string, refreshToken: string, channelId: string, limit = 20) {
+export async function replyToPending(userId: string, refreshToken: string, channelId: string, limit = 20, workspaceId: string | null = null) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const access = await refreshAccess(refreshToken);
   const all = await recentComments(access, channelId);
@@ -32,7 +32,7 @@ export async function replyToPending(userId: string, refreshToken: string, chann
     const r = out.replies.find((x) => x.id === c.id);
     const text = r?.reply.trim().slice(0, 500) ?? "";
     // Claim first so a parallel run can never double-post.
-    const { error } = await supabaseAdmin.from("youtube_replies").insert({ comment_id: c.id, user_id: userId, video_id: c.videoId, author: c.author, comment: c.text.slice(0, 2000), reply: r?.skip || !text ? "(skipped)" : text });
+    const { error } = await supabaseAdmin.from("youtube_replies").insert({ comment_id: c.id, user_id: userId, workspace_id: workspaceId, video_id: c.videoId, author: c.author, comment: c.text.slice(0, 2000), reply: r?.skip || !text ? "(skipped)" : text });
     if (error) continue;
     if (r?.skip || !text) { skipped++; continue; }
     try { await postReply(access, c.id, text); replied++; }

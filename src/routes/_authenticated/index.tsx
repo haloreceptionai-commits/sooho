@@ -1,7 +1,7 @@
 import { exactDuration } from "@/lib/shorts-writer/stage";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Film, Smartphone, Sparkles, Loader2, ArrowUpRight, Mic } from "lucide-react";
+import { Film, Smartphone, Sparkles, Loader2, ArrowUpRight, Mic, Youtube, FilePenLine, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, STYLES, type VideoEngine } from "@/lib/store";
 import { startVideo } from "@/lib/pipeline";
@@ -18,8 +18,19 @@ import { topicHistoryQuery } from "@/lib/topics-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getTopicHistory } from "@/lib/topics.functions";
+import { RemixPanel } from "@/components/remix-panel";
+import { ScriptWriterPanel } from "@/components/script-writer-panel";
+import { useActiveWorkspace, useWorkspaceVideos } from "@/lib/workspaces";
+
+type Mode = "topic" | "remix" | "script";
+const MODES: { id: Mode; icon: typeof PenLine; name: string; sub: string }[] = [
+  { id: "topic", icon: Sparkles, name: "Make a video", sub: "Pick a topic, get a finished video" },
+  { id: "remix", icon: Youtube, name: "Remix a YouTube video", sub: "Same true story, brand-new video" },
+  { id: "script", icon: FilePenLine, name: "Write a script", sub: "Script and scene plan only, no video" },
+];
 
 export const Route = createFileRoute("/_authenticated/")({
+  validateSearch: (search: Record<string, unknown>): { mode?: "remix" | "script" } => (search["mode"] === "remix" || search["mode"] === "script" ? { mode: search["mode"] } : {}),
   head: () => ({
     meta: [
       { title: "Create video — Chronicle Studio" },
@@ -36,14 +47,20 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function Create() {
   const settings = useStore((s) => s.settings);
-  const videos = useStore((s) => s.videos);
+  const videos = useStore((s) => s.videos);          // every workspace: a topic is never made twice
+  const workspaceVideos = useWorkspaceVideos();      // this workspace only: what is shown on the right
+  const { active } = useActiveWorkspace();
+  const search = Route.useSearch();
+  const navigate = useNavigate();
+  const mode: Mode = search.mode ?? "topic";
+  const setMode = (m: Mode) => void navigate({ to: "/", search: m === "topic" ? {} : { mode: m }, replace: true });
   const [format, setFormat] = useState<"long" | "short">("short");
   const [topic, setTopic] = useState("");
   const [arch, setArch] = useState<ArchetypeId>("paradox");
   const [shortSec, setShortSec] = useState(60);
   const [longMin, setLongMin] = useState(8);
     const [style, setStyle] = useState(settings.defaultStyle);
-  const [engine, setEngine] = useState<VideoEngine>("own");
+  const [engine, setEngine] = useState<VideoEngine>("advanced");   // Shorts always use the Advanced engine; the older engines stay for long-form only
   const { data: history } = useSuspenseQuery(topicHistoryQuery);
   const checkHistory = useServerFn(getTopicHistory);
   const [checking, setChecking] = useState(false);
@@ -59,8 +76,8 @@ function Create() {
   const unavailable = topicUnavailable(topic, topicId, blocking(used));
   const score = scoreTopic(topic);
   // Owner dismissed this replaced Hannibal attempt; preserve its saved record and checkpoints.
-  const active = videos.filter((v) => v.status !== "done" && !v.removed && v.id !== "g0anuaym").slice(0, 5);
-  const recent = videos.filter((v) => v.status === "done").slice(0, 4);
+  const inProduction = workspaceVideos.filter((v) => v.status !== "done" && !v.removed && v.id !== "g0anuaym").slice(0, 5);
+  const recent = workspaceVideos.filter((v) => v.status === "done").slice(0, 4);
   const busy = videos.some((v) => v.status === "running");
 
   const generate = async () => {
@@ -85,8 +102,19 @@ function Create() {
   };
 
   return (
-    <Page eyebrow="Studio" title="Create a video" desc="Pick a format and topic. Script, narration, scene images, sound and editing happen automatically.">
-      <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
+    <Page eyebrow={active?.name ?? "Studio"} title="Create a video" desc="Make a video from a topic, remix a YouTube video, or just write the script. Narration, scenes, sound and editing happen automatically.">
+      <div role="tablist" aria-label="How do you want to start?" className="grid gap-2 sm:grid-cols-3">
+        {MODES.map((m) => (
+          <button key={m.id} role="tab" aria-selected={mode === m.id} onClick={() => setMode(m.id)}
+            className={`flex items-center gap-3 rounded-lg border-2 p-3 text-left transition-colors ${mode === m.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted"}`}>
+            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-md ${mode === m.id ? "bg-primary text-primary-foreground" : "bg-muted"}`}><m.icon className="h-4 w-4" /></span>
+            <span className="min-w-0"><span className="block text-sm font-bold">{m.name}</span><span className="block truncate text-xs text-muted-foreground">{m.sub}</span></span>
+          </button>
+        ))}
+      </div>
+      {mode === "remix" && <RemixPanel />}
+      {mode === "script" && <ScriptWriterPanel />}
+      {mode === "topic" && <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
         <div className="min-w-0 space-y-6">
           {/* 1. Format */}
           <Panel className="p-5">
@@ -96,7 +124,7 @@ function Create() {
                 ["short", Smartphone, "Short / Reel", "9:16 vertical · 30–90 sec · viral hook formula"],
                 ["long", Film, "Long-form", "16:9 YouTube · 3–15 min documentary"],
               ] as const).map(([f, Icon, name, sub]) => (
-                <button key={f} onClick={() => { setFormat(f); if (f === "long") setStyle("Ink explainer"); }}
+                <button key={f} onClick={() => { setFormat(f); setEngine(f === "long" ? "own" : "advanced"); if (f === "long") setStyle("Ink explainer"); }}
                   className={`flex items-center gap-4 rounded-lg border-2 p-4 text-left transition-colors ${format === f ? "border-primary bg-primary/5" : "border-border hover:bg-muted"}`}>
                   <div className={`grid h-12 place-items-center rounded-md ${format === f ? "bg-primary text-primary-foreground" : "bg-muted"} ${f === "short" ? "w-8" : "w-16"}`}><Icon className="h-5 w-5" /></div>
                   <div><p className="font-bold">{name}</p><p className="text-xs text-muted-foreground">{sub}</p></div>
@@ -146,14 +174,21 @@ function Create() {
           </Panel>
 
           <Panel className="p-5">
-            <label htmlFor="engine" className={label}>4 · Video model</label>
-            <select id="engine" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
-              <option value="own">Own model — AI images with camera motion</option>
-              <option value="cartoon">Own cartoon — 3D cartoon + animated maps on Azure</option>
-              <option value="advanced">Advanced Video AI — painted characters in 3D sets, fastest</option>
-            </select>
-            {engine === "advanced" && <p className="mt-2 text-xs text-muted-foreground">Advanced Video AI: story-matched painted characters standing in inked 3D sets, with depth of field, word-pop captions and music. Renders straight through on Azure — no preview step — and keeps going if you close your browser.</p>}
-            {engine === "cartoon" && format !== "short" && <p className="mt-2 text-xs text-muted-foreground">Long-form cartoon: 16:9 documentary with animated relief maps, glowing territory and marching armies, plus cartoon scenes. You approve a preview before the full render.</p>}
+            <p className={label}>4 · Video model</p>
+            {format === "long" ? (
+              <>
+                <select id="engine" aria-label="Video model" className={`${input} mt-3`} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
+                  <option value="own">Own model — AI images with camera motion</option>
+                  <option value="cartoon">Own cartoon — 3D cartoon + animated maps on Azure</option>
+                </select>
+                {engine === "cartoon" && <p className="mt-2 text-xs text-muted-foreground">Long-form cartoon: 16:9 documentary with animated relief maps, glowing territory and marching armies, plus cartoon scenes. You approve a preview before the full render.</p>}
+              </>
+            ) : (
+              <div className="mt-3 rounded-md border bg-muted/40 p-3">
+                <p className="text-sm font-bold">Advanced Video AI</p>
+                <p className="mt-1 text-xs text-muted-foreground">3D worlds and characters in inked sets, depth of field, VFX, music, ambience and sound effects, word-pop captions and on-screen graphics. Renders on Azure GPUs, retries and repairs itself if a step fails — safe to close your browser.</p>
+              </div>
+            )}
           </Panel>
 
           <Button onClick={generate} disabled={checking || unavailable} className={`${btnPrimary} h-auto w-full py-4 text-base`}>
@@ -166,11 +201,11 @@ function Create() {
           <Panel className="p-5">
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 font-bold">{busy && <Loader2 className="h-4 w-4 animate-spin text-primary" />} In production</h2>
-              <span className="font-mono text-xs text-muted-foreground">{active.length} job{active.length === 1 ? "" : "s"}</span>
+              <span className="font-mono text-xs text-muted-foreground">{inProduction.length} job{inProduction.length === 1 ? "" : "s"}</span>
             </div>
             <div className="mt-4 space-y-3">
-              {active.length === 0 && <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">No videos generating. Your next one will show live progress here.</p>}
-              {active.map((v) => <VideoJob key={v.id} v={v} />)}
+              {inProduction.length === 0 && <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">No videos generating. Your next one will show live progress here.</p>}
+              {inProduction.map((v) => <VideoJob key={v.id} v={v} />)}
             </div>
             {busy && <p className="mt-3 text-[11px] text-muted-foreground">Keep this tab open until rendering finishes.</p>}
           </Panel>
@@ -192,7 +227,7 @@ function Create() {
           </Panel>
           <p className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground"><Mic className="h-3 w-3" /> Atlas narrator · script by {settings.scriptDeployment} · images by {settings.imageDeployment} on Azure OpenAI.</p>
         </div>
-      </div>
+      </div>}
     </Page>
   );
 }

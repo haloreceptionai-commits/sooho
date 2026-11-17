@@ -29,6 +29,6 @@ export const shortsWriterStep = createServerFn({ method: "POST" }).middleware([r
     }
   });
 
-/** Off switch: Shorts use the new writer only when SHORTS_WRITER_V4 is "on" (owner approval gate). */
+/** The new writer is the default; set SHORTS_WRITER_V4 to "off" to disable it. */
 export const shortsWriterEnabled = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
-  .handler(async () => process.env['SHORTS_WRITER_V4'] === 'on');
+  .handler(async () => process.env['SHORTS_WRITER_V4'] !== 'off');

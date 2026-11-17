@@ -13,7 +13,7 @@ const callback = (Route as unknown as { server: { handlers: { GET: (args: { requ
 describe("YouTube callback workspace connection", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    mocks.readState.mockResolvedValue("verified-owner");
+    mocks.readState.mockResolvedValue({ userId: "verified-owner", workspaceId: null });
     mocks.exchangeCode.mockResolvedValue({ refresh_token: "fake-refresh", access_token: "fake-access" });
     mocks.myChannel.mockResolvedValue({ id: "channel", title: "Test channel" });
   });

@@ -13,8 +13,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
-import { Route as AuthenticatedRemixRouteImport } from './routes/_authenticated/remix'
-import { Route as AuthenticatedScriptWriterRouteImport } from './routes/_authenticated/script-writer'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
 import { Route as ApiPublicGenerationRecoveryRouteImport } from './routes/api/public/generation-recovery'
@@ -43,17 +41,6 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedRemixRoute = AuthenticatedRemixRouteImport.update({
-  id: '/remix',
-  path: '/remix',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedScriptWriterRoute =
-  AuthenticatedScriptWriterRouteImport.update({
-    id: '/script-writer',
-    path: '/script-writer',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -103,8 +90,6 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/remix': typeof AuthenticatedRemixRoute
-  '/script-writer': typeof AuthenticatedScriptWriterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
@@ -117,8 +102,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/remix': typeof AuthenticatedRemixRoute
-  '/script-writer': typeof AuthenticatedScriptWriterRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/': typeof AuthenticatedIndexRoute
@@ -134,8 +117,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
-  '/_authenticated/remix': typeof AuthenticatedRemixRoute
-  '/_authenticated/script-writer': typeof AuthenticatedScriptWriterRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -152,8 +133,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/analytics'
-    | '/remix'
-    | '/script-writer'
     | '/settings'
     | '/videos'
     | '/api/public/generation-recovery'
@@ -166,8 +145,6 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/analytics'
-    | '/remix'
-    | '/script-writer'
     | '/settings'
     | '/videos'
     | '/'
@@ -182,8 +159,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/analytics'
-    | '/_authenticated/remix'
-    | '/_authenticated/script-writer'
     | '/_authenticated/settings'
     | '/_authenticated/videos'
     | '/_authenticated/'
@@ -234,20 +209,6 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/remix': {
-      id: '/_authenticated/remix'
-      path: '/remix'
-      fullPath: '/remix'
-      preLoaderRoute: typeof AuthenticatedRemixRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/script-writer': {
-      id: '/_authenticated/script-writer'
-      path: '/script-writer'
-      fullPath: '/script-writer'
-      preLoaderRoute: typeof AuthenticatedScriptWriterRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
@@ -311,8 +272,6 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
-  AuthenticatedRemixRoute: typeof AuthenticatedRemixRoute
-  AuthenticatedScriptWriterRoute: typeof AuthenticatedScriptWriterRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -320,8 +279,6 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
-  AuthenticatedRemixRoute: AuthenticatedRemixRoute,
-  AuthenticatedScriptWriterRoute: AuthenticatedScriptWriterRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedVideosRoute: AuthenticatedVideosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

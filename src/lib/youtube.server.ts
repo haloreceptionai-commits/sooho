@@ -77,18 +77,22 @@ async function hmac(text: string) {
 }
 
 /** Signed, 10-minute state binding the OAuth round-trip to the signed-in owner. */
-export async function makeState(userId: string) {
-  const body = `${userId}.${Date.now() + 600_000}`;
+export async function makeState(userId: string, workspaceId: string) {
+  const body = `${userId}.${workspaceId}.${Date.now() + 600_000}`;
   return `${body}.${await hmac(body)}`;
 }
 
-export async function readState(state: string): Promise<string | null> {
+/** Verifies the signed state. `workspaceId` is null only for links made before workspaces existed. */
+export async function readState(state: string): Promise<{ userId: string; workspaceId: string | null } | null> {
   const parts = state.split(".");
-  if (parts.length !== 3) return null;
-  const [userId, exp, sig] = parts as [string, string, string];
+  if (parts.length !== 3 && parts.length !== 4) return null;
+  const sig = parts.at(-1)!, exp = parts.at(-2)!, signed = parts.slice(0, -1).join(".");
   if (Number(exp) < Date.now()) return null;
-  if ((await hmac(`${userId}.${exp}`)) !== sig) return null;
-  return /^[0-9a-f-]{36}$/.test(userId) ? userId : null;
+  if ((await hmac(signed)) !== sig) return null;
+  const userId = parts[0]!, workspaceId = parts.length === 4 ? parts[1]! : null;
+  const uuid = /^[0-9a-f-]{36}$/;
+  if (!uuid.test(userId) || (workspaceId !== null && !uuid.test(workspaceId))) return null;
+  return { userId, workspaceId };
 }
 
 export function authUrl(state: string) {

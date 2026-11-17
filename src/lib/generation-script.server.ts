@@ -37,7 +37,7 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       await up({ hooks: { best: ex.hook, runnerUp: ex.hook }, checks: [], scriptCheckpoint: saved });
       return saved;
     }
-    if (input.format === 'short' && process.env['SHORTS_WRITER_V4'] === 'on') try {
+    if (input.format === 'short' && process.env['SHORTS_WRITER_V4'] !== 'off') try {
       // Shorts Writer v4 (owner's task): one checkpointed AI call per step, then scenes split word for word.
       const research = [input.reference ? `Inspiration video transcript (research only; never copy its lines): ${input.reference.transcript.slice(0, 4000)}` : '', input.topicSource ? `Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify independently.` : ''].filter(Boolean).join('\n') || undefined;
       const calls = writerCalls((step, args) => api.call(() => directRunner(step, args)), { topic: input.topic, deployment: s.scriptDeployment, durationSec: input.durationSec, kid: advanced, research });

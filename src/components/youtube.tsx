@@ -12,6 +12,7 @@ import { badgeLayout, inkTitleLayout } from "@/lib/thumbnail-text";
 import { generateInkThumbnail } from "@/lib/ink.functions";
 import { INK_HERO } from "@/lib/styles";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveWorkspace } from "@/lib/workspaces";
 
 const MESSAGES: Record<string, string> = {
   connected: "YouTube channel connected", cancelled: "YouTube connection cancelled", expired: "Connection link expired — try again",
@@ -20,26 +21,27 @@ const MESSAGES: Record<string, string> = {
 
 export function YouTubePanel() {
   const status = useServerFn(youtubeStatus), connect = useServerFn(youtubeConnectUrl), disconnect = useServerFn(youtubeDisconnect);
+  const { id: workspaceId, active } = useActiveWorkspace();
   const [s, setS] = useState<{ connected: boolean; channel: string | null } | null>(null);
-  const load = () => void status().then(setS).catch(() => setS({ connected: false, channel: null }));
+  const load = () => { if (!workspaceId) return; setS(null); void status({ data: { workspaceId } }).then(setS).catch(() => setS({ connected: false, channel: null })); };
   useEffect(() => {
     load();
     const r = new URLSearchParams(window.location.search).get("youtube");
     if (r) { (r === "connected" ? toast.success : toast.error)(MESSAGES[r] ?? "YouTube connection failed"); window.history.replaceState(null, "", window.location.pathname); }
-  }, []);
+  }, [workspaceId]);
   const onSite = typeof window !== "undefined" && window.location.hostname === "sooha.io";
   return (
     <Panel className="space-y-3 p-5">
-      <h2 className="flex items-center gap-2 font-bold"><Youtube className="h-4 w-4" /> YouTube</h2>
+      <h2 className="flex items-center gap-2 font-bold"><Youtube className="h-4 w-4" /> YouTube channel{active ? <span className="font-normal text-muted-foreground"> · {active.name}</span> : null}</h2>
       {!s ? <p className="text-sm text-muted-foreground">Checking…</p> : s.connected ? (
         <>
           <p className="text-sm">Connected to <b>{s.channel ?? "your channel"}</b>. Use “Publish” on any finished video.</p>
-          <button className={btnOutline} onClick={() => void disconnect().then(load)}>Disconnect</button>
+          <button className={btnOutline} onClick={() => void disconnect({ data: { workspaceId: workspaceId! } }).then(load)}>Disconnect</button>
         </>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">Connect your channel to publish videos and Shorts straight from My videos.</p>
-          {onSite ? <button className={btnDark} onClick={() => void connect().then((r) => { window.location.href = r.url; })}>Connect YouTube</button>
+          <p className="text-sm text-muted-foreground">Connect this workspace's own channel to publish its videos and Shorts straight from My videos. Other workspaces can use other channels.</p>
+          {onSite ? <button className={btnDark} disabled={!workspaceId} onClick={() => void connect({ data: { workspaceId: workspaceId! } }).then((r) => { window.location.href = r.url; })}>Connect YouTube</button>
             : <p className="text-sm text-warning">Open <a className="underline" href="https://sooha.io/settings">sooha.io/settings</a> to connect — Google only allows that address.</p>}
         </>
       )}
@@ -56,6 +58,8 @@ export function PublishButton({ v, className }: { v: Video; className?: string }
 }
 
 function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
+  const { id: activeId, firstId } = useActiveWorkspace();
+  const workspaceId = v.workspaceId ?? firstId ?? activeId ?? "";
   const start = useServerFn(youtubeStartUpload);
   const setThumb_ = useServerFn(youtubeSetThumbnail);
   const short = v.input.format === "short";
@@ -72,7 +76,7 @@ function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
       if (!blob) throw new Error("Video file not found on this device");
       setPct(0);
       const mime = v.mime ?? blob.type ?? "video/mp4";
-      const { uploadUrl } = await start({ data: { title, description, tags: tags.split(",").map((t) => t.trim()).filter(Boolean), privacy, short, size: blob.size, mime: mime.split(";")[0] ?? "video/mp4", origin: window.location.origin } });
+      const { uploadUrl } = await start({ data: { title, description, tags: tags.split(",").map((t) => t.trim()).filter(Boolean), privacy, short, size: blob.size, mime: mime.split(";")[0] ?? "video/mp4", origin: window.location.origin, workspaceId } });
       const id = await new Promise<string>((res, rej) => {
         const x = new XMLHttpRequest();
         x.open("PUT", uploadUrl);
@@ -84,7 +88,7 @@ function PublishDialog({ v, onClose }: { v: Video; onClose: () => void }) {
       });
       actions.updateVideo(v.id, { youtubeId: id });
       if (thumb) {
-        try { await setThumb_({ data: { videoId: id, jpeg: thumb.split(",")[1] ?? "" } }); }
+        try { await setThumb_({ data: { videoId: id, jpeg: thumb.split(",")[1] ?? "", workspaceId } }); }
         catch (e) { toast.error(e instanceof Error ? e.message : "Thumbnail upload failed"); }
       }
       toast.success("Published to YouTube", { action: { label: "Open", onClick: () => window.open(short ? `https://youtube.com/shorts/${id}` : `https://youtu.be/${id}`, "_blank") } });

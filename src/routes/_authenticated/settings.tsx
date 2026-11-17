@@ -9,6 +9,7 @@ const MODELS = [
 ] as const;
 import { toast } from "sonner";
 import { YouTubePanel } from "@/components/youtube";
+import { cleanName, NAME_MAX, renameWorkspace, useActiveWorkspace } from "@/lib/workspaces";
 import { actions, useStore, STYLES, DEFAULT_SETTINGS, type Settings } from "@/lib/store";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
 
@@ -32,15 +33,30 @@ function Field({ name, children, hint }: { name: string; children: React.ReactNo
 
 function SettingsPage() {
   const saved = useStore((s) => s.settings);
+  const { active } = useActiveWorkspace();
+  const [wsName, setWsName] = useState("");
+  useEffect(() => setWsName(active?.name ?? ""), [active?.id, active?.name]);
+  const saveWsName = async () => {
+    if (!active) return;
+    try { await renameWorkspace(active.id, wsName); toast.success("Workspace renamed"); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not rename the workspace"); }
+  };
   const [f, setF] = useState<Settings>(saved);
   useEffect(() => setF(saved), [saved]);
   const set = <K extends keyof Settings>(k: K, v: Settings[K]) => setF((x) => ({ ...x, [k]: v }));
 
   return (
-    <Page eyebrow="System" title="Settings"
+    <Page eyebrow={active?.name ?? "System"} title="Settings"
       actions={<><button className={btnOutline} onClick={() => { setF(DEFAULT_SETTINGS); toast("Defaults restored — click Save to keep them"); }}><RotateCcw className="h-4 w-4" /> Restore defaults</button>
         <button className={btnDark} onClick={() => { actions.saveSettings(f); toast.success("Settings saved"); }}><Save className="h-4 w-4" /> Save changes</button></>}>
       <div className="grid gap-6 lg:grid-cols-2">
+        <Panel className="space-y-4 p-5">
+          <h2 className="font-bold">This workspace</h2>
+          <Field name="Workspace name" hint="Each workspace has its own videos, analytics and YouTube channel.">
+            <div className="flex gap-2"><input className={input} maxLength={NAME_MAX} value={wsName} onChange={(e) => setWsName(e.target.value)} />
+              <button className={btnOutline} disabled={!active || !cleanName(wsName) || cleanName(wsName) === active.name} onClick={() => void saveWsName()}>Rename</button></div>
+          </Field>
+        </Panel>
+
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Channel</h2>
           <Field name="Channel name"><input className={input} value={f.channelName} onChange={(e) => set("channelName", e.target.value)} /></Field>

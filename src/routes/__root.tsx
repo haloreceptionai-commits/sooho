@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { hydrateStore, syncFromCloud, clearVideos } from "@/lib/store";
+import { loadWorkspaces, clearWorkspaces } from "@/lib/workspaces";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -128,10 +129,11 @@ function RootComponent() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     hydrateStore();
+    void loadWorkspaces();
     void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted()));
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      if (event === "SIGNED_OUT") clearVideos(); else void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted()));
+      if (event === "SIGNED_OUT") { clearVideos(); clearWorkspaces(); } else { void loadWorkspaces(); void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted())); }
       void router.invalidate();
     });
     return () => data.subscription.unsubscribe();

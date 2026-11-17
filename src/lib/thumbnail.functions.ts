@@ -14,11 +14,11 @@ export const generateThumbnail = createServerFn({ method: 'POST' }).middleware([
 
 /** Sets the custom thumbnail on an uploaded video (YouTube requires a verified channel for this). */
 export const youtubeSetThumbnail = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { videoId: string; jpeg: string }) => z.object({ videoId: z.string().regex(/^[A-Za-z0-9_-]{6,20}$/), jpeg: z.string().min(100).max(2_800_000) }).parse(d))
+  .inputValidator((d: { videoId: string; jpeg: string; workspaceId: string }) => z.object({ videoId: z.string().regex(/^[A-Za-z0-9_-]{6,20}$/), jpeg: z.string().min(100).max(2_800_000), workspaceId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: conn } = await supabaseAdmin.from('youtube_connections').select('refresh_token').eq('user_id', context.userId).maybeSingle();
-    if (!conn) throw new Error('Connect your YouTube channel in Settings first');
+    const { data: conn } = await supabaseAdmin.from('youtube_connections').select('refresh_token').eq('user_id', context.userId).eq('workspace_id', data.workspaceId).maybeSingle();
+    if (!conn) throw new Error('Connect this workspace\'s YouTube channel in Settings first');
     const yt = await import('./youtube.server');
     const access = await yt.refreshAccess(conn.refresh_token);
     const bin = Uint8Array.from(atob(data.jpeg), c => c.charCodeAt(0));

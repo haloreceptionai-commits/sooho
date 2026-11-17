@@ -202,7 +202,7 @@ export async function runVideo(id: string, input: VideoInput) {
       up({ hooks: { best: ex.hook, runnerUp: ex.hook }, checks: [], scriptCheckpoint: saved }); await flushVideo(id);
       return saved;
     }
-    if (input.format === 'short' && await withRetry(() => shortsWriterEnabled()).catch(() => false)) try {
+    if (input.format === 'short' && await withRetry(() => shortsWriterEnabled()).catch(() => true)) for (let attempt = 1; attempt <= 3; attempt++) try {
       // Shorts Writer v4 (owner's task): facts -> spine -> hooks -> narrator script -> critic, then scenes split word for word.
       const research = [input.reference ? `Inspiration video transcript (research only; never copy its lines): ${input.reference.transcript.slice(0, 4000)}` : '', input.topicSource ? `Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify independently.` : ''].filter(Boolean).join('\n') || undefined;
       const calls = writerCalls((step, args) => withRetry(() => shortsWriterStep({ data: { step: step as never, args } }), 2, 16000, 8 * 60_000), { topic: input.topic, deployment: s.scriptDeployment, durationSec: input.durationSec, kid: advanced, research });
@@ -212,9 +212,9 @@ export async function runVideo(id: string, input: VideoInput) {
       up({ hooks: { best: v4.writer.hook, runnerUp: v4.writer.rounds[0]?.hooks[1]?.line ?? v4.writer.hook }, checks: v4.gate.blockers, scriptCheckpoint: saved }); await flushVideo(id);
       return saved;
     } catch (e) {
-      // Self-healing: a failed new-writer run falls back to the proven Story Engine instead of stopping the video.
-      console.warn('Shorts Writer v4 failed, using the backup writer:', e);
-      up({ detail: 'New script writer hit a problem — continuing with the backup writer…' });
+      // Self-healing: the new writer is retried twice (each run starts clean); only if all three runs fail does the old Story Engine finish the script instead of stopping the video.
+      console.warn(`Shorts Writer v4 failed (run ${attempt}/3):`, e);
+      up({ detail: attempt < 3 ? `Script writer hit a problem — trying again (${attempt}/2)…` : 'New script writer could not finish — using the backup writer…' });
     }
     // 1) fact check
     up({ detail: "Fact-checking the story…" });

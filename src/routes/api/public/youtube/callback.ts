@@ -8,16 +8,20 @@ export const Route = createFileRoute("/api/public/youtube/callback")({
     const code = url.searchParams.get("code"), state = url.searchParams.get("state");
     if (url.searchParams.get("error") || !code || !state) return back("cancelled");
     const yt = await import("@/lib/youtube.server");
-    const userId = await yt.readState(state);
-    if (!userId) return back("expired");
+    const verified = await yt.readState(state);
+    if (!verified) return back("expired");
+    const userId = verified.userId;
     try {
       const tokens = await yt.exchangeCode(code);
       if (!tokens.refresh_token) return back("no-refresh");
       const channel = await yt.myChannel(tokens.access_token);
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: workspace, error: workspaceError } = await supabaseAdmin
-        .from("workspaces").select("id").eq("user_id", userId)
+      // The workspace must belong to the verified owner; old links without one use the owner's first workspace.
+      let query = supabaseAdmin.from("workspaces").select("id").eq("user_id", userId);
+      if (verified.workspaceId) query = query.eq("id", verified.workspaceId);
+      const { data: workspace, error: workspaceError } = await query
         .order("created_at", { ascending: true }).order("id", { ascending: true }).limit(1).maybeSingle();
+      if (verified.workspaceId && !workspace) return back("failed");
       if (workspaceError) throw workspaceError;
       let workspaceId = workspace?.id;
       if (!workspaceId) {
