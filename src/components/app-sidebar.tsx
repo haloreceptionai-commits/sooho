@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
-import { Sparkles, Clapperboard, Settings, ChevronsLeft, ChevronsRight, ChevronDown, Menu, X, Cpu, PlaySquare, LogOut, BarChart3, Plus, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sparkles, Clapperboard, Settings, ChevronDown, Menu, X, Cpu, PlaySquare, LogOut, BarChart3, Plus, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { createWorkspace, NAME_MAX, setActiveWorkspace, useActiveWorkspace, useWorkspaceVideos, type Workspace } from "@/lib/workspaces";
@@ -13,10 +13,21 @@ const TINTS = ["bg-primary text-primary-foreground", "bg-accent text-accent-fore
 const tint = (w: Workspace, i: number) => TINTS[(i + w.name.length) % TINTS.length]!;
 const initial = (w: Workspace) => (w.name.trim()[0] ?? "W").toUpperCase();
 
+// The nav remembers whether the owner left it as a thin icon rail or a full panel.
+const RAIL_KEY = "chronicle-sidebar-rail";
+
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  useEffect(() => {
+    try { setCollapsed(localStorage.getItem(RAIL_KEY) === "1"); } catch { /* private mode: just start expanded */ }
+  }, []);
+  const toggleRail = () => setCollapsed((c) => {
+    const next = !c;
+    try { localStorage.setItem(RAIL_KEY, next ? "1" : "0"); } catch { /* private mode: the choice just is not kept */ }
+    return next;
+  });
   const navigate = useNavigate();
   const signOut = async () => { await supabase.auth.signOut(); void navigate({ to: "/auth", replace: true }); };
   const { list, active, ready, error } = useActiveWorkspace();
@@ -54,7 +65,7 @@ export function AppSidebar() {
     );
     return (
       <div className="flex h-full flex-col">
-        <div className={`flex h-16 items-center border-b ${c ? "justify-center" : "justify-between px-4"}`}>
+        <div className={`flex items-center border-b ${c ? "flex-col gap-1 py-2" : "h-16 justify-between px-4"}`}>
           <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm"><Clapperboard className="h-4 w-4" /></div>
             {!c && (
@@ -64,7 +75,11 @@ export function AppSidebar() {
               </div>
             )}
           </Link>
-          {isMobile && <button onClick={() => setMobileOpen(false)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-muted"><X className="h-4 w-4" /></button>}
+          {isMobile
+            ? <button onClick={() => setMobileOpen(false)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-muted"><X className="h-4 w-4" /></button>
+            : <button onClick={toggleRail} aria-label={collapsed ? "Open the workspace panel" : "Close the workspace panel"} title={collapsed ? "Open the workspace panel" : "Close the workspace panel"} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+                {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+              </button>}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3" aria-label="Workspaces">
@@ -111,11 +126,6 @@ export function AppSidebar() {
               {!c && <div className="min-w-0 flex-1 leading-tight"><p className="truncate text-sm font-semibold">James</p><p className="truncate text-[11px] text-muted-foreground">{active?.name ?? "No workspace"}</p></div>}
             </div>
             <button onClick={() => void signOut()} title="Sign out" aria-label="Sign out" className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"><LogOut className="h-4 w-4" /></button>
-            {!isMobile && (
-              <button onClick={() => setCollapsed(!collapsed)} title={collapsed ? "Expand" : "Collapse"} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
-                {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
-              </button>
-            )}
           </div>
         </div>
       </div>
