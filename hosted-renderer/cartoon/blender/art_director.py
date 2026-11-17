@@ -836,7 +836,7 @@ class Director:
         if re.search(r'\b(suddenly|boom|bang|crash\w*|explod\w*|exploded|slam\w*|shock\w*|snap\w*|gasp\w*)\b', t): want.append('flash')
         if re.search(r'\b(glitch\w*|hack\w*|virus|error|matrix|digital|cyber\w*|computer|software|AI|robot\w*|signal)\b', t, re.I): want.append('glitch')
         if re.search(r'\b(memory|memories|remember\w*|childhood|nostalg\w*|years ago|once upon|long ago|old days)\b', t): want.append('light_leak')
-        if re.search(r'(flashback|footage|vintage|old photo\w*|black and white|archive\w*|tape)', t): want.append('grain')
+        if re.search(r'\b(flashback|footage|vintage|old photo\w*|black and white|archive\w*|tape)\b', t): want.append('grain')
         for w in want:
             if len(ov) < 4 and w not in ov: ov.append(w)
 
