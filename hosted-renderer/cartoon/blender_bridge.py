@@ -3,7 +3,7 @@ declarative Blender shot (via the step-6 shot_director compiler), renders one fr
 GPU, upscales to 1080x1920 and burns in the same captions as the web engine. Output files and the
 checkpoint use capture.py's format and input hash, so joining, mixing and QA are unchanged.
 """
-import argparse, hashlib, json, math, os, re, subprocess, sys, tempfile
+import argparse, hashlib, json, math, os, re, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -206,43 +206,88 @@ def render_range(manifest_path, web, out, first, last, card_dir):
         want = [f for f in range(max(first, a), min(last, b - 1) + 1) if not valid_frame(out / f'f{f:06d}.jpg', saved['frames'].get(str(f)))]
         if want: jobs.append((k, i, a, shot, want))
 
-    def run(job):
+    def shot_for(job):
         k, i, a, shot, want = job
         shot = dict(shot); shot['engine'] = eng['SHOT_ENGINE']; shot['samples'] = samples
         if os.environ.get('BLENDER_SAFE') == '1':   # last-resort retry: the same shot without the extra dressing, effects and overlays
             if shot.get('place'): shot['place'] = {**shot['place'], 'items': []}
             shot['effects'] = []; shot['overlay'] = []
-        n = round(shot['duration'] * 30)
-        local = {f: min(n, f - a + 1) for f in want}
-        shot['frames'] = sorted(set(local.values()))
-        with tempfile.TemporaryDirectory() as tmp:
-            sp = Path(tmp) / 'shot.json'; sp.write_text(json.dumps(shot))
-            env = {**os.environ, **eng, 'CARD_DIR': card_dir or ''}
-            r = subprocess.run([blender, '-b', '--factory-startup', '--python-exit-code', '1', '--python', str(ROOT / 'blender' / 'render_shot.py'), '--', str(sp), tmp],
-                               env=env, capture_output=True, text=True, timeout=1500)
-            if r.returncode != 0: raise RuntimeError(f'Blender segment {k} (shot {i}) failed: {(r.stdout + r.stderr)[-1500:]}')
-            for f in want:
-                png = Path(tmp) / f'f_{local[f]:05d}.png'
-                img = Image.open(png).convert('RGB').resize((1080, 1920), Image.LANCZOS)
-                a = dip_alpha(bounds, f)
-                if a > 0: img = Image.blend(img, Image.new('RGB', img.size, CREAM), a)
-                ev = ui_overlays.active(ui_events, f)
-                if ev:
-                    try: img = ui_overlays.draw(img, ui_events, f, ui_overlays.target_px(shot, local[f], img.size) if ev['kind'] == 'highlight' else None)
-                    except Exception as e: print(json.dumps({'ui_skipped': ev['kind'], 'why': str(e)[:200]}), flush=True)
-                img = burn(img, caption_at(m, f), cap_style)
-                file = out / f'f{f:06d}.jpg'; tmpf = file.with_suffix(f'.{k}.tmp')
-                img.save(tmpf, 'JPEG', quality=93)
-                meta = {'sha256': hashlib.sha256(tmpf.read_bytes()).hexdigest()}
-                tmpf.replace(file)
-                with lock: saved['frames'][str(f)] = meta
-            with lock: atomic_json(ck, saved)
-            print(json.dumps({'blender_segment': k, 'shot': i, 'frames': len(want)}), flush=True)
+        return shot
 
-    # Two Blender processes per machine: one builds its scene on the CPU while the other draws on the card.
-    lanes = max(1, int(os.environ.get('BLENDER_LANES', '2')))
-    with ThreadPoolExecutor(lanes) as pool:
-        for fut in [pool.submit(run, j) for j in jobs]: fut.result()
+    def blender_run(sp, outdir, env, what):
+        r = subprocess.run([blender, '-b', '--factory-startup', '--python-exit-code', '1', '--python', str(ROOT / 'blender' / 'render_shot.py'), '--', str(sp), str(outdir)],
+                           env=env, capture_output=True, text=True, timeout=1500)
+        if r.returncode != 0: raise RuntimeError(f'Blender {what} failed: {(r.stdout + r.stderr)[-1500:]}')
+        return r.stdout
+
+    # The scene build (importing models, rigging, keyframing) is single-threaded CPU work that used to keep the GPU waiting. It now runs ahead on
+    # spare CPU cores into a saved .blend; the GPU lanes only open the file and draw, and finished frames are post-processed on a third pool.
+    cpus = os.cpu_count() or 4
+    split = os.environ.get('BLEND_SPLIT', '1') != '0'
+    lanes = max(1, int(os.environ.get('BLENDER_LANES', '2')))                       # GPU drawing processes
+    bake_lanes = max(1, int(os.environ.get('BAKE_LANES', str(max(2, min(6, cpus - 2))))))  # CPU scene builders
+    post_lanes = max(1, int(os.environ.get('POST_LANES', '3')))                      # upscale, captions, UI, JPEG
+    work = Path(tempfile.mkdtemp(prefix='bridge-'))
+
+    def bake(job):
+        k = job[0]; shot = shot_for(job); d = work / f'seg-{k}'; d.mkdir(parents=True, exist_ok=True)
+        (d / 'shot.json').write_text(json.dumps(shot))
+        t = time.time()
+        blender_run(d / 'shot.json', d, {**os.environ, **eng, 'CYCLES_DEVICE': 'CPU', 'BLEND_MODE': 'bake', 'CARD_DIR': card_dir or ''}, f'bake of segment {k}')
+        print(json.dumps({'baked_segment': k, 'seconds': round(time.time() - t, 1)}), flush=True)
+        return d / 'scene.blend'
+
+    def draw(job, baked):
+        """Draws the wanted frames into a fresh folder; returns (folder, shot, local frame numbers). Falls back to build-and-draw in one process if the bake failed."""
+        k, i, a0, _, want = job
+        shot = shot_for(job); n = round(shot['duration'] * 30)
+        local = {f: min(n, f - a0 + 1) for f in want}; shot['frames'] = sorted(set(local.values()))
+        tmp = Path(tempfile.mkdtemp(prefix=f'draw-{k}-', dir=work)); sp = tmp / 'shot.json'; sp.write_text(json.dumps(shot))
+        env = {**os.environ, **eng, 'CARD_DIR': card_dir or ''}
+        blend = None
+        if baked is not None:
+            try: blend = baked.result()
+            except Exception as e: print(json.dumps({'bake_failed_using_single_process': k, 'why': str(e)[-300:]}), flush=True)
+        if blend is not None and blend.exists():
+            try: blender_run(sp, tmp, {**env, 'BLEND_MODE': 'render', 'BLEND_FILE': str(blend)}, f'draw of segment {k} (shot {i})')
+            except Exception as e:
+                print(json.dumps({'draw_from_blend_failed_using_single_process': k, 'why': str(e)[-300:]}), flush=True)
+                blender_run(sp, tmp, env, f'segment {k} (shot {i})')
+        else:
+            blender_run(sp, tmp, env, f'segment {k} (shot {i})')
+        return tmp, shot, local
+
+    def post(job, drawn):
+        k, i, a0, _, want = job; tmp, shot, local = drawn
+        for f in want:
+            img = Image.open(tmp / f'f_{local[f]:05d}.png').convert('RGB').resize((1080, 1920), Image.LANCZOS)
+            alpha = dip_alpha(bounds, f)
+            if alpha > 0: img = Image.blend(img, Image.new('RGB', img.size, CREAM), alpha)
+            ev = ui_overlays.active(ui_events, f)
+            if ev:
+                try: img = ui_overlays.draw(img, ui_events, f, ui_overlays.target_px(shot, local[f], img.size) if ev['kind'] == 'highlight' else None)
+                except Exception as e: print(json.dumps({'ui_skipped': ev['kind'], 'why': str(e)[:200]}), flush=True)
+            img = burn(img, caption_at(m, f), cap_style)
+            file = out / f'f{f:06d}.jpg'; tmpf = file.with_suffix(f'.{k}.tmp')
+            img.save(tmpf, 'JPEG', quality=93)
+            meta = {'sha256': hashlib.sha256(tmpf.read_bytes()).hexdigest()}
+            tmpf.replace(file)
+            with lock: saved['frames'][str(f)] = meta
+        with lock: atomic_json(ck, saved)
+        shutil.rmtree(tmp, ignore_errors=True); shutil.rmtree(work / f'seg-{k}', ignore_errors=True)
+        print(json.dumps({'blender_segment': k, 'shot': i, 'frames': len(want)}), flush=True)
+
+    t_all = time.time()
+    try:
+        with ThreadPoolExecutor(bake_lanes) as bakers, ThreadPoolExecutor(lanes) as drawers, ThreadPoolExecutor(post_lanes) as posters:
+            bakes = {j[0]: bakers.submit(bake, j) for j in jobs} if split else {}
+            def one(job):
+                drawn = draw(job, bakes.get(job[0]))
+                return posters.submit(post, job, drawn)
+            for fut in [f.result() for f in [drawers.submit(one, j) for j in jobs]]: fut.result()
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    print(json.dumps({'bridge_seconds': round(time.time() - t_all, 1), 'segments': len(jobs), 'split': split, 'bake_lanes': bake_lanes, 'draw_lanes': lanes}), flush=True)
 
 
 if __name__ == '__main__':

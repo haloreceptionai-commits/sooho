@@ -528,13 +528,8 @@ def build_props(shot):
         model({'id': p['id'], 'pos': [p['pos'][0], p['pos'][1], 0], 'height': p.get('height', 1), 'yaw': p.get('yaw', 0)})
 
 
-def main():
-    argv = sys.argv[sys.argv.index('--') + 1:]
-    shot = validate_shot(json.load(open(argv[0]))); out = argv[1]; os.makedirs(out, exist_ok=True)
-    bpy.ops.wm.read_factory_settings(use_empty=True)
-    sc = bpy.context.scene
-    if not sc.world: sc.world = bpy.data.worlds.new('w')
-    sc.world.use_nodes = True
+def configure_render(sc, shot):
+    """Engine, device, samples and output size: used when a scene is built here and when a baked .blend is opened on the GPU machine."""
     engine = os.environ.get('SHOT_ENGINE') or shot.get('engine', 'eevee')
     if engine == 'eevee':
         # Blender 4.2 calls it EEVEE_NEXT; 4.5+/5.x renamed it back to EEVEE. Optional knobs differ by version.
@@ -574,6 +569,40 @@ def main():
     W, H = shot.get('size', [1080, 1920]); sc.render.resolution_x = W; sc.render.resolution_y = H
     sc.render.resolution_percentage = 100; fps = shot.get('fps', 30); sc.render.fps = fps
     sc.render.image_settings.file_format = 'PNG'
+    return fps
+
+
+def render_frames(sc, shot, out, n):
+    only = shot.get('frames')  # optional subset for stills/tests
+    t0 = time.time()
+    if only:
+        for f in only:
+            sc.frame_set(f); sc.render.filepath = os.path.join(out, f'f_{f:05d}'); bpy.ops.render.render(write_still=True)
+    else:
+        bpy.ops.render.render(animation=True)
+    print(json.dumps({'frames': len(only) if only else n, 'seconds': round(time.time() - t0, 1)}))
+
+
+def render_from_blend(shot, out):
+    """GPU half of the split: open the scene a CPU machine already built and only draw the frames."""
+    t0 = time.time(); bpy.ops.wm.open_mainfile(filepath=os.environ['BLEND_FILE']); sc = bpy.context.scene
+    configure_render(sc, shot); n = sc.frame_end
+    sc.render.filepath = os.path.join(out, 'f_#####')
+    print(json.dumps({'opened_seconds': round(time.time() - t0, 1)}), flush=True)
+    render_frames(sc, shot, out, n)
+
+
+def main():
+    t_start = time.time()
+    argv = sys.argv[sys.argv.index('--') + 1:]
+    shot = validate_shot(json.load(open(argv[0]))); out = argv[1]; os.makedirs(out, exist_ok=True)
+    mode = os.environ.get('BLEND_MODE', '')
+    if mode == 'render': return render_from_blend(shot, out)
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    sc = bpy.context.scene
+    if not sc.world: sc.world = bpy.data.worlds.new('w')
+    sc.world.use_nodes = True
+    fps = configure_render(sc, shot)
     place = shot.get('place')
     if place and place['terrain'] not in KIT_TERRAINS:
         from place_modules import build_place
@@ -623,15 +652,12 @@ def main():
         from composition import enforce
         enforce(sc, shot, scenery, [c for c in cards if c is not None], roots, out)
     sc.render.filepath = os.path.join(out, 'f_#####')
-    only = shot.get('frames')  # optional subset for stills/tests
-    t0 = time.time()
-    if only:
-        for f in only:
-            sc.frame_set(f); sc.render.filepath = os.path.join(out, f'f_{f:05d}'); bpy.ops.render.render(write_still=True)
-    else:
-        bpy.ops.render.render(animation=True)
-    print(json.dumps({'frames': len(only) if only else n, 'seconds': round(time.time() - t0, 1)}))
-
+    print(json.dumps({'built_seconds': round(time.time() - t_start, 1)}), flush=True)
+    if mode == 'bake':   # CPU half of the split: save the finished scene (every motion is keyframed) and stop; a GPU machine draws it later
+        bpy.ops.wm.save_as_mainfile(filepath=os.path.join(out, 'scene.blend'), compress=False)
+        print(json.dumps({'baked_seconds': round(time.time() - t_start, 1)}), flush=True)
+        return
+    render_frames(sc, shot, out, n)
 
 if __name__ == '__main__':
     main()

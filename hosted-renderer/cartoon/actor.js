@@ -158,8 +158,23 @@ try {
     // Each explicit retry elects a fresh assembler; the previous attempt's permanent claim must not block recovery.
     if(!(await store.claim(`assemble-${hash(Buffer.from(input.callbackToken))}`))){await platform.output({status:'rendered-share'});await platform.exit();process.exit(0);}
     const deadline=Date.now()+Math.max(90,Math.ceil(m.narration.samples/48000/60)*6)*60*1000; // long-form: ~6 min of budget per narrated minute
+    // Join while drawing: batches other machines have finished are downloaded now, so the final join only has the last few left.
+    const prefetched=new Set();
+    async function prefetch(first,last){
+      const part=await store.getValue(`part-${first}`);if(!part||!part.frames)return;
+      const ids=[];for(let f=first;f<=last;f++)ids.push(f);
+      await pool(ids,16,async f=>{
+        const flat=path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`),want=part.frames[String(f)]?.sha256;
+        const have=await readFile(flat).catch(()=>null);if(have&&hash(have)===want)return;
+        const local=await readFile(path.join(framesDir,`batch-${first}`,`f${String(f).padStart(6,'0')}.jpg`)).catch(()=>null);
+        const bytes=local&&hash(local)===want?local:await store.getValue(`frame-${f}`);
+        if(Buffer.isBuffer(bytes)&&hash(bytes)===want)await writeFile(flat,bytes);
+      });
+      prefetched.add(first);
+    }
     for(;;){
       const missing=[];for(const b of batches)if(!(await hasPart(b[0])))missing.push(b);
+      try{for(const b of batches)if(!prefetched.has(b[0])&&!missing.includes(b))await prefetch(b[0],b[1]);}catch(e){console.warn('prefetch skipped',String(e?.message).slice(0,120));}
       if(!missing.length)break;
       if(Date.now()>deadline)throw Error('Parallel frame batches did not finish');
       for(const b of missing)if(await store.claim(`claim-${attempt}-${b[0]}`,STALE)){await guard(85);await renderBatch(b);}
@@ -175,6 +190,8 @@ try {
     // Frames this replica drew are already on disk; only fetch the rest, many at a time.
     const tFetch=Date.now();
     await pool(Array.from({length:total},(_,f)=>f),32,async f=>{
+      const flat=path.join(framesDir,`f${String(f).padStart(6,'0')}.jpg`);
+      if((await readFile(flat).then(b=>hash(b)===merged.frames[String(f)]?.sha256).catch(()=>false)))return;   // already fetched while the other machines were drawing
       const local=path.join(framesDir,`batch-${batches.find(([a,b])=>f>=a&&f<=b)[0]}`,`f${String(f).padStart(6,'0')}.jpg`);
       let bytes=await readFile(local).catch(()=>null);
       if(!bytes||hash(bytes)!==merged.frames[String(f)]?.sha256)bytes=await store.getValue(`frame-${f}`);
