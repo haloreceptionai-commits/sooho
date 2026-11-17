@@ -17,26 +17,32 @@ async function ytGet<T>(access: string, path: string): Promise<T> {
 export type YtVideo = { id: string; title: string; thumb: string; published: string; views: number; likes: number; comments: number; duration: string };
 
 /** Channel totals plus the latest 50 uploads with their public stats. */
-export async function channelAnalytics(access: string) {
+export async function channelAnalytics(access: string, allUploads = false) {
   const ch = await ytGet<{ items?: { id: string; snippet: { title: string; thumbnails?: { default?: { url: string } } }; statistics: Record<string, string>; contentDetails: { relatedPlaylists: { uploads: string } } }[] }>(
     access, "channels?part=snippet,statistics,contentDetails&mine=true");
   const c = ch.items?.[0];
   if (!c) throw new Error("No YouTube channel found on this account");
-  const pl = await ytGet<{ items?: { contentDetails: { videoId: string } }[] }>(access, `playlistItems?part=contentDetails&maxResults=50&playlistId=${c.contentDetails.relatedPlaylists.uploads}`);
-  const ids = (pl.items ?? []).map((i) => i.contentDetails.videoId);
+  const ids: string[] = [];
+  let pageToken: string | undefined;
+  do {
+    const pl: { items?: { contentDetails: { videoId: string } }[]; nextPageToken?: string } = await ytGet(access,
+      `playlistItems?part=contentDetails&maxResults=50&playlistId=${encodeURIComponent(c.contentDetails.relatedPlaylists.uploads)}${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ""}`);
+    ids.push(...(pl.items ?? []).map((i) => i.contentDetails.videoId));
+    pageToken = allUploads ? pl.nextPageToken : undefined;
+  } while (pageToken);
   let videos: YtVideo[] = [];
-  if (ids.length) {
+  for (let i = 0; i < ids.length; i += 50) {
     const v = await ytGet<{ items?: { id: string; snippet: { title: string; publishedAt: string; thumbnails?: { medium?: { url: string } } }; statistics: Record<string, string>; contentDetails: { duration: string } }[] }>(
-      access, `videos?part=snippet,statistics,contentDetails&id=${ids.join(",")}`);
-    videos = (v.items ?? []).map((x) => ({
+      access, `videos?part=snippet,statistics,contentDetails&id=${ids.slice(i, i + 50).join(",")}`);
+    videos.push(...(v.items ?? []).map((x) => ({
       id: x.id, title: x.snippet.title, thumb: x.snippet.thumbnails?.medium?.url ?? "", published: x.snippet.publishedAt,
       views: Number(x.statistics["viewCount"] ?? 0), likes: Number(x.statistics["likeCount"] ?? 0), comments: Number(x.statistics["commentCount"] ?? 0),
       duration: x.contentDetails.duration,
-    }));
+    })));
   }
   return {
     channel: { id: c.id, title: c.snippet.title, thumb: c.snippet.thumbnails?.default?.url ?? "",
-      subscribers: Number(c.statistics["subscriberCount"] ?? 0), views: Number(c.statistics["viewCount"] ?? 0), videos: Number(c.statistics["videoCount"] ?? 0) },
+      subscribers: Number(c.statistics["subscriberCount"] ?? 0), ...(allUploads && c.statistics["hiddenSubscriberCount"] === "true" ? { subscribers: null } : {}), views: Number(c.statistics["viewCount"] ?? 0), videos: Number(c.statistics["videoCount"] ?? 0) },
     videos,
   };
 }

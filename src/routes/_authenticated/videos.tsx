@@ -87,7 +87,7 @@ function Videos() {
         <label className={`${btnOutline} cursor-pointer`}><Upload className="h-4 w-4" /> Import video
           <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void importVideo(f); }} />
         </label>
-        <Link to="/" className={btnPrimary}><Plus className="h-4 w-4" /> New video</Link>
+        <Link to="/create" className={btnPrimary}><Plus className="h-4 w-4" /> New video</Link>
       </div>}>
       <RunningSteps videos={videos} />
       {inProgress.length > 0 && (
@@ -101,7 +101,7 @@ function Videos() {
       </div>
 
       {done.length === 0 ? (
-        <Empty icon={Clapperboard} title="No finished videos yet" desc="Generate your first video and it will appear here." action={<Link to="/" className={btnPrimary}>Create a video</Link>} />
+        <Empty icon={Clapperboard} title="No finished videos yet" desc="Generate your first video and it will appear here." action={<Link to="/create" className={btnPrimary}>Create a video</Link>} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {done.map((v) => (

@@ -83,7 +83,7 @@ function AnalyticsPage() {
     <Page eyebrow={active?.name ?? "YouTube"} title="Analytics" desc={`${d.channel.title} · last ${d.videos.length} uploads`}
       actions={<button className={btnOutline} onClick={() => void q.refetch()} disabled={q.isFetching}><RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} /> Refresh</button>}>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi icon={Users} label="Subscribers" value={fmt(d.channel.subscribers)} />
+        <Kpi icon={Users} label="Subscribers" value={d.channel.subscribers === null ? "Hidden" : fmt(d.channel.subscribers)} />
         <Kpi icon={Eye} label="Total views" value={fmt(d.channel.views)} sub={`${fmt(stats.week)} on this week's uploads`} />
         <Kpi icon={PlaySquare} label="Videos" value={fmt(d.channel.videos)} sub={`${stats.shorts} Shorts · ${stats.long} long-form`} />
         <Kpi icon={TrendingUp} label="Avg views / video" value={fmt(stats.avg)} />

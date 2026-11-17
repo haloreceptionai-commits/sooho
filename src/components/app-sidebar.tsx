@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Sparkles, Clapperboard, Settings, ChevronDown, Menu, X, Cpu, PlaySquare, LogOut, BarChart3, Plus, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Sparkles, Clapperboard, Settings, ChevronDown, Menu, X, Cpu, PlaySquare, LogOut, BarChart3, Plus, Loader2, PanelLeftClose, PanelLeftOpen, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { createWorkspace, NAME_MAX, setActiveWorkspace, useActiveWorkspace, useWorkspaceVideos, type Workspace } from "@/lib/workspaces";
 
-type To = "/" | "/videos" | "/settings" | "/analytics";
+type To = "/create" | "/videos" | "/settings" | "/analytics";
 
 // A small, stable colour per workspace so channels are easy to tell apart at a glance.
 const TINTS = ["bg-primary text-primary-foreground", "bg-accent text-accent-foreground", "bg-success/15 text-success", "bg-warning/15 text-warning", "bg-muted text-foreground"];
@@ -36,13 +36,13 @@ export function AppSidebar() {
   const done = videos.filter((v) => v.status === "done").length;
 
   const items: { to: To; icon: typeof Sparkles; label: string; badge?: number; live?: boolean }[] = [
-    { to: "/", icon: Sparkles, label: "Create video", badge: running, live: running > 0 },
+    { to: "/create", icon: Sparkles, label: "Create video", badge: running, live: running > 0 },
     { to: "/videos", icon: PlaySquare, label: "My videos", badge: done },
     { to: "/analytics", icon: BarChart3, label: "Analytics" },
     { to: "/settings", icon: Settings, label: "Settings" },
   ];
 
-  const pick = (w: Workspace) => { setActiveWorkspace(w.id); setMobileOpen(false); void navigate({ to: "/" }); };
+  const pick = (w: Workspace) => { setActiveWorkspace(w.id); setMobileOpen(false); void navigate({ to: "/analytics" }); };
 
   const body = (isMobile: boolean) => {
     const c = collapsed && !isMobile;
@@ -83,6 +83,10 @@ export function AppSidebar() {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3" aria-label="Workspaces">
+          <Link to="/" activeOptions={{ exact: true }} onClick={() => setMobileOpen(false)} title={c ? "Dashboard" : undefined}
+            className={`mb-4 flex items-center gap-2.5 rounded-md py-2 text-sm font-semibold hover:bg-muted data-[status=active]:bg-accent data-[status=active]:text-accent-foreground ${c ? "justify-center" : "px-2.5"}`}>
+            <LayoutDashboard className="h-4 w-4 shrink-0" />{!c && "Dashboard"}
+          </Link>
           {!c && <p className="px-2 pb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Workspaces</p>}
           {!ready && <p className="px-2 py-3 text-xs text-muted-foreground">Loading workspaces…</p>}
           {ready && error && <p className="px-2 py-3 text-xs text-destructive">{error}</p>}

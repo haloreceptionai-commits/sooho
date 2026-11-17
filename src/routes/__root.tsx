@@ -133,11 +133,11 @@ function RootComponent() {
     void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted()));
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      if (event === "SIGNED_OUT") { clearVideos(); clearWorkspaces(); } else { void loadWorkspaces(); void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted())); }
+      if (event === "SIGNED_OUT") { clearVideos(); clearWorkspaces(); queryClient.removeQueries({ queryKey: ["workspace-dashboard"] }); } else { void loadWorkspaces(); void syncFromCloud().then(() => import("@/lib/pipeline").then((m) => m.resumeInterrupted())); }
       void router.invalidate();
     });
     return () => data.subscription.unsubscribe();
-  }, [router]);
+  }, [router, queryClient]);
   useEffect(() => {
     const timer = setInterval(() => { void syncFromCloud(); }, 15_000);
     return () => clearInterval(timer);
