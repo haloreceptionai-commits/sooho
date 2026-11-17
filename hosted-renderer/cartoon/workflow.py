@@ -12,6 +12,7 @@ from pathlib import Path
 import numpy as np
 from capture import atomic_json, fingerprint
 from stems import synthesize
+import sound_lib
 from mix import mix_stems, read_pcm
 
 def jsround(x):
@@ -90,8 +91,14 @@ def main():
     for shot in m['shots']:
         for e in shot['events']:
             cues.append({'frame':jsround(m['words'][e['word']]['start']*30)-e['lead'],'kind':e['kind']})
-    music,sfx=synthesize(len(narration),a.twist_frame,cues,advanced=m.get('advancedEdit')==1)
-    mixed,report=mix_stems(narration,music,sfx,rate,advanced=m.get('advancedEdit')==1)
+    advanced=m.get('advancedEdit')==1;mood=None
+    if advanced:
+        # Places call for ambient beds, and the script's own words pick the music bed (the original score unless one mood clearly dominates).
+        cues+=sound_lib.ambience_plan(m['shots'],jsround(len(narration)/48000*30))
+        mood=sound_lib.pick_mood(' '.join(w['text'] for w in m['words']),m.get('music'))
+    music,sfx=synthesize(len(narration),a.twist_frame,cues,advanced=advanced,mood=mood)
+    mixed,report=mix_stems(narration,music,sfx,rate,advanced=advanced)
+    report['music_mood']=mood or 'quirky'
     np.save(work/'mix.npy',mixed);atomic_json(work/'mix-report.json',report)
     stage('encode_qa')
     run(sys.executable,str(ROOT/'finish.py'),'--frames',str(frames),'--mix',str(work/'mix.npy'),'--out',str(work/'output.mp4'))

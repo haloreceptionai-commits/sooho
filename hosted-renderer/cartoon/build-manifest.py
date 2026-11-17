@@ -2,6 +2,7 @@
 import argparse, hashlib, json, re, wave, math
 from pathlib import Path
 from camera_fit import fit_camera_keys
+from sound_words import WORD_SOUNDS
 
 def jsround(x):
     # Match JavaScript Math.round so frame counts agree with the scene validator (106.5 -> 107).
@@ -146,6 +147,7 @@ def sentence_shots(d,words,first,last,start,end,sfx,previous):
             if first+c['word']<last: events.append({'word':first+c['word'],'lead':0,'kind':c['kind']})
         for wi in range(first,last):
             kind_s=next((k for stem,k in AUTO_SOUNDS if words[wi]['text'].startswith(stem) and not (ADVANCED and stem in ('gold','coin','storm','crowd'))),None)
+            if not kind_s and ADVANCED: kind_s=WORD_SOUNDS.get(words[wi]['text'])
             if kind_s: events.append({'word':wi,'lead':0,'kind':kind_s})
         if mood=='reveal' and not ADVANCED: events.append({'word':first,'lead':0,'kind':'reveal'})
         if move=='whip': events.append({'word':first,'lead':0,'kind':'whoosh'})

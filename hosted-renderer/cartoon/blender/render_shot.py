@@ -13,7 +13,7 @@ from mathutils import Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from shot_schema import validate_shot  # noqa: E402
-from set_library import build_set, dress_mine as library_mine, surface
+from set_library import build_set, dress_mine as library_mine, surface, hide_engulfing
 from characters import build_character
 from story_objects import build_object
 from verify_characters import verify_characters
@@ -616,6 +616,7 @@ def main():
             if o.type == 'LIGHT' and o.data.type == 'SUN': o.data.color = (min(1.0, o.data.color[0] * tr), min(1.0, o.data.color[1] * tg), min(1.0, o.data.color[2] * tb))
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
+    bpy.context.view_layer.update(); hide_engulfing([Vector(shot['camera']['from']), Vector(shot['camera'].get('to', shot['camera']['from']))])
     cards = [build_card(cd, sc.camera, shot['duration'], fps) for cd in shot.get('cards', [])]
     if not place: build_backdrop(shot, sc.camera)  # v3 places are real 3D; painted backdrops are legacy only
     if shot.get('composition'):

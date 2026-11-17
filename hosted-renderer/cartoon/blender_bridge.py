@@ -12,6 +12,7 @@ from animals import ANIMAL  # noqa: E402
 from shot_director import compile_one, ZONES  # noqa: E402
 from shot_schema import validate_shot  # noqa: E402
 from place_spec import compile_place, LIGHTING as PLACE_LIGHT, smooth_story_time  # noqa: E402
+import ui_overlays  # noqa: E402
 
 # Old-engine worlds -> Blender set kits (+ forced lighting).
 WORLD = {'ship': ('ship_deck', None), 'storm_sea': ('ship_deck', 'rain'), 'town': ('village', None), 'market': ('street', None),
@@ -135,10 +136,10 @@ def caption_at(m, f):
     g = i - ((i - first) % 3)
     last = next((k for k, w in enumerate(W) if round(w['start'] * 30) >= shot['end']), len(W))
     return [{'text': m['caption_words'][k], 'key': (k == shot['keyword']) if shot.get('keyword') is not None else k == i, 'live': k == i,
-             'shown': W[k]['start'] <= t + .05} for k in range(g, min(last, g + 3))]
+             'shown': W[k]['start'] <= t + .05, 'age': f - round(W[k]['start'] * 30)} for k in range(g, min(last, g + 3))]
 
 
-def burn(img, words):
+def burn_legacy(img, words):
     from PIL import ImageDraw, ImageFont
     shown = [w for w in words or [] if w['shown']]
     if not shown: return img
@@ -155,6 +156,13 @@ def burn(img, words):
         d.text((x, y), t, font=font, anchor='lm', fill=(255, 212, 0) if w['key'] else (255, 255, 255), stroke_width=max(2, round(size * .1)), stroke_fill=(0, 0, 0))
         x += wd + gap
     return img
+
+
+def burn(img, words, style='bold'):
+    """Caption templates (bold, pop, box, neon, karaoke): see ui_overlays.burn_caption. Never stops a paid render over a styling slip."""
+    try: return ui_overlays.burn_caption(img, words, style)
+    except Exception as e:
+        print(json.dumps({'caption_fallback': str(e)[:200]}), flush=True); return burn_legacy(img, words)
 
 
 def segments(m, cards=()):
@@ -186,6 +194,10 @@ def render_range(manifest_path, web, out, first, last, card_dir):
     if saved['input_hash'] != signature: raise ValueError('Inputs changed; stale frames cannot resume')
     cards = set(os.listdir(card_dir)) if card_dir and os.path.isdir(card_dir) else set()
     bounds = dip_frames(m)
+    ui_events, cap_style = [], ui_overlays.caption_style(m)
+    if os.environ.get('UI_OVERLAYS', '1') != '0':
+        try: ui_events = ui_overlays.plan(m)
+        except Exception as e: print(json.dumps({'ui_plan_skipped': str(e)[:200]}), flush=True)
     blender = os.environ.get('BLENDER_BIN', '/opt/blender/blender')
     lock = threading.Lock(); eng = engine_env()
     samples = int(os.environ.get('BLENDER_SAMPLES', '16' if eng['SHOT_ENGINE'] == 'eevee' else '5'))  # Cycles + denoiser: 5 samples measured identical to 10
@@ -211,7 +223,11 @@ def render_range(manifest_path, web, out, first, last, card_dir):
                 img = Image.open(png).convert('RGB').resize((1080, 1920), Image.LANCZOS)
                 a = dip_alpha(bounds, f)
                 if a > 0: img = Image.blend(img, Image.new('RGB', img.size, CREAM), a)
-                img = burn(img, caption_at(m, f))
+                ev = ui_overlays.active(ui_events, f)
+                if ev:
+                    try: img = ui_overlays.draw(img, ui_events, f, ui_overlays.target_px(shot, local[f], img.size) if ev['kind'] == 'highlight' else None)
+                    except Exception as e: print(json.dumps({'ui_skipped': ev['kind'], 'why': str(e)[:200]}), flush=True)
+                img = burn(img, caption_at(m, f), cap_style)
                 file = out / f'f{f:06d}.jpg'; tmpf = file.with_suffix(f'.{k}.tmp')
                 img.save(tmpf, 'JPEG', quality=93)
                 meta = {'sha256': hashlib.sha256(tmpf.read_bytes()).hexdigest()}

@@ -170,6 +170,22 @@ def fit_subject(cam, cast, kind, indoor=False):
             target_h = math.sqrt(max(want * want - dz * dz, 0.9)); k = target_h / hd
             cam['from'] = [round(sx + hx * k, 3), round(sy + hy * k, 3), round(max(0.4, subj[2] + dz), 3)]
     return cam
+CLOSE_LENS, CLOSE_FSTOP, XCLOSE_LENS, XCLOSE_FSTOP = 30, 5.0, 45, 3.6
+
+
+def rule_of_thirds(cam, side):
+    """Put a lone subject on a third of the frame instead of dead centre, so the place shows beside them (the benchmark close-ups do this):
+    the aim point slides sideways by a third of the half-width of the frame at the subject's distance. Moves keep the same offset."""
+    f, la = cam['from'], cam['look_at']; dx, dy = la[0] - f[0], la[1] - f[1]; d = math.hypot(dx, dy)
+    if d < 1e-3: return cam
+    tan_half = math.tan(math.atan(18.0 / max(10.0, cam.get('lens', 35)))); half_w = tan_half * 9 / 16 * d
+    rx, ry = dy / d, -dx / d                      # the camera's right
+    off = -side * half_w / 3
+    cam['look_at'] = [round(la[0] + rx * off, 3), round(la[1] + ry * off, 3), la[2]]
+    if 'look_to' in cam: cam['look_to'] = [round(cam['look_to'][0] + rx * off, 3), round(cam['look_to'][1] + ry * off, 3), cam['look_to'][2]]
+    return cam
+
+
 SIZE = (720, 1280)  # upscaled to 1080x1920; measured same look as 810x1440 at ~45% less GPU time
 # ---------------------------------------------------------------- locations
 _RING = {'center': ((0, -1), 90), 'left': ((-1.6, 1.8), 125), 'right': ((2.0, 1.4), 58), 'reverse': ((0, 2.5), 270)}
@@ -898,9 +914,10 @@ class Director:
         elif kind in ('close', 'xclose'):
             who = cast[0]['pos'] if cast else (cards[0]['pos'] if cards else C)
             hz = face if cast else (cards[0]['height'] * .75 if cards else 1.2)
-            d = 1.7 if kind == 'close' else 1.05
+            lens_ = CLOSE_LENS if kind == 'close' else XCLOSE_LENS
+            d = 1.9 / (SUBJECT_FRAC[kind] * 2 * 18.0 / lens_)    # the distance that already gives the subject its share of the frame: a wide lens close in shows far more of the place than a long lens far back
             cam = {'from': at(who, F, R, -d, .35 * side, hz + .05), 'look_at': at(who, F, R, 0, 0, hz - (0.08 if kind == 'close' else 0)),
-                   'lens': 50 if kind == 'close' else 75, 'fstop': 2.4 if kind == 'close' else 1.8}
+                   'lens': CLOSE_LENS if kind == 'close' else XCLOSE_LENS, 'fstop': CLOSE_FSTOP if kind == 'close' else XCLOSE_FSTOP}
         elif kind == 'low':
             cam = {'from': P(-2.5, .9 * side, 0.32), 'look_at': P(0, 0, 1.55), 'lens': 21, 'fstop': 5}
         elif kind == 'high':
@@ -945,6 +962,7 @@ class Director:
             else:
                 cam = {'from': P(-1.4, .5 * side, 1.2), 'look_at': P(0, 0, 0.9), 'lens': 60, 'fstop': 2.2}
         if cast and kind not in ('insert',): cam = fit_subject(cam, cast, kind, indoor=st in INDOOR_KITS)
+        if kind in ('close', 'xclose') and len(cast) == 1: cam = rule_of_thirds(cam, side)
         # editorial move on top of the setup (never on track/orbit/establish, which already move)
         if kind not in ('track', 'orbit', 'establish'):
             f, la = cam['from'], cam['look_at']; tw = [la[k] - f[k] for k in range(3)]

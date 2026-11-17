@@ -8,6 +8,7 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 from set_detail import detail_set, practical_lights
+from prop_scale import fit_scale
 
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE / 'assets'
@@ -94,6 +95,13 @@ def finish_palette(m):
 
 
 _MODEL_CACHE = {}
+BIG_ASSETS = []         # props wider than 10 m: checked against the lens in hide_engulfing
+
+
+def scale_for(spec, height, foot):
+    f, clamped = fit_scale(spec['height'], height, foot)
+    if clamped: print('ASSET_CLAMPED', spec['id'], round(foot * spec['height'] / height, 1), '->', round(foot * f, 1), flush=True)
+    return f
 
 
 def _instance(spec):
@@ -107,8 +115,9 @@ def _instance(spec):
     for o in c['order']:
         n = mapping[o]; n.parent = mapping.get(o.parent); n.matrix_parent_inverse = o.matrix_parent_inverse.copy()
         n.matrix_basis = o.matrix_basis.copy()
-    factor = spec['height'] / c['height']
+    factor = scale_for(spec, c['height'], c['foot'])
     root.scale = (factor,) * 3; root.location = spec['pos']; root.rotation_euler.z = math.radians(spec.get('yaw', 0))
+    if c['foot'] * factor > 10: BIG_ASSETS.append(root)
     return root
 
 
@@ -131,8 +140,10 @@ def model(spec):
         if o.parent not in objects:
             world = o.matrix_world.copy(); o.parent = root; o.matrix_world = world
             o.location -= center
-    factor = spec['height'] / height
+    foot = max(high.x - low.x, high.y - low.y, 1e-6)
+    factor = scale_for(spec, height, foot)
     root.scale = (factor,) * 3; root.location = spec['pos']; root.rotation_euler.z = math.radians(spec.get('yaw', 0))
+    if foot * factor > 10: BIG_ASSETS.append(root)
     print('ASSET_BOUNDS',spec['id'],[round(float(v),3) for v in (high-low)*factor], 'yaw',spec.get('yaw',0),flush=True)
     for o in meshes:
         for old in o.data.materials:natural_foliage(old);finish_palette(old)
@@ -158,8 +169,22 @@ def model(spec):
         def walk(parent):
             for ch in [o for o in objects if o.parent == parent]: order.append(ch); walk(ch)
         walk(root)
-        _MODEL_CACHE[spec['id']] = {'root': root, 'order': order, 'height': height}
+        _MODEL_CACHE[spec['id']] = {'root': root, 'order': order, 'height': height, 'foot': foot}
     return root
+
+
+def hide_engulfing(points):
+    """Last line of defence against a brown or grey void: a wide prop whose bounding box contains the camera (at either end of its move) is hidden for this shot."""
+    hidden = []
+    for root in BIG_ASSETS:
+        meshes = [o for o in root.children_recursive if o.type == 'MESH']
+        pts = [o.matrix_world @ Vector(c) for o in meshes for c in o.bound_box]
+        if not pts: continue
+        lo = [min(v[i] for v in pts) for i in range(3)]; hi = [max(v[i] for v in pts) for i in range(3)]
+        if any(all(lo[i] - .05 <= p[i] <= hi[i] + .05 for i in range(3)) for p in points):
+            for o in meshes: o.hide_render = True; o.hide_viewport = True
+            hidden.append(root.name); print('LENS_BLOCKED', root.name, flush=True)
+    return hidden
 
 
 def box(name, pos, size, material):

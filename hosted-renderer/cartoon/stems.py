@@ -4,6 +4,7 @@ import json
 import wave
 from pathlib import Path
 import numpy as np
+import sound_lib as lib
 
 def jsround(x):
     # Match JavaScript Math.round so frame counts agree with the scene validator (106.5 -> 107).
@@ -12,9 +13,10 @@ def jsround(x):
 
 
 RATE = 48000
-KINDS = {'whoosh', 'impact', 'creak', 'pour', 'splash', 'reveal', 'thunder', 'bell', 'coin', 'wind', 'crowd', 'pop'}
+LEGACY_KINDS = {'whoosh', 'impact', 'creak', 'pour', 'splash', 'reveal', 'thunder', 'bell', 'coin', 'wind', 'crowd', 'pop'}
+KINDS = LEGACY_KINDS | set(lib.NEW_KINDS)   # the original web engine only ever plays the first twelve; the Advanced engine plays all of them
 
-def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
+def synthesize(samples, twist_frame, cues, seed=1, advanced=False, mood=None):
     if not isinstance(samples, int) or samples <= 0:
         raise ValueError('Invalid narration samples')
     total = jsround(samples / RATE * 30)
@@ -22,7 +24,7 @@ def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
         raise ValueError('Twist must be inside the locked timeline')
     rng = np.random.default_rng(seed)
     if advanced:
-        return sound_design(samples,twist_frame,cues,seed)
+        return sound_design(samples,twist_frame,cues,seed,mood)
     music = np.zeros(samples, dtype=np.float64)
     sfx = np.zeros(samples, dtype=np.float64)
     twist = min(samples, jsround(twist_frame * RATE / 30))
@@ -58,6 +60,7 @@ def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
         noise = np.random.default_rng(seed*1000+index).standard_normal(n)
         envelope = np.sin(np.pi*np.minimum(1, ct/.32))**2
         kind = cue['kind']
+        if kind not in LEGACY_KINDS: continue
         if kind in ('pour', 'splash', 'whoosh'):
             sound = .15*noise*envelope
         elif kind == 'creak':
@@ -81,15 +84,16 @@ def synthesize(samples, twist_frame, cues, seed=1, advanced=False):
         sfx[start:start+n] += sound
     return music[:,None], sfx[:,None]
 
-def sound_design(samples,twist_frame,cues,seed=1):
-    """Original staccato score plus licensed CC0 Foley, exactly on the saved voice clock."""
+def sound_design(samples,twist_frame,cues,seed=1,mood=None):
+    """Music bed (the original staccato score or a mood bed), licensed CC0 Foley and synthesized effects/ambience, exactly on the saved voice clock."""
+    quirky=mood not in lib.MOODS
     music=np.zeros(samples);sfx=np.zeros(samples)
     # Original 112 BPM score: rounded pizzicato, soft bass and sparse brushed percussion.
     # Four-bar variation avoids the former three-note metronome; the answer opens the harmony.
     rng=np.random.default_rng(seed)
     step=RATE*60/112/2
     patterns=((0,2,1,4,2,1,3,1),(0,1,3,2,4,2,1,3),(0,3,2,4,1,2,3,4),(0,2,4,3,2,1,4,2))
-    for index in range(int(np.ceil(samples/step))):
+    for index in range(int(np.ceil(samples/step)) if quirky else 0):
         start=jsround(index*step);n=min(int(RATE*.24),samples-start)
         if n<=0:continue
         tt=np.arange(n)/RATE
@@ -104,36 +108,43 @@ def sound_design(samples,twist_frame,cues,seed=1):
         if index%8 in (2,6):
             brushed=np.convolve(rng.standard_normal(n),np.ones(12)/12,'same')
             music[start:start+n]+=.004*brushed*np.exp(-tt*35)
+    if not quirky:music=lib.music_bed(mood,samples,twist_frame*1600,seed)
+    amb=np.zeros(samples)
     import os
     root=Path(os.environ.get('CARTOON_SOUND_DIR',str(Path(__file__).parent/'assets'/'sound')))
     names={'impact':'impact','pour':'splash','splash':'splash','pop':'tap','creak':'handling'}
     cache={}
+    total=round(samples/RATE*30)
     for cue in cues:
-        if cue['kind'] not in KINDS or not isinstance(cue['frame'],int) or not 0<=cue['frame']<round(samples/RATE*30):raise ValueError('Invalid sound cue')
-        # No recording is better than a semantically false sound (stones are not wind,
-        # one footstep is not a crowd, and handling is not a bell). Unsupported categories stay silent.
-        name=names.get(cue['kind'])
+        end=cue.get('end')
+        if cue['kind'] not in KINDS or not isinstance(cue['frame'],int) or not 0<=cue['frame']<total:raise ValueError('Invalid sound cue')
+        if end is not None and (not isinstance(end,int) or not cue['frame']<end<=total):raise ValueError('Invalid sound cue')
+        if not isinstance(cue.get('gain',1.0),(int,float)) or not 0<=cue.get('gain',1.0)<=2:raise ValueError('Invalid sound cue')
+    for cue in lib.thin_cues(cues):
+        kind=cue['kind'];first=cue['frame']*1600
+        if kind in lib.AMBIENT or kind in ('wind','crowd'):
+            # Ambience is a bed, not an effect: it joins the music stem so it is ducked under speech and cannot inflate the effects level.
+            n=(cue['end']*1600-first) if cue.get('end') else int(RATE*2.5)
+            n=min(n,samples-first)
+            if n>RATE//4:amb[first:first+n]+=lib.render(kind,seed,n)*cue.get('gain',1.0)
+            continue
+        # No recording is better than a semantically false sound (stones are not wind, one footstep is not a crowd).
+        name=names.get(kind)
         if name is None:
-            # Designed editorial sweeps and literal metal jingles, not unrelated Foley substitutes.
-            if cue['kind'] not in ('whoosh','reveal','coin','thunder'):continue
-            first=cue['frame']*1600;n=min(int(RATE*.45),samples-first);tt=np.arange(n)/RATE
-            noise=np.random.default_rng(seed+cue['frame']).standard_normal(n)
-            if cue['kind']=='whoosh':
-                sound=.12*np.convolve(noise,np.ones(16)/16,'same')*np.sin(np.pi*np.arange(n)/max(n,1))**2
-            elif cue['kind']=='coin':
-                sound=.06*(np.sin(2*np.pi*2400*tt)+.4*np.sin(2*np.pi*3617*tt))*np.exp(-tt*24)
-            elif cue['kind']=='thunder':
-                sound=.15*np.convolve(noise,np.ones(180)/180,'same')*np.exp(-tt*5)+.06*np.sin(2*np.pi*42*tt)*np.exp(-tt*9)
-            else:
-                sound=.05*(np.sin(2*np.pi*523.251*tt)+.5*np.sin(2*np.pi*659.255*tt))*np.exp(-tt*13)
-            sfx[first:first+n]+=sound
+            if kind not in lib.SFX:continue
+            n=min(len(lib.render(kind,seed+cue['frame'])),samples-first)
+            sfx[first:first+n]+=.35*cue.get('gain',1.0)*lib.render(kind,seed+cue['frame'])[:n]
             continue
         if name not in cache:
             with wave.open(str(root/(name+'.wav')),'rb') as w:
                 if w.getframerate()!=RATE or w.getnchannels()!=1 or w.getsampwidth()!=2:raise ValueError('Invalid licensed Foley format')
                 cache[name]=np.frombuffer(w.readframes(w.getnframes()),dtype='<i2').astype(float)/32768
-        sound=cache[name];first=cue['frame']*1600;n=min(len(sound),samples-first)
+        sound=cache[name];n=min(len(sound),samples-first)
         sfx[first:first+n]+=.3*sound[:n]
+    if amb.any():
+        live=np.abs(music)>1e-5;bed=float(np.sqrt(np.mean(music[live]**2))) if live.any() else .02
+        active=np.abs(amb)>1e-6;rms=float(np.sqrt(np.mean(amb[active]**2)))
+        music=music+amb*(.45*bed/rms)
     edge=min(samples,int(.05*RATE));music[:edge]*=np.linspace(0,1,edge);music[-edge:]*=np.linspace(1,0,edge)
     return music[:,None],sfx[:,None]
 

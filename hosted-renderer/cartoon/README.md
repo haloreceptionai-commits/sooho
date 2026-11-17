@@ -26,7 +26,16 @@ remain unsupported, not silently replaced.
 `acoustic.py` loads hash-pinned wav2vec2 weights offline. It successfully aligned
 the actual 33.67-second Atlas sample to 86 script words. Uncalibrated CTC scores
 always require review; no syllable fallback or voice retiming occurs.
-`stems.py` creates deterministic music/SFX on the narration clock.
+`stems.py` creates deterministic music/SFX on the narration clock. In the Advanced pipeline it plays
+`sound_lib.py`: about 30 synthesized effects (whoosh, pop, boing, door, engine, punch, clash, heartbeat, gasp, bass drop,
+record scratch, sad trombone, shutter, cash, sparkle, typing, applause, ...), eight ambient beds chosen from each shot's
+place (rain, wind, traffic, chatter, crickets, birds, fire, water) and five music beds picked from the script's own
+words (the original quirky score, lo-fi, epic, suspense, sad). Everything is numpy arithmetic on a seeded generator, so
+there is nothing to download or license and the same manifest always gives the same bytes. `sound_words.py` maps spoken
+whole words to effects (pure python, used by `build-manifest.py`); ambience goes in the music stem so it ducks under speech.
+`blender/ui_overlays.py` draws the caption templates (bold, pop, box, neon, karaoke; `caption_style` in the manifest) and the
+on-screen UI (emoji reaction stickers, subscribe/like button, message bubbles, health bar, level up, achievement, XP, and
+circle/arrow/box highlights projected onto the real camera) on the final frames in `blender_bridge.py`; set `UI_OVERLAYS=0` to turn the elements off.
 `capture.py` writes checked frames atomically; `contact-sheet.py` covers all shots
 and the ending, with paginated sheets.
 
