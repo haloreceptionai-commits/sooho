@@ -820,6 +820,26 @@ class Director:
                                      'cast': [c['id'] for c in cast], 'cast_reasons': {c['id']: (s.get('cast_reasons') or {}).get(c['id'], '') for c in cast},
                                      'sequence_step': seq[part] if seq_card else None}
 
+    def vfx_extras(self, shot, i, part, kind, st, cast, txt):
+        """Editing-language VFX chosen from the words of the line: confetti at a celebration, hearts for love, floating dust motes in light,
+        speed lines on a chase, a white flash on a bang, an RGB glitch for digital trouble, film grain for old footage, a light leak for warm memories."""
+        t = (txt or '').lower(); fx = shot.setdefault('effects', []); ov = shot.setdefault('overlay', [])
+        if not cast: return
+        cx = sum(c['pos'][0] for c in cast) / len(cast); cy = sum(c['pos'][1] for c in cast) / len(cast)
+        def add(kk, sc=1.0):
+            if len(fx) < 6 and all(e['kind'] != kk for e in fx): fx.append({'kind': kk, 'pos': [round(cx, 3), round(cy, 3), 0.0], 'start': 0, 'scale': sc, 'seed': i * 11 + part})
+        if re.search(r'\b(party|birthday|celebrat\w*|confetti|congratulat\w*|won|win|wins|victory|winner|cheer\w*|surprise)\b', t): add('confetti')
+        if re.search(r'\b(love|loved|loves|kiss\w*|heart|romance|romantic|crush|valentine|wedding|date)\b', t): add('hearts')
+        if st in ('room', 'office', 'workshop') and re.search(r'\b(sunlight|sunbeam|dust|dusty|old|attic|abandoned|quiet|morning|afternoon|memory|remember\w*)\b', t): add('motes')
+        want = []
+        if re.search(r'\b(chase\w*|chasing|ran|run|running|race|racing|raced|sprint\w*|speed\w*|fast|rush\w*|escape\w*|fled|flee|zoom\w*|dash\w*)\b', t): want.append('speed_lines')
+        if re.search(r'\b(suddenly|boom|bang|crash\w*|explod\w*|exploded|slam\w*|shock\w*|snap\w*|gasp\w*)\b', t): want.append('flash')
+        if re.search(r'\b(glitch\w*|hack\w*|virus|error|matrix|digital|cyber\w*|computer|software|AI|robot\w*|signal)\b', t, re.I): want.append('glitch')
+        if re.search(r'\b(memory|memories|remember\w*|childhood|nostalg\w*|years ago|once upon|long ago|old days)\b', t): want.append('light_leak')
+        if re.search(r'(flashback|footage|vintage|old photo\w*|black and white|archive\w*|tape)', t): want.append('grain')
+        for w in want:
+            if len(ov) < 4 and w not in ov: ov.append(w)
+
     def house_extras(self, shot, i, part, kind, st, cast, cam, txt):
         """Depth, story lighting and an in-world label (benchmark rulebook): a blurred foreground object near the lens, a cooler key at the pivot,
         and a painted sign carrying the year or number the line names."""
@@ -834,6 +854,7 @@ class Director:
         else: limit_pitch(cam)
         place = shot.get('place')
         if place: clear_lens_items(place, cam)
+        self.vfx_extras(shot, i, part, kind, st, cast, txt)
         if not place or not cast: return
         import library
         f, la = cam['from'], cam['look_at']; fx, fy = la[0] - f[0], la[1] - f[1]; L = math.hypot(fx, fy) or 1.0; fx, fy = fx / L, fy / L; rx, ry = fy, -fx

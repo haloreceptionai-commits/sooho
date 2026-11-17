@@ -171,3 +171,16 @@ class WorldTests(unittest.TestCase):
         from character_motion import OUTFITS, HATS
         for role, (outfit, hat, shirt, trim, gl, fac, sp) in AD.ROLES.items():
             self.assertIn(outfit, OUTFITS, role); self.assertIn(hat, HATS, role); self.assertIn(sp, ('human', 'alien', 'monster', 'ghost'), role)
+
+
+class VfxTests(unittest.TestCase):
+    def test_new_effects_and_overlays_are_valid(self):
+        import effects
+        for k in ('confetti', 'hearts', 'motes'):
+            self.assertIn(k, effects.KINDS)
+            ps = effects.particles(k, 1); self.assertEqual(len(ps), effects.COUNTS[k])
+            for p in ps[:5]:
+                x, y, z, s = effects.state(k, p, 1.3)
+                self.assertTrue(all(v == v for v in (x, y, z, s)))
+        import shot_schema
+        self.assertIn('overlay', shot_schema.KEYS)

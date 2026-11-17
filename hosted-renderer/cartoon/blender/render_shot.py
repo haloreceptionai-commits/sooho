@@ -340,6 +340,10 @@ def look(scene, shot):
     nt.links.new(img, grade.inputs['Image']); img = grade.outputs['Image']
     cc = nt.nodes.new('CompositorNodeBrightContrast'); cc.inputs['Bright'].default_value = 0.04; cc.inputs['Contrast'].default_value = 0.38
     nt.links.new(img, cc.inputs['Image']); img = cc.outputs['Image']
+    try:
+        from overlays import add_overlays
+        img = add_overlays(nt, img, shot, shot.get('fps', 30))
+    except Exception as e: print('overlay skipped', str(e)[:160], flush=True)
     nt.links.new(img, comp.inputs['Image'])
 
 

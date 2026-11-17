@@ -5,8 +5,8 @@ time t are closed-form, so tests can check gravity, start timing and ground cont
 """
 import math, random
 
-KINDS = {'explosion', 'smoke', 'fire', 'sparks', 'dust', 'rain', 'embers', 'snow', 'lightning'}
-COUNTS = {'explosion': 90, 'smoke': 24, 'fire': 28, 'sparks': 60, 'dust': 36, 'rain': 260, 'embers': 40, 'snow': 220, 'lightning': 1}
+KINDS = {'explosion', 'smoke', 'fire', 'sparks', 'dust', 'rain', 'embers', 'snow', 'lightning', 'confetti', 'hearts', 'motes'}
+COUNTS = {'explosion': 90, 'smoke': 24, 'fire': 28, 'sparks': 60, 'dust': 36, 'rain': 260, 'embers': 40, 'snow': 220, 'lightning': 1, 'confetti': 140, 'hearts': 14, 'motes': 70}
 G = 9.81
 
 
@@ -64,6 +64,15 @@ def state(kind, p, t, scale=1.0):
     if kind == 'snow':     # slow flakes that sway as they fall
         span = 8 * s; z = 5 - ((t * 1.1 + p['delay'] * 5) % 5)
         return (p['x'] * span / 2 + .25 * math.sin(t * 1.7 + p['a']), p['y'] * span / 2 + .25 * math.cos(t * 1.3 + p['a']), z, .028 * p['size'])
+    if kind == 'confetti':   # party paper: falls slowly, sways, spreads wide
+        span = 7 * s; z = 4.6 - ((t * 1.5 + p['delay'] * 4.6) % 4.6)
+        return (p['x'] * span / 2 + .35 * math.sin(t * 2.3 + p['a']), p['y'] * span / 2 + .3 * math.cos(t * 1.9 + p['a']), z, .06 * p['size'])
+    if kind == 'hearts':     # love: pink hearts float up and fade
+        life = 3.0; age = (t + p['delay'] * life) % life; k = age / life
+        return (s * (.9 * p['x'] + .25 * math.sin(age * 2.2 + p['a'])), s * (.5 * p['y']), s * (1.2 + 2.2 * k), s * .13 * p['size'] * (1 - k * k))
+    if kind == 'motes':      # dust floating in a shaft of light: slow, tiny, everywhere
+        span = 6 * s; k = (t * .05 + p['delay']) % 1
+        return (p['x'] * span / 2 + .3 * math.sin(t * .6 + p['a']), p['y'] * span / 2 + .3 * math.cos(t * .5 + p['a']), .3 + 2.6 * ((p['u'] + .2) / 1.2 + .1 * math.sin(t * .4 + p['a'])), .02 * p['size'])
     if kind == 'lightning':  # one hidden marker; the flash is a light (see fx_render), so no geometry to draw
         return (0, 0, 0, 0)
     if kind == 'rain':

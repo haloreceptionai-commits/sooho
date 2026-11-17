@@ -8,7 +8,7 @@ from effects import KINDS as EFFECT_KINDS
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day', 'neutral'}
 PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label', 'overlay'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -55,6 +55,8 @@ def validate_shot(s):
     if not isinstance(sh, list) or len(sh) > 6: raise ValueError('up to 6 shake hits')
     for h in sh:
         if set(h) - {'t', 'amp'} or not 0 <= h.get('t', -1) <= d or not 0 < h.get('amp', .04) <= .08: raise ValueError('shake hit {t within shot, amp<=0.08}')
+    ov = s.get('overlay', [])
+    if not isinstance(ov, list) or len(ov) > 4 or any(x not in ('speed_lines', 'flash', 'light_leak', 'glitch', 'grain') for x in ov): raise ValueError('overlay: up to 4 of speed_lines flash light_leak glitch grain')
     fx = s.get('effects', [])
     if not isinstance(fx, list) or len(fx) > 6: raise ValueError('up to 6 effects')
     for e in fx:

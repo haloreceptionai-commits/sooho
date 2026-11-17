@@ -38,12 +38,15 @@ def mats():
                     # step-7 review: opaque spheres read as boulders, so smoke and dust are real volumes
                     smoke=_volume('fx smoke', (.12, .11, .1), 8), dust=_volume('fx dust', (.55, .45, .32), 5),
                     debris=material('fx debris', (.2, .14, .09), .9), rain=material('fx rain', (.7, .78, .9), .1),
-                    ember=_glow('fx ember', (1, .35, .06), 9), snow=_glow('fx snow', (.92, .95, 1.0), 1.2))
+                    ember=_glow('fx ember', (1, .35, .06), 9), snow=_glow('fx snow', (.92, .95, 1.0), 1.2),
+                    heart=_glow('fx heart', (1, .25, .45), 4), mote=_glow('fx mote', (1, .93, .7), 2.5),
+                    **{f'confetti{i}': _glow(f'fx confetti {i}', c, 1.6) for i, c in enumerate([(1, .2, .3), (1, .85, .15), (.2, .6, 1), (.3, .9, .4), (.9, .4, 1)])})
     return MATS
 
 def _mesh(kind, role):
     if role in ('debris',): bpy.ops.mesh.primitive_cube_add(size=1)
     elif kind == 'rain': bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=1, depth=18)
+    elif kind == 'confetti': bpy.ops.mesh.primitive_plane_add(size=1.6)
     else: bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1 if role in ('debris', 'sparks') else 3, radius=1)
     o = bpy.context.active_object
     if role not in ('debris',):
@@ -57,7 +60,7 @@ def build_effects(shot, fps):
         for p in particles(kind, e.get('seed', 0)):
             role = p['role']; o = _mesh(kind, role); o.name = f'fx {kind} {role}'
             o.data.materials.append(m['core'] if role == 'fireball' and p['i'] < 5 else m['fire'] if role in ('fireball', 'fire') else
-                                    m['spark'] if kind == 'sparks' else m['ember'] if kind == 'embers' else m['snow'] if kind == 'snow' else m['smoke'] if role == 'smoke' else m['dust'] if kind == 'dust' else m['rain'] if kind == 'rain' else m['debris'])
+                                    m['spark'] if kind == 'sparks' else m['ember'] if kind == 'embers' else m['snow'] if kind == 'snow' else m['smoke'] if role == 'smoke' else m['dust'] if kind == 'dust' else m['heart'] if kind == 'hearts' else m['mote'] if kind == 'motes' else m['confetti' + str(p['i'] % 5)] if kind == 'confetti' else m['rain'] if kind == 'rain' else m['debris'])
             o.visible_shadow = role in ('debris', 'smoke', 'dust'); o.rotation_euler = (p['a'], p['u'], p['a'] * 2)
             for f in range(n):
                 x, y, z, s = state(kind, p, f / fps - e.get('start', 0), sc)
@@ -67,9 +70,10 @@ def build_effects(shot, fps):
                 o.location = base + Vector((x, y, z)); o.scale = (s, s, s) if active else (.01,) * 3
                 o.hide_render = o.hide_viewport = not active
                 if role == 'debris': o.rotation_euler.x = p['a'] + f * .25
+                if kind == 'confetti': o.rotation_euler = (p['a'] + f * .3, p['u'] + f * .21, p['a'] * 2)
                 o.keyframe_insert('location', frame=f + 1); o.keyframe_insert('scale', frame=f + 1)
                 o.keyframe_insert('hide_render', frame=f + 1); o.keyframe_insert('hide_viewport', frame=f + 1)
-                if role == 'debris': o.keyframe_insert('rotation_euler', frame=f + 1)
+                if role == 'debris' or kind == 'confetti': o.keyframe_insert('rotation_euler', frame=f + 1)
             count += 1
         if kind == 'lightning':  # cold white flash that lights the whole set for a moment
             ld = bpy.data.lights.new('fx flash', 'POINT'); ld.color = (.82, .88, 1.0); ld.shadow_soft_size = 2.0
