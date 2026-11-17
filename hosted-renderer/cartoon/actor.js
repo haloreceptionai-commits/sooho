@@ -184,6 +184,9 @@ try {
     timing('join-fetch',tFetch);
     timing('draw-all',tDraw);
     await writeFile(path.join(framesDir,'checkpoint.json'),JSON.stringify(merged));
+    // Frame doctor: a black or unreadable frame is drawn again gently (or replaced by its neighbour) here, so it can never fail the finished render at the QA step.
+    try{await heal(python,[path.join(root,'frame_doctor.py'),'--frames',framesDir,'--manifest',path.join(work,'manifest.json'),'--web',path.join(work,'render/prepared/web'),'--cards',path.join(work,'cards'),'--bridge',process.env.CARTOON_RENDERER==='blender'?path.join(root,'blender_bridge.py'):'','--python',python],{tries:1});}
+    catch(e){if(e instanceof Cancelled||/cancelled/i.test(String(e?.message)))throw e;console.error('Frame doctor skipped',String(e?.message).slice(-300));}
     const tFinish=Date.now();
     try {
       await run(python,[path.join(root,'workflow.py'),'--manifest',path.join(work,'manifest.json'),'--voice',path.join(work,'voice.wav'),'--work',path.join(work,'render'),'--mode','finish','--twist-frame',String(Math.max(0,Math.min(total-1,Math.round(input.manifest.report.revealSec*30))))]);

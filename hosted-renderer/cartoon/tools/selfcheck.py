@@ -64,5 +64,33 @@ def words():
     return f'{len(voc)} sound kinds'
 
 
-for name, fn in (('sound library + mix', sound), ('captions + UI with the real font', ui), ('place recipes', places), ('vocabulary', words)): step(name, fn)
+def finishing():
+    """The end of the pipeline on synthetic data: black frames are repaired by the frame doctor, and finish.py encodes and passes its QA."""
+    import hashlib, shutil, subprocess, tempfile
+    import numpy as np
+    from PIL import Image
+    import frame_doctor
+    if not (shutil.which('ffmpeg') and shutil.which('ffprobe')): return 'skipped (no ffmpeg here)'
+    with tempfile.TemporaryDirectory() as d:
+        d = Path(d); frames = d / 'frames'; frames.mkdir(); total = 60; ck = {'input_hash': 'x', 'frames': {}}
+        for i in range(total):
+            colour = (0, 0, 0) if 20 <= i < 24 else (90 + i, 120, 160 - i)       # four black frames in the middle
+            img = Image.new('RGB', (1080, 1920), colour)
+            if colour != (0, 0, 0):
+                for x in range(0, 1080, 60): img.paste((255, 255, 255), (x, (i * 17) % 1900, x + 20, (i * 17) % 1900 + 20))
+            p = frames / f'f{i:06d}.jpg'; img.save(p, 'JPEG', quality=92); ck['frames'][str(i)] = {'sha256': hashlib.sha256(p.read_bytes()).hexdigest()}
+        (frames / 'checkpoint.json').write_text(json.dumps(ck))
+        def boom(*_): raise RuntimeError('redraw unavailable')
+        r = frame_doctor.heal(frames, total, boom, log=lambda *_: None)
+        assert r['bad_found'] == 4 and r['copied'] == 4, r
+        t = np.arange(48000 * 2) / 48000; mix = (.2 * np.sin(2 * np.pi * 220 * t) * (1 + .5 * np.sin(2 * np.pi * 3 * t)))[:, None]
+        np.save(d / 'mix.npy', mix.astype('float64'))
+        out = d / 'out.mp4'
+        subprocess.run([sys.executable, str(ROOT / 'finish.py'), '--frames', str(frames), '--mix', str(d / 'mix.npy'), '--out', str(out)], check=True, capture_output=True, text=True)
+        qa = json.loads(out.with_suffix('.qa.json').read_text())
+        assert out.exists() and not qa['review_required'], qa
+    return f"4 black frames repaired, encoded, QA ok ({len(qa['warnings'])} notes)"
+
+
+for name, fn in (('sound library + mix', sound), ('captions + UI with the real font', ui), ('place recipes', places), ('vocabulary', words), ('finishing: frame doctor + encode + QA', finishing)): step(name, fn)
 print(f'SELFCHECK PASSED in {time.time() - t0:.1f}s')
