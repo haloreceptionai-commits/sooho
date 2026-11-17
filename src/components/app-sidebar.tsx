@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { Sparkles, Clapperboard, Settings, ChevronDown, Menu, X, Cpu, PlaySquare, LogOut, BarChart3, Plus, Loader2, PanelLeftClose, PanelLeftOpen, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { createWorkspace, NAME_MAX, setActiveWorkspace, useActiveWorkspace, useWorkspaceVideos, type Workspace } from "@/lib/workspaces";
 
 type To = "/create" | "/videos" | "/settings" | "/analytics";
 
 // A small, stable colour per workspace so channels are easy to tell apart at a glance.
 const TINTS = ["bg-primary text-primary-foreground", "bg-accent text-accent-foreground", "bg-success/15 text-success", "bg-warning/15 text-warning", "bg-muted text-foreground"];
-const tint = (w: Workspace, i: number) => TINTS[(i + w.name.length) % TINTS.length]!;
+const tint = (w: Workspace, i: number) => TINTS[(i + w.name.length) % TINTS.length] ?? TINTS[0];
 const initial = (w: Workspace) => (w.name.trim()[0] ?? "W").toUpperCase();
 
 // The nav remembers whether the owner left it as a thin icon rail or a full panel.
@@ -20,6 +21,7 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [openWorkspaceId, setOpenWorkspaceId] = useState<string | null>(null);
   useEffect(() => {
     try { setCollapsed(localStorage.getItem(RAIL_KEY) === "1"); } catch { /* private mode: just start expanded */ }
   }, []);
@@ -42,14 +44,21 @@ export function AppSidebar() {
     { to: "/settings", icon: Settings, label: "Settings" },
   ];
 
-  const pick = (w: Workspace) => { setActiveWorkspace(w.id); setMobileOpen(false); void navigate({ to: "/analytics" }); };
+  const pick = (w: Workspace, isMobile: boolean) => {
+    setOpenWorkspaceId((id) => id === w.id ? null : w.id);
+    setActiveWorkspace(w.id);
+    if (collapsed && !isMobile) {
+      setCollapsed(false);
+      try { localStorage.setItem(RAIL_KEY, "0"); } catch { /* private mode */ }
+    }
+  };
 
   const body = (isMobile: boolean) => {
     const c = collapsed && !isMobile;
-    const links = (
-      <div className={c ? "space-y-1" : "ml-[18px] space-y-0.5 border-l pl-3"}>
+    const links = (w: Workspace) => (
+      <div id={`workspace-links-${isMobile ? "mobile" : "desktop"}-${w.id}`} className={c ? "space-y-1" : "ml-[18px] space-y-0.5 border-l pl-3"}>
         {items.map((it) => (
-          <Link key={it.to} to={it.to} onClick={() => setMobileOpen(false)} activeOptions={{ exact: true }} title={c ? it.label : undefined}
+          <Link key={it.to} to={it.to} onClick={() => { setActiveWorkspace(w.id); setMobileOpen(false); }} activeOptions={{ exact: true }} title={c ? it.label : undefined}
             className={`group relative flex items-center gap-2.5 rounded-md py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[status=active]:bg-accent data-[status=active]:font-semibold data-[status=active]:text-accent-foreground ${c ? "justify-center px-0" : "px-2.5"}`}>
             <it.icon className="h-4 w-4 shrink-0" />
             {!c && <span className="flex-1">{it.label}</span>}
@@ -92,18 +101,18 @@ export function AppSidebar() {
           {ready && error && <p className="px-2 py-3 text-xs text-destructive">{error}</p>}
           <div className="space-y-1">
             {list.map((w, i) => {
-              const open = w.id === active?.id;
+              const open = w.id === openWorkspaceId;
               return (
                 <div key={w.id}>
-                  <button onClick={() => pick(w)} aria-expanded={open} title={c ? w.name : undefined}
-                    className={`flex w-full items-center gap-2.5 rounded-md py-2 text-left transition-colors hover:bg-muted ${open ? "bg-muted/60" : ""} ${c ? "justify-center px-0" : "px-2"}`}>
+                  <Button variant="ghost" onClick={() => pick(w, isMobile)} aria-label={w.name} aria-expanded={open} aria-controls={`workspace-links-${isMobile ? "mobile" : "desktop"}-${w.id}`} title={c ? w.name : undefined}
+                    className={`flex h-auto w-full items-center gap-2.5 rounded-md py-2 text-left transition-colors hover:bg-muted ${open ? "bg-muted/60" : ""} ${c ? "justify-center px-0" : "px-2"}`}>
                     <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-md text-xs font-bold ${tint(w, i)}`}>{initial(w)}</span>
                     {!c && <>
                       <span className={`min-w-0 flex-1 truncate text-sm ${open ? "font-bold" : "font-medium text-muted-foreground"}`}>{w.name}</span>
                       <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
                     </>}
-                  </button>
-                  {open && <div className="mt-1 pb-2">{links}</div>}
+                  </Button>
+                  {open && <div className="mt-1 pb-2">{links(w)}</div>}
                 </div>
               );
             })}

@@ -85,7 +85,7 @@ function Dashboard() {
 function WorkspaceCard({ workspace: w }: { workspace: WorkspaceStats }) {
   const c = w.channel;
   const metrics = c ? [
-    ["Views", fmt(c.views)], ["Subscribers", c.subscribers === null ? "Hidden" : fmt(c.subscribers)], ["Videos posted", fmt(c.videos)],
+    ["Subscribers", c.subscribers === null ? "Hidden" : fmt(c.subscribers)], ["Videos posted", fmt(c.videos)],
     ["Likes", fmt(w.videos.reduce((s, v) => s + v.likes, 0))], ["Comments", fmt(w.videos.reduce((s, v) => s + v.comments, 0))],
   ] : [];
   return <article className="min-w-0 rounded-lg border bg-background p-5">

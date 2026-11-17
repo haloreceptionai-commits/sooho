@@ -1,4 +1,5 @@
 # Workspace dashboard home
+- [x] Fix workspace menus to start closed and toggle on click without navigating; remove repeated workspace-card Views and verify desktop/mobile.
 - [x] Rename the existing Main workspace to Facts & Robi without changing its videos or connection.
 - [x] Make home an all-workspace dashboard with live YouTube totals, per-workspace KPIs, refresh, and connection/error states; retain creation modes on Create video.
 - [x] Test aggregation and verify the signed-in home, refresh, and navigation on desktop/mobile.
