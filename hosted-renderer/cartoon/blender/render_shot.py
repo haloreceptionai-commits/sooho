@@ -304,7 +304,7 @@ def camera(shot, fps):
 
 def look(scene, shot):
     scene.view_settings.view_transform = 'AgX'
-    scene.view_settings.exposure = {'night': 1.15, 'sunset': 0.75, 'rain': 0.65, 'day': 0.45}.get(shot.get('lighting', 'day'), 0.45)   # benchmark brightness is 0.50-0.57
+    scene.view_settings.exposure = {'night': 0.6, 'sunset': 0.35, 'rain': 0.3, 'day': 0.15}.get(shot.get('lighting', 'day'), 0.45)   # benchmark brightness is 0.50-0.57
     for name in (shot.get('grade', 'Medium High Contrast'),):
         for cand in (f'AgX - {name}', name):
             try: scene.view_settings.look = cand; break
@@ -325,17 +325,21 @@ def look(scene, shot):
         nt.links.new(rl.outputs['Mist'], mul.inputs[0]); nt.links.new(mul.outputs[0], mix.inputs[0])
         nt.links.new(img, mix.inputs[1]); img = mix.outputs[0]
     glare = nt.nodes.new('CompositorNodeGlare'); glare.glare_type = 'FOG_GLOW'; glare.quality = 'MEDIUM'
-    glare.threshold = 0.9; glare.size = 7; glare.mix = -0.75  # soft bloom around lamps and highlights
+    glare.threshold = 0.75; glare.size = 8; glare.mix = -0.45  # glow around lamps, the moon and bright edges
     nt.links.new(img, glare.inputs['Image']); img = glare.outputs['Image']
     mask = nt.nodes.new('CompositorNodeEllipseMask'); mask.width = 0.95; mask.height = 0.92
     blur = nt.nodes.new('CompositorNodeBlur'); blur.filter_type = 'FAST_GAUSS'; blur.use_relative = True
     blur.factor_x = 0.25; blur.factor_y = 0.25; nt.links.new(mask.outputs[0], blur.inputs[0])
     vig = nt.nodes.new('CompositorNodeMixRGB'); vig.blend_type = 'MULTIPLY'
     inv = nt.nodes.new('CompositorNodeMath'); inv.operation = 'MULTIPLY_ADD'
-    inv.inputs[1].default_value = 0.28; inv.inputs[2].default_value = 0.72  # edges at 72% brightness
+    inv.inputs[1].default_value = 0.16; inv.inputs[2].default_value = 0.84  # light vignette: edges at 84% brightness
     nt.links.new(blur.outputs[0], inv.inputs[0])
     nt.links.new(img, vig.inputs[1]); nt.links.new(inv.outputs[0], vig.inputs[2]); vig.inputs[0].default_value = 1
     img = vig.outputs[0]
+    grade = nt.nodes.new('CompositorNodeHueSat'); grade.inputs['Saturation'].default_value = 1.0; grade.inputs['Value'].default_value = 1.0   # colour grade: richer, punchier
+    nt.links.new(img, grade.inputs['Image']); img = grade.outputs['Image']
+    cc = nt.nodes.new('CompositorNodeBrightContrast'); cc.inputs['Bright'].default_value = 0.04; cc.inputs['Contrast'].default_value = 0.38
+    nt.links.new(img, cc.inputs['Image']); img = cc.outputs['Image']
     nt.links.new(img, comp.inputs['Image'])
 
 
@@ -597,6 +601,11 @@ def main():
         from toon import apply_house_style
         print('HOUSE_STYLE', apply_house_style(), flush=True)
     except Exception as e: print('house style skipped', str(e)[:160], flush=True)
+    try:
+        from lighting import apply_rig
+        cc = [sum(c['pos'][i] for c in shot['cast']) / len(shot['cast']) for i in (0, 1)] if shot.get('cast') else [0.0, 0.0]
+        print('RIG', apply_rig(shot.get('lighting', 'day'), cc, bool(shot.get('cast'))), flush=True)
+    except Exception as e: print('rig skipped', str(e)[:160], flush=True)
     if shot.get('tint'):   # story lighting: scale the key colours (warm setup, cooler pivot)
         tr, tg, tb = shot['tint']
         for o in bpy.data.objects:
