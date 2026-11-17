@@ -30,6 +30,7 @@ def outline(o, width=0.014):
     d = hull.modifiers.new('grow', 'DISPLACE'); d.strength = -width / max(min(o.scale), 1e-3); d.mid_level = 0
     hull.parent = o; hull.location = (0, 0, 0); hull.rotation_euler = (0, 0, 0); hull.scale = (1, 1, 1); hull.matrix_parent_inverse.identity()
     hull.visible_shadow = False; hull.visible_diffuse = False; hull.visible_glossy = False; hull.visible_transmission = False; hull.visible_volume_scatter = False
+    hull['ink_hull'] = True; o['ink_hull'] = True
     return hull
 
 
@@ -93,6 +94,7 @@ def build_character(c,duration=3,fps=30):
     cloth=material(ident+' cloth',tuple(c.get('shirt',(.13,.36,.3))),.88)
     hatmat=material(ident+' hat',tuple(c.get('hat_color',(.32,.19,.06))),.85)
     trim=material(ident+' trim',tuple(c.get('trim',(.72,.55,.12))),.35)
+    pants=material(ident+' trousers',tuple(c.get('pants',(.42,.37,.2))),.85)
     root=bpy.data.objects.new(ident,None);bpy.context.collection.objects.link(root)
     headroot=bpy.data.objects.new(ident+' head',None);bpy.context.collection.objects.link(headroot);headroot.parent=root
     style=c.get('style','benchmark');premium=style=='premium';bench=style=='benchmark'
@@ -101,7 +103,8 @@ def build_character(c,duration=3,fps=30):
     if premium:
         mouth=build_premium_face(c,headroot,skin,face,expr,ident)
     for side in ([] if premium else [-1,1]):
-        eye=sphere('eye',(side*.105,face_y(side*.105,.035),.035),(.034,.014,face['eye']),black);eye.parent=headroot
+        eye=sphere('eye',(side*.105,face_y(side*.105,.035),.035),((.034 if not bench else .05),.014,face['eye']*(1 if not bench else 1.35)),black);eye.parent=headroot
+        if bench:sphere('eyelid',(side*.105,face_y(side*.105,.035)-.004,.035+face['eye']*.62),(.062,.018,.016),black).parent=headroot
         brow=cube('eyebrow',(side*.105,face_y(side*.105,.12),.12),(.095,.022,.018),black,.008);brow.parent=headroot
         brow.rotation_euler.y=side*face['brow']
         if expr=='smug' and side==1:eye.scale.z*=.5
@@ -188,6 +191,10 @@ def build_character(c,duration=3,fps=30):
     if premium and outfit not in ('armor','dress','robe','royal','labcoat'):
         body_details.extend([cube('shirt collar L',(-.075,-.13,1.3),(.1,.05,.055),cloth,.012),cube('shirt collar R',(.075,-.13,1.3),(.1,.05,.055),cloth,.012),
                              cube('placket',(0,-.158,1.08),(.03,.015,.4),skin if outfit=='labcoat' else cloth,.004)])
+    if bench and outfit in ('worker','merchant','uniform','sailor','tunic','rags'):
+        lower=sphere('torso lower',(0,0,.9),(.245,.168,.2),pants);body_details.append(lower)
+        body_details.extend([cube('collar L',(-.07,-.138,1.31),(.1,.05,.05),skin,.012),cube('collar R',(.07,-.138,1.31),(.1,.05,.05),skin,.012),
+                             cube('tie',(0,-.158,1.17),(.045,.03,.22),black,.008),cube('pocket patch',(.1,-.158,1.06),(.085,.014,.085),trim,.006)])
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[];anchors={}
@@ -234,7 +241,7 @@ def build_character(c,duration=3,fps=30):
                 sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist
     if bench:
         for side in ['left','right']:
-            hand=sphere(side+' hand',(0,0,.05),(.06,.045,.07),skin);hand.parent=anchors[side+'_wrist'];outline(hand,.01)
+            hand=sphere(side+' hand',(0,0,.05),(.07,.03,.07),black);hand.parent=anchors[side+'_wrist']
         for o in list(headroot.children):
             if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest')):outline(o,.013)
         for o in list(root.children):

@@ -107,6 +107,23 @@ def compile_all(m, cards=()):
     return [compile_shot(m, i, cards) for i in range(len(m['shots']))]
 
 
+CREAM = (247, 239, 217)
+
+
+def dip_frames(m):
+    """Frames where the LOCATION changes between consecutive shots (a different place), for the 0.4 s dip to cream."""
+    def sig(sh):
+        p = sh.get('place') or {}
+        return (p.get('terrain'), p.get('ground'), p.get('relief'), p.get('water')) if p else (sh.get('world'),)
+    shots = m['shots']
+    return [b['start'] for a, b in zip(shots, shots[1:]) if sig(a) != sig(b)]
+
+
+def dip_alpha(bounds, f, half=6):
+    d = min((abs(f - b) for b in bounds), default=999)
+    return max(0.0, 1 - d / half) * 0.92
+
+
 def caption_at(m, f):
     if not m.get('captions'): return None
     W = m['words']; t = f / 30
@@ -168,6 +185,7 @@ def render_range(manifest_path, web, out, first, last, card_dir):
     saved = json.loads(ck.read_text()) if ck.exists() else {'input_hash': signature, 'frames': {}}
     if saved['input_hash'] != signature: raise ValueError('Inputs changed; stale frames cannot resume')
     cards = set(os.listdir(card_dir)) if card_dir and os.path.isdir(card_dir) else set()
+    bounds = dip_frames(m)
     blender = os.environ.get('BLENDER_BIN', '/opt/blender/blender')
     lock = threading.Lock(); eng = engine_env()
     samples = int(os.environ.get('BLENDER_SAMPLES', '16' if eng['SHOT_ENGINE'] == 'eevee' else '5'))  # Cycles + denoiser: 5 samples measured identical to 10
@@ -191,6 +209,8 @@ def render_range(manifest_path, web, out, first, last, card_dir):
             for f in want:
                 png = Path(tmp) / f'f_{local[f]:05d}.png'
                 img = Image.open(png).convert('RGB').resize((1080, 1920), Image.LANCZOS)
+                a = dip_alpha(bounds, f)
+                if a > 0: img = Image.blend(img, Image.new('RGB', img.size, CREAM), a)
                 img = burn(img, caption_at(m, f))
                 file = out / f'f{f:06d}.jpg'; tmpf = file.with_suffix(f'.{k}.tmp')
                 img.save(tmpf, 'JPEG', quality=93)

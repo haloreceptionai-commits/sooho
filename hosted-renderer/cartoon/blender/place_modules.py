@@ -59,19 +59,20 @@ def terrain_mat(t, params=None):
     a.inputs['Color2'].default_value = (*rock, 1)
     c = nt.nodes.new('ShaderNodeMixRGB'); nt.links.new(hr.outputs['Result'], c.inputs['Fac']); nt.links.new(a.outputs[0], c.inputs['Color1'])
     c.inputs['Color2'].default_value = (*high, 1)
-    # real surface detail: multiply the palette by a CC0 texture (rock on slopes, the ground texture elsewhere) and bump from it
-    main = GROUND_TEX[(params or {}).get('ground', 'grass')] if t == 'custom' else MAIN_TEX.get(t, 'grass')
+    # painted flat colour with soft wear (house style): two scales of noise nudge the lightness +-12%, no photo texture, no gloss
     pos = geo.outputs['Position']
-    tm = tex_node(nt, main, 'color', 3.5, pos); tr = tex_node(nt, 'rock', 'color', 5.0, pos)
-    detail = nt.nodes.new('ShaderNodeMixRGB'); nt.links.new(sr.outputs['Result'], detail.inputs['Fac'])   # slope -> rock texture
-    nt.links.new(tm.outputs['Color'], detail.inputs['Color2']); nt.links.new(tr.outputs['Color'], detail.inputs['Color1'])
-    gain = nt.nodes.new('ShaderNodeMixRGB'); gain.blend_type = 'MULTIPLY'; gain.inputs['Fac'].default_value = 1.0
-    nt.links.new(c.outputs[0], gain.inputs['Color1']); nt.links.new(detail.outputs[0], gain.inputs['Color2'])
-    bright = nt.nodes.new('ShaderNodeBrightContrast'); bright.inputs['Bright'].default_value = 0.35; bright.inputs['Contrast'].default_value = 0.25
-    nt.links.new(gain.outputs[0], bright.inputs['Color']); nt.links.new(bright.outputs[0], b.inputs['Base Color'])
-    hm = tex_node(nt, main, 'roughness', 3.5, pos)
-    bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.6; bump.inputs['Distance'].default_value = 0.08
-    nt.links.new(hm.outputs['Color'], bump.inputs['Height']); nt.links.new(bump.outputs['Normal'], b.inputs['Normal'])
+    wear1 = nt.nodes.new('ShaderNodeTexNoise'); wear1.inputs['Scale'].default_value = 1.1; wear1.inputs['Detail'].default_value = 3
+    wear2 = nt.nodes.new('ShaderNodeTexNoise'); wear2.inputs['Scale'].default_value = 5.0; wear2.inputs['Detail'].default_value = 1
+    nt.links.new(pos, wear1.inputs['Vector']); nt.links.new(pos, wear2.inputs['Vector'])
+    mixw = nt.nodes.new('ShaderNodeMath'); mixw.operation = 'ADD'; mixw.use_clamp = False
+    nt.links.new(wear1.outputs['Fac'], mixw.inputs[0]); nt.links.new(wear2.outputs['Fac'], mixw.inputs[1])
+    gain_v = nt.nodes.new('ShaderNodeMapRange'); gain_v.inputs['From Min'].default_value = 0.4; gain_v.inputs['From Max'].default_value = 1.6
+    gain_v.inputs['To Min'].default_value = 0.74; gain_v.inputs['To Max'].default_value = 1.22; nt.links.new(mixw.outputs[0], gain_v.inputs['Value'])
+    gain = nt.nodes.new('ShaderNodeMix'); gain.data_type = 'RGBA'; gain.blend_type = 'MULTIPLY'; gain.inputs['Factor'].default_value = 1.0
+    nt.links.new(c.outputs[0], gain.inputs['A'])
+    gcol = nt.nodes.new('ShaderNodeCombineColor'); nt.links.new(gain_v.outputs['Result'], gcol.inputs[0]); nt.links.new(gain_v.outputs['Result'], gcol.inputs[1]); nt.links.new(gain_v.outputs['Result'], gcol.inputs[2])
+    nt.links.new(gcol.outputs[0], gain.inputs['B']); nt.links.new(gain.outputs['Result'], b.inputs['Base Color'])
+    b.inputs['Roughness'].default_value = 1.0
     return m
 
 
@@ -246,8 +247,8 @@ def build_sky(mode, weather='clear'):
     sky = nt.nodes.new('ShaderNodeMixRGB'); nt.links.new(cm.outputs[0], sky.inputs['Fac']); nt.links.new(ramp.outputs[0], sky.inputs['Color1']); nt.links.new(cc.outputs[0], sky.inputs['Color2'])
     last = sky.outputs[0]
     if mode == 'night':   # stars and a big moon
-        vr = nt.nodes.new('ShaderNodeTexVoronoi'); vr.feature = 'DISTANCE_TO_EDGE'; vr.inputs['Scale'].default_value = 90; nt.links.new(coord.outputs['Generated'], vr.inputs['Vector'])
-        st = nt.nodes.new('ShaderNodeMath'); st.operation = 'LESS_THAN'; st.inputs[1].default_value = 0.012; nt.links.new(vr.outputs['Distance'], st.inputs[0])
+        vr = nt.nodes.new('ShaderNodeTexVoronoi'); vr.feature = 'F1'; vr.inputs['Scale'].default_value = 42; nt.links.new(coord.outputs['Generated'], vr.inputs['Vector'])
+        st = nt.nodes.new('ShaderNodeMath'); st.operation = 'LESS_THAN'; st.inputs[1].default_value = 0.035; nt.links.new(vr.outputs['Distance'], st.inputs[0])
         sg = nt.nodes.new('ShaderNodeMath'); sg.operation = 'MULTIPLY'; nt.links.new(st.outputs[0], sg.inputs[0]); nt.links.new(hz.outputs['Result'], sg.inputs[1])
         sc = nt.nodes.new('ShaderNodeMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = 0;
         inv = nt.nodes.new('ShaderNodeMath'); inv.operation = 'SUBTRACT'; inv.inputs[0].default_value = 1; nt.links.new(cm.outputs[0], inv.inputs[1])
@@ -282,7 +283,7 @@ def scatter_detail(p, seed):
     tufts = [m for m in ('nature-kit/grass_leafsLarge', 'nature-kit/grass_large', 'nature-kit/grass_leafs') if library.known(m)]
     if not tufts: return 0
     n = 0
-    for k in range(140):
+    for k in range(260):
         a = _wobble(seed, k * 3 + 1) * math.tau; d = 4.2 + 24 * (_wobble(seed + 5, k) ** 0.8)
         x, y = math.cos(a) * d, math.sin(a) * d
         if t == 'river_crossing' and abs(y - RIVER_Y) < RIVER_HALF + 1.5: continue

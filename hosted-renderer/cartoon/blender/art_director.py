@@ -17,9 +17,159 @@ import math, re
 from shot_schema import validate_shot
 from shot_director import ZONES as BASE_ZONES, OBJ_CAMS
 from object_specs import OBJECTS
-from place_spec import compile_place, KITS as PLACE_KITS, LIGHTING as PLACE_LIGHT, smooth_story_time
+from place_spec import height as terrain_height, compile_place, KITS as PLACE_KITS, LIGHTING as PLACE_LIGHT, smooth_story_time
 
 FPS = 30
+FG_KINDS = ('medium', 'close', 'ots', 'low', 'track', 'wide', 'orbit')
+FG_OUTDOOR = ('nature-kit/plant_bush', 'nature-kit/rock_largeA', 'q-stylizednaturemegakit/Fern_1')
+FG_INDOOR = ('furniture-kit/chair', 'furniture-kit/lampRoundFloor', 'pirate-kit/barrel')
+LABEL_RE = re.compile(r"\b(\d{1,3}(?:,\d{3})+|\d{3,4}\s*(?:bc|bce|ad)?|\d{1,2}\s*(?:percent|%))\b")
+
+
+UNITS = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11, 'twelve': 12, 'thirteen': 13,
+         'fourteen': 14, 'fifteen': 15, 'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20, 'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60,
+         'seventy': 70, 'eighty': 80, 'ninety': 90}
+SCALES = {'hundred': 100, 'thousand': 1000, 'million': 1000000}
+
+
+def spoken_number(text):
+    """First number spelled out in the line ('two hundred seventeen BC', 'about two thousand oxen') -> sign text ('217 BC', '2,000 OXEN'), or None."""
+    toks = re.findall(r"[a-z]+|\d+", (text or '').lower().replace('-', ' '))
+    i = 0
+    while i < len(toks):
+        if toks[i] in UNITS or toks[i] in SCALES:
+            total = cur = 0; j = i; seen = False
+            while j < len(toks) and (toks[j] in UNITS or toks[j] in SCALES or toks[j] == 'and'):
+                w = toks[j]
+                if w in UNITS: cur += UNITS[w]; seen = True
+                elif w in SCALES:
+                    if w == 'hundred': cur = max(cur, 1) * 100
+                    else: total += max(cur, 1) * SCALES[w]; cur = 0
+                    seen = True
+                j += 1
+            value = total + cur
+            nxt = toks[j] if j < len(toks) else ''
+            if seen and value >= 10:
+                if nxt in ('bc', 'bce', 'ad'): return f"{value} {nxt.upper()}"
+                if value >= 100: return f"{value:,}" + (f" {nxt.upper()}" if nxt.isalpha() and 3 <= len(nxt) <= 9 and nxt not in ('and', 'the', 'of', 'in', 'for', 'were', 'was', 'that', 'with', 'from') else '')
+            i = max(j, i + 1)
+        else: i += 1
+    return None
+
+
+def travel_width_per_s(cam, dur):
+    """Camera travel as a fraction of the frame width per second (push + sideways + turn), the benchmark rulebook's speed measure."""
+    f = cam['from']; t = cam.get('to', f); la = cam['look_at']; lt = cam.get('look_to', la)
+    th = math.tan(math.atan(18.0 / max(10.0, cam.get('lens', 35)))); d0 = math.dist(f, la) or 1.0; fw = 2 * d0 * th * 9 / 16
+    d1 = math.dist(t, lt); v = [la[i] - f[i] for i in range(3)]; w = [lt[i] - t[i] for i in range(3)]
+    cosang = sum(a * b for a, b in zip(v, w)) / ((math.hypot(*v) or 1) * (math.hypot(*w) or 1)); turn = math.acos(max(-1, min(1, cosang)))
+    move = math.dist(f, t); lateral = math.sqrt(max(0.0, move ** 2 - (d0 - d1) ** 2))
+    return (abs(d0 - d1) / fw * 0.5 + lateral / fw + turn / (2 * math.atan(th * 9 / 16))) / max(0.2, dur)
+
+
+def normalize_travel(cam, dur, lo=0.07, hi=0.35):
+    """Every shot travels, but never so fast it is hard to follow: scale the move into the 0.07-0.35 frame widths per second band."""
+    ws = travel_width_per_s(cam, dur); f = cam['from']
+    if ws > hi and 'to' in cam:
+        k = hi / ws; cam['to'] = [round(f[i] + (cam['to'][i] - f[i]) * k, 3) for i in range(3)]
+        if 'look_to' in cam: la = cam['look_at']; cam['look_to'] = [round(la[i] + (cam['look_to'][i] - la[i]) * k, 3) for i in range(3)]
+    elif ws < lo:
+        la = cam['look_at']; cam['to'] = [round(f[i] + (la[i] - f[i]) * 0.2, 3) for i in range(3)]
+    return cam
+
+
+def project_point(cam, p, t):
+    """Where a world point lands in the frame (0..1 both ways) at time t (0..1) of the shot, or None when it is behind the lens."""
+    f = [cam['from'][i] + (cam.get('to', cam['from'])[i] - cam['from'][i]) * t for i in range(3)]
+    la = [cam['look_at'][i] + (cam.get('look_to', cam['look_at'])[i] - cam['look_at'][i]) * t for i in range(3)]
+    fw = [la[i] - f[i] for i in range(3)]; n = math.sqrt(sum(v * v for v in fw)) or 1.0; fw = [v / n for v in fw]
+    rt = [fw[1], -fw[0], 0.0]; rn = math.hypot(rt[0], rt[1]) or 1.0; rt = [rt[0] / rn, rt[1] / rn, 0.0]
+    up = [rt[1] * fw[2] - rt[2] * fw[1], rt[2] * fw[0] - rt[0] * fw[2], rt[0] * fw[1] - rt[1] * fw[0]]
+    v = [p[i] - f[i] for i in range(3)]; z = sum(v[i] * fw[i] for i in range(3))
+    if z <= 0.1: return None
+    th = math.tan(math.atan(18.0 / max(10.0, cam.get('lens', 35))))
+    return (0.5 + 0.5 * sum(v[i] * rt[i] for i in range(3)) / (z * th * 9 / 16), 0.5 + 0.5 * sum(v[i] * up[i] for i in range(3)) / (z * th))
+
+
+def cast_in_frame(cam, cast):
+    for c in cast:
+        x, y = c['pos']
+        for t in (0.0, 0.5, 1.0):
+            h = project_point(cam, (x, y, 1.8), t); top = project_point(cam, (x, y, 2.1), t)
+            if h is None or not (0.07 < h[0] < 0.93) or (top is not None and top[1] > 0.985): return False
+    return True
+
+
+def keep_cast_in_frame(cam, cast):
+    """Camera moves must never carry a head out of the frame: shrink the move, then back the lens off, until every head stays inside the whole shot."""
+    if not cast: return cam
+    base_to = list(cam.get('to', cam['from'])); base_lt = list(cam.get('look_to', cam['look_at'])); f = cam['from']; la = cam['look_at']
+    for back in (1.0, 1.15, 1.3, 1.5):
+        if back != 1.0:
+            sx = sum(c['pos'][0] for c in cast) / len(cast); sy = sum(c['pos'][1] for c in cast) / len(cast)
+            cam['from'] = [round(sx + (f[0] - sx) * back, 3), round(sy + (f[1] - sy) * back, 3), f[2]]
+        for k in (1.0, 0.7, 0.45, 0.2, 0.0):
+            ff = cam['from']
+            cam['to'] = [round(ff[i] + (base_to[i] - f[i]) * k, 3) for i in range(3)]
+            if 'look_to' in cam or k < 1.0: cam['look_to'] = [round(la[i] + (base_lt[i] - la[i]) * k, 3) for i in range(3)]
+            if cast_in_frame(cam, cast): return cam
+    return cam
+
+
+def limit_pitch(cam, max_down=48.0, max_up=22.0):
+    """No top-down or worm's-eye views: keep the lens between 22 degrees below and 48 degrees above horizontal by moving it away horizontally."""
+    for key in ('from', 'to'):
+        if key not in cam: continue
+        look = cam['look_at'] if key == 'from' else cam.get('look_to', cam['look_at']); f = cam[key]
+        hx, hy = f[0] - look[0], f[1] - look[1]; hd = math.hypot(hx, hy) or 1e-3; dz = f[2] - look[2]
+        pitch = math.degrees(math.atan2(dz, hd))
+        if pitch > max_down: need = dz / math.tan(math.radians(max_down))
+        elif pitch < -max_up: need = -dz / math.tan(math.radians(max_up))
+        else: continue
+        k = need / hd; cam[key] = [round(look[0] + hx * k, 3), round(look[1] + hy * k, 3), f[2]]
+    return cam
+
+
+def clear_lens_items(place, cam):
+    """Nothing may sit in the lens's way: drop props and landmarks that stand within a body's reach of the camera path (the creator's 'passing through the lens' check)."""
+    path = [(cam['from'][i] + (cam.get('to', cam['from'])[i] - cam['from'][i]) * t) for t in (0.0, 0.5, 1.0) for i in (0, 1)]
+    pts = [(path[0], path[1]), (path[2], path[3]), (path[4], path[5])]
+    keep = []
+    for it in place.get('items', []):
+        r = 1.4 if it['height'] < 3 else 2.4 + 0.15 * it['height']
+        if any(math.hypot(it['pos'][0] - px, it['pos'][1] - py) < r for px, py in pts): continue
+        keep.append(it)
+    place['items'] = keep
+
+
+def story_tint(p, lighting):
+    """Warm and bright for the setup, a deeper blue at the pivot (53-87% of the story), warm again for the payoff."""
+    warm, cool = (1.0, 0.95, 0.86), (0.82, 0.9, 1.08)
+    w = max(0.0, 1 - abs(p - 0.70) / 0.17); k = w * w * (3 - 2 * w) * (0.5 if lighting == 'night' else 1.0)
+    return [round(warm[i] + (cool[i] - warm[i]) * k, 3) for i in range(3)]
+# Fraction of the frame height the main subject should fill (benchmark rulebook: 40-60% in medium shots, 70%+ in close shots)
+SUBJECT_FRAC = {'close': 0.72, 'xclose': 0.9, 'medium': 0.55, 'ots': 0.55, 'low': 0.5, 'track': 0.5, 'orbit': 0.42, 'wide': 0.3, 'high': 0.3, 'establish': 0.17}
+
+
+def fit_subject(cam, cast, kind, indoor=False):
+    """Move the lens along its line of sight so the cast fills the rulebook share of the frame height and still fits the frame width."""
+    frac = SUBJECT_FRAC.get(kind)
+    if not frac or not cast: return cam
+    xs = [c['pos'][0] for c in cast]; ys = [c['pos'][1] for c in cast]
+    sx, sy = sum(xs) / len(xs), sum(ys) / len(ys); spread = max(math.hypot(a - sx, b - sy) for a, b in zip(xs, ys)) * 2
+    tan_half = math.tan(math.atan(18.0 / max(10.0, cam.get('lens', 35))))   # vertical half field of view (36 mm sensor fits the portrait height)
+    d_h = 1.9 / (frac * 2 * tan_half); d_w = (spread + 1.2) / (0.92 * 2 * tan_half * 9 / 16)
+    want = max(d_h, d_w, 1.35)
+    f = cam['from']; subj = (sx, sy, 0.95); d = math.dist(f, subj)
+    back_ok = (not indoor) or kind in ('close', 'xclose', 'medium', 'ots', 'low', 'track')   # indoors only the framed kinds may back away
+    if d > want * 1.06 or (d < want * 0.6 and back_ok):
+        # keep the lens height (never below the ground) and change only the horizontal distance
+        dz = f[2] - subj[2]; hx, hy = f[0] - sx, f[1] - sy; hd = math.hypot(hx, hy)
+        if kind != 'high': dz = max(-0.25 * want, min(0.35 * want, dz))      # never a top-down or underground view unless the shot is a crane move
+        if hd > 1e-3:
+            target_h = math.sqrt(max(want * want - dz * dz, 0.9)); k = target_h / hd
+            cam['from'] = [round(sx + hx * k, 3), round(sy + hy * k, 3), round(max(0.4, subj[2] + dz), 3)]
+    return cam
 SIZE = (720, 1280)  # upscaled to 1080x1920; measured same look as 810x1440 at ~45% less GPU time
 # ---------------------------------------------------------------- locations
 _RING = {'center': ((0, -1), 90), 'left': ((-1.6, 1.8), 125), 'right': ((2.0, 1.4), 58), 'reverse': ((0, 2.5), 270)}
@@ -45,6 +195,7 @@ PLACE_WORDS = {
     'village': 'village hamlet town',
 }
 PLACE_INDEX = {k: v.split() for k, v in PLACE_WORDS.items()}
+KITSET = set(PLACE_KITS)
 INDOOR_KITS = {'office', 'workshop', 'saloon', 'room', 'mine_tunnel', 'castle'}  # 'indoors' in a location rules out street/field kits
 MIN_PLACE = 1        # the location text must name the place type at least once
 MIN_SPOKEN = 2       # legacy shots without a location: two place words in the line itself
@@ -81,7 +232,7 @@ VERB_ACTION = [  # first match wins; literal verbs in the spoken line drive the 
     (r'\b(carr\w*|haul\w*|deliver\w*|lift\w*|brought|bring\w*)\b', 'carry'),
     (r'\b(dug|dig\w*|smash\w*|hit|hits|hammer\w*|chop\w*|struck|strike\w*|built|build\w*)\b', 'swing'),
     (r'\b(pour\w*|spill\w*|fill\w*)\b', 'pour'),
-    (r'\b(fell|collaps\w*|fainted|tripped|slipped)\b', 'fall'),
+    (r'\b(fell|collaps\w*|fainted)\b', 'fall'),
     (r'\b(won|win|wins|celebrat\w*|cheer\w*|victory|triumph\w*|success\w*)\b', 'cheer'),
     (r'\b(panic\w*|terrif\w*|chaos|disaster|destroy\w*|ruin\w*|lost|failed|fail\w*|humiliat\w*)\b', 'panic'),
     (r'\b(point\w*|show\w*|explain\w*|discover\w*|found|notic\w*|look\w*|spott\w*|announc\w*|declar\w*|order\w*)\b', 'point'),
@@ -354,7 +505,7 @@ class Director:
     def __init__(self, m, cards=()):
         smooth_story_time(m)   # one time of day per stretch of the story: no day/night flicker between neighbouring scenes
         self.m = m; self.cards = set(cards); self.locations = plan_locations(m, self.cards)
-        self.history = []; self.zone_use = {}; self.cast_look = {}
+        self.history = []; self.zone_use = {}; self.cast_look = {}; self.last_label = -9
         for i, c in enumerate(m.get('cast') or []):
             role = c.get('outfit')   # the shared vocabulary stays small (legacy web engine); the cast id's own words refine the look
             for w in re.split(r'[^a-z]+', str(c.get('id', '')).lower()):
@@ -637,12 +788,46 @@ class Director:
         if crowd: shot['crowd'] = crowd
         if effects: shot['effects'] = effects
         if prop_specs: shot['props'] = prop_specs
+        self.house_extras(shot, i, part, kind, st, cast, cam, txt)
+        if kind not in ('track', 'orbit', 'establish'): normalize_travel(cam, shot['duration'])
+        if cast and kind not in ('establish', 'high', 'insert'): keep_cast_in_frame(cam, cast)
         self.history.append(kind); self.last_zone = (st, zname)
         return validate_shot(shot), {'camera_type': kind, 'set': st, 'zone': zname, 'verb': verb, 'words': txt, 'location': s.get('location'),
                                      'objects': [o['phrase'] for o in obj_cards], 'cards_shown': shown,
                                      'key_height': round(height_frac(cam, key), 3) if key else None, 'fixes': fixes,
                                      'cast': [c['id'] for c in cast], 'cast_reasons': {c['id']: (s.get('cast_reasons') or {}).get(c['id'], '') for c in cast},
                                      'sequence_step': seq[part] if seq_card else None}
+
+    def house_extras(self, shot, i, part, kind, st, cast, cam, txt):
+        """Depth, story lighting and an in-world label (benchmark rulebook): a blurred foreground object near the lens, a cooler key at the pivot,
+        and a painted sign carrying the year or number the line names."""
+        n = max(2, len(self.m['shots'])); shot['tint'] = story_tint(i / (n - 1), shot['lighting'])
+        limit_pitch(cam)
+        place = shot.get('place')
+        if place: clear_lens_items(place, cam)
+        if not place or not cast: return
+        import library
+        f, la = cam['from'], cam['look_at']; fx, fy = la[0] - f[0], la[1] - f[1]; L = math.hypot(fx, fy) or 1.0; fx, fy = fx / L, fy / L; rx, ry = fy, -fx
+        cx = sum(c['pos'][0] for c in cast) / len(cast); cy = sum(c['pos'][1] for c in cast) / len(cast)
+        lat = (cx - f[0]) * rx + (cy - f[1]) * ry; side = -1 if lat > 0 else 1        # the object enters from the side the cast is not on
+        if kind in FG_KINDS and (i + part) % 3 != 2 and len(place.get('items', [])) < 38:
+            indoor = st in INDOOR_KITS or place.get('terrain') in KITSET
+            pool = FG_INDOOR if indoor else FG_OUTDOOR; mid = pool[(i * 5 + part) % len(pool)]
+            if library.known(mid):
+                fw = 0.675 * 1.9                                                          # frame width at the object's distance
+                x, y = f[0] + fx * 1.9 + rx * side * 0.40 * fw, f[1] + fy * 1.9 + ry * side * 0.40 * fw
+                z = 0.0 if indoor else max(0.0, terrain_height(place['terrain'], x, y, place.get('seed', 0), place.get('params')))
+                place['items'].append({'id': 'lib:' + mid, 'model': mid, 'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': 0.5, 'yaw': float((i * 53) % 360 - 180)})
+                cam['fstop'] = min(cam.get('fstop', 3.4), 3.4)                         # shallow enough for the foreground to blur
+        m = LABEL_RE.search(txt or '')
+        spoken = None if m else spoken_number(txt or '')
+        if (m or spoken) and part == 0 and i - self.last_label >= 3 and kind not in ('insert', 'xclose'):
+            word = (re.sub(r"\s+", " ", m.group(1).upper()).strip() if m else spoken)[:24]
+            d = max(1.5, math.hypot(cx - f[0], cy - f[1])); fw = 0.675 * d; width = max(1.2, min(2.6, 0.30 + 0.2 * len(word)))
+            sc = min(1.0, 0.26 * fw / width); lat = 0.24 * fw + 0.13 * fw
+            lx, ly = cx - rx * side * lat - fx * 0.5, cy - ry * side * lat - fy * 0.5
+            shot['label'] = {'text': word, 'pos': [round(lx, 3), round(ly, 3)], 'yaw': round(math.degrees(math.atan2(f[0] - lx, -(f[1] - ly))), 1), 'scale': round(sc, 3)}
+            self.last_label = i
 
     def make_camera(self, kind, s, st, origin, head, F, R, C, cast, cards, objects, dur, moving, verb, tdir, txt, part, obj_cards=()):
         side = 1 if (len(self.history) % 2 == 0) else -1
@@ -708,6 +893,7 @@ class Director:
                     cam = {'from': at(o0, F, R, -1.2, .3, .9), 'look_at': at(o0, F, R, 0, 0, .35), 'lens': 60, 'fstop': 2.2}
             else:
                 cam = {'from': P(-1.4, .5 * side, 1.2), 'look_at': P(0, 0, 0.9), 'lens': 60, 'fstop': 2.2}
+        if cast and kind not in ('insert',): cam = fit_subject(cam, cast, kind, indoor=st in INDOOR_KITS)
         # editorial move on top of the setup (never on track/orbit/establish, which already move)
         if kind not in ('track', 'orbit', 'establish'):
             f, la = cam['from'], cam['look_at']; tw = [la[k] - f[k] for k in range(3)]

@@ -115,4 +115,15 @@ export const RETENTION = `RETENTION RULES (a viewer decides in 2 seconds, then a
 - Build escalation: each step is bigger, riskier or stranger than the last. Put the most visual event (the trick working, the disaster, the reveal) in the final third.
 - Use concrete specifics (a number, a name, a material) instead of generalities. "Two thousand oxen" beats "many animals".
 - The last line lands the insight and makes the viewer want to replay (a reframe that makes the first line mean something new).
-- Never start more than two lines in a row with the same word, and never use filler ("interestingly", "it turns out", "in fact").`;
+- Never start more than two lines in a row with the same word, and never use filler ("interestingly", "it turns out", "in fact").
+
+STORY BEATS (the house formula; positions are by line, for a 12-16 line script):
+- Line 1 is the paradox: a strange claim that sounds impossible, with no intro and no throat-clearing. The first word of the script is already the story.
+- Setup in lines 2-3: where, when, who is stuck, and a concrete number.
+- BUT (about line 4): the first obstacle or the plan that goes wrong. Begin the line with "But" or "So".
+- THEN (about line 5): what happens next as a direct result.
+- CONFLICT (about line 6): the complaint, the doubt or the danger; someone says it can't work.
+- PIVOT (at 55-85% of the script, after about two thirds of the lines): the reveal that flips the viewer's assumption, introduced plainly ("You see," or "Here is the catch:"), then the mechanism in simple words.
+- CONSEQUENCE (at 80-93%): what the reveal caused, begun with "So" or "That means", with a concrete number or result.
+- CLOSING LINE (under 15 words): the reframe in new words. No outro, no call to action, no "follow for more".
+- One idea per sentence. Every claim comes from the fact sheet. Prefer physical events a viewer can SEE over explanations.`;

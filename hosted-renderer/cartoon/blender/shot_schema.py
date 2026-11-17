@@ -8,7 +8,7 @@ from effects import KINDS as EFFECT_KINDS
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day', 'neutral'}
 PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place'}
+KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -29,6 +29,13 @@ def validate_shot(s):
     for b in bd:
         if not isinstance(b, dict) or set(b) != {'image', 'layer'} or b['layer'] not in ('far', 'mid') or not re.fullmatch(r'bg-[a-z0-9_]{1,20}-(far|mid)\.png', str(b['image'])) or not str(b['image']).endswith(f"-{b['layer']}.png"):
             raise ValueError('invalid backdrop layer')
+    if 'tint' in s:
+        t = s['tint']
+        if not (isinstance(t, list) and len(t) == 3 and all(isinstance(v, (int, float)) and 0.3 <= v <= 1.6 for v in t)): raise ValueError('tint needs three numbers 0.3-1.6')
+    if 'label' in s:
+        lb = s['label']
+        if not isinstance(lb, dict) or set(lb) - {'text', 'pos', 'yaw', 'scale'} or not re.fullmatch(r"[A-Z0-9 ,.'&-]{1,24}", str(lb.get('text', ''))): raise ValueError('invalid label')
+        _vec(lb.get('pos'), 2, 'label.pos', 200)
     if 'place' in s:
         from place_spec import validate_compiled
         validate_compiled(s['place'])

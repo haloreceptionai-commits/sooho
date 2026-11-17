@@ -304,6 +304,7 @@ def camera(shot, fps):
 
 def look(scene, shot):
     scene.view_settings.view_transform = 'AgX'
+    scene.view_settings.exposure = {'night': 1.15, 'sunset': 0.75, 'rain': 0.65, 'day': 0.45}.get(shot.get('lighting', 'day'), 0.45)   # benchmark brightness is 0.50-0.57
     for name in (shot.get('grade', 'Medium High Contrast'),):
         for cand in (f'AgX - {name}', name):
             try: scene.view_settings.look = cand; break
@@ -588,6 +589,18 @@ def main():
         with open(os.path.join(out,'object-qa.json'),'w') as file:json.dump(qa,file,indent=2)
     build_props(shot)
     fx = build_effects(shot, fps); crowd = build_crowd(shot, fps); print('FX', fx, 'CROWD', crowd, flush=True)
+    if shot.get('label'):
+        from labels import build_label
+        try: build_label(shot['label'])
+        except Exception as e: print('label skipped', str(e)[:120], flush=True)
+    try:
+        from toon import apply_house_style
+        print('HOUSE_STYLE', apply_house_style(), flush=True)
+    except Exception as e: print('house style skipped', str(e)[:160], flush=True)
+    if shot.get('tint'):   # story lighting: scale the key colours (warm setup, cooler pivot)
+        tr, tg, tb = shot['tint']
+        for o in bpy.data.objects:
+            if o.type == 'LIGHT' and o.data.type == 'SUN': o.data.color = (min(1.0, o.data.color[0] * tr), min(1.0, o.data.color[1] * tg), min(1.0, o.data.color[2] * tb))
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     cards = [build_card(cd, sc.camera, shot['duration'], fps) for cd in shot.get('cards', [])]

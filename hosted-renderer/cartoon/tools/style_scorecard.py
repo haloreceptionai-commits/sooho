@@ -55,7 +55,24 @@ def analyse(path):
     }
 
 
+def frame_metrics(img):
+    """Same colour and sharpness measures for one still image (resized the same way as video frames)."""
+    small = cv2.resize(img, (W, H), interpolation=cv2.INTER_AREA)
+    g = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY).astype(np.float32); hsv = cv2.cvtColor(small, cv2.COLOR_BGR2HSV)
+    lap = cv2.Laplacian(g, cv2.CV_32F)
+    return {'brightness': float(hsv[..., 2].mean()) / 255, 'contrast': float(g.std()) / 255, 'saturation': float(hsv[..., 1].mean()) / 255,
+            'sharpness_centre': float(lap[H // 3: 2 * H // 3, W // 4: 3 * W // 4].var()),
+            'sharpness_scene': float(lap[int(H * .10): int(H * .52), int(W * .08): int(W * .92)].var())}   # above the caption zone
+
+
+def frames_report(paths):
+    rows = [frame_metrics(cv2.imread(p)) for p in paths]
+    return {k: round(float(np.mean([r[k] for r in rows])), 3) for k in rows[0]}
+
+
 if __name__ == '__main__':
+    if sys.argv[1] == '--frames':
+        print(json.dumps(frames_report(sys.argv[2:]))); sys.exit(0)
     out = sys.argv[1]; rows = [analyse(p) for p in sys.argv[2:]]
     json.dump(rows, open(out, 'w'), indent=1)
     keys = [k for k in rows[0] if k != 'file']
