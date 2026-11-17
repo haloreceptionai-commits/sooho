@@ -6,6 +6,33 @@ from character_motion import pose, face_shape
 from set_detail import material, cube, rope
 
 
+_OUTLINE = None
+
+
+def outline_material():
+    """Inverted-hull ink line: black on the shell's back faces, transparent on its front faces."""
+    global _OUTLINE
+    if _OUTLINE is None:
+        m = bpy.data.materials.new('benchmark ink'); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
+        out = nt.nodes.new('ShaderNodeOutputMaterial'); geo = nt.nodes.new('ShaderNodeNewGeometry'); mix = nt.nodes.new('ShaderNodeMixShader')
+        tr = nt.nodes.new('ShaderNodeBsdfTransparent'); em = nt.nodes.new('ShaderNodeEmission'); em.inputs['Color'].default_value = (0.005, 0.005, 0.007, 1)
+        nt.links.new(geo.outputs['Backfacing'], mix.inputs['Fac']); nt.links.new(em.outputs[0], mix.inputs[1]); nt.links.new(tr.outputs[0], mix.inputs[2])
+        nt.links.new(mix.outputs[0], out.inputs['Surface']); _OUTLINE = m
+    return _OUTLINE
+
+
+def outline(o, width=0.014):
+    """Thick black outline (benchmark look): a flipped, slightly inflated single-layer shell, camera-only, parented so it follows the animation."""
+    hull = o.copy(); hull.data = o.data.copy(); hull.data.materials.clear(); hull.data.materials.append(outline_material())
+    for m in list(hull.modifiers): hull.modifiers.remove(m)
+    bpy.context.collection.objects.link(hull)
+    for poly in hull.data.polygons: poly.flip()
+    d = hull.modifiers.new('grow', 'DISPLACE'); d.strength = -width / max(min(o.scale), 1e-3); d.mid_level = 0
+    hull.parent = o; hull.location = (0, 0, 0); hull.rotation_euler = (0, 0, 0); hull.scale = (1, 1, 1); hull.matrix_parent_inverse.identity()
+    hull.visible_shadow = False; hull.visible_diffuse = False; hull.visible_glossy = False; hull.visible_transmission = False; hull.visible_volume_scatter = False
+    return hull
+
+
 def sphere(name,pos,size,mat):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=16,location=pos)
     o=bpy.context.active_object;o.name=name;o.scale=size;o.data.materials.append(mat)
@@ -68,7 +95,7 @@ def build_character(c,duration=3,fps=30):
     trim=material(ident+' trim',tuple(c.get('trim',(.72,.55,.12))),.35)
     root=bpy.data.objects.new(ident,None);bpy.context.collection.objects.link(root)
     headroot=bpy.data.objects.new(ident+' head',None);bpy.context.collection.objects.link(headroot);headroot.parent=root
-    premium=c.get('style','premium')=='premium'
+    style=c.get('style','benchmark');premium=style=='premium';bench=style=='benchmark'
     head=sphere('egg head',(0,0,0),(.31,.27,.36) if not premium else (.3,.27,.34),skin);head.parent=headroot
     expr=c.get('expression','neutral');face=face_shape(expr)
     if premium:
@@ -205,6 +232,13 @@ def build_character(c,duration=3,fps=30):
             if held=='cup':
                 bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.1,depth=.16,location=(0,0,.06));o=bpy.context.active_object;o.data.materials.append(hatmat);o.parent=wrist
                 sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist
+    if bench:
+        for side in ['left','right']:
+            hand=sphere(side+' hand',(0,0,.05),(.06,.045,.07),skin);hand.parent=anchors[side+'_wrist'];outline(hand,.01)
+        for o in list(headroot.children):
+            if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest')):outline(o,.013)
+        for o in list(root.children):
+            if o.type=='MESH' and o.name.startswith(('coat','tricorne','work apron','robe','dress','lab coat','royal','breastplate','tunic')):outline(o,.013)
     action=c.get('action','stand');base=Vector((*c['pos'],0));yaw=math.radians(c.get('yaw',0));scale=c.get('scale',1)
     for f in range(round(duration*fps)):
         p=pose(action,f/fps);off=Vector(p['root']);off.rotate(Euler((0,0,yaw)));root.location=base+off*scale;root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)

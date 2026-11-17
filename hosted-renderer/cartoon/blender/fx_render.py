@@ -91,7 +91,7 @@ def build_crowd(shot, fps):
     n = round(shot['duration'] * fps); yaw = math.radians(cr.get('yaw', 0))
     army = cr.get('kind') == 'army'
     ink = material('crowd ink', (.012, .013, .015), .65)
-    skins = [material(f'crowd skin {i}', c, .6) for i, c in enumerate([(.93, .8, .68), (.78, .6, .46), (.62, .46, .34), (.88, .72, .58)])]
+    skins = [material(f'crowd skin {i}', c, .6) for i, c in enumerate([(.96, .95, .92), (.94, .93, .9), (.97, .96, .94), (.93, .92, .88)])]   # benchmark: every face is the same white
     metal = material('crowd bronze', (.62, .42, .14), .35); wood = material('crowd shaft', (.3, .2, .1), .8)
     cloth = [material(f'crowd cloth {i}', c, .88) for i, c in enumerate([(.55, .12, .08), (.42, .32, .14), (.25, .25, .27), (.6, .5, .2), (.13, .22, .42), (.38, .12, .1)] if army else [(.13, .36, .3), (.55, .12, .08), (.12, .2, .45), (.42, .32, .14), (.25, .25, .27), (.6, .5, .2)])]
     heads = []
@@ -118,12 +118,23 @@ def build_crowd(shot, fps):
         bpy.ops.object.transform_apply(); hats.append(h.data); bpy.data.objects.remove(h)
     bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6); hm = bpy.context.active_object; hm.data.materials.append(metal)
     hm.scale = (.19, .17, .13); bpy.ops.object.transform_apply(scale=True); helm_mesh = hm.data; bpy.data.objects.remove(hm)
+    from characters import outline_material
+    ink_mat = outline_material(); hulls = {}
     pts = crowd_layout(cr['count'], cr['center'], cr['size'], cr.get('seed', 0))
     for i, (x, y, s, ci, ph) in enumerate(pts):
         root = bpy.data.objects.new(f'crowd {i}', None); bpy.context.collection.objects.link(root)
         root.rotation_euler.z = yaw + (ph - math.pi) * .08; root.scale = (s, s, s)
         for name, me, loc in (('body', bodies[ci % len(bodies)], (0, 0, .5)), ('head', heads[(i * 7 + ci) % len(heads)], (0, 0, .95)), ('eye', eye_mesh, (-.06, -.15, 1.0)), ('eye', eye_mesh, (.06, -.15, 1.0))):
             o = bpy.data.objects.new(f'crowd {name}', me); bpy.context.collection.objects.link(o); o.parent = root; o.location = loc
+            if name in ('body', 'head'):   # thick black outline, one shared flipped shell mesh per source mesh
+                hm = hulls.get(me.name)
+                if hm is None:
+                    hm = me.copy(); hm.materials.clear(); hm.materials.append(ink_mat)
+                    for pl in hm.polygons: pl.flip()
+                    hulls[me.name] = hm
+                ho = bpy.data.objects.new('crowd ink', hm); bpy.context.collection.objects.link(ho); ho.parent = o
+                dm = ho.modifiers.new('grow', 'DISPLACE'); dm.strength = -.022; dm.mid_level = 0
+                ho.visible_shadow = False; ho.visible_diffuse = False; ho.visible_glossy = False; ho.visible_transmission = False; ho.visible_volume_scatter = False
         for lx in (-.07, .07):
             o = bpy.data.objects.new('crowd leg', leg_mesh); bpy.context.collection.objects.link(o); o.parent = root; o.location = (lx, 0, 0)
         if army:

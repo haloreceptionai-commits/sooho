@@ -26,6 +26,20 @@ GROUND_PAL = {   # custom places: ground colour sets (low, rock/slope, high)
     'asphalt': ((0.1, 0.1, 0.11), (0.14, 0.14, 0.15), (0.18, 0.18, 0.19)), 'metal': ((0.35, 0.37, 0.4), (0.25, 0.27, 0.3), (0.5, 0.52, 0.56))}
 
 
+MAIN_TEX = {'mountain_pass': 'grass', 'valley': 'grass', 'plain': 'grass', 'river_crossing': 'grass', 'camp': 'dirt', 'desert': 'dirt', 'snow_mountain': 'stone',
+            'coast': 'dirt', 'jungle': 'grass', 'ancient_city': 'stone'}
+GROUND_TEX = {'grass': 'grass', 'sand': 'dirt', 'snow': 'stone', 'rock': 'rock', 'dirt': 'dirt', 'stone': 'stone', 'mud': 'dirt', 'ice': 'stone', 'asphalt': 'stone', 'metal': 'stone'}
+
+
+def tex_node(nt, name, role, metres, vec):
+    """Triplanar (box) CC0 texture sampled in world space so it never stretches on slopes."""
+    from set_library import asset_path
+    sc = nt.nodes.new('ShaderNodeVectorMath'); sc.operation = 'SCALE'; sc.inputs['Scale'].default_value = 1.0 / metres; nt.links.new(vec, sc.inputs[0])
+    t = nt.nodes.new('ShaderNodeTexImage'); t.image = bpy.data.images.load(asset_path(name, 'texture', role), check_existing=True)
+    t.image.colorspace_settings.name = 'sRGB' if role == 'color' else 'Non-Color'; t.projection = 'BOX'; t.projection_blend = 0.25
+    nt.links.new(sc.outputs[0], t.inputs['Vector']); return t
+
+
 def terrain_mat(t, params=None):
     low, rock, high = GROUND_PAL[(params or {}).get('ground', 'grass')] if t == 'custom' else PALETTE[t]
     m = bpy.data.materials.new('terrain'); m.use_nodes = True; nt = m.node_tree
@@ -45,9 +59,19 @@ def terrain_mat(t, params=None):
     a.inputs['Color2'].default_value = (*rock, 1)
     c = nt.nodes.new('ShaderNodeMixRGB'); nt.links.new(hr.outputs['Result'], c.inputs['Fac']); nt.links.new(a.outputs[0], c.inputs['Color1'])
     c.inputs['Color2'].default_value = (*high, 1)
-    nt.links.new(c.outputs[0], b.inputs['Base Color'])
-    bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.25
-    nt.links.new(tex.outputs['Fac'], bump.inputs['Height']); nt.links.new(bump.outputs['Normal'], b.inputs['Normal'])
+    # real surface detail: multiply the palette by a CC0 texture (rock on slopes, the ground texture elsewhere) and bump from it
+    main = GROUND_TEX[(params or {}).get('ground', 'grass')] if t == 'custom' else MAIN_TEX.get(t, 'grass')
+    pos = geo.outputs['Position']
+    tm = tex_node(nt, main, 'color', 3.5, pos); tr = tex_node(nt, 'rock', 'color', 5.0, pos)
+    detail = nt.nodes.new('ShaderNodeMixRGB'); nt.links.new(sr.outputs['Result'], detail.inputs['Fac'])   # slope -> rock texture
+    nt.links.new(tm.outputs['Color'], detail.inputs['Color2']); nt.links.new(tr.outputs['Color'], detail.inputs['Color1'])
+    gain = nt.nodes.new('ShaderNodeMixRGB'); gain.blend_type = 'MULTIPLY'; gain.inputs['Fac'].default_value = 1.0
+    nt.links.new(c.outputs[0], gain.inputs['Color1']); nt.links.new(detail.outputs[0], gain.inputs['Color2'])
+    bright = nt.nodes.new('ShaderNodeBrightContrast'); bright.inputs['Bright'].default_value = 0.35; bright.inputs['Contrast'].default_value = 0.25
+    nt.links.new(gain.outputs[0], bright.inputs['Color']); nt.links.new(bright.outputs[0], b.inputs['Base Color'])
+    hm = tex_node(nt, main, 'roughness', 3.5, pos)
+    bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.6; bump.inputs['Distance'].default_value = 0.08
+    nt.links.new(hm.outputs['Color'], bump.inputs['Height']); nt.links.new(bump.outputs['Normal'], b.inputs['Normal'])
     return m
 
 
@@ -195,6 +219,82 @@ def ox_coat(root):
                 seen.add(m.name)
 
 
+def build_sky(mode, weather='clear'):
+    """Painted storybook sky (benchmark look): gradient, toon-edged clouds, a big moon and stars at night, a warm glow at dawn/dusk."""
+    w = bpy.context.scene.world; nt = w.node_tree; nt.nodes.clear()
+    out = nt.nodes.new('ShaderNodeOutputWorld'); bg = nt.nodes.new('ShaderNodeBackground')
+    coord = nt.nodes.new('ShaderNodeTexCoord'); sep = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(coord.outputs['Generated'], sep.inputs[0])
+    pal = {'day': ((0.07, 0.30, 0.85), (0.62, 0.82, 1.0), (1, 1, 1), (0.72, 0.8, 0.92), 1.0),
+           'sunset': ((0.22, 0.26, 0.55), (1.0, 0.55, 0.28), (1.0, 0.82, 0.68), (0.75, 0.45, 0.5), 0.9),
+           'night': ((0.01, 0.02, 0.09), (0.07, 0.14, 0.38), (0.35, 0.45, 0.75), (0.08, 0.12, 0.28), 0.9),
+           'rain': ((0.22, 0.25, 0.3), (0.42, 0.46, 0.52), (0.55, 0.58, 0.62), (0.3, 0.33, 0.38), 0.8)}[mode if mode in ('day', 'sunset', 'night', 'rain') else 'day']
+    zen, hor, cl_hi, cl_lo, strength = pal
+    elev = nt.nodes.new('ShaderNodeMapRange'); elev.inputs['From Min'].default_value = -0.05; elev.inputs['From Max'].default_value = 0.85; nt.links.new(sep.outputs[2], elev.inputs['Value'])
+    ramp = nt.nodes.new('ShaderNodeValToRGB'); ramp.color_ramp.elements[0].color = (*hor, 1); ramp.color_ramp.elements[1].color = (*zen, 1)
+    nt.links.new(elev.outputs['Result'], ramp.inputs['Fac'])
+    # clouds: stretched noise thresholded with a short ramp = soft toon edge, brighter on top
+    mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (2.2, 2.2, 5.5); nt.links.new(coord.outputs['Generated'], mp.inputs['Vector'])
+    nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.6; nz.inputs['Detail'].default_value = 5; nz.inputs['Roughness'].default_value = 0.55
+    nt.links.new(mp.outputs[0], nz.inputs['Vector'])
+    cover = 0.55 if mode != 'rain' else 0.35
+    cr = nt.nodes.new('ShaderNodeValToRGB'); cr.color_ramp.elements[0].position = cover; cr.color_ramp.elements[1].position = cover + 0.1
+    nt.links.new(nz.outputs['Fac'], cr.inputs['Fac'])
+    hz = nt.nodes.new('ShaderNodeMapRange'); hz.inputs['From Min'].default_value = 0.04; hz.inputs['From Max'].default_value = 0.22; nt.links.new(sep.outputs[2], hz.inputs['Value'])
+    cm = nt.nodes.new('ShaderNodeMath'); cm.operation = 'MULTIPLY'; nt.links.new(cr.outputs[0], cm.inputs[0]); nt.links.new(hz.outputs['Result'], cm.inputs[1])
+    cc = nt.nodes.new('ShaderNodeMixRGB'); cc.inputs['Color1'].default_value = (*cl_lo, 1); cc.inputs['Color2'].default_value = (*cl_hi, 1)
+    nt.links.new(nz.outputs['Fac'], cc.inputs['Fac'])
+    sky = nt.nodes.new('ShaderNodeMixRGB'); nt.links.new(cm.outputs[0], sky.inputs['Fac']); nt.links.new(ramp.outputs[0], sky.inputs['Color1']); nt.links.new(cc.outputs[0], sky.inputs['Color2'])
+    last = sky.outputs[0]
+    if mode == 'night':   # stars and a big moon
+        vr = nt.nodes.new('ShaderNodeTexVoronoi'); vr.feature = 'DISTANCE_TO_EDGE'; vr.inputs['Scale'].default_value = 90; nt.links.new(coord.outputs['Generated'], vr.inputs['Vector'])
+        st = nt.nodes.new('ShaderNodeMath'); st.operation = 'LESS_THAN'; st.inputs[1].default_value = 0.012; nt.links.new(vr.outputs['Distance'], st.inputs[0])
+        sg = nt.nodes.new('ShaderNodeMath'); sg.operation = 'MULTIPLY'; nt.links.new(st.outputs[0], sg.inputs[0]); nt.links.new(hz.outputs['Result'], sg.inputs[1])
+        sc = nt.nodes.new('ShaderNodeMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = 0;
+        inv = nt.nodes.new('ShaderNodeMath'); inv.operation = 'SUBTRACT'; inv.inputs[0].default_value = 1; nt.links.new(cm.outputs[0], inv.inputs[1])
+        sk = nt.nodes.new('ShaderNodeMath'); sk.operation = 'MULTIPLY'; sk.inputs[1].default_value = 6.0; nt.links.new(sg.outputs[0], sk.inputs[0])
+        sg2 = nt.nodes.new('ShaderNodeMath'); sg2.operation = 'MULTIPLY'; nt.links.new(sk.outputs[0], sg2.inputs[0]); nt.links.new(inv.outputs[0], sg2.inputs[1])
+        addst = nt.nodes.new('ShaderNodeMixRGB'); addst.blend_type = 'ADD'; nt.links.new(sg2.outputs[0], addst.inputs['Fac']); nt.links.new(last, addst.inputs['Color1']); addst.inputs['Color2'].default_value = (1, 1, 1, 1)
+        last = addst.outputs[0]
+    # moon (night) / sun glow (day, dawn): a bright disc plus a soft halo in a fixed direction
+    d = {'night': (0.25, 0.80, 0.52), 'day': (0.30, 0.78, 0.52), 'sunset': (0.1, 0.9, 0.16)}.get(mode)
+    if d:
+        ln = math.sqrt(sum(v * v for v in d)); d = tuple(v / ln for v in d)
+        dot = nt.nodes.new('ShaderNodeVectorMath'); dot.operation = 'DOT_PRODUCT'; dot.inputs[1].default_value = d
+        nrm = nt.nodes.new('ShaderNodeVectorMath'); nrm.operation = 'NORMALIZE'; nt.links.new(coord.outputs['Generated'], nrm.inputs[0]); nt.links.new(nrm.outputs[0], dot.inputs[0])
+        disc = nt.nodes.new('ShaderNodeMapRange'); disc.inputs['From Min'].default_value = 0.9962 if mode == 'night' else 0.9985; disc.inputs['From Max'].default_value = 0.9972 if mode == 'night' else 0.9990
+        nt.links.new(dot.outputs['Value'], disc.inputs['Value'])
+        halo = nt.nodes.new('ShaderNodeMapRange'); halo.inputs['From Min'].default_value = 0.93; halo.inputs['From Max'].default_value = 1.0; halo.inputs['To Max'].default_value = 0.35
+        nt.links.new(dot.outputs['Value'], halo.inputs['Value'])
+        glow = nt.nodes.new('ShaderNodeMixRGB'); glow.blend_type = 'ADD'; glow.inputs['Color2'].default_value = ((0.5, 0.6, 0.9, 1) if mode == 'night' else (1, 0.75, 0.45, 1))
+        nt.links.new(halo.outputs['Result'], glow.inputs['Fac']); nt.links.new(last, glow.inputs['Color1'])
+        disk = nt.nodes.new('ShaderNodeMixRGB'); disk.blend_type = 'ADD'; disk.inputs['Color2'].default_value = ((1.6, 1.6, 1.5, 1) if mode == 'night' else (3.0, 2.6, 1.8, 1))
+        nt.links.new(disc.outputs['Result'], disk.inputs['Fac']); nt.links.new(glow.outputs[0], disk.inputs['Color1']); last = disk.outputs[0]
+    nt.links.new(last, bg.inputs['Color']); bg.inputs['Strength'].default_value = strength; nt.links.new(bg.outputs[0], out.inputs[0])
+
+
+def scatter_detail(p, seed):
+    """Real ground detail like the benchmark: tufts of grass and a few flowers instanced over grassy places."""
+    from set_library import model
+    import library
+    t = p['terrain']; ground = (p.get('params') or {}).get('ground', 'grass')
+    grassy = (t in ('valley', 'plain', 'river_crossing', 'jungle', 'mountain_pass') or (t == 'custom' and ground in ('grass', 'mud'))) and t != 'snow_mountain'
+    if not grassy: return 0
+    tufts = [m for m in ('nature-kit/grass_leafsLarge', 'nature-kit/grass_large', 'nature-kit/grass_leafs') if library.known(m)]
+    if not tufts: return 0
+    n = 0
+    for k in range(140):
+        a = _wobble(seed, k * 3 + 1) * math.tau; d = 4.2 + 24 * (_wobble(seed + 5, k) ** 0.8)
+        x, y = math.cos(a) * d, math.sin(a) * d
+        if t == 'river_crossing' and abs(y - RIVER_Y) < RIVER_HALF + 1.5: continue
+        z = height(t, x, y, seed, p.get('params'))
+        if z < -0.2: continue
+        flower = k % 9 == 0 and library.known('nature-kit/flower_yellowA')
+        mid = ('nature-kit/flower_yellowA', 'nature-kit/flower_redA', 'nature-kit/flower_purpleA')[k % 3] if flower else tufts[k % len(tufts)]
+        try: model({'id': mid, 'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': (0.35 if flower else 0.45 + 0.45 * _wobble(seed + 9, k)), 'yaw': _wobble(seed + 2, k) * 360}); n += 1
+        except Exception: break
+    return n
+
+
 def build_assembly(it):
     """An object the library lacks, composed from <=16 validated primitives (shape, size, position, colour, glow) and scaled to its real height."""
     parts = it['asm']['parts']; shapes = {'box': 'cube', 'cylinder': 'cylinder', 'sphere': 'uv_sphere', 'cone': 'cone', 'torus': 'torus'}
@@ -260,12 +360,9 @@ def build_place(p, mode, duration=1.0, fps=30):
             before_f = set(bpy.data.objects)
             flame((x, y, z + it['height'] * (0.95 if it['id'] == 'torch' else 0.3)), 0.2 if it['id'] == 'torch' else 0.45,
                   seed=hash(it['id']) % 97, frames=frames, fps=fps)
-    w = bpy.context.scene.world.node_tree; nodes = w.nodes
-    sky = nodes.new('ShaderNodeTexSky')
-    elev = {'night': -3.5, 'sunset': 9, 'rain': 18}.get(mode, 30)   # night: sun below the horizon so the sky itself is dark; dusk/dawn: low and warm
-    try: sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(elev); sky.sun_rotation = math.radians(35)
-    except Exception: pass
-    w.links.new(sky.outputs[0], nodes['Background'].inputs['Color']); nodes['Background'].inputs['Strength'].default_value = .2
+    build_sky(mode)
+    try: scatter_detail(p, p.get('seed', 0))
+    except Exception as e: print('scatter skipped', str(e)[:120], flush=True)
     bpy.ops.object.light_add(type='SUN', rotation=(math.radians(52), 0, math.radians(35)))
     s = bpy.context.active_object.data; s.energy = 2.4; s.angle = math.radians(4); s.color = (1.0, 0.93, 0.82)
     return True
