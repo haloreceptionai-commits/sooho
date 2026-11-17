@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { liftDressing, placeSpec, requirePlaces, PLACE_DRESSING, PLACE_TERRAINS } from "@/lib/place-spec";
+import { essentialFor, liftDressing, placeSpec, requirePlaces, PLACE_DRESSING, PLACE_TERRAINS } from "@/lib/place-spec";
 import { cartoonScene } from "@/lib/cartoon-job";
 
 const pass = { terrain: "mountain_pass", time: "night", weather: "clear", dressing: [{ id: "ox_burning", count: 8 }] };
@@ -29,5 +29,14 @@ describe("Advanced place spec", () => {
     const base = { world: "landscape", light: "day", action: "idle", expression: "neutral", actor: "a", wide: true };
     expect(cartoonScene.safeParse(base).success).toBe(true);
     expect(cartoonScene.safeParse({ ...base, place: pass }).success).toBe(true);
+  });
+});
+
+describe("Essential props", () => {
+  it("maps everyday words to an exact model or assembly and leaves ambiguous phrases to the fuzzy search", () => {
+    expect(essentialFor("a smartphone")).toMatchObject({ asm: { name: "smartphone" } });
+    expect(essentialFor("a hot coffee")).toMatchObject({ lib: "food-kit/cup-coffee" });
+    expect(essentialFor("oil can")).toBeUndefined();
+    expect(essentialFor("staff meeting")).toBeUndefined();
   });
 });

@@ -1674,7 +1674,35 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.78,
+     0.7,
+     0.5
+    ],
+    "floor2": [
+     0.66,
+     0.58,
+     0.42
+    ],
+    "wall": [
+     0.92,
+     0.94,
+     0.85
+    ],
+    "wainscot": [
+     0.25,
+     0.5,
+     0.35
+    ],
+    "ceiling": [
+     0.96,
+     0.96,
+     0.94
+    ],
+    "window": true
+   }
   },
   "house": {
    "label": "a living room or home interior with a sofa, a TV, a rug, lamps and plants",
@@ -1810,7 +1838,30 @@
      ],
      "yaw": 90
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.55,
+     0.38,
+     0.24
+    ],
+    "wall": [
+     0.88,
+     0.78,
+     0.62
+    ],
+    "ceiling": [
+     0.96,
+     0.95,
+     0.92
+    ],
+    "accent": [
+     0.95,
+     0.93,
+     0.88
+    ],
+    "window": true
+   }
   },
   "party": {
    "label": "a birthday or party room with a table, a cake, balloons, presents and string lights",
@@ -2516,7 +2567,35 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.42,
+     0.28,
+     0.18
+    ],
+    "wall": [
+     0.5,
+     0.3,
+     0.65
+    ],
+    "ceiling": [
+     0.3,
+     0.2,
+     0.4
+    ],
+    "accent": [
+     1,
+     0.9,
+     0.4
+    ],
+    "light": [
+     1,
+     0.8,
+     0.95
+    ],
+    "energy": 700
+   }
   },
   "garage": {
    "label": "a garage or workshop with a car, a workbench, shelves, tires and tools",
@@ -2638,7 +2717,35 @@
      ],
      "yaw": 30
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.4,
+     0.4,
+     0.43
+    ],
+    "wall": [
+     0.66,
+     0.66,
+     0.7
+    ],
+    "ceiling": [
+     0.5,
+     0.5,
+     0.54
+    ],
+    "accent": [
+     0.8,
+     0.7,
+     0.1
+    ],
+    "light": [
+     1,
+     0.95,
+     0.82
+    ],
+    "energy": 900
+   }
   },
   "sky": {
    "label": "open sky above the clouds, for flight, weather and space-edge scenes",
@@ -3490,7 +3597,35 @@
      ],
      "yaw": 90
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.6,
+     0.42,
+     0.27
+    ],
+    "wall": [
+     0.6,
+     0.7,
+     0.9
+    ],
+    "ceiling": [
+     0.95,
+     0.95,
+     0.95
+    ],
+    "accent": [
+     0.95,
+     0.95,
+     0.95
+    ],
+    "window": true,
+    "light": [
+     1,
+     0.93,
+     0.82
+    ]
+   }
   },
   "kitchen": {
    "label": "a kitchen and dining room with cabinets, a fridge, a stove and a dining table with chairs",
@@ -3609,7 +3744,36 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.92,
+     0.92,
+     0.9
+    ],
+    "floor2": [
+     0.5,
+     0.56,
+     0.62
+    ],
+    "wall": [
+     0.98,
+     0.9,
+     0.62
+    ],
+    "ceiling": [
+     0.97,
+     0.97,
+     0.95
+    ],
+    "accent": [
+     1,
+     1,
+     1
+    ],
+    "window": true,
+    "window_x": -3.0
+   }
   },
   "rooftop": {
    "label": "an apartment balcony or rooftop with a railing, chairs, plants, string lights and a city skyline",
@@ -5688,7 +5852,40 @@
       0
      ]
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.86,
+     0.86,
+     0.8
+    ],
+    "floor2": [
+     0.28,
+     0.48,
+     0.7
+    ],
+    "wall": [
+     0.97,
+     0.96,
+     0.9
+    ],
+    "accent": [
+     0.9,
+     0.2,
+     0.2
+    ],
+    "ceiling": [
+     0.98,
+     0.98,
+     0.96
+    ],
+    "light": [
+     1,
+     1,
+     1
+    ],
+    "energy": 1400
+   }
   },
   "countryside_road": {
    "label": "a quiet countryside road between fields with a barn, fences, trees and hills",
@@ -7744,7 +7941,39 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.82,
+     0.82,
+     0.76
+    ],
+    "floor2": [
+     0.55,
+     0.56,
+     0.62
+    ],
+    "wall": [
+     0.92,
+     0.86,
+     0.68
+    ],
+    "wainscot": [
+     0.2,
+     0.4,
+     0.65
+    ],
+    "ceiling": [
+     0.96,
+     0.96,
+     0.94
+    ],
+    "light": [
+     1,
+     1,
+     0.95
+    ]
+   }
   },
   "playground": {
    "label": "a playground in a park with swings, a slide, a seesaw, a sandbox, benches and trees",
@@ -8478,7 +8707,41 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.86,
+     0.93,
+     0.93
+    ],
+    "floor2": [
+     0.72,
+     0.85,
+     0.87
+    ],
+    "wall": [
+     0.94,
+     0.98,
+     0.96
+    ],
+    "accent": [
+     0.55,
+     0.85,
+     0.8
+    ],
+    "ceiling": [
+     0.97,
+     0.99,
+     0.99
+    ],
+    "light": [
+     0.92,
+     1,
+     1
+    ],
+    "energy": 1400,
+    "window": true
+   }
   },
   "office_cubicles": {
    "label": "an open office with cubicles, desks, computers, a water cooler and plants",
@@ -8649,7 +8912,31 @@
      ],
      "yaw": 180
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.33,
+     0.36,
+     0.44
+    ],
+    "wall": [
+     0.88,
+     0.89,
+     0.92
+    ],
+    "ceiling": [
+     0.96,
+     0.97,
+     0.98
+    ],
+    "light": [
+     0.96,
+     1,
+     1
+    ],
+    "energy": 1200,
+    "window": true
+   }
   },
   "boardroom": {
    "label": "a boardroom with a long table, chairs, a screen and a window",
@@ -8821,7 +9108,36 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.3,
+     0.2,
+     0.14
+    ],
+    "wall": [
+     0.82,
+     0.84,
+     0.88
+    ],
+    "ceiling": [
+     0.95,
+     0.95,
+     0.96
+    ],
+    "accent": [
+     0.2,
+     0.2,
+     0.25
+    ],
+    "window": true,
+    "window_x": 0.0,
+    "light": [
+     1,
+     0.98,
+     0.95
+    ]
+   }
   },
   "courtroom": {
    "label": "a courtroom with a judge bench, a witness stand, gallery benches, a flag and wood panelling",
@@ -9053,7 +9369,40 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.3,
+     0.18,
+     0.1
+    ],
+    "wall": [
+     0.72,
+     0.62,
+     0.46
+    ],
+    "wainscot": [
+     0.3,
+     0.16,
+     0.07
+    ],
+    "ceiling": [
+     0.82,
+     0.76,
+     0.66
+    ],
+    "accent": [
+     0.25,
+     0.13,
+     0.06
+    ],
+    "light": [
+     1,
+     0.88,
+     0.65
+    ],
+    "energy": 700
+   }
   },
   "interrogation": {
    "label": "an interrogation room with a bare table, two chairs, a hanging lamp and a dark one-way mirror",
@@ -9336,7 +9685,35 @@
      ],
      "yaw": 180
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.16,
+     0.16,
+     0.18
+    ],
+    "wall": [
+     0.24,
+     0.26,
+     0.3
+    ],
+    "ceiling": [
+     0.08,
+     0.08,
+     0.1
+    ],
+    "accent": [
+     0.1,
+     0.1,
+     0.12
+    ],
+    "light": [
+     1,
+     0.9,
+     0.6
+    ],
+    "energy": 180
+   }
   },
   "war_zone": {
    "label": "a ruined war zone with sandbags, tents, barrels, barbed fences, burning wrecks and smoke",
@@ -9965,7 +10342,68 @@
      "yaw": 180
     },
     {
-     "lib": "q-ultimatehomeinterior/Column_Round1",
+     "asm": {
+      "name": "stone column",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.9,
+         0.25
+        ],
+        "pos": [
+         0,
+         0,
+         0.12
+        ],
+        "color": [
+         0.62,
+         0.6,
+         0.58
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.62,
+         0.62,
+         2.7
+        ],
+        "pos": [
+         0,
+         0,
+         1.6
+        ],
+        "color": [
+         0.72,
+         0.7,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.95,
+         0.95,
+         0.25
+        ],
+        "pos": [
+         0,
+         0,
+         3.07
+        ],
+        "color": [
+         0.62,
+         0.6,
+         0.58
+        ],
+        "glow": 0
+       }
+      ]
+     },
      "count": 2,
      "height": 3.2,
      "layout": "near",
@@ -9980,7 +10418,68 @@
      ]
     },
     {
-     "lib": "q-ultimatehomeinterior/Column_Round1",
+     "asm": {
+      "name": "stone column",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.9,
+         0.25
+        ],
+        "pos": [
+         0,
+         0,
+         0.12
+        ],
+        "color": [
+         0.62,
+         0.6,
+         0.58
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.62,
+         0.62,
+         2.7
+        ],
+        "pos": [
+         0,
+         0,
+         1.6
+        ],
+        "color": [
+         0.72,
+         0.7,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.95,
+         0.95,
+         0.25
+        ],
+        "pos": [
+         0,
+         0,
+         3.07
+        ],
+        "color": [
+         0.62,
+         0.6,
+         0.58
+        ],
+        "glow": 0
+       }
+      ]
+     },
      "count": 2,
      "height": 3.2,
      "layout": "near",
@@ -10122,7 +10621,40 @@
      ],
      "yaw": 0
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.5,
+     0.5,
+     0.55
+    ],
+    "floor2": [
+     0.36,
+     0.36,
+     0.42
+    ],
+    "wall": [
+     0.56,
+     0.5,
+     0.45
+    ],
+    "wainscot": [
+     0.4,
+     0.1,
+     0.1
+    ],
+    "ceiling": [
+     0.25,
+     0.22,
+     0.2
+    ],
+    "light": [
+     1,
+     0.75,
+     0.4
+    ],
+    "energy": 520
+   }
   },
   "deep_forest": {
    "label": "a deep forest with tall trees, ferns, mushrooms, logs, rocks and shafts of light",
@@ -10950,7 +11482,47 @@
      ],
      "yaw": 180
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.5,
+     0.55,
+     0.62
+    ],
+    "floor2": [
+     0.34,
+     0.39,
+     0.48
+    ],
+    "wall": [
+     0.82,
+     0.86,
+     0.9
+    ],
+    "ceiling": [
+     0.3,
+     0.35,
+     0.42
+    ],
+    "accent": [
+     0.2,
+     0.6,
+     1
+    ],
+    "light": [
+     0.6,
+     0.8,
+     1
+    ],
+    "energy": 900,
+    "window": true,
+    "sky": [
+     0.03,
+     0.05,
+     0.16
+    ],
+    "window_x": -2.5
+   }
   },
   "alien_planet": {
    "label": "an alien planet with purple rock, glowing crystals, strange plants, a crashed spaceship and two moons",
@@ -11743,7 +12315,36 @@
      ],
      "yaw": 180
     }
-   ]
+   ],
+   "shell": {
+    "floor": [
+     0.2,
+     0.22,
+     0.25
+    ],
+    "wall": [
+     0.92,
+     0.92,
+     0.94
+    ],
+    "wainscot": [
+     0.95,
+     0.45,
+     0.15
+    ],
+    "ceiling": [
+     0.9,
+     0.9,
+     0.92
+    ],
+    "light": [
+     0.95,
+     1,
+     1
+    ],
+    "energy": 1300,
+    "window": true
+   }
   },
   "stadium": {
    "label": "a sports stadium with a grass pitch, white lines, goals, stands full of seats and floodlights",

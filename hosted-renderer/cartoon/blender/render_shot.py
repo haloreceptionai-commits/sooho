@@ -576,7 +576,7 @@ def main():
         build_place(place, shot.get('lighting', 'day'), shot['duration'], fps)
         apply_mood(shot.get('lighting', 'day'))
     elif place:
-        build_set(place['terrain'], shot.get('lighting', 'day'))
+        build_set(place['terrain'], shot.get('lighting', 'day'), place.get('shell'))
         from place_modules import build_kit_items
         build_kit_items(place)
     elif shot['set'] in SETS:

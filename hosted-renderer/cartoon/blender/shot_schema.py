@@ -76,7 +76,7 @@ def validate_shot(s):
     cast = s.get('cast', [])
     if not isinstance(cast, list) or len(cast) > 12: raise ValueError('cast must be a list of up to 12')
     for ch in cast:
-        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model','skin','facial','trim','style','pants','hair','eyes'}: raise ValueError('unknown cast keys')
+        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model','skin','facial','trim','style','pants','hair','eyes','species','glasses'}: raise ValueError('unknown cast keys')
         if 'model' in ch:
             from human_clips import MODELS, CLIPS
             if ch['model'] not in MODELS: raise ValueError('unknown human model')
@@ -88,6 +88,7 @@ def validate_shot(s):
         if ch.get('action','stand') not in ACTIONS:raise ValueError('unknown action')
         if ch.get('expression','neutral') not in EXPRESSIONS:raise ValueError('unknown expression')
         if ch.get('outfit','worker') not in OUTFITS:raise ValueError('unknown outfit')
+        if ch.get('species','human') not in ('human','alien','monster','ghost'):raise ValueError('unknown species')
         if ch.get('held') not in (None,'crate','tool','cup','rifle'):raise ValueError('unknown held prop')
     cards = s.get('cards', [])
     if not isinstance(cards, list) or len(cards) > 6: raise ValueError('up to 6 painted cards')

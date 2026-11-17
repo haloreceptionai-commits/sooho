@@ -40,6 +40,7 @@ def resolve(spec):
         if k in r: out[k] = r[k]
     for k in ('time', 'weather'):   # a cyberpunk alley is a night scene, a haunted house is foggy: the recipe decides
         if k in r: out[k] = r[k]
+    if r.get('shell'): out['shell'] = r['shell']
     out['dressing'] = list(r['base']) + list(spec.get('dressing', []))
     return out
 
@@ -61,8 +62,10 @@ def validate(spec, scene=None, era=None, _recipe=False):
     if spec.get('terrain') in RECIPES:
         if len(spec.get('dressing', [])) > MAX_ITEMS: raise PlaceError(f'{where}: up to {MAX_ITEMS} kinds of set dressing')
         validate(resolve(spec), scene, era, _recipe=True); return spec
-    extra = set(spec) - {'terrain', 'time', 'weather', 'dressing', 'seed', 'ground', 'relief', 'water'}
+    extra = set(spec) - {'terrain', 'time', 'weather', 'dressing', 'seed', 'ground', 'relief', 'water', 'shell'}
     if extra: raise PlaceError(f'{where}: unknown place fields {sorted(extra)}')
+    if spec.get('shell') is not None and spec.get('terrain') not in KITS: raise PlaceError(f'{where}: a room shell needs an indoor set')
+    if spec.get('shell') is not None: validate_shell(spec['shell'], where)
     t = spec.get('terrain')
     if t not in TERRAINS and t not in KITS: raise PlaceError(f"{where} needs the place '{t}', which the 3D engine cannot build yet")
     if t in KITS and era is not None:
@@ -96,6 +99,18 @@ def validate(spec, scene=None, era=None, _recipe=False):
             if DRESSING[d['id']].get('water') and t not in ('river_crossing', 'coast') and not (t == 'custom' and spec.get('water', 'none') != 'none'):
                 raise PlaceError(f"{where}: '{d['id']}' needs water, but the place is {t}")
     return spec
+
+
+SHELL_KEYS = {'floor', 'floor2', 'wall', 'wainscot', 'ceiling', 'light', 'accent', 'sky', 'window', 'window_x', 'energy'}
+
+
+def validate_shell(sh, where='place'):
+    if not isinstance(sh, dict) or set(sh) - SHELL_KEYS or not {'floor', 'wall', 'ceiling'} <= set(sh): raise PlaceError(f'{where}: bad room shell')
+    for k in ('floor', 'floor2', 'wall', 'wainscot', 'ceiling', 'light', 'accent', 'sky'):
+        if k in sh and not (isinstance(sh[k], list) and len(sh[k]) == 3 and all(isinstance(x, (int, float)) and not isinstance(x, bool) and 0 <= x <= 1 for x in sh[k])): raise PlaceError(f'{where}: shell {k} needs 3 numbers 0-1')
+    if not isinstance(sh.get('window', False), bool): raise PlaceError(f'{where}: shell window is true or false')
+    for k, lo, hi in (('window_x', -5, 5), ('energy', 0, 5000)):
+        if k in sh and (isinstance(sh[k], bool) or not isinstance(sh[k], (int, float)) or not lo <= sh[k] <= hi): raise PlaceError(f'{where}: shell {k} out of range')
 
 
 def _size_layout(d, where):
@@ -243,7 +258,7 @@ def _place_open(out, d, t, seed, params, k0, H):
         water = (params or {}).get('water', 'none') != 'none' or t in ('coast', 'river_crossing')
         z = H(x, y)
         if water and z < -0.2: z = -0.4          # standing in the water: boats and piers float, not sink
-        item = {'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': round(h, 3), 'yaw': float(d['yaw']) if d.get('yaw') is not None else round(_rand(seed, f'oy{k0}:{c}') * 360 - 180, 1)}
+        item = {'pos': [round(x, 3), round(y, 3), round(z, 3)], 'height': round(h, 3), 'yaw': float(d['yaw']) if d.get('yaw') is not None else (round(_rand(seed, f'oy{k0}:{c}') * 50 - 25, 1) if 'asm' in d else round(_rand(seed, f'oy{k0}:{c}') * 360 - 180, 1))}
         if 'lib' in d: item.update({'id': 'lib:' + d['lib'], 'model': d['lib']})
         else: item.update({'id': 'asm:' + d['asm']['name'][:30], 'asm': d['asm']})
         out['items'].append(item)
@@ -256,6 +271,7 @@ def compile_place(spec, seed=0):
     out = {'terrain': t, 'time': spec['time'], 'weather': spec.get('weather', 'clear'), 'seed': seed, 'items': []}
     BENCH = {'name': 'lab bench', 'parts': [{'shape': 'box', 'size': [3.6, 1.0, .09], 'pos': [0, 0, .86], 'color': [.46, .31, .17], 'glow': 0}] + [
         {'shape': 'box', 'size': [.12, .12, .82], 'pos': [sx * 1.7, sy * .42, .41], 'color': [.36, .24, .13], 'glow': 0} for sx in (-1, 1) for sy in (-1, 1)]}
+    if spec.get('shell'): out['shell'] = spec['shell']
     if t in KITS:   # an indoor set (lab/workshop, room, office...) can be furnished: library and assembled props stand on its floor
         dress = [d for d in spec.get('dressing', []) if 'lib' in d or 'asm' in d]
         tabled = [d for d in dress if d.get('layout') == 'table']
@@ -321,7 +337,7 @@ def compile_place(spec, seed=0):
 
 def validate_compiled(p):
     """Worker/renderer-side check of a compiled place carried in a shot (numbers and whitelisted models only)."""
-    if not isinstance(p, dict) or set(p) - {'terrain', 'time', 'weather', 'seed', 'items', 'params'}: raise ValueError('invalid place')
+    if not isinstance(p, dict) or set(p) - {'terrain', 'time', 'weather', 'seed', 'items', 'params', 'shell'}: raise ValueError('invalid place')
     if p.get('terrain') not in TERRAINS | KITS or p.get('time') not in TIMES or p.get('weather') not in WEATHER: raise ValueError('invalid place')
     items = p.get('items', [])
     if not isinstance(items, list) or len(items) > 90: raise ValueError('up to 90 place items')
@@ -338,6 +354,9 @@ def validate_compiled(p):
         else: raise ValueError('invalid place item')
         if not (isinstance(it.get('pos'), list) and len(it['pos']) == 3 and all(isinstance(v, (int, float)) and abs(v) < 200 for v in it['pos'])): raise ValueError('place item pos')
         if not 0.02 <= it.get('height', 1) <= 60 or not -720 <= it.get('yaw', 0) <= 720: raise ValueError('place item size')
+    if p.get('shell') is not None:
+        try: validate_shell(p['shell'])
+        except PlaceError as e: raise ValueError(str(e))
     pr = p.get('params')
     if pr is not None and (not isinstance(pr, dict) or pr.get('ground') not in GROUNDS or pr.get('relief') not in RELIEFS or pr.get('water') not in WATERS): raise ValueError('invalid place params')
     return p

@@ -257,6 +257,20 @@ OUTFIT = {'soldier': ('armor', 'helmet'), 'veteran': ('armor', 'helmet'), 'knigh
           'astronaut': ('uniform', 'helmet'), 'engineer': ('worker', 'hardhat'), 'miner': ('worker', 'hardhat'), 'guard': ('armor', 'helmet'), 'pilot': ('uniform', 'cap'),
           'judge': ('robe', 'none'), 'sultan': ('royal', 'turban'), 'scribe': ('robe', 'headband'), 'shepherd': ('tunic', 'hood'), 'hunter': ('tunic', 'cap'),
           'merchant_woman': ('dress', 'headband'), 'rebel': ('rags', 'headband'), 'officer': ('uniform', 'cap')}
+ROLES = {   # archetype word (in the cast id) -> outfit kind, hair/hat, shirt colour, trim colour, glasses, facial hair, species
+    'hero': ('hoodie', 'spiky', [.2, .45, .85], [.95, .75, .2], 0, 'none', 'human'), 'protagonist': ('hoodie', 'spiky', [.2, .45, .85], [.95, .75, .2], 0, 'none', 'human'),
+    'sidekick': ('hoodie', 'beanie', [.25, .65, .35], [.9, .9, .3], 0, 'none', 'human'), 'friend': ('hoodie', 'beanie', [.25, .65, .35], [.9, .9, .3], 0, 'none', 'human'),
+    'rival': ('hoodie', 'spiky', [.85, .25, .2], [.1, .1, .12], 0, 'none', 'human'), 'bully': ('sweater', 'none', [.8, .2, .18], [.1, .1, .12], 0, 'none', 'human'),
+    'villain': ('suit', 'top', [.12, .1, .18], [.6, .1, .7], 0, 'goatee', 'human'), 'antagonist': ('suit', 'top', [.12, .1, .18], [.6, .1, .7], 0, 'goatee', 'human'),
+    'love': ('dress', 'bun', [.95, .45, .6], [.98, .85, .9], 0, 'none', 'human'), 'girlfriend': ('dress', 'bun', [.95, .45, .6], [.98, .85, .9], 0, 'none', 'human'), 'boyfriend': ('hoodie', 'spiky', [.9, .35, .45], [.95, .8, .85], 0, 'none', 'human'),
+    'professor': ('sweater', 'none', [.45, .3, .2], [.8, .7, .5], 1, 'goatee', 'human'), 'teacher': ('uniform', 'bob', [.3, .4, .6], [.85, .8, .3], 1, 'none', 'human'),
+    'boss': ('suit', 'none', [.25, .27, .32], [.85, .15, .15], 0, 'mustache', 'human'), 'manager': ('suit', 'none', [.3, .32, .4], [.2, .3, .7], 1, 'none', 'human'), 'ceo': ('suit', 'none', [.1, .1, .14], [.9, .75, .2], 0, 'none', 'human'),
+    'mom': ('dress', 'bun', [.8, .35, .5], [.95, .85, .6], 0, 'none', 'human'), 'mother': ('dress', 'bun', [.8, .35, .5], [.95, .85, .6], 0, 'none', 'human'), 'dad': ('sweater', 'none', [.3, .45, .6], [.85, .85, .4], 0, 'mustache', 'human'), 'father': ('sweater', 'none', [.3, .45, .6], [.85, .85, .4], 0, 'mustache', 'human'),
+    'neighbor': ('sweater', 'none', [.55, .5, .35], [.7, .35, .3], 1, 'mustache', 'human'), 'grandpa': ('sweater', 'none', [.5, .45, .4], [.7, .6, .5], 1, 'beard', 'human'), 'grandma': ('dress', 'bun', [.6, .45, .6], [.9, .85, .9], 1, 'none', 'human'), 'grandfather': ('sweater', 'none', [.5, .45, .4], [.7, .6, .5], 1, 'beard', 'human'), 'grandmother': ('dress', 'bun', [.6, .45, .6], [.9, .85, .9], 1, 'none', 'human'),
+    'police': ('police', 'cap', [.15, .25, .5], [.95, .8, .2], 0, 'mustache', 'human'), 'cop': ('police', 'cap', [.15, .25, .5], [.95, .8, .2], 0, 'mustache', 'human'),
+    'cashier': ('apron', 'cap', [.85, .3, .25], [.95, .85, .3], 0, 'none', 'human'), 'shopkeeper': ('apron', 'none', [.3, .55, .45], [.9, .75, .3], 0, 'mustache', 'human'), 'clerk': ('apron', 'cap', [.3, .5, .8], [.95, .85, .3], 0, 'none', 'human'), 'barista': ('apron', 'cap', [.4, .28, .2], [.9, .8, .6], 0, 'none', 'human'),
+    'alien': ('suit', 'none', [.3, .3, .5], [.5, 1, .5], 0, 'none', 'alien'), 'monster': ('hoodie', 'none', [.35, .2, .5], [.9, .85, .8], 0, 'none', 'monster'), 'ghost': ('worker', 'none', [.9, .95, 1], [.8, .9, 1], 0, 'none', 'ghost'),
+}
 FACIAL = {'king': 'beard', 'general': 'mustache', 'emperor': 'beard', 'scholar': 'goatee', 'elder': 'beard', 'priest': 'beard', 'monk': 'none', 'pirate': 'beard',
           'viking': 'beard', 'merchant': 'mustache', 'cowboy': 'mustache', 'blacksmith': 'beard', 'centurion': 'mustache', 'sultan': 'goatee', 'sailor': 'mustache', 'captain': 'mustache',
           'pharaoh': 'goatee', 'inventor': 'mustache', 'president': 'mustache', 'scientist': 'goatee', 'doctor': 'mustache', 'soldier': 'mustache', 'veteran': 'mustache'}
@@ -510,14 +524,19 @@ class Director:
             role = c.get('outfit')   # the shared vocabulary stays small (legacy web engine); the cast id's own words refine the look
             for w in re.split(r'[^a-z]+', str(c.get('id', '')).lower()):
                 if w in OUTFIT and w not in ('worker', 'woman'): role = w; break
-            outfit, hat = OUTFIT.get(role, ('worker', 'none'))
+            outfit, hat = OUTFIT.get(role, ('worker', 'none')); extra = {}
+            for w in re.split(r'[^a-z]+', str(c.get('id', '')).lower()):   # an archetype word in the id (boss, mom, hero, ghost...) sets the whole look
+                if w in ROLES:
+                    outfit, hat, shirt_c, trim_c, gl, fac, sp = ROLES[w]; extra = {'shirt': shirt_c, 'trim': trim_c, 'glasses': bool(gl), 'facial': fac, 'species': sp}; break
             self.cast_look[c['id']] = {'outfit': outfit, 'hat': hat, 'shirt': SHIRTS[i % 4], 'hat_color': HAT_COLORS[i % 4], 'skin': SKINS[(i * 2 + len(c['id'])) % len(SKINS)],
                                        'facial': FACIAL.get(role, 'none') if outfit not in ('dress',) else 'none', 'trim': TRIMS.get(outfit, [.72, .55, .12])}
+            self.cast_look[c['id']].update(extra)
         self.last_zone = None; self.scene_shown = {}
 
     # -- choose a zone that differs from the previous segment's backdrop
-    def zone(self, st, keep=False):
+    def zone(self, st, keep=False, shelled=False):
         zones = list(ZONES.get(st, {'center': ((0, 0), 90)}))
+        if shelled: zones = [z for z in zones if z == 'front'] or zones   # a furnished room is always seen from its open front, facing the back wall
         if keep and self.last_zone and self.last_zone[0] == st: return self.last_zone[1]
         k = self.zone_use.get(st, 0)
         for j in range(len(zones)):
@@ -557,7 +576,8 @@ class Director:
         seq_card = f'obj-{seq[part]}.png' if seq and part < len(seq) else None
         ws = spoken(m, a, b); txt = text_of(ws); whole = text_of(spoken(m, s['start'], s['end']))
         new_place = part == 0 and (i == 0 or self.locations[i - 1] != st)
-        zname = self.zone(st, keep=part > 0 and part % 2 == 1 and False)
+        from place_spec import resolve as _resolve
+        zname = self.zone(st, keep=part > 0 and part % 2 == 1 and False, shelled=bool(_resolve(s.get('place') or {}).get('shell')))
         (origin, head) = ZONES[st][zname]; F, R = basis(head)
         dur = round((b - a) / FPS, 3)
         lighting = {'golden': 'sunset', 'night_bright': 'night'}.get(s.get('light'), 'day')
@@ -643,6 +663,8 @@ class Director:
                     yaw = yaw_facing((-F[0] + R[0] * .25 * (1 if j % 2 else -1), -F[1] + R[1] * .25 * (1 if j % 2 else -1)))
             ch = {'id': x['id'], 'pos': pos, 'yaw': yaw, 'action': act, 'expression': expr, 'outfit': look['outfit'], 'hat': look['hat'],
                   'shirt': look['shirt'], 'hat_color': look['hat_color'], 'skin': look.get('skin', [.94, .93, .88]), 'facial': look.get('facial', 'none'), 'trim': look.get('trim', [.72, .55, .12])}
+            if look.get('species', 'human') != 'human': ch['species'] = look['species']
+            if look.get('glasses'): ch['glasses'] = True
             if act in ('aim', 'load') and st in ('office', 'saloon', 'workshop', 'room'): act = 'point'; ch['action'] = act
             if act in ('aim', 'load') and look['outfit'] in ('soldier', 'armor'): ch['held'] = 'rifle'
             elif act == 'carry': ch['held'] = 'crate'
@@ -805,7 +827,11 @@ class Director:
         if (shot.get('place') or {}).get('terrain') in KITSET:   # indoors the lens stays under the ceiling (a 5 m 'high' shot would look at the roof planks)
             for key in ('from', 'to'):
                 if key in cam and cam[key][2] > 2.3: cam[key] = [cam[key][0], cam[key][1], 2.3]
-        limit_pitch(cam)
+            limit_pitch(cam, 24.0, 15.0)   # a room is seen level, never looked down at the floor
+            if shot['place'].get('shell') and kind in ('wide', 'establish', 'high', 'orbit', 'track'):   # establish the whole furnished room from its open front
+                dx = round(max(-1.0, min(1.0, cam['from'][0])) * 0.6, 3)
+                cam['from'] = [dx, -4.4, 1.5]; cam['to'] = [dx * 0.5, -3.6, 1.5]; cam['look_at'] = [0.0, 5.0, 0.85]; cam['look_to'] = [0.0, 5.0, 0.85]; cam['lens'] = 28
+        else: limit_pitch(cam)
         place = shot.get('place')
         if place: clear_lens_items(place, cam)
         if not place or not cast: return

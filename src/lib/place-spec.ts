@@ -4,6 +4,7 @@
 // from simple shapes when the library has nothing. An undrawable place still stops the video before any paid rendering.
 import { z } from "zod";
 import registry from "../../hosted-renderer/cartoon/blender/place-registry.json";
+import essentials from "../../hosted-renderer/cartoon/blender/essentials.json";
 import audit from "../../hosted-renderer/cartoon/blender/registry-audit.json";
 import { LIBRARY, searchLibrary, words } from "./object-library";
 
@@ -81,6 +82,19 @@ ADVANCED 3D PLACE (required per scene; the engine builds it as a real 3D world, 
 const GENERIC = new Set(["red", "blue", "green", "yellow", "black", "white", "grey", "gray", "brown", "orange", "purple", "pink", "gold", "golden", "silver", "dark", "old", "new", "big", "small", "large", "tiny", "huge", "tall", "short", "heavy",
   "steel", "wooden", "wood", "stone", "iron", "metal", "rusty", "ancient", "modern", "giant", "base", "large", "medium", "small", "detailed", "simple", "long", "round", "square"]);
 /** A modifier that changes WHAT the thing is ("water tower" is not a watchtower): such phrases are built from shapes instead of matched loosely. */
+/** Everyday props (phone, car, backpack, money, vending machine, microphone, speech bubble, pets...) are exact: words map to a chosen library model or shape assembly, checked before any fuzzy library search. */
+type Essential = { words: string[]; dressing: Dressing };
+const ESSENTIALS = Object.values((essentials as unknown as { items: Record<string, Essential> }).items);
+export function essentialFor(phrase: string): Dressing | undefined {
+  const text = ` ${phrase.toLowerCase().replace(/[^a-z]+/g, " ").trim()} `;
+  const ws = text.trim().split(" "); const head = ws[ws.length - 1] ?? "";
+  let best: { len: number; d: Dressing } | undefined;
+  for (const e of ESSENTIALS) for (const a of e.words) {
+    const hit = a.includes(" ") ? text.includes(` ${a} `) : (head === a || head === a + "s");
+    if (hit && (!best || a.length > best.len)) best = { len: a.length, d: e.dressing };
+  }
+  return best ? structuredClone(best.d) : undefined;
+}
 const DISTINCT_MODIFIER = /\b(water|oil|power|clock|bell|radio|signal|gas|wind|control|fire|ice|sand)\s+\w+/;
 const headNoun = (phrase: string): string | undefined => {
   const first = phrase.toLowerCase().split(/\b(?:on|in|with|of|at|near|by|from|for|under|over|beside|made)\b/)[0] ?? "";
@@ -109,6 +123,12 @@ export function liftDressing<T extends { phrase?: string; id?: string; size?: st
   for (const o of objects) {
     const text = ` ${String(o.phrase ?? o.id ?? "").toLowerCase().replace(/[^a-z]+/g, " ")} `;
     const distinct = DISTINCT_MODIFIER.exec(text.trim());
+    const ess = distinct ? undefined : essentialFor(String(o.phrase ?? o.id ?? ""));
+    if (ess) {
+      const key = JSON.stringify("lib" in ess ? ess.lib : "asm" in ess ? ess.asm.name : "");
+      if (dressing.length < 12 && !dressing.some(d => JSON.stringify("lib" in d ? d.lib : "asm" in d ? d.asm.name : "") === key)) dressing.push({ ...ess, count: PLURAL.test(text) ? Math.min(4, Math.max(2, ess.count)) : ess.count });
+      continue;
+    }
     const hit = distinct ? undefined : PLACE_DRESSING.map(id => ({ id, len: Math.max(0, ...DRESSING[id]!.words.filter(w => text.includes(` ${w} `)).map(w => w.length)) }))
       .filter(h => h.len > 0 && !(DRESSING[h.id]!.water && !wet)).sort((a, b) => b.len - a.len)[0];
     // Combination: cattle + fire words is the burning-ox herd, not a torch or a plain ox.
@@ -119,7 +139,8 @@ export function liftDressing<T extends { phrase?: string; id?: string; size?: st
     }
     const phrase = String(o.phrase ?? o.id ?? "");
     const head = headNoun(phrase);
-    const lib = phrase && head && !distinct && !BAD_HEAD.has(head) ? searchLibrary(phrase, 12).find(m => m.type === "model" && !BAD_PACKS.has(m.pack) && nameWords(m.id).includes(head) && !nameWords(m.id).every(w => GENERIC.has(w))) : undefined;
+    const ambiguous = head === "tank" && !/(war|army|battle|battlefield|military|armou?red|soldiers?|panzer|sherman|turret|cannon)/.test(text);   // a molasses or water tank is not a war tank
+    const lib = phrase && head && !distinct && !ambiguous && !BAD_HEAD.has(head) ? searchLibrary(phrase, 12).find(m => m.type === "model" && !BAD_PACKS.has(m.pack) && nameWords(m.id).includes(head) && !nameWords(m.id).every(w => GENERIC.has(w))) : undefined;
     if (!lib || dressing.length >= 12) { kept.push(o); continue; }
     const many = PLURAL.test(text);
     const h = sizeToHeight(o.size, text);

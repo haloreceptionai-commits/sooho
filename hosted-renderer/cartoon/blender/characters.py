@@ -96,6 +96,12 @@ def build_character(c,duration=3,fps=30):
         if nd:
             nd.inputs['Base Color'].default_value=(1,1,1,1)
             nd.inputs['Emission Color' if 'Emission Color' in nd.inputs else 'Emission'].default_value=(1,1,1,1); nd.inputs['Emission Strength'].default_value=0.75
+    species=c.get('species','human')
+    if species!='human':   # alien / monster / ghost keep the egg and the ink line but get their own skin
+        col={'alien':(.5,.95,.4),'monster':(.62,.38,.88),'ghost':(.9,.96,1.0)}[species]
+        nd=skin.node_tree.nodes.get('Principled BSDF')
+        if nd:
+            nd.inputs['Base Color'].default_value=(*col,1);nd.inputs['Emission Color' if 'Emission Color' in nd.inputs else 'Emission'].default_value=(*col,1);nd.inputs['Emission Strength'].default_value=.6 if species!='ghost' else 1.1
     cloth=material(ident+' cloth',tuple(c.get('shirt',(.13,.36,.3))),.88)
     hatmat=material(ident+' hat',tuple(c.get('hat_color',(.32,.19,.06))),.85)
     trim=material(ident+' trim',tuple(c.get('trim',(.72,.55,.12))),.35)
@@ -125,6 +131,11 @@ def build_character(c,duration=3,fps=30):
             z=-.13+(x/face['width'])**2*face['curve']
             curve.append((x,face_y(x,z),z))
         for a,b in zip(curve,curve[1:]):rope('mouth stroke',a,b,.01,black).parent=headroot
+    if c.get('glasses'):   # professors, teachers, grandparents, nerds
+        for sx in (-1,1):
+            bpy.ops.mesh.primitive_torus_add(major_radius=.075,minor_radius=.011,rotation=(math.pi/2,0,0),location=(sx*.105,face_y(sx*.105,.035)-.03,.035))
+            g=bpy.context.active_object;g.name='glasses rim';g.data.materials.append(black);g.parent=headroot
+        cube('glasses bridge',(0,face_y(0,.035)-.03,.045),(.05,.012,.012),black,.004).parent=headroot
     facial=c.get('facial','none')
     if facial in ('mustache','beard','goatee'):
         hair=material(ident+' hair',(.06,.045,.035),.8)
@@ -133,7 +144,16 @@ def build_character(c,duration=3,fps=30):
                 o=sphere('mustache',(sx*.075,face_y(sx*.075,-.075)-.02,-.075),(.085,.03,.032),hair);o.rotation_euler.y=sx*.35;o.parent=headroot
         else:
             sphere('beard',(0,-.1,-.3),(.2,.12,.11),hair).parent=headroot
+    if species=='alien':
+        for sx in (-1,1):
+            bpy.ops.mesh.primitive_cylinder_add(vertices=8,radius=.012,depth=.3,location=(sx*.12,0,.5));st=bpy.context.active_object;st.rotation_euler.y=sx*.3;st.data.materials.append(black);st.parent=headroot
+            sphere('alien antenna glow',(sx*.165,0,.65),(.045,.045,.045),skin).parent=headroot
+    if species=='monster':
+        for sx in (-1,1):
+            bpy.ops.mesh.primitive_cone_add(vertices=12,radius1=.07,depth=.22,location=(sx*.17,0,.4));hn=bpy.context.active_object;hn.name='monster horn';hn.rotation_euler.y=sx*.35;hn.data.materials.append(hatmat);hn.parent=headroot
+            bpy.ops.mesh.primitive_cone_add(vertices=8,radius1=.022,depth=.07,location=(sx*.05,face_y(sx*.05,-.14)-.01,-.15),rotation=(math.pi,0,0));fg=bpy.context.active_object;fg.name='monster fang';fg.data.materials.append(skin);fg.parent=headroot
     hat=c.get('hat','beanie')
+    if species=='ghost':hat='none'
     if hat!='none':
         if hat=='beanie':sphere('beanie',(0,0,.27),(.325,.29,.17),hatmat).parent=headroot
         else:
@@ -159,6 +179,15 @@ def build_character(c,duration=3,fps=30):
                 for k in range(9):
                     a=math.pi*.15+k*math.pi*.7/8;o=sphere('laurel leaf',(.3*math.cos(a)*1.0,-.3*math.sin(a)*.2+.0,.25),(.05,.03,.02),trim);o.parent=headroot
             elif hat=='headband':bpy.ops.mesh.primitive_torus_add(major_radius=.31,minor_radius=.03,location=(0,0,.2));bpy.context.active_object.data.materials.append(trim);bpy.context.active_object.parent=headroot
+            elif hat=='spiky':
+                for k in range(7):
+                    a=math.pi*(.1+.8*k/6);o=cube('hair spike',(.2*math.cos(a),-.02*math.sin(a),.3+.05*math.sin(a)),(.09,.09,.2),hatmat,.01);o.rotation_euler.y=(math.cos(a))*-.7;o.parent=headroot
+                sphere('hair base',(0,.02,.25),(.33,.29,.14),hatmat).parent=headroot
+            elif hat=='bun':
+                sphere('hair cap',(0,.02,.25),(.33,.3,.15),hatmat).parent=headroot;sphere('hair bun',(0,.05,.5),(.14,.14,.14),hatmat).parent=headroot
+            elif hat=='bob':
+                sphere('hair cap',(0,.02,.24),(.34,.31,.17),hatmat).parent=headroot
+                for sx in (-1,1):sphere('hair side',(sx*.3,.05,-.02),(.07,.2,.3),hatmat).parent=headroot
             elif hat=='helmet':sphere('helmet',(0,0,.28),(.34,.3,.2),hatmat).parent=headroot
             elif hat=='top':
                 bpy.ops.mesh.primitive_cylinder_add(vertices=40,radius=.25,depth=.35,location=(0,0,.46));bpy.context.active_object.data.materials.append(hatmat);bpy.context.active_object.parent=headroot
@@ -170,6 +199,14 @@ def build_character(c,duration=3,fps=30):
     body=sphere('coat',(0,0,1.04),(.24,.16,.32),cloth);body.parent=root
     outfit=c.get('outfit','worker')
     body_details=[]
+    if species=='ghost':   # a floating sheet that hides the legs: translucent, glowing, with a wavy hem
+        gm=material(ident+' ghost sheet',(.92,.97,1.0),.9)
+        gn=gm.node_tree.nodes.get('Principled BSDF')
+        if gn:
+            gn.inputs['Alpha'].default_value=.62;gn.inputs['Emission Color' if 'Emission Color' in gn.inputs else 'Emission'].default_value=(.8,.9,1,1);gn.inputs['Emission Strength'].default_value=.9
+        body_details.append(sphere('ghost sheet',(0,0,.62),(.4,.3,.72),gm))
+        for k in range(6):
+            a=k*math.tau/6;body_details.append(sphere('ghost hem',(.34*math.cos(a),.26*math.sin(a),.0),(.12,.12,.14),gm))
     for z in [.94,1.08,1.2]:body_details.append(sphere('coat button',(0,-.153,z),(.014,.014,.014),black))
     if outfit=='merchant':
         body_details.extend([cube('white shirt',(0,-.151,1.19),(.12,.03,.2),skin,.02),cube('bowtie',(0,-.179,1.24),(.16,.035,.06),black,.015)])
@@ -186,7 +223,9 @@ def build_character(c,duration=3,fps=30):
     if outfit=='robe':
         body_details.extend([cube('robe skirt',(0,0,.62),(.56,.36,.5),cloth,.04),cube('robe sash',(0,-.01,.95),(.46,.32,.05),trim,.012)])
     if outfit=='dress':
-        body_details.extend([cube('dress skirt',(0,0,.55),(.62,.4,.6),cloth,.05),cube('dress waist',(0,-.01,.93),(.42,.3,.05),trim,.01)])
+        bpy.ops.mesh.primitive_cone_add(vertices=28,radius1=.37,radius2=.2,depth=.62,location=(0,0,.58));sk=bpy.context.active_object;sk.name='dress skirt';sk.scale.y=.75;sk.data.materials.append(cloth)
+        for pl in sk.data.polygons:pl.use_smooth=True
+        body_details.extend([sk,cube('dress waist',(0,-.01,.93),(.42,.3,.05),trim,.01)])
     if outfit=='labcoat':
         body_details.extend([cube('lab coat',(0,0,.8),(.52,.36,.5),skin,.03),cube('coat pocket',(.12,-.18,.78),(.1,.02,.1),black,.005)])
     if outfit=='uniform':
@@ -196,10 +235,24 @@ def build_character(c,duration=3,fps=30):
     if premium and outfit not in ('armor','dress','robe','royal','labcoat'):
         body_details.extend([cube('shirt collar L',(-.075,-.13,1.3),(.1,.05,.055),cloth,.012),cube('shirt collar R',(.075,-.13,1.3),(.1,.05,.055),cloth,.012),
                              cube('placket',(0,-.158,1.08),(.03,.015,.4),skin if outfit=='labcoat' else cloth,.004)])
-    if bench and outfit in ('worker','merchant','uniform','sailor','tunic','rags'):
+    if outfit=='suit':
+        body_details.extend([cube('suit shirt',(0,-.153,1.17),(.13,.03,.3),skin,.02),cube('lapel L',(-.09,-.162,1.12),(.07,.02,.34),cloth,.008),cube('lapel R',(.09,-.162,1.12),(.07,.02,.34),cloth,.008),
+                             cube('suit tie',(0,-.172,1.1),(.05,.025,.3),trim,.008),cube('pocket square',(.12,-.165,1.2),(.05,.012,.04),skin,.004)])
+    if outfit=='hoodie':
+        body_details.extend([sphere('hood roll',(0,.09,1.3),(.2,.14,.1),cloth),cube('hoodie pocket',(0,-.16,.92),(.26,.02,.12),trim,.01),cube('hood string L',(-.04,-.16,1.2),(.012,.012,.14),skin,.003),cube('hood string R',(.04,-.16,1.2),(.012,.012,.14),skin,.003)])
+    if outfit=='apron':
+        body_details.extend([cube('shop apron',(0,-.165,1.0),(.26,.035,.42),skin,.02),cube('apron pocket',(0,-.19,.88),(.14,.014,.09),trim,.005),cube('apron strap L',(-.1,-.16,1.3),(.025,.02,.12),skin,.004),cube('apron strap R',(.1,-.16,1.3),(.025,.02,.12),skin,.004)])
+    if outfit=='police':
+        body_details.extend([cube('police belt',(0,-.01,.86),(.46,.33,.07),black,.02),sphere('police badge',(-.1,-.168,1.17),(.035,.012,.04),trim),cube('epaulette L',(-.22,0,1.3),(.1,.07,.03),trim,.006),cube('epaulette R',(.22,0,1.3),(.1,.07,.03),trim,.006),cube('police tie',(0,-.165,1.14),(.04,.02,.2),black,.006)])
+    if outfit=='sweater':
+        for z in (.92,1.06,1.2):
+            pts=[(x,-.16*math.sqrt(max(0,1-(x/.24)**2-((z-1.04)/.32)**2))-.003,z) for x in [-.2+i*.4/16 for i in range(17)]]
+            for a,b in zip(pts,pts[1:]):body_details.append(rope('sweater band',a,b,.014,trim))
+        body_details.append(cube('sweater collar',(0,-.12,1.33),(.2,.1,.05),trim,.015))
+    if bench and outfit in ('worker','merchant','uniform','sailor','tunic','rags','hoodie','suit','apron','police','sweater'):
         lower=sphere('torso lower',(0,0,.9),(.245,.168,.2),pants);body_details.append(lower)
-        body_details.extend([cube('collar L',(-.07,-.138,1.31),(.1,.05,.05),skin,.012),cube('collar R',(.07,-.138,1.31),(.1,.05,.05),skin,.012),
-                             cube('tie',(0,-.158,1.17),(.045,.03,.22),black,.008),cube('pocket patch',(.1,-.158,1.06),(.085,.014,.085),trim,.006)])
+        body_details.extend([cube('collar L',(-.07,-.138,1.31),(.1,.05,.05),skin,.012),cube('collar R',(.07,-.138,1.31),(.1,.05,.05),skin,.012)])
+        if outfit not in ('suit','hoodie','apron','police','sweater'):body_details.extend([cube('tie',(0,-.158,1.17),(.045,.03,.22),black,.008),cube('pocket patch',(.1,-.158,1.06),(.085,.014,.085),trim,.006)])
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[];anchors={}
@@ -250,7 +303,7 @@ def build_character(c,duration=3,fps=30):
         for o in list(headroot.children):
             if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest')):outline(o,.013)
         for o in list(root.children):
-            if o.type=='MESH' and o.name.startswith(('coat','tricorne','work apron','robe','dress','lab coat','royal','breastplate','tunic')):outline(o,.013)
+            if o.type=='MESH' and o.name.startswith(('coat','tricorne','work apron','robe','dress','lab coat','royal','breastplate','tunic','shop apron','hood roll','lapel','ghost')):outline(o,.013)
     action=c.get('action','stand');base=Vector((*c['pos'],0));yaw=math.radians(c.get('yaw',0));scale=c.get('scale',1)
     for f in range(round(duration*fps)):
         p=pose(action,f/fps);off=Vector(p['root']);off.rotate(Euler((0,0,yaw)));root.location=base+off*scale;root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)

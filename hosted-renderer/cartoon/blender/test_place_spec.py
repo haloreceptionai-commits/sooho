@@ -147,3 +147,27 @@ class RecipeTests(unittest.TestCase):
         for k in P.RECIPES:
             s = {'terrain': k, 'time': 'day', 'weather': 'clear', 'dressing': []}
             P.validate(s); P.validate_compiled(P.compile_place(s))
+
+
+class WorldTests(unittest.TestCase):
+    def test_room_shell_rules(self):
+        import place_spec as P
+        ok = {'terrain': 'bedroom', 'time': 'day', 'weather': 'clear', 'dressing': []}
+        P.validate(ok)
+        bad = {'terrain': 'office', 'time': 'day', 'weather': 'clear', 'dressing': [], 'shell': {'floor': [2, 0, 0], 'wall': [.5, .5, .5], 'ceiling': [1, 1, 1]}}
+        with self.assertRaises(P.PlaceError): P.validate(bad)
+        outdoor = {'terrain': 'plain', 'time': 'day', 'weather': 'clear', 'dressing': [], 'shell': {'floor': [1, 1, 1], 'wall': [1, 1, 1], 'ceiling': [1, 1, 1]}}
+        with self.assertRaises(P.PlaceError): P.validate(outdoor)
+
+    def test_every_essential_prop_is_buildable(self):
+        import json, place_spec as P
+        items = json.load(open(P.HERE / 'essentials.json'))['items']
+        self.assertGreaterEqual(len(items), 50)
+        for name, e in items.items():
+            P.validate({'terrain': 'plain', 'time': 'day', 'weather': 'clear', 'dressing': [e['dressing']]})
+
+    def test_character_roles_make_valid_cast(self):
+        import art_director as AD
+        from character_motion import OUTFITS, HATS
+        for role, (outfit, hat, shirt, trim, gl, fac, sp) in AD.ROLES.items():
+            self.assertIn(outfit, OUTFITS, role); self.assertIn(hat, HATS, role); self.assertIn(sp, ('human', 'alien', 'monster', 'ghost'), role)

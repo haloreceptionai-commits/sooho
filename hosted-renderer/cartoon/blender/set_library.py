@@ -230,8 +230,11 @@ def lighting(mode, indoor=False):
         o=bpy.data.objects.new('rain-streaks',mesh);bpy.context.collection.objects.link(o);o.data.materials.append(m)
 
 
-def build_set(name, mode='day'):
+def build_set(name, mode='day', shell=None):
     kit = KITS[name]
+    if shell:   # a recipe's own room: its colours, its lights, no legacy cabin decor
+        from shell import build_shell
+        build_shell(shell); lighting(mode, True); return
     for b in kit.get('structure', []):
         if b['name'] != 'ocean':box(b['name'], b['pos'], b['size'], b['surface'])
     for item in kit['models']: model(item)
