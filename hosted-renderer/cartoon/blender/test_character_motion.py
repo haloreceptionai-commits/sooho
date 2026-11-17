@@ -47,3 +47,27 @@ class MotionTests(unittest.TestCase):
             self.assertAlmostEqual(a['root'][1]+a['left_ankle'][1],b['root'][1]+b['left_ankle'][1],places=6)
 
 if __name__=='__main__':unittest.main()
+
+class CalmGestureTests(unittest.TestCase):
+    def joints(self, action, t): p = pose(action, t); return {k: v for k, v in p.items() if isinstance(v, tuple)}
+
+    def test_react_worry_shout_settle_and_then_hold_perfectly_still(self):
+        for action in ('react', 'worry', 'shout', 'stand', 'point'):
+            with self.subTest(action=action):
+                a, b = self.joints(action, 0.6), self.joints(action, 2.7)
+                self.assertEqual(a, b)          # no flailing: nothing moves after the gesture has eased in
+
+    def test_the_gesture_eases_in_from_rest(self):
+        rest, mid, done = pose('react', 0)['left_wrist'], pose('react', .17)['left_wrist'], pose('react', .5)['left_wrist']
+        self.assertEqual(rest, pose('stand', 0)['left_wrist']); self.assertNotEqual(mid, rest); self.assertNotEqual(mid, done)
+        self.assertGreater(done[2], rest[2] + .3)    # the hands are up
+
+    def test_only_real_panic_and_walking_move_the_legs(self):
+        for action in ('react', 'worry', 'shout', 'cheer', 'point'):
+            self.assertEqual(pose(action, 0.3)['left_ankle'], pose(action, 1.9)['left_ankle'])
+        self.assertNotEqual(pose('panic', 0.1)['left_ankle'], pose('panic', 0.25)['left_ankle'])
+        self.assertNotEqual(pose('walk', 0.1)['left_ankle'], pose('walk', 0.5)['left_ankle'])
+
+    def test_a_cheer_sways_gently(self):
+        ys = [pose('cheer', t / 10)['left_wrist'][2] for t in range(0, 20)]
+        self.assertLess(max(ys) - min(ys), .12)

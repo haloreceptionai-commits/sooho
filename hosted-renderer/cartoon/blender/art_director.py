@@ -250,17 +250,18 @@ VERB_ACTION = [  # first match wins; literal verbs in the spoken line drive the 
     (r'\b(pour\w*|spill\w*|fill\w*)\b', 'pour'),
     (r'\b(fell|collaps\w*|fainted)\b', 'fall'),
     (r'\b(won|win|wins|celebrat\w*|cheer\w*|victory|triumph\w*|success\w*)\b', 'cheer'),
-    (r'\b(panic\w*|terrif\w*|chaos|disaster|destroy\w*|ruin\w*|lost|failed|fail\w*|humiliat\w*)\b', 'panic'),
+    (r'\b(panic\w*|terrif\w*|chaos|disaster)\b', 'panic'),
+    (r'\b(destroy\w*|ruin\w*|lost|failed|fail\w*|humiliat\w*)\b', 'react'),   # one startled gesture, not a flail
     (r'\b(point\w*|show\w*|explain\w*|discover\w*|found|notic\w*|look\w*|spott\w*|announc\w*|declar\w*|order\w*)\b', 'point'),
     (r'\b(hid|hide\w*|crouch\w*|duck\w*|wait\w*|search\w*|inspect\w*|examin\w*)\b', 'crouch'),
 ]
 LEGACY_ACTION = {'idle': 'stand', 'walk': 'walk', 'run': 'run', 'point': 'point', 'lift': 'carry', 'carry': 'carry', 'hold': 'carry', 'grab': 'carry',
-                 'place': 'carry', 'pour': 'pour', 'react': 'panic', 'shout': 'panic', 'cower': 'crouch', 'worried': 'panic', 'wave': 'cheer',
+                 'place': 'carry', 'pour': 'pour', 'react': 'react', 'shout': 'shout', 'cower': 'crouch', 'worried': 'worry', 'wave': 'cheer',
                  'cheer': 'cheer', 'thumbs_up': 'cheer', 'aim': 'aim', 'fire': 'aim', 'load': 'load', 'strike': 'swing', 'throw': 'swing',
                  'inspect': 'crouch', 'tap': 'point', 'think': 'stand', 'shrug': 'stand', 'cross_arms': 'stand', 'look_back': 'walk'}
 FACE = {'grin': 'happy', 'smile': 'happy', 'laugh': 'happy', 'relief': 'happy', 'whistle': 'smug', 'stern': 'determined',
         'nervous': 'worried', 'shock': 'shock', 'dazed': 'sad', 'pained': 'sad', 'neutral': 'neutral'}
-ACTION_FACE = {'run': 'shock', 'panic': 'shock', 'aim': 'determined', 'load': 'determined', 'swing': 'determined', 'cheer': 'happy', 'fall': 'shock'}
+ACTION_FACE = {'run': 'shock', 'panic': 'shock', 'react': 'shock', 'worry': 'worried', 'shout': 'determined', 'aim': 'determined', 'load': 'determined', 'swing': 'determined', 'cheer': 'happy', 'fall': 'shock'}
 OUTFIT = {'soldier': ('armor', 'helmet'), 'veteran': ('armor', 'helmet'), 'knight': ('armor', 'helmet'), 'captain': ('uniform', 'tricorne'),
           'pirate': ('sailor', 'tricorne'), 'sailor': ('sailor', 'beanie'), 'fisherman': ('sailor', 'beanie'), 'merchant': ('merchant', 'top'),
           'noble': ('royal', 'none'), 'king': ('royal', 'crown'), 'queen': ('dress', 'crown'), 'scholar': ('robe', 'none'), 'doctor': ('labcoat', 'none'),
@@ -292,8 +293,8 @@ FACIAL = {'king': 'beard', 'general': 'mustache', 'emperor': 'beard', 'scholar':
           'pharaoh': 'goatee', 'inventor': 'mustache', 'president': 'mustache', 'scientist': 'goatee', 'doctor': 'mustache', 'soldier': 'mustache', 'veteran': 'mustache'}
 SKINS = [[1.0, 1.0, 1.0]]   # house style: every face is pure white (the benchmark's egg characters)
 TRIMS = {'armor': [.75, .55, .2], 'royal': [.85, .65, .15], 'robe': [.7, .6, .2], 'dress': [.85, .7, .3], 'tunic': [.8, .7, .35], 'uniform': [.8, .65, .2], 'worker': [.9, .75, .1]}
-SHIRTS = [[0.72, 0.42, 0.22], [0.2, 0.32, 0.6], [0.55, 0.2, 0.2], [0.3, 0.5, 0.3]]
-HAT_COLORS = [[0.32, 0.19, 0.06], [0.22, 0.27, 0.16], [0.1, 0.1, 0.12], [0.5, 0.12, 0.08]]
+SHIRTS = [[0.95, 0.32, 0.25], [0.2, 0.55, 0.95], [0.98, 0.78, 0.15], [0.2, 0.75, 0.5]]   # coral, azure, sunny yellow, mint: bright and easy to tell apart
+HAT_COLORS = [[0.95, 0.55, 0.1], [0.2, 0.6, 0.9], [0.85, 0.2, 0.45], [0.3, 0.75, 0.35]]
 
 # ---------------------------------------------------------------- props (whitelisted offline models only)
 PROP_MODEL = {'barrel': ('pirate-kit/barrel', .9), 'oil_jar': ('pirate-kit/barrel', .8), 'pot': ('pirate-kit/barrel', .6), 'chest': ('pirate-kit/chest', .7),

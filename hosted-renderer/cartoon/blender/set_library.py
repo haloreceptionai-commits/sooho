@@ -187,10 +187,35 @@ def hide_engulfing(points):
     return hidden
 
 
+# Pastel paint for the walls of the older indoor kits (picked per kit), light floors and white ceilings: the brown wood and grey stone made every room dark.
+PASTELS = [(0.85, 2.3, 2.6), (2.6, 1.25, 1.15), (2.6, 2.3, 0.8), (1.15, 2.5, 1.35), (1.9, 1.3, 2.7)]    # multiplied onto the scanned texture: aqua, coral, lemon, mint, lavender
+
+
+def painted(kit, part, surface_name, metres=2):
+    """A bright copy of a scanned surface for a room's floor, walls or ceiling (the texture detail stays, the colour is lifted)."""
+    if 'floor' in part: tint = (2.2, 2.0, 1.75)          # pale, only slightly warm: a saturated honey floor read as orange
+    elif 'ceiling' in part: tint = (3.4, 3.3, 3.1)
+    elif part == 'beam': tint = (2.6, 2.5, 2.3)
+    elif 'wall' in part: tint = PASTELS[sum(map(ord, kit)) % len(PASTELS)]
+    else: return surface(surface_name, metres)
+    key = f'bright-{surface_name}-{metres}-{tint}'
+    if key in bpy.data.materials: return bpy.data.materials[key]
+    m = surface(surface_name, metres).copy(); m.name = key; nt = m.node_tree; bs = nt.nodes.get('Principled BSDF')
+    if bs is None: return m
+    mul = nt.nodes.new('ShaderNodeMixRGB'); mul.blend_type = 'MULTIPLY'; mul.inputs[0].default_value = 1.0; mul.inputs[2].default_value = (*tint, 1)
+    links = list(bs.inputs['Base Color'].links); src = links[0].from_socket if links else None
+    if surface_name == 'wood' and src is not None:   # take most of the orange out of the scanned wood first: lifting orange only gives bright orange
+        des = nt.nodes.new('ShaderNodeHueSaturation'); des.inputs['Saturation'].default_value = .28; nt.links.new(src, des.inputs['Color']); src = des.outputs[0]
+    if src is not None: nt.links.new(src, mul.inputs[1])
+    else: mul.inputs[1].default_value = bs.inputs['Base Color'].default_value
+    nt.links.new(mul.outputs[0], bs.inputs['Base Color'])
+    return m
+
+
 def box(name, pos, size, material):
     bpy.ops.mesh.primitive_cube_add(size=1, location=pos)
     o = bpy.context.active_object; o.name = name; o.scale = size
-    o.data.materials.append(surface(material))
+    o.data.materials.append(material if not isinstance(material, str) else surface(material))
     bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
     mod = o.modifiers.new('soft edges', 'BEVEL'); mod.width = 0.025; mod.segments = 2
     return o
@@ -217,16 +242,16 @@ def lighting(mode, indoor=False):
     nt.links.new(light_path.outputs['Is Camera Ray'], mix.inputs[0])
     nt.links.new(nt.nodes['Background'].outputs[0], mix.inputs[1]); nt.links.new(background.outputs[0], mix.inputs[2])
     nt.links.new(mix.outputs[0], nt.nodes['World Output'].inputs['Surface'])
-    nt.nodes['Background'].inputs['Strength'].default_value = (0.08 if indoor else .22) if mode != 'night' else 0.025
+    nt.nodes['Background'].inputs['Strength'].default_value = (0.45 if indoor else .5) if mode != 'night' else 0.08     # a bright, airy world
     bpy.ops.object.light_add(type='AREA', location=(-2, 1, 3.8) if indoor else (-3,-4,7))
     key = bpy.context.active_object; key.rotation_euler = (Vector((0, 6, 1.5)) - key.location).to_track_quat('-Z', 'Y').to_euler()
-    key.data.energy = 450 if indoor else 1100; key.data.size = 1.3 if indoor else 3
-    key.data.color = (1, 0.72, 0.42) if mode == 'sunset' or indoor else (0.8, 0.89, 1)
-    if mode == 'night': key.data.energy = 400; key.data.color = (0.35, 0.5, 1)
+    key.data.energy = 900 if indoor else 1500; key.data.size = 2.4 if indoor else 3
+    key.data.color = (1, 0.72, 0.42) if mode == 'sunset' else (1, 0.95, 0.88) if indoor else (0.9, 0.95, 1)     # neutral daylight, not an orange lamp
+    if mode == 'night': key.data.energy = 650; key.data.color = (0.45, 0.6, 1)
     if not indoor and mode in ('day', 'sunset'):
         bpy.ops.object.light_add(type='SUN', rotation=(math.radians(35 if mode == 'day' else 65), math.radians(-20), math.radians(-30)))
         bpy.context.active_object.rotation_euler=(Vector((0,6,0))-Vector((-6,-10,12 if mode=='day' else 5))).to_track_quat('-Z','Y').to_euler()
-        bpy.context.active_object.data.energy = 2.2
+        bpy.context.active_object.data.energy = 3.2
         bpy.context.active_object.data.angle = math.radians(2)
         bpy.context.active_object.data.color = (1, .7, .38) if mode == 'sunset' else (1, .96, .86)
         bpy.ops.object.light_add(type='AREA',location=(5,8,6))
@@ -236,12 +261,12 @@ def lighting(mode, indoor=False):
         # Table lamp pool and warm fill, instead of a single distant ceiling light.
         bpy.ops.object.light_add(type='AREA', location=(1,-1,3.2))
         fill=bpy.context.active_object; fill.rotation_euler=(Vector((0,3,1))-fill.location).to_track_quat('-Z','Y').to_euler()
-        fill.data.energy=180;fill.data.size=2;fill.data.color=(1,.76,.48)
+        fill.data.energy=420;fill.data.size=3;fill.data.color=(1,.97,.92)
         bpy.ops.object.light_add(type='POINT', location=(1,2,1.65))
-        bpy.context.active_object.data.energy=35;bpy.context.active_object.data.color=(1,.57,.22);bpy.context.active_object.data.shadow_soft_size=.08
+        bpy.context.active_object.data.energy=45;bpy.context.active_object.data.color=(1,.85,.6);bpy.context.active_object.data.shadow_soft_size=.08
         bpy.ops.object.light_add(type='AREA',location=(2.8,8.4,2.7))
         window=bpy.context.active_object;window.rotation_euler=(Vector((0,2,1))-window.location).to_track_quat('-Z','Y').to_euler()
-        window.data.energy=250;window.data.size=1.6;window.data.color=(.55,.7,1)
+        window.data.energy=520;window.data.size=2.4;window.data.color=(.75,.85,1)
     if mode == 'rain':
         # Static rain at step 3; animated weather is the step-7 effects clock.
         import random
@@ -264,9 +289,9 @@ def build_set(name, mode='day', shell=None):
             if ob.type == 'LIGHT' and ob.data.type in ('AREA', 'POINT') and ob.name != 'Area' or (ob.type == 'LIGHT' and ob.data.type in ('AREA', 'POINT')): ob.data.energy *= 0.3
         return
     for b in kit.get('structure', []):
-        if b['name'] != 'ocean':box(b['name'], b['pos'], b['size'], b['surface'])
+        if b['name'] != 'ocean':box(b['name'], b['pos'], b['size'], painted(name, b['name'], b['surface']) if kit.get('indoor') and b['surface'] in ('wood', 'stone') else b['surface'])
     for item in kit['models']: model(item)
-    detail_set(name,surface)
+    detail_set(name, (lambda n, m=2: painted(name, 'beam' if n == 'wood' else 'wall' if n == 'stone' else '', n, m)) if kit.get('indoor') else surface)
     lighting(mode, kit.get('indoor', False))
     practical_lights(name,mode)
 

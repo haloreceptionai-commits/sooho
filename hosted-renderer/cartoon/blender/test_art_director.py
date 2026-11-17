@@ -148,3 +148,19 @@ class ArtDirector(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class BrightCalmLookTests(unittest.TestCase):
+    def test_nobody_flails_for_a_failed_story_or_a_react_or_worried_cue(self):
+        import re, art_director as AD
+        verb = lambda text: next((a for pat, a in AD.VERB_ACTION if re.search(pat, text)), None)
+        self.assertEqual(verb('the first whistle failed again'), 'react')        # one startled gesture
+        self.assertEqual(verb('a lost army'), 'react')
+        self.assertEqual(verb('the crowd began to panic'), 'panic')              # real panic still flails
+        for cue, want in (('react', 'react'), ('worried', 'worry'), ('shout', 'shout')): self.assertEqual(AD.LEGACY_ACTION[cue], want)
+        self.assertNotIn('panic', [AD.LEGACY_ACTION[c] for c in ('react', 'worried', 'shout')])
+
+    def test_the_cast_wears_bright_saturated_colours(self):
+        import art_director as AD
+        for rgb in AD.SHIRTS + AD.HAT_COLORS: self.assertGreaterEqual(max(rgb) - min(rgb), .45, rgb)
+        self.assertGreater(len({tuple(c) for c in AD.SHIRTS}), 3)

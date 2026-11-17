@@ -4,7 +4,7 @@ import math
 EXPRESSIONS = {'neutral','happy','angry','sad','shock','worried','smug','determined','talk'}
 OUTFITS = {'worker','merchant','soldier','sailor','tunic','armor','robe','dress','labcoat','uniform','royal','rags','hoodie','suit','apron','police','sweater'}
 HATS = {'none','beanie','top','helmet','tricorne','crested','crown','turban','hood','cap','straw','hardhat','laurel','headband','spiky','bun','bob'}
-ACTIONS = {'stand','walk','run','carry','point','swing','aim','load','pour','crouch','fall','cheer','panic'}
+ACTIONS = {'stand','walk','run','carry','point','swing','aim','load','pour','crouch','fall','cheer','panic','react','worry','shout'}
 
 
 def elbow(a,b,length=.34,side=1,bend=None):
@@ -62,8 +62,16 @@ def pose(action,t):
         p['right_wrist']=(-.02,-.3,1.12+.2*a)
         p['left_wrist']=(-.02,-.3-.16*math.sin(p['grip_angle']),p['right_wrist'][2]+.16*math.cos(p['grip_angle']))
     if action in ('cheer','panic'):
-        wave=math.sin(t*math.tau*(3 if action=='panic' else 1.6))
-        p['left_wrist']=(-.54,-.22,1.58+.1*wave);p['right_wrist']=(.54,-.22,1.58-.1*wave)
+        # panic flails (it is only for real panic); a cheer raises both arms and sways them slowly
+        wave=math.sin(t*math.tau*(3 if action=='panic' else .8));amp=.1 if action=='panic' else .045
+        p['left_wrist']=(-.54,-.22,1.58+amp*wave);p['right_wrist']=(.54,-.22,1.58-amp*wave)
+    if action in ('react','worry','shout'):
+        # One deliberate gesture that eases in over a third of a second and then holds perfectly still: people do not flail for no reason.
+        e=min(1.0,t/.35);e=e*e*(3-2*e);lw,rw=p['left_wrist'],p['right_wrist']
+        if action=='react':tl,tr=(-.5,-.2,hip_z+.75),(.5,-.2,hip_z+.75)          # startled: both hands up
+        elif action=='worry':tl,tr=(-.12,-.34,hip_z+.42),(.12,-.34,hip_z+.42)    # hands together at the chest
+        else:tl,tr=lw,(.42,-.25,hip_z+.82)                                      # shout: one arm raised
+        p['left_wrist']=tuple(a+(b-a)*e for a,b in zip(lw,tl));p['right_wrist']=tuple(a+(b-a)*e for a,b in zip(rw,tr))
     if action=='fall':p['tilt']=max(0,min(1,t))*math.pi/2
     for side,sign in [('left',-1),('right',1)]:
         p[side+'_elbow']=elbow(p[side+'_shoulder'],p[side+'_wrist'],.34,1,bend=(sign,-.5,0))

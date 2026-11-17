@@ -21,7 +21,7 @@ WORLD = {'ship': ('ship_deck', None), 'storm_sea': ('ship_deck', 'rain'), 'town'
          'map': ('battlefield', None)}
 LIGHT = {'day': 'day', 'golden': 'sunset', 'night_bright': 'night'}
 ACTION = {'idle': 'stand', 'walk': 'walk', 'run': 'run', 'point': 'point', 'lift': 'carry', 'carry': 'carry', 'hold': 'carry', 'grab': 'carry',
-          'place': 'carry', 'pour': 'pour', 'react': 'panic', 'shout': 'panic', 'cower': 'crouch', 'worried': 'panic', 'wave': 'cheer',
+          'place': 'carry', 'pour': 'pour', 'react': 'react', 'shout': 'shout', 'cower': 'crouch', 'worried': 'worry', 'wave': 'cheer',
           'cheer': 'cheer', 'thumbs_up': 'cheer', 'aim': 'aim', 'fire': 'aim', 'load': 'load', 'strike': 'swing', 'throw': 'swing',
           'inspect': 'crouch', 'tap': 'point'}
 FACE = {'grin': 'happy', 'smile': 'happy', 'laugh': 'happy', 'relief': 'happy', 'whistle': 'smug', 'stern': 'determined',
@@ -33,7 +33,7 @@ OUTFIT = {'soldier': ('soldier', 'helmet'), 'veteran': ('soldier', 'helmet'), 'k
 PROP = {'magnifier': ('magnifier', 'swing'), 'coins': ('money_bag', 'hold'), 'gold_piece': ('money_bag', 'hold'), 'chest': ('money_bag', 'hold'),
         'cart': ('covered_cart', 'hold'), 'pan': ('gold_pan', 'pour'), 'cannon': ('gold_shotgun', 'fire')}
 FX = {'smoke': 'smoke', 'fire': 'fire', 'dust': 'dust', 'burst': 'explosion', 'sparkle': 'sparks', 'rain': 'rain', 'splash': 'dust'}
-SHIRTS = [[0.72, 0.42, 0.22], [0.2, 0.32, 0.6], [0.55, 0.2, 0.2], [0.3, 0.5, 0.3]]
+SHIRTS = [[0.95, 0.32, 0.25], [0.2, 0.55, 0.95], [0.98, 0.78, 0.15], [0.2, 0.75, 0.5]]
 SCALE = (810, 1440)  # rendered size, upscaled to 1080x1920 (about 1.8x faster on the T4)
 
 

@@ -304,7 +304,7 @@ def camera(shot, fps):
 
 def look(scene, shot):
     scene.view_settings.view_transform = 'AgX'
-    scene.view_settings.exposure = {'night': 0.6, 'sunset': 0.35, 'rain': 0.3, 'day': 0.15}.get(shot.get('lighting', 'day'), 0.45)   # benchmark brightness is 0.50-0.57
+    scene.view_settings.exposure = {'night': 1.0, 'sunset': 0.75, 'rain': 0.7, 'day': 0.6}.get(shot.get('lighting', 'day'), 0.8)   # bright and cheerful: viewers prefer a light, colourful picture to a dark one   # benchmark brightness is 0.50-0.57
     for name in (shot.get('grade', 'Medium High Contrast'),):
         for cand in (f'AgX - {name}', name):
             try: scene.view_settings.look = cand; break
@@ -336,9 +336,9 @@ def look(scene, shot):
     nt.links.new(blur.outputs[0], inv.inputs[0])
     nt.links.new(img, vig.inputs[1]); nt.links.new(inv.outputs[0], vig.inputs[2]); vig.inputs[0].default_value = 1
     img = vig.outputs[0]
-    grade = nt.nodes.new('CompositorNodeHueSat'); grade.inputs['Saturation'].default_value = 1.0; grade.inputs['Value'].default_value = 1.0   # colour grade: richer, punchier
+    grade = nt.nodes.new('CompositorNodeHueSat'); grade.inputs['Saturation'].default_value = 1.32; grade.inputs['Value'].default_value = 1.04   # colour grade: vivid, punchy
     nt.links.new(img, grade.inputs['Image']); img = grade.outputs['Image']
-    cc = nt.nodes.new('CompositorNodeBrightContrast'); cc.inputs['Bright'].default_value = 0.04; cc.inputs['Contrast'].default_value = 0.38
+    cc = nt.nodes.new('CompositorNodeBrightContrast'); cc.inputs['Bright'].default_value = 0.08; cc.inputs['Contrast'].default_value = 0.26   # lifted shadows: nothing crushes to brown or black
     nt.links.new(img, cc.inputs['Image']); img = cc.outputs['Image']
     try:
         from overlays import add_overlays
@@ -391,8 +391,8 @@ def apply_mood(mode):
     sc = bpy.context.scene; bg = sc.world.node_tree.nodes.get('Background')
     suns = [o for o in bpy.data.objects if o.type == 'LIGHT' and o.data.type == 'SUN']
     if mode == 'night':
-        for o in suns: o.data.energy = 1.7; o.data.color = (0.5, 0.64, 1.0); o.rotation_euler.x = math.radians(40)   # moonlight: cold blue and clearly night, but bright enough to read faces
-        if bg and not bg.inputs['Color'].links: bg.inputs['Strength'].default_value = 0.4; bg.inputs['Color'].default_value = (0.05, 0.09, 0.22, 1)
+        for o in suns: o.data.energy = 2.6; o.data.color = (0.55, 0.68, 1.0); o.rotation_euler.x = math.radians(40)   # moonlight: cold blue and clearly night, but bright enough to read faces
+        if bg and not bg.inputs['Color'].links: bg.inputs['Strength'].default_value = 0.7; bg.inputs['Color'].default_value = (0.1, 0.16, 0.36, 1)
         for x, y, e in ((-1.6, -1.2, 170), (2.2, 1.5, 90)):   # warm firelight on the cast, cool moon rim from the sun
             bpy.ops.object.light_add(type='POINT', location=(x, y, 1.6)); L = bpy.context.active_object.data
             L.energy = e; L.color = (1.0, 0.55, 0.25); L.shadow_soft_size = 0.4
