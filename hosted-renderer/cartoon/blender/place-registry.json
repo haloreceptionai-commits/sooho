@@ -2779,6 +2779,9268 @@
      "yaw": 90
     }
    ]
+  },
+  "cozy_house": {
+   "label": "a small cozy house with a fence, flower beds, a tree and a path",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "lib": "city-kit-suburban/building-type-b",
+     "count": 1,
+     "height": 6.5,
+     "layout": "near",
+     "at": [
+      0,
+      15
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "path",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         1.6,
+         14,
+         0.05
+        ],
+        "pos": [
+         0,
+         0,
+         0.025
+        ],
+        "color": [
+         0.78,
+         0.72,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.05,
+     "layout": "near",
+     "at": [
+      0,
+      7.5
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/fence_simple",
+     "count": 6,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      -9.8,
+      11
+     ],
+     "yaw": 0,
+     "step": [
+      1.75,
+      0
+     ]
+    },
+    {
+     "lib": "nature-kit/fence_simple",
+     "count": 5,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      2.0,
+      11
+     ],
+     "yaw": 0,
+     "step": [
+      1.75,
+      0
+     ]
+    },
+    {
+     "lib": "nature-kit/flower_redA",
+     "count": 5,
+     "height": 0.55,
+     "layout": "near",
+     "at": [
+      -4,
+      8.5
+     ],
+     "yaw": 0,
+     "step": [
+      0.55,
+      0.1
+     ]
+    },
+    {
+     "lib": "nature-kit/flower_yellowB",
+     "count": 5,
+     "height": 0.55,
+     "layout": "near",
+     "at": [
+      2.6,
+      8.8
+     ],
+     "yaw": 0,
+     "step": [
+      0.5,
+      0.1
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 1,
+     "height": 7.5,
+     "layout": "near",
+     "at": [
+      -7.5,
+      14
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/tree_default",
+     "count": 1,
+     "height": 5.5,
+     "layout": "near",
+     "at": [
+      8,
+      13
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/plant_bush",
+     "count": 2,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      -2.8,
+      14
+     ],
+     "yaw": 0,
+     "step": [
+      5.2,
+      0
+     ]
+    },
+    {
+     "lib": "car-kit/sedan",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      6.4,
+      5.6
+     ],
+     "yaw": 90
+    }
+   ]
+  },
+  "luxury_house": {
+   "label": "a modern luxury house with glass walls, a pool, palms and a sports car",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "lib": "city-kit-suburban/building-type-f",
+     "count": 1,
+     "height": 8,
+     "layout": "near",
+     "at": [
+      -1,
+      20
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "pool",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         9,
+         5,
+         0.1
+        ],
+        "pos": [
+         0,
+         0,
+         0.05
+        ],
+        "color": [
+         0.85,
+         0.85,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         8.4,
+         4.4,
+         0.12
+        ],
+        "pos": [
+         0,
+         0,
+         0.08
+        ],
+        "color": [
+         0.1,
+         0.65,
+         0.9
+        ],
+        "glow": 1.2
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.14,
+     "layout": "near",
+     "at": [
+      3.5,
+      9
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-desert/BigPalmTree",
+     "count": 1,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -7.5,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-desert/SmallPalmTree",
+     "count": 1,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      9.5,
+      14
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/plant_bush",
+     "count": 5,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      -5,
+      15
+     ],
+     "yaw": 0,
+     "step": [
+      2.4,
+      0
+     ]
+    },
+    {
+     "lib": "car-kit/sedan-sports",
+     "count": 1,
+     "height": 1.4,
+     "layout": "near",
+     "at": [
+      -5.2,
+      5.6
+     ],
+     "yaw": 80
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 2,
+     "height": 4,
+     "layout": "near",
+     "at": [
+      -9,
+      9
+     ],
+     "yaw": 0,
+     "step": [
+      18,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/benchCushion",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -1.2,
+      8.6
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "mansion": {
+   "label": "a huge mansion with columns, a fountain, hedges, a gate and luxury cars",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "lib": "q-ultimatetexturedbuildings/2Story_Columns_Mat",
+     "count": 1,
+     "height": 14,
+     "layout": "near",
+     "at": [
+      0,
+      32
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-ultimatetexturedbuildings/2Story_Wide_Mat",
+     "count": 1,
+     "height": 11,
+     "layout": "near",
+     "at": [
+      -18,
+      30
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-ultimatetexturedbuildings/2Story_Wide_Mat",
+     "count": 1,
+     "height": 11,
+     "layout": "near",
+     "at": [
+      18,
+      30
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "fountain",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         4.4,
+         4.4,
+         0.5
+        ],
+        "pos": [
+         0,
+         0,
+         0.25
+        ],
+        "color": [
+         0.78,
+         0.78,
+         0.8
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         3.8,
+         3.8,
+         0.55
+        ],
+        "pos": [
+         0,
+         0,
+         0.3
+        ],
+        "color": [
+         0.2,
+         0.6,
+         0.95
+        ],
+        "glow": 1.0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.5,
+         0.5,
+         2
+        ],
+        "pos": [
+         0,
+         0,
+         1.2
+        ],
+        "color": [
+         0.8,
+         0.8,
+         0.82
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         1.2,
+         1.2,
+         0.5
+        ],
+        "pos": [
+         0,
+         0,
+         2.3
+        ],
+        "color": [
+         0.4,
+         0.7,
+         1
+        ],
+        "glow": 1.5
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.55,
+     "layout": "near",
+     "at": [
+      0,
+      14
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "drive",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         19,
+         19,
+         0.05
+        ],
+        "pos": [
+         0,
+         0,
+         0.025
+        ],
+        "color": [
+         0.62,
+         0.58,
+         0.5
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.05,
+     "layout": "near",
+     "at": [
+      0,
+      20
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/plant_bush",
+     "count": 6,
+     "height": 1.6,
+     "layout": "near",
+     "at": [
+      -12,
+      8
+     ],
+     "yaw": 0,
+     "step": [
+      4.8,
+      0
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 2,
+     "height": 8,
+     "layout": "near",
+     "at": [
+      -14,
+      22
+     ],
+     "yaw": 0,
+     "step": [
+      28,
+      0
+     ]
+    },
+    {
+     "lib": "car-kit/sedan-sports",
+     "count": 1,
+     "height": 1.4,
+     "layout": "near",
+     "at": [
+      7,
+      8
+     ],
+     "yaw": 20
+    },
+    {
+     "lib": "car-kit/suv-luxury",
+     "count": 1,
+     "height": 1.7,
+     "layout": "near",
+     "at": [
+      -7,
+      9
+     ],
+     "yaw": -20
+    },
+    {
+     "lib": "castle-kit/metal-gate",
+     "count": 1,
+     "height": 3.5,
+     "layout": "near",
+     "at": [
+      0,
+      5
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 2,
+     "height": 4.5,
+     "layout": "near",
+     "at": [
+      -6,
+      5.5
+     ],
+     "yaw": 0,
+     "step": [
+      12,
+      0
+     ]
+    }
+   ]
+  },
+  "bedroom": {
+   "label": "a bedroom with a double bed, a nightstand lamp, a wardrobe, a rug and a window",
+   "terrain": "room",
+   "base": [
+    {
+     "asm": {
+      "name": "rug",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.6,
+         2.6,
+         0.03
+        ],
+        "pos": [
+         0,
+         0,
+         0.015
+        ],
+        "color": [
+         0.3,
+         0.4,
+         0.7
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.1,
+         2.1,
+         0.035
+        ],
+        "pos": [
+         0,
+         0,
+         0.02
+        ],
+        "color": [
+         0.85,
+         0.85,
+         0.9
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.038,
+     "layout": "near",
+     "at": [
+      0,
+      4.3
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/bedDouble",
+     "count": 1,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      0,
+      6.0
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/cabinetBedDrawerTable",
+     "count": 1,
+     "height": 0.6,
+     "layout": "near",
+     "at": [
+      -1.9,
+      6.4
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/cabinetBedDrawerTable",
+     "count": 1,
+     "height": 0.6,
+     "layout": "near",
+     "at": [
+      1.9,
+      6.4
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/lampSquareTable",
+     "count": 1,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      -1.9,
+      6.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/bookcaseClosedWide",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      3.3,
+      4.4
+     ],
+     "yaw": 270
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -3.1,
+      3.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-ultimatehomeinterior/Curtains_Double",
+     "count": 1,
+     "height": 2.4,
+     "layout": "near",
+     "at": [
+      0,
+      6.9
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/chairDesk",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -3.0,
+      5.0
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "furniture-kit/desk",
+     "count": 1,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      -3.4,
+      4.2
+     ],
+     "yaw": 90
+    }
+   ]
+  },
+  "kitchen": {
+   "label": "a kitchen and dining room with cabinets, a fridge, a stove and a dining table with chairs",
+   "terrain": "room",
+   "base": [
+    {
+     "lib": "furniture-kit/kitchenCabinet",
+     "count": 3,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -1.4,
+      6.6
+     ],
+     "yaw": 180,
+     "step": [
+      1.0,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/kitchenStove",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -2.4,
+      6.6
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/kitchenSink",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -0.4,
+      6.6
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/kitchenFridgeLarge",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      2.8,
+      6.5
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/kitchenMicrowave",
+     "count": 1,
+     "height": 0.35,
+     "layout": "near",
+     "at": [
+      0.6,
+      6.6
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/tableRound",
+     "count": 1,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      0,
+      3.8
+     ]
+    },
+    {
+     "lib": "furniture-kit/chair",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -1.2,
+      3.8
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "furniture-kit/chair",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      1.2,
+      3.8
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "food-kit/cake-birthday",
+     "count": 1,
+     "height": 0.3,
+     "layout": "near",
+     "at": [
+      0,
+      3.8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/lampRoundFloor",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      -3.2,
+      3.0
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "rooftop": {
+   "label": "an apartment balcony or rooftop with a railing, chairs, plants, string lights and a city skyline",
+   "terrain": "custom",
+   "ground": "stone",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "roof rail",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         16,
+         0.12,
+         0.12
+        ],
+        "pos": [
+         0,
+         0,
+         1.0
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         16,
+         0.12,
+         0.12
+        ],
+        "pos": [
+         0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         -7.5,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         -6.0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         -4.5,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         -3.0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         -1.5,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         0.0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         1.5,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         3.0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         4.5,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         6.0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.0
+        ],
+        "pos": [
+         7.5,
+         0,
+         0.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.06,
+     "layout": "near",
+     "at": [
+      0,
+      6.5
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "city skyline",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.075929254183783,
+         2.6,
+         12.98652147825547
+        ],
+        "pos": [
+         -18.5,
+         0,
+         6.493260739127735
+        ],
+        "color": [
+         0.38,
+         0.42,
+         0.55
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.431889623461962,
+         2.6,
+         12.214588902018392
+        ],
+        "pos": [
+         -13.214285714285715,
+         0,
+         6.107294451009196
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.62
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.8111990602786534,
+         2.6,
+         16.997002402038575
+        ],
+        "pos": [
+         -7.928571428571429,
+         0,
+         8.498501201019288
+        ],
+        "color": [
+         0.6,
+         0.5,
+         0.45
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.118708028656015,
+         2.6,
+         9.57764057151366
+        ],
+        "pos": [
+         -2.6428571428571423,
+         0,
+         4.78882028575683
+        ],
+        "color": [
+         0.6,
+         0.5,
+         0.45
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.6819477712580775,
+         2.6,
+         13.045942837297062
+        ],
+        "pos": [
+         2.6428571428571423,
+         0,
+         6.522971418648531
+        ],
+        "color": [
+         0.6,
+         0.5,
+         0.45
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.8781362810883238,
+         2.6,
+         8.656780664258763
+        ],
+        "pos": [
+         7.928571428571427,
+         0,
+         4.3283903321293815
+        ],
+        "color": [
+         0.55,
+         0.55,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.336090614286594,
+         2.6,
+         12.754993314216314
+        ],
+        "pos": [
+         13.214285714285715,
+         0,
+         6.377496657108157
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.62
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.9428229507391848,
+         2.6,
+         7.70434582049697
+        ],
+        "pos": [
+         18.5,
+         0,
+         3.852172910248485
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.62
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 16.997,
+     "layout": "near",
+     "at": [
+      0,
+      40
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "city skyline",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.5260147156300428,
+         2.6,
+         11.479743176740504
+        ],
+        "pos": [
+         -18.5,
+         0,
+         5.739871588370252
+        ],
+        "color": [
+         0.55,
+         0.55,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.97228990892413,
+         2.6,
+         15.11972278414086
+        ],
+        "pos": [
+         -13.214285714285715,
+         0,
+         7.55986139207043
+        ],
+        "color": [
+         0.38,
+         0.42,
+         0.55
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.6055641601044166,
+         2.6,
+         17.779575640383257
+        ],
+        "pos": [
+         -7.928571428571429,
+         0,
+         8.889787820191628
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.62
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.2680480175356634,
+         2.6,
+         18.236630405484142
+        ],
+        "pos": [
+         -2.6428571428571423,
+         0,
+         9.118315202742071
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.62
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.056384470746213,
+         2.6,
+         9.032970461560522
+        ],
+        "pos": [
+         2.6428571428571423,
+         0,
+         4.516485230780261
+        ],
+        "color": [
+         0.6,
+         0.5,
+         0.45
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.502542393283029,
+         2.6,
+         12.071040167554361
+        ],
+        "pos": [
+         7.928571428571427,
+         0,
+         6.035520083777181
+        ],
+        "color": [
+         0.55,
+         0.55,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.0760244049330656,
+         2.6,
+         8.331370335736176
+        ],
+        "pos": [
+         13.214285714285715,
+         0,
+         4.165685167868088
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.62
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.148418934471022,
+         2.6,
+         11.603978138231778
+        ],
+        "pos": [
+         18.5,
+         0,
+         5.801989069115889
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.62
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 18.237,
+     "layout": "near",
+     "at": [
+      -6,
+      70
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/chairCushion",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -2.2,
+      3.6
+     ],
+     "yaw": 200
+    },
+    {
+     "lib": "furniture-kit/chairCushion",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      2.2,
+      3.6
+     ],
+     "yaw": 160
+    },
+    {
+     "lib": "furniture-kit/tableRound",
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      0,
+      3.2
+     ]
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 3,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -4,
+      5.8
+     ],
+     "yaw": 0,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "asm": {
+      "name": "string lights",
+      "parts": [
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         -3.0,
+         0,
+         2.8
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         -2.45,
+         0,
+         2.9
+        ],
+        "color": [
+         1,
+         0.85,
+         0.2
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         -1.9,
+         0,
+         2.8
+        ],
+        "color": [
+         0.3,
+         0.8,
+         1
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         -1.3499999999999999,
+         0,
+         2.9
+        ],
+        "color": [
+         0.5,
+         1,
+         0.4
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         -0.7999999999999998,
+         0,
+         2.8
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         -0.25,
+         0,
+         2.9
+        ],
+        "color": [
+         1,
+         0.85,
+         0.2
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         0.30000000000000027,
+         0,
+         2.8
+        ],
+        "color": [
+         0.3,
+         0.8,
+         1
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         0.8500000000000005,
+         0,
+         2.9
+        ],
+        "color": [
+         0.5,
+         1,
+         0.4
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         1.4000000000000004,
+         0,
+         2.8
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         1.9500000000000002,
+         0,
+         2.9
+        ],
+        "color": [
+         1,
+         0.85,
+         0.2
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         2.5,
+         0,
+         2.8
+        ],
+        "color": [
+         0.3,
+         0.8,
+         1
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         3.0500000000000007,
+         0,
+         2.9
+        ],
+        "color": [
+         0.5,
+         1,
+         0.4
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         3.6000000000000005,
+         0,
+         2.8
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.2,
+         0.2,
+         0.2
+        ],
+        "pos": [
+         4.15,
+         0,
+         2.9
+        ],
+        "color": [
+         1,
+         0.85,
+         0.2
+        ],
+        "glow": 5.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.3,
+     "layout": "near",
+     "at": [
+      0,
+      5.0
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-ultimatetexturedbuildings/AC_Unit",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      5.2,
+      6.0
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "village_life": {
+   "label": "a cosy village with cottages, a well, a windmill, hay bales, fences and a dirt road",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "hills",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "dirt road",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         4.5,
+         20,
+         0.04
+        ],
+        "pos": [
+         0,
+         0,
+         0.02
+        ],
+        "color": [
+         0.55,
+         0.43,
+         0.3
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.04,
+     "layout": "near",
+     "at": [
+      0,
+      18
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-farmbuildings/Barn",
+     "count": 1,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      -10,
+      14
+     ],
+     "yaw": 70
+    },
+    {
+     "lib": "q-farmbuildings/Windmill",
+     "count": 1,
+     "height": 12,
+     "layout": "near",
+     "at": [
+      12,
+      30
+     ],
+     "yaw": -30
+    },
+    {
+     "lib": "q-farmbuildings/Well",
+     "count": 1,
+     "height": 2.2,
+     "layout": "near",
+     "at": [
+      4.8,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "city-kit-suburban/building-type-g",
+     "count": 1,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      9,
+      15
+     ],
+     "yaw": -80
+    },
+    {
+     "lib": "graveyard-kit/hay-bale",
+     "count": 3,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -5.5,
+      7
+     ],
+     "yaw": 0,
+     "step": [
+      1.3,
+      0.3
+     ]
+    },
+    {
+     "lib": "nature-kit/fence_simple",
+     "count": 5,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      -12,
+      9
+     ],
+     "yaw": 0,
+     "step": [
+      1.75,
+      0
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 3,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -12,
+      26
+     ],
+     "yaw": 0,
+     "step": [
+      10,
+      4
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_default",
+     "count": 2,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      13,
+      20
+     ],
+     "yaw": 0,
+     "step": [
+      -3,
+      8
+     ]
+    }
+   ]
+  },
+  "lowpoly_city": {
+   "label": "a colourful low-poly city with towers, streets, cars and trees",
+   "terrain": "custom",
+   "ground": "stone",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "road",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         8,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         -9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         8,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         -5.1,
+         -9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         -5.1,
+         9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         5.1,
+         -9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         5.1,
+         9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -16.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -12.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -9.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -5.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -2.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         1.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         5.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         8.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.14,
+     "layout": "near",
+     "at": [
+      0,
+      12
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "city-kit-commercial/building-skyscraper-a",
+     "count": 1,
+     "height": 28,
+     "layout": "near",
+     "at": [
+      -14,
+      26
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "city-kit-commercial/building-skyscraper-c",
+     "count": 1,
+     "height": 34,
+     "layout": "near",
+     "at": [
+      14,
+      30
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "city-kit-commercial/building-skyscraper-e",
+     "count": 1,
+     "height": 24,
+     "layout": "near",
+     "at": [
+      -16,
+      44
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "city-kit-commercial/building-a",
+     "count": 1,
+     "height": 12,
+     "layout": "near",
+     "at": [
+      -10,
+      10
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "city-kit-commercial/building-e",
+     "count": 1,
+     "height": 14,
+     "layout": "near",
+     "at": [
+      10.5,
+      12
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "city-kit-suburban/building-type-a",
+     "count": 1,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -10,
+      22
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "car-kit/taxi",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      1.8,
+      10
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/sedan",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      -1.8,
+      18
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 3,
+     "height": 4.6,
+     "layout": "near",
+     "at": [
+      -5,
+      7
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      9
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_default",
+     "count": 3,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      5.8,
+      12
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      9
+     ]
+    }
+   ]
+  },
+  "cyberpunk_alley": {
+   "label": "a neon-lit cyberpunk alley at night with signs, pipes, steam, wet ground and tall dark towers",
+   "terrain": "custom",
+   "ground": "asphalt",
+   "relief": "flat",
+   "water": "none",
+   "time": "night",
+   "weather": "rain",
+   "base": [
+    {
+     "asm": {
+      "name": "alley floor",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         6,
+         20,
+         0.04
+        ],
+        "pos": [
+         0,
+         0,
+         0.02
+        ],
+        "color": [
+         0.07,
+         0.07,
+         0.1
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.04,
+     "layout": "near",
+     "at": [
+      0,
+      16
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-ultimatetexturedbuildings/4Story_Mat",
+     "count": 1,
+     "height": 16,
+     "layout": "near",
+     "at": [
+      -7.2,
+      12
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "q-ultimatetexturedbuildings/6Story_Stack_Mat",
+     "count": 1,
+     "height": 24,
+     "layout": "near",
+     "at": [
+      7.2,
+      15
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "q-ultimatetexturedbuildings/4Story_Center_Mat",
+     "count": 1,
+     "height": 18,
+     "layout": "near",
+     "at": [
+      -7.4,
+      28
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "q-ultimatetexturedbuildings/3Story_Small_Mat",
+     "count": 1,
+     "height": 11,
+     "layout": "near",
+     "at": [
+      7.2,
+      30
+     ],
+     "yaw": -90
+    },
+    {
+     "asm": {
+      "name": "pink neon",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.2,
+         0.12,
+         0.7
+        ],
+        "pos": [
+         0,
+         0,
+         4.2
+        ],
+        "color": [
+         0.05,
+         0.05,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.0,
+         0.06,
+         0.5
+        ],
+        "pos": [
+         0,
+         -0.05,
+         4.2
+        ],
+        "color": [
+         1,
+         0.1,
+         0.7
+        ],
+        "glow": 9.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      -4.3,
+      9
+     ],
+     "yaw": 90
+    },
+    {
+     "asm": {
+      "name": "cyan neon",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         2.8,
+         0.12,
+         0.7
+        ],
+        "pos": [
+         0,
+         0,
+         5.6
+        ],
+        "color": [
+         0.05,
+         0.05,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.5999999999999996,
+         0.06,
+         0.5
+        ],
+        "pos": [
+         0,
+         -0.05,
+         5.6
+        ],
+        "color": [
+         0.1,
+         0.95,
+         1
+        ],
+        "glow": 9.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      4.3,
+      13
+     ],
+     "yaw": -90
+    },
+    {
+     "asm": {
+      "name": "yellow neon",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         0.12,
+         0.7
+        ],
+        "pos": [
+         0,
+         0,
+         3.4
+        ],
+        "color": [
+         0.05,
+         0.05,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.0,
+         0.06,
+         0.5
+        ],
+        "pos": [
+         0,
+         -0.05,
+         3.4
+        ],
+        "color": [
+         1,
+         0.8,
+         0.1
+        ],
+        "glow": 9.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      -4.2,
+      19
+     ],
+     "yaw": 90
+    },
+    {
+     "asm": {
+      "name": "violet neon",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.0,
+         0.12,
+         0.7
+        ],
+        "pos": [
+         0,
+         0,
+         6.4
+        ],
+        "color": [
+         0.05,
+         0.05,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.8,
+         0.06,
+         0.5
+        ],
+        "pos": [
+         0,
+         -0.05,
+         6.4
+        ],
+        "color": [
+         0.7,
+         0.2,
+         1
+        ],
+        "glow": 9.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      4.2,
+      23
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "q-cyberpunkgamekit/Light_Street_1",
+     "count": 3,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      -3.3,
+      5
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      9
+     ]
+    },
+    {
+     "lib": "q-cyberpunkgamekit/AC",
+     "count": 2,
+     "height": 1.4,
+     "layout": "near",
+     "at": [
+      -4.2,
+      6
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      8
+     ]
+    },
+    {
+     "lib": "q-cyberpunkgamekit/Pipe_1",
+     "count": 2,
+     "height": 4,
+     "layout": "near",
+     "at": [
+      4.2,
+      6
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      10
+     ]
+    },
+    {
+     "lib": "q-cyberpunkgamekit/TV_1",
+     "count": 1,
+     "height": 1.6,
+     "layout": "near",
+     "at": [
+      3.8,
+      7.5
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "city-kit-roads/dumpster",
+     "count": 1,
+     "height": 1.3,
+     "layout": "near",
+     "at": [
+      3.2,
+      9
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "steam vent",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.7,
+         0.7,
+         0.3
+        ],
+        "pos": [
+         0,
+         0,
+         0.15
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.22
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         1.2,
+         1.2,
+         1.8
+        ],
+        "pos": [
+         0,
+         0,
+         1.2
+        ],
+        "color": [
+         0.85,
+         0.88,
+         0.95
+        ],
+        "glow": 0.5
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.1,
+     "layout": "near",
+     "at": [
+      -2.6,
+      10
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "shop": {
+   "label": "a convenience store or shopping mall shop with shelves of goods, a counter, fridges and a neon sign",
+   "terrain": "office",
+   "base": [
+    {
+     "lib": "furniture-kit/bookcaseOpen",
+     "count": 3,
+     "height": 1.9,
+     "layout": "near",
+     "at": [
+      -2.4,
+      3.2
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      1.4
+     ]
+    },
+    {
+     "lib": "furniture-kit/bookcaseOpen",
+     "count": 3,
+     "height": 1.9,
+     "layout": "near",
+     "at": [
+      2.4,
+      3.2
+     ],
+     "yaw": 270,
+     "step": [
+      0,
+      1.4
+     ]
+    },
+    {
+     "lib": "furniture-kit/kitchenFridgeLarge",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      -3.1,
+      7.2
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/kitchenFridgeLarge",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      -1.9,
+      7.2
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/kitchenBar",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      2.6,
+      6.6
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "food-kit/pizza",
+     "count": 1,
+     "height": 0.08,
+     "layout": "near",
+     "at": [
+      2.3,
+      6.6
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "food-kit/cake-birthday",
+     "count": 1,
+     "height": 0.3,
+     "layout": "near",
+     "at": [
+      3.0,
+      6.6
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "open sign",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.4,
+         0.12,
+         0.7
+        ],
+        "pos": [
+         0,
+         0,
+         4.0
+        ],
+        "color": [
+         0.05,
+         0.05,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.1999999999999997,
+         0.06,
+         0.5
+        ],
+        "pos": [
+         0,
+         -0.05,
+         4.0
+        ],
+        "color": [
+         1,
+         0.3,
+         0.3
+        ],
+        "glow": 9.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      0,
+      7.4
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "q-scifiessentialskit/Prop_Crate",
+     "count": 2,
+     "height": 0.6,
+     "layout": "near",
+     "at": [
+      -0.9,
+      2.2
+     ],
+     "yaw": 20,
+     "step": [
+      1.0,
+      0
+     ]
+    }
+   ]
+  },
+  "countryside_road": {
+   "label": "a quiet countryside road between fields with a barn, fences, trees and hills",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "hills",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "road",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         6,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         -9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         6,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -16.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -12.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -9.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -5.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -2.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         1.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         5.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         8.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         12.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         15.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.07,
+     "layout": "near",
+     "at": [
+      0,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-farmbuildings/BigBarn",
+     "count": 1,
+     "height": 8,
+     "layout": "near",
+     "at": [
+      -16,
+      22
+     ],
+     "yaw": 80
+    },
+    {
+     "lib": "q-farmbuildings/Silo",
+     "count": 1,
+     "height": 10,
+     "layout": "near",
+     "at": [
+      -12,
+      30
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-farmbuildings/Windmill",
+     "count": 1,
+     "height": 12,
+     "layout": "near",
+     "at": [
+      18,
+      38
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/fence_simple",
+     "count": 12,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      -4.2,
+      4
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      3.2
+     ]
+    },
+    {
+     "lib": "nature-kit/fence_simple",
+     "count": 12,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      4.2,
+      4
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      3.2
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 4,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -8,
+      12
+     ],
+     "yaw": 0,
+     "step": [
+      -1,
+      10
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 3,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      9,
+      16
+     ],
+     "yaw": 0,
+     "step": [
+      1,
+      11
+     ]
+    },
+    {
+     "lib": "car-kit/truck",
+     "count": 1,
+     "height": 2.6,
+     "layout": "near",
+     "at": [
+      1.6,
+      20
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "highway": {
+   "label": "a wide multi-lane highway with cars, trucks, lamp posts, road signs and barriers",
+   "terrain": "custom",
+   "ground": "asphalt",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "highway",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         16,
+         20,
+         0.06
+        ],
+        "pos": [
+         0,
+         -10,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         16,
+         20,
+         0.06
+        ],
+        "pos": [
+         0,
+         10,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         -2.7,
+         -15.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         -2.7,
+         -7.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         -2.7,
+         0.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         -2.7,
+         7.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         2.7,
+         -15.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         2.7,
+         -7.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         2.7,
+         0.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.6,
+         0.01
+        ],
+        "pos": [
+         2.7,
+         7.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.25,
+         20,
+         0.02
+        ],
+        "pos": [
+         -7.6,
+         0,
+         0.07
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.25,
+         20,
+         0.02
+        ],
+        "pos": [
+         7.6,
+         0,
+         0.07
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.08,
+     "layout": "near",
+     "at": [
+      0,
+      14
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/sedan",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      -5.4,
+      12
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/truck",
+     "count": 1,
+     "height": 2.8,
+     "layout": "near",
+     "at": [
+      0,
+      22
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/taxi",
+     "count": 1,
+     "height": 1.5,
+     "layout": "near",
+     "at": [
+      5.4,
+      16
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "car-kit/suv",
+     "count": 1,
+     "height": 1.8,
+     "layout": "near",
+     "at": [
+      -5.4,
+      30
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "q-publictransport/Bus",
+     "count": 1,
+     "height": 3.2,
+     "layout": "near",
+     "at": [
+      5.4,
+      36
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 4,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      -9.5,
+      8
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      10
+     ]
+    },
+    {
+     "lib": "racing-kit/barrierWhite",
+     "count": 6,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      9.4,
+      6
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      6
+     ]
+    },
+    {
+     "lib": "city-kit-roads/road-sign-street",
+     "count": 1,
+     "height": 4,
+     "layout": "near",
+     "at": [
+      9.8,
+      20
+     ],
+     "yaw": -90
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 3,
+     "height": 8,
+     "layout": "near",
+     "at": [
+      -16,
+      14
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      16
+     ]
+    }
+   ]
+  },
+  "train_station": {
+   "label": "a train station with a platform, rails, a train, benches, lamps and a sign",
+   "terrain": "custom",
+   "ground": "stone",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "platform",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         8,
+         20,
+         0.6
+        ],
+        "pos": [
+         -6,
+         0,
+         0.3
+        ],
+        "color": [
+         0.62,
+         0.6,
+         0.58
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         8,
+         20,
+         0.02
+        ],
+        "pos": [
+         -6,
+         0,
+         0.61
+        ],
+        "color": [
+         0.9,
+         0.85,
+         0.3
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.62,
+     "layout": "near",
+     "at": [
+      0,
+      14
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "rails",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.14,
+         20,
+         0.1
+        ],
+        "pos": [
+         0.7,
+         0,
+         0.05
+        ],
+        "color": [
+         0.35,
+         0.35,
+         0.4
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.14,
+         20,
+         0.1
+        ],
+        "pos": [
+         2.2,
+         0,
+         0.05
+        ],
+        "color": [
+         0.35,
+         0.35,
+         0.4
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.14,
+         20,
+         0.1
+        ],
+        "pos": [
+         5.0,
+         0,
+         0.05
+        ],
+        "color": [
+         0.35,
+         0.35,
+         0.4
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.14,
+         20,
+         0.1
+        ],
+        "pos": [
+         6.5,
+         0,
+         0.05
+        ],
+        "color": [
+         0.35,
+         0.35,
+         0.4
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         1.45,
+         -16,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         1.45,
+         -10,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         1.45,
+         -4,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         1.45,
+         2,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         1.45,
+         8,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         1.45,
+         14,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         5.75,
+         -16,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         5.75,
+         -10,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         5.75,
+         -4,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         5.75,
+         2,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         5.75,
+         8,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2,
+         0.3,
+         0.08
+        ],
+        "pos": [
+         5.75,
+         14,
+         0.04
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.1,
+     "layout": "near",
+     "at": [
+      4,
+      14
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-modulartrain/HighSpeed_Front",
+     "count": 1,
+     "height": 4,
+     "layout": "near",
+     "at": [
+      3.6,
+      24
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "q-modulartrain/HighSpeed_Wagon",
+     "count": 1,
+     "height": 4,
+     "layout": "near",
+     "at": [
+      3.6,
+      36
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/bench",
+     "count": 2,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -3.2,
+      8
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      5
+     ]
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 3,
+     "height": 4.6,
+     "layout": "near",
+     "at": [
+      -6,
+      6
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      9
+     ]
+    },
+    {
+     "asm": {
+      "name": "station sign",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3,
+         0.12,
+         0.7
+        ],
+        "pos": [
+         0,
+         0,
+         3.2
+        ],
+        "color": [
+         0.1,
+         0.25,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.8,
+         0.06,
+         0.5
+        ],
+        "pos": [
+         0,
+         -0.05,
+         3.2
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 1.2
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.1,
+         0.1,
+         3
+        ],
+        "pos": [
+         -1.2,
+         0,
+         1.5
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.1,
+         0.1,
+         3
+        ],
+        "pos": [
+         1.2,
+         0,
+         1.5
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 3.55,
+     "layout": "near",
+     "at": [
+      -4.5,
+      11
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "bus_stop": {
+   "label": "a bus stop with a shelter, a bench, a bus, lamp posts and trees",
+   "terrain": "custom",
+   "ground": "stone",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "road",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         7,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         -9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         7,
+         18,
+         0.06
+        ],
+        "pos": [
+         0,
+         9,
+         0.03
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.23
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         -4.6,
+         -9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         -4.6,
+         9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         4.6,
+         -9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         18,
+         0.14
+        ],
+        "pos": [
+         4.6,
+         9,
+         0.07
+        ],
+        "color": [
+         0.74,
+         0.71,
+         0.66
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -16.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -12.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -9.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -5.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         -2.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         1.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         5.0,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         1.1,
+         0.01
+        ],
+        "pos": [
+         0,
+         8.5,
+         0.065
+        ],
+        "color": [
+         0.96,
+         0.9,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.14,
+     "layout": "near",
+     "at": [
+      0,
+      10
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "bus shelter",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.4,
+         0.1,
+         0.08
+        ],
+        "pos": [
+         0,
+         0,
+         2.5
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         2.5
+        ],
+        "pos": [
+         -1.6,
+         0,
+         1.25
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         2.5
+        ],
+        "pos": [
+         1.6,
+         0,
+         1.25
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.2,
+         0.05,
+         1.8
+        ],
+        "pos": [
+         0,
+         0.5,
+         1.3
+        ],
+        "color": [
+         0.7,
+         0.85,
+         0.95
+        ],
+        "glow": 0,
+        "glass": true
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.4,
+         1.1,
+         0.1
+        ],
+        "pos": [
+         0,
+         0.3,
+         2.55
+        ],
+        "color": [
+         0.2,
+         0.35,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.6,
+     "layout": "near",
+     "at": [
+      -4.6,
+      4.5
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "furniture-kit/bench",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -5.2,
+      4.5
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "q-publictransport/Bus",
+     "count": 1,
+     "height": 3.2,
+     "layout": "near",
+     "at": [
+      -1.8,
+      12
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-publictransport/TrafficSign1",
+     "count": 1,
+     "height": 3.0,
+     "layout": "near",
+     "at": [
+      -5.8,
+      7.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "racing-kit/lightPostModern",
+     "count": 1,
+     "height": 4.6,
+     "layout": "near",
+     "at": [
+      -6.2,
+      2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/tree_default",
+     "count": 2,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      -6.5,
+      10
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      10
+     ]
+    },
+    {
+     "lib": "city-kit-suburban/building-type-c",
+     "count": 1,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -12,
+      16
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "city-kit-commercial/building-c",
+     "count": 1,
+     "height": 12,
+     "layout": "near",
+     "at": [
+      10,
+      20
+     ],
+     "yaw": -90
+    }
+   ]
+  },
+  "school_hallway": {
+   "label": "a school hallway with rows of lockers, doors, benches and a trophy shelf",
+   "terrain": "office",
+   "base": [
+    {
+     "asm": {
+      "name": "lockers",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.6,
+         2.0
+        ],
+        "pos": [
+         -3.2,
+         0,
+         1.0
+        ],
+        "color": [
+         0.2,
+         0.45,
+         0.75
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.6,
+         2.0
+        ],
+        "pos": [
+         -2.25,
+         0,
+         1.0
+        ],
+        "color": [
+         0.2,
+         0.6,
+         0.45
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.6,
+         2.0
+        ],
+        "pos": [
+         -1.3000000000000003,
+         0,
+         1.0
+        ],
+        "color": [
+         0.8,
+         0.3,
+         0.25
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.6,
+         2.0
+        ],
+        "pos": [
+         -0.35000000000000053,
+         0,
+         1.0
+        ],
+        "color": [
+         0.2,
+         0.45,
+         0.75
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.6,
+         2.0
+        ],
+        "pos": [
+         0.5999999999999996,
+         0,
+         1.0
+        ],
+        "color": [
+         0.2,
+         0.6,
+         0.45
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.6,
+         2.0
+        ],
+        "pos": [
+         1.5499999999999998,
+         0,
+         1.0
+        ],
+        "color": [
+         0.8,
+         0.3,
+         0.25
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.6,
+         2.0
+        ],
+        "pos": [
+         2.499999999999999,
+         0,
+         1.0
+        ],
+        "color": [
+         0.2,
+         0.45,
+         0.75
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.02,
+         0.5
+        ],
+        "pos": [
+         -3.2,
+         -0.32,
+         1.4
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.02,
+         0.5
+        ],
+        "pos": [
+         -2.25,
+         -0.32,
+         1.4
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.02,
+         0.5
+        ],
+        "pos": [
+         -1.3000000000000003,
+         -0.32,
+         1.4
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.02,
+         0.5
+        ],
+        "pos": [
+         -0.35000000000000053,
+         -0.32,
+         1.4
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.02,
+         0.5
+        ],
+        "pos": [
+         0.5999999999999996,
+         -0.32,
+         1.4
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.02,
+         0.5
+        ],
+        "pos": [
+         1.5499999999999998,
+         -0.32,
+         1.4
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.05,
+         0.02,
+         0.5
+        ],
+        "pos": [
+         2.499999999999999,
+         -0.32,
+         1.4
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.9
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/doorway",
+     "count": 1,
+     "height": 2.4,
+     "layout": "near",
+     "at": [
+      -3.2,
+      6.9
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/bench",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      0,
+      4.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      3.2,
+      4.0
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/coatRackStanding",
+     "count": 1,
+     "height": 1.6,
+     "layout": "near",
+     "at": [
+      -3.1,
+      3.4
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "playground": {
+   "label": "a playground in a park with swings, a slide, a seesaw, a sandbox, benches and trees",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "swing set",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.14,
+         0.14,
+         3.2
+        ],
+        "pos": [
+         -1.8,
+         0,
+         1.6
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.14,
+         0.14,
+         3.2
+        ],
+        "pos": [
+         1.8,
+         0,
+         1.6
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.2,
+         0.16,
+         0.16
+        ],
+        "pos": [
+         0,
+         0,
+         3.2
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.6,
+         0.5,
+         0.08
+        ],
+        "pos": [
+         -0.7,
+         0,
+         0.5
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.6,
+         0.5,
+         0.08
+        ],
+        "pos": [
+         0.7,
+         0,
+         0.5
+        ],
+        "color": [
+         0.2,
+         0.45,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.02,
+         0.02,
+         2.7
+        ],
+        "pos": [
+         -0.7,
+         0,
+         1.85
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.02,
+         0.02,
+         2.7
+        ],
+        "pos": [
+         0.7,
+         0,
+         1.85
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 3.28,
+     "layout": "near",
+     "at": [
+      -4.5,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "slide",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         1.1,
+         3.2,
+         0.1
+        ],
+        "pos": [
+         0,
+         1.3,
+         1.1
+        ],
+        "color": [
+         0.9,
+         0.8,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         1.0,
+         1.0,
+         0.1
+        ],
+        "pos": [
+         0,
+         -0.7,
+         2.0
+        ],
+        "color": [
+         0.2,
+         0.45,
+         0.9
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         2.0
+        ],
+        "pos": [
+         -0.45,
+         -1.0,
+         1.0
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         2.0
+        ],
+        "pos": [
+         0.45,
+         -1.0,
+         1.0
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         2.0
+        ],
+        "pos": [
+         -0.45,
+         -0.4,
+         1.0
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         2.0
+        ],
+        "pos": [
+         0.45,
+         -0.4,
+         1.0
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.15
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.05,
+     "layout": "near",
+     "at": [
+      4.5,
+      9
+     ],
+     "yaw": 90
+    },
+    {
+     "asm": {
+      "name": "seesaw",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.4,
+         0.4,
+         0.1
+        ],
+        "pos": [
+         0,
+         0,
+         0.6
+        ],
+        "color": [
+         0.98,
+         0.8,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cone",
+        "size": [
+         0.5,
+         0.5,
+         0.5
+        ],
+        "pos": [
+         0,
+         0,
+         0.25
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.65,
+     "layout": "near",
+     "at": [
+      0,
+      11
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "sandbox",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3,
+         3,
+         0.3
+        ],
+        "pos": [
+         0,
+         0,
+         0.15
+        ],
+        "color": [
+         0.6,
+         0.4,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.7,
+         2.7,
+         0.32
+        ],
+        "pos": [
+         0,
+         0,
+         0.16
+        ],
+        "color": [
+         0.92,
+         0.82,
+         0.55
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.32,
+     "layout": "near",
+     "at": [
+      -5.5,
+      3.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/bench",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      5.5,
+      4
+     ],
+     "yaw": 270
+    },
+    {
+     "lib": "nature-kit/tree_oak",
+     "count": 3,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -11,
+      14
+     ],
+     "yaw": 0,
+     "step": [
+      10,
+      4
+     ]
+    },
+    {
+     "lib": "nature-kit/flower_redA",
+     "count": 4,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      8,
+      6
+     ],
+     "yaw": 0,
+     "step": [
+      0.5,
+      0.2
+     ]
+    },
+    {
+     "lib": "nature-kit/fence_simple",
+     "count": 12,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      -9.8,
+      22
+     ],
+     "yaw": 0,
+     "step": [
+      1.75,
+      0
+     ]
+    }
+   ]
+  },
+  "hospital": {
+   "label": "a hospital room with a bed, a heart monitor, an IV stand, a curtain and a window",
+   "terrain": "office",
+   "base": [
+    {
+     "lib": "furniture-kit/bedSingle",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      0,
+      5.8
+     ],
+     "yaw": 180
+    },
+    {
+     "asm": {
+      "name": "monitor",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.7,
+         0.4,
+         0.5
+        ],
+        "pos": [
+         0,
+         0,
+         1.5
+        ],
+        "color": [
+         0.1,
+         0.1,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.62,
+         0.02,
+         0.4
+        ],
+        "pos": [
+         0,
+         -0.2,
+         1.5
+        ],
+        "color": [
+         0.1,
+         0.95,
+         0.5
+        ],
+        "glow": 3.0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.06,
+         0.06,
+         1.2
+        ],
+        "pos": [
+         0,
+         0,
+         0.6
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.4,
+         0.4,
+         0.05
+        ],
+        "pos": [
+         0,
+         0,
+         0.03
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.75,
+     "layout": "near",
+     "at": [
+      2.0,
+      6.6
+     ],
+     "yaw": 180
+    },
+    {
+     "asm": {
+      "name": "iv stand",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.04,
+         0.04,
+         2.0
+        ],
+        "pos": [
+         0,
+         0,
+         1.0
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.5,
+         0.04,
+         0.04
+        ],
+        "pos": [
+         0,
+         0,
+         2.0
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.16,
+         0.1,
+         0.3
+        ],
+        "pos": [
+         0,
+         0,
+         1.8
+        ],
+        "color": [
+         0.85,
+         0.95,
+         1.0
+        ],
+        "glow": 0.6,
+        "glass": true
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.3,
+         0.3,
+         0.04
+        ],
+        "pos": [
+         0,
+         0,
+         0.02
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.02,
+     "layout": "near",
+     "at": [
+      -1.5,
+      6.2
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "red cross",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         1.2,
+         0.1,
+         0.36
+        ],
+        "pos": [
+         0,
+         0,
+         3.0
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.15
+        ],
+        "glow": 2.0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.36,
+         0.1,
+         1.2
+        ],
+        "pos": [
+         0,
+         0,
+         3.0
+        ],
+        "color": [
+         0.85,
+         0.15,
+         0.15
+        ],
+        "glow": 2.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/chair",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -2.6,
+      4.2
+     ],
+     "yaw": 70
+    },
+    {
+     "lib": "furniture-kit/cabinetBedDrawerTable",
+     "count": 1,
+     "height": 0.6,
+     "layout": "near",
+     "at": [
+      -1.5,
+      6.6
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      3.1,
+      3.2
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "office_cubicles": {
+   "label": "an open office with cubicles, desks, computers, a water cooler and plants",
+   "terrain": "office",
+   "base": [
+    {
+     "lib": "furniture-kit/desk",
+     "count": 2,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      -2.5,
+      3.8
+     ],
+     "yaw": 180,
+     "step": [
+      0,
+      2.2
+     ]
+    },
+    {
+     "lib": "furniture-kit/desk",
+     "count": 2,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      2.5,
+      3.8
+     ],
+     "yaw": 180,
+     "step": [
+      0,
+      2.2
+     ]
+    },
+    {
+     "lib": "furniture-kit/computerScreen",
+     "count": 2,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      -2.5,
+      3.8
+     ],
+     "yaw": 180,
+     "step": [
+      0,
+      2.2
+     ]
+    },
+    {
+     "lib": "furniture-kit/computerScreen",
+     "count": 2,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      2.5,
+      3.8
+     ],
+     "yaw": 180,
+     "step": [
+      0,
+      2.2
+     ]
+    },
+    {
+     "lib": "furniture-kit/chairDesk",
+     "count": 2,
+     "height": 0.95,
+     "layout": "near",
+     "at": [
+      -2.5,
+      3.0
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      2.2
+     ]
+    },
+    {
+     "lib": "furniture-kit/chairDesk",
+     "count": 2,
+     "height": 0.95,
+     "layout": "near",
+     "at": [
+      2.5,
+      3.0
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      2.2
+     ]
+    },
+    {
+     "asm": {
+      "name": "cubicle wall",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.08,
+         2.0,
+         1.4
+        ],
+        "pos": [
+         -1.2,
+         0,
+         0.7
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.08,
+         2.0,
+         1.4
+        ],
+        "pos": [
+         1.2,
+         0,
+         0.7
+        ],
+        "color": [
+         0.45,
+         0.5,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.4,
+     "layout": "near",
+     "at": [
+      0,
+      4.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      3.3,
+      6.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/bookcaseClosedWide",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      -3.3,
+      6.4
+     ],
+     "yaw": 180
+    }
+   ]
+  },
+  "boardroom": {
+   "label": "a boardroom with a long table, chairs, a screen and a window",
+   "terrain": "office",
+   "base": [
+    {
+     "asm": {
+      "name": "long table",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         4.4,
+         1.4,
+         0.1
+        ],
+        "pos": [
+         0,
+         0,
+         0.78
+        ],
+        "color": [
+         0.35,
+         0.22,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.2,
+         1.0,
+         0.75
+        ],
+        "pos": [
+         -1.8,
+         0,
+         0.38
+        ],
+        "color": [
+         0.2,
+         0.15,
+         0.1
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.2,
+         1.0,
+         0.75
+        ],
+        "pos": [
+         1.8,
+         0,
+         0.38
+        ],
+        "color": [
+         0.2,
+         0.15,
+         0.1
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.825,
+     "layout": "near",
+     "at": [
+      0,
+      4.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/chairModernCushion",
+     "count": 3,
+     "height": 0.95,
+     "layout": "near",
+     "at": [
+      -1.6,
+      3.4
+     ],
+     "yaw": 0,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/chairModernCushion",
+     "count": 3,
+     "height": 0.95,
+     "layout": "near",
+     "at": [
+      -1.6,
+      5.4
+     ],
+     "yaw": 180,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "asm": {
+      "name": "wall screen",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.2,
+         0.1,
+         1.8
+        ],
+        "pos": [
+         0,
+         0,
+         1.8
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         3.0,
+         0.05,
+         1.6
+        ],
+        "pos": [
+         0,
+         -0.05,
+         1.8
+        ],
+        "color": [
+         0.2,
+         0.55,
+         0.95
+        ],
+        "glow": 2.5
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.8,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/plantSmall1",
+     "count": 1,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      3.3,
+      6.2
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "courtroom": {
+   "label": "a courtroom with a judge bench, a witness stand, gallery benches, a flag and wood panelling",
+   "terrain": "office",
+   "base": [
+    {
+     "asm": {
+      "name": "judge bench",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         4.0,
+         1.2,
+         1.5
+        ],
+        "pos": [
+         0,
+         0,
+         0.75
+        ],
+        "color": [
+         0.3,
+         0.18,
+         0.09
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         4.2,
+         1.3,
+         0.1
+        ],
+        "pos": [
+         0,
+         0,
+         1.55
+        ],
+        "color": [
+         0.4,
+         0.25,
+         0.12
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.6,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/chairModernCushion",
+     "count": 1,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      0,
+      7.6
+     ],
+     "yaw": 180
+    },
+    {
+     "asm": {
+      "name": "witness stand",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         1.2,
+         1.0,
+         1.0
+        ],
+        "pos": [
+         0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.35,
+         0.2,
+         0.1
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         1.3,
+         1.1,
+         0.08
+        ],
+        "pos": [
+         0,
+         0,
+         1.04
+        ],
+        "color": [
+         0.45,
+         0.28,
+         0.14
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.08,
+     "layout": "near",
+     "at": [
+      -3.0,
+      5.8
+     ],
+     "yaw": 180
+    },
+    {
+     "asm": {
+      "name": "us flag",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.05,
+         0.05,
+         2.6
+        ],
+        "pos": [
+         0,
+         0,
+         1.3
+        ],
+        "color": [
+         0.6,
+         0.5,
+         0.2
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         1.0,
+         0.04,
+         0.7
+        ],
+        "pos": [
+         0.5,
+         0,
+         2.2
+        ],
+        "color": [
+         0.75,
+         0.1,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.4,
+         0.05,
+         0.35
+        ],
+        "pos": [
+         0.2,
+         -0.01,
+         2.38
+        ],
+        "color": [
+         0.1,
+         0.15,
+         0.55
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.6,
+     "layout": "near",
+     "at": [
+      2.9,
+      6.6
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/bench",
+     "count": 2,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      -1.8,
+      2.2
+     ],
+     "yaw": 0,
+     "step": [
+      3.6,
+      0
+     ]
+    },
+    {
+     "lib": "furniture-kit/desk",
+     "count": 1,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      -1.6,
+      4.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/desk",
+     "count": 1,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      1.6,
+      4.4
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "interrogation": {
+   "label": "an interrogation room with a bare table, two chairs, a hanging lamp and a dark one-way mirror",
+   "terrain": "office",
+   "time": "night",
+   "base": [
+    {
+     "asm": {
+      "name": "steel table",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         2.2,
+         1.0,
+         0.06
+        ],
+        "pos": [
+         0,
+         0,
+         0.76
+        ],
+        "color": [
+         0.5,
+         0.52,
+         0.56
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.74
+        ],
+        "pos": [
+         -0.9,
+         -0.4,
+         0.37
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.74
+        ],
+        "pos": [
+         0.9,
+         -0.4,
+         0.37
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.74
+        ],
+        "pos": [
+         -0.9,
+         0.4,
+         0.37
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.74
+        ],
+        "pos": [
+         0.9,
+         0.4,
+         0.37
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.79,
+     "layout": "near",
+     "at": [
+      0,
+      4.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/chair",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      0,
+      3.4
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "furniture-kit/chair",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      0,
+      5.4
+     ],
+     "yaw": 180
+    },
+    {
+     "asm": {
+      "name": "hanging lamp",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.02,
+         0.02,
+         1.2
+        ],
+        "pos": [
+         0,
+         0,
+         2.6
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cone",
+        "size": [
+         0.8,
+         0.8,
+         0.4
+        ],
+        "pos": [
+         0,
+         0,
+         1.9
+        ],
+        "color": [
+         0.2,
+         0.2,
+         0.22
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.3,
+         0.3,
+         0.3
+        ],
+        "pos": [
+         0,
+         0,
+         1.75
+        ],
+        "color": [
+         1,
+         0.9,
+         0.6
+        ],
+        "glow": 12.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.6,
+     "layout": "near",
+     "at": [
+      0,
+      4.4
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "one-way mirror",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         2.6,
+         0.1,
+         1.4
+        ],
+        "pos": [
+         0,
+         0,
+         1.6
+        ],
+        "color": [
+         0.05,
+         0.07,
+         0.1
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.8,
+         0.12,
+         0.06
+        ],
+        "pos": [
+         0,
+         0,
+         2.33
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.8,
+         0.12,
+         0.06
+        ],
+        "pos": [
+         0,
+         0,
+         0.87
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.52,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 180
+    }
+   ]
+  },
+  "war_zone": {
+   "label": "a ruined war zone with sandbags, tents, barrels, barbed fences, burning wrecks and smoke",
+   "terrain": "custom",
+   "ground": "dirt",
+   "relief": "hills",
+   "water": "none",
+   "weather": "fog",
+   "base": [
+    {
+     "asm": {
+      "name": "sandbags",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -1.4,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -0.44999999999999996,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         0.5,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         1.4499999999999997,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -1.4,
+         0.02,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -0.44999999999999996,
+         0.02,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         0.5,
+         0.02,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         1.4499999999999997,
+         0.02,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.74,
+     "layout": "near",
+     "at": [
+      -3.5,
+      6
+     ],
+     "yaw": 10
+    },
+    {
+     "asm": {
+      "name": "sandbags",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -1.4,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -0.44999999999999996,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         0.5,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         1.4499999999999997,
+         0,
+         0.19
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -1.4,
+         0,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         -0.44999999999999996,
+         0,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         0.5,
+         0,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.5,
+         0.38
+        ],
+        "pos": [
+         1.4499999999999997,
+         0,
+         0.55
+        ],
+        "color": [
+         0.62,
+         0.55,
+         0.38
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.74,
+     "layout": "near",
+     "at": [
+      4,
+      8
+     ],
+     "yaw": -10
+    },
+    {
+     "lib": "survival-kit/tent-canvas",
+     "count": 1,
+     "height": 3,
+     "layout": "near",
+     "at": [
+      -10,
+      14
+     ],
+     "yaw": 40
+    },
+    {
+     "lib": "survival-kit/tent-canvas",
+     "count": 1,
+     "height": 3,
+     "layout": "near",
+     "at": [
+      10,
+      16
+     ],
+     "yaw": -50
+    },
+    {
+     "lib": "pirate-kit/barrel",
+     "count": 3,
+     "height": 0.9,
+     "layout": "near",
+     "at": [
+      3,
+      4.5
+     ],
+     "yaw": 0,
+     "step": [
+      0.7,
+      0.3
+     ]
+    },
+    {
+     "lib": "survival-kit/fence-fortified",
+     "count": 3,
+     "height": 1.6,
+     "layout": "near",
+     "at": [
+      -9,
+      5
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      2.4
+     ]
+    },
+    {
+     "lib": "castle-kit/siege-catapult",
+     "count": 1,
+     "height": 3.5,
+     "layout": "near",
+     "at": [
+      -6,
+      22
+     ],
+     "yaw": 20
+    },
+    {
+     "lib": "castle-kit/flag-banner-long",
+     "count": 1,
+     "height": 4,
+     "layout": "near",
+     "at": [
+      7,
+      20
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "nature-kit/stump_old",
+     "count": 3,
+     "height": 0.8,
+     "layout": "near",
+     "at": [
+      -4,
+      12
+     ],
+     "yaw": 0,
+     "step": [
+      2.5,
+      1.5
+     ]
+    },
+    {
+     "lib": "q-desert/DeadTree",
+     "count": 2,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      12,
+      26
+     ],
+     "yaw": 0,
+     "step": [
+      -6,
+      6
+     ]
+    },
+    {
+     "lib": "car-kit/truck",
+     "count": 1,
+     "height": 2.6,
+     "layout": "near",
+     "at": [
+      8,
+      11
+     ],
+     "yaw": 130
+    }
+   ]
+  },
+  "throne_room": {
+   "label": "a medieval castle throne room with a golden throne, a red carpet, stone columns, banners and torches",
+   "terrain": "office",
+   "base": [
+    {
+     "asm": {
+      "name": "red carpet",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         1.8,
+         8,
+         0.03
+        ],
+        "pos": [
+         0,
+         0,
+         0.015
+        ],
+        "color": [
+         0.7,
+         0.1,
+         0.12
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         2.0,
+         8,
+         0.02
+        ],
+        "pos": [
+         0,
+         0,
+         0.01
+        ],
+        "color": [
+         0.9,
+         0.75,
+         0.2
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.03,
+     "layout": "near",
+     "at": [
+      0,
+      4.2
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "throne",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         1.3,
+         1.0,
+         0.5
+        ],
+        "pos": [
+         0,
+         0,
+         0.25
+        ],
+        "color": [
+         0.8,
+         0.62,
+         0.1
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         1.1,
+         0.2,
+         2.2
+        ],
+        "pos": [
+         0,
+         0.45,
+         1.1
+        ],
+        "color": [
+         0.8,
+         0.62,
+         0.1
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.2,
+         0.9,
+         0.8
+        ],
+        "pos": [
+         -0.6,
+         0,
+         0.9
+        ],
+        "color": [
+         0.75,
+         0.56,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.2,
+         0.9,
+         0.8
+        ],
+        "pos": [
+         0.6,
+         0,
+         0.9
+        ],
+        "color": [
+         0.75,
+         0.56,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cone",
+        "size": [
+         0.35,
+         0.35,
+         0.5
+        ],
+        "pos": [
+         0,
+         0.45,
+         2.4
+        ],
+        "color": [
+         0.85,
+         0.12,
+         0.15
+        ],
+        "glow": 0.5
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.65,
+     "layout": "near",
+     "at": [
+      0,
+      6.8
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "q-ultimatehomeinterior/Column_Round1",
+     "count": 2,
+     "height": 3.2,
+     "layout": "near",
+     "at": [
+      -3.1,
+      3.4
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      3.0
+     ]
+    },
+    {
+     "lib": "q-ultimatehomeinterior/Column_Round1",
+     "count": 2,
+     "height": 3.2,
+     "layout": "near",
+     "at": [
+      3.1,
+      3.4
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      3.0
+     ]
+    },
+    {
+     "lib": "castle-kit/flag-banner-long",
+     "count": 1,
+     "height": 3.4,
+     "layout": "near",
+     "at": [
+      -3.3,
+      6.8
+     ],
+     "yaw": 90
+    },
+    {
+     "lib": "castle-kit/flag-banner-long",
+     "count": 1,
+     "height": 3.4,
+     "layout": "near",
+     "at": [
+      3.3,
+      6.8
+     ],
+     "yaw": -90
+    },
+    {
+     "asm": {
+      "name": "torch",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.08,
+         0.08,
+         0.6
+        ],
+        "pos": [
+         0,
+         0,
+         0.3
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cone",
+        "size": [
+         0.3,
+         0.3,
+         0.5
+        ],
+        "pos": [
+         0,
+         0,
+         0.85
+        ],
+        "color": [
+         1,
+         0.5,
+         0.1
+        ],
+        "glow": 9.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      -3.2,
+      5.0
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "torch",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.08,
+         0.08,
+         0.6
+        ],
+        "pos": [
+         0,
+         0,
+         0.3
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cone",
+        "size": [
+         0.3,
+         0.3,
+         0.5
+        ],
+        "pos": [
+         0,
+         0,
+         0.85
+        ],
+        "color": [
+         1,
+         0.5,
+         0.1
+        ],
+        "glow": 9.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      3.2,
+      5.0
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "deep_forest": {
+   "label": "a deep forest with tall trees, ferns, mushrooms, logs, rocks and shafts of light",
+   "terrain": "custom",
+   "ground": "mud",
+   "relief": "hills",
+   "water": "none",
+   "weather": "fog",
+   "base": [
+    {
+     "lib": "q-ultimatenature/CommonTree_1",
+     "count": 5,
+     "height": 9,
+     "layout": "near",
+     "at": [
+      -6,
+      9
+     ],
+     "yaw": 0,
+     "step": [
+      -1.2,
+      5
+     ]
+    },
+    {
+     "lib": "q-ultimatenature/CommonTree_3",
+     "count": 5,
+     "height": 10,
+     "layout": "near",
+     "at": [
+      6.5,
+      10
+     ],
+     "yaw": 0,
+     "step": [
+      1.4,
+      5
+     ]
+    },
+    {
+     "lib": "q-ultimatenature/BirchTree_2",
+     "count": 3,
+     "height": 8,
+     "layout": "near",
+     "at": [
+      -3,
+      22
+     ],
+     "yaw": 0,
+     "step": [
+      3,
+      4
+     ]
+    },
+    {
+     "lib": "q-ultimatenature/Bush_1",
+     "count": 4,
+     "height": 1.3,
+     "layout": "near",
+     "at": [
+      -3.5,
+      6
+     ],
+     "yaw": 0,
+     "step": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "lib": "survival-kit/rock-a",
+     "count": 2,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      3.8,
+      4.5
+     ],
+     "yaw": 0,
+     "step": [
+      -6,
+      3
+     ]
+    },
+    {
+     "lib": "q-cubeworldkit/Mushroom",
+     "count": 3,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      -2,
+      3.5
+     ],
+     "yaw": 0,
+     "step": [
+      1.2,
+      0.6
+     ]
+    },
+    {
+     "lib": "nature-kit/log",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      2.8,
+      6
+     ],
+     "yaw": 20
+    },
+    {
+     "lib": "q-stylizednaturemegakit/Fern_1",
+     "count": 5,
+     "height": 0.7,
+     "layout": "near",
+     "at": [
+      0,
+      5
+     ],
+     "yaw": 0,
+     "step": [
+      1.0,
+      0.5
+     ]
+    }
+   ]
+  },
+  "beach": {
+   "label": "a tropical beach island with sand, palm trees, an umbrella, a boat, rocks and the sea",
+   "terrain": "custom",
+   "ground": "sand",
+   "relief": "flat",
+   "water": "sea",
+   "base": [
+    {
+     "lib": "q-desert/BigPalmTree",
+     "count": 1,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -7,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-desert/SmallPalmTree",
+     "count": 2,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      8,
+      10
+     ],
+     "yaw": 0,
+     "step": [
+      -3,
+      6
+     ]
+    },
+    {
+     "lib": "pirate-kit/boat-row-small",
+     "count": 1,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      5,
+      15
+     ],
+     "yaw": 30
+    },
+    {
+     "asm": {
+      "name": "beach umbrella",
+      "parts": [
+       {
+        "shape": "cylinder",
+        "size": [
+         0.05,
+         0.05,
+         2.2
+        ],
+        "pos": [
+         0,
+         0,
+         1.1
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cone",
+        "size": [
+         2.0,
+         2.0,
+         0.6
+        ],
+        "pos": [
+         0,
+         0,
+         2.4
+        ],
+        "color": [
+         0.95,
+         0.25,
+         0.25
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.7,
+     "layout": "near",
+     "at": [
+      -3.8,
+      5.0
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "towel",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         1.1,
+         2.0,
+         0.03
+        ],
+        "pos": [
+         0,
+         0,
+         0.015
+        ],
+        "color": [
+         0.2,
+         0.6,
+         0.9
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.03,
+     "layout": "near",
+     "at": [
+      -3.0,
+      4.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "survival-kit/rock-sand-a",
+     "count": 3,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      -9,
+      12
+     ],
+     "yaw": 0,
+     "step": [
+      3,
+      4
+     ]
+    },
+    {
+     "lib": "pirate-kit/chest",
+     "count": 1,
+     "height": 0.6,
+     "layout": "near",
+     "at": [
+      3.8,
+      4.0
+     ],
+     "yaw": 20
+    },
+    {
+     "lib": "nature-kit/plant_bush",
+     "count": 3,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      9,
+      7
+     ],
+     "yaw": 0,
+     "step": [
+      -1.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  "mountain_cliff": {
+   "label": "a rugged mountain cliffside with rock walls, pines, boulders, snow and a narrow path",
+   "terrain": "custom",
+   "ground": "rock",
+   "relief": "mountains",
+   "water": "none",
+   "base": [
+    {
+     "lib": "castle-kit/rocks-large",
+     "count": 3,
+     "height": 5,
+     "layout": "near",
+     "at": [
+      -9,
+      9
+     ],
+     "yaw": 0,
+     "step": [
+      3,
+      3
+     ]
+    },
+    {
+     "lib": "survival-kit/rock-b",
+     "count": 3,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      5,
+      6
+     ],
+     "yaw": 0,
+     "step": [
+      3,
+      4
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_pineTallA",
+     "count": 4,
+     "height": 9,
+     "layout": "near",
+     "at": [
+      -7,
+      14
+     ],
+     "yaw": 0,
+     "step": [
+      3.5,
+      4
+     ]
+    },
+    {
+     "lib": "nature-kit/tree_pineTallA",
+     "count": 3,
+     "height": 9,
+     "layout": "near",
+     "at": [
+      8,
+      16
+     ],
+     "yaw": 0,
+     "step": [
+      -3,
+      5
+     ]
+    },
+    {
+     "asm": {
+      "name": "wooden fence",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         5,
+         0.1,
+         0.1
+        ],
+        "pos": [
+         0,
+         0,
+         0.9
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         5,
+         0.1,
+         0.1
+        ],
+        "pos": [
+         0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1
+        ],
+        "pos": [
+         -2.4,
+         0,
+         0.5
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1
+        ],
+        "pos": [
+         -1.2,
+         0,
+         0.5
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1
+        ],
+        "pos": [
+         0.0,
+         0,
+         0.5
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1
+        ],
+        "pos": [
+         1.1999999999999997,
+         0,
+         0.5
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1
+        ],
+        "pos": [
+         2.4,
+         0,
+         0.5
+        ],
+        "color": [
+         0.5,
+         0.33,
+         0.18
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      -3.6,
+      4.0
+     ],
+     "yaw": 90
+    },
+    {
+     "asm": {
+      "name": "cliff edge",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         16,
+         3,
+         4
+        ],
+        "pos": [
+         0,
+         0,
+         2
+        ],
+        "color": [
+         0.45,
+         0.42,
+         0.4
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 4.0,
+     "layout": "near",
+     "at": [
+      0,
+      28
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "desert_canyon": {
+   "label": "a desert canyon with red rock walls, cacti, dunes, bones and a pyramid on the horizon",
+   "terrain": "custom",
+   "ground": "sand",
+   "relief": "canyon",
+   "water": "none",
+   "base": [
+    {
+     "lib": "q-desert/Cactus",
+     "count": 3,
+     "height": 3,
+     "layout": "near",
+     "at": [
+      -4,
+      7
+     ],
+     "yaw": 0,
+     "step": [
+      3.5,
+      3
+     ]
+    },
+    {
+     "lib": "q-desert/Cactus2",
+     "count": 2,
+     "height": 2.5,
+     "layout": "near",
+     "at": [
+      6,
+      10
+     ],
+     "yaw": 0,
+     "step": [
+      -3,
+      5
+     ]
+    },
+    {
+     "lib": "q-desert/Bones",
+     "count": 1,
+     "height": 0.6,
+     "layout": "near",
+     "at": [
+      2.4,
+      4.2
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-desert/Skull",
+     "count": 1,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      -2.6,
+      3.8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-desert/DeadTree",
+     "count": 2,
+     "height": 4.5,
+     "layout": "near",
+     "at": [
+      -8,
+      14
+     ],
+     "yaw": 0,
+     "step": [
+      14,
+      6
+     ]
+    },
+    {
+     "lib": "survival-kit/rock-sand-b",
+     "count": 3,
+     "height": 2.5,
+     "layout": "near",
+     "at": [
+      -9,
+      10
+     ],
+     "yaw": 0,
+     "step": [
+      3,
+      4
+     ]
+    },
+    {
+     "lib": "q-desert/Pyramid",
+     "count": 1,
+     "height": 18,
+     "layout": "near",
+     "at": [
+      14,
+      55
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "q-desert/Monument",
+     "count": 1,
+     "height": 7,
+     "layout": "near",
+     "at": [
+      -12,
+      34
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "space_station": {
+   "label": "a space station interior with metal floor panels, computer consoles, display walls, pipes and a window onto a planet",
+   "terrain": "office",
+   "time": "night",
+   "base": [
+    {
+     "lib": "space-station-kit/computer-wide",
+     "count": 1,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      -2.2,
+      6.4
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "space-station-kit/computer-system",
+     "count": 1,
+     "height": 1.4,
+     "layout": "near",
+     "at": [
+      2.2,
+      6.4
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "space-station-kit/display-wall-wide",
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "space-station-kit/chair-armrest-headrest",
+     "count": 1,
+     "height": 1.1,
+     "layout": "near",
+     "at": [
+      0,
+      5.0
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "space-station-kit/pipe-ring-colored",
+     "count": 2,
+     "height": 2.4,
+     "layout": "near",
+     "at": [
+      -3.2,
+      4.0
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      2.8
+     ]
+    },
+    {
+     "lib": "space-station-kit/container-tall",
+     "count": 2,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      3.2,
+      3.6
+     ],
+     "yaw": 0,
+     "step": [
+      0,
+      2.2
+     ]
+    },
+    {
+     "lib": "space-station-kit/table-display-planet",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      0,
+      3.0
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "planet window",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         3.4,
+         0.12,
+         2.0
+        ],
+        "pos": [
+         0,
+         0,
+         1.5
+        ],
+        "color": [
+         0.02,
+         0.03,
+         0.08
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         1.4,
+         0.1,
+         1.4
+        ],
+        "pos": [
+         0.4,
+         -0.1,
+         1.5
+        ],
+        "color": [
+         0.2,
+         0.5,
+         0.95
+        ],
+        "glow": 2.5
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.5,
+         0.1,
+         0.5
+        ],
+        "pos": [
+         -0.9,
+         -0.1,
+         1.9
+        ],
+        "color": [
+         0.9,
+         0.85,
+         0.7
+        ],
+        "glow": 3.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.0,
+     "layout": "near",
+     "at": [
+      -0.5,
+      7.2
+     ],
+     "yaw": 180
+    }
+   ]
+  },
+  "alien_planet": {
+   "label": "an alien planet with purple rock, glowing crystals, strange plants, a crashed spaceship and two moons",
+   "terrain": "custom",
+   "ground": "rock",
+   "relief": "dunes",
+   "water": "none",
+   "time": "dusk",
+   "base": [
+    {
+     "lib": "q-ultimaterpg/Crystal1",
+     "count": 3,
+     "height": 3,
+     "layout": "near",
+     "at": [
+      -5,
+      8
+     ],
+     "yaw": 0,
+     "step": [
+      2.6,
+      3
+     ]
+    },
+    {
+     "lib": "q-ultimaterpg/Crystal3",
+     "count": 3,
+     "height": 2.2,
+     "layout": "near",
+     "at": [
+      6,
+      10
+     ],
+     "yaw": 0,
+     "step": [
+      -2.6,
+      2
+     ]
+    },
+    {
+     "lib": "q-cubeworldkit/Crystal_Big",
+     "count": 2,
+     "height": 3.5,
+     "layout": "near",
+     "at": [
+      -9,
+      16
+     ],
+     "yaw": 0,
+     "step": [
+      14,
+      4
+     ]
+    },
+    {
+     "lib": "q-ultimatenature/Cactus_3",
+     "count": 2,
+     "height": 3,
+     "layout": "near",
+     "at": [
+      4,
+      5
+     ],
+     "yaw": 0,
+     "step": [
+      -8,
+      8
+     ]
+    },
+    {
+     "lib": "space-kit/craft_speederA",
+     "count": 1,
+     "height": 3,
+     "layout": "near",
+     "at": [
+      8,
+      22
+     ],
+     "yaw": 150
+    },
+    {
+     "lib": "q-modularscifimegakit/Alien_Cyclop",
+     "count": 1,
+     "height": 2.2,
+     "layout": "near",
+     "at": [
+      -3,
+      14
+     ],
+     "yaw": 180
+    },
+    {
+     "asm": {
+      "name": "moons",
+      "parts": [
+       {
+        "shape": "sphere",
+        "size": [
+         6,
+         1,
+         6
+        ],
+        "pos": [
+         -6,
+         0,
+         14
+        ],
+        "color": [
+         0.85,
+         0.8,
+         0.95
+        ],
+        "glow": 3.0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         3,
+         1,
+         3
+        ],
+        "pos": [
+         6,
+         0,
+         10
+        ],
+        "color": [
+         0.95,
+         0.6,
+         0.5
+        ],
+        "glow": 3.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 8.5,
+     "layout": "near",
+     "at": [
+      0,
+      90
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "haunted_house": {
+   "label": "a haunted abandoned house at night with a graveyard, broken fences, dead trees, fog and glowing windows",
+   "terrain": "custom",
+   "ground": "dirt",
+   "relief": "flat",
+   "water": "none",
+   "time": "night",
+   "weather": "fog",
+   "base": [
+    {
+     "lib": "city-kit-suburban/building-type-b",
+     "count": 1,
+     "height": 9,
+     "layout": "near",
+     "at": [
+      0,
+      24
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "window glow",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.1,
+         1.2
+        ],
+        "pos": [
+         -1.6,
+         0,
+         3.2
+        ],
+        "color": [
+         1,
+         0.65,
+         0.15
+        ],
+        "glow": 5.0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.9,
+         0.1,
+         1.2
+        ],
+        "pos": [
+         1.6,
+         0,
+         3.2
+        ],
+        "color": [
+         1,
+         0.65,
+         0.15
+        ],
+        "glow": 5.0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      0,
+      17.8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "graveyard-kit/gravestone-cross",
+     "count": 4,
+     "height": 1.4,
+     "layout": "near",
+     "at": [
+      -5,
+      7
+     ],
+     "yaw": 0,
+     "step": [
+      2.6,
+      1.3
+     ]
+    },
+    {
+     "lib": "graveyard-kit/gravestone-round",
+     "count": 3,
+     "height": 1.2,
+     "layout": "near",
+     "at": [
+      6,
+      9
+     ],
+     "yaw": 0,
+     "step": [
+      -3,
+      2
+     ]
+    },
+    {
+     "lib": "graveyard-kit/iron-fence-damaged",
+     "count": 6,
+     "height": 1.6,
+     "layout": "near",
+     "at": [
+      -10,
+      12
+     ],
+     "yaw": 0,
+     "step": [
+      3.2,
+      0
+     ]
+    },
+    {
+     "lib": "graveyard-kit/lightpost-single",
+     "count": 1,
+     "height": 3.2,
+     "layout": "near",
+     "at": [
+      3.6,
+      8
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "graveyard-kit/crypt-small",
+     "count": 1,
+     "height": 3.5,
+     "layout": "near",
+     "at": [
+      -10,
+      20
+     ],
+     "yaw": 70
+    },
+    {
+     "lib": "q-ultimatenature/CommonTree_Dead_2",
+     "count": 2,
+     "height": 9,
+     "layout": "near",
+     "at": [
+      8,
+      16
+     ],
+     "yaw": 0,
+     "step": [
+      -16,
+      6
+     ]
+    },
+    {
+     "lib": "graveyard-kit/candle-multiple",
+     "count": 1,
+     "height": 0.5,
+     "layout": "near",
+     "at": [
+      2.2,
+      4.0
+     ],
+     "yaw": 0
+    }
+   ]
+  },
+  "gym": {
+   "label": "a gym with treadmills, weights, a bench press, mirrors and a boxing ring",
+   "terrain": "office",
+   "base": [
+    {
+     "asm": {
+      "name": "treadmill",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.8,
+         1.8,
+         0.2
+        ],
+        "pos": [
+         0,
+         0,
+         0.2
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.7,
+         1.5,
+         0.03
+        ],
+        "pos": [
+         0,
+         0,
+         0.32
+        ],
+        "color": [
+         0.3,
+         0.3,
+         0.35
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.1
+        ],
+        "pos": [
+         -0.35,
+         -0.7,
+         0.8
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         1.1
+        ],
+        "pos": [
+         0.35,
+         -0.7,
+         0.8
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.8,
+         0.15,
+         0.3
+        ],
+        "pos": [
+         0,
+         -0.7,
+         1.3
+        ],
+        "color": [
+         0.1,
+         0.5,
+         0.9
+        ],
+        "glow": 2.0
+       }
+      ]
+     },
+     "count": 2,
+     "height": 1.35,
+     "layout": "near",
+     "at": [
+      -2.6,
+      5.8
+     ],
+     "yaw": 180,
+     "step": [
+      1.6,
+      0
+     ]
+    },
+    {
+     "asm": {
+      "name": "barbell bench",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.5,
+         1.6,
+         0.15
+        ],
+        "pos": [
+         0,
+         0,
+         0.45
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.4
+        ],
+        "pos": [
+         -0.2,
+         -0.5,
+         0.2
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.1,
+         0.1,
+         0.4
+        ],
+        "pos": [
+         0.2,
+         -0.5,
+         0.2
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         1.8,
+         0.06,
+         0.06
+        ],
+        "pos": [
+         0,
+         -0.4,
+         1.0
+        ],
+        "color": [
+         0.55,
+         0.56,
+         0.6
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.5,
+         0.5,
+         0.1
+        ],
+        "pos": [
+         -0.8,
+         -0.4,
+         1.0
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         0.5,
+         0.5,
+         0.1
+        ],
+        "pos": [
+         0.8,
+         -0.4,
+         1.0
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.05,
+     "layout": "near",
+     "at": [
+      2.6,
+      3.4
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "dumbbell rack",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         2.4,
+         0.5,
+         0.08
+        ],
+        "pos": [
+         0,
+         0,
+         0.6
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.08,
+         0.4,
+         0.6
+        ],
+        "pos": [
+         -1.1,
+         0,
+         0.3
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.08,
+         0.4,
+         0.6
+        ],
+        "pos": [
+         1.1,
+         0,
+         0.3
+        ],
+        "color": [
+         0.12,
+         0.12,
+         0.15
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.18,
+         0.18,
+         0.18
+        ],
+        "pos": [
+         -0.9,
+         0,
+         0.75
+        ],
+        "color": [
+         0.15,
+         0.15,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.18,
+         0.18,
+         0.18
+        ],
+        "pos": [
+         -0.54,
+         0,
+         0.75
+        ],
+        "color": [
+         0.15,
+         0.15,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.18,
+         0.18,
+         0.18
+        ],
+        "pos": [
+         -0.18000000000000005,
+         0,
+         0.75
+        ],
+        "color": [
+         0.15,
+         0.15,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.18,
+         0.18,
+         0.18
+        ],
+        "pos": [
+         0.18000000000000005,
+         0,
+         0.75
+        ],
+        "color": [
+         0.15,
+         0.15,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.18,
+         0.18,
+         0.18
+        ],
+        "pos": [
+         0.5399999999999999,
+         0,
+         0.75
+        ],
+        "color": [
+         0.15,
+         0.15,
+         0.18
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "sphere",
+        "size": [
+         0.18,
+         0.18,
+         0.18
+        ],
+        "pos": [
+         0.8999999999999998,
+         0,
+         0.75
+        ],
+        "color": [
+         0.15,
+         0.15,
+         0.18
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.84,
+     "layout": "near",
+     "at": [
+      -3.0,
+      3.0
+     ],
+     "yaw": 90
+    },
+    {
+     "asm": {
+      "name": "wall mirror",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         5,
+         0.08,
+         1.8
+        ],
+        "pos": [
+         0,
+         0,
+         1.5
+        ],
+        "color": [
+         0.75,
+         0.85,
+         0.95
+        ],
+        "glow": 0.6
+       }
+      ]
+     },
+     "count": 1,
+     "height": 1.8,
+     "layout": "near",
+     "at": [
+      0,
+      7.0
+     ],
+     "yaw": 180
+    },
+    {
+     "lib": "furniture-kit/benchCushion",
+     "count": 1,
+     "height": 1.0,
+     "layout": "near",
+     "at": [
+      3.1,
+      6.2
+     ],
+     "yaw": 180
+    }
+   ]
+  },
+  "stadium": {
+   "label": "a sports stadium with a grass pitch, white lines, goals, stands full of seats and floodlights",
+   "terrain": "custom",
+   "ground": "grass",
+   "relief": "flat",
+   "water": "none",
+   "base": [
+    {
+     "asm": {
+      "name": "pitch lines",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         20,
+         0.12,
+         0.02
+        ],
+        "pos": [
+         0,
+         0,
+         0.01
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.12,
+         20,
+         0.02
+        ],
+        "pos": [
+         0,
+         0,
+         0.01
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         8,
+         0.12,
+         0.02
+        ],
+        "pos": [
+         0,
+         14,
+         0.01
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.12,
+         3.5,
+         0.02
+        ],
+        "pos": [
+         -4,
+         12.3,
+         0.01
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.12,
+         3.5,
+         0.02
+        ],
+        "pos": [
+         4,
+         12.3,
+         0.01
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "cylinder",
+        "size": [
+         5,
+         5,
+         0.02
+        ],
+        "pos": [
+         0,
+         0,
+         0.015
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       }
+      ]
+     },
+     "count": 1,
+     "height": 0.025,
+     "layout": "near",
+     "at": [
+      0,
+      6
+     ],
+     "yaw": 0
+    },
+    {
+     "asm": {
+      "name": "goal",
+      "parts": [
+       {
+        "shape": "box",
+        "size": [
+         0.12,
+         0.12,
+         2.4
+        ],
+        "pos": [
+         -3.6,
+         0,
+         1.2
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         0.12,
+         0.12,
+         2.4
+        ],
+        "pos": [
+         3.6,
+         0,
+         1.2
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         7.2,
+         0.12,
+         0.12
+        ],
+        "pos": [
+         0,
+         0,
+         2.4
+        ],
+        "color": [
+         0.95,
+         0.95,
+         0.97
+        ],
+        "glow": 0
+       },
+       {
+        "shape": "box",
+        "size": [
+         7.2,
+         1.6,
+         0.02
+        ],
+        "pos": [
+         0,
+         0.8,
+         1.2
+        ],
+        "color": [
+         0.9,
+         0.9,
+         0.92
+        ],
+        "glow": 0,
+        "glass": true
+       }
+      ]
+     },
+     "count": 1,
+     "height": 2.46,
+     "layout": "near",
+     "at": [
+      0,
+      24
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "racing-kit/grandStand",
+     "count": 3,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      -18,
+      14
+     ],
+     "yaw": 90,
+     "step": [
+      0,
+      11
+     ]
+    },
+    {
+     "lib": "racing-kit/grandStand",
+     "count": 3,
+     "height": 6,
+     "layout": "near",
+     "at": [
+      18,
+      14
+     ],
+     "yaw": -90,
+     "step": [
+      0,
+      11
+     ]
+    },
+    {
+     "lib": "racing-kit/grandStandCovered",
+     "count": 1,
+     "height": 8,
+     "layout": "near",
+     "at": [
+      0,
+      46
+     ],
+     "yaw": 0
+    },
+    {
+     "lib": "racing-kit/lightPostLarge",
+     "count": 2,
+     "height": 14,
+     "layout": "near",
+     "at": [
+      -14,
+      24
+     ],
+     "yaw": 0,
+     "step": [
+      28,
+      0
+     ]
+    },
+    {
+     "lib": "racing-kit/flagCheckers",
+     "count": 1,
+     "height": 3,
+     "layout": "near",
+     "at": [
+      -6,
+      18
+     ],
+     "yaw": 0
+    }
+   ]
   }
  }
 }

@@ -38,6 +38,8 @@ def resolve(spec):
     out['terrain'] = r['terrain']
     for k in ('ground', 'relief', 'water'):
         if k in r: out[k] = r[k]
+    for k in ('time', 'weather'):   # a cyberpunk alley is a night scene, a haunted house is foggy: the recipe decides
+        if k in r: out[k] = r[k]
     out['dressing'] = list(r['base']) + list(spec.get('dressing', []))
     return out
 
@@ -101,7 +103,7 @@ def _size_layout(d, where):
     if isinstance(h, bool) or not isinstance(h, (int, float)) or not 0.02 <= h <= 60: raise PlaceError(f'{where}: height must be 0.02-60 metres')
     for key in ('at', 'step'):
         v = d.get(key)
-        if v is not None and not (isinstance(v, list) and len(v) == 2 and all(isinstance(x, (int, float)) and not isinstance(x, bool) and abs(x) <= 60 for x in v)): raise PlaceError(f'{where}: {key} needs [x, y] metres')
+        if v is not None and not (isinstance(v, list) and len(v) == 2 and all(isinstance(x, (int, float)) and not isinstance(x, bool) and abs(x) <= 150 for x in v)): raise PlaceError(f'{where}: {key} needs [x, y] metres')
     if d.get('yaw') is not None and (isinstance(d['yaw'], bool) or not isinstance(d['yaw'], (int, float)) or abs(d['yaw']) > 720): raise PlaceError(f'{where}: bad yaw')
     if d.get('layout', 'near') not in LAYOUTS: raise PlaceError(f'{where}: layout must be one of {LAYOUTS}')
 
