@@ -9,6 +9,9 @@ from set_detail import material, cube, rope
 _OUTLINE = None
 
 
+# Trouser colours for the benchmark cast: denim, charcoal, khaki, black, deep olive. Picked per character, never the same as a bright shirt.
+TROUSERS=[(.12,.19,.4),(.2,.21,.25),(.42,.35,.24),(.1,.1,.12),(.26,.3,.2)]
+
 def outline_material():
     """Inverted-hull ink line: black on the shell's back faces, transparent on its front faces."""
     global _OUTLINE
@@ -27,7 +30,7 @@ def outline(o, width=0.014):
     for m in list(hull.modifiers): hull.modifiers.remove(m)
     bpy.context.collection.objects.link(hull)
     for poly in hull.data.polygons: poly.flip()
-    d = hull.modifiers.new('grow', 'DISPLACE'); d.strength = -width / max(min(o.scale), 1e-3); d.mid_level = 0
+    d = hull.modifiers.new('grow', 'DISPLACE'); d.strength = -width / (max(min(o.scale), 1e-3) * (o.get('girth', .021) / .021)); d.mid_level = 0   # limbs are scaled up to their girth later: keep the ink line the same thickness
     hull.parent = o; hull.location = (0, 0, 0); hull.rotation_euler = (0, 0, 0); hull.scale = (1, 1, 1); hull.matrix_parent_inverse.identity()
     hull.visible_shadow = False; hull.visible_diffuse = False; hull.visible_glossy = False; hull.visible_transmission = False; hull.visible_volume_scatter = False
     hull['ink_hull'] = True; o['ink_hull'] = True
@@ -105,7 +108,7 @@ def build_character(c,duration=3,fps=30):
     cloth=material(ident+' cloth',tuple(c.get('shirt',(.13,.36,.3))),.88)
     hatmat=material(ident+' hat',tuple(c.get('hat_color',(.32,.19,.06))),.85)
     trim=material(ident+' trim',tuple(c.get('trim',(.72,.55,.12))),.35)
-    pants=material(ident+' trousers',tuple(c.get('pants',(.42,.37,.2))),.85)
+    pants=material(ident+' trousers',tuple(c.get('pants') or TROUSERS[sum(map(ord,ident))%len(TROUSERS)]),.85)
     root=bpy.data.objects.new(ident,None);bpy.context.collection.objects.link(root)
     headroot=bpy.data.objects.new(ident+' head',None);bpy.context.collection.objects.link(headroot);headroot.parent=root
     style=c.get('style','benchmark');premium=style=='premium';bench=style=='benchmark'
@@ -256,22 +259,22 @@ def build_character(c,duration=3,fps=30):
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[];anchors={}
-    pants=material(ident+' trousers',tuple(c.get('pants',(.42,.37,.2))),.85);shoe=material(ident+' shoes',(.35,.2,.1),.55)
+    pants=material(ident+' trousers',tuple(c.get('pants') or TROUSERS[sum(map(ord,ident))%len(TROUSERS)]),.85);shoe=material(ident+' shoes',(.35,.2,.1),.55)
     for side in ['left','right']:
         for joint in ['elbow','wrist','knee','ankle']:
-            jm=black if not premium else (cloth if joint in ('elbow','wrist') else pants)
-            jr=(.052 if joint=='elbow' else .068 if joint=='wrist' else .062 if joint=='knee' else .058) if not premium else (.043 if joint=='elbow' else .036 if joint=='wrist' else .06 if joint=='knee' else .05)
+            jm=(black if joint in ('elbow','wrist') else pants) if not premium else (cloth if joint in ('elbow','wrist') else pants)
+            jr=(.052 if joint=='elbow' else .068 if joint=='wrist' else .08 if joint=='knee' else .072) if not premium else (.043 if joint=='elbow' else .036 if joint=='wrist' else .06 if joint=='knee' else .05)
             o=sphere(side+' '+joint,(0,0,0),(jr,)*3,jm);o.parent=root;joints[side+'_'+joint]=o
             if joint in ('wrist','ankle'):
                 anchor=bpy.data.objects.new(side+' '+joint+' attachment',None);bpy.context.collection.objects.link(anchor);anchor.parent=root;anchors[side+'_'+joint]=anchor
         for a,b in [('shoulder','elbow'),('elbow','wrist'),('hip','knee'),('knee','ankle')]:
             bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=.021,depth=1)
             o=bpy.context.active_object;o.name=side+' '+a+'-'+b
-            o.data.materials.append(black if not premium else (cloth if a in ('shoulder','elbow') else pants));o.parent=root
-            for pl in o.data.polygons:pl.use_smooth=True
+            o.data.materials.append((black if a in ('shoulder','elbow') else pants) if not premium else (cloth if a in ('shoulder','elbow') else pants));o.parent=root
+            for pl in o.data.polygons:pl.use_smooth=False   # smooth sides, flat end caps (smooth caps smear light along the limb)
             if premium:
                 o['girth']=(.043 if a=='shoulder' else .038) if a in ('shoulder','elbow') else (.06 if a=='hip' else .052)
-            else: o['girth']=.04 if a in ('shoulder','elbow') else .046   # sturdy limbs that fit the body, not thin sticks
+            else: o['girth']=.04 if a in ('shoulder','elbow') else .075 if a=='hip' else .066   # sturdy arms; trouser legs that taper from hip to ankle
             segments.append((o,side+'_'+a,side+'_'+b))
         if premium:
             sphere(side+' shoe',(0,-.07,.0),(.075,.14,.046),shoe).parent=anchors[side+'_ankle']
