@@ -300,7 +300,7 @@ HAT_COLORS = [[0.95, 0.55, 0.1], [0.2, 0.6, 0.9], [0.85, 0.2, 0.45], [0.3, 0.75,
 PROP_MODEL = {'barrel': ('pirate-kit/barrel', .9), 'oil_jar': ('pirate-kit/barrel', .8), 'pot': ('pirate-kit/barrel', .6), 'chest': ('pirate-kit/chest', .7),
               'coins': ('pirate-kit/chest', .6), 'gold_piece': ('pirate-kit/chest', .6), 'cannon': ('pirate-kit/cannon', 1.0), 'cart': ('q-medievalvillage/Cart', 1.6),
               'lantern': ('fantasy-town-kit/lantern', .7), 'books': ('furniture-kit/books', .35), 'bottle': ('pirate-kit/bottle', .4), 'flask': ('pirate-kit/bottle', .4),
-              'pickaxe': ('pirate-kit/tool-shovel', 1.1), 'tree': ('q-stylizednaturemegakit/CommonTree_3', 5), 'house': ('q-medievalvillage/House_1', 5),
+              'pickaxe': ('pirate-kit/tool-shovel', 1.1), 'tree': ('q-stylizednaturemegakit/CommonTree_3', 5), 'house': ('city-kit-suburban/building-type-b', 5),
               'rock': ('nature-kit/rock_largeA', 1.4), 'pirate_ship': ('pirate-kit/ship-large', 7), 'merchant_ship': ('pirate-kit/ship-large', 7),
               'rowboat': ('pirate-kit/crate', .7), 'bread': ('pirate-kit/crate-bottles', .6), 'tower': ('castle-kit/tower-square-base', 5),
               'flag': ('castle-kit/flag-banner-long', 2.2), 'clock': ('furniture-kit/sideTable', .8)}

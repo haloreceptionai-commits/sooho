@@ -254,8 +254,27 @@ def ground_detail(name):
         o=bpy.context.active_object;o.scale=(12,10,4+i%3);o.data.materials.append(hill)
 
 
+def modern_detail(name,black,glass):
+    """A clean modern room: no beams, studs or plank seams; a big window, a few framed pictures, a light skirting; then the kit's own furniture."""
+    white=material('modern white',(.95,.95,.93),.6)
+    cube('skirting',(0,8.72,.1),(12,.06,.2),white,.01)
+    cube('window pane',(2.8,8.74,2.7),(2.4,.03,2.0),glass,0)
+    for x in [1.6,4.0]:cube('window frame',(x,8.66,2.7),(.07,.1,2.1),white)
+    for z in [1.65,3.75]:cube('window frame',(2.8,8.66,z),(2.5,.1,.07),white)
+    for i,(x,c) in enumerate([(-3.4,(.95,.4,.3)),(-2.2,(.25,.6,.9)),(-1.0,(.98,.8,.2))]):
+        cube('picture frame',(x,8.74,2.7),(.9,.05,1.2),white,.01);cube('picture',(x,8.71,2.7),(.74,.02,1.04),material('picture '+str(i),c,.6),.005)
+    if name=='workshop':
+        cube('tool rack',(-3,8.55,1.4),(3.8,.12,1.1),material('modern shelf',(.8,.82,.85),.5))
+        for x in [-4.4,-3.7,-3,-2.3,-1.6]:cube('tool hooks',(x,8.45,1.7),(.04,.15,.13),black)
+    if name=='room':
+        cloth=material('cushion teal',(.1,.6,.62),.9)
+        for x in [-1.75,-.25]:
+            p=cube('sofa cushion',(x,4.86,.88),(.6,.23,.47),cloth,.1);p.rotation_euler.y=.12
+
+
 def indoor_detail(name,surface):
     wood=surface('wood',1.5);black=material('window iron',(.04,.055,.065));glass=material('blue window',(.24,.42,.65),.25,0,1.5)
+    if name!='saloon':return modern_detail(name,black,glass)
     # Repeated panel joints, ceiling beams and skirting carry visible scale.
     for x in range(-5,6):cube('ceiling beam',(x,4,4.48),(.12,12,.18),wood)
     for x in range(-5,6):cube('wall stud',(x,8.82,2.2),(.1,.12,4.4),wood)

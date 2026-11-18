@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import unittest
 from shot_schema import validate_shot
+import library
 
 HERE = Path(__file__).parent
 KITS = json.loads((HERE / 'set-kits.json').read_text())
@@ -26,7 +27,7 @@ class SetLibraryTests(unittest.TestCase):
         for name, kit in KITS.items():
             self.assertGreaterEqual(len(kit['models']), 5, name)
             for m in kit['models']:
-                self.assertIn(m['id'], ids)
+                self.assertTrue(m['id'] in ids or library.known(m['id']), m['id'])   # the offline kit manifest or the full CC0 library
                 self.assertGreater(m['height'], 0)
                 self.assertEqual(len(m['pos']), 3)
 
@@ -51,10 +52,16 @@ class SetLibraryTests(unittest.TestCase):
         self.assertNotIn('furniture-kit/desk', saloon_ids)
         self.assertIn('pirate-kit/bottle', saloon_ids)
 
+    def test_street_village_and_market_use_modern_buildings(self):
+        for name in ('village', 'street', 'market'):
+            ids = {m['id'] for m in KITS[name]['models']}
+            self.assertFalse(any(i in ids for i in ('q-medievalvillage/House_1', 'q-medievalvillage/House_2', 'q-medievalvillage/Inn', 'q-medievalvillage/Blacksmith')), name)
+            self.assertTrue(any(i.startswith(('city-kit-suburban/', 'city-kit-commercial/')) for i in ids), name)
+
     def test_outdoors_use_complete_buildings_not_partial_facades(self):
         for name in ['village','street','rail_yard']:
             ids={m['id'] for m in KITS[name]['models']}
-            self.assertIn('q-medievalvillage/House_1', ids)
+            self.assertTrue(any(i.startswith(('q-medievalvillage/House', 'city-kit-suburban/building')) for i in ids), name)   # village and street are modern now
             self.assertNotIn('fantasy-town-kit/wall-door', ids)
 
     def test_train_and_track_share_longitudinal_axis(self):

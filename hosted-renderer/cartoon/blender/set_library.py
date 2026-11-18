@@ -26,7 +26,28 @@ def asset_path(identity, kind, role=None):
     return str(ASSETS / matches[0]['path'])
 
 
+def plain(name, colour, rough=.8):
+    m = bpy.data.materials.get(name)
+    if m: return m
+    m = bpy.data.materials.new(name); m.use_nodes = True; bs = m.node_tree.nodes['Principled BSDF']
+    bs.inputs['Base Color'].default_value = (*colour, 1); bs.inputs['Roughness'].default_value = rough
+    return m
+
+
+def tile(name, a, b, metres=.6, rough=.3):
+    """Floor tiles: two close light tones in a chequer, so the floor reads as tile and not as planks."""
+    m = bpy.data.materials.get(name)
+    if m: return m
+    m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; bs = nt.nodes['Principled BSDF']; bs.inputs['Roughness'].default_value = rough
+    geo = nt.nodes.new('ShaderNodeNewGeometry'); chk = nt.nodes.new('ShaderNodeTexChecker'); chk.inputs['Color1'].default_value = (*a, 1); chk.inputs['Color2'].default_value = (*b, 1); chk.inputs['Scale'].default_value = 1.0 / metres
+    nt.links.new(geo.outputs['Position'], chk.inputs['Vector']); nt.links.new(chk.outputs['Color'], bs.inputs['Base Color'])
+    return m
+
+
 def surface(name, metres=2):
+    if name == 'asphalt': return plain('modern-asphalt', (.13, .135, .15), .9)
+    if name == 'pavement': return tile('modern-pavement', (.5, .49, .46), (.44, .43, .41), 1.2, .8)
+    if name == 'lawn': return plain('modern-lawn', (.2, .5, .14), .95)
     existing = bpy.data.materials.get(f'cc0-{name}-{metres}')
     if existing: return existing
     m = bpy.data.materials.new(f'cc0-{name}-{metres}'); m.use_nodes = True
@@ -188,11 +209,28 @@ def hide_engulfing(points):
 
 
 # Pastel paint for the walls of the older indoor kits (picked per kit), light floors and white ceilings: the brown wood and grey stone made every room dark.
+MODERN_WALLS = [(.94, .93, .9), (.86, .92, .95), (.95, .9, .86), (.9, .94, .9)]    # warm white, pale blue, blush, soft sage: painted plaster
 PASTELS = [(0.85, 2.3, 2.6), (2.6, 1.25, 1.15), (2.6, 2.3, 0.8), (1.15, 2.5, 1.35), (1.9, 1.3, 2.7)]    # multiplied onto the scanned texture: aqua, coral, lemon, mint, lavender
 
 
 def painted(kit, part, surface_name, metres=2):
     """A bright copy of a scanned surface for a room's floor, walls or ceiling (the texture detail stays, the colour is lifted)."""
+    if kit != 'saloon':   # modern rooms: tile floor, smooth white ceiling, plain painted walls and one brick feature wall (only the saloon keeps old planks and beams)
+        if 'floor' in part: return tile('modern-floor-tile', (.68, .67, .64), (.58, .57, .55), .6)
+        if 'ceiling' in part: return plain('modern-ceiling', (.97, .97, .96), .95)
+        if part == 'beam': return plain('modern-trim', (.95, .95, .93), .6)
+        if 'wall' in part and part != 'back wall': return plain('modern-plaster-' + kit, MODERN_WALLS[sum(map(ord, kit)) % len(MODERN_WALLS)], .9)
+        if part == 'back wall': surface_name = 'stone'; tint = (1.9, 1.55, 1.4)    # real brick, lifted and warm
+        else: tint = None
+        if tint:
+            key = f'modern-brick-{metres}'
+            if key in bpy.data.materials: return bpy.data.materials[key]
+            m = surface(surface_name, metres).copy(); m.name = key; nt = m.node_tree; bs = nt.nodes.get('Principled BSDF')
+            if bs is None: return m
+            mul = nt.nodes.new('ShaderNodeMixRGB'); mul.blend_type = 'MULTIPLY'; mul.inputs[0].default_value = 1.0; mul.inputs[2].default_value = (*tint, 1)
+            links = list(bs.inputs['Base Color'].links)
+            if links: nt.links.new(links[0].from_socket, mul.inputs[1])
+            nt.links.new(mul.outputs[0], bs.inputs['Base Color']); return m
     if 'floor' in part: tint = (2.2, 2.0, 1.75)          # pale, only slightly warm: a saturated honey floor read as orange
     elif 'ceiling' in part: tint = (3.4, 3.3, 3.1)
     elif part == 'beam': tint = (2.6, 2.5, 2.3)
