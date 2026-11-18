@@ -209,16 +209,6 @@ export function planScene(s: SceneInput, state: CameraState): DocBeat[] {
     at = p.range[1];
   }
   if (at < n) pushImages(at, n);
-  // long-form: every third held picture becomes an animated board (parchment or amber plaster) that carries the story's elements
-  if (long) {
-    let plain = 0;
-    spans.forEach((sp, k) => {
-      if (sp.data || sp.ai || k === 0) return;
-      if (plain++ % 3 !== 2) return;
-      sp.data = { style: (plain / 3) % 2 === 1 ? 'parchment' : 'plaster', seed: s.index * 7 + k };
-      sp.ai = { kind: 'board', w0: sp.range[0], w1: sp.range[1] } as AiBeat;
-    });
-  }
   // a card right at the start of a scene would hide its picture; keep at least one picture beat in the scene
   if (spans.length && spans.every(sp => sp.data)) spans[0] = { range: spans[0]!.range };
   // 4) beats: camera, transition, sound
@@ -287,6 +277,15 @@ export function planVideo(scenes: SceneInput[], opts: { pace?: 'long' | undefine
   const state = newCameraState();
   const out: DocBeat[] = [];
   scenes.forEach((sc, i) => out.push(...planScene({ ...sc, ...(opts.pace ? { pace: opts.pace } : {}), prev: i > 0 ? scenes[i - 1]!.text.split(/\s+/).slice(-14) : [], next: i + 1 < scenes.length ? scenes[i + 1]!.text.split(/\s+/).slice(0, 14) : [] }, state)));
+  if (opts.pace === 'long') {
+    // long-form: every third held picture (never in the cold open) becomes an animated board that carries the story's elements
+    let plain = 0;
+    return limitCards(out.map(b => {
+      if (b.visual.type !== 'image' || scenes[b.scene]?.cold) return b;
+      if (plain++ % 3 !== 2) return b;
+      return { ...b, visual: { type: 'card', card: 'board', data: { style: (plain / 3) % 2 === 1 ? 'parchment' : 'plaster', seed: b.scene * 7 + plain }, bg: b.visual.src } as BeatVisual, transition: 'cross' as Transition };
+    }));
+  }
   return limitCards(out);
 }
 
