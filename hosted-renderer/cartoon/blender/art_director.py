@@ -920,6 +920,19 @@ class Director:
             bd = backdrop_for(s.get('location'), self.cards)
             if bd: shot['backdrop'] = bd
         if crowd: shot['crowd'] = crowd
+        foot_n = 0
+        # footfall dust: a small puff where each foot lands, timed to the stride (walk 1.2 steps/s, run 2.8 steps/s)
+        for j, c in enumerate(cast):
+            if c.get('action') in ('walk', 'run') and os.environ.get('FOOTFALL_DUST', '1') != '0':
+                period = (1 / 1.2) if c['action'] == 'walk' else (1 / 2.8)
+                x0, y0 = c['pos']; x1, y1 = c.get('to', c['pos'])
+                k = 0; t = period * 0.5
+                while t < dur - 0.05 and foot_n < 24:
+                    u = t / max(dur, 1e-3)
+                    px, py = x0 + (x1 - x0) * u, y0 + (y1 - y0) * u
+                    effects.append({'kind': 'dust', 'pos': [round(px, 3), round(py, 3), 0.0], 'start': round(t, 3), 'scale': 0.35 if c['action'] == 'walk' else 0.55,
+                                    'seed': i * 31 + j * 7 + k})
+                    foot_n += 1; t += period; k += 1
         if effects: shot['effects'] = effects
         if prop_specs: shot['props'] = prop_specs
         if rigs: shot['rigs'] = rigs

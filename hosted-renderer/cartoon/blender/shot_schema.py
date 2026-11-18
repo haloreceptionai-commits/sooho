@@ -65,7 +65,7 @@ def validate_shot(s):
     ov = s.get('overlay', [])
     if not isinstance(ov, list) or len(ov) > 4 or any(x not in ('speed_lines', 'flash', 'light_leak', 'glitch', 'grain') for x in ov): raise ValueError('overlay: up to 4 of speed_lines flash light_leak glitch grain')
     fx = s.get('effects', [])
-    if not isinstance(fx, list) or len(fx) > 6: raise ValueError('up to 6 effects')
+    if not isinstance(fx, list) or len(fx) > 24: raise ValueError('up to 24 effects (footfall puffs included)')
     for e in fx:
         if set(e) - {'kind', 'pos', 'start', 'scale', 'seed'} or e.get('kind') not in EFFECT_KINDS: raise ValueError('unknown effect')
         _vec(e.get('pos'), 3, 'effect.pos')
