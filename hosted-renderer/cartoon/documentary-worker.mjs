@@ -7,6 +7,17 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
 import { platform, netFetch } from './platform.mjs';
+import { deflateSync } from 'node:zlib';
+
+/** A fully transparent PNG of the given size (used for a cutout whose picture is not available). */
+export function blankPng(w, h) {
+  const crc = (buf) => { let c = ~0; for (const byte of buf) { c ^= byte; for (let k = 0; k < 8; k++) c = c & 1 ? (c >>> 1) ^ 0xedb88320 : c >>> 1; } return (~c) >>> 0; };
+  const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type, 'ascii'), data]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([len, td, c]); };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+  const row = Buffer.alloc(1 + w * 4);
+  const raw = Buffer.concat(Array.from({ length: h }, () => row));
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
 
 const python = process.env.CARTOON_PYTHON || 'python3';
 const root = path.dirname(new URL(import.meta.url).pathname);
@@ -92,7 +103,14 @@ export async function runDocumentary(input) {
   let t0 = Date.now();
   await pool(m.images.map((p, i) => [p, i]), 8, async ([p, i]) => fetchTo(signed(p), path.join(dirs.img, `img-${i}.jpg`)));
   // cutouts of the people in the story (transparent pictures laid in front of the backgrounds)
-  await pool((m.cutouts || []).map((p, i) => [p, i]), 6, async ([p, i]) => fetchTo(signed(p), path.join(dirs.img, `cast-${i}.png`)));
+  // cutouts are optional: a person whose cutout has no grant is drawn as a transparent placeholder, so the video still renders and the
+  // cast indices stay the same (the failed render of this kind stopped on one missing cutout and sent every machine into a retry loop)
+  await pool((m.cutouts || []).map((p, i) => [p, i]), 6, async ([p, i]) => {
+    const file = path.join(dirs.img, `cast-${i}.png`);
+    if (input.signed?.[p]) return fetchTo(input.signed[p], file);
+    console.warn(JSON.stringify({ cutout_grant_missing: p }));
+    await writeFile(file, blankPng(64, 96));
+  });
   lap('pictures', t0);
 
   // 2) narration timing: each take is aligned once, by whichever machine claims it
