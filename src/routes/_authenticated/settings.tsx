@@ -9,6 +9,7 @@ const MODELS = [
 ] as const;
 import { toast } from "sonner";
 import { YouTubePanel } from "@/components/youtube";
+import { FacebookPanel } from "@/components/facebook";
 import { cleanName, NAME_MAX, renameWorkspace, useActiveWorkspace } from "@/lib/workspaces";
 import { actions, useStore, STYLES, DEFAULT_SETTINGS, type Settings } from "@/lib/store";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
@@ -64,6 +65,7 @@ function SettingsPage() {
         </Panel>
 
         <YouTubePanel />
+        <FacebookPanel />
 
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Azure OpenAI</h2>

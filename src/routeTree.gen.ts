@@ -20,6 +20,7 @@ import { Route as ApiPublicGenerationRecoveryRouteImport } from './routes/api/pu
 import { Route as ApiPublicGenerationWorkerRouteImport } from './routes/api/public/generation-worker'
 import { Route as ApiPublicRenderCallbackRouteImport } from './routes/api/public/render-callback'
 import { Route as ApiPublicRenderWatchdogRouteImport } from './routes/api/public/render-watchdog'
+import { Route as ApiPublicFacebookCallbackRouteImport } from './routes/api/public/facebook/callback'
 import { Route as ApiPublicYoutubeAutoReplyRouteImport } from './routes/api/public/youtube/auto-reply'
 import { Route as ApiPublicYoutubeCallbackRouteImport } from './routes/api/public/youtube/callback'
 
@@ -79,6 +80,12 @@ const ApiPublicRenderWatchdogRoute = ApiPublicRenderWatchdogRouteImport.update({
   path: '/api/public/render-watchdog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFacebookCallbackRoute =
+  ApiPublicFacebookCallbackRouteImport.update({
+    id: '/api/public/facebook/callback',
+    path: '/api/public/facebook/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicYoutubeAutoReplyRoute =
   ApiPublicYoutubeAutoReplyRouteImport.update({
     id: '/api/public/youtube/auto-reply',
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
   '/api/public/render-watchdog': typeof ApiPublicRenderWatchdogRoute
+  '/api/public/facebook/callback': typeof ApiPublicFacebookCallbackRoute
   '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
@@ -117,6 +125,7 @@ export interface FileRoutesByTo {
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
   '/api/public/render-watchdog': typeof ApiPublicRenderWatchdogRoute
+  '/api/public/facebook/callback': typeof ApiPublicFacebookCallbackRoute
   '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
@@ -133,6 +142,7 @@ export interface FileRoutesById {
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
   '/api/public/render-watchdog': typeof ApiPublicRenderWatchdogRoute
+  '/api/public/facebook/callback': typeof ApiPublicFacebookCallbackRoute
   '/api/public/youtube/auto-reply': typeof ApiPublicYoutubeAutoReplyRoute
   '/api/public/youtube/callback': typeof ApiPublicYoutubeCallbackRoute
 }
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
     | '/api/public/render-watchdog'
+    | '/api/public/facebook/callback'
     | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   fileRoutesByTo: FileRoutesByTo
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
     | '/api/public/render-watchdog'
+    | '/api/public/facebook/callback'
     | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   id:
@@ -178,6 +190,7 @@ export interface FileRouteTypes {
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
     | '/api/public/render-watchdog'
+    | '/api/public/facebook/callback'
     | '/api/public/youtube/auto-reply'
     | '/api/public/youtube/callback'
   fileRoutesById: FileRoutesById
@@ -189,6 +202,7 @@ export interface RootRouteChildren {
   ApiPublicGenerationWorkerRoute: typeof ApiPublicGenerationWorkerRoute
   ApiPublicRenderCallbackRoute: typeof ApiPublicRenderCallbackRoute
   ApiPublicRenderWatchdogRoute: typeof ApiPublicRenderWatchdogRoute
+  ApiPublicFacebookCallbackRoute: typeof ApiPublicFacebookCallbackRoute
   ApiPublicYoutubeAutoReplyRoute: typeof ApiPublicYoutubeAutoReplyRoute
   ApiPublicYoutubeCallbackRoute: typeof ApiPublicYoutubeCallbackRoute
 }
@@ -272,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRenderWatchdogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/facebook/callback': {
+      id: '/api/public/facebook/callback'
+      path: '/api/public/facebook/callback'
+      fullPath: '/api/public/facebook/callback'
+      preLoaderRoute: typeof ApiPublicFacebookCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/youtube/auto-reply': {
       id: '/api/public/youtube/auto-reply'
       path: '/api/public/youtube/auto-reply'
@@ -315,6 +336,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGenerationWorkerRoute: ApiPublicGenerationWorkerRoute,
   ApiPublicRenderCallbackRoute: ApiPublicRenderCallbackRoute,
   ApiPublicRenderWatchdogRoute: ApiPublicRenderWatchdogRoute,
+  ApiPublicFacebookCallbackRoute: ApiPublicFacebookCallbackRoute,
   ApiPublicYoutubeAutoReplyRoute: ApiPublicYoutubeAutoReplyRoute,
   ApiPublicYoutubeCallbackRoute: ApiPublicYoutubeCallbackRoute,
 }

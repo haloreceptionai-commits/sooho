@@ -190,6 +190,20 @@
       "when": 1794939402941,
       "tag": "0026_add_workspaces_and_workspace_youtube_connections",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1794991357925,
+      "tag": "0027_facebook_connections",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794991375761,
+      "tag": "0028_facebook_user_token",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.facebook_connections ADD COLUMN user_access_token text;

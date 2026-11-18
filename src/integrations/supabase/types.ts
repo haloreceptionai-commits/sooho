@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      facebook_connections: {
+        Row: {
+          created_at: string
+          page_access_token: string
+          page_id: string
+          page_name: string
+          updated_at: string
+          user_access_token: string | null
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          page_access_token: string
+          page_id: string
+          page_name: string
+          updated_at?: string
+          user_access_token?: string | null
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          page_access_token?: string
+          page_id?: string
+          page_name?: string
+          updated_at?: string
+          user_access_token?: string | null
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_connections_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generation_jobs: {
         Row: {
           created_at: string
