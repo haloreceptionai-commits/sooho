@@ -24,7 +24,21 @@ CASES = [
 ]
 
 
+# Explainer narration is full of words that look like actions but are not: a note of sound, the pitch of a tone, a sound wave, a single ball, a fish as food.
+ABSTRACT = ['but pea-less whistles make a steady note that gets lost', 'a single loose ball spins inside and', 'sway, and pitch and', 'loudness wobble',
+            'the pea does not make the note, a sharp', 'even without a pea, air hitting a sharp edge', 'makes a tone, like a kettle whistle', 'the sound wave travels through the air',
+            'the ball swirl nudges that jet', 'the cost of a fish rose last year', 'heat flows from the hot side to the cold side', 'the boiling point of water changes with height',
+            'the bow of the ship was damaged', 'there is a gap of two metres between the rails', 'the first bit of data arrived', 'he is mine, the story says', 'a type of steel',
+            'the spring of the year came late', 'hope was lost', 'a draft of cold air', 'the scale of the problem is huge', 'the sign on the road said stop', 'the bed of the river dried up']
+BAD = {'cook', 'eat', 'drink', 'drive', 'ride', 'type', 'write', 'read', 'phone', 'photo', 'dig', 'sweep', 'paint', 'fish', 'throw', 'kick', 'punch', 'knock', 'dance', 'wave', 'bow',
+       'climb', 'sleep', 'hug', 'jump', 'play', 'carry', 'swing', 'count', 'cry', 'laugh', 'look', 'chop', 'pour', 'pull', 'push'}
+
+
 class Lexicon(unittest.TestCase):
+    def test_explainer_words_that_look_like_actions_do_nothing(self):
+        wrong = [(t, A.interpret(t).activity) for t in ABSTRACT if A.interpret(t) and A.interpret(t).activity in BAD]
+        self.assertEqual(wrong, [])
+
     def test_sentences_become_the_right_activity(self):
         wrong = [(t, want, (A.interpret(t) or A.Plan('none', 'none', 0)).activity) for t, want in CASES if (A.interpret(t) or A.Plan('none', 'none', 0)).activity != want]
         self.assertEqual(wrong, [])

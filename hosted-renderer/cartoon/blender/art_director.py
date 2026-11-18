@@ -256,6 +256,7 @@ VERB_ACTION = [  # first match wins; literal verbs in the spoken line drive the 
     (r'\b(point\w*|show\w*|explain\w*|discover\w*|found|notic\w*|look\w*|spott\w*|announc\w*|declar\w*|order\w*)\b', 'point'),
     (r'\b(hid|hide\w*|crouch\w*|duck\w*|wait\w*|search\w*|inspect\w*|examin\w*)\b', 'crouch'),
 ]
+GESTURES = ['talk', 'point', 'talk', 'think']   # what a person does while explaining, in rotation
 LEGACY_ACTION = {'idle': 'stand', 'walk': 'walk', 'run': 'run', 'point': 'point', 'lift': 'carry', 'carry': 'carry', 'hold': 'carry', 'grab': 'carry',
                  'place': 'carry', 'pour': 'pour', 'react': 'react', 'shout': 'shout', 'cower': 'crouch', 'worried': 'worry', 'wave': 'cheer',
                  'cheer': 'cheer', 'thumbs_up': 'cheer', 'aim': 'aim', 'fire': 'aim', 'load': 'load', 'strike': 'swing', 'throw': 'swing',
@@ -664,6 +665,7 @@ class Director:
             base = LEGACY_ACTION.get(x.get('action'), 'stand')
             act = verb if verb and (j == 0 or verb in ('run', 'walk', 'panic', 'cheer', 'aim') or (plan and plan.companion)) else base
             if act == 'stand' and j == 0 and (x['id'] == s.get('speaker') or base == 'stand'): act = 'talk' if x['id'] == s.get('speaker') else 'point' if (i + j) % 3 == 0 else 'stand'
+            if act == 'point' and verb != 'point' and not plan: act = GESTURES[(i * 3 + part + j) % len(GESTURES)]   # a planner default 'point' on every line looks robotic: vary the speaking gestures
             expr = 'talk' if x['id'] == s.get('speaker') else FACE.get(x.get('expression'), ACTION_FACE.get(act, 'neutral'))
             if act in ACTION_FACE and expr == 'neutral': expr = ACTION_FACE[act]
             n = len(actors)

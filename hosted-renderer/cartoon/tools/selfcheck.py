@@ -64,6 +64,19 @@ def words():
     return f'{len(voc)} sound kinds'
 
 
+def acting():
+    """The director: lines of narration become the right activity, with its props, furniture and vehicle, and the shot validates."""
+    import art_director
+    sys.path.insert(0, str(ROOT / 'blender'))
+    from test_art_director import manifest
+    seen = {}
+    for line in ('She was baking cookies for the town.', 'He drove his red car down the highway.', 'The hacker typed on a laptop.', 'She rode her bike to school.'):
+        shot = art_director.plan(manifest([line], cast=[{'id': 'major', 'outfit': 'worker'}], secs=3.5))[0]['shot']
+        seen[shot['cast'][0]['action']] = len(shot.get('props', [])) + len(shot.get('rigs', []))
+    assert set(seen) == {'cook', 'drive', 'type', 'ride'}, seen
+    return f'{len(seen)} activities staged'
+
+
 def finishing():
     """The end of the pipeline on synthetic data: black frames are repaired by the frame doctor, and finish.py encodes and passes its QA."""
     import hashlib, shutil, subprocess, tempfile
@@ -92,5 +105,5 @@ def finishing():
     return f"4 black frames repaired, encoded, QA ok ({len(qa['warnings'])} notes)"
 
 
-for name, fn in (('sound library + mix', sound), ('captions + UI with the real font', ui), ('place recipes', places), ('vocabulary', words), ('finishing: frame doctor + encode + QA', finishing)): step(name, fn)
+for name, fn in (('sound library + mix', sound), ('captions + UI with the real font', ui), ('place recipes', places), ('vocabulary', words), ('acting: activities staged', acting), ('finishing: frame doctor + encode + QA', finishing)): step(name, fn)
 print(f'SELFCHECK PASSED in {time.time() - t0:.1f}s')
