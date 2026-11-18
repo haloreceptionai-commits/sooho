@@ -43,10 +43,30 @@ def finish(p,reach=.66,leg=.83):
     return p
 
 
-def pose(action,t,seat=None):
+MOVING={'walk','run','panic','drive','ride','sleep','fall','climb','jump','dance'}
+
+
+def life(p,t,seed=0,action='stand'):
+    """Benchmark idle life on top of any pose that does not already travel: breathing, a slow weight shift, head turns and nods.
+    A frozen character was the main reason our frames read as still pictures (measured: 0.0 m of movement in 2 s of 'stand')."""
+    if action in MOVING:return p
+    ph=(seed%97)*.61;tau=math.tau
+    breath=.013*math.sin(tau*.3*t+ph);sway=.02*math.sin(tau*.19*t+ph*1.3)
+    for k in ('head','left_shoulder','right_shoulder','left_elbow','right_elbow','left_wrist','right_wrist'):
+        if k in p:x,y,z=p[k];p[k]=(x+sway,y,z+breath)
+    if 'hips' in p:x,y,z=p['hips'];p['hips']=(x+sway*.5,y,z+breath*.4)
+    p['turn']=p.get('turn',0)+.15*math.sin(tau*.16*t+ph)+.05*math.sin(tau*.43*t+ph*2.1)
+    p['nod']=p.get('nod',0)+.045*math.sin(tau*.37*t+ph*1.7)
+    p['tilt']=p.get('tilt',0)+.018*math.sin(tau*.19*t+ph*1.3)
+    return p
+
+
+def pose(action,t,seat=None,seed=None):
+    """Joint targets at time t. seed (a per-character number) adds the idle life layer; without it the pose is the bare, testable shape."""
     if action not in ACTIONS:raise ValueError('unknown action')
-    if action in ACTIVITY_POSES:return finish(_activity_pose(action,t,seat))
-    p=_legacy_pose(action,t);p.setdefault('lean',0);p.setdefault('nod',0);p.setdefault('turn',0);return p
+    if action in ACTIVITY_POSES:p=finish(_activity_pose(action,t,seat))
+    else:p=_legacy_pose(action,t);p.setdefault('lean',0);p.setdefault('nod',0);p.setdefault('turn',0)
+    return life(p,t,seed,action) if seed is not None and not seat else p
 
 
 def _legacy_pose(action,t):

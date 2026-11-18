@@ -11,11 +11,42 @@ import re
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 FPS = 30
-STYLES = ('bold', 'pop', 'box', 'neon', 'karaoke')
+STYLES = ('clean', 'bold', 'pop', 'box', 'neon', 'karaoke')
 YELLOW, GREEN, RED, WHITE, BLACK = (255, 212, 0), (59, 227, 122), (255, 64, 64), (255, 255, 255), (0, 0, 0)
 
 
 # ----------------------------------------------------------------------------- drawing helpers
+@functools.lru_cache(maxsize=16)
+def caption_font(size):
+    """Inter Bold (bundled, OFL) for the clean captions; the system bold sans when it is missing."""
+    p = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'fonts', 'Inter-VF.ttf')
+    try:
+        f = ImageFont.truetype(p, int(size))
+        try: f.set_variation_by_axes([700])
+        except Exception: pass
+        return f
+    except OSError: return font(size)
+
+
+def burn_clean(img, words):
+    """Benchmark captions: 1-3 words as spoken (sentence case), white with a thin dark outline and a soft shadow, always the same size.
+    A group too wide for the frame drops its oldest words instead of shrinking."""
+    shown = [w for w in words or [] if w['shown']]
+    if not shown: return img
+    W, H = img.size; size = round(W * .074); y = round(H * .7)
+    f = caption_font(size); d = ImageDraw.Draw(img)
+    while len(shown) > 1 and d.textlength(' '.join(w['text'] for w in shown), font=f) > W * .86: shown = shown[1:]
+    text = ' '.join(w['text'] for w in shown)
+    while d.textlength(text, font=f) > W * .9 and size > W * .05:   # one very long word: the only case that may shrink
+        size = int(size * .92); f = caption_font(size)
+    sw = max(2, round(size * .085))
+    shadow = _canvas(W, H); sd = ImageDraw.Draw(shadow)
+    sd.text((W / 2, y + size * .06), text, font=f, anchor='mm', fill=(0, 0, 0, 150), stroke_width=sw + 3, stroke_fill=(0, 0, 0, 150))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(size * .08)); img.paste(shadow, (0, 0), shadow)
+    ImageDraw.Draw(img).text((W / 2, y), text, font=f, anchor='mm', fill=(255, 255, 255), stroke_width=sw, stroke_fill=(18, 14, 12))
+    return img
+
+
 @functools.lru_cache(maxsize=64)
 def font(size, bold=True):
     names = [os.environ.get('UI_FONT', ''), '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
@@ -442,8 +473,8 @@ _DANGER = set('die died dies death dead kill killed war attack attacked trap dan
 
 
 def caption_style(m):
-    """The video's caption template: the manifest's own choice when valid, otherwise the benchmark's bold white/yellow."""
-    s = m.get('caption_style'); return s if s in STYLES else 'bold'
+    """The video's caption template: the manifest's own choice when valid, otherwise the benchmark's clean white sentence-case words."""
+    s = m.get('caption_style'); return s if s in STYLES else 'clean'
 
 
 def _word_color(text, key):
@@ -456,6 +487,7 @@ def _word_color(text, key):
 
 def burn_caption(img, words, style='bold'):
     """Burns up to three live caption words, lower-middle safe area, in the chosen template (img modified in place and returned)."""
+    if style == 'clean': return burn_clean(img, words)
     shown = [w for w in words or [] if w['shown'] or style == 'karaoke']
     if not shown: return img
     W, H = img.size; size = round(min(W, H) * .085); y = round(H * (.82 if W > H else .7))

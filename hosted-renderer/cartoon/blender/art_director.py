@@ -68,14 +68,21 @@ def travel_width_per_s(cam, dur):
     return (abs(d0 - d1) / fw * 0.5 + lateral / fw + turn / (2 * math.atan(th * 9 / 16))) / max(0.2, dur)
 
 
-def normalize_travel(cam, dur, lo=0.07, hi=0.35):
-    """Every shot travels, but never so fast it is hard to follow: scale the move into the 0.07-0.35 frame widths per second band."""
-    ws = travel_width_per_s(cam, dur); f = cam['from']
-    if ws > hi and 'to' in cam:
-        k = hi / ws; cam['to'] = [round(f[i] + (cam['to'][i] - f[i]) * k, 3) for i in range(3)]
-        if 'look_to' in cam: la = cam['look_at']; cam['look_to'] = [round(la[i] + (cam['look_to'][i] - la[i]) * k, 3) for i in range(3)]
+def normalize_travel(cam, dur, lo=0.16, hi=0.45):
+    """Every shot travels at the benchmark's pace (it averages ~0.28 frame widths per second), never so fast it is hard to follow:
+    scale the move into the 0.16-0.45 band. A shot with too little travel gets its own move stretched (up to 4x); one with none gets a push with a sideways arc."""
+    ws = travel_width_per_s(cam, dur); f = cam['from']; la = cam['look_at']
+    def scale(k):
+        cam['to'] = [round(f[i] + (cam['to'][i] - f[i]) * k, 3) for i in range(3)]
+        if 'look_to' in cam: cam['look_to'] = [round(la[i] + (cam['look_to'][i] - la[i]) * k, 3) for i in range(3)]
+    if ws > hi and 'to' in cam: scale(hi / ws)
     elif ws < lo:
-        la = cam['look_at']; cam['to'] = [round(f[i] + (la[i] - f[i]) * 0.2, 3) for i in range(3)]
+        if 'to' in cam and math.dist(f, cam['to']) > 0.05 and ws > 0.01: scale(min(4.0, lo / ws))
+        else:
+            tw = [la[i] - f[i] for i in range(3)]; d = math.hypot(tw[0], tw[1]) or 1.0; side = [-tw[1] / d, tw[0] / d]
+            arc = 0.12 * math.dist(f, la)
+            cam['to'] = [round(f[0] + tw[0] * 0.25 + side[0] * arc, 3), round(f[1] + tw[1] * 0.25 + side[1] * arc, 3), round(f[2] + tw[2] * 0.25, 3)]
+            if travel_width_per_s(cam, dur) < lo: scale(min(4.0, lo / max(0.01, travel_width_per_s(cam, dur))))
     return cam
 
 
@@ -105,11 +112,12 @@ def keep_cast_in_frame(cam, cast):
     """Camera moves must never carry a head out of the frame: shrink the move, then back the lens off, until every head stays inside the whole shot."""
     if not cast: return cam
     base_to = list(cam.get('to', cam['from'])); base_lt = list(cam.get('look_to', cam['look_at'])); f = cam['from']; la = cam['look_at']
-    for back in (1.0, 1.15, 1.3, 1.5):
+    # back the lens off first and keep most of the move: a shrunken move is what made the old Shorts look like still pictures
+    for back in (1.0, 1.12, 1.25, 1.4, 1.6):
         if back != 1.0:
             sx = sum(c['pos'][0] for c in cast) / len(cast); sy = sum(c['pos'][1] for c in cast) / len(cast)
             cam['from'] = [round(sx + (f[0] - sx) * back, 3), round(sy + (f[1] - sy) * back, 3), f[2]]
-        for k in (1.0, 0.7, 0.45, 0.2, 0.0):
+        for k in ((1.0, 0.8, 0.6) if back < 1.6 else (1.0, 0.8, 0.6, 0.4)):
             ff = cam['from']
             cam['to'] = [round(ff[i] + (base_to[i] - f[i]) * k, 3) for i in range(3)]
             if 'look_to' in cam or k < 1.0: cam['look_to'] = [round(la[i] + (base_lt[i] - la[i]) * k, 3) for i in range(3)]
@@ -129,6 +137,21 @@ def limit_pitch(cam, max_down=48.0, max_up=22.0):
         else: continue
         k = need / hd; cam[key] = [round(look[0] + hx * k, 3), round(look[1] + hy * k, 3), f[2]]
     return cam
+
+
+def clear_sightline(place, cam, subjects):
+    """Nothing may stand between the lens and what the shot is about: drop set props whose footprint sits on the line from the camera to any
+    subject (cast or story object) and nearer than it. Sets are now fully dressed, so a cart or a well used to hide the very thing being described."""
+    f = cam['from']; keep = []
+    for it in place.get('items', []):
+        x, y = it['pos'][0], it['pos'][1]; r = 0.55 + 0.35 * min(3.0, float(it.get('height', 1.0)))
+        blocked = False
+        for sx, sy in subjects:
+            dx, dy = sx - f[0], sy - f[1]; L2 = dx * dx + dy * dy or 1.0
+            t = ((x - f[0]) * dx + (y - f[1]) * dy) / L2
+            if 0.05 < t < 0.97 and math.hypot(f[0] + dx * t - x, f[1] + dy * t - y) < r + 0.25: blocked = True; break
+        if not blocked: keep.append(it)
+    place['items'] = keep
 
 
 def clear_lens_items(place, cam):
@@ -324,7 +347,7 @@ FX_WORDS = [(r'\b(explo\w*|blast\w*|bomb\w*|dynamite|boom)\b', 'explosion'), (r'
             (r'\b(lightning|thunder\w*|bolt)\b', 'lightning'), (r'\b(torch\w*|campfire\w*|bonfire\w*|ember\w*|ablaze|on fire|wildfire\w*)\b', 'embers')]
 IMPACT = re.compile(r'\b(boom|bang|crash\w*|explo\w*|smash\w*|hit|fir(e|ed|ing)|shot|slam\w*|destroy\w*|collaps\w*)\b')
 SCALE_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|millions?|army|armies|entire|whole|all|every|herds?|flocks?|mobs?|swarms?|hordes?|crowds?|nation|country)\b')
-CROWD_WORDS = re.compile(r'\b(army|armies|soldiers?|troops?|crowds?|farmers|people|villagers|citizens|men|workers|miners|public|locals|settlers|residents|romans?|carthaginians?|fighters|legion\w*|warriors?|guards|columns|marching|soldiery|garrison|battalions?|regiments?|spectators|fans|passengers|sailors|crew)\b')
+CROWD_WORDS = re.compile(r'\b(thousands|hundreds|lined up|queued?|queues?|visitors|onlookers|army|armies|soldiers?|troops?|crowds?|farmers|people|villagers|citizens|men|workers|miners|public|locals|settlers|residents|romans?|carthaginians?|fighters|legion\w*|warriors?|guards|columns|marching|soldiery|garrison|battalions?|regiments?|spectators|fans|passengers|sailors|crew)\b')
 HERD_WORDS = re.compile(r'\b(\d[\d,]*|thousands?|hundreds?|herds?|flocks?|mobs?|swarms?|hordes?|groups?|packs?)\b')
 UPLOADED_HUMANS = os.environ.get('ADVANCED_HUMANS', 'egg') == 'uploaded'  # benchmark look: expressive egg-heads by default (Nov 16 2026 upgrade); 'uploaded' restores the rigged humans
 WOMAN = re.compile(r'\b(woman|women|wife|queen|mother|mom|girl|lady|ladies|daughter|princess|empress|sister|nurse|widow|actress|duchess|aunt|grandmother|she|her)\b')
@@ -402,6 +425,23 @@ def match_location(location):
 
 
 MODERN_ITEM = re.compile(r'television|computer|laptop|monitor|keyboard|phone|speaker|microwave|toaster|fridge|refrigerator|washer|dryer|radio|vending|escalator|trafficLight|neon|server|drone|robot|sedan|taxi|truck|pickup|ambulance|airplane|helicopter|rocket|ufo|motorcycle|scooter', re.I)
+
+
+# People a line talks about without naming anyone from the cast: generic extras act it out.
+TRAGEDY = re.compile(r'\b(kill\w*|died|dies|dead|deaths?|victims?|murder\w*|drown\w*|buried alive|massacre\w*|executed|wounded|injured|casualt\w*)\b', re.I)
+EXTRA_WORDS = re.compile(r"\b(diggers?|workers?|farmers?|labou?rers?|men|women|people|visitors?|villagers?|miners?|guards?|soldiers?|sailors?|crew|scientists?|"
+                         r"experts?|officials?|reporters?|doctors?|police|they|someone|somebody|a man|a woman|the man|the woman|stone ?cutters?|carvers?|builders?)\b")
+EXTRA_LOOK = [(r'guards?|soldiers?|police', 'police'), (r'scientists?|experts?|doctors?', 'scientist'), (r'sailors?|crew', 'sailor'),
+              (r'officials?|reporters?', 'merchant'), (r'women|a woman|the woman', 'woman'), (r'.', 'worker')]
+
+
+def extras_for(text):
+    """[(id, role)] for the people a line describes but the cast does not name; plural words give two people."""
+    m = EXTRA_WORDS.search(text or '')
+    if not m or TRAGEDY.search(text or ''): return []   # never put cheerful stand-ins on a line about deaths or victims
+    w = m.group(1); role = next(r for pat, r in EXTRA_LOOK if re.fullmatch(pat, w) or pat == '.')
+    two = w.endswith('s') or w in ('men', 'women', 'people', 'they', 'crew', 'police') or re.search(r'\b(two|both|pair|several|many|thousands|hundreds)\b', text)
+    return [(f'extra-{role}-{k}', role) for k in range(2 if two else 1)]
 
 
 def plan_locations(m, cards=()):
@@ -507,16 +547,16 @@ def yaw_facing(d):
     return round(math.degrees(math.atan2(d[0], -d[1])), 2)
 
 
-def split_points(m, s, n_max=3, target=2.6):
-    """Cut a long manifest shot into setups at word boundaries (benchmark median ~2-3 s per shot)."""
+def split_points(m, s, n_max=4, target=1.8):
+    """Cut a long manifest shot into setups at word boundaries (measured benchmark: average 1.94 s, median 1.65 s per shot)."""
     a, b = s['start'], s['end']; dur = (b - a) / FPS
     n = max(1, min(n_max, round(dur / target)))
-    if n == 1 or dur < 3.4: return [(a, b)]
+    if n == 1 or dur < 2.4: return [(a, b)]
     starts = [round(w['start'] * FPS) for _, w, _ in spoken(m, a, b)]
     cuts = []
     for j in range(1, n):
         ideal = a + (b - a) * j / n
-        cand = [f for f in starts if a + 30 <= f <= b - 30] or [round(ideal)]
+        cand = [f for f in starts if a + 24 <= f <= b - 24] or [round(ideal)]
         cuts.append(min(cand, key=lambda f: abs(f - ideal)))
     edges = [a] + sorted(set(cuts)) + [b]
     return [(x, y) for x, y in zip(edges, edges[1:]) if y - x >= 12] or [(a, b)]
@@ -617,6 +657,13 @@ class Director:
         actors = [] if s.get('empty') else [x for x in s.get('actors') or [] if not ANIMAL.search(x['id'].lower())][:3]
         beasts = [x for x in s.get('actors') or [] if ANIMAL.search(x['id'].lower()) and f"{x['id']}.png" in self.cards]
         if s.get('empty'): beasts = []
+        if not actors and not beasts and os.environ.get('EXTRAS', '1') != '0':
+            for eid, role in ([] if TRAGEDY.search(whole) else extras_for(txt or whole)):   # nobody named: extras do what the line says (diggers dig, guards stand watch)
+                if eid not in self.cast_look:
+                    k = len(self.cast_look); outfit, hat = OUTFIT.get(role, ('worker', 'none'))
+                    self.cast_look[eid] = {'outfit': outfit, 'hat': hat, 'shirt': SHIRTS[(k + 1) % 4], 'hat_color': HAT_COLORS[(k + 2) % 4], 'skin': SKINS[(k * 3 + 1) % len(SKINS)],
+                                           'facial': 'none', 'trim': TRIMS.get(outfit, [.72, .55, .12])}
+                actors.append({'id': eid, 'action': 'idle', 'expression': 'neutral'})
         if not actors and not beasts and not s.get('empty') and s.get('actor') and not ANIMAL.search(str(s['actor']).lower()):
             actors = [{'id': s['actor'], 'action': s.get('action', 'idle'), 'expression': s.get('expression', 'neutral')}]
         if not beasts and s.get('actor') and f"{s['actor']}.png" in self.cards and ANIMAL.search(str(s['actor']).lower()):
@@ -627,7 +674,7 @@ class Director:
         verb = next((act for pat, act in VERB_ACTION if re.search(pat, txt or whole)), None)
         if verb is None and re.search(r'\b(kill\w*|hunt\w*|cull\w*)\b', txt or whole):  # killing means aiming only when weapons are in the story
             verb = 'aim' if re.search(r'\b(gun\w*|rifle\w*|shot|shoot\w*|bullets?|hunters?|soldiers?)\b', whole + ' ' + text_of(spoken(m, 0, 10 ** 9))) else 'panic'
-        plan = ACT.interpret(txt or whole) if (actors and not (named and beasts)) else None   # what the character is actually DOING (cook, type, drive, eat, hug...)
+        plan = (ACT.interpret(txt) or (None if ANIMAL.search(whole) else ACT.interpret(whole))) if (actors and not (named and beasts)) else None   # a line cut into several setups keeps its action in every one   # what the character is actually DOING (cook, type, drive, eat, hug...)
         if plan: verb = plan.motion
         beast_verb = verb if named and beasts else None
         if beast_verb in ('run', 'walk', 'panic', 'fall'):  # "the emus scattered": the animals move, people react
@@ -855,7 +902,7 @@ class Director:
         shot = {'set': st, 'lighting': lighting, 'duration': max(0.2, min(12, dur)), 'camera': cam, 'cast': cast, 'objects': objects,
                 'engine': 'eevee', 'samples': 16, 'size': list(SIZE), 'grade': 'Punchy'}
         if st in OUTDOOR and lighting in ('day', 'sunset'):  # gentle aerial perspective only: strong mist swallowed the sky
-            shot['haze'] = 0.006; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.72, 0.8, 0.88]
+            shot['haze'] = 0.003; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.5, 0.66, 0.9]   # a touch of blue distance, never a white wash
         if cards: shot['cards'] = cards
         if self.year is not None and self.year < 1900: shot['era'] = int(self.year)   # old story: rooms get period materials, not modern tile and lamps
         if s.get('place'):
@@ -918,7 +965,9 @@ class Director:
                 cam['from'] = [dx, -4.4, 1.5]; cam['to'] = [dx * 0.5, -3.6, 1.5]; cam['look_at'] = [0.0, 5.0, 0.85]; cam['look_to'] = [0.0, 5.0, 0.85]; cam['lens'] = 28
         else: limit_pitch(cam)
         place = shot.get('place')
-        if place: clear_lens_items(place, cam)
+        if place:
+            clear_lens_items(place, cam)
+            clear_sightline(place, cam, [tuple(c['pos'][:2]) for c in cast] + [tuple(c['pos'][:2]) for c in shot.get('cards', [])])
         self.vfx_extras(shot, i, part, kind, st, cast, txt)
         if not place or not cast: return
         import library
@@ -1027,7 +1076,8 @@ class Director:
             elif mv == 'whip':
                 cam['whip_from'] = r3([f[0] + R[0] * 1.6, f[1] + R[1] * 1.6, f[2]]); cam['to'] = r3([f[k] + tw[k] * 0.12 for k in range(3)])
             else:
-                cam['to'] = r3([f[k] + tw[k] * (0.28 if kind in ('low', 'medium', 'wide') else 0.18) for k in range(3)])
+                arc = (0.18 if kind in ('low', 'medium', 'wide') else 0.1) * math.dist(f, la) * (1 if (len(self.history) + part) % 2 else -1)
+                cam['to'] = r3([f[k] + tw[k] * (0.3 if kind in ('low', 'medium', 'wide') else 0.22) + (R[k] * arc if k < 2 else 0) for k in range(3)])
         cam = clear_lens(cam, obstacles(cast, cards, dur), keep=kind in ('close', 'xclose', 'insert'))
         if st == 'mine_tunnel':
             for k in ('from', 'to', 'whip_from'):

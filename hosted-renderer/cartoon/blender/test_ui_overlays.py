@@ -142,7 +142,20 @@ class CaptionTests(unittest.TestCase):
         self.assertLess(width(1), width(8)); self.assertAlmostEqual(width(30), width(60), delta=3)
 
     def test_style_choice_is_validated(self):
-        self.assertEqual(U.caption_style({'caption_style': 'neon'}), 'neon'); self.assertEqual(U.caption_style({'caption_style': 'evil'}), 'bold'); self.assertEqual(U.caption_style({}), 'bold')
+        self.assertEqual(U.caption_style({'caption_style': 'neon'}), 'neon'); self.assertEqual(U.caption_style({'caption_style': 'evil'}), 'clean'); self.assertEqual(U.caption_style({}), 'clean')
+
+    def test_clean_captions_keep_case_one_size_and_no_colour(self):
+        line = [{'text': 'Feeding', 'key': True, 'live': False, 'shown': True, 'age': 9}, {'text': 'your', 'key': False, 'live': True, 'shown': True, 'age': 2}]
+        base = frame(); img = U.burn_caption(base.copy(), line, 'clean'); box = changed_box(base, img)
+        self.assertIsNotNone(box)
+        import numpy as np
+        px = np.asarray(img.crop(box)).reshape(-1, 3).astype(int)
+        bright = px[px.sum(1) > 600]
+        self.assertGreater(len(bright), 50); self.assertLess(np.abs(bright[:, 0] - bright[:, 2]).max(), 30)   # white letters, no yellow or green highlight
+        long = [dict(line[0], text='Unbelievably'), dict(line[1], text='extraordinary'), dict(line[1], text='circumstances')]
+        b2 = changed_box(base, U.burn_caption(base.copy(), long, 'clean'))
+        self.assertLess(b2[2] - b2[0], base.width * .92)   # too wide: older words drop instead of the text shrinking
+        self.assertGreater(b2[3] - b2[1], (box[3] - box[1]) * .85)
 
     def test_nothing_shown_draws_nothing(self):
         base = frame(); self.assertIsNone(changed_box(base, U.burn_caption(base.copy(), [dict(w, shown=False) for w in self.LINE], 'bold')))

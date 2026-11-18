@@ -51,16 +51,25 @@ class CameraSpeed(unittest.TestCase):
         still = {'from': [0, -4, 1.5], 'look_at': [0, 0, 1.0], 'lens': 35}
         fast = {'from': [0, -4, 1.5], 'look_at': [0, 0, 1.0], 'lens': 35, 'to': [3, -1, 1.5]}
         a = A.normalize_travel(dict(still), 3.0); b = A.normalize_travel(dict(fast), 3.0)
-        self.assertGreaterEqual(A.travel_width_per_s(a, 3.0), 0.04)
-        self.assertLessEqual(A.travel_width_per_s(b, 3.0), 0.36)
+        self.assertGreaterEqual(A.travel_width_per_s(a, 3.0), 0.15)   # the benchmark camera averages ~0.28 frame widths per second
+        self.assertLessEqual(A.travel_width_per_s(b, 3.0), 0.46)
 
 
-class CreamDips(unittest.TestCase):
-    def test_dip_only_at_location_changes(self):
+class PlaceChangeCuts(unittest.TestCase):
+    def test_whip_only_at_location_changes_and_no_cream_wash(self):
         m = {'shots': [{'start': 0, 'place': {'terrain': 'plain'}}, {'start': 90, 'place': {'terrain': 'plain'}}, {'start': 180, 'place': {'terrain': 'camp'}}]}
         self.assertEqual(BB.dip_frames(m), [180])
-        self.assertAlmostEqual(BB.dip_alpha([180], 180), 0.92); self.assertEqual(BB.dip_alpha([180], 120), 0.0)
-        self.assertGreater(BB.dip_alpha([180], 184), 0.0)
+        self.assertEqual(BB.dip_alpha([180], 180), 0.0)   # the benchmark never washes the picture out
+        self.assertGreater(BB.whip_strength([180], 180), 0.8); self.assertGreater(BB.whip_strength([180], 179), 0.8)
+        self.assertEqual(BB.whip_strength([180], 120), 0.0); self.assertEqual(BB.whip_strength([180], 184), 0.0)
+
+    def test_whip_blurs_sideways_only(self):
+        import numpy as np
+        from PIL import Image
+        a = np.zeros((64, 64, 3), np.uint8); a[:, 30:34] = 255; img = Image.fromarray(a)
+        out = np.asarray(BB.whip(img, 1.0)).astype(int)
+        self.assertGreater((out[:, :, 0] > 10).sum(axis=1).min(), 8)   # the bar is smeared across the width
+        self.assertTrue((out[0] == out[-1]).all())                     # but not up or down
 
 
 class SchemaKeys(unittest.TestCase):

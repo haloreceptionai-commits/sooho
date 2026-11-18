@@ -273,7 +273,12 @@ def compile_place(spec, seed=0):
         {'shape': 'box', 'size': [.12, .12, .82], 'pos': [sx * 1.7, sy * .42, .41], 'color': [.36, .24, .13], 'glow': 0} for sx in (-1, 1) for sy in (-1, 1)]}
     if spec.get('shell'): out['shell'] = spec['shell']
     if t in KITS:   # an indoor set (lab/workshop, room, office...) can be furnished: library and assembled props stand on its floor
-        dress = [d for d in spec.get('dressing', []) if 'lib' in d or 'asm' in d]
+        # registry props (well, cart, barrel, tent...) are real library models too: a kit set used to drop them, which left every farm, street and
+        # rail-yard shot empty. They now stand in the set like any library prop.
+        reg = [{'lib': DRESSING[d['id']]['model'], 'count': min(int(d.get('count', 1)), 6), 'height': float(DRESSING[d['id']].get('height', 1.0)),
+                'layout': 'far' if DRESSING[d['id']].get('far') else 'near', **({'at': [-5.5, 13.0]} if DRESSING[d['id']].get('far') else {})}
+               for d in spec.get('dressing', []) if 'id' in d and isinstance(DRESSING.get(d['id']), dict) and DRESSING[d['id']].get('model') and library.known(DRESSING[d['id']]['model'])]
+        dress = [d for d in spec.get('dressing', []) if 'lib' in d or 'asm' in d] + reg
         tabled = [d for d in dress if d.get('layout') == 'table']
         if tabled:   # one bench in front of the back wall, props evenly spaced on top
             total = sum(d.get('count', 1) for d in tabled)

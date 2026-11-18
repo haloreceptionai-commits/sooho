@@ -220,12 +220,19 @@ def ox_coat(root):
                 seen.add(m.name)
 
 
-def build_sky(mode, weather='clear'):
-    """Painted storybook sky (benchmark look): gradient, toon-edged clouds, a big moon and stars at night, a warm glow at dawn/dusk."""
-    w = bpy.context.scene.world; nt = w.node_tree; nt.nodes.clear()
-    out = nt.nodes.new('ShaderNodeOutputWorld'); bg = nt.nodes.new('ShaderNodeBackground')
+def build_sky(mode, weather='clear', keep_light=False):
+    """Painted storybook sky (benchmark look): gradient, toon-edged clouds, a big moon and stars at night, a warm glow at dawn/dusk.
+    keep_light: the camera sees the painted sky while the world's existing lighting (a set kit's HDRI) still lights the scene."""
+    w = bpy.context.scene.world; nt = w.node_tree; light_src = None
+    if keep_light:
+        out = next((n for n in nt.nodes if n.type == 'OUTPUT_WORLD'), None)
+        if out is None or not out.inputs['Surface'].is_linked: keep_light = False
+        else: light_src = out.inputs['Surface'].links[0].from_socket
+    if not keep_light:
+        nt.nodes.clear(); out = nt.nodes.new('ShaderNodeOutputWorld')
+    bg = nt.nodes.new('ShaderNodeBackground')
     coord = nt.nodes.new('ShaderNodeTexCoord'); sep = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(coord.outputs['Generated'], sep.inputs[0])
-    pal = {'day': ((0.07, 0.30, 0.85), (0.62, 0.82, 1.0), (1, 1, 1), (0.72, 0.8, 0.92), 1.0),
+    pal = {'day': ((0.04, 0.2, 0.72), (0.3, 0.56, 0.95), (1, 1, 1), (0.7, 0.8, 0.95), 1.0),   # benchmark: a saturated blue right down to the horizon, no milky band
            'sunset': ((0.22, 0.26, 0.55), (1.0, 0.55, 0.28), (1.0, 0.82, 0.68), (0.75, 0.45, 0.5), 0.9),
            'night': ((0.01, 0.02, 0.09), (0.07, 0.14, 0.38), (0.35, 0.45, 0.75), (0.08, 0.12, 0.28), 0.9),
            'rain': ((0.22, 0.25, 0.3), (0.42, 0.46, 0.52), (0.55, 0.58, 0.62), (0.3, 0.33, 0.38), 0.8)}[mode if mode in ('day', 'sunset', 'night', 'rain') else 'day']
@@ -270,7 +277,12 @@ def build_sky(mode, weather='clear'):
         nt.links.new(halo.outputs['Result'], glow.inputs['Fac']); nt.links.new(last, glow.inputs['Color1'])
         disk = nt.nodes.new('ShaderNodeMixRGB'); disk.blend_type = 'ADD'; disk.inputs['Color2'].default_value = ((1.6, 1.6, 1.5, 1) if mode == 'night' else (3.0, 2.6, 1.8, 1))
         nt.links.new(disc.outputs['Result'], disk.inputs['Fac']); nt.links.new(glow.outputs[0], disk.inputs['Color1']); last = disk.outputs[0]
-    nt.links.new(last, bg.inputs['Color']); bg.inputs['Strength'].default_value = strength; nt.links.new(bg.outputs[0], out.inputs[0])
+    nt.links.new(last, bg.inputs['Color']); bg.inputs['Strength'].default_value = strength
+    if keep_light:
+        lp = nt.nodes.new('ShaderNodeLightPath'); mx = nt.nodes.new('ShaderNodeMixShader')
+        nt.links.new(lp.outputs['Is Camera Ray'], mx.inputs[0]); nt.links.new(light_src, mx.inputs[1]); nt.links.new(bg.outputs[0], mx.inputs[2])
+        nt.links.new(mx.outputs[0], out.inputs[0])
+    else: nt.links.new(bg.outputs[0], out.inputs[0])
 
 
 def scatter_detail(p, seed):

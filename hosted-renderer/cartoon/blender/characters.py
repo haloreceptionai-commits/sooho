@@ -11,6 +11,10 @@ _OUTLINE = None
 
 # Trouser colours for the benchmark cast: denim, charcoal, khaki, black, deep olive. Picked per character, never the same as a bright shirt.
 TROUSERS=[(.12,.19,.4),(.2,.21,.25),(.42,.35,.24),(.1,.1,.12),(.26,.3,.2)]
+# Benchmark bean cast: warm skin tones (light peach to deep brown), one dark ink for the stick limbs, brows and features.
+SKINS=[(1.0,.76,.52),(.97,.7,.48),(.93,.64,.42),(.8,.54,.34),(.6,.39,.25),(1.0,.8,.6)]   # saturated enough to stay warm under the AgX view transform
+INK=(.045,.03,.028)
+STUBBLE_OUTFITS=('worker','soldier','rags','tunic','police','sailor','uniform','merchant','suit')
 
 def outline_material():
     """Inverted-hull ink line: black on the shell's back faces, transparent on its front faces."""
@@ -44,8 +48,11 @@ def sphere(name,pos,size,mat):
     return o
 
 
+HEAD=[.31,.27,.36]   # x, depth, height radii of the head the face is drawn on (set per character)
+
+
 def face_y(x,z):
-    return -.27*math.sqrt(max(0,1-(x/.31)**2-(z/.36)**2))-.004
+    rx,ry,rz=HEAD;return -ry*math.sqrt(max(0,1-(x/rx)**2-(z/rz)**2))-.004
 
 
 def _mat(name,color,rough=.5):
@@ -94,11 +101,13 @@ def build_character(c,duration=3,fps=30):
         return build_uploaded_human(c,duration,fps)
     ident=c.get('id','cast');black=material('cast ink',(.012,.013,.015),.65)
     skin=material('cast skin '+ident,tuple(c.get('skin',(.94,.93,.88))),.58)
-    if c.get('style','benchmark')=='benchmark':   # house style: plain white faces and hands, lit like everything else (no self-glow, so they never blow out)
+    if c.get('style','benchmark')=='benchmark':   # house style: warm cartoon skin (benchmark), lit like everything else (no self-glow, so it never blows out)
         nd=skin.node_tree.nodes.get('Principled BSDF')
         if nd:
-            nd.inputs['Base Color'].default_value=(1,1,1,1)
+            sk=c.get('skin');sk=tuple(sk) if sk and not all(v>.97 for v in sk[:3]) else SKINS[sum(map(ord,ident))%len(SKINS)]
+            nd.inputs['Base Color'].default_value=(*sk[:3],1);nd.inputs['Roughness'].default_value=.62
             nd.inputs['Emission Color' if 'Emission Color' in nd.inputs else 'Emission'].default_value=(0,0,0,1); nd.inputs['Emission Strength'].default_value=0
+        black=material('cast ink',INK,.65)
     species=c.get('species','human')
     if species!='human':   # alien / monster / ghost keep the egg and the ink line but get their own skin
         col={'alien':(.5,.95,.4),'monster':(.62,.38,.88),'ghost':(.9,.96,1.0)}[species]
@@ -112,15 +121,23 @@ def build_character(c,duration=3,fps=30):
     root=bpy.data.objects.new(ident,None);bpy.context.collection.objects.link(root)
     headroot=bpy.data.objects.new(ident+' head',None);bpy.context.collection.objects.link(headroot);headroot.parent=root
     style=c.get('style','benchmark');premium=style=='premium';bench=style=='benchmark'
-    head=sphere('egg head',(0,0,0),(.31,.27,.36) if not premium else (.3,.27,.34),skin);head.parent=headroot
+    HEAD[:]=[.34,.31,.33] if bench else [.3,.27,.34] if premium else [.31,.27,.36]   # benchmark: one big round head
+    head=sphere('egg head',(0,0,0),tuple(HEAD),skin);head.parent=headroot;blinkers=[]
     expr=c.get('expression','neutral');face=face_shape(expr)
     if premium:
         mouth=build_premium_face(c,headroot,skin,face,expr,ident)
     for side in ([] if premium else [-1,1]):
-        eye=sphere('eye',(side*.105,face_y(side*.105,.035),.035),((.034 if not bench else .05),.014,face['eye']*(1 if not bench else 1.35)),black);eye.parent=headroot
-        if bench:sphere('eyelid',(side*.105,face_y(side*.105,.035)-.004,.035+face['eye']*.62),(.062,.018,.016),black).parent=headroot
-        brow=cube('eyebrow',(side*.105,face_y(side*.105,.12),.12),(.095,.022,.018),black,.008);brow.parent=headroot
-        brow.rotation_euler.y=side*face['brow']
+        if bench:   # benchmark: small round ink dots, wide awake (no heavy eyelids), thick acting brows set high
+            ez=.03;eye=sphere('eye',(side*.11,face_y(side*.11,ez),ez),(.036,.014,max(.012,face['eye']*1.25)),black);eye.parent=headroot;blinkers.append(eye)
+            if expr in ('shock','worried'):   # wide eyes: an ink ring with the dot inside
+                bpy.ops.mesh.primitive_torus_add(major_radius=.07,minor_radius=.012,rotation=(math.pi/2,0,0),location=(side*.11,face_y(side*.11,ez)+.002,ez))
+                ring=bpy.context.active_object;ring.name='eye ring';ring.data.materials.append(black);ring.parent=headroot
+            bz=.15+(.03 if expr in ('shock','worried','sad') else -.02 if expr in ('angry','determined') else 0)
+            brow=cube('eyebrow',(side*.11,face_y(side*.11,bz)-.006,bz),(.13,.03,.034),black,.012);brow.parent=headroot
+        else:
+            eye=sphere('eye',(side*.105,face_y(side*.105,.035),.035),(.034,.014,face['eye']),black);eye.parent=headroot
+            brow=cube('eyebrow',(side*.105,face_y(side*.105,.12),.12),(.095,.022,.018),black,.008);brow.parent=headroot
+        brow.rotation_euler.y=side*face['brow']*(-1.3 if bench else 1)   # benchmark brows: angry = inner ends down
         if expr=='smug' and side==1:eye.scale.z*=.5
     if not premium: mouth=None
     if premium: pass
@@ -134,6 +151,12 @@ def build_character(c,duration=3,fps=30):
             z=-.13+(x/face['width'])**2*face['curve']
             curve.append((x,face_y(x,z),z))
         for a,b in zip(curve,curve[1:]):rope('mouth stroke',a,b,.01,black).parent=headroot
+    if bench and c.get('outfit','worker') in STUBBLE_OUTFITS and c.get('facial','none')=='none' and sum(map(ord,ident))%3!=0:   # benchmark: a scatter of stubble dots on the jaw
+        import random as _r;rr=_r.Random(sum(map(ord,ident)))
+        for k in range(15):   # a light scatter on the chin and lower cheeks, well inside the outline
+            x=rr.uniform(-.17,.17);z=rr.uniform(-.235,-.15)-.03*(1-abs(x)/.17)
+            if abs(x)<.07 and z>-.2:continue   # keep the mouth clear
+            sphere('stubble dot',(x,face_y(x,z)-.002,z),(.0075,.004,.0075),black).parent=headroot
     if c.get('glasses'):   # professors, teachers, grandparents, nerds
         for sx in (-1,1):
             bpy.ops.mesh.primitive_torus_add(major_radius=.075,minor_radius=.011,rotation=(math.pi/2,0,0),location=(sx*.105,face_y(sx*.105,.035)-.03,.035))
@@ -199,9 +222,11 @@ def build_character(c,duration=3,fps=30):
                 for i in range(3):
                     a=i*math.tau/3
                     o=cube('tricorne folded brim',(.24*math.cos(a),.24*math.sin(a),.32),(.4,.1,.15),hatmat,.035);o.rotation_euler.z=a+math.pi/2;o.parent=headroot
-    body=sphere('coat',(0,0,1.04),(.24,.16,.32),cloth);body.parent=root
+    body=sphere('coat',(0,0,1.04),(.24,.16,.32) if not bench else (.27,.21,.37),cloth);body.parent=root
     outfit=c.get('outfit','worker')
     body_details=[]
+    def block(name,pos,size,mat,bev=.02):   # bean bodies get rounded garment pieces; the box versions read as trays
+        return sphere(name,pos,(max(size[0]/2,.27),max(size[1]/2,.21),size[2]/2),mat) if bench else cube(name,pos,size,mat,bev)
     if species=='ghost':   # a floating sheet that hides the legs: translucent, glowing, with a wavy hem
         gm=material(ident+' ghost sheet',(.92,.97,1.0),.9)
         gn=gm.node_tree.nodes.get('Principled BSDF')
@@ -218,19 +243,19 @@ def build_character(c,duration=3,fps=30):
         for z in [.94,1.04,1.14]:
             points=[(x,-.16*math.sqrt(max(0,1-(x/.24)**2-((z-1.04)/.32)**2))-.003,z) for x in [-.18+i*.36/16 for i in range(17)]]
             for a,b in zip(points,points[1:]):body_details.append(rope('sailor stripe',a,b,.009,skin))
-    if outfit=='worker':body_details.append(cube('work apron',(0,-.16,1.02),(.25,.035,.35),hatmat,.018))
+    if outfit=='worker' and not bench:body_details.append(cube('work apron',(0,-.16,1.02),(.25,.035,.35),hatmat,.018))   # on the bean body it read as a tray
     if outfit in ('tunic','rags'):
-        body_details.append(cube('tunic hem',(0,0,.74),(.52,.34,.1),hatmat,.03));body_details.append(cube('rope belt',(0,-.01,.9),(.44,.32,.04),trim,.012))
+        (None if bench else body_details.append(cube('tunic hem',(0,0,.74),(.52,.34,.1),hatmat,.03)));body_details.append(cube('rope belt',(0,-.01,.9),(.44,.32,.04),trim,.012))
     if outfit=='armor':
-        body_details.extend([sphere('breastplate',(0,-.07,1.1),(.215,.12,.3),trim),cube('skirt strips',(0,0,.78),(.5,.34,.12),hatmat,.02),sphere('shoulder guard L',(-.24,0,1.28),(.1,.1,.06),trim),sphere('shoulder guard R',(.24,0,1.28),(.1,.1,.06),trim)])
+        body_details.extend([sphere('breastplate',(0,-.07,1.1),(.215,.12,.3),trim),block('skirt strips',(0,0,.78),(.58,.44,.14),hatmat,.02),sphere('shoulder guard L',(-.24,0,1.28),(.1,.1,.06),trim),sphere('shoulder guard R',(.24,0,1.28),(.1,.1,.06),trim)])
     if outfit=='robe':
-        body_details.extend([cube('robe skirt',(0,0,.62),(.56,.36,.5),cloth,.04),cube('robe sash',(0,-.01,.95),(.46,.32,.05),trim,.012)])
+        body_details.extend([block('robe skirt',(0,0,.62),(.56,.36,.5),cloth,.04),cube('robe sash',(0,-.01,.95),(.46,.32,.05),trim,.012)])
     if outfit=='dress':
         bpy.ops.mesh.primitive_cone_add(vertices=28,radius1=.37,radius2=.2,depth=.62,location=(0,0,.58));sk=bpy.context.active_object;sk.name='dress skirt';sk.scale.y=.75;sk.data.materials.append(cloth)
         for pl in sk.data.polygons:pl.use_smooth=True
         body_details.extend([sk,cube('dress waist',(0,-.01,.93),(.42,.3,.05),trim,.01)])
     if outfit=='labcoat':
-        body_details.extend([cube('lab coat',(0,0,.8),(.52,.36,.5),skin,.03),cube('coat pocket',(.12,-.18,.78),(.1,.02,.1),black,.005)])
+        body_details.extend([block('lab coat',(0,0,.8),(.56,.44,.5),skin,.03),cube('coat pocket',(.12,-.18,.78),(.1,.02,.1),black,.005)])
     if outfit=='uniform':
         body_details.extend([cube('uniform sash',(0,-.15,1.1),(.1,.03,.5),trim,.008),cube('uniform belt',(0,-.01,.86),(.44,.32,.06),black,.015)])
     if outfit=='royal':
@@ -253,17 +278,19 @@ def build_character(c,duration=3,fps=30):
             for a,b in zip(pts,pts[1:]):body_details.append(rope('sweater band',a,b,.014,trim))
         body_details.append(cube('sweater collar',(0,-.12,1.33),(.2,.1,.05),trim,.015))
     if bench and outfit in ('worker','merchant','uniform','sailor','tunic','rags','hoodie','suit','apron','police','sweater'):
-        lower=sphere('torso lower',(0,0,.9),(.245,.168,.2),pants);body_details.append(lower)
+        lower=sphere('torso lower',(0,0,.88),(.262,.205,.2),cloth);body_details.append(lower)   # the suit runs all the way down: legs are ink sticks
+        body_details.append(cube('belt line',(0,-.01,.93),(.5,.39,.035),black,.012))
         body_details.extend([cube('collar L',(-.07,-.138,1.31),(.1,.05,.05),skin,.012),cube('collar R',(.07,-.138,1.31),(.1,.05,.05),skin,.012)])
         if outfit not in ('suit','hoodie','apron','police','sweater'):body_details.extend([cube('tie',(0,-.158,1.17),(.045,.03,.22),black,.008),cube('pocket patch',(.1,-.158,1.06),(.085,.014,.085),trim,.006)])
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[];anchors={}
-    pants=material(ident+' trousers',tuple(c.get('pants') or TROUSERS[sum(map(ord,ident))%len(TROUSERS)]),.85);shoe=material(ident+' shoes',(.35,.2,.1),.55)
+    pants=material(ident+' trousers',tuple(c.get('pants') or TROUSERS[sum(map(ord,ident))%len(TROUSERS)]),.85) if not bench else black;shoe=material(ident+' shoes',(.35,.2,.1),.55)
     for side in ['left','right']:
         for joint in ['elbow','wrist','knee','ankle']:
             jm=(black if joint in ('elbow','wrist') else pants) if not premium else (cloth if joint in ('elbow','wrist') else pants)
             jr=(.052 if joint=='elbow' else .068 if joint=='wrist' else .08 if joint=='knee' else .072) if not premium else (.043 if joint=='elbow' else .036 if joint=='wrist' else .06 if joint=='knee' else .05)
+            if bench:jr=.023 if joint in ('elbow','wrist') else .027   # stick limbs: the joint is as thin as the limb, so no ball shows
             o=sphere(side+' '+joint,(0,0,0),(jr,)*3,jm);o.parent=root;joints[side+'_'+joint]=o
             if joint in ('wrist','ankle'):
                 anchor=bpy.data.objects.new(side+' '+joint+' attachment',None);bpy.context.collection.objects.link(anchor);anchor.parent=root;anchors[side+'_'+joint]=anchor
@@ -275,6 +302,7 @@ def build_character(c,duration=3,fps=30):
             if premium:
                 o['girth']=(.043 if a=='shoulder' else .038) if a in ('shoulder','elbow') else (.06 if a=='hip' else .052)
             else: o['girth']=.04 if a in ('shoulder','elbow') else .075 if a=='hip' else .066   # sturdy arms; trouser legs that taper from hip to ankle
+            if bench:o['girth']=.022 if a in ('shoulder','elbow') else .026   # benchmark: thin dark stick arms and legs (girth is the radius)
             segments.append((o,side+'_'+a,side+'_'+b))
         if premium:
             sphere(side+' shoe',(0,-.07,.0),(.075,.14,.046),shoe).parent=anchors[side+'_ankle']
@@ -283,7 +311,7 @@ def build_character(c,duration=3,fps=30):
             th=sphere(side+' thumb',((-1 if side=='left' else 1)*.04,-.02,.05),(.018,.018,.04),skin);th.parent=anchors[side+'_wrist']
             for fi in range(3):sphere(side+' finger',(-.026+fi*.026,0,.14),(.014,.014,.04),skin).parent=anchors[side+'_wrist']
         else:
-            sphere(side+' shoe',(0,-.06,-.01),(.085,.15,.045),black).parent=anchors[side+'_ankle']
+            sphere(side+' shoe',(0,-.035,-.01),(.04,.07,.025) if bench else (.085,.15,.045),black).parent=anchors[side+'_ankle']
     held=c.get('held')
     if held:
         wrist=anchors['right_wrist']
@@ -303,21 +331,22 @@ def build_character(c,duration=3,fps=30):
                 sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist
     if bench:
         for side in ['left','right']:
-            hand=sphere(side+' hand',(0,0,.05),(.07,.03,.07),black);hand.parent=anchors[side+'_wrist']
+            hand=sphere(side+' hand',(0,0,.04),(.05,.04,.055),black);hand.parent=anchors[side+'_wrist']
         for o in list(headroot.children):
-            if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest')):outline(o,.013)
+            if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest','stubble')):outline(o,.013)
         for o in list(root.children):
             if o.type=='MESH' and o.name.startswith(('coat','tricorne','work apron','robe','dress','lab coat','royal','breastplate','tunic','shop apron','hood roll','lapel','ghost')):outline(o,.013)
     import hand_props
     for h in c.get('holds',[]):   # what the activity puts in the hands: a pan, a phone, a book, a shovel...
         hand='right' if h['hand']=='both' else h['hand']
         hand_props.build(h['prop'],anchors[hand+'_wrist'],anchors['left_wrist' if hand=='right' else 'right_wrist'])
+    for e in blinkers:e['z0']=e.scale.z
     action=c.get('action','stand');seat=c.get('seat');base=Vector((*c['pos'],0));yaw=math.radians(c.get('yaw',0));scale=c.get('scale',1)
     travel=Vector((c['to'][0]-c['pos'][0],c['to'][1]-c['pos'][1],0)) if c.get('to') else Vector((0,0,0));frames=round(duration*fps)
     for f in range(frames):
-        p=pose(action,f/fps,seat) if seat else pose(action,f/fps);off=Vector(p['root']);off.rotate(Euler((0,0,yaw)));root.location=base+off*scale+travel*(f/max(1,frames-1));root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)
+        p=pose(action,f/fps,seat) if seat else pose(action,f/fps,seed=sum(map(ord,ident)));off=Vector(p['root']);off.rotate(Euler((0,0,yaw)));root.location=base+off*scale+travel*(f/max(1,frames-1));root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)
         root.keyframe_insert('location',frame=f+1);root.keyframe_insert('rotation_euler',frame=f+1)
-        headroot.location=p['head'];headroot.rotation_euler=(p.get('nod',0),0,p.get('turn',0));headroot.keyframe_insert('location',frame=f+1);headroot.keyframe_insert('rotation_euler',frame=f+1)
+        headroot.location=(p['head'][0],p['head'][1],p['head'][2]-(.02 if bench else 0));headroot.rotation_euler=(p.get('nod',0),0,p.get('turn',0));headroot.keyframe_insert('location',frame=f+1);headroot.keyframe_insert('rotation_euler',frame=f+1)
         hz=p['hips'][2];L=p.get('lean',0);cl,sl=math.cos(L),math.sin(L)
         body.location=(0,-.22*sl,hz+.22*cl);body.rotation_euler=(L,0,0);body.keyframe_insert('location',frame=f+1);body.keyframe_insert('rotation_euler',frame=f+1)
         for o,original in detail_positions:
@@ -325,6 +354,9 @@ def build_character(c,duration=3,fps=30):
         for key,o in joints.items():o.location=p[key];o.keyframe_insert('location',frame=f+1)
         for key,o in anchors.items():o.location=p[key];o.keyframe_insert('location',frame=f+1)
         anchors['right_wrist'].rotation_euler.x=p['grip_angle'];anchors['right_wrist'].keyframe_insert('rotation_euler',frame=f+1)
+        if blinkers and expr not in ('sleep',):   # a blink every ~3 s, out of step between characters
+            k=(f+sum(map(ord,ident))*7)%(round(fps*3.1));sz=.12 if k in (1,2) else .55 if k in (0,3) else 1.0
+            for e in blinkers:e.scale.z=e['z0']*sz if 'z0' in e else e.scale.z;e.keyframe_insert('scale',frame=f+1)
         if mouth is not None and expr=='talk':
             shape=face_shape(expr,f/fps);mouth.scale=(shape['width'],.016,shape['height']);mouth.keyframe_insert('scale',frame=f+1)
         for o,a,b in segments:

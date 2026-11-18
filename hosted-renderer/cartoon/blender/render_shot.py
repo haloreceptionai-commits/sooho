@@ -279,7 +279,9 @@ def character(c):
 
 
 # ---------------------------------------------------------------- camera
-def ease(t): return t * t * (3 - 2 * t)
+def ease(t):
+    """Moves start visibly on the first frame and settle at the end (the old smoothstep sat still for the first and last quarter of every shot)."""
+    return 0.4 * t + 0.6 * (1 - (1 - t) ** 2.2)
 
 
 def camera(shot, fps):
@@ -299,13 +301,22 @@ def camera(shot, fps):
         if 'look_to' in c:  # tracking / panning: the aim point travels with the subject
             target.location = la.lerp(lb, ease(f / max(1, n - 1))); target.keyframe_insert('location', frame=f + 1)
     camera_moves(cam, target, shot, fps)
+    if os.environ.get('HANDHELD', '1') != '0':
+        # a living camera: slow, small handheld drift on the lens and its aim (F-curve noise, deterministic per shot)
+        seed = sum(int(abs(v) * 100) for v in c['from'])
+        for ob, amp in ((cam, 0.012 * max(1.0, math.dist(c['from'], c['look_at']) / 3)), (target, 0.008)):
+            if not ob.animation_data or not ob.animation_data.action: ob.keyframe_insert('location', frame=1)
+            for fc in ob.animation_data.action.fcurves:
+                if fc.data_path != 'location': continue
+                nz = fc.modifiers.new('NOISE'); nz.scale = 26 + 7 * fc.array_index; nz.strength = amp * 2; nz.phase = (seed + 17 * fc.array_index) % 97; nz.depth = 1
+    sc = bpy.context.scene; sc.render.use_motion_blur = True; sc.render.motion_blur_shutter = max(sc.render.motion_blur_shutter, 0.35)
     return n
 
 
 def look(scene, shot):
     scene.view_settings.view_transform = 'AgX'
-    scene.view_settings.exposure = {'night': 1.0, 'sunset': 0.75, 'rain': 0.7, 'day': 0.6}.get(shot.get('lighting', 'day'), 0.8)   # bright and cheerful: viewers prefer a light, colourful picture to a dark one   # benchmark brightness is 0.50-0.57
-    for name in (shot.get('grade', 'Medium High Contrast'),):
+    scene.view_settings.exposure = {'night': 1.0, 'sunset': 0.75, 'rain': 0.7, 'day': 0.6}.get(shot.get('lighting', 'day'), 0.8) + float(os.environ.get('GRADE_EXPOSURE', '0'))   # bright and cheerful: viewers prefer a light, colourful picture to a dark one   # benchmark brightness is 0.50-0.57
+    for name in (os.environ.get('GRADE_LOOK') or shot.get('grade', 'Medium High Contrast'),):
         for cand in (f'AgX - {name}', name):
             try: scene.view_settings.look = cand; break
             except TypeError: pass
@@ -336,9 +347,9 @@ def look(scene, shot):
     nt.links.new(blur.outputs[0], inv.inputs[0])
     nt.links.new(img, vig.inputs[1]); nt.links.new(inv.outputs[0], vig.inputs[2]); vig.inputs[0].default_value = 1
     img = vig.outputs[0]
-    grade = nt.nodes.new('CompositorNodeHueSat'); grade.inputs['Saturation'].default_value = 1.32; grade.inputs['Value'].default_value = 1.04   # colour grade: vivid, punchy
+    grade = nt.nodes.new('CompositorNodeHueSat'); grade.inputs['Saturation'].default_value = float(os.environ.get('GRADE_SAT', '1.4')); grade.inputs['Value'].default_value = float(os.environ.get('GRADE_VALUE', '1.04'))   # colour grade: vivid, punchy
     nt.links.new(img, grade.inputs['Image']); img = grade.outputs['Image']
-    cc = nt.nodes.new('CompositorNodeBrightContrast'); cc.inputs['Bright'].default_value = 0.08; cc.inputs['Contrast'].default_value = 0.26   # lifted shadows: nothing crushes to brown or black
+    cc = nt.nodes.new('CompositorNodeBrightContrast'); cc.inputs['Bright'].default_value = float(os.environ.get('GRADE_BRIGHT', '0.0')); cc.inputs['Contrast'].default_value = float(os.environ.get('GRADE_CONTRAST', '0.3'))   # lifted shadows: nothing crushes to brown or black
     nt.links.new(img, cc.inputs['Image']); img = cc.outputs['Image']
     try:
         from overlays import add_overlays
@@ -400,6 +411,20 @@ def build_card(cd, cam, duration=3.0, fps=30):
 
 
 BACKDROP_DEPTH = {'far': 48.0, 'mid': 24.0}
+
+
+def rim_light(shot):
+    """Benchmark edge light: a soft light behind the cast, aimed back toward the lens, draws a bright rim around heads and bodies
+    and separates them from the background; a weak warm fill from the camera side keeps faces open."""
+    c = shot['camera']; xs = [p['pos'][0] for p in shot['cast']]; ys = [p['pos'][1] for p in shot['cast']]
+    cx, cy = sum(xs) / len(xs), sum(ys) / len(ys); fx, fy = c['from'][0] - cx, c['from'][1] - cy; d = math.hypot(fx, fy) or 1.0; fx, fy = fx / d, fy / d
+    mode = shot.get('lighting', 'day'); indoor = bool((shot.get('place') or {}).get('shell'))
+    col = {'night': (0.55, 0.7, 1.0), 'sunset': (1.0, 0.72, 0.45)}.get(mode, (1.0, 0.9, 0.75) if indoor else (0.85, 0.92, 1.0))
+    for name, (ox, oy, z, energy, size, colour) in {'rim': (-fx * 2.4 + fy * .8, -fy * 2.4 - fx * .8, 2.6, 260 if mode != 'night' else 340, 1.2, col),
+                                                    'fill': (fx * 3.0 - fy * 1.5, fy * 3.0 + fx * 1.5, 1.9, 45, 2.5, (1.0, 0.86, 0.7))}.items():
+        bpy.ops.object.light_add(type='AREA', location=(cx + ox, cy + oy, z)); L = bpy.context.active_object; L.name = 'cast ' + name
+        L.data.energy = energy * (0.6 if indoor else 1.0); L.data.size = size; L.data.color = colour
+        L.rotation_euler = (Vector((cx, cy, 1.45)) - L.location).to_track_quat('-Z', 'Y').to_euler()
 
 
 def apply_mood(mode):
@@ -642,6 +667,7 @@ def main():
         build_set(shot['set'], shot.get('lighting', 'day'))
     scenery = set(o for o in bpy.data.objects if o.type == 'MESH')
     roots=[build_character(c,shot['duration'],fps) for c in shot.get('cast', [])]
+    if shot.get('cast') and os.environ.get('RIM_LIGHT', '1') != '0': rim_light(shot)
     if roots:verify_characters(roots,shot['duration'],fps)
     object_roots=[build_object(obj,shot['duration'],fps) for obj in shot.get('objects',[])]
     if object_roots:

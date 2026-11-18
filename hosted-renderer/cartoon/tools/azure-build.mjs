@@ -20,8 +20,9 @@ const tar = path.join(os.tmpdir(), 'cartoon-src.tar.gz');   // os.tmpdir works o
 execFileSync(process.platform === 'win32' ? 'C:/Windows/System32/tar.exe' : 'tar', ['-czf', tar, '--exclude=__pycache__', '--exclude=node_modules', '--exclude=test_*.py', '-C', root, '.']);
 console.log('source', Math.round(statSync(tar).size / 1e6), 'MB');
 const up = await arm('POST', `${base}/listBuildSourceUploadUrl?api-version=2019-06-01-preview`);
-const put = await fetch(up.uploadUrl, { method: 'PUT', headers: { 'x-ms-blob-type': 'BlockBlob' }, body: readFileSync(tar) });
-if (!put.ok) throw Error(`Source upload failed ${put.status}`);
+const retry = async (label, fn, tries = 6) => { for (let i = 1; ; i++) { try { return await fn(); } catch (e) { if (i >= tries) throw e; console.log(`${label} failed (${String(e.cause?.code || e.message).slice(0, 80)}), retry ${i}/${tries - 1}`); await new Promise(res => setTimeout(res, 5000 * i)); } } };   // the home network drops long TLS uploads now and then
+const data = readFileSync(tar);
+await retry('source upload', async () => { const put = await fetch(up.uploadUrl, { method: 'PUT', headers: { 'x-ms-blob-type': 'BlockBlob' }, body: data }); if (!put.ok) throw Error(`Source upload failed ${put.status}`); });
 const tags = (process.argv[2] || 'v1,slim').split(',');
 const runs = [];
 for (const tag of tags) {
@@ -31,7 +32,7 @@ for (const tag of tags) {
   runs.push([tag, run.properties?.runId ?? run.name]); console.log('scheduled', tag, runs.at(-1)[1]);
 }
 for (const [tag, id] of runs) {
-  for (;;) { const r = await arm('GET', `${base}/runs/${id}?api-version=2019-06-01-preview`); const st = r.properties.status;
+  for (;;) { const r = await retry('poll', () => arm('GET', `${base}/runs/${id}?api-version=2019-06-01-preview`), 20); const st = r.properties.status;
     if (['Succeeded', 'Failed', 'Canceled', 'Error', 'Timeout'].includes(st)) { console.log(tag, st); if (st !== 'Succeeded') process.exitCode = 1; break; }
     await new Promise(res => setTimeout(res, 15000)); }
 }

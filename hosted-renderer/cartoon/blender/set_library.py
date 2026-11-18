@@ -3,6 +3,7 @@
 Only whitelisted kits/models/maps load; never a URL or a caller-selected path.
 """
 import json
+import os
 import math
 from pathlib import Path
 import bpy
@@ -289,6 +290,11 @@ def lighting(mode, indoor=False):
     nt.links.new(nt.nodes['Background'].outputs[0], mix.inputs[1]); nt.links.new(background.outputs[0], mix.inputs[2])
     nt.links.new(mix.outputs[0], nt.nodes['World Output'].inputs['Surface'])
     nt.nodes['Background'].inputs['Strength'].default_value = (0.45 if indoor else .5) if mode != 'night' else 0.08     # a bright, airy world
+    if not indoor and os.environ.get('PAINTED_SKY', '1') != '0':   # benchmark: the camera sees a saturated painted sky, not a pale photographic one
+        try:
+            from place_modules import build_sky
+            build_sky(mode, keep_light=True)
+        except Exception as e: print('painted sky skipped', str(e)[:120], flush=True)
     bpy.ops.object.light_add(type='AREA', location=(-2, 1, 3.8) if indoor else (-3,-4,7))
     key = bpy.context.active_object; key.rotation_euler = (Vector((0, 6, 1.5)) - key.location).to_track_quat('-Z', 'Y').to_euler()
     key.data.energy = 900 if indoor else 1500; key.data.size = 2.4 if indoor else 3

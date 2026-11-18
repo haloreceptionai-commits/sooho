@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends xz-utils libx11
 ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=all
 WORKDIR /usr/src/app
 COPY blender ./blender
-COPY blender_bridge.py actor.js capture.py ./
+COPY blender_bridge.py actor.js capture.py atmosphere.py ./
+COPY tools/bench-frames.mjs ./tools/
 # Owner-uploaded rigged humans (Quaternius CC0), materialized and checksum-pinned at build: the project keeps only pointers.
 RUN mkdir -p blender/assets/humans \
       && curl -fsSL -o blender/assets/humans/Casual.fbx https://sooha.io/__l5e/assets-v1/$(python3 -c "import json;print(json.load(open('blender/assets/humans/uploaded-woman.fbx.asset.json'))['asset_id'])")/uploaded-woman.fbx \

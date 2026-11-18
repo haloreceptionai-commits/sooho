@@ -40,9 +40,10 @@ class ArtDirector(unittest.TestCase):
 
     def test_running_animals_move_and_people_react(self):
         m = manifest(['The soldiers opened fire but the emus scattered and ran.'], secs=2.5)
-        g = A.plan(m, {'bird.png'})[0]['shot']
+        shots = [x['shot'] for x in A.plan(m, {'bird.png'})]
+        g = next(x for x in shots if x.get('cards'))   # the setup where the emus scatter (lines are cut into ~1.8 s setups)
         self.assertTrue(g['cards'] and all('to' in c for c in g['cards']))
-        self.assertTrue(all(c['action'] != 'run' for c in g['cast']))
+        self.assertTrue(all(c['action'] != 'run' for x in shots for c in x['cast']))
 
     def test_walkers_cross_the_frame(self):
         m = manifest(['The major walked across the plains.'], secs=2.5)
@@ -55,8 +56,9 @@ class ArtDirector(unittest.TestCase):
 
     def test_gunfire_effects_start_on_the_word(self):
         m = manifest(['They waited and then fired.'], secs=2.5)
-        fx = [e for e in A.plan(m)[0]['shot'].get('effects', []) if e['kind'] == 'sparks']
-        self.assertTrue(fx and fx[0]['start'] > 1.0)
+        segs = A.plan(m); fired = [w for w in m['words'] if w['text'].startswith('fired')][0]['start']
+        fx = [(g['start'] / 30 + e['start']) for g in segs for e in g['shot'].get('effects', []) if e['kind'] == 'sparks']
+        self.assertTrue(fx and abs(fx[0] - fired) < 0.35)   # the sparks start on the word, in whichever setup says it
 
     def test_no_money_bag_unless_money_is_spoken(self):
         m = manifest(['The emus ate the wheat.'], secs=2.5); m['shots'][0]['props'] = [{'kind': 'coins', 'place': 'hand', 'motion': 'none', 'asset': ''}]

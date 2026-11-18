@@ -30,7 +30,7 @@ def mix_stems(voice, music, sfx, rate, advanced=False):
         raise ValueError("Narration is silent")
     mr, sr = gated_rms(music, rate), gated_rms(sfx, rate)
     sp = float(np.max(np.abs(sfx)))
-    mg = 0.5 * vr / mr if mr else 0.0
+    mg = (0.24 if advanced else 0.5) * vr / mr if mr else 0.0   # Advanced: the benchmark keeps its music ~16-17 dB under the voice (measured); ours sat ~8 dB under
     sg = min(0.5 * vr / sr, 0.7 * vp / sp) if sr and sp else 0.0
     if advanced:
         # Bounded 20ms envelopes; never move, stretch or filter the accepted voice.
@@ -40,7 +40,7 @@ def mix_stems(voice, music, sfx, rate, advanced=False):
         for first in range(0, len(voice), width):
             last = min(len(voice), first + width)
             active = float(np.sqrt(np.mean(voice[first:last] ** 2))) > vr * .18
-            target = .32 if active else .7
+            target = .42 if active else .75
             alpha = .55 if target < level else .08
             next_level = level + alpha * (target - level)
             envelope[first:last] = np.linspace(level, next_level, last-first)

@@ -13,6 +13,7 @@ from shot_director import compile_one, ZONES  # noqa: E402
 from shot_schema import validate_shot  # noqa: E402
 from place_spec import compile_place, LIGHTING as PLACE_LIGHT, smooth_story_time  # noqa: E402
 import ui_overlays  # noqa: E402
+import atmosphere  # noqa: E402
 
 # Old-engine worlds -> Blender set kits (+ forced lighting).
 WORLD = {'ship': ('ship_deck', None), 'storm_sea': ('ship_deck', 'rain'), 'town': ('village', None), 'market': ('street', None),
@@ -121,8 +122,30 @@ def dip_frames(m):
 
 
 def dip_alpha(bounds, f, half=6):
+    """Legacy cream dip (only when TRANSITION=dip); the benchmark cuts hard with a short whip blur instead."""
+    if os.environ.get('TRANSITION') != 'dip': return 0.0
     d = min((abs(f - b) for b in bounds), default=999)
     return max(0.0, 1 - d / half) * 0.92
+
+
+def whip_strength(bounds, f, half=3):
+    """0..1 horizontal whip blur in the 3 frames either side of a place change (strongest on the cut)."""
+    if os.environ.get('TRANSITION', 'whip') != 'whip': return 0.0
+    d = min((f - b + .5 for b in bounds), key=abs, default=999)
+    return max(0.0, 1 - abs(d) / half)
+
+
+def whip(img, k):
+    """A fast pan blur across the frame: averaged sideways copies, slightly brighter at the peak, like a whip pan between places."""
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(img).astype(np.float32); W = a.shape[1]; span = int(W * .22 * k)
+    if span < 4: return img
+    acc = np.zeros_like(a); n = 0
+    for dx in range(-span, span + 1, max(1, span // 12)):
+        acc += np.roll(a, dx, axis=1); n += 1
+    out = acc / n * (1 + .08 * k)
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8))
 
 
 def caption_at(m, f):
@@ -270,6 +293,11 @@ def render_range(manifest_path, web, out, first, last, card_dir):
             img = Image.open(tmp / f'f_{local[f]:05d}.png').convert('RGB').resize((1080, 1920), Image.LANCZOS)
             alpha = dip_alpha(bounds, f)
             if alpha > 0: img = Image.blend(img, Image.new('RGB', img.size, CREAM), alpha)
+            wk = whip_strength(bounds, f)
+            if wk > 0: img = whip(img, wk)
+            if os.environ.get('ATMOSPHERE', '1') != '0':
+                try: img = atmosphere.draw(img, f, atmosphere.kind_for(shot), seed=i)
+                except Exception as e: print(json.dumps({'atmosphere_skipped': str(e)[:160]}), flush=True)
             ev = ui_overlays.active(ui_events, f)
             if ev:
                 try: img = ui_overlays.draw(img, ui_events, f, ui_overlays.target_px(shot, local[f], img.size) if ev['kind'] == 'highlight' else None)

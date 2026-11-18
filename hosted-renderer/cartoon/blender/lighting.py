@@ -4,10 +4,11 @@ import math, os
 import bpy
 
 RIG = {  # mode: key colour, key energy, rim colour, rim energy, pool colour, pool watts, ambient strength
-    'day': ((1.0, 0.93, 0.80), 3.6, (1.0, 0.85, 0.65), 1.6, (1.0, 0.9, 0.7), 260, 1.15),
-    'sunset': ((1.0, 0.70, 0.42), 3.4, (1.0, 0.5, 0.35), 2.2, (1.0, 0.75, 0.45), 320, 1.0),
-    'night': ((0.5, 0.66, 1.0), 1.9, (0.5, 0.72, 1.0), 3.2, (1.0, 0.72, 0.4), 640, 0.85),
-    'rain': ((0.8, 0.86, 0.95), 2.4, (0.7, 0.8, 0.95), 1.4, (0.95, 0.9, 0.8), 240, 1.0),
+    # ambient and pool halved (measured against the benchmark): the old 'lifted' fill flattened every shot into a milky, shadowless picture
+    'day': ((1.0, 0.93, 0.80), 3.6, (1.0, 0.85, 0.65), 1.6, (1.0, 0.9, 0.7), 105, 0.58),
+    'sunset': ((1.0, 0.70, 0.42), 3.4, (1.0, 0.5, 0.35), 2.2, (1.0, 0.75, 0.45), 130, 0.5),
+    'night': ((0.5, 0.66, 1.0), 1.9, (0.5, 0.72, 1.0), 3.2, (1.0, 0.72, 0.4), 420, 0.6),
+    'rain': ((0.8, 0.86, 0.95), 2.4, (0.7, 0.8, 0.95), 1.4, (0.95, 0.9, 0.8), 120, 0.6),
 }
 
 
@@ -20,6 +21,8 @@ def _sun(name, rot, color, energy, angle=4.0):
 def apply_rig(mode, cast_center, has_cast):
     if os.environ.get('ADVANCED_RIG', 'on') == 'off': return False
     key_c, key_e, rim_c, rim_e, pool_c, pool_w, amb = RIG.get(mode, RIG['day'])
+    E = lambda k, v: v * float(os.environ.get(k, '1'))   # tuning knobs (multipliers), default unchanged
+    key_e, rim_e, pool_w, amb = E('RIG_KEY', key_e), E('RIG_RIM', rim_e), E('RIG_POOL', pool_w), E('RIG_AMBIENT', amb)
     for o in list(bpy.data.objects):                       # replace the legacy suns so the rig is the only directional light
         if o.type == 'LIGHT' and o.data.type == 'SUN': bpy.data.objects.remove(o, do_unlink=True)
     _sun('rig key', (math.radians(48), 0, math.radians(-38)), key_c, key_e)                # warm, from the upper left front
