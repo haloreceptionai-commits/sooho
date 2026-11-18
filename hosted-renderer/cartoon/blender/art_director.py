@@ -68,7 +68,7 @@ def travel_width_per_s(cam, dur):
     return (abs(d0 - d1) / fw * 0.5 + lateral / fw + turn / (2 * math.atan(th * 9 / 16))) / max(0.2, dur)
 
 
-def normalize_travel(cam, dur, lo=0.16, hi=0.45):
+def normalize_travel(cam, dur, lo=0.26, hi=0.5):
     """Every shot travels at the benchmark's pace (it averages ~0.28 frame widths per second), never so fast it is hard to follow:
     scale the move into the 0.16-0.45 band. A shot with too little travel gets its own move stretched (up to 4x); one with none gets a push with a sideways arc."""
     ws = travel_width_per_s(cam, dur); f = cam['from']; la = cam['look_at']
@@ -80,7 +80,7 @@ def normalize_travel(cam, dur, lo=0.16, hi=0.45):
         if 'to' in cam and math.dist(f, cam['to']) > 0.05 and ws > 0.01: scale(min(4.0, lo / ws))
         else:
             tw = [la[i] - f[i] for i in range(3)]; d = math.hypot(tw[0], tw[1]) or 1.0; side = [-tw[1] / d, tw[0] / d]
-            arc = 0.12 * math.dist(f, la)
+            arc = 0.3 * math.dist(f, la)
             cam['to'] = [round(f[0] + tw[0] * 0.25 + side[0] * arc, 3), round(f[1] + tw[1] * 0.25 + side[1] * arc, 3), round(f[2] + tw[2] * 0.25, 3)]
             if travel_width_per_s(cam, dur) < lo: scale(min(4.0, lo / max(0.01, travel_width_per_s(cam, dur))))
     return cam

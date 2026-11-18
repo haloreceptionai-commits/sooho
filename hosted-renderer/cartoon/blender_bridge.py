@@ -138,7 +138,7 @@ def whip_strength(bounds, f, half=3):
 def whip(img, k):
     """A fast pan blur across the frame: averaged sideways copies, slightly brighter at the peak, like a whip pan between places."""
     import numpy as np
-    from PIL import Image
+    from PIL import Image, ImageFilter
     a = np.asarray(img).astype(np.float32); W = a.shape[1]; span = int(W * .22 * k)
     if span < 4: return img
     acc = np.zeros_like(a); n = 0
@@ -207,7 +207,7 @@ def engine_env():
 def render_range(manifest_path, web, out, first, last, card_dir):
     import threading
     from concurrent.futures import ThreadPoolExecutor
-    from PIL import Image
+    from PIL import Image, ImageFilter
     from capture import fingerprint, atomic_json, valid_frame
     m = json.loads(Path(manifest_path).read_text()); out = Path(out); out.mkdir(parents=True, exist_ok=True)
     smooth_story_time(m)
@@ -291,6 +291,8 @@ def render_range(manifest_path, web, out, first, last, card_dir):
         k, i, a0, _, want = job; tmp, shot, local = drawn
         for f in want:
             img = Image.open(tmp / f'f_{local[f]:05d}.png').convert('RGB').resize((1080, 1920), Image.LANCZOS)
+            # the render is drawn at 810x1440 and upscaled: a light unsharp pass puts back some of the edge detail the upscale softens
+            img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=70, threshold=2))
             alpha = dip_alpha(bounds, f)
             if alpha > 0: img = Image.blend(img, Image.new('RGB', img.size, CREAM), alpha)
             wk = whip_strength(bounds, f)
