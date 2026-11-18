@@ -11,7 +11,7 @@ import { groupTakes, joinWavs } from './wav';
 import { composeInkCard, pickInkCards, type InkCard } from "@/lib/ink-card";
 import { planInkBeats, planInkCards } from "@/lib/ink.functions";
 import { splitInkBeats } from "@/lib/ink-beats";
-import { INK_HERO } from "@/lib/styles";
+import { INK_HERO, styleAnchor } from "@/lib/styles";
 import { finalScore, hookIssues, hookTextIssues, MICRO_SEC, rankHookTypes, sceneStarts, speakable, spellNumbers, splitSentences, spokenBy, storyScore, validateStory } from "@/lib/story-v2";
 import { wordBudget } from "@/lib/plain-words";
 import { renderVideo, type RenderScene, type VoiceChunk } from "@/lib/renderer";
@@ -24,9 +24,12 @@ import { writerCalls } from '@/lib/shorts-writer/calls';
 import { runExactScript, runShortsV4 } from '@/lib/shorts-writer/stage';
 import { autoFixPlan, eligibleHooks, preferRepair, preferAdvancedRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
-import { documentaryChapter, documentaryColdOpen, documentaryDossier, documentaryEnabled, documentaryOutline, documentaryPackaging, documentarySag, documentaryVisuals, submitDocumentary } from '@/lib/documentary/documentary.functions';
+import { documentaryChapter, documentaryCast, documentaryColdOpen, documentaryDossier, documentaryEnabled, documentaryPaintCutout, documentaryOutline, documentaryPackaging, documentarySag, documentaryVisuals, submitDocumentary } from '@/lib/documentary/documentary.functions';
 import { writeLongForm, type LongFormCalls } from '@/lib/documentary/long-form';
 import { buildManifest } from '@/lib/documentary/build-manifest';
+import { buildCast, eraOf, type CastEntry } from '@/lib/documentary/cast';
+import { BACKGROUND_RULE } from '@/lib/documentary/cast';
+import { cutoutName, paintCutouts } from '@/lib/documentary/cast-paint';
 import { describeWeak } from '@/lib/documentary/boredom';
 import type { AiScenePlan } from '@/lib/documentary/types';
 
@@ -390,6 +393,18 @@ export async function runVideo(id: string, input: VideoInput) {
     const n = plan.scenes.length;
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${gate.score}/100 · ${n} scenes` });
 
+    // Documentary: who is in the story? Named people become cartoon cutouts of themselves, roles (soldier, sailor) become human cartoon faces of the era.
+    let cast: CastEntry[] = [];
+    const era = eraOf(plan.scenes.map(sc => sc.narration));
+    if (docMode) {
+      up({ detail: 'Casting the people of the story…' });
+      const lines = plan.scenes.map(sc => sc.narration);
+      const names = [...(plan.hero?.name ? [{ name: plan.hero.name, role: plan.hero.role }] : []), ...plan.characters.map(c => ({ name: c.name, role: c.role, look: c.look }))];
+      const ai = await withRetry(() => documentaryCast({ data: { topic: input.topic, era, lines: lines.map((text, index) => ({ index, text: text.slice(0, 380) })).slice(0, 400), known: names.map(x => x.name).slice(0, 20), deployment: s.scriptDeployment } }), 2, 16000, 5 * 60_000)
+        .then(r => (r as { cast: CastEntry[] }).cast).catch((e: unknown) => { console.warn('Casting skipped, using the built-in finders:', e); return undefined; });
+      cast = buildCast({ lines, era, ai, names });
+      up({ detail: cast.length ? `Cast: ${cast.map(c => c.name).join(', ')}` : 'No named people in this story' });
+    }
     if (usesCartoonWorker(input.engine)) {
       const long = input.format !== 'short';
       // Owner approves the preview before the full render, so the best draft continues; leftover script notes stay on the video as checks.
@@ -492,6 +507,11 @@ export async function runVideo(id: string, input: VideoInput) {
     const media = await mediaCache(id);
     // the cut plan (beats, cards, camera) only needs the narration, so it is asked while the pictures and voice are being made
     const visualPlan = docMode ? planDocumentaryVisuals(plan.scenes.map(sc => sc.narration), input.topic, plan.documentary?.sources ?? [], s.scriptDeployment).catch(() => [] as AiScenePlan[]) : null;
+    const castP = docMode && cast.length ? paintCutouts(cast, era, {
+      have: media.names(), limit: 3, look: styleAnchor(input.style), report: detail => up({ detail }),
+      save: (name, bytes) => media.put(name, bytes.buffer as ArrayBuffer, 'image/png'),
+      paint: prompts => withRetry(() => documentaryPaintCutout({ data: { prompts, deployment: s.imageDeployment } }), 5, 30000) as Promise<{ image: string; tried: number }>,
+    }).catch((e: unknown) => { console.warn('Cutouts skipped:', e); return { painted: [] as CastEntry[], log: [] as string[] }; }) : null;
     await Promise.all([
       pool(groups, 3, async (g, gi) => {
         const text = g.map((i) => plan.scenes[i]!.narration.trim()).join(" ");
@@ -506,7 +526,7 @@ export async function runVideo(id: string, input: VideoInput) {
       (async () => {
         // 1) character sheet keeps the cast identical in every shot
         let sheet: string | undefined;
-        if (plan.characters.length) {
+        if (plan.characters.length && !docMode) {
           try {
             const kept = await media.get("sheet.jpg");
             if (kept) sheet = bufToB64(kept);
@@ -569,7 +589,7 @@ export async function runVideo(id: string, input: VideoInput) {
             tick("Painting scenes");
             return;
           }
-          const people = ink ? /\bhero\b/i.test(sc.image_prompt) : sc.shot === "action" || sc.shot === "face";
+          const people = !docMode && (ink ? /\bhero\b/i.test(sc.image_prompt) : sc.shot === "action" || sc.shot === "face");
           if (ink) {
             // Ink explainer: one literal subject per picture, the stick-figure hero only when the phrase is about him
             const inkShot = `${sc.image_prompt} ${people ? `The hero is drawn exactly like the reference: ${INK_HERO}.` : "No hero in this picture."} Any other people are minimal stick figures (round heads, thin black stick limbs) in period clothing. Simple clean background, one clear subject.`;
@@ -582,9 +602,9 @@ export async function runVideo(id: string, input: VideoInput) {
           const castAll = sc.characters.map((nm) => looks.get(nm.toLowerCase())).filter(Boolean).map((c) => `${c!.name}: ${c!.look}`).join("; ");
           const cast = people ? castAll : "";
           const shot = [
-            SHOT[sc.shot] ?? "", ANGLE[sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
-            people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
-            COLOR[sc.color] ?? "", LIGHT,
+            SHOT[docMode && (sc.shot === "face" || sc.shot === "action") ? "wide" : sc.shot] ?? "", ANGLE[docMode && ["close", "over_shoulder", "pov"].includes(sc.angle) ? "wide" : sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
+            people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll && !docMode ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
+            COLOR[sc.color] ?? "", LIGHT, docMode ? BACKGROUND_RULE : "",
           ].filter(Boolean).join(" ");
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
@@ -622,12 +642,15 @@ export async function runVideo(id: string, input: VideoInput) {
       const dm = plan.documentary;
       const dscenes = plan.scenes as (typeof plan.scenes[number] & { cold?: boolean; ambience?: string })[];
       const ai = (await visualPlan) ?? [];
+      const painted = castP ? await castP : { painted: [] as CastEntry[], log: [] as string[] };
       const { manifest, report: bored } = buildManifest({
         title: plan.title, subtitle: dm?.subtitle, scenes: dscenes.map(sc => ({ narration: sc.narration, mood: sc.mood === 'reveal' ? 'reveal' as const : 'tension' as const, ambience: sc.ambience, cold: sc.cold, reveal: sc.beat === 'reveal' || sc.beat === 'payoff', beat: sc.beat })),
         chapters: (dm?.chapters ?? [{ scene: 0, title: plan.title, music: 'suspense' }]).map(c => ({ scene: c.scene, title: c.title, music: c.music as 'lofi' | 'epic' | 'suspense' | 'sad' })),
         sceneImage: plan.scenes.map((_, i) => i), images: cp.images, voice: cp.voice, ai, sources: dm?.sources, captions: s.burnCaptions,
+        cast: painted.painted, cutouts: painted.painted.map(c => media.path(cutoutName(c.id))),
       });
       const weak = describeWeak(bored);
+      if (painted.log.length) up({ checks: [...(getState().videos.find(v => v.id === id)?.checks ?? []), ...painted.log].slice(0, 100) });
       up({ boredom: { score: bored.score, pass: bored.pass, weakest: weak, metrics: bored.metrics }, checks: [...(getState().videos.find(v => v.id === id)?.checks ?? []), ...(bored.pass ? [] : [`Boredom meter ${bored.score}/100: ${weak.join(' | ')}`])].slice(0, 100) });
       const request = { videoId: id, doc: manifest, checkpoint: { gate: cp.gate, report: cp.report, hookType: cp.hookType, continuity: cp.continuity, plan: { characters: plan.characters } } };
       up({ documentaryCheckpoint: request as never, detail: 'Sending to the documentary renderer…' });
@@ -685,6 +708,8 @@ async function mediaCache(id: string) {
       const { data } = await bucket.download(`${root}/${name}`);
       return data ? await data.arrayBuffer() : null;
     },
+    names: () => new Set(have),
+    path: (name: string) => `${root}/${name}`,
     async put(name: string, body: ArrayBuffer, contentType: string) {
       const { error } = await bucket.upload(`${root}/${name}`, body, { upsert: true, contentType });
       if (error) throw Error('Paid media could not be saved. Do not regenerate; check your connection.');

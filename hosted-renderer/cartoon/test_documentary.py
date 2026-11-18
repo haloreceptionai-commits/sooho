@@ -18,6 +18,7 @@ import cv2  # noqa: E402
 import doc_align as AL  # noqa: E402
 import doc_audio as AU  # noqa: E402
 import doc_camera as CAM  # noqa: E402
+import doc_cast as CAST  # noqa: E402
 import doc_cards as CARDS  # noqa: E402
 import doc_geo as GEO  # noqa: E402
 import doc_gfx as G  # noqa: E402
@@ -244,6 +245,16 @@ class Camera(unittest.TestCase):
         near = float(np.abs(a[:, 3 * W // 4:].astype(int) - b[:, 3 * W // 4:].astype(int)).mean())
         self.assertGreater(near, far)
 
+    def test_an_unreadable_depth_file_never_stops_a_render(self):
+        import doc_render as R
+        d = tempfile.mkdtemp()
+        os.makedirs(os.path.join(d, 'img')); os.makedirs(os.path.join(d, 'depth'))
+        cv2.imwrite(os.path.join(d, 'img', 'img-0.jpg'), self.img())
+        open(os.path.join(d, 'depth', 'depth-0.png'), 'wb').write(b'owner-host-name')   # what a claim marker looks like
+        shots = R.load_shots({'images': ['a']}, os.path.join(d, 'img'), os.path.join(d, 'depth'), W, H)
+        self.assertEqual(shots[0].frame(.5, CAM.plan_move('push')).shape, (H, W, 3))
+        shutil.rmtree(d)
+
     def test_missing_model_falls_back(self):
         os.environ[CAM.MODEL_ENV] = '/nonexistent.onnx'
         CAM._SESSION, CAM._SESSION_TRIED = None, False
@@ -317,6 +328,73 @@ class Audio(unittest.TestCase):
         out = AU.read_wav(os.path.join(d, 'b.wav'))
         self.assertGreater(float(np.sqrt((out ** 2).mean())), float(np.sqrt((x ** 2).mean())) * 2)   # and was brought up
         shutil.rmtree(d)
+
+
+def cartoon_person(path, w=400, h=600):
+    """A transparent cartoon cutout (head, body, legs) for tests: BGRA PNG with a soft edge."""
+    img = np.zeros((h, w, 4), np.uint8)
+    cv2.ellipse(img, (w // 2, int(h * .2)), (int(w * .2), int(h * .15)), 0, 0, 360, (190, 210, 245, 255), -1, cv2.LINE_AA)       # head
+    cv2.rectangle(img, (int(w * .3), int(h * .33)), (int(w * .7), int(h * .72)), (40, 60, 200, 255), -1, cv2.LINE_AA)           # coat
+    cv2.rectangle(img, (int(w * .33), int(h * .72)), (int(w * .47), int(h * .97)), (60, 50, 40, 255), -1, cv2.LINE_AA)          # legs
+    cv2.rectangle(img, (int(w * .53), int(h * .72)), (int(w * .67), int(h * .97)), (60, 50, 40, 255), -1, cv2.LINE_AA)
+    cv2.imwrite(path, img)
+
+
+class Cast(unittest.TestCase):
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        cartoon_person(os.path.join(self.d, 'cast-0.png'))
+        self.m = {'cutouts': ['c'], 'cast': [{'id': 'queen', 'name': 'Queen Elizabeth I', 'kind': 'figure', 'cutout': 0}]}
+
+    def tearDown(self):
+        shutil.rmtree(self.d)
+
+    def test_clean_trims_to_the_figure_and_rejects_pictures_without_transparency(self):
+        raw = cv2.imread(os.path.join(self.d, 'cast-0.png'), cv2.IMREAD_UNCHANGED)
+        out = CAST.clean(raw)
+        self.assertLess(out.shape[1], raw.shape[1])
+        self.assertIsNone(CAST.clean(np.zeros((50, 50, 3), np.uint8)))
+        self.assertIsNone(CAST.clean(None))
+
+    def test_a_cutout_stands_on_its_side_and_slides_in_only_when_it_enters(self):
+        art = CAST.CastArt(self.m, self.d)
+        bg = np.full((360, 640, 3), 90, np.uint8)
+        entering = CAST.draw_cast(bg.copy(), [{'id': 'queen', 'side': 'left', 'enter': True}], .1, art)
+        settled = CAST.draw_cast(bg.copy(), [{'id': 'queen', 'side': 'left', 'enter': True}], 1.5, art)
+        staying = CAST.draw_cast(bg.copy(), [{'id': 'queen', 'side': 'left', 'enter': False}], .1, art)
+        changed = lambda f: np.abs(f.astype(int) - bg.astype(int)).sum(axis=2) > 12
+        left, right = changed(settled)[:, :320].sum(), changed(settled)[:, 320:].sum()
+        self.assertGreater(left, 5000)
+        self.assertEqual(right, 0)
+        energy = lambda f: np.abs(f.astype(int) - bg.astype(int)).sum()
+        self.assertLess(energy(entering), energy(settled) * .6)     # still fading in and below the frame edge
+        self.assertGreater(energy(staying), energy(settled) * .85)  # already standing there: no slide, no fade
+        feet = np.nonzero(changed(settled).any(axis=1))[0].max()
+        self.assertGreater(feet, 340)                                           # stands at the bottom of the frame
+
+    def test_missing_or_broken_cutout_is_skipped_not_fatal(self):
+        art = CAST.CastArt({'cutouts': ['c'], 'cast': [{'id': 'x', 'name': 'X', 'kind': 'role', 'cutout': 3}]}, self.d)
+        bg = np.full((120, 200, 3), 50, np.uint8)
+        self.assertTrue((CAST.draw_cast(bg.copy(), [{'id': 'x', 'side': 'right'}, {'id': 'nobody', 'side': 'left'}], 1, art) == bg).all())
+
+    def test_timeline_marks_who_enters_and_validates_the_cast(self):
+        m = sample_manifest()
+        m['cutouts'] = ['c']; m['cast'] = [{'id': 'queen', 'name': 'Queen', 'kind': 'figure', 'cutout': 0}]
+        for b in m['beats']:
+            if b['visual']['type'] == 'card':    # no card in between: the same person stays on the same side across neighbouring beats
+                b['visual'] = {'type': 'image', 'src': 0, 'move': 'drift'}
+            b['cast'] = [{'id': 'queen', 'side': 'left'}]
+        aligned, dur = sample_alignment(m)
+        tl = TL.build(m, aligned, dur)
+        flags = [b['cast'][0]['enter'] for b in tl['beats'] if b.get('cast')]
+        self.assertTrue(flags[0])
+        self.assertIn(False, flags)           # a beat right after another with the same person on the same side does not slide again
+        bad = json.loads(json.dumps(m)); bad['beats'][0]['cast'] = [{'id': 'ghost', 'side': 'left'}]
+        with self.assertRaises(ValueError):
+            TL.validate_manifest(bad)
+        bad = json.loads(json.dumps(m)); bad['cast'][0]['cutout'] = 4
+        with self.assertRaises(ValueError):
+            TL.validate_manifest(bad)
 
 
 class FullRender(unittest.TestCase):

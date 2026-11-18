@@ -16,6 +16,8 @@ export const documentaryRequest = z.object({
     pauses: z.array(z.object({ scene: z.number().int(), after_word: z.number().int(), sec: z.number().min(.1).max(1.6), hush: z.boolean().optional() })).max(200),
     music: z.array(z.object({ scene: z.number().int(), mood: z.enum(['lofi', 'epic', 'suspense', 'sad']) })).max(60),
     captions: z.boolean(),
+    cutouts: z.array(assetPath).max(16).optional(),
+    cast: z.array(z.object({ id: z.string().regex(/^[a-z0-9-]{1,24}$/), name: z.string().max(60), kind: z.enum(['figure', 'role']), cutout: z.number().int().min(0).max(15) })).max(16).optional(),
   }),
   checkpoint: z.object({
     gate: z.object({ score: z.number().min(0).max(100), ready: z.boolean(), parts: z.record(z.number()), blockers: z.array(z.string()).max(100) }),

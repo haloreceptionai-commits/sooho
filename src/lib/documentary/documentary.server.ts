@@ -1,6 +1,8 @@
 // Server-side AI steps of the long-form pipeline. Each one asks for strict JSON, checks it, and never trusts a model with numbers or places:
 // whatever it proposes is verified against the narration again before it reaches a card (plan-visuals.ts).
 import { azureJson } from '../pipeline-operations.server';
+import { azureOpenAIRequest } from '../azure-openai.server';
+import { castPrompt, castSchema, parseCast, type CastEntry, type Era } from './cast';
 import { packagingPrompt, packagingSchema, type PackagingConcept } from './packaging';
 import { chapterPrompt, chapterSchema, coldOpenPrompt, coldOpenSchema, dossierPrompt, dossierSchema, outlinePrompt, outlineSchema, patchSchema, sagPrompt, chapterCount,
   type ChapterDraft, type Dossier, type Outline } from './long-script';
@@ -60,4 +62,22 @@ export async function planVisualsOperation({ data }: { data: { scenes: { index: 
   const p = visualPrompt(data.scenes, data.topic, data.sources);
   const r = await azureJson<VisualAnswer>(data.deployment, p.system, p.user, 'visuals', visualSchema, 'Visual plan', 'low');
   return parseVisualPlan(r, new Set(data.scenes.map(s => s.index)));
+}
+
+// ------------------------------------------------------------------------------------------------ the cast
+export async function castOperation({ data }: { data: { topic: string; era: Era; lines: { index: number; text: string }[]; known: string[]; deployment: string } }): Promise<{ cast: CastEntry[] }> {
+  const p = castPrompt(data.topic, data.era, data.lines, data.known);
+  const r = await azureJson<{ cast: { name: string; kind: string; label: string; look: string }[] }>(data.deployment, p.system, p.user, 'cast', castSchema, 'Casting', 'low');
+  return { cast: parseCast(r, data.lines.map(l => l.text), data.era) };
+}
+
+/** One transparent cutout. `prompts` are tried in order: a 400 (the image service refused, usually because of a real person) moves on to the next, plainer one. */
+export async function paintCutoutOperation({ data }: { data: { prompts: string[]; deployment: string } }): Promise<{ image: string; tried: number }> {
+  if (!/^[A-Za-z0-9._-]{1,64}$/.test(data.deployment)) throw new Error('Invalid deployment name');
+  for (let i = 0; i < data.prompts.length; i++) {
+    const res = await azureOpenAIRequest(`${data.deployment}/images/generations`, { prompt: data.prompts[i]!.slice(0, 3900), size: '1024x1536', quality: 'medium', background: 'transparent', output_format: 'png', n: 1 });
+    if (res.ok) { const j = await res.json() as { data?: { b64_json?: string }[] }; const b = j.data?.[0]?.b64_json; if (b) return { image: b, tried: i }; continue; }
+    if (res.status === 429 || res.status >= 500) throw new Error(`[${res.status}] The image service is busy`);   // the caller retries these; they are not refusals
+  }
+  throw new Error('The image service refused every version of this character');
 }

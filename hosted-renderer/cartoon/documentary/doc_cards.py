@@ -448,7 +448,9 @@ def lower_third(W, H, d, t, dur):
     nf, sf = font('oswald', 64 * s, 700), font('inter', 34 * s, 600)
     w = max(text_size(name.upper(), nf)[0], text_size(sub, sf)[0] if sub else 0) + 70 * s
     h = nf.size * 1.12 + (sf.size * 1.4 if sub else 8 * s) + 18 * s
-    x = W * .06 - (1 - slide) * (w + 80 * s) - out * (w + 80 * s)
+    right = d.get('side') == 'right'   # next to a cutout, the label stands on the other side of the frame
+    gone = (1 - slide) * (w + 80 * s) + out * (w + 80 * s)
+    x = (W - w - W * .06 + gone) if right else (W * .06 - gone)
     y = H * .76
     L.rect(x, y, w, h, (12, 14, 22), alpha=225, radius=int(8 * s))
     L.rect(x, y, 10 * s, h, GOLD, radius=int(4 * s))

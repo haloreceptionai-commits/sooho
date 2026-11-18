@@ -1,6 +1,7 @@
 // Builds the documentary manifest the Azure worker renders: beats from the visual planner, chapter openers, a title after the cold open,
 // planned breaths of silence before reveals, a music mood per chapter and ambience per scene, then measures it with the boredom meter.
 import { boredomReport, estimateTimes, type BoredomReport } from './boredom';
+import { attachCast, type CastEntry } from './cast';
 import { planVideo, type SceneInput } from './plan-visuals';
 import { DOC_WPS, type AiScenePlan, type DocBeat, type DocManifest, type DocScene, type Mood, type MusicMood } from './types';
 
@@ -14,6 +15,9 @@ export interface BuildInput {
   images: string[];
   voice: { path: string; scenes: number[] }[];
   ai?: AiScenePlan[] | undefined;
+  /** People of the story whose cutouts were painted, and where those pictures are stored (same order as `cast`). */
+  cast?: CastEntry[] | undefined;
+  cutouts?: string[] | undefined;
   sources?: string[] | undefined;
   width?: number | undefined; height?: number | undefined; captions?: boolean | undefined;
 }
@@ -45,7 +49,7 @@ export function buildManifest(inp: BuildInput): { manifest: DocManifest; report:
     index: i, text: s.narration.trim(), mood: s.mood, cold: s.cold, chapterStart: chapterAt.has(i) && i > 0, image: inp.sceneImage[i]!, sources: inp.sources,
     ai: inp.ai?.find(p => p.scene === i),
   }));
-  const beats = planVideo(sceneInputs);
+  const beats = attachCast(planVideo(sceneInputs), inp.scenes.map(s => s.narration.trim()), inp.cast ?? []);
   // chapter openers sit on the first beat of the chapter; the video's own title sits on the first beat after the cold open
   const first = (scene: number): DocBeat | undefined => beats.find(b => b.scene === scene);
   for (const [scene, c] of chapterAt) {
@@ -87,7 +91,7 @@ export function buildManifest(inp: BuildInput): { manifest: DocManifest; report:
   const scenes: DocScene[] = inp.scenes.map(s => ({ text: s.narration.trim(), ...(s.mood ? { mood: s.mood } : {}), ...(s.ambience && AMBIENT.has(s.ambience) ? { ambience: s.ambience } : {}) }));
   const manifest: DocManifest = {
     kind: 'documentary', version: 1, width: inp.width ?? 1920, height: inp.height ?? 1080, title: inp.title,
-    images: inp.images, voice: inp.voice, scenes, beats, pauses, music: music.filter((m, i, a) => a.findIndex(x => x.scene === m.scene) === i), captions: inp.captions !== false,
+    images: inp.images, voice: inp.voice, scenes, beats, pauses, ...(inp.cast?.length && inp.cutouts?.length ? { cutouts: inp.cutouts, cast: inp.cast.map((c, i) => ({ id: c.id, name: c.name, kind: c.kind, cutout: i })) } : {}), music: music.filter((m, i, a) => a.findIndex(x => x.scene === m.scene) === i), captions: inp.captions !== false,
   };
   return { manifest, report: boredomReport(manifest) };
 }

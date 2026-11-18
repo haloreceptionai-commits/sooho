@@ -63,6 +63,12 @@ def validate_manifest(m):
         for o in b.get('overlays') or []:
             if o.get('kind') not in OVERLAYS and o.get('kind') not in KINDS:
                 raise ValueError('Unknown overlay')
+        for c in b.get('cast') or []:
+            if c.get('id') not in {x.get('id') for x in (m.get('cast') or [])} or c.get('side') not in ('left', 'right', 'center'):
+                raise ValueError('A beat shows someone who is not in the cast')
+    for c in m.get('cast') or []:
+        if not isinstance(c.get('cutout'), int) or not 0 <= c['cutout'] < len(m.get('cutouts') or []):
+            raise ValueError('A cast member points at a missing cutout')
     return True
 
 
@@ -143,6 +149,11 @@ def build(manifest, aligned, durations):
         end = starts[i + 1] if i + 1 < len(beats) else duration
         end = min(end, duration)
         out.append({**b, 'start': starts[i], 'end': max(end, starts[i] + .3)})
+    # a cutout slides in only when it was not already standing there on the previous beat
+    for i, b in enumerate(out):
+        prev = out[i - 1].get('cast') or [] if i else []
+        if b.get('cast'):
+            b['cast'] = [dict(c, enter=not any(p['id'] == c['id'] and p['side'] == c['side'] for p in prev)) for c in b['cast']]
     duration = max(duration, out[-1]['end'])
     out[-1]['end'] = duration
     return {'duration': duration, 'words': words, 'beats': out, 'edits': edits, 'frames': int(math.ceil(duration * FPS))}

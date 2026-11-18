@@ -27,11 +27,12 @@ def load_shots(manifest, images_dir, depth_dir, W, H, needed=None):
     for i in sorted(needed if needed is not None else range(len(manifest['images']))):
         img = read_rgb(os.path.join(images_dir, f'img-{i}.jpg'))
         dpath = os.path.join(depth_dir, f'depth-{i}.png')
-        if os.path.exists(dpath):
-            d = unpack_depth(cv2.imread(dpath, cv2.IMREAD_UNCHANGED))
+        raw = cv2.imread(dpath, cv2.IMREAD_UNCHANGED) if os.path.exists(dpath) else None
+        if raw is not None and raw.ndim == 2:
+            d = unpack_depth(raw)
             if d.shape[:2] != img.shape[:2]:
                 d = cv2.resize(d, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_CUBIC)
-        else:
+        else:   # missing or unreadable map: work it out here (or fall back to the guessed depth); a render never stops for this
             d = estimate_depth(img)
         shots[i] = StillShot(img, d, W, H)
     return shots

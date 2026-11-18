@@ -54,7 +54,7 @@ def cmd_shard(a):
     W, H = int(m.get('width', 1920)), int(m.get('height', 1080))
     beats = R.beats_in_range(tl, a.first, a.last)
     shots = R.load_shots(m, a.images, a.depth, W, H, R.pictures_for(tl, beats))
-    R.encode_range(Composer(m, tl, shots, W, H, bool(a.captions)), a.first, min(a.last, tl['frames'] - 1), a.out)
+    R.encode_range(Composer(m, tl, shots, W, H, bool(a.captions), cast_dir=a.images), a.first, min(a.last, tl['frames'] - 1), a.out)
     print(json.dumps({'first': a.first, 'last': a.last}))
 
 

@@ -91,6 +91,8 @@ export async function runDocumentary(input) {
   // 1) pictures (every machine needs them to draw its pieces)
   let t0 = Date.now();
   await pool(m.images.map((p, i) => [p, i]), 8, async ([p, i]) => fetchTo(signed(p), path.join(dirs.img, `img-${i}.jpg`)));
+  // cutouts of the people in the story (transparent pictures laid in front of the backgrounds)
+  await pool((m.cutouts || []).map((p, i) => [p, i]), 6, async ([p, i]) => fetchTo(signed(p), path.join(dirs.img, `cast-${i}.png`)));
   lap('pictures', t0);
 
   // 2) narration timing: each take is aligned once, by whichever machine claims it
@@ -130,8 +132,9 @@ export async function runDocumentary(input) {
   // 3) depth for every picture (claimed one by one), shared through the private store
   t0 = Date.now();
   for (let i = 0; i < m.images.length; i++) {
-    if (await store.getValue(`depth-${i}`)) continue;
-    if (!(await store.claim(`depth-${i}`, STALE))) continue;
+    const have = await store.getValue(`depth-${i}`);
+    if (Buffer.isBuffer(have) && have.length > 100 && have.readUInt32BE(0) === 0x89504e47) continue;
+    if (!(await store.claim(`claim-depth-${i}`, STALE))) continue;
     const out = path.join(dirs.depth, `depth-${i}.png`);
     await cli('depth', '--image', path.join(dirs.img, `img-${i}.jpg`), '--out', out);
     await store.setValue(`depth-${i}`, await readFile(out), { contentType: 'image/png' });
@@ -140,9 +143,9 @@ export async function runDocumentary(input) {
   await pool(m.images.map((_, i) => i), 8, async i => {
     for (let wait = 0; ; wait++) {
       const b = await store.getValue(`depth-${i}`);
-      if (Buffer.isBuffer(b)) { await writeFile(path.join(dirs.depth, `depth-${i}.png`), b); return; }
+      if (Buffer.isBuffer(b) && b.length > 100 && b.readUInt32BE(0) === 0x89504e47) { await writeFile(path.join(dirs.depth, `depth-${i}.png`), b); return; }
       if (wait > 120) { console.error('depth missing, drawing without it', i); return; }   // a missing map only means a flatter camera for that picture
-      if (wait && wait % 40 === 0 && await store.claim(`depth-${i}`, STALE)) { return; }
+      if (wait && wait % 40 === 0 && await store.claim(`claim-depth-${i}`, STALE)) { return; }
       await sleep(3000);
     }
   });

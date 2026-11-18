@@ -9,14 +9,16 @@ import numpy as np
 import doc_cards as cards
 import doc_fx as fx
 from doc_camera import plan_move
+from doc_cast import CastArt, draw_cast
 from doc_gfx import GOLD, INK, WHITE, Layer, clamp01, font, over, smooth, text_size, window
 from doc_fx import TRANSITION_SEC
 from doc_timeline import FPS, beat_at, phrases
 
 
 class Composer:
-    def __init__(self, manifest, timeline, shots, W, H, captions=True):
+    def __init__(self, manifest, timeline, shots, W, H, captions=True, cast_dir=None):
         self.m, self.tl, self.shots = manifest, timeline, shots
+        self.art = CastArt(manifest, cast_dir) if (manifest.get('cast') and cast_dir) else None
         self.W, self.H = int(W), int(H)
         self.captions = bool(captions)
         self.paths = {}
@@ -44,7 +46,10 @@ class Composer:
         dur = b['end'] - b['start']
         v = b['visual']
         if v['type'] == 'image':
-            return self._picture(v['src'], bi, tb, dur)
+            pic = self._picture(v['src'], bi, tb, dur)
+            if b.get('cast') and self.art:
+                draw_cast(pic, b['cast'], tb, self.art)
+            return pic
         kind = v['card']
         layer = cards.CARD_FUNCS[kind](self.W, self.H, v.get('data') or {}, tb, dur)
         if kind == 'location':

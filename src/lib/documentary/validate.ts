@@ -29,5 +29,9 @@ export function manifestProblems(m: DocManifest): string[] {
     for (const o of b.overlays ?? []) if (!(OVERLAY_KINDS as readonly string[]).includes(o.kind) && !(CARD_KINDS as readonly string[]).includes(o.kind)) out.push('unknown overlay');
   }
   for (let s = 0; s < m.scenes.length; s++) if (!m.beats.some(b => b.scene === s)) out.push(`scene ${s} has no beat`);
+  const cutouts = m.cutouts ?? [], cast = m.cast ?? [];
+  if (cast.some(c => !Number.isInteger(c.cutout) || c.cutout < 0 || c.cutout >= cutouts.length)) out.push('a cast member points at a missing cutout');
+  const ids = new Set(cast.map(c => c.id));
+  for (const b of m.beats) for (const c of b.cast ?? []) { if (!ids.has(c.id)) out.push('a beat shows a person who is not in the cast'); if (!['left', 'right', 'center'].includes(c.side)) out.push('a cast member has an unknown side'); }
   return [...new Set(out)];
 }

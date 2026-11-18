@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { documentaryRequest, type DocumentaryRequest } from './documentary-job';
 import type { Dossier, Outline } from './long-script';
+import type { Era } from './cast';
 
 const deployment = z.string().regex(/^[A-Za-z0-9._-]{1,64}$/);
 const text = (n: number) => z.string().max(n);
@@ -56,3 +57,12 @@ export const submitDocumentary = createServerFn({ method: 'POST' }).middleware([
 /** True when the Azure fleet is configured for documentary renders (and not switched off with LONGFORM_DOCUMENTARY=off). */
 export const documentaryEnabled = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth])
   .handler(async () => ({ enabled: process.env['LONGFORM_DOCUMENTARY'] !== 'off' && Boolean(process.env['AZURE_RENDER_IMAGE'] && process.env['AZURE_CLIENT_ID'] && process.env['AZURE_BLOB_BASE']) }));
+
+export const documentaryCast = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { topic: string; era: Era; lines: { index: number; text: string }[]; known: string[]; deployment: string }) =>
+    z.object({ topic: text(300).min(1), era: z.enum(['ancient', 'medieval', 'early-modern', '19th', '20th', 'modern']), lines: z.array(z.object({ index: z.number().int().min(0).max(3000), text: text(400) })).min(1).max(400), known: z.array(text(80)).max(20), deployment }).parse(d))
+  .handler(async ({ data }) => { const { castOperation } = await import('./documentary.server'); return castOperation({ data }); });
+
+export const documentaryPaintCutout = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { prompts: string[]; deployment: string }) => z.object({ prompts: z.array(text(3900).min(20)).min(1).max(4), deployment }).parse(d))
+  .handler(async ({ data }) => { const { paintCutoutOperation } = await import('./documentary.server'); return paintCutoutOperation({ data }); });
