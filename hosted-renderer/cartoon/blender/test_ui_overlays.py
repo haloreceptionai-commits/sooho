@@ -22,6 +22,14 @@ def words(text, start=0.0, step=.4):
 
 
 class PlanTests(unittest.TestCase):
+    def setUp(self):   # the sticker tests check the opt-in sticker mode
+        self._saved = U.STICKERS_ON; U.STICKERS_ON = True
+    def tearDown(self):
+        U.STICKERS_ON = self._saved
+
+    def test_reaction_stickers_are_off_by_default(self):
+        U.STICKERS_ON = False
+        self.assertEqual([e['kind'] for e in U.plan(words('the dead king said shock'))], [])
     def test_trigger_words_make_the_right_elements(self):
         kinds = lambda s: [e['kind'] for e in U.plan(words(s))]
         self.assertEqual(kinds('please subscribe now'), ['subscribe'])

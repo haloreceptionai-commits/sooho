@@ -616,6 +616,7 @@ class Director:
         if ctx.get('opening_reveal'): prefs += ['wide', 'establish', 'high']                                                              # then pull out and show the world
         if ctx['new_place'] and ctx['part'] == 0: prefs += ['establish', 'wide', 'high']
         if ctx['story_object'] and ctx['part'] >= 1: prefs += ['insert']
+        elif ctx['story_object'] or ctx['props']: prefs += ['insert']   # benchmark: the key object gets its own close-up as early as the line allows
         if ctx.get('vehicle'): prefs = ['track'] + prefs   # a car or bike is always followed, never left to drive out of frame
         if ctx['moving']: prefs += ['track', 'wide']
         if ctx['scale']: prefs += ['high', 'establish']

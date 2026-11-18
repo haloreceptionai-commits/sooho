@@ -375,6 +375,7 @@ def target_px(shot, k, size=(1080, 1920)):
 
 
 # ----------------------------------------------------------------------------- planning: manifest words -> timed elements
+STICKERS_ON = os.environ.get('UI_STICKERS', '0') == '1'   # benchmark look: no floating emoji stickers (set UI_STICKERS=1 to bring them back)
 DURATION = {'sticker': 1.5, 'subscribe': 3.0, 'chat': 3.4, 'health': 2.6, 'levelup': 2.2, 'achievement': 3.0, 'xp': 1.6, 'highlight': 2.2}
 GAP = {'sticker': 2.6, 'subscribe': 99, 'chat': 6.0, 'health': 6.0, 'levelup': 8.0, 'achievement': 8.0, 'xp': 4.0, 'highlight': 6.0}
 PRIORITY = ('subscribe', 'chat', 'achievement', 'levelup', 'health', 'highlight', 'xp', 'sticker')
@@ -399,9 +400,9 @@ def plan(m, fps=FPS):
         elif t in HEALTH_WORDS: ev = {'kind': 'health'}
         elif t in ('points', 'xp', 'score', 'scored'): ev = {'kind': 'xp', 'text': '+100 XP'}
         elif t in HIGHLIGHT_WORDS: ev = {'kind': 'highlight', 'style': HIGHLIGHT_WORDS[t]}
-        elif t in STICKER_FOR: ev = {'kind': 'sticker', 'icon': STICKER_FOR[t]}
+        elif t in STICKER_FOR and STICKERS_ON: ev = {'kind': 'sticker', 'icon': STICKER_FOR[t]}   # reaction stickers are off by default: the scene's own in-world boards carry the beat
         if ev: cand.append({**ev, 'start': start, 'end': start + round(DURATION[ev['kind']] * fps), 'word': i})
-    if words and not any(e['start'] < 45 for e in cand) and round(words[0]['start'] * fps) < 15:   # the hook line: a reaction sticker in the first second
+    if STICKERS_ON and words and not any(e['start'] < 45 for e in cand) and round(words[0]['start'] * fps) < 15:   # the hook line: a reaction sticker in the first second
         icon = next((STICKER_FOR[x['text']] for x in words[:12] if x['text'] in STICKER_FOR), 'shock')
         cand.append({'kind': 'sticker', 'icon': icon, 'start': 8, 'end': 8 + round(1.5 * fps), 'word': 0})
     out, last = [], {}
