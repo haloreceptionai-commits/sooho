@@ -7,6 +7,7 @@ import { validRenderAssets } from '@/lib/hosted-render';
 import { RENDER_CALLBACK_URL } from '@/lib/render-complete';
 import { DOC_LIFETIME_MS, documentaryManifest, type DocumentaryRequest } from './documentary-job';
 import { manifestProblems } from './validate';
+import { documentaryMediaPaths } from './media-paths';
 
 type Db = SupabaseClient<Database>;
 const digest = async (v: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v))), x => x.toString(16).padStart(2, '0')).join('');
@@ -14,7 +15,8 @@ const digest = async (v: string) => Array.from(new Uint8Array(await crypto.subtl
 /** Fresh signed addresses for everything a render machine needs; used for the first start and again for every automatic restart. */
 export async function documentaryInput(admin: Db, job: { id: string; user_id: string; video_id: string; manifest: Json; output_path: string }, token: string) {
   const manifest = job.manifest as unknown as ReturnType<typeof documentaryManifest>;
-  const paths = [...new Set([...manifest.doc.images, ...manifest.doc.voice.map(v => v.path)])];
+  const paths = documentaryMediaPaths(manifest.doc);
+  if (!validRenderAssets(job.user_id, job.video_id, paths)) throw Error('Invalid saved video assets');
   const bucket = admin.storage.from('videos');
   const signed: Record<string, string> = {};
   for (const p of paths) {
@@ -32,7 +34,7 @@ export async function submitDocumentaryOperation({ data, context }: { data: Docu
   if (!video || video.user_id !== context.userId) throw Error('Video not found');
   const problems = manifestProblems(data.doc);
   if (problems.length) throw Error(`The documentary plan is not valid: ${problems.slice(0, 3).join('; ')}`);
-  const paths = [...data.doc.images, ...data.doc.voice.map(v => v.path)];
+  const paths = documentaryMediaPaths(data.doc);
   if (!validRenderAssets(context.userId, data.videoId, paths)) throw Error('Invalid saved video assets');
   const { data: existing } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
   if (existing && !['failed', 'cancelled'].includes(existing.status)) return { id: existing.id, status: existing.status };
@@ -59,7 +61,7 @@ export async function submitDocumentaryOperation({ data, context }: { data: Docu
       // An uncertain start is reconciled by the render watchdog against Azure (and restarted if none exists).
       console.error('Documentary start unconfirmed', e instanceof Error ? e.message : e);
     }
-    await event('running', { status: 'running', progress: 72, stage: 'render', detail: 'Documentary render · safe to close your browser' });
+    await event('running', { status: 'running', error: null, progress: 72, stage: 'render', detail: 'Documentary render · safe to close your browser' });
     return { id: job.id, status: 'running' };
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Could not start the documentary render';

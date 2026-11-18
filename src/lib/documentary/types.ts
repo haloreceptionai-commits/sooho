@@ -16,7 +16,8 @@ export type Mood = (typeof MOODS)[number];
 export const MUSIC = ['lofi', 'epic', 'suspense', 'sad'] as const;
 export type MusicMood = (typeof MUSIC)[number];
 
-export type CardData = Record<string, unknown>;
+export type CardValue = string | number | boolean | null | CardValue[] | { [key: string]: CardValue };
+export type CardData = Record<string, CardValue>;
 export type CastSide = 'left' | 'right' | 'center';
 /** A cutout shown in front of a picture beat: a named person or a role, on one side of the frame. */
 export interface BeatCast { id: string; side: CastSide; scale?: number | undefined }

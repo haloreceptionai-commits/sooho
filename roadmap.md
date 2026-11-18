@@ -1,3 +1,7 @@
+# Spartacus documentary recovery
+- [x] Recover saved Spartacus assembly without regenerating media and verify the completed video (544.73 seconds, 244 MB).
+- [x] Include character cutouts in documentary media validation and signing; restore documentary Resume; 418 tests passed and preview build OK.
+
 # Workspace dashboard home
 - [x] Fix workspace menus to start closed and toggle on click without navigating; remove repeated workspace-card Views and verify desktop/mobile.
 - [x] Rename the existing Main workspace to Facts & Robi without changing its videos or connection.
