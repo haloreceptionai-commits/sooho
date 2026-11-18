@@ -1,5 +1,6 @@
 """Opt-in real skinned human importer. FBX files must be materialized before rendering."""
 import math
+import re
 import os
 from pathlib import Path
 import bpy
@@ -17,15 +18,24 @@ def build_uploaded_human(c, duration, fps):
         raise ValueError('Uploaded human file not materialized; no replacement fallback')
     objects_before = set(bpy.data.objects)
     actions_before = set(bpy.data.actions)
-    bpy.ops.import_scene.fbx(filepath=str(source))
+    if model == 'ual-mannequin': bpy.ops.import_scene.gltf(filepath=str(source))
+    else: bpy.ops.import_scene.fbx(filepath=str(source))
     objects = [o for o in bpy.data.objects if o not in objects_before]
+    if model == 'ual-mannequin':   # the library file ships a default cube and icosphere next to the figure: they are not part of the character
+        for o in list(objects):
+            if o.type == 'MESH' and o.parent is None and re.match(r'^(Cube|Icosphere)(\.\d+)?$', o.name):
+                bpy.data.objects.remove(o, do_unlink=True); objects.remove(o)
     rigs = [o for o in objects if o.type == 'ARMATURE']
     if len(rigs) != 1:
         raise ValueError('Expected one character skeleton')
     rig = rigs[0]
     actions = [a for a in bpy.data.actions if a not in actions_before]
     action_name = c.get('action', 'stand')
-    chosen = resolve_clip(action_name, [a.name for a in actions])
+    if model == 'ual-mannequin':
+        from human_clips import resolve_ual_clip
+        chosen = resolve_ual_clip(action_name, [a.name for a in actions])
+    else:
+        chosen = resolve_clip(action_name, [a.name for a in actions])
     action = next(a for a in actions if a.name == chosen)
     rig.animation_data_create()
     for track in list(rig.animation_data.nla_tracks):
@@ -74,6 +84,15 @@ def build_uploaded_human(c, duration, fps):
     for o in meshes:
         if 'Head' in o.name:
             o['human_head'] = True
+    if model == 'ual-mannequin' and 'shirt' in c:   # bare mannequin: a skin tone for the body and the outfit colour on the joint bands
+        for o in meshes:
+            for slot in o.material_slots:
+                mat = slot.material
+                if not mat or not mat.use_nodes: continue
+                bsdf = mat.node_tree.nodes.get('Principled BSDF')
+                if not bsdf: continue
+                if mat.name.startswith('M_Main'): bsdf.inputs['Base Color'].default_value = (*c.get('skin', (.86, .62, .44)), 1); bsdf.inputs['Roughness'].default_value = .5
+                if mat.name.startswith('M_Joints'): bsdf.inputs['Base Color'].default_value = (*c['shirt'], 1); bsdf.inputs['Roughness'].default_value = .7
     # Explicit material role rather than repainting skin, hair or every part.
     if 'shirt' in c:
         for o in meshes:

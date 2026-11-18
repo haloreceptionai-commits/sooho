@@ -4,7 +4,7 @@ from human_clips import MODELS, resolve_clip, clip_frame
 
 class UploadedHumans(unittest.TestCase):
     def test_selected_files(self):
-        self.assertEqual(MODELS, {'uploaded-woman': 'Casual.fbx', 'uploaded-man': 'Casual_Hoodie.fbx'})
+        self.assertEqual(MODELS, {'uploaded-woman': 'Casual.fbx', 'uploaded-man': 'Casual_Hoodie.fbx', 'ual-mannequin': 'ual_mannequin.glb'})
 
     def test_walk_uses_walk(self):
         self.assertEqual(resolve_clip('walk', ['rig|Walk', 'rig|Run']), 'rig|Walk')

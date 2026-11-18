@@ -87,9 +87,9 @@ def validate_shot(s):
     for ch in cast:
         if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model','skin','facial','trim','style','pants','hair','eyes','species','glasses','seat','holds','to'}: raise ValueError('unknown cast keys')
         if 'model' in ch:
-            from human_clips import MODELS, CLIPS
+            from human_clips import MODELS, clips_for
             if ch['model'] not in MODELS: raise ValueError('unknown human model')
-            if ch.get('action', 'stand') not in CLIPS or ch.get('held'): raise ValueError('uploaded human action/attachment not verified')
+            if ch['model'] != 'ual-mannequin' and ch.get('action', 'stand') not in clips_for(ch['model']) or ch.get('held'): raise ValueError('uploaded human action/attachment not verified')   # the library maps every action (unmapped -> idle)
         _vec(ch.get('pos'), 2, 'cast.pos')
         for k in ('shirt', 'hat_color'):
             if k in ch: _vec(ch[k], 3, k); assert all(0 <= x <= 1 for x in ch[k]), k

@@ -34,3 +34,4 @@ dist-ssr
 # Python bytecode
 __pycache__/
 *.pyc
+hosted-renderer/cartoon/blender/assets/humans/ual_mannequin.glb

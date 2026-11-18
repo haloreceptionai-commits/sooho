@@ -905,6 +905,8 @@ class Director:
         if st in OUTDOOR and lighting in ('day', 'sunset'):  # gentle aerial perspective only: strong mist swallowed the sky
             shot['haze'] = 0.003; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.5, 0.66, 0.9]   # a touch of blue distance, never a white wash
         if cards: shot['cards'] = cards
+        if cast and os.environ.get('HUMAN_CAST') == 'ual':   # CC0 mocap mannequin for every person (HUMAN_CAST=ual); the bean cast stays the default
+            for c in cast: c['model'] = 'ual-mannequin'; c.pop('held', None)
         if self.year is not None and self.year < 1900: shot['era'] = int(self.year)   # old story: rooms get period materials, not modern tile and lamps
         if s.get('place'):
             pl = s['place']
