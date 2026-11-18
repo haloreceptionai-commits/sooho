@@ -394,7 +394,7 @@ export async function runVideo(id: string, input: VideoInput) {
     up({ title: plan.title, description: plan.description, sceneCount: n, stage: "voice", progress: 12, detail: `Script ready · story score ${gate.score}/100 · ${n} scenes` });
 
     // Documentary: who is in the story? Named people become cartoon cutouts of themselves, roles (soldier, sailor) become human cartoon faces of the era.
-    let cast: CastEntry[] = [];
+    let docCast: CastEntry[] = [];
     const era = eraOf(plan.scenes.map(sc => sc.narration));
     if (docMode) {
       up({ detail: 'Casting the people of the story…' });
@@ -402,8 +402,8 @@ export async function runVideo(id: string, input: VideoInput) {
       const names = [...(plan.hero?.name ? [{ name: plan.hero.name, role: plan.hero.role }] : []), ...plan.characters.map(c => ({ name: c.name, role: c.role, look: c.look }))];
       const ai = await withRetry(() => documentaryCast({ data: { topic: input.topic, era, lines: lines.map((text, index) => ({ index, text: text.slice(0, 380) })).slice(0, 400), known: names.map(x => x.name).slice(0, 20), deployment: s.scriptDeployment } }), 2, 16000, 5 * 60_000)
         .then(r => (r as { cast: CastEntry[] }).cast).catch((e: unknown) => { console.warn('Casting skipped, using the built-in finders:', e); return undefined; });
-      cast = buildCast({ lines, era, ai, names });
-      up({ detail: cast.length ? `Cast: ${cast.map(c => c.name).join(', ')}` : 'No named people in this story' });
+      docCast = buildCast({ lines, era, ai, names });
+      up({ detail: docCast.length ? `Cast: ${docCast.map(c => c.name).join(', ')}` : 'No named people in this story' });
     }
     if (usesCartoonWorker(input.engine)) {
       const long = input.format !== 'short';
@@ -507,7 +507,7 @@ export async function runVideo(id: string, input: VideoInput) {
     const media = await mediaCache(id);
     // the cut plan (beats, cards, camera) only needs the narration, so it is asked while the pictures and voice are being made
     const visualPlan = docMode ? planDocumentaryVisuals(plan.scenes.map(sc => sc.narration), input.topic, plan.documentary?.sources ?? [], s.scriptDeployment).catch(() => [] as AiScenePlan[]) : null;
-    const castP = docMode && cast.length ? paintCutouts(cast, era, {
+    const castP = docMode && docCast.length ? paintCutouts(docCast, era, {
       have: media.names(), limit: 3, look: styleAnchor(input.style), report: detail => up({ detail }),
       save: (name, bytes) => media.put(name, bytes.buffer as ArrayBuffer, 'image/png'),
       paint: prompts => withRetry(() => documentaryPaintCutout({ data: { prompts, deployment: s.imageDeployment } }), 5, 30000) as Promise<{ image: string; tried: number }>,
@@ -604,7 +604,7 @@ export async function runVideo(id: string, input: VideoInput) {
           const shot = [
             SHOT[docMode && (sc.shot === "face" || sc.shot === "action") ? "wide" : sc.shot] ?? "", ANGLE[docMode && ["close", "over_shoulder", "pov"].includes(sc.angle) ? "wide" : sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
             people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll && !docMode ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
-            COLOR[sc.color] ?? "", LIGHT, docMode ? BACKGROUND_RULE : "", docMode ? sceneBible(sc.narration, cast, era) : "",
+            COLOR[sc.color] ?? "", LIGHT, docMode ? BACKGROUND_RULE : "", docMode ? sceneBible(sc.narration, docCast, era) : "",
           ].filter(Boolean).join(" ");
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
