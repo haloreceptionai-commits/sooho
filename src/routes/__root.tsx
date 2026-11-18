@@ -143,7 +143,7 @@ function RootComponent() {
     return () => clearInterval(timer);
   }, []);
 
-  if (path === "/auth") {
+  if (path === "/auth" || path === "/privacy" || path === "/terms") {
     return (
       <QueryClientProvider client={queryClient}>
         <div className="min-h-screen bg-background text-foreground"><Outlet /></div>
