@@ -1,7 +1,7 @@
 // Server-only Facebook Page helpers. Tokens never leave the server.
 export const FB_REDIRECT = "https://sooha.io/api/public/facebook/callback";
 const GRAPH = "https://graph.facebook.com/v21.0";
-export const FB_SCOPES = ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "pages_manage_engagement", "read_insights"];
+export const FB_SCOPES = ["pages_show_list", "pages_read_engagement", "pages_manage_posts"];
 
 const env = (k: string) => { const v = process.env[k]; if (!v) throw new Error(`${k} is not configured`); return v; };
 
