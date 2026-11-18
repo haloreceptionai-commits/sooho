@@ -63,10 +63,10 @@ def pictures_for(timeline, beats):
     return need
 
 
-def encode_range(composer, first, last, out_path, crf=21, preset='veryfast'):
+def encode_range(composer, first, last, out_path, crf=23, preset='veryfast'):
     W, H = composer.W, composer.H
     cmd = [FFMPEG, '-y', '-hide_banner', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-           '-an', '-c:v', 'libx264', '-preset', preset, '-crf', str(crf), '-maxrate', '10M', '-bufsize', '20M', '-pix_fmt', 'yuv420p', '-g', str(FPS * 2), '-keyint_min', str(FPS * 2), '-sc_threshold', '0',
+           '-an', '-c:v', 'libx264', '-preset', preset, '-crf', str(crf), '-maxrate', '6M', '-bufsize', '12M', '-pix_fmt', 'yuv420p', '-g', str(FPS * 2), '-keyint_min', str(FPS * 2), '-sc_threshold', '0',
            '-movflags', '+faststart', out_path]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
     try:

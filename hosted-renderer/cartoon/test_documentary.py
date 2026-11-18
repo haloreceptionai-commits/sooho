@@ -178,6 +178,19 @@ class Timeline(unittest.TestCase):
         self.assertAlmostEqual(b['t0'] - a['t0'], .6, 2)
         self.assertEqual(sum(e[1] for e in paused['edits'] if e[0] == 'silence') - sum(e[1] for e in plain['edits'] if e[0] == 'silence'), .6)
 
+    def test_pause_on_a_take_boundary_is_kept(self):
+        m = sample_manifest()
+        m['voice'] = [{'path': 'a', 'scenes': [0, 1]}, {'path': 'b', 'scenes': [2]}]
+        m['pauses'] = [{'scene': 1, 'after_word': len(m['scenes'][1]['text'].split()) - 1, 'sec': .6, 'hush': True}]
+        a0, t = words(m['scenes'][0]['text']); a1, t = words(m['scenes'][1]['text'], t + .4)
+        b0, t2 = words(m['scenes'][2]['text'])
+        aligned = [[{'scene': 0, 'words': a0}, {'scene': 1, 'words': a1}], [{'scene': 2, 'words': b0}]]
+        plain = TL.build({**m, 'pauses': []}, aligned, [t + .2, t2 + .2])
+        paused = TL.build(m, aligned, [t + .2, t2 + .2])
+        self.assertAlmostEqual(paused['duration'] - plain['duration'], .6, 2)
+        first = [w for w in paused['words'] if w['scene'] == 2][0]['t0'] - [w for w in plain['words'] if w['scene'] == 2][0]['t0']
+        self.assertAlmostEqual(first, .6, 2)
+
     def test_scene_without_beats_gets_a_picture(self):
         m = sample_manifest()
         m['beats'] = [b for b in m['beats'] if b['scene'] != 2]

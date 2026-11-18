@@ -92,7 +92,10 @@ def build(manifest, aligned, durations):
             sec = pauses.get((si, wi - 1)) if wi > 0 else None
             if wi == 0 and si > 0:
                 sec = pauses.get((si - 1, len(str(scenes[si - 1]['text']).split()) - 1))
-            if sec and idx > 0:
+            if sec and idx == 0:   # the pause falls on a take boundary: it is silence in front of this take
+                edits.append(('silence', sec))
+                shift += sec
+            elif sec and idx > 0:
                 prev_end = local[idx - 1][3]
                 cut = (prev_end + s) / 2 if s - prev_end > .12 else max(prev_end, s - .03)
                 edits.append(('take', k, last_cut, cut))

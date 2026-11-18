@@ -3,9 +3,17 @@ export const LONG_NARRATION_DIRECTION = "An energetic, engaging male mystery sto
 
 export const SHORT_NARRATION_DIRECTION = "Keep the Puck male narrator identity. Clear everyday English, a close microphone sound, no reverb. Read exactly the supplied narration, no added words. One coherent story with connected phrases, crisp consonants and audible small connecting words. No greetings, character impressions, shouting or whispering. Do not imitate any named person.\nEnergetic compact explanation around 225 words per minute if all words remain clear. Quick light connecting words, strong concrete nouns and verbs. Minimal dead space, smoothly linked sentences, controlled pitch. A small contrast on But and a clean firm conclusion. No theatrical drama.";
 
+/** Documentary chapters are read the way their music feels ("long:suspense"): the voice, the words and the take boundaries never change, only the delivery notes. */
+export const CHAPTER_DELIVERY: Record<string, string> = {
+  suspense: " For this passage: hushed, close and intense, a little slower than usual; leave a tiny beat of silence before the key fact, then land it clearly.",
+  epic: " For this passage: weight and momentum, building energy on action; firm, rising delivery; slow down and give the big numbers room.",
+  sad: " For this passage: soft, slow and restrained; let the loss sit in the pauses; no melodrama.",
+  lofi: " For this passage: relaxed, curious and conversational, like explaining something fascinating to a friend.",
+};
+
 export function narrationSettings(style: string, text: string) {
-  const long = style === "long";
-  const direction = long ? LONG_NARRATION_DIRECTION : SHORT_NARRATION_DIRECTION;
+  const long = style === "long" || style.startsWith("long:");
+  const direction = long ? LONG_NARRATION_DIRECTION + (CHAPTER_DELIVERY[style.slice(5)] ?? "") : SHORT_NARRATION_DIRECTION;
   return {
     voice: long ? "Charon" : "Puck",
     text: long

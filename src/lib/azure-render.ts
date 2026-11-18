@@ -82,6 +82,27 @@ export async function startAzureCartoon(jobId: string, mode: 'preflight' | 'fini
   return `azure:${id}`;
 }
 
+// Long-form documentary videos (pictures with a depth camera, cards, music) use the same fleet of 23 machines. The :v1 image has the
+// speech-alignment model, which the worker needs to place every card on the word it illustrates; the worker splits the pieces itself.
+export const DOC_JOB = { name: 'cartoon-render', lanes: 3, replicas: 23 } as const;
+
+export async function startAzureDocumentary(jobId: string, input: unknown, key = cartoonInputKey(jobId, 'finish')) {
+  await putInput(key, input);
+  const url = `https://management.azure.com/subscriptions/${env('AZURE_SUBSCRIPTION_ID')}/resourceGroups/${env('AZURE_RESOURCE_GROUP')}/providers/Microsoft.App/jobs/${DOC_JOB.name}/start?api-version=${API}`;
+  const template = { containers: [{ name: DOC_JOB.name, image: env('AZURE_RENDER_IMAGE'), resources: { cpu: 4, memory: '8Gi' }, env: [
+    { name: 'AZURE_BLOB_BASE', value: env('AZURE_BLOB_BASE') }, { name: 'AZURE_BLOB_SAS', secretRef: 'blobsas' }, { name: 'CARTOON_PARALLEL', value: String(DOC_JOB.lanes) },
+    { name: 'CARTOON_REPLICAS', value: String(DOC_JOB.replicas) }, { name: 'CARTOON_INPUT_KEY', value: key }] }] };
+  const r = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${await armToken()}`, 'Content-Type': 'application/json' }, body: JSON.stringify(template) });
+  if (!r.ok && r.status !== 202) {
+    console.error('Azure start (documentary)', r.status, await r.text());
+    throw Error(`Documentary rendering could not start on Azure [${r.status}]`);
+  }
+  const result = await r.json().catch(() => ({})) as { name?: string; id?: string };
+  const id = result.name || result.id?.split('/').pop();
+  if (!id) throw Error('Azure start was not confirmed; do not resubmit');
+  return `azure:${id}`;
+}
+
 async function startWebFinish(jobId: string, input: unknown, key: string) {
   const job = AZURE_JOBS.finish;
   const url = `https://management.azure.com/subscriptions/${env('AZURE_SUBSCRIPTION_ID')}/resourceGroups/${env('AZURE_RESOURCE_GROUP')}/providers/Microsoft.App/jobs/${job.name}/start?api-version=${API}`;

@@ -51,6 +51,12 @@ export interface Video {
   hostedRender?: { id: string; status: string } | undefined;
   generationJob?: { id: string; status: string } | undefined;
   cartoonCheckpoint?: import('@/lib/cartoon-job').CartoonStart;
+  /** Long-form documentary: the finished plan sent to the renderer, kept so a failed render resumes without new script, picture or voice spend. */
+  documentaryCheckpoint?: import('@/lib/documentary/documentary-job').DocumentaryRequest;
+  /** Boredom meter result for the planned cut (score, weakest minutes and why). */
+  boredom?: { score: number; pass: boolean; weakest: string[]; metrics: Record<string, number> } | undefined;
+  /** The title and thumbnail promise locked before the script was written. */
+  packaging?: { title: string; thumb_text: string; focal_subject: string; layout: string; promise: string } | undefined;
   /** Advanced/cartoon shot plan saved right after the paid Visual Director (and staging), so Resume never repays for it. */
   directionCheckpoint?: import('zod').infer<typeof import('@/lib/cartoon-job').cartoonDirection>;
   cartoonReview?: import('@/lib/cartoon-job').CartoonReview;

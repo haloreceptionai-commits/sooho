@@ -248,11 +248,15 @@ export interface PlanScene {
   beat: string; narration: string; image_prompt: string; characters: string[];
   camera: Camera; sfx: string; mood: "tension" | "reveal"; color: string; angle: string;
   shot: "wide" | "aerial" | "action" | "macro" | "face"; money: boolean; loop_opened: string; loop_closed: string; purpose: string;
+  /** Long-form documentary: part of the cold open, the chapter it belongs to, and the ambience bed it asks for. */
+  cold?: boolean; chapter?: number; ambience?: string;
 }
 export interface PlanBeat { beat: string; start_s: number; end_s: number; words: number; purpose: string; loop_opened: string; loop_closed: string; visual: string; camera_move: string }
 export interface Plan {
   premise: string; question: string; hero: { name: string; role: string; want: string };
   beats: PlanBeat[]; script: string; title: string; description: string; palette: string; hookText: string; loopLine: string; characters: PlanCharacter[]; scenes: PlanScene[];
+  /** Set by the long-form documentary writer: chapters (for cards and music), the locked packaging and the title-card subtitle. */
+  documentary?: { chapters: { scene: number; title: string; music: string }[]; coldCount: number; subtitle: string; packaging?: { title: string; thumb_text: string; focal_subject: string; emotion: string; layout: string; promise: string }; sources: string[] };
 }
 
 const BEATS = ["hook", "context", "question", "try", "fail", "escalation", "myth", "reveal", "analogy", "proof", "payoff"];

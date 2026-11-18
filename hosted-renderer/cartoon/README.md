@@ -76,3 +76,24 @@ the **furniture** it needs, a **vehicle** if any, and the **place** it belongs i
 * when the planner's place does not suit a clear activity (cooking on a beach), the director switches to the recipe that does (`kitchen`).
 * tests: `test_activities.py` (lexicon + every pose reachable/finite/calm), `test_activity_director.py` (sentence -> staged shot). Visual check: `mk_acts.py` + `render_acts.sh` in the scratch folder.
 * adding an activity: one entry in `ACTIVITIES` (words + motion + props), one pose function in `activity_motion.ACTIVITY_POSES`; the tests fail if a prop or model does not exist.
+
+## Documentary renderer: long-form videos made of pictures (Nov 2026)
+
+Long videos ("Own images") used to be recorded in real time in a browser. They are now drawn by `documentary/` on the same Azure fleet (`actor.js` hands any job whose
+manifest `kind` is `documentary` to `documentary-worker.mjs`). Same callback protocol as the picture assembler (`progress` / `failed` / `done`), the MP4 goes to the signed upload URL.
+
+* **Plan, not seconds.** `src/lib/documentary/` plans *beats* named by words (`scene, w0, w1`); the worker aligns each recorded take with the pinned CTC model (`doc_align.py`,
+  speech-span fallback if the model cannot) and `doc_timeline.py` turns word ranges into exact times, splicing planned pauses into the narration. A beat starts on the word it illustrates.
+* **Visuals.** `doc_camera.py`: Depth Anything V2 Small (Apache-2.0, ONNX, pinned by hash in the Dockerfile) gives every picture a depth map and the camera moves *through* it
+  (push, pull, pan, tilt, orbit, punch, drift); no model = flatter camera, never a failure. `doc_cards.py` + `doc_geo.py` draw numbers that count up, timelines, maps with
+  coastlines (Natural Earth 1:50m, public domain, `documentary/land.json` from `tools/build-land.py`) and animated routes, bar comparisons, quotes, documents, key facts, step chains,
+  chapter and title cards, lower thirds, date stamps and source tags - all from exact data. `doc_fx.py`: colour grade by mood, vignette, grain, dust, light leaks, cross / dip / whip / flash.
+* **Sound.** `doc_audio.py`: a music bed per chapter (sound_lib, deterministic), ducked under the voice, hush before reveals, risers / hits / whooshes from the plan, optional ambience,
+  two-pass EBU R128 loudness (-15 LUFS). Directed narration: take boundaries follow chapters and each take is read in its chapter's mood (`narration-direction.ts`).
+* **Speed.** Frames are independent: pieces of 150 frames are claimed through the job's blob store by every replica (3 lanes each); alignment (per take), depth (per picture) and the
+  soundtrack are claimed the same way; one replica joins the pieces (stream copy) and uploads. A dead assembler is replaced after 12 minutes; the watchdog restarts a stopped job and the
+  new machines reuse every saved piece.
+* **Grounding.** A card shows only what the narrator says: `plan-visuals.ts` checks every number against `spoken-numbers.ts`, quotes/key facts/steps/documents against the narration,
+  timeline years and compare values against spoken numbers, place names against the narration, coordinates by range. Anything else is dropped and the beat becomes a picture.
+* **Tests.** `test_documentary.py` (26 tests incl. a tiny end-to-end encode), `src/test/documentary-*.test.ts`. Smoke on Azure: `tools/selfcheck.py` (step "documentary renderer") and a
+  `DOC_TEST=1` job (see `documentary-worker.mjs`; test-only, never set on production jobs).

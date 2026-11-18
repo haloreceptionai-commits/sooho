@@ -237,8 +237,15 @@ export async function runDocumentary(input) {
   const final = path.join(work, 'final.mp4');
   await cli('join', '--parts', ...pieces.map((_, n) => partFile(n)), '--audio', audioFile, '--out', final, '--duration', String(tl.duration));
   const bytes = await readFile(final);
-  const up = await netFetch(input.uploadUrl, { method: 'PUT', headers: { 'Content-Type': 'video/mp4', 'x-upsert': 'true', ...(testMode ? input.uploadHeaders || {} : {}) }, body: bytes });
-  if (!up.ok) throw Error(`Cloud video upload failed [${up.status}]`);
+  // The finished file can be hundreds of megabytes: a long window per try (netFetch gives two minutes), a few tries with a pause between them.
+  let uploaded = false;
+  for (let i = 0; i < 4 && !uploaded; i++) {
+    try {
+      const up = await fetch(input.uploadUrl, { method: 'PUT', headers: { 'Content-Type': 'video/mp4', 'x-upsert': 'true', ...(testMode ? input.uploadHeaders || {} : {}) }, body: bytes, signal: AbortSignal.timeout(20 * 60 * 1000) });
+      if (up.ok) uploaded = true; else if (up.status < 500 && up.status !== 429) throw Error(`Cloud video upload failed [${up.status}]`); else await sleep(4000 * (i + 1));
+    } catch (e) { if (/\[\d+\]/.test(String(e.message))) throw e; if (i === 3) throw Error(`Cloud video upload failed: ${e?.cause?.code || e?.message}`); await sleep(4000 * (i + 1)); }
+  }
+  if (!uploaded) throw Error('Cloud video upload failed');
   const completion = { type: 'done', duration: tl.duration, mime: 'video/mp4', size: bytes.length, stats: { lufs: stats.lufs, lra: stats.lra, avgShotSec: tl.duration / tl.beats.length, wordsPerSec: tl.words.length / tl.duration } };
   await store.setValue('PENDING-COMPLETION', completion);
   const result = await notify(completion);

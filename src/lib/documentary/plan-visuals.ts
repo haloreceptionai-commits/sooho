@@ -131,15 +131,15 @@ function groundOverlay(o: AiBeat['overlay'], ctx: Ctx): OverlaySpec | null {
 export interface SceneInput {
   index: number;
   text: string;
-  mood?: Mood;
+  mood?: Mood | undefined;
   /** The scene is part of the cold open: short beats, strongest pictures, tension. */
-  cold?: boolean;
+  cold?: boolean | undefined;
   /** First scene of a chapter (its card is added by the manifest builder). */
-  chapterStart?: boolean;
-  ai?: AiScenePlan;
-  prev?: string[];
-  next?: string[];
-  sources?: string[];
+  chapterStart?: boolean | undefined;
+  ai?: AiScenePlan | undefined;
+  prev?: string[] | undefined;
+  next?: string[] | undefined;
+  sources?: string[] | undefined;
   /** Index of the scene's own picture in the manifest's image list. */
   image: number;
 }
@@ -154,7 +154,8 @@ export function heuristicNumberBeat(words: string[], spoken: SpokenNumber[], tak
     if (taken.some(([a, b]) => n.start < b && n.end > a)) continue;
     const label = labelAfter(words, n.end);
     if (!label || label.split(' ').length > 3) continue;
-    return { w0: n.start, w1: Math.min(words.length, Math.max(n.end + 2, n.start + 4)), kind: 'number', data: { value: cardValue(n), label } };
+    // a counter that would come after one or two lead-in words starts with the line instead of a blink-long picture beat
+    return { w0: n.start < 3 ? 0 : n.start, w1: Math.min(words.length, Math.max(n.end + 2, n.start + 4)), kind: 'number', data: { value: cardValue(n), label } };
   }
   return null;
 }
@@ -166,7 +167,7 @@ export function planScene(s: SceneInput, state: CameraState): DocBeat[] {
   const win = [...(s.prev ?? []), ...words, ...(s.next ?? [])];
   const ctx: Ctx = { words, window: win, spoken: findSpokenNumbers(win), sources: s.sources ?? [] };
   // 1) the proposed beats that survive the checks (cards must be grounded; images just need a sane range)
-  const picked: { range: [number, number]; ai: AiBeat; data?: CardData }[] = [];
+  const picked: { range: [number, number]; ai: AiBeat; data?: CardData | undefined }[] = [];
   for (const b of (s.ai?.beats ?? []).slice().sort((x, y) => x.w0 - y.w0)) {
     const w0 = Math.max(0, Math.floor(b.w0)), w1 = Math.min(n, Math.ceil(b.w1));
     if (!(w1 - w0 >= 2) || picked.some(p => w0 < p.range[1] && w1 > p.range[0])) continue;
@@ -183,7 +184,7 @@ export function planScene(s: SceneInput, state: CameraState): DocBeat[] {
   picked.sort((a, b) => a.range[0] - b.range[0]);
   // 3) fill everything not covered with picture beats of a sensible length
   const target = s.cold ? 5 : 8, min = s.cold ? 3 : 4, max = s.cold ? 7 : 13;
-  const spans: { range: [number, number]; ai?: AiBeat; data?: CardData }[] = [];
+  const spans: { range: [number, number]; ai?: AiBeat | undefined; data?: CardData | undefined }[] = [];
   let at = 0;
   const pushImages = (a: number, b: number) => { for (const r of chunkWords(words, a, b, target, min, max)) spans.push({ range: r }); };
   for (const p of picked) {
@@ -230,7 +231,7 @@ const POOL: Record<string, Move[]> = {
 };
 const FOCI: [number, number][] = [[.5, .46], [.34, .5], [.66, .48], [.45, .4], [.58, .55], [.3, .42], [.7, .42]];
 
-export function pickCamera(state: CameraState, o: { text: string; mood?: Mood; first: boolean; image: number; cold: boolean; ai?: AiBeat }): BeatVisual {
+export function pickCamera(state: CameraState, o: { text: string; mood?: Mood | undefined; first: boolean; image: number; cold: boolean; ai?: AiBeat | undefined }): BeatVisual {
   const kind = ACTION.test(o.text) ? 'action' : o.mood === 'tension' || o.mood === 'dark' ? 'tension' : o.mood === 'reveal' || REVEAL.test(o.text) ? 'reveal' : 'calm';
   const pool = POOL[kind]!;
   const sameSrc = state.lastSrc === o.image;

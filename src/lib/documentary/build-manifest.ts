@@ -4,18 +4,18 @@ import { boredomReport, estimateTimes, type BoredomReport } from './boredom';
 import { planVideo, type SceneInput } from './plan-visuals';
 import { DOC_WPS, type AiScenePlan, type DocBeat, type DocManifest, type DocScene, type Mood, type MusicMood } from './types';
 
-export interface BuildScene { narration: string; mood?: Mood; ambience?: string; cold?: boolean; reveal?: boolean; beat?: string }
-export interface BuildChapter { scene: number; title: string; subtitle?: string; music?: MusicMood }
+export interface BuildScene { narration: string; mood?: Mood | undefined; ambience?: string | undefined; cold?: boolean | undefined; reveal?: boolean | undefined; beat?: string | undefined }
+export interface BuildChapter { scene: number; title: string; subtitle?: string | undefined; music?: MusicMood | undefined }
 export interface BuildInput {
-  title: string; subtitle?: string;
+  title: string; subtitle?: string | undefined;
   scenes: BuildScene[]; chapters: BuildChapter[];
   /** Picture index (into `images`) used for each scene. */
   sceneImage: number[];
   images: string[];
   voice: { path: string; scenes: number[] }[];
-  ai?: AiScenePlan[];
-  sources?: string[];
-  width?: number; height?: number; captions?: boolean;
+  ai?: AiScenePlan[] | undefined;
+  sources?: string[] | undefined;
+  width?: number | undefined; height?: number | undefined; captions?: boolean | undefined;
 }
 
 const AMBIENT = new Set(['rain', 'wind', 'traffic', 'chatter', 'crickets', 'birds', 'fire', 'water']);

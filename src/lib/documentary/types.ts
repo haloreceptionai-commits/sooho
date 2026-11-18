@@ -17,12 +17,12 @@ export const MUSIC = ['lofi', 'epic', 'suspense', 'sad'] as const;
 export type MusicMood = (typeof MUSIC)[number];
 
 export type CardData = Record<string, unknown>;
-export interface OverlaySpec { kind: OverlayKind | CardKind; data: CardData; at?: number; dur?: number }
+export interface OverlaySpec { kind: OverlayKind | CardKind; data: CardData; at?: number | undefined; dur?: number | undefined }
 export type BeatVisual =
-  | { type: 'image'; src: number; move: Move; focus?: [number, number]; strength?: number; zoom?: [number, number] }
-  | { type: 'card'; card: CardKind; data: CardData; bg?: number | null };
-export interface DocBeat { scene: number; w0: number; w1: number; visual: BeatVisual; transition?: Transition; sfx?: Sfx; overlays?: OverlaySpec[]; mood?: Mood }
-export interface DocScene { text: string; mood?: Mood; ambience?: string }
+  | { type: 'image'; src: number; move: Move; focus?: [number, number] | undefined; strength?: number | undefined; zoom?: [number, number] | undefined }
+  | { type: 'card'; card: CardKind; data: CardData; bg?: number | null | undefined };
+export interface DocBeat { scene: number; w0: number; w1: number; visual: BeatVisual; transition?: Transition | undefined; sfx?: Sfx | undefined; overlays?: OverlaySpec[] | undefined; mood?: Mood | undefined }
+export interface DocScene { text: string; mood?: Mood | undefined; ambience?: string | undefined }
 export interface DocManifest {
   kind: 'documentary'; version: 1; width: number; height: number; title: string;
   images: string[]; voice: { path: string; scenes: number[] }[]; scenes: DocScene[]; beats: DocBeat[];
@@ -31,8 +31,8 @@ export interface DocManifest {
 
 /** What the visual planner (AI or heuristic) proposes for one scene; every proposal is checked against the spoken words before it is used. */
 export interface AiBeat {
-  w0: number; w1: number; kind: 'image' | CardKind; move?: Move; focus?: number[]; zoom?: number[]; strength?: number;
-  data?: CardData; overlay?: { kind: OverlayKind; data: CardData }; sfx?: Sfx; transition?: Transition; prompt?: string;
+  w0: number; w1: number; kind: 'image' | CardKind; move?: Move | undefined; focus?: number[] | undefined; zoom?: number[] | undefined; strength?: number | undefined;
+  data?: CardData | undefined; overlay?: { kind: OverlayKind; data: CardData } | undefined; sfx?: Sfx | undefined; transition?: Transition | undefined; prompt?: string | undefined;
 }
 export interface AiScenePlan { scene: number; beats: AiBeat[] }
 

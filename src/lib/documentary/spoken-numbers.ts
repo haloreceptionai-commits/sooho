@@ -6,7 +6,7 @@ const TENS: Record<string, number> = { twenty: 20, thirty: 30, forty: 40, fifty:
 const SCALE: Record<string, number> = { thousand: 1e3, million: 1e6, billion: 1e9 };
 const ERA = /^(bc|bce|ad|ce)$/i;
 
-export interface SpokenNumber { start: number; end: number; value: number; year: boolean; era?: string; text: string }
+export interface SpokenNumber { start: number; end: number; value: number; year: boolean; era?: string | undefined; text: string }
 
 const clean = (w: string) => w.toLowerCase().replace(/[^a-z-]/g, '');
 const parts = (w: string) => clean(w).split('-').filter(Boolean);

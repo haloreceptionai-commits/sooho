@@ -161,9 +161,9 @@ function ThumbnailPicker({ v, chosen, onChoose }: { v: Video; chosen: string | n
   const ink = v.input.style === "Ink explainer";
   const deployment = useStore((s) => s.settings.imageDeployment);
   const [subject, setSubject] = useState(v.input.topic.slice(0, 80));
-  const [labelText, setLabel] = useState(v.input.topic.split(/\s+/).slice(0, 2).join(" ").slice(0, 20));
+  const [labelText, setLabel] = useState((v.packaging?.thumb_text ?? v.input.topic.split(/\s+/).slice(0, 2).join(" ")).slice(0, 20));   // the 1-3 words locked with the title before the script
   const [years, setYears] = useState("");
-  const [figure, setFigure] = useState(`the most famous ruler or figure of ${v.input.topic}`.slice(0, 160));
+  const [figure, setFigure] = useState((v.packaging?.focal_subject ?? `the most famous ruler or figure of ${v.input.topic}`).slice(0, 160));
   const [options, setOptions] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   async function make() {

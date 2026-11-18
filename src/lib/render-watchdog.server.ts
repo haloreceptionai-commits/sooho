@@ -2,7 +2,8 @@
 // Azure dropped, never started, or finished without reporting is continued or completed instead of hanging.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Json } from '@/integrations/supabase/types';
-import { cartoonExecution, cartoonExecutions, cartoonInputKey, cartoonStoreState, readCartoonPending, startAzureCartoon, stopAzureExecution } from '@/lib/azure-render';
+import { cartoonExecution, cartoonExecutions, cartoonInputKey, cartoonStoreState, readCartoonPending, startAzureCartoon, startAzureDocumentary, stopAzureExecution } from '@/lib/azure-render';
+import { documentaryInput } from '@/lib/documentary/documentary-submit.server';
 import { decideRecovery, type Decision, type Recovery, type RenderMode } from '@/lib/render-recovery';
 import { donePatch, RENDER_CALLBACK_URL } from '@/lib/render-complete';
 import { renderCallback } from '@/lib/hosted-render';
@@ -15,12 +16,13 @@ async function digest(value: string) { return Array.from(new Uint8Array(await cr
 
 export async function superviseCartoonJob(db: Db, job: Job): Promise<Decision> {
   const manifest = job.manifest as Record<string, Json> & { voicePath?: string };
-  if (manifest['kind'] !== 'cartoon' || !ACTIVE.includes(job.status)) return { action: 'wait', why: 'not an active cartoon render' };
+  const documentary = manifest['kind'] === 'documentary';   // long-form pictures render: one stage, restarts reuse the pieces already saved
+  if ((manifest['kind'] !== 'cartoon' && !documentary) || !ACTIVE.includes(job.status)) return { action: 'wait', why: 'not an active cartoon or documentary render' };
   if (job.run_id && !/^(azure|pending):/.test(job.run_id)) return { action: 'wait', why: 'older worker' };
   const { data: video } = await db.from('videos').select('data').eq('id', job.video_id).eq('user_id', job.user_id).single();
   if (!video) return { action: 'wait', why: 'video missing' };
   const review = (video.data as Record<string, Json>)['cartoonReview'] as { approved?: boolean; storeId?: string; hash?: string } | undefined;
-  const mode: RenderMode = review?.approved ? 'finish' : 'preflight';
+  const mode: RenderMode = documentary || review?.approved ? 'finish' : 'preflight';
   const recovery = (job.recovery ?? {}) as Recovery;
   const tracked = /^azure:(cartoon-preflight|cartoon-render-gpu|cartoon-render)-[a-z0-9]+$/.exec(job.run_id ?? '');
   const unconfirmed = !tracked || (tracked[1] === 'cartoon-preflight' ? 'preflight' : 'finish') !== mode;
@@ -55,12 +57,12 @@ export async function superviseCartoonJob(db: Db, job: Job): Promise<Decision> {
   } else if (decision.action === 'fail') {
     await event('failed', { status: 'failed', error: decision.message, detail: decision.message });
   } else if (decision.action === 'restart') {
-    await restart(db, job, mode, recovery, store.parts, review);
+    await restart(db, job, mode, recovery, store.parts, review, documentary);
   }
   return decision;
 }
 
-async function restart(db: Db, job: Job, mode: RenderMode, recovery: Recovery, parts: number, review: { storeId?: string; hash?: string } | undefined) {
+async function restart(db: Db, job: Job, mode: RenderMode, recovery: Recovery, parts: number, review: { storeId?: string; hash?: string } | undefined, documentary = false) {
   const token = crypto.randomUUID() + crypto.randomUUID(), tokenHash = await digest(token);
   const key = cartoonInputKey(job.id, mode);
   const next: Recovery = { attempts: (recovery.attempts ?? 0) + 1, lastParts: parts, claimedAt: Date.now(), inputKey: key };
@@ -68,7 +70,9 @@ async function restart(db: Db, job: Job, mode: RenderMode, recovery: Recovery, p
   const { data: claimed } = await db.from('render_jobs').update({ token_hash: tokenHash, run_id: `pending:${mode}`, recovery: next as unknown as Json }).eq('id', job.id).eq('token_hash', job.token_hash).in('status', ACTIVE).select('id');
   if (!claimed?.length) return;
   let input: Record<string, unknown>;
-  if (mode === 'finish') {
+  if (documentary) {
+    input = await documentaryInput(db, job, token);   // fresh signed addresses; the machines pick up the pieces already saved in the job's store
+  } else if (mode === 'finish') {
     if (!review?.storeId || !review.hash) throw Error('Approved preview is missing');
     input = { jobId: job.id, callbackToken: token, callbackUrl: RENDER_CALLBACK_URL, manifest: job.manifest, mode, storeId: review.storeId, approvedHash: review.hash };
   } else {
@@ -86,7 +90,7 @@ async function restart(db: Db, job: Job, mode: RenderMode, recovery: Recovery, p
   const detail = mode === 'finish' ? `Render machine stopped — continuing automatically from saved frames (attempt ${next.attempts! + 1})` : `Preview machine stopped — restarting it automatically (attempt ${next.attempts! + 1})`;
   await db.rpc('apply_render_event', { job_id: job.id, job_token: tokenHash, next_status: 'running', video_patch: { detail, hostedRender: { id: job.id, status: 'running' } } as Json, saved_path: '' });
   try {
-    const run = await startAzureCartoon(job.id, mode, input, key);
+    const run = documentary ? await startAzureDocumentary(job.id, input, key) : await startAzureCartoon(job.id, mode, input, key);
     await db.from('render_jobs').update({ run_id: run }).eq('id', job.id).eq('token_hash', tokenHash);
   } catch (e) {
     // An uncertain start is reconciled on the next pass by matching Azure executions to this exact input key.

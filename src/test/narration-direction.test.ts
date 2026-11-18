@@ -13,4 +13,13 @@ describe("approved narration selection", () => {
     expect(take.voice).toBe("Charon");
     expect(take.text).toBe(`${LONG_NARRATION_DIRECTION}: Read the following narration aloud, word for word. Narration: Earth is a giant magnet.`);
   });
+  it("adds only delivery notes for a documentary chapter mood, never new words or a new voice", () => {
+    const plain = narrationSettings("long", "Earth is a giant magnet.");
+    const tense = narrationSettings("long:suspense", "Earth is a giant magnet.");
+    expect(tense.voice).toBe("Charon");
+    expect(tense.text).toContain("hushed");
+    expect(tense.text.endsWith("Narration: Earth is a giant magnet.")).toBe(true);
+    expect(tense.text).not.toBe(plain.text);
+    expect(narrationSettings("long:unknown", "x").text).toBe(narrationSettings("long", "x").text);
+  });
 });

@@ -113,5 +113,26 @@ def finishing():
     return f"4 black frames repaired, encoded, QA ok ({len(qa['warnings'])} notes)"
 
 
-for name, fn in (('sound library + mix', sound), ('captions + UI with the real font', ui), ('place recipes', places), ('vocabulary', words), ('acting: activities staged', acting), ('finishing: frame doctor + encode + QA', finishing)): step(name, fn)
+def documentary():
+    """Long-form documentary renderer: fonts, every card, the coastline data, the depth model and a parallax frame, with the exact libraries that ship in this image."""
+    import numpy as np
+    sys.path.insert(0, str(ROOT / 'documentary'))
+    import doc_cards as C, doc_camera as K, doc_geo, doc_gfx as G, doc_timeline as T
+    for name in ('oswald', 'playfair', 'inter'):
+        assert (Path(G.FONT_DIR) / G.FILES[name]).exists(), f'font {name} missing'
+    f = G.font('oswald', 60, 700); assert getattr(f, 'path', '').endswith('Oswald-VF.ttf'), 'documentary fonts are not used'
+    assert len(doc_geo.land()) > 500, 'coastline data missing'
+    data = {'number': {'value': '37,000', 'label': 'soldiers'}, 'quote': {'text': 'We find a way', 'who': 'Hannibal'}, 'document': {'kind': 'headline', 'title': 'Tower opens', 'lines': ['Crowds came']},
+            'timeline': {'events': [{'when': '218 BC', 'label': 'Alps'}, {'when': '216 BC', 'label': 'Cannae'}]}, 'location': {'points': [{'name': 'Rome', 'lat': 41.9, 'lon': 12.5}, {'name': 'Carthage', 'lat': 36.8, 'lon': 10.3}]},
+            'compare': {'items': [{'label': 'A', 'value': '330'}, {'label': 'B', 'value': '93'}]}, 'keyfact': {'text': 'He lost half his army'}, 'chapter': {'number': '1', 'title': 'The crossing'},
+            'title': {'title': 'The Tower'}, 'steps': {'steps': ['One', 'Two', 'Three']}}
+    for kind, d in data.items():
+        assert C.CARD_FUNCS[kind](960, 540, d, 1.5, 3.0).a.any(), kind
+    img = (np.random.default_rng(1).integers(0, 255, (512, 768, 3))).astype('uint8')
+    depth = K.estimate_depth(img); assert depth.shape == img.shape[:2] and 0 <= depth.min() and depth.max() <= 1
+    shot = K.StillShot(img, depth, 960, 540); fr = shot.frame(.5, K.plan_move('orbit_right')); assert fr.shape == (540, 960, 3)
+    return f'cards, map and camera ok; depth model {"loaded" if K.model_available() else "NOT loaded (flat camera fallback)"}'
+
+
+for name, fn in (('sound library + mix', sound), ('captions + UI with the real font', ui), ('place recipes', places), ('vocabulary', words), ('acting: activities staged', acting), ('documentary renderer: cards, map, depth camera', documentary), ('finishing: frame doctor + encode + QA', finishing)): step(name, fn)
 print(f'SELFCHECK PASSED in {time.time() - t0:.1f}s')

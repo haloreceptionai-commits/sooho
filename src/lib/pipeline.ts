@@ -24,6 +24,11 @@ import { writerCalls } from '@/lib/shorts-writer/calls';
 import { runExactScript, runShortsV4 } from '@/lib/shorts-writer/stage';
 import { autoFixPlan, eligibleHooks, preferRepair, preferAdvancedRepair, repairBrief } from '@/lib/script-repair';
 import { backgroundGenerationEnabled, startBackgroundGeneration, cancelBackgroundGeneration } from './generation.functions';
+import { documentaryChapter, documentaryColdOpen, documentaryDossier, documentaryEnabled, documentaryOutline, documentaryPackaging, documentarySag, documentaryVisuals, submitDocumentary } from '@/lib/documentary/documentary.functions';
+import { writeLongForm, type LongFormCalls } from '@/lib/documentary/long-form';
+import { buildManifest } from '@/lib/documentary/build-manifest';
+import { describeWeak } from '@/lib/documentary/boredom';
+import type { AiScenePlan } from '@/lib/documentary/types';
 
 import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
 import { ensureAnimalCast, paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
@@ -157,6 +162,14 @@ export async function runVideo(id: string, input: VideoInput) {
     catch (e) { actions.updateVideo(id, { error: e instanceof Error ? e.message : 'Could not resume approved render' }); }
     return;
   }
+  if (prior?.documentaryCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '')) {
+    try {
+      actions.updateVideo(id, { hostedRender: undefined, status: 'running', error: undefined, detail: 'Resuming the saved documentary…' });
+      const job = await submitDocumentary({ data: prior.documentaryCheckpoint as never });
+      actions.updateVideo(id, { hostedRender: { id: job.id, status: job.status }, stage: 'render', progress: 72, detail: 'Documentary render · safe to close your browser' });
+    } catch (e) { actions.updateVideo(id, { status: 'failed', error: e instanceof Error ? e.message : 'Could not resume the documentary render', detail: 'Failed' }); }
+    return;
+  }
   const resumable = !!prior?.cartoonCheckpoint && ['failed', 'cancelled'].includes(prior.hostedRender?.status ?? '');
   if (prior?.hostedRender && !resumable) return;
   if (resumable) actions.updateVideo(id, { hostedRender: undefined, status: 'running', error: undefined, detail: 'Resuming saved cartoon…' });
@@ -180,7 +193,9 @@ export async function runVideo(id: string, input: VideoInput) {
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); if (p.detail) held.setStage(p.detail); actions.updateVideo(id, p); };
   const advanced = input.engine === 'advanced';
+  let docMode = false;
   try {
+    docMode = input.format !== 'short' && !advanced && !usesCartoonWorker(input.engine) && input.style !== 'Ink explainer' && await documentaryEnabled().then(r => r.enabled).catch(() => false);
     const assembly = getState().videos.find(v => v.id === id)?.assemblyCheckpoint;
     const cartoon = getState().videos.find(v => v.id === id)?.cartoonCheckpoint;
     if (usesCartoonWorker(input.engine) && cartoon) {
@@ -286,6 +301,35 @@ export async function runVideo(id: string, input: VideoInput) {
       const gate = storyScore(report, judge, p.scenes.length, { strict: advanced });
       return { report, judge, gate };
     };
+    if (docMode) {
+      // Long-form documentary writer: packaging first, dossier, outline, chapters written side by side, edit pass, cold open (src/lib/documentary).
+      // Any step that cannot finish falls back to the single-call writer below, so the video never stalls here.
+      try {
+        const dep = s.scriptDeployment, slow = 8 * 60_000;
+        const calls: LongFormCalls = {
+          packaging: a => withRetry(() => documentaryPackaging({ data: { ...a, deployment: dep } }), 3, 16000, slow),
+          dossier: a => withRetry(() => documentaryDossier({ data: { ...a, deployment: dep } }), 3, 16000, slow),
+          outline: a => withRetry(() => documentaryOutline({ data: { ...a, deployment: dep } }), 3, 16000, slow),
+          chapter: a => withRetry(() => documentaryChapter({ data: { ...a, deployment: dep } }), 3, 16000, slow),
+          sag: a => withRetry(() => documentarySag({ data: { ...a, deployment: dep } }), 3, 16000, slow),
+          coldOpen: a => withRetry(() => documentaryColdOpen({ data: { ...a, deployment: dep } }), 3, 16000, slow),
+        };
+        const past = getState().videos.filter(v => v.id !== id && v.title).map(v => v.title).slice(0, 20);
+        const res = await writeLongForm({ topic: input.topic, durationSec: input.durationSec, archetype: base.archetype, style: input.style, facts: factText, research: researchText, hook: hb.line, hookText: hb.text, description: '',
+          hero: rs.hero, question: rs.question, premise: rs.premise, palette: '', pastTitles: past, sources: (facts.claims ?? []).flatMap(c => c.sources).slice(0, 8) }, calls, detail => up({ detail }));
+        let dplan = res.plan;
+        dplan = { ...dplan, description: dplan.description || `${rs.premise} ${rs.question}`.trim().slice(0, 600), hookText: dplan.hookText || hb.text || '' };
+        const ev = await evaluate(dplan);
+        const blockers = [...ev.gate.blockers, ...res.issues.map(i => `Long-form: ${i.msg}`)];
+        up({ checks: blockers, judges: ev.judge ? { passA: ev.judge.passA, passB: ev.judge.passB, passC: ev.judge.passC, payoff: ev.judge.payoff, weakest: ev.judge.weakest } : undefined, ...(res.locked ? { packaging: { title: res.locked.title, thumb_text: res.locked.thumb_text, focal_subject: res.locked.focal_subject, layout: res.locked.layout, promise: res.locked.promise } } : {}) });
+        const savedDoc: ScriptCheckpoint = { plan: dplan, gate: { ...ev.gate, blockers }, report: { revealSec: ev.report.revealSec, shotMix: ev.report.shotMix }, judgeOk: !!ev.judge, hookType: hb.type, moneyShot: rs.moneyShot };
+        up({ scriptCheckpoint: savedDoc }); await flushVideo(id);
+        return savedDoc;
+      } catch (e) {
+        console.warn('Documentary writer unavailable, using the single-call writer:', e instanceof Error ? e.message : e);
+        up({ detail: 'Using the backup script writer…' });
+      }
+    }
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
     let plan = autoFixPlan(await withRetry(() => generatePlan({ data: base }), 4, 16000, planWait), advanced);
     let ev = await evaluate(plan);
@@ -412,12 +456,15 @@ export async function runVideo(id: string, input: VideoInput) {
     const scenes: Partial<RenderScene>[] = plan.scenes.map((sc) => ({ text: sc.narration, sfx: sc.sfx, camera: sc.camera, mood: sc.mood, beat: sc.beat }));
     // narration is recorded in chunks of a few scenes so the delivery flows like one take
     const groups: number[][] = [];
+    const chapterMarks = plan.documentary?.chapters ?? [];
+    const chapterOf = (i: number) => chapterMarks.filter(c => c.scene <= i).length;
+    const chapterMusic = (i: number) => chapterMarks.filter(c => c.scene <= i).at(-1)?.music ?? ((plan.documentary?.coldCount ?? 0) > 0 ? 'suspense' : '');   // the cold open is read as suspense
     let cur: number[] = []; let wc = 0;
     plan.scenes.forEach((sc, i) => {
       const w = sc.narration.split(/\s+/).filter(Boolean).length;
       // new take when the pace class changes (action / reveal / normal) so each take gets its own rate
       const cls = (b: string) => (["try", "fail", "escalation"].includes(b) ? 1 : ["reveal", "analogy", "proof"].includes(b) ? 2 : 0);
-      const brk = cur.length && cls(plan.scenes[cur[0]!]!.beat) !== cls(sc.beat);
+      const brk = cur.length && (cls(plan.scenes[cur[0]!]!.beat) !== cls(sc.beat) || (docMode && chapterOf(i) !== chapterOf(cur[0]!)));   // documentary takes never cross a chapter, so each is read in its chapter's mood
       if (cur.length && (brk || wc + w > (portrait ? 60 : 90))) { groups.push(cur); cur = []; wc = 0; }
       cur.push(i); wc += w;
     });
@@ -443,13 +490,15 @@ export async function runVideo(id: string, input: VideoInput) {
       withRetry(() => generateImage({ data: { prompt, aspect: portrait ? "portrait" : "landscape", deployment: s.imageDeployment, quality: ink && s.imageQuality === "low" ? "medium" : s.imageQuality, style: input.style, palette: plan.palette, ...(ink ? { crisp: true } : {}), ...extra } }), 9, 30000);
 
     const media = await mediaCache(id);
+    // the cut plan (beats, cards, camera) only needs the narration, so it is asked while the pictures and voice are being made
+    const visualPlan = docMode ? planDocumentaryVisuals(plan.scenes.map(sc => sc.narration), input.topic, plan.documentary?.sources ?? [], s.scriptDeployment).catch(() => [] as AiScenePlan[]) : null;
     await Promise.all([
       pool(groups, 3, async (g, gi) => {
         const text = g.map((i) => plan.scenes[i]!.narration.trim()).join(" ");
         const key = `voice-${textKey(text)}.wav`;
         const kept = await media.get(key);
         if (kept) { voice[gi]!.audio = kept; tick("Recording narration"); return; }
-        const r = await withRetry(() => generateVoice({ data: { text, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "short" : "long" } }));
+        const r = await withRetry(() => generateVoice({ data: { text, voice: input.voice, deployment: s.ttsDeployment, style: portrait ? "short" : docMode && chapterMusic(g[0]!) ? `long:${chapterMusic(g[0]!)}` : "long" } }));
         voice[gi]!.audio = b64ToBuf(r.audio);
         await media.put(key, voice[gi]!.audio.slice(0), "audio/wav");
         tick("Recording narration");
@@ -494,7 +543,7 @@ export async function runVideo(id: string, input: VideoInput) {
           }
           for (const sh of shots) if (plan.scenes[sh.i]) beatVisual.set(sh.i, sh.visual.trim());
         }
-        await pool(plan.scenes, ink ? 10 : 2, async (sc0, i) => {
+        await pool(plan.scenes, ink ? 10 : docMode ? 5 : 2, async (sc0, i) => {
           const sc = ink ? { ...sc0, image_prompt: beatVisual.get(i) ?? `${sc0.image_prompt} The picture shows exactly: ${sc0.narration}` } : sc0;
           const card = cards.get(i);
           if (card) {
@@ -566,6 +615,28 @@ export async function runVideo(id: string, input: VideoInput) {
     const full = scenes as RenderScene[];
 
     const continuity = contScores.length ? contScores.filter((x) => x >= 6).length / contScores.length : 1;
+    if (docMode) {
+      // Documentary render on the Azure fleet: pictures and narration are saved, the visual plan (beats, cards, camera) is built and checked, then submitted.
+      const cp = await saveAssemblyAssets(id, plan, full, voice, { gate: gate, report: { revealSec: report.revealSec, shotMix: report.shotMix }, hookType: hookType, continuity });
+      up({ assemblyCheckpoint: cp, stage: 'render', progress: 70, detail: 'Planning the cuts, cards and camera…', thumb: full[0] ? thumbnail(full[0].image) : undefined });
+      const dm = plan.documentary;
+      const dscenes = plan.scenes as (typeof plan.scenes[number] & { cold?: boolean; ambience?: string })[];
+      const ai = (await visualPlan) ?? [];
+      const { manifest, report: bored } = buildManifest({
+        title: plan.title, subtitle: dm?.subtitle, scenes: dscenes.map(sc => ({ narration: sc.narration, mood: sc.mood === 'reveal' ? 'reveal' as const : 'tension' as const, ambience: sc.ambience, cold: sc.cold, reveal: sc.beat === 'reveal' || sc.beat === 'payoff', beat: sc.beat })),
+        chapters: (dm?.chapters ?? [{ scene: 0, title: plan.title, music: 'suspense' }]).map(c => ({ scene: c.scene, title: c.title, music: c.music as 'lofi' | 'epic' | 'suspense' | 'sad' })),
+        sceneImage: plan.scenes.map((_, i) => i), images: cp.images, voice: cp.voice, ai, sources: dm?.sources, captions: s.burnCaptions,
+      });
+      const weak = describeWeak(bored);
+      up({ boredom: { score: bored.score, pass: bored.pass, weakest: weak, metrics: bored.metrics }, checks: [...(getState().videos.find(v => v.id === id)?.checks ?? []), ...(bored.pass ? [] : [`Boredom meter ${bored.score}/100: ${weak.join(' | ')}`])].slice(0, 100) });
+      const request = { videoId: id, doc: manifest, checkpoint: { gate: cp.gate, report: cp.report, hookType: cp.hookType, continuity: cp.continuity, plan: { characters: plan.characters } } };
+      up({ documentaryCheckpoint: request as never, detail: 'Sending to the documentary renderer…' });
+      await flushVideo(id);
+      const job = await submitDocumentary({ data: request as never });
+      up({ hostedRender: { id: job.id, status: job.status }, stage: 'render', progress: 72, detail: 'Documentary render · safe to close your browser' });
+      for (const scene of full) scene.image.close();
+      return;
+    }
     const cp = await saveAssemblyAssets(id, plan, full, voice, { gate: gate, report: { revealSec: report.revealSec, shotMix: report.shotMix }, hookType: hookType, continuity });
     const clipPaths: { path: string; scenes: number[] }[] = [];
     up({ assemblyCheckpoint: cp, assemblyClips: clipPaths, stage: "render", progress: 72, detail: "Sending to hosted assembly…", thumb: full[0] ? thumbnail(full[0].image) : undefined });
@@ -581,6 +652,15 @@ export async function runVideo(id: string, input: VideoInput) {
     setVideoActive(id, false);
     keepAlive();
   }
+}
+
+/** The model's cut plan for every scene (beats, cards, camera), asked in small batches; a failed batch just means those scenes use the built-in planner. */
+async function planDocumentaryVisuals(lines: string[], topic: string, sources: string[], deployment: string): Promise<AiScenePlan[]> {
+  const chunks: { index: number; text: string }[][] = [];
+  for (let i = 0; i < lines.length; i += 18) chunks.push(lines.slice(i, i + 18).map((text, k) => ({ index: i + k, text })));
+  const out: AiScenePlan[][] = [];
+  await pool(chunks, 3, async (c, ci) => { out[ci] = (await withRetry(() => documentaryVisuals({ data: { scenes: c, topic, sources, deployment } }), 3, 16000, 5 * 60_000).catch((e: unknown) => { console.warn('Visual plan batch skipped:', e); return []; })) as AiScenePlan[]; });
+  return out.flat();
 }
 
 export interface ScriptCheckpoint {
