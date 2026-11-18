@@ -547,6 +547,16 @@ def yaw_facing(d):
     return round(math.degrees(math.atan2(d[0], -d[1])), 2)
 
 
+def _merge_short(edges, least):
+    """Consecutive setups from edge points; a piece shorter than `least` frames joins its neighbour, so no frame is ever left out."""
+    pieces = [(x, y) for x, y in zip(edges, edges[1:]) if y > x]
+    out = []
+    for x, y in pieces:
+        if out and (y - x < least or out[-1][1] - out[-1][0] < least): out[-1] = (out[-1][0], y)
+        else: out.append((x, y))
+    return out or [(edges[0], edges[-1])]
+
+
 def split_points(m, s, n_max=4, target=1.8):
     """Cut a long manifest shot into setups at word boundaries (measured benchmark: average 1.94 s, median 1.65 s per shot)."""
     a, b = s['start'], s['end']; dur = (b - a) / FPS
@@ -559,7 +569,7 @@ def split_points(m, s, n_max=4, target=1.8):
         cand = [f for f in starts if a + 24 <= f <= b - 24] or [round(ideal)]
         cuts.append(min(cand, key=lambda f: abs(f - ideal)))
     edges = [a] + sorted(set(cuts)) + [b]
-    return [(x, y) for x, y in zip(edges, edges[1:]) if y - x >= 12] or [(a, b)]
+    return _merge_short(edges, 12)
 
 
 def split_sequence(m, s, n):
@@ -572,7 +582,7 @@ def split_sequence(m, s, n):
         cand = [f for f in starts if a + 12 <= f <= b - 12 and f not in cuts] or [round(ideal)]
         cuts.append(min(cand, key=lambda f: abs(f - ideal)))
     edges = [a] + sorted(set(cuts)) + [b]
-    out = [(x, y) for x, y in zip(edges, edges[1:]) if y - x >= 12]
+    out = _merge_short(edges, 12)
     return out or [(a, b)]
 
 

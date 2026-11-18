@@ -24,6 +24,14 @@ class ArtDirector(unittest.TestCase):
         frames = [f for g in segs for f in range(g['start'], g['end'])]
         self.assertEqual(frames, list(range(0, m['shots'][-1]['end'])))
 
+    def test_no_frame_is_ever_left_out_of_the_plan(self):
+        """Regression: a short setup used to be dropped, leaving frames uncovered and the video cut short."""
+        for secs in (1.0, 2.2, 3.1, 4.7, 6.3, 7.9):
+            for line in ('Thousands lined up because two well diggers hit a foot.', 'They cleared soil and uncovered a ten foot stone giant.'):
+                m = manifest([line, line], secs=secs)
+                frames = [f for g in A.plan(m) for f in range(g['start'], g['end'])]
+                self.assertEqual(frames, list(range(0, m['shots'][-1]['end'])), (secs, line))
+
     def test_long_lines_are_split_into_setups(self):
         m = manifest(['In nineteen thirty two the farmers of western australia begged the government for help against the birds.'], secs=7.5)
         self.assertGreaterEqual(len(A.plan(m)), 3)
