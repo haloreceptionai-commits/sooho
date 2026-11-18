@@ -196,7 +196,7 @@ export function planScene(s: SceneInput, state: CameraState): DocBeat[] {
   picked.sort((a, b) => a.range[0] - b.range[0]);
   // 3) fill everything not covered with picture beats of a sensible length
   const long = s.pace === 'long';
-  const target = s.cold ? 5 : long ? 30 : 8, min = s.cold ? 3 : long ? 18 : 4, max = s.cold ? 7 : long ? 44 : 13;
+  const target = s.cold ? 5 : long ? 40 : 8, min = s.cold ? 3 : long ? 26 : 4, max = s.cold ? 7 : long ? 60 : 13;
   const spans: { range: [number, number]; ai?: AiBeat | undefined; data?: CardData | undefined }[] = [];
   let at = 0;
   const pushImages = (a: number, b: number) => { for (const r of chunkWords(words, a, b, target, min, max)) spans.push({ range: r }); };
