@@ -14,6 +14,13 @@ describe("approved narration selection", () => {
   it("uses the same Shorts selection for Advanced", () => {
     expect(narrationSettings("advanced", "A needle points north.")).toEqual(narrationSettings("short", "A needle points north."));
   });
+  it.each(["long", "long:suspense", "long:epic", "long:sad", "long:lofi"])("keeps %s on the history narrator instead of the Shorts narrator", (style) => {
+    const text = "Spartacus turned back from the Alps.";
+    const take = narrationSettings(style, text);
+    expect(take.voice).toBe("Charon");
+    expect(take.voice).not.toBe(narrationSettings("short", text).voice);
+    expect(take.text.split("Narration: ").at(-1)).toBe(text);
+  });
   it("preserves the long-form Charon selection", () => {
     const take = narrationSettings("long", "Earth is a giant magnet.");
     expect(take.voice).toBe("Charon");
