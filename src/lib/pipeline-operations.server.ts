@@ -810,15 +810,18 @@ export const importShortOperation = async ({ data }: { data: { url: string; depl
 
 /** One clean 16:9 thumbnail picture (no text: the exact title is drawn by the browser so spelling is guaranteed). */
 export async function thumbnailImageOperation(data: { subject: string; region: string; figure: string; deployment: string; variant: number }) {
+  // Long-form thumbnail (click-first): one huge emotional figure, one object that raises a question, flat 2D history style like the video.
+  // The headline is drawn in the empty left area by the app, so the picture never contains text.
   const looks = [
-    'The figure stands on the right third, three-quarter view, confident expression, warm golden rim light.',
-    'The figure stands on the right third, facing the viewer, intense stare, dramatic cool side light.',
+    'One huge close-up of the figure on the right half, head and shoulders filling the frame, wide eyes and an open-mouthed shock expression, pointing at the object.',
+    'The figure on the right half, a knowing half-smile and raised eyebrow, leaning toward the viewer with one hand holding up the key object.',
+    'The figure on the right half, a stern stare straight at the viewer, the key object big and sharp in the foreground left-centre, a single warm light behind.',
   ];
-  const prompt = `Viral YouTube history documentary thumbnail, 16:9, ultra crisp and saturated. Background: a bright 3D relief map of ${data.region} seen from above at a slight angle, vivid green lowlands, yellow-ochre plains and brown mountains with strong hillshade, deep glossy blue sea, thin white country borders. The territory of ${data.subject} glows bright red with a thick white outline and a soft red glow, covering the left and middle of the frame. Foreground: a bold stylised digital painting (illustration, not a photograph) of ${data.figure}, chest-up, highly detailed costume. ${looks[data.variant % looks.length]} Keep the top-left quarter free of important detail for a title. Absolutely no text, letters, numbers, logos or watermarks.`;
-  const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt, size: '1536x1024', quality: 'medium', output_format: 'jpeg', output_compression: 90, n: 1 });
+  const prompt = `YouTube history video thumbnail, 16:9, flat 2D cartoon illustration with bold clean ink outlines and smooth cel shading (not 3D, not a photograph). Colour: a single saturated background colour (deep blue or warm red) with one bright yellow accent, very high contrast, big readable shapes. Scene: ${data.region}, simplified to a few flat shapes. Focal subject: ${data.subject}. ${looks[data.variant % looks.length]} Figure: ${data.figure}. Keep the LEFT HALF simple and uncluttered (a flat colour area) so a large headline can sit there. Absolutely no text, letters, numbers, logos or watermarks.`;
+  const res = await azure(`${safeName(data.deployment)}/images/generations`, { prompt: prompt.slice(0, 3900), size: '1536x1024', quality: 'medium', output_format: 'jpeg', output_compression: 90, n: 1 });
   if (!res.ok) await fail(res, 'Thumbnail');
-  const j = await res.json() as { data?: { b64_json?: string }[] };
-  const image = j.data?.[0]?.b64_json;
+  const j2 = await res.json() as { data?: { b64_json?: string }[] };
+  const image = j2.data?.[0]?.b64_json;
   if (!image) throw Error('Thumbnail came back empty');
   return { image };
 }

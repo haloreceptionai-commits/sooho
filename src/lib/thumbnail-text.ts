@@ -39,3 +39,21 @@ export function inkTitleLayout(text: string, width: number, height: number, meas
   const total = lines.length * size * 1.05, x0 = width * 0.97;
   return lines.map((l, i) => { const w = measure(l, size); return { text: l, x: x0 - w, y: (height - total) / 2 + i * size * 1.05, w, h: size * 1.05, size }; });
 }
+
+// Click-first headline check (model-free): 2-3 short, concrete words that a stranger understands at a glance.
+const FILLER = /^(the|a|an|of|in|on|to|and|or|is|was|who|how|why|this|that|it|its|with|for|from|by|at|as)$/i;
+const CONCRETE = /^(giant|king|queen|war|map|ship|gold|bridge|tower|city|town|secret|hoax|lie|stolen|lost|buried|burned|sold|bomb|plague|empire|prison|treasure|fake|real|dead|murder|crown|empire|castle|sword|ghost|mystery|first|last|only|twice|million|billion|\d+)$/i;
+
+export function headlineScore(text: string): { score: number; notes: string[] } {
+  const notes: string[] = [];
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  let score = 50;
+  if (words.length >= 2 && words.length <= 3) score += 15;
+  else { score -= 15; notes.push('headline should be 2-3 words'); }
+  const content = words.filter(w => !FILLER.test(w));
+  if (content.length === words.length || content.length >= 2) score += 10; else { score -= 10; notes.push('too many filler words'); }
+  if (words.some(w => CONCRETE.test(w.replace(/[^a-z0-9]/gi, '')) || /\d/.test(w))) score += 15; else notes.push('no concrete, curiosity-driving word (a number, object, place or act)');
+  if (words.some(w => /^[A-Z][a-z]{2,}/.test(w)) && words.length >= 2) score += 5;
+  if (text.trim().length > 24) { score -= 10; notes.push('headline longer than 24 characters reads poorly on a phone'); }
+  return { score: Math.max(0, Math.min(100, score)), notes };
+}

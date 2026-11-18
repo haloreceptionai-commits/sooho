@@ -1,3 +1,4 @@
+import { headlineScore } from '../thumbnail-text';
 // Packaging first: ten title + thumbnail concepts are written and scored BEFORE the script, the best one is locked, and the script
 // must deliver exactly that promise. A title that makes a curiosity gap and a thumbnail with one focal point decide the click; the video pays it off.
 export interface PackagingConcept { title: string; thumb_text: string; focal_subject: string; emotion: string; layout: 'face' | 'object' | 'split' | 'map' | 'versus'; promise: string; gap: string }
@@ -34,6 +35,8 @@ export function scoreConcept(c: PackagingConcept): ScoredConcept {
   if (c.title === c.title.toUpperCase() && len > 6) { score -= 12; notes.push('all capitals'); }
   const tw = c.thumb_text.trim().split(/\s+/).filter(Boolean).length;
   if (tw >= 1 && tw <= 3) score += 8; else { score -= 8; notes.push('thumbnail text should be 1-3 words'); }
+  const head = headlineScore(c.thumb_text);
+  score += Math.round((head.score - 50) / 10); notes.push(...head.notes);
   if (c.thumb_text.trim().toLowerCase() === c.title.trim().toLowerCase()) { score -= 8; notes.push('thumbnail repeats the title'); }
   if (c.promise.trim().split(/\s+/).length < 6) { score -= 10; notes.push('no clear promise'); }
   if (c.focal_subject.trim().split(/\s+/).length > 8) { score -= 4; notes.push('thumbnail has more than one focal point'); }
