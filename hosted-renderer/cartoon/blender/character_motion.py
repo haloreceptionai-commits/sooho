@@ -114,8 +114,13 @@ def _legacy_pose(action,t):
         p['left_wrist']=(-.02,-.3-.16*math.sin(p['grip_angle']),p['right_wrist'][2]+.16*math.cos(p['grip_angle']))
     if action in ('cheer','panic'):
         # panic flails (it is only for real panic); a cheer raises both arms and sways them slowly
-        wave=math.sin(t*math.tau*(3 if action=='panic' else .8));amp=.1 if action=='panic' else .045
-        p['left_wrist']=(-.54,-.22,1.58+amp*wave);p['right_wrist']=(.54,-.22,1.58-amp*wave)
+        if action=='panic':
+            wave=math.sin(t*math.tau*3);amp=.1
+            p['left_wrist']=(-.54,-.22,1.58+amp*wave);p['right_wrist']=(.54,-.22,1.58-amp*wave)
+        else:
+            # a cheer is one raise of both arms that eases in and then holds still: no endless hand loop
+            e=min(1.0,t/.4);e=e*e*(3-2*e)
+            p['left_wrist']=(-.54*e-.27*(1-e),-.22,(p['left_wrist'][2])*(1-e)+1.58*e);p['right_wrist']=(.54*e+.27*(1-e),-.22,(p['right_wrist'][2])*(1-e)+1.58*e)
     if action in ('react','worry','shout'):
         # One deliberate gesture that eases in over a third of a second and then holds perfectly still: people do not flail for no reason.
         e=min(1.0,t/.35);e=e*e*(3-2*e);lw,rw=p['left_wrist'],p['right_wrist']

@@ -285,24 +285,25 @@ def build_character(c,duration=3,fps=30):
     detail_positions=[]
     for o in body_details:o.parent=root;detail_positions.append((o,o.location.copy()))
     joints={};segments=[];anchors={}
-    pants=material(ident+' trousers',tuple(c.get('pants') or TROUSERS[sum(map(ord,ident))%len(TROUSERS)]),.85) if not bench else black;shoe=material(ident+' shoes',(.35,.2,.1),.55)
+    pants=material(ident+' trousers',tuple(c.get('pants') or TROUSERS[sum(map(ord,ident))%len(TROUSERS)]),.85);shoe=material(ident+' shoes',(.35,.2,.1),.55)
     for side in ['left','right']:
         for joint in ['elbow','wrist','knee','ankle']:
             jm=(black if joint in ('elbow','wrist') else pants) if not premium else (cloth if joint in ('elbow','wrist') else pants)
             jr=(.052 if joint=='elbow' else .068 if joint=='wrist' else .08 if joint=='knee' else .072) if not premium else (.043 if joint=='elbow' else .036 if joint=='wrist' else .06 if joint=='knee' else .05)
-            if bench:jr=.023 if joint in ('elbow','wrist') else .027   # stick limbs: the joint is as thin as the limb, so no ball shows
+            if bench:jr=.036 if joint in ('elbow','wrist') else .042   # stick limbs: the joint is as thin as the limb, so no ball shows
             o=sphere(side+' '+joint,(0,0,0),(jr,)*3,jm);o.parent=root;joints[side+'_'+joint]=o
             if joint in ('wrist','ankle'):
                 anchor=bpy.data.objects.new(side+' '+joint+' attachment',None);bpy.context.collection.objects.link(anchor);anchor.parent=root;anchors[side+'_'+joint]=anchor
         for a,b in [('shoulder','elbow'),('elbow','wrist'),('hip','knee'),('knee','ankle')]:
             bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=.021,depth=1)
             o=bpy.context.active_object;o.name=side+' '+a+'-'+b
-            o.data.materials.append((black if a in ('shoulder','elbow') else pants) if not premium else (cloth if a in ('shoulder','elbow') else pants));o.parent=root
+            if bench: o.data.materials.append(cloth if a=='shoulder' else skin if a=='elbow' else pants);o.parent=root   # benchmark: sleeves, bare forearms, trousers
+            else: o.data.materials.append((black if a in ('shoulder','elbow') else pants) if not premium else (cloth if a in ('shoulder','elbow') else pants));o.parent=root
             for pl in o.data.polygons:pl.use_smooth=False   # smooth sides, flat end caps (smooth caps smear light along the limb)
             if premium:
                 o['girth']=(.043 if a=='shoulder' else .038) if a in ('shoulder','elbow') else (.06 if a=='hip' else .052)
             else: o['girth']=.04 if a in ('shoulder','elbow') else .075 if a=='hip' else .066   # sturdy arms; trouser legs that taper from hip to ankle
-            if bench:o['girth']=.022 if a in ('shoulder','elbow') else .026   # benchmark: thin dark stick arms and legs (girth is the radius)
+            if bench:o['girth']=.036 if a in ('shoulder','elbow') else .045   # benchmark: thin dark stick arms and legs (girth is the radius)
             segments.append((o,side+'_'+a,side+'_'+b))
         if premium:
             sphere(side+' shoe',(0,-.07,.0),(.075,.14,.046),shoe).parent=anchors[side+'_ankle']
@@ -311,7 +312,7 @@ def build_character(c,duration=3,fps=30):
             th=sphere(side+' thumb',((-1 if side=='left' else 1)*.04,-.02,.05),(.018,.018,.04),skin);th.parent=anchors[side+'_wrist']
             for fi in range(3):sphere(side+' finger',(-.026+fi*.026,0,.14),(.014,.014,.04),skin).parent=anchors[side+'_wrist']
         else:
-            sphere(side+' shoe',(0,-.035,-.01),(.04,.07,.025) if bench else (.085,.15,.045),black).parent=anchors[side+'_ankle']
+            sphere(side+' shoe',(0,-.04,-.01),(.062,.11,.034) if bench else (.085,.15,.045),black).parent=anchors[side+'_ankle']
     held=c.get('held')
     if held:
         wrist=anchors['right_wrist']
@@ -331,7 +332,7 @@ def build_character(c,duration=3,fps=30):
                 sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist
     if bench:
         for side in ['left','right']:
-            hand=sphere(side+' hand',(0,0,.04),(.05,.04,.055),black);hand.parent=anchors[side+'_wrist']
+            hand=sphere(side+' hand',(0,0,.04),(.075,.06,.07),skin);hand.parent=anchors[side+'_wrist']
         for o in list(headroot.children):
             if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest','stubble')):outline(o,.013)
         for o in list(root.children):

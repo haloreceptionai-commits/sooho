@@ -68,6 +68,8 @@ class CalmGestureTests(unittest.TestCase):
         self.assertNotEqual(pose('panic', 0.1)['left_ankle'], pose('panic', 0.25)['left_ankle'])
         self.assertNotEqual(pose('walk', 0.1)['left_ankle'], pose('walk', 0.5)['left_ankle'])
 
-    def test_a_cheer_sways_gently(self):
-        ys = [pose('cheer', t / 10)['left_wrist'][2] for t in range(0, 20)]
-        self.assertLess(max(ys) - min(ys), .12)
+    def test_a_cheer_raises_once_and_holds_still(self):
+        # the arms go up once and stay there: no repeated hand loop
+        late = [pose('cheer', t / 10)['left_wrist'] for t in range(10, 40)]
+        self.assertLess(max(p[2] for p in late) - min(p[2] for p in late), .01)
+        self.assertGreater(pose('cheer', 1.0)['left_wrist'][2], 1.4)
