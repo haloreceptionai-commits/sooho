@@ -91,11 +91,11 @@ def build_character(c,duration=3,fps=30):
         return build_uploaded_human(c,duration,fps)
     ident=c.get('id','cast');black=material('cast ink',(.012,.013,.015),.65)
     skin=material('cast skin '+ident,tuple(c.get('skin',(.94,.93,.88))),.58)
-    if c.get('style','benchmark')=='benchmark':   # house style: pure white, self-lit faces and hands, never grey under any light
+    if c.get('style','benchmark')=='benchmark':   # house style: plain white faces and hands, lit like everything else (no self-glow, so they never blow out)
         nd=skin.node_tree.nodes.get('Principled BSDF')
         if nd:
             nd.inputs['Base Color'].default_value=(1,1,1,1)
-            nd.inputs['Emission Color' if 'Emission Color' in nd.inputs else 'Emission'].default_value=(1,1,1,1); nd.inputs['Emission Strength'].default_value=0.75
+            nd.inputs['Emission Color' if 'Emission Color' in nd.inputs else 'Emission'].default_value=(0,0,0,1); nd.inputs['Emission Strength'].default_value=0
     species=c.get('species','human')
     if species!='human':   # alien / monster / ghost keep the egg and the ink line but get their own skin
         col={'alien':(.5,.95,.4),'monster':(.62,.38,.88),'ghost':(.9,.96,1.0)}[species]

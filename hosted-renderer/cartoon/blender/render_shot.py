@@ -325,7 +325,7 @@ def look(scene, shot):
         nt.links.new(rl.outputs['Mist'], mul.inputs[0]); nt.links.new(mul.outputs[0], mix.inputs[0])
         nt.links.new(img, mix.inputs[1]); img = mix.outputs[0]
     glare = nt.nodes.new('CompositorNodeGlare'); glare.glare_type = 'FOG_GLOW'; glare.quality = 'MEDIUM'
-    glare.threshold = 0.75; glare.size = 8; glare.mix = -0.45  # glow around lamps, the moon and bright edges
+    glare.threshold = 1.5; glare.size = 8; glare.mix = -0.45  # glow around lamps, the moon and bright edges
     nt.links.new(img, glare.inputs['Image']); img = glare.outputs['Image']
     mask = nt.nodes.new('CompositorNodeEllipseMask'); mask.width = 0.95; mask.height = 0.92
     blur = nt.nodes.new('CompositorNodeBlur'); blur.filter_type = 'FAST_GAUSS'; blur.use_relative = True
