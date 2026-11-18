@@ -8,6 +8,15 @@ import { canonical } from './canonical.mjs';
 
 await platform.init();
 const input = await platform.input();
+// Long-form videos made of still pictures use the documentary renderer (same machines, same callback address).
+if (input?.manifest?.kind === 'documentary') {
+  const { runDocumentary } = await import('./documentary-worker.mjs');
+  try { await runDocumentary(input); }
+  catch (error) { if (process.env.DOC_TEST === '1') { try { await (await platform.open(`cartoon-${input.jobId}`)).setValue('TEST-ERROR', { message: String(error.message || error).slice(0, 2000) }); } catch {} }
+    await fetch(input.callbackUrl, { method: 'POST', headers: { 'x-render-job': input.jobId, 'x-render-token': input.callbackToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'failed', error: String(error.message || error).slice(0, 900) }) }).catch(() => {}); throw error; }
+  await platform.exit();
+  process.exit(0);
+}
 if (!input?.jobId || !input.callbackToken || input.manifest?.kind !== 'cartoon') throw Error('Invalid cartoon job');
 const address = new URL(input.callbackUrl);
 // The app is reachable at its published address and its custom domain; anything else is rejected.
