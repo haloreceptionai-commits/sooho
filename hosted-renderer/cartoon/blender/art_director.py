@@ -572,6 +572,7 @@ class Director:
         if ctx.get('opening_reveal'): prefs += ['wide', 'establish', 'high']                                                              # then pull out and show the world
         if ctx['new_place'] and ctx['part'] == 0: prefs += ['establish', 'wide', 'high']
         if ctx['story_object'] and ctx['part'] >= 1: prefs += ['insert']
+        if ctx.get('vehicle'): prefs = ['track'] + prefs   # a car or bike is always followed, never left to drive out of frame
         if ctx['moving']: prefs += ['track', 'wide']
         if ctx['scale']: prefs += ['high', 'establish']
         if ctx['threat']: prefs += ['low']
@@ -581,6 +582,7 @@ class Director:
         if ctx['hint']: prefs.insert(1 if prefs else 0, ctx['hint'])
         prefs += ['medium', 'orbit', 'low', 'close', 'wide', 'high']
         for p in prefs:
+            if p == 'track' and ctx.get('vehicle'): return p
             if p == prev or recent.count(p) >= 2 or p in self.history[-2:]: continue
             if p == 'establish' and 'establish' in self.history[-3:]: continue
             if p in ('ots',) and (ctx['n_people'] < 2 or ctx['moving']): continue
@@ -650,7 +652,7 @@ class Director:
         if seq_card:  # climax: each setup shows one state of the key event, in story order
             obj_cards = [o for o in obj_cards if o['image'] == seq_card][:1]
         ctx = {'first_of_video': i == 0 and part == 0, 'opening_reveal': i == 0 and part == 1, 'new_place': new_place, 'part': part, 'story_object': bool(story_obj), 'props': bool(props) or bool(obj_cards),
-               'moving': bool(moving), 'scale': bool(SCALE_WORDS.search(txt)) or herd, 'threat': verb in ('aim', 'load') or s.get('mood') == 'tense',
+               'moving': bool(moving), 'vehicle': bool(plan and plan.vehicle), 'scale': bool(SCALE_WORDS.search(txt)) or herd, 'threat': verb in ('aim', 'load') or s.get('mood') == 'tense',
                'n_people': len(actors), 'n_subjects': len(actors) + len(beasts), 'emotion': verb in ('panic', 'fall', 'cheer') or s.get('expression') in ('shock', 'laugh', 'nervous'),
                'reveal': s.get('mood') == 'reveal', 'hint': HINT.get(s.get('shot')) if part == 0 else None}
         kind = self.camera_type(ctx)
@@ -866,7 +868,7 @@ class Director:
         if rigs: shot['rigs'] = rigs
         self.house_extras(shot, i, part, kind, st, cast, cam, txt)
         if kind not in ('track', 'orbit', 'establish'): normalize_travel(cam, shot['duration'])
-        if cast and kind not in ('establish', 'high', 'insert'): keep_cast_in_frame(cam, cast)
+        if cast and kind not in ('establish', 'high', 'insert') and not (kind == 'track' and any(c.get('to') for c in cast)): keep_cast_in_frame(cam, cast)
         self.history.append(kind); self.last_zone = (st, zname)
         return validate_shot(shot), {'camera_type': kind, 'set': st, 'zone': zname, 'verb': verb, 'words': txt, 'location': s.get('location'),
                                      'objects': [o['phrase'] for o in obj_cards], 'cards_shown': shown,
@@ -1002,7 +1004,8 @@ class Director:
                     cam = {'from': at(o0, F, R, -1.2, .3, .9), 'look_at': at(o0, F, R, 0, 0, .35), 'lens': 60, 'fstop': 2.2}
             else:
                 cam = {'from': P(-1.4, .5 * side, 1.2), 'look_at': P(0, 0, 0.9), 'lens': 60, 'fstop': 2.2}
-        if cast and kind not in ('insert',): cam = fit_subject(cam, cast, kind, indoor=st in INDOOR_KITS)
+        follows = kind == 'track' and any(c.get('to') for c in cast)   # a travelling vehicle: the camera already moves with it
+        if cast and kind not in ('insert',) and not follows: cam = fit_subject(cam, cast, kind, indoor=st in INDOOR_KITS)
         if kind in ('close', 'xclose') and len(cast) == 1: cam = rule_of_thirds(cam, side)
         # editorial move on top of the setup (never on track/orbit/establish, which already move)
         if kind not in ('track', 'orbit', 'establish'):

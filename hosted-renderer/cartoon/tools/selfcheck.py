@@ -68,7 +68,15 @@ def acting():
     """The director: lines of narration become the right activity, with its props, furniture and vehicle, and the shot validates."""
     import art_director
     sys.path.insert(0, str(ROOT / 'blender'))
-    from test_art_director import manifest
+    def manifest(lines, cast, secs=3.5):   # a tiny manifest of our own: test files are not shipped in the image
+        words, cap, shots, t = [], [], [], 0.2
+        for k, line in enumerate(lines):
+            start = t
+            for w in line.split():
+                words.append({'text': w.lower(), 'start': round(t, 3), 'end': round(t + .3, 3)}); cap.append(w); t += secs / len(line.split())
+            shots.append({'start': round(start * 30) if k else 0, 'end': round(t * 30), 'world': 'landscape', 'light': 'day', 'shot': 'medium', 'move': 'static', 'mood': 'calm', 'speaker': None, 'keyword': 0,
+                          'props': [], 'fx': [], 'actors': [{'id': 'major', 'action': 'idle', 'expression': 'neutral', 'slot': 'center', 'facing': 0}]})
+        return {'words': words, 'caption_words': cap, 'shots': shots, 'cast': cast}
     seen = {}
     for line in ('She was baking cookies for the town.', 'He drove his red car down the highway.', 'The hacker typed on a laptop.', 'She rode her bike to school.'):
         shot = art_director.plan(manifest([line], cast=[{'id': 'major', 'outfit': 'worker'}], secs=3.5))[0]['shot']
