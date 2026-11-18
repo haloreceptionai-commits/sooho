@@ -629,6 +629,9 @@ def main():
         qa=verify_objects(object_roots,shot['duration'],fps)
         with open(os.path.join(out,'object-qa.json'),'w') as file:json.dump(qa,file,indent=2)
     build_props(shot)
+    if shot.get('rigs'):
+        from rigs import build_rig
+        for r in shot['rigs']: build_rig(r, shot['duration'], fps)
     fx = build_effects(shot, fps); crowd = build_crowd(shot, fps); print('FX', fx, 'CROWD', crowd, flush=True)
     if shot.get('label'):
         from labels import build_label

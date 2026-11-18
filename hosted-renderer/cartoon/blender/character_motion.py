@@ -1,10 +1,12 @@
 """Pure, deterministic joint targets for the isolated benchmark cast."""
 import math
 
-EXPRESSIONS = {'neutral','happy','angry','sad','shock','worried','smug','determined','talk'}
+EXPRESSIONS = {'neutral','happy','angry','sad','shock','worried','smug','determined','talk','sleep'}
 OUTFITS = {'worker','merchant','soldier','sailor','tunic','armor','robe','dress','labcoat','uniform','royal','rags','hoodie','suit','apron','police','sweater'}
 HATS = {'none','beanie','top','helmet','tricorne','crested','crown','turban','hood','cap','straw','hardhat','laurel','headband','spiky','bun','bob'}
-ACTIONS = {'stand','walk','run','carry','point','swing','aim','load','pour','crouch','fall','cheer','panic','react','worry','shout'}
+from activity_motion import ACTIVITY_POSES, pose as _activity_pose
+LEGACY_ACTIONS = {'stand','walk','run','carry','point','swing','aim','load','pour','crouch','fall','cheer','panic','react','worry','shout'}
+ACTIONS = LEGACY_ACTIONS | set(ACTIVITY_POSES)   # 16 classic poses + the activity library (cook, type, drive, eat, dance, hug...)
 
 
 def elbow(a,b,length=.34,side=1,bend=None):
@@ -23,8 +25,31 @@ def elbow(a,b,length=.34,side=1,bend=None):
     return tuple(mid[i]+side*h*normal[i]/norm for i in range(3))
 
 
-def pose(action,t):
+def finish(p,reach=.66,leg=.83):
+    """Shared last step for the activity poses: torso lean about the hips, reachable hands and feet, then the two-bone elbows and knees."""
+    hz=p['hips'][2];L=p.get('lean',0);c,s_=math.cos(L),math.sin(L)
+    if L:
+        def lean(v):
+            dy,dz=v[1],v[2]-hz;return (v[0],dy*c-dz*s_,hz+dz*c+dy*s_)
+        for k in ('left_shoulder','right_shoulder','head'):p[k]=lean(p[k])
+    def within(a,b,r):
+        d=[b[i]-a[i] for i in range(3)];n=math.sqrt(sum(x*x for x in d))
+        return b if n<=r else tuple(a[i]+d[i]*r/n for i in range(3))
+    for side,sign in (('left',-1),('right',1)):
+        p[side+'_wrist']=within(p[side+'_shoulder'],p[side+'_wrist'],reach)
+        hip=(sign*.09,0,hz);p[side+'_hip']=hip;p[side+'_ankle']=within(hip,p[side+'_ankle'],leg)
+        p[side+'_elbow']=elbow(p[side+'_shoulder'],p[side+'_wrist'],.34,1,bend=(sign,-.5,0))
+        p[side+'_knee']=elbow(hip,p[side+'_ankle'],.42,1,bend=(0,-1,0))
+    return p
+
+
+def pose(action,t,seat=None):
     if action not in ACTIONS:raise ValueError('unknown action')
+    if action in ACTIVITY_POSES:return finish(_activity_pose(action,t,seat))
+    p=_legacy_pose(action,t);p.setdefault('lean',0);p.setdefault('nod',0);p.setdefault('turn',0);return p
+
+
+def _legacy_pose(action,t):
     phase=t*math.tau*(2.8 if action in ('run','panic') else 1.2)
     moving=action in ('walk','run','panic')
     crouch=.33 if action=='crouch' else .075 if moving else 0
@@ -98,6 +123,7 @@ def face_shape(expression,t=0):
         'angry':(.025,.45,-.018,.075,.014), 'sad':(.03,-.38,-.055,.075,.012),
         'shock':(.06,0,0,.045,.075), 'worried':(.048,-.24,-.025,.045,.03),
         'smug':(.02,.12,.035,.075,.012), 'determined':(.025,.25,0,.085,.02),
-        'talk':(.035,0,0,.04+.02*abs(math.sin(t*8)),.015+.055*abs(math.sin(t*11)))}
+        'talk':(.035,0,0,.04+.02*abs(math.sin(t*8)),.015+.055*abs(math.sin(t*11))),
+        'sleep':(.004,0,.02,.05,.012)}
     eye,brow,curve,width,height=profiles[expression]
     return dict(eye=eye,brow=brow,curve=curve,width=width,height=height)

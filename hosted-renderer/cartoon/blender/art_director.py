@@ -14,6 +14,7 @@ Everything compiles to shot_schema-validated JSON; nothing the language model wr
 from world_pack import backdrop_for, kit_fits_era, story_year
 from animals import ANIMAL
 import math, re
+import activities as ACT
 from shot_schema import validate_shot
 from shot_director import ZONES as BASE_ZONES, OBJ_CAMS
 from object_specs import OBJECTS
@@ -619,11 +620,13 @@ class Director:
         verb = next((act for pat, act in VERB_ACTION if re.search(pat, txt or whole)), None)
         if verb is None and re.search(r'\b(kill\w*|hunt\w*|cull\w*)\b', txt or whole):  # killing means aiming only when weapons are in the story
             verb = 'aim' if re.search(r'\b(gun\w*|rifle\w*|shot|shoot\w*|bullets?|hunters?|soldiers?)\b', whole + ' ' + text_of(spoken(m, 0, 10 ** 9))) else 'panic'
+        plan = ACT.interpret(txt or whole) if (actors and not (named and beasts)) else None   # what the character is actually DOING (cook, type, drive, eat, hug...)
+        if plan: verb = plan.motion
         beast_verb = verb if named and beasts else None
         if beast_verb in ('run', 'walk', 'panic', 'fall'):  # "the emus scattered": the animals move, people react
             verb = 'aim' if re.search(r'\b(gun\w*|fir\w*|shot|soldiers?|bullets?|kill\w*)\b', whole) and any(self.cast_look.get(x['id'], {}).get('outfit') in ('soldier', 'armor') for x in actors) else 'point'
         herd = bool(HERD_WORDS.search(whole)) and bool(beasts)
-        moving = (verb in ('run', 'walk') and bool(actors)) or (beast_verb in ('run', 'walk', 'panic') and bool(beasts))
+        moving = (verb in ('run', 'walk', 'drive', 'ride') and bool(actors)) or (beast_verb in ('run', 'walk', 'panic') and bool(beasts))
         # --- story objects (only when the words name them) and whitelisted props
         story_obj = []
         for p in s.get('props') or []:
@@ -659,12 +662,17 @@ class Director:
         for j, x in enumerate(actors):
             look = self.cast_look.get(x['id'], {'outfit': 'worker', 'hat': 'none', 'shirt': SHIRTS[j % 4], 'hat_color': HAT_COLORS[j % 4]})
             base = LEGACY_ACTION.get(x.get('action'), 'stand')
-            act = verb if verb and (j == 0 or verb in ('run', 'walk', 'panic', 'cheer', 'aim')) else base
-            if act == 'stand' and j == 0 and (x['id'] == s.get('speaker') or base == 'stand'): act = 'point' if (i + j) % 3 == 0 else 'stand'
+            act = verb if verb and (j == 0 or verb in ('run', 'walk', 'panic', 'cheer', 'aim') or (plan and plan.companion)) else base
+            if act == 'stand' and j == 0 and (x['id'] == s.get('speaker') or base == 'stand'): act = 'talk' if x['id'] == s.get('speaker') else 'point' if (i + j) % 3 == 0 else 'stand'
             expr = 'talk' if x['id'] == s.get('speaker') else FACE.get(x.get('expression'), ACTION_FACE.get(act, 'neutral'))
             if act in ACTION_FACE and expr == 'neutral': expr = ACTION_FACE[act]
             n = len(actors)
-            if act in ('walk', 'run'):
+            mine = plan if (plan and act == plan.motion) else None
+            if mine and mine.profile and not mine.vehicle:
+                pos = at(S, F, R, 0, 0); yaw = yaw_facing((R[0] * travel_dir, R[1] * travel_dir)) if not mine.away else yaw_facing((F[0] + R[0] * .45 * travel_dir, F[1] + R[1] * .45 * travel_dir))   # side-on to the camera: it can be seen working on what is in front of it
+            elif mine and mine.vehicle:
+                pos = at(S, F, R, 0, -travel_dir * 2.0 * dur * (1.4 if mine.vehicle == 'car' else .8) / 2); yaw = yaw_facing((R[0] * travel_dir, R[1] * travel_dir))
+            elif act in ('walk', 'run'):
                 v = .7 if act == 'walk' else 1.3; span = v * dur
                 start = at(S, F, R, 0.6 * j, -travel_dir * span / 2 + (-.7 * j * travel_dir))
                 yaw = yaw_facing((R[0] * travel_dir, R[1] * travel_dir))
@@ -672,7 +680,8 @@ class Director:
                     start = at(S, F, R, 0.5 + span * .6, 0.6 * (j - (n - 1) / 2)); yaw = yaw_facing((-F[0], -F[1]))
                 pos = start
             else:
-                offs = [(0, 0)] if n == 1 else [(-.75, 0), (.75, 0)] if n == 2 else [(-.9, 0), (.9, 0), (0, .9)]
+                gap = .3 if (plan and plan.activity == 'hug') else .52 if (plan and plan.activity == 'handshake') else .75   # partners stand close enough to touch
+                offs = [(0, 0)] if n == 1 else [(-gap, 0), (gap, 0)] if n == 2 else [(-.9, 0), (.9, 0), (0, .9)]
                 pos = at(S, F, R, offs[j][1], offs[j][0])
                 if n >= 2 and j < 2:  # partners turn toward each other (3/4 to camera)
                     other = at(S, F, R, offs[1 - j][1], offs[1 - j][0]); d = (other[0] - pos[0] - F[0] * .9, other[1] - pos[1] - F[1] * .9)
@@ -683,9 +692,15 @@ class Director:
                   'shirt': look['shirt'], 'hat_color': look['hat_color'], 'skin': look.get('skin', [.94, .93, .88]), 'facial': look.get('facial', 'none'), 'trim': look.get('trim', [.72, .55, .12])}
             if look.get('species', 'human') != 'human': ch['species'] = look['species']
             if look.get('glasses'): ch['glasses'] = True
+            if mine:
+                if mine.held: ch['holds'] = [{'prop': pr, 'hand': hd} for pr, hd in mine.held]
+                if mine.seat: ch['seat'] = .53
+                if ch['expression'] in ('neutral', 'talk') and mine.face and x['id'] != s.get('speaker'): ch['expression'] = 'sleep' if mine.activity == 'sleep' else mine.face
+                if mine.activity == 'sleep': ch['expression'] = 'sleep'
+                if mine.companion and n >= 2: ch['holds'] = []
             if act in ('aim', 'load') and st in ('office', 'saloon', 'workshop', 'room'): act = 'point'; ch['action'] = act
             if act in ('aim', 'load') and look['outfit'] in ('soldier', 'armor'): ch['held'] = 'rifle'
-            elif act == 'carry': ch['held'] = 'crate'
+            elif act == 'carry' and not ch.get('holds'): ch['held'] = 'crate'
             elif act == 'swing': ch['held'] = 'tool'
             cast.append(human_cast(ch, x, look) if UPLOADED_HUMANS else ch)
         if beasts:
@@ -729,6 +744,21 @@ class Director:
             big = hgt >= 4
             p = at(S, F, R, 4.0 + 2 * j, (-3.2 if j % 2 else 3.2)) if big else at(anchor, F, R, 0.3 + 0.5 * j, (1.25 if j % 2 == 0 else -1.3))
             prop_specs.append({'id': mid, 'pos': p, 'height': hgt, 'yaw': round((head + 35 * j) % 360, 1)})
+        rigs = []
+        if plan and cast:
+            c0 = cast[0]; yv = math.radians(c0['yaw']); fw = (math.sin(yv), -math.cos(yv)); rt = (math.cos(yv), math.sin(yv))
+            for mid, ph, fwd, right, off in plan.pieces:
+                prop_specs.append({'id': mid, 'pos': r3([c0['pos'][0] + fw[0] * fwd + rt[0] * right, c0['pos'][1] + fw[1] * fwd + rt[1] * right]), 'height': ph, 'yaw': round((math.degrees(yv) + off) % 360, 1)})
+            if plan.vehicle:
+                lx, ly = (-.32, .2) if plan.vehicle == 'car' else (0, .4)   # where the rider sits in the vehicle's own frame
+                px, py = c0['pos']; ryaw = math.degrees(yv)
+                cx = px - (lx * math.cos(yv) - ly * math.sin(yv)); cy = py - (lx * math.sin(yv) + ly * math.cos(yv))
+                dist = dur * (5.5 if plan.vehicle == 'car' else 3.0)
+                c0['pos'] = r3([px, py]); c0['to'] = r3([px + fw[0] * dist, py + fw[1] * dist]); c0['action'] = plan.motion
+                if plan.vehicle == 'car': c0['seat'] = .55
+                rigs.append({'kind': plan.vehicle, 'pos': r3([cx, cy]), 'yaw': round(ryaw % 360, 1), 'to': r3([cx + fw[0] * dist, cy + fw[1] * dist]), 'color': SHIRTS[(i + part) % 4]})
+            if plan.rig: rigs.append({'kind': plan.rig, 'pos': r3([c0['pos'][0] + fw[0] * .35, c0['pos'][1] + fw[1] * .35]), 'yaw': round(math.degrees(yv) % 360, 1)})
+            prop_specs = prop_specs[:8]
         # effects timed to the words that trigger them
         for pat, fk in FX_WORDS:
             hits = [w for _, w, t in ws if re.search(pat, str(t).lower())]
@@ -820,7 +850,10 @@ class Director:
             shot['haze'] = 0.006; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.72, 0.8, 0.88]
         if cards: shot['cards'] = cards
         if s.get('place'):
-            shot['place'] = compile_place(s['place'], seed=i)
+            pl = s['place']
+            if plan and plan.place_hint and plan.score >= 2.9 and not ACT.compatible(plan, pl.get('terrain')) and pl.get('terrain') not in ('road', 'highway'):
+                pl = {**pl, 'terrain': plan.place_hint, 'dressing': []}
+            shot['place'] = compile_place(pl, seed=i)
             if s['place'].get('weather') == 'fog': shot['haze'] = 0.02; shot['haze_color'] = [0.62, 0.66, 0.72]
         else:
             bd = backdrop_for(s.get('location'), self.cards)
@@ -828,6 +861,7 @@ class Director:
         if crowd: shot['crowd'] = crowd
         if effects: shot['effects'] = effects
         if prop_specs: shot['props'] = prop_specs
+        if rigs: shot['rigs'] = rigs
         self.house_extras(shot, i, part, kind, st, cast, cam, txt)
         if kind not in ('track', 'orbit', 'establish'): normalize_travel(cam, shot['duration'])
         if cast and kind not in ('establish', 'high', 'insert'): keep_cast_in_frame(cam, cast)
@@ -933,8 +967,10 @@ class Director:
             cam = {'from': r3([a_[0] - u[0] * 1.8 + perp[0] * 1.25 * sgn - F[0] * .4, a_[1] - u[1] * 1.8 + perp[1] * 1.25 * sgn - F[1] * .4, 1.62]),
                    'look_at': r3([b_[0], b_[1], 1.55]), 'lens': 38, 'fstop': 2.8}
         elif kind == 'track':
-            mover = next((c for c in cast if c['action'] in ('walk', 'run')), None)
-            if mover:
+            mover = next((c for c in cast if c['action'] in ('walk', 'run', 'drive', 'ride')), None)
+            if mover and mover.get('to'):
+                p0 = mover['pos']; p1 = mover['to']; mover = None
+            elif mover:
                 v = .7 if mover['action'] == 'walk' else 1.3; yv = math.radians(mover['yaw'])
                 dvec = [math.sin(yv), -math.cos(yv)]; p0 = mover['pos']; p1 = [p0[0] + dvec[0] * v * dur, p0[1] + dvec[1] * v * dur]
             else:

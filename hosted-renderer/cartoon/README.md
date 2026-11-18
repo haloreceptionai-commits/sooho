@@ -62,3 +62,17 @@ finishes; new cartoon submissions remain disabled until then. The full 1,010-fra
 overshoot; this is not proof of hosted completion. No speed promise is made.
 A local steady-state ten-frame test took
 7.26 seconds excluding startup; hosted timings differ materially.
+## Activities: the characters do what the script says (Nov 2026)
+
+`blender/activities.py` reads each line of narration and decides the activity (cook, eat, drink, drive, ride, type, write, read, phone, photo, dig, sweep, paint,
+fish, throw, kick, punch, dance, hug, handshake, climb, sleep, bow, wave, think, cry, laugh... about 50). Each activity names its **motion**, the **items in the hands**,
+the **furniture** it needs, a **vehicle** if any, and the **place** it belongs in. `art_director.py` applies the plan:
+
+* `blender/activity_motion.py` holds the poses (pure maths): torso lean, head nod and turn, seated variants, hands that reach what they should. Gestures ease in and out;
+  nothing shakes. `character_motion.pose(action, t, seat)` is the single entry point and `finish()` clamps reach and solves elbows and knees.
+* `blender/hand_props.py` builds the held items (pan, spatula, knife, phone, book, pen, shovel, broom, camera, rod, guitar...) on the wrist anchors.
+* `blender/rigs.py` builds the open cartoon car, the bicycle and the ladder; wheels turn with the distance driven and the rider travels with the vehicle (`cast.to`, `rigs[].to`).
+* the shot schema gained `cast.holds`, `cast.seat`, `cast.to`, `rigs` and accepts any library model as a `props` entry.
+* when the planner's place does not suit a clear activity (cooking on a beach), the director switches to the recipe that does (`kitchen`).
+* tests: `test_activities.py` (lexicon + every pose reachable/finite/calm), `test_activity_director.py` (sentence -> staged shot). Visual check: `mk_acts.py` + `render_acts.sh` in the scratch folder.
+* adding an activity: one entry in `ACTIVITIES` (words + motion + props), one pose function in `activity_motion.ACTIVITY_POSES`; the tests fail if a prop or model does not exist.

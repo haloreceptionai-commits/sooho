@@ -211,7 +211,7 @@ def render_range(manifest_path, web, out, first, last, card_dir):
         shot = dict(shot); shot['engine'] = eng['SHOT_ENGINE']; shot['samples'] = samples
         if os.environ.get('BLENDER_SAFE') == '1':   # last-resort retry: the same shot without the extra dressing, effects and overlays
             if shot.get('place'): shot['place'] = {**shot['place'], 'items': []}
-            shot['effects'] = []; shot['overlay'] = []
+            shot['effects'] = []; shot['overlay'] = []; shot.pop('rigs', None)   # a vehicle or ladder that fails to build must never stop the video
         return shot
 
     def blender_run(sp, outdir, env, what):

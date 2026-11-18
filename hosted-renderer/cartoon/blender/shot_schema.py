@@ -6,9 +6,15 @@ from object_specs import validate_object
 from effects import KINDS as EFFECT_KINDS
 
 SETS = set(json.loads((Path(__file__).parent / 'set-kits.json').read_text())) | {'open_day', 'neutral'}
+HOLD_PROPS = {'pan','spatula','knife','food','cup','pen','paper','book','phone','camera','magnifier','cash','hammer','shovel','broom','brush','rod','ball','guitar','crate'}
+def _known_model(i):
+    import library
+    return library.known(i)
+
+
 PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label', 'overlay'}
+KEYS = {'rigs', 'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label', 'overlay'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -78,7 +84,7 @@ def validate_shot(s):
     cast = s.get('cast', [])
     if not isinstance(cast, list) or len(cast) > 12: raise ValueError('cast must be a list of up to 12')
     for ch in cast:
-        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model','skin','facial','trim','style','pants','hair','eyes','species','glasses'}: raise ValueError('unknown cast keys')
+        if set(ch) - {'pos', 'yaw', 'scale', 'shirt', 'hat', 'hat_color','id','expression','outfit','action','held','model','skin','facial','trim','style','pants','hair','eyes','species','glasses','seat','holds','to'}: raise ValueError('unknown cast keys')
         if 'model' in ch:
             from human_clips import MODELS, CLIPS
             if ch['model'] not in MODELS: raise ValueError('unknown human model')
@@ -92,6 +98,10 @@ def validate_shot(s):
         if ch.get('outfit','worker') not in OUTFITS:raise ValueError('unknown outfit')
         if ch.get('species','human') not in ('human','alien','monster','ghost'):raise ValueError('unknown species')
         if ch.get('held') not in (None,'crate','tool','cup','rifle'):raise ValueError('unknown held prop')
+        if ch.get('seat') is not None and not .3<=ch['seat']<=.8:raise ValueError('seat height .3-.8')
+        if ch.get('to') is not None:_vec(ch['to'],2,'cast.to',200)
+        for h in ch.get('holds',[]):
+            if not isinstance(h,dict) or set(h)-{'prop','hand'} or h.get('prop') not in HOLD_PROPS or h.get('hand') not in ('left','right','both'):raise ValueError('unknown hold')
     cards = s.get('cards', [])
     if not isinstance(cards, list) or len(cards) > 6: raise ValueError('up to 6 painted cards')
     for cd in cards:
@@ -101,11 +111,18 @@ def validate_shot(s):
         if not isinstance(cd.get('image'), str) or not re.fullmatch(r'[a-z0-9_-]{1,40}\.png', cd['image']): raise ValueError('card image must be a plain png name')
         _vec(cd.get('pos'), 2, 'card.pos')
         if not 0.3 <= cd.get('height', 1.6) <= 8: raise ValueError('card height 0.3-8')
+    rigs = s.get('rigs', [])
+    if not isinstance(rigs, list) or len(rigs) > 4: raise ValueError('up to 4 rigs')
+    for r in rigs:
+        if not isinstance(r, dict) or set(r) - {'kind', 'pos', 'yaw', 'to', 'color'} or r.get('kind') not in ('car', 'bike', 'ladder'): raise ValueError('unknown rig')
+        _vec(r.get('pos'), 2, 'rig.pos', 200)
+        if 'to' in r: _vec(r['to'], 2, 'rig.to', 200)
+        if 'color' in r: _vec(r['color'], 3, 'rig.color', 1)
     props = s.get('props', [])
     if not isinstance(props, list) or len(props) > 8: raise ValueError('up to 8 props')
     for p in props:
         if not isinstance(p, dict) or set(p) - {'id', 'pos', 'height', 'yaw'}: raise ValueError('unknown prop keys')
-        if p.get('id') not in PROP_IDS: raise ValueError(f'prop {p.get("id")!r} is not a whitelisted offline model')
+        if p.get('id') not in PROP_IDS and not _known_model(p.get('id')): raise ValueError(f'prop {p.get("id")!r} is not a whitelisted offline model')
         _vec(p.get('pos'), 2, 'prop.pos')
         if not 0.1 <= p.get('height', 1) <= 12: raise ValueError('prop height 0.1-12')
         if not -720 <= p.get('yaw', 0) <= 720: raise ValueError('prop yaw')

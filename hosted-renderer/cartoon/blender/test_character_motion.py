@@ -38,7 +38,7 @@ class MotionTests(unittest.TestCase):
         self.assertNotEqual(pose('pour',.1)['grip_angle'],pose('pour',.7)['grip_angle'])
 
     def test_nine_distinct_faces_and_mouth_cycle(self):
-        self.assertEqual(len({tuple(face_shape(e).values()) for e in EXPRESSIONS}),9)
+        self.assertEqual(len({tuple(face_shape(e).values()) for e in EXPRESSIONS}),len(EXPRESSIONS))   # one per expression, sleep included
         self.assertNotEqual(face_shape('talk',0)['height'],face_shape('talk',.13)['height'])
 
     def test_stance_feet_do_not_slide(self):

@@ -308,13 +308,20 @@ def build_character(c,duration=3,fps=30):
             if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest')):outline(o,.013)
         for o in list(root.children):
             if o.type=='MESH' and o.name.startswith(('coat','tricorne','work apron','robe','dress','lab coat','royal','breastplate','tunic','shop apron','hood roll','lapel','ghost')):outline(o,.013)
-    action=c.get('action','stand');base=Vector((*c['pos'],0));yaw=math.radians(c.get('yaw',0));scale=c.get('scale',1)
-    for f in range(round(duration*fps)):
-        p=pose(action,f/fps);off=Vector(p['root']);off.rotate(Euler((0,0,yaw)));root.location=base+off*scale;root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)
+    import hand_props
+    for h in c.get('holds',[]):   # what the activity puts in the hands: a pan, a phone, a book, a shovel...
+        hand='right' if h['hand']=='both' else h['hand']
+        hand_props.build(h['prop'],anchors[hand+'_wrist'],anchors['left_wrist' if hand=='right' else 'right_wrist'])
+    action=c.get('action','stand');seat=c.get('seat');base=Vector((*c['pos'],0));yaw=math.radians(c.get('yaw',0));scale=c.get('scale',1)
+    travel=Vector((c['to'][0]-c['pos'][0],c['to'][1]-c['pos'][1],0)) if c.get('to') else Vector((0,0,0));frames=round(duration*fps)
+    for f in range(frames):
+        p=pose(action,f/fps,seat) if seat else pose(action,f/fps);off=Vector(p['root']);off.rotate(Euler((0,0,yaw)));root.location=base+off*scale+travel*(f/max(1,frames-1));root.scale=(scale,)*3;root.rotation_euler=(p['tilt'],0,yaw)
         root.keyframe_insert('location',frame=f+1);root.keyframe_insert('rotation_euler',frame=f+1)
-        headroot.location=p['head'];headroot.keyframe_insert('location',frame=f+1)
-        body.location=(0,0,p['hips'][2]+.22);body.keyframe_insert('location',frame=f+1)
-        for o,original in detail_positions:o.location=original+Vector((0,0,p['hips'][2]-.82));o.keyframe_insert('location',frame=f+1)
+        headroot.location=p['head'];headroot.rotation_euler=(p.get('nod',0),0,p.get('turn',0));headroot.keyframe_insert('location',frame=f+1);headroot.keyframe_insert('rotation_euler',frame=f+1)
+        hz=p['hips'][2];L=p.get('lean',0);cl,sl=math.cos(L),math.sin(L)
+        body.location=(0,-.22*sl,hz+.22*cl);body.rotation_euler=(L,0,0);body.keyframe_insert('location',frame=f+1);body.keyframe_insert('rotation_euler',frame=f+1)
+        for o,original in detail_positions:
+            v=original+Vector((0,0,hz-.82));dz=v.z-hz;o.location=(v.x,v.y*cl-dz*sl,hz+dz*cl+v.y*sl);o.rotation_euler=(L,0,0);o.keyframe_insert('location',frame=f+1);o.keyframe_insert('rotation_euler',frame=f+1)
         for key,o in joints.items():o.location=p[key];o.keyframe_insert('location',frame=f+1)
         for key,o in anchors.items():o.location=p[key];o.keyframe_insert('location',frame=f+1)
         anchors['right_wrist'].rotation_euler.x=p['grip_angle'];anchors['right_wrist'].keyframe_insert('rotation_euler',frame=f+1)
