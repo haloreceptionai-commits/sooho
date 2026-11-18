@@ -260,7 +260,7 @@ def build_character(c,duration=3,fps=30):
     for side in ['left','right']:
         for joint in ['elbow','wrist','knee','ankle']:
             jm=black if not premium else (cloth if joint in ('elbow','wrist') else pants)
-            jr=.034 if not premium else (.043 if joint=='elbow' else .036 if joint=='wrist' else .06 if joint=='knee' else .05)
+            jr=(.052 if joint=='elbow' else .068 if joint=='wrist' else .062 if joint=='knee' else .058) if not premium else (.043 if joint=='elbow' else .036 if joint=='wrist' else .06 if joint=='knee' else .05)
             o=sphere(side+' '+joint,(0,0,0),(jr,)*3,jm);o.parent=root;joints[side+'_'+joint]=o
             if joint in ('wrist','ankle'):
                 anchor=bpy.data.objects.new(side+' '+joint+' attachment',None);bpy.context.collection.objects.link(anchor);anchor.parent=root;anchors[side+'_'+joint]=anchor
@@ -268,9 +268,10 @@ def build_character(c,duration=3,fps=30):
             bpy.ops.mesh.primitive_cylinder_add(vertices=16,radius=.021,depth=1)
             o=bpy.context.active_object;o.name=side+' '+a+'-'+b
             o.data.materials.append(black if not premium else (cloth if a in ('shoulder','elbow') else pants));o.parent=root
+            for pl in o.data.polygons:pl.use_smooth=True
             if premium:
-                for pl in o.data.polygons:pl.use_smooth=True
                 o['girth']=(.043 if a=='shoulder' else .038) if a in ('shoulder','elbow') else (.06 if a=='hip' else .052)
+            else: o['girth']=.04 if a in ('shoulder','elbow') else .046   # sturdy limbs that fit the body, not thin sticks
             segments.append((o,side+'_'+a,side+'_'+b))
         if premium:
             sphere(side+' shoe',(0,-.07,.0),(.075,.14,.046),shoe).parent=anchors[side+'_ankle']
@@ -279,7 +280,7 @@ def build_character(c,duration=3,fps=30):
             th=sphere(side+' thumb',((-1 if side=='left' else 1)*.04,-.02,.05),(.018,.018,.04),skin);th.parent=anchors[side+'_wrist']
             for fi in range(3):sphere(side+' finger',(-.026+fi*.026,0,.14),(.014,.014,.04),skin).parent=anchors[side+'_wrist']
         else:
-            sphere(side+' shoe',(0,-.05,-.025),(.058,.115,.03),black).parent=anchors[side+'_ankle']
+            sphere(side+' shoe',(0,-.06,-.01),(.085,.15,.045),black).parent=anchors[side+'_ankle']
     held=c.get('held')
     if held:
         wrist=anchors['right_wrist']
