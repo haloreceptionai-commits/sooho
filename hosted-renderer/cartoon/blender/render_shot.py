@@ -356,10 +356,23 @@ def build_card(cd, cam, duration=3.0, fps=30):
     img = bpy.data.images.load(path, check_existing=True); w, h = img.size
     H = cd.get('height', 1.6); W = H * w / max(1, h)
     x, y = cd['pos']
-    bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0)); ob = bpy.context.object
-    ob.scale = (W, H, 1); ob.rotation_euler = (math.pi / 2, 0, 0)
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-    for v in ob.data.vertices: v.co.z += H / 2  # feet on the ground, face along -Y
+    ob = None
+    if os.environ.get('CARD_RELIEF', '1') != '0':
+        # A real volume instead of a flat picture: the figure is trimmed to its own outline, given thickness and rounded edges, so the sun shades it,
+        # it casts a shadow, it stands on the ground at its planned size and keeps its shape while the camera moves.
+        try:
+            import card_relief
+            flat, tw, th = card_relief.trim_to_figure(list(img.pixels), w, h)
+            img = card_relief.make_image('card ' + cd['image'], flat, tw, th); w, h = tw, th
+            W = H * w / max(1, h)
+            ob = card_relief.build_relief(flat, w, h, W, H)
+        except Exception as e:
+            print('card relief skipped, flat card used:', str(e)[:160], flush=True); ob = None
+    if ob is None:
+        bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0)); ob = bpy.context.object
+        ob.scale = (W, H, 1); ob.rotation_euler = (math.pi / 2, 0, 0)
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        for v in ob.data.vertices: v.co.z += H / 2  # feet on the ground, face along -Y
     ob.location = (x, y, 0)
     tr = ob.constraints.new('LOCKED_TRACK'); tr.target = cam; tr.track_axis = 'TRACK_NEGATIVE_Y'; tr.lock_axis = 'LOCK_Z'
     if cd.get('to'):
@@ -377,6 +390,12 @@ def build_card(cd, cam, duration=3.0, fps=30):
     try: m.surface_render_method = 'DITHERED'
     except (AttributeError, TypeError): pass
     ob.data.materials.append(m); ob.visible_shadow = True
+    if not cd.get('to'):
+        # a story object pops into the shot with a little overshoot instead of simply being there
+        n = max(1, round(0.4 * fps)); s0 = ob.scale.copy()
+        for f in range(n + 1):
+            u = f / n; k = 0.15 + 0.85 * (1 - (1 - u) ** 3) + 0.06 * math.sin(u * math.pi)
+            ob.scale = s0 * k; ob.keyframe_insert('scale', frame=f + 1)
     return ob
 
 
@@ -613,7 +632,7 @@ def main():
         build_place(place, shot.get('lighting', 'day'), shot['duration'], fps)
         apply_mood(shot.get('lighting', 'day'))
     elif place:
-        build_set(place['terrain'], shot.get('lighting', 'day'), place.get('shell'))
+        build_set(place['terrain'], shot.get('lighting', 'day'), place.get('shell'), shot.get('era'))
         from place_modules import build_kit_items
         build_kit_items(place)
     elif shot['set'] in SETS:

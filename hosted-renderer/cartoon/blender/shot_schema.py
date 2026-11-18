@@ -14,7 +14,7 @@ def _known_model(i):
 
 PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'rigs', 'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label', 'overlay'}
+KEYS = {'rigs', 'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label', 'overlay', 'era'}
 
 
 def _vec(v, n, name, limit=1000):
@@ -35,6 +35,7 @@ def validate_shot(s):
     for b in bd:
         if not isinstance(b, dict) or set(b) != {'image', 'layer'} or b['layer'] not in ('far', 'mid') or not re.fullmatch(r'bg-[a-z0-9_]{1,20}-(far|mid)\.png', str(b['image'])) or not str(b['image']).endswith(f"-{b['layer']}.png"):
             raise ValueError('invalid backdrop layer')
+    if 'era' in s and not (isinstance(s['era'], int) and not isinstance(s['era'], bool) and -6000 <= s['era'] < 1900): raise ValueError('era is a whole year before 1900')
     if 'tint' in s:
         t = s['tint']
         if not (isinstance(t, list) and len(t) == 3 and all(isinstance(v, (int, float)) and 0.3 <= v <= 1.6 for v in t)): raise ValueError('tint needs three numbers 0.3-1.6')

@@ -213,8 +213,16 @@ MODERN_WALLS = [(.94, .93, .9), (.86, .92, .95), (.95, .9, .86), (.9, .94, .9)] 
 PASTELS = [(0.85, 2.3, 2.6), (2.6, 1.25, 1.15), (2.6, 2.3, 0.8), (1.15, 2.5, 1.35), (1.9, 1.3, 2.7)]    # multiplied onto the scanned texture: aqua, coral, lemon, mint, lavender
 
 
+ERA = None   # story year of the shot being built (set by build_set): before 1900 rooms get period materials
+
+
 def painted(kit, part, surface_name, metres=2):
     """A bright copy of a scanned surface for a room's floor, walls or ceiling (the texture detail stays, the colour is lifted)."""
+    if ERA is not None and ERA < 1900 and kit != 'saloon':   # period rooms: worn planks, lime-wash plaster, dark timber (no tile, no white ceiling, no brick feature wall)
+        if 'floor' in part: return plain('period-floor', (.42, .29, .17), .75)
+        if 'ceiling' in part: return plain('period-ceiling', (.33, .23, .14), .9)
+        if part == 'beam': return plain('period-beam', (.27, .18, .1), .8)
+        if 'wall' in part: return plain('period-plaster', (.82, .74, .58), .95)
     if kit != 'saloon':   # modern rooms: tile floor, smooth white ceiling, plain painted walls and one brick feature wall (only the saloon keeps old planks and beams)
         if 'floor' in part: return tile('modern-floor-tile', (.68, .67, .64), (.58, .57, .55), .6)
         if 'ceiling' in part: return plain('modern-ceiling', (.97, .97, .96), .95)
@@ -318,11 +326,13 @@ def lighting(mode, indoor=False):
         o=bpy.data.objects.new('rain-streaks',mesh);bpy.context.collection.objects.link(o);o.data.materials.append(m)
 
 
-def build_set(name, mode='day', shell=None):
+def build_set(name, mode='day', shell=None, era=None):
+    global ERA
+    ERA = era
     kit = KITS[name]
     if shell:   # a recipe's own room: its colours, its lights, no legacy cabin decor
-        from shell import build_shell
-        build_shell(shell); lighting(mode, True)
+        from shell import build_shell, period_shell
+        build_shell(period_shell(shell) if era is not None and era < 1900 else shell); lighting(mode, True)
         for ob in bpy.data.objects:   # the legacy cabin lights are far too hot for a white room: keep them as soft fill
             if ob.type == 'LIGHT' and ob.data.type in ('AREA', 'POINT') and ob.name != 'Area' or (ob.type == 'LIGHT' and ob.data.type in ('AREA', 'POINT')): ob.data.energy *= 0.3
         return

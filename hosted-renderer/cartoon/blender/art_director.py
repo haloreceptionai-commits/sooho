@@ -401,6 +401,9 @@ def match_location(location):
     return best[0]
 
 
+MODERN_ITEM = re.compile(r'television|computer|laptop|monitor|keyboard|phone|speaker|microwave|toaster|fridge|refrigerator|washer|dryer|radio|vending|escalator|trafficLight|neon|server|drone|robot|sedan|taxi|truck|pickup|ambulance|airplane|helicopter|rocket|ufo|motorcycle|scooter', re.I)
+
+
 def plan_locations(m, cards=()):
     """One location per manifest shot, never a closest-wrong kit:
     * shots with a free-text location use the kit that location names, else the neutral sky + ground;
@@ -538,6 +541,7 @@ class Director:
     def __init__(self, m, cards=()):
         smooth_story_time(m)   # one time of day per stretch of the story: no day/night flicker between neighbouring scenes
         self.m = m; self.cards = set(cards); self.locations = plan_locations(m, self.cards)
+        self.year = story_year(m.get('script') or ' '.join(str(w) for w in m.get('caption_words') or []) or ' '.join(str(w.get('word', '')) for w in m.get('words') or []))
         self.history = []; self.zone_use = {}; self.cast_look = {}; self.last_label = -9
         for i, c in enumerate(m.get('cast') or []):
             role = c.get('outfit')   # the shared vocabulary stays small (legacy web engine); the cast id's own words refine the look
@@ -853,11 +857,14 @@ class Director:
         if st in OUTDOOR and lighting in ('day', 'sunset'):  # gentle aerial perspective only: strong mist swallowed the sky
             shot['haze'] = 0.006; shot['haze_color'] = [0.86, 0.72, 0.56] if st == 'outback' else [0.72, 0.8, 0.88]
         if cards: shot['cards'] = cards
+        if self.year is not None and self.year < 1900: shot['era'] = int(self.year)   # old story: rooms get period materials, not modern tile and lamps
         if s.get('place'):
             pl = s['place']
             if plan and plan.place_hint and plan.score >= 2.9 and not ACT.compatible(plan, pl.get('terrain')) and pl.get('terrain') not in ('road', 'highway'):
                 pl = {**pl, 'terrain': plan.place_hint, 'dressing': []}
             shot['place'] = compile_place(pl, seed=i)
+            if shot.get('era') is not None:   # no televisions, computers or phones in an old story's rooms
+                shot['place']['items'] = [it for it in shot['place'].get('items', []) if not MODERN_ITEM.search(str(it.get('id', '')))]
             if s['place'].get('weather') == 'fog': shot['haze'] = 0.02; shot['haze_color'] = [0.62, 0.66, 0.72]
         else:
             bd = backdrop_for(s.get('location'), self.cards)

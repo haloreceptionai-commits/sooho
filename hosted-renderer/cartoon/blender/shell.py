@@ -20,6 +20,20 @@ def _mat(name, color, rough=.7, checker=None, scale=1.2, glow=0.0):
     return m
 
 
+def _planks(name, color, dark):
+    """Worn floorboards: long boards of two close browns with thin dark gaps (a wave texture used as bands across the room)."""
+    m = bpy.data.materials.new(name); m.use_nodes = True
+    nt = m.node_tree; bs = nt.nodes['Principled BSDF']; bs.inputs['Roughness'].default_value = .7
+    geo = nt.nodes.new('ShaderNodeNewGeometry'); wave = nt.nodes.new('ShaderNodeTexWave')
+    wave.wave_type = 'BANDS'; wave.bands_direction = 'X'; wave.inputs['Scale'].default_value = 1.9; wave.inputs['Distortion'].default_value = 0.0
+    nt.links.new(geo.outputs['Position'], wave.inputs['Vector'])
+    ramp = nt.nodes.new('ShaderNodeValToRGB'); ramp.color_ramp.interpolation = 'CONSTANT'
+    ramp.color_ramp.elements[0].position = 0.0; ramp.color_ramp.elements[0].color = (*dark, 1)
+    ramp.color_ramp.elements[1].position = 0.06; ramp.color_ramp.elements[1].color = (*color, 1)
+    nt.links.new(wave.outputs['Fac'], ramp.inputs['Fac']); nt.links.new(ramp.outputs['Color'], bs.inputs['Base Color'])
+    return m
+
+
 def _box(name, pos, size, mat, bevel=.02):
     bpy.ops.mesh.primitive_cube_add(size=1, location=pos)
     o = bpy.context.active_object; o.name = name; o.scale = size
@@ -29,8 +43,16 @@ def _box(name, pos, size, mat, bevel=.02):
     return o
 
 
+def period_shell(sh):
+    """The same room as it looked before 1900: lime-washed plaster, worn planks, dark timber, warm lantern light (the recipe's furniture stays)."""
+    out = dict(sh)
+    out.update({'floor': [.42, .29, .17], 'floor2': [.36, .24, .14], 'wall': [.82, .74, .58], 'ceiling': [.3, .21, .13], 'accent': [.27, .18, .1], 'wainscot': [.3, .2, .12],
+                'light': [1.0, .78, .5], 'period': True})
+    return out
+
+
 def build_shell(sh):
-    floor = _mat('shell floor', tuple(sh['floor']), .55, tuple(sh['floor2']) if sh.get('floor2') else None)
+    floor = _planks('shell floor', tuple(sh['floor']), (.17, .11, .06)) if sh.get('period') else _mat('shell floor', tuple(sh['floor']), .55, tuple(sh['floor2']) if sh.get('floor2') else None)
     wall = _mat('shell wall', tuple(sh['wall']), .85)
     ceil = _mat('shell ceiling', tuple(sh['ceiling']), .9)
     _box('floor', (0, -1, -0.1), (12, 24, .2), floor, 0)
@@ -45,9 +67,16 @@ def build_shell(sh):
         _box('wainscot back', (0, 8.86, .65), (12, .1, 1.3), pan, .015); _box('wainscot left', (-5.78, 4, .65), (.1, 10, 1.3), pan, .015); _box('wainscot right', (5.78, 4, .65), (.1, 10, 1.3), pan, .015)
     lc = tuple(sh.get('light', [1, .95, .85]))
     lm = _mat('shell lamp', lc, .5, None, 1, 6.0)
-    for x in (-2.8, 2.8):
-        for y in (2.0, 6.0):
-            _box('ceiling lamp', (x, y, 4.58), (1.6, .5, .05), lm, 0)
+    if sh.get('period'):   # timber beams across the ceiling and hanging oil lanterns instead of modern light panels
+        beam = _mat('shell beam', (.22, .15, .09), .8)
+        for y in (-2.0, 1.5, 5.0, 8.0): _box('ceiling beam', (0, y, 4.45), (12, .35, .3), beam, .02)
+        cap = _mat('shell lantern cap', (.12, .1, .09), .5)
+        for x, y in ((-2.8, 2.0), (2.8, 2.0), (-2.8, 6.0), (2.8, 6.0)):
+            _box('lantern rope', (x, y, 4.2), (.03, .03, .5), cap, 0); _box('lantern', (x, y, 3.85), (.22, .22, .3), lm, .03); _box('lantern cap', (x, y, 4.03), (.28, .28, .06), cap, 0)
+    else:
+        for x in (-2.8, 2.8):
+            for y in (2.0, 6.0):
+                _box('ceiling lamp', (x, y, 4.58), (1.6, .5, .05), lm, 0)
     if sh.get('window'):   # a sunlit window on the back wall: the world outside is a soft bright sky
         sky = _mat('shell window', tuple(sh.get('sky', [.7, .85, 1.0])), .2, None, 1, 1.8)
         frame = _mat('shell window frame', (.95, .95, .95), .5)

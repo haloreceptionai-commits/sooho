@@ -67,7 +67,7 @@ ACTIVITIES = {
     'sweep':  dict(motion='sweep', held=[('broom', 'both')], words=W((r'\b(sweep(s|ing)?|swept|brooms?|mop(s|ped|ping)?|scrub(bed|bing|s)?|janitor)\b', 3.0), (r'\b(clean(ed|ing)? (the|up|his|her)|wash(ed|ing)? (the|his|her|dishes)|polish(ed|ing)?|dust(ed|ing)? (the|off))\b', 2.0))),
     'paint':  dict(motion='paint', profile=True, held=[('brush', 'right')], face='happy', words=W((r'\b(paint(s|ed|ing|er|ers)?|brush(ed|ing)? (the|a|on)|canvas|murals?|sketch(ed|ing|es)?|graffiti)\b', 3.0), (r'\b(artists?|drew|drawing (a|the))\b', 2.0))),
     'fish':   dict(motion='fish', held=[('rod', 'both')], place_hint='beach', places=('beach', 'deep_forest', 'mountain_cliff', 'countryside_road'), words=W((r'\b(fishing|fished|fisherman|fishermen|anglers?|angling|reeled in)\b', 3.4))),
-    'throw':  dict(motion='throw', held=[('ball', 'right')], face='determined', words=W((r'\b(threw|throw(s|ing|n)?|hurl(ed|ing|s)?|toss(ed|ing|es)?|pitch(ed|er) (a|the)|flung|fling(s|ing)?|lob(bed|bing|s)?|catapult(ed|ing|s)?)\b', 3.0))),
+    'throw':  dict(motion='throw', held=[('ball', 'right')], face='determined', words=W((r'\b(threw|throw(s|ing|n)?|hurl(ed|ing|s)?|toss(ed|ing|es)?|pitch(ed|er) (a|the)(?! tents?)|flung|fling(s|ing)?|lob(bed|bing|s)?|catapult(ed|ing|s)?)\b', 3.0))),
     'kick':   dict(motion='kick', face='determined', words=W((r'\b(kick(s|ed|ing)?|soccer|football|stomp(ed|ing|s)?)\b', 3.0))),
     'punch':  dict(motion='punch', face='angry', words=W((r'\b(punch(es|ed|ing)?|fight(s|ing)?|fought|brawl\w*|boxing|boxers?|slapp?(ed|ing|s)?|duel(s|ed|ing)?|wrestl\w*)\b', 3.2), (r'\b(attack(ed|ing|s)?|combat|assault\w*)\b', 1.8))),
     'knock':  dict(motion='knock', face='worried', pieces=[], words=W((r'\b(knock(s|ed|ing)? (on|at)|knocked|doorbell|rang the bell|tapped on)\b', 3.2))),
@@ -98,6 +98,14 @@ ACTIVITIES = {
     'crouch': dict(motion='crouch', face='worried', words=W((r'\b(hid|hide|hides|hiding|crouch\w*|duck(ed|ing)? (down|behind)|cower\w*)\b', 2.8))),
     'worry':  dict(motion='worry', face='worried', words=W((r'\b(worr(y|ied|ies|ying)|nervous\w*|anxious\w*|afraid|scared)\b', 2.2), (r'\b(fear\w*|danger\w*|trembl\w*|risk(y|ed|s)?)\b', 1.3))),
 }
+
+# History stories: the verbs that were missing (carving, selling tickets, confessing, uncovering, unveiling, pitching a tent)
+ACTIVITIES['swing']['words'] += W((r'\b(chisel\w*|sculpt\w*|stonecutters?|stone ?mason\w*)\b', 3.6), (r'\bcarv(e|ed|es|ing)\b(?=[^.]{0,40}\b(stone|statue|giant|gypsum|rock|marble|figure|wood)\b)', 3.6),
+                                 (r'\b(pitch(ed|ing)? (a |the )?tents?|tent stakes?|stakes?)\b', 2.2))
+ACTIVITIES['dig']['words'] += W((r'\b(unearth\w*|uncover(ed|ing|s)?|burial|graves?|well diggers?)\b', 3.4))
+ACTIVITIES['count']['words'] += W((r'\b(tickets?|admission fees?|charg(ed|ing) (people|visitors|crowds?|fifty|a fee)|sold|selling|sells?|vendors?|merchants?|cents?)\b', 2.4))
+ACTIVITIES['bow']['words'] += W((r'\b(confess(ed|es|ing|ion)?|admitted|admits?|owned up|came clean)\b', 3.0))
+ACTIVITIES['show'] = dict(motion='point', face='happy', words=W((r'\b(exhibit(ed|ing|s|ion)?|display(ed|ing|s)?|showcas\w*|show(ed|n|ing)? (off|them|people|the crowd|visitors)|unveil(ed|ing|s)?)\b', 3.0)))
 
 # the actions the old pipeline already knows, so a plan can always fall back to them
 FALLBACK = {'look': 'point', 'count': 'carry', 'play': 'cheer'}
