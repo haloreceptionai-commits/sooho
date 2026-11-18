@@ -1,7 +1,8 @@
 import type { FactTopic } from "@/lib/topics";
+import { VIRAL_TOPICS } from "@/lib/viral-topics";
 
 // Internet-researched NOAA, NASA and Smithsonian article catalog. Claims are starting points; the pipeline still fact-checks each story.
-export const FACT_TOPICS: FactTopic[] = [
+const GENERAL_TOPICS: FactTopic[] = [
   {
     "id": "fact-8700d9c314-dfe22b",
     "title": "How Barnacles Glue Themselves to Ships",
@@ -871,3 +872,6 @@ export const FACT_TOPICS: FactTopic[] = [
     "source": "https://oceanservice.noaa.gov/facts/volcanoes.html"
   }
 ];
+
+/** The hyper-viral stories come first; the general catalogue follows. */
+export const FACT_TOPICS: FactTopic[] = [...VIRAL_TOPICS, ...GENERAL_TOPICS];

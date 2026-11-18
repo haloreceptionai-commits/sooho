@@ -562,9 +562,13 @@ def configure_render(sc, shot):
         cy.use_light_tree = True
         cy.denoising_use_gpu = True  # OpenImageDenoise on the card (OptiX denoiser libraries are not injected)
         cy.samples = shot.get('samples', 32); cy.use_adaptive_sampling = True
-        cy.adaptive_threshold = 0.03; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
-        cy.max_bounces = 4; cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2
-        cy.volume_bounces = 1; cy.transparent_max_bounces = 8; cy.volume_step_rate = 4
+        cy.adaptive_threshold = float(os.environ.get('CYCLES_ADAPTIVE', '0.03')); cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
+        cy.max_bounces = int(os.environ.get('CYCLES_BOUNCES', '4')); cy.diffuse_bounces = 2; cy.glossy_bounces = 2; cy.transmission_bounces = 2
+        cy.volume_bounces = 1; cy.transparent_max_bounces = int(os.environ.get('CYCLES_TRANSPARENT', '8')); cy.volume_step_rate = 4
+        if os.environ.get('CYCLES_MIN_SAMPLES'): cy.adaptive_min_samples = int(os.environ['CYCLES_MIN_SAMPLES'])
+        if os.environ.get('CYCLES_DENOISE') == '0': cy.use_denoising = False
+    if os.environ.get('PNG_COMPRESSION'): sc.render.image_settings.compression = int(os.environ['PNG_COMPRESSION'])
+    if os.environ.get('NO_COMPOSITE') == '1': sc.use_nodes = False   # speed experiments only
     sc.render.use_persistent_data = True
     W, H = shot.get('size', [1080, 1920]); sc.render.resolution_x = W; sc.render.resolution_y = H
     sc.render.resolution_percentage = 100; fps = shot.get('fps', 30); sc.render.fps = fps

@@ -36,6 +36,13 @@ class Bridge(unittest.TestCase):
         self.assertEqual([w['text'] for w in words], ['the', 'army', 'went'])
         self.assertTrue(words[2]['key'] and words[2]['live'])
 
+    def test_the_opening_frame_is_a_bold_hook_with_a_white_pop_then_the_world_is_revealed(self):
+        segs = b.segments(manifest(), {'bird.png'})
+        first = segs[0][3]
+        self.assertIn('flash', first.get('overlay', []))
+        self.assertLessEqual(first['camera']['lens'], 50)       # not a tiny establishing shot: the first frame is big
+        self.assertNotIn('flash', segs[-1][3].get('overlay', []))   # only the opener pops
+
     def test_art_director_segments_cover_every_frame_and_always_move(self):
         m = manifest(); segs = b.segments(m, {'bird.png'})
         self.assertEqual([f for _, a, z, _ in segs for f in range(a, z)], list(range(0, 120)))

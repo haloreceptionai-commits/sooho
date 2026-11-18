@@ -370,6 +370,9 @@ def plan(m, fps=FPS):
         elif t in HIGHLIGHT_WORDS: ev = {'kind': 'highlight', 'style': HIGHLIGHT_WORDS[t]}
         elif t in STICKER_FOR: ev = {'kind': 'sticker', 'icon': STICKER_FOR[t]}
         if ev: cand.append({**ev, 'start': start, 'end': start + round(DURATION[ev['kind']] * fps), 'word': i})
+    if words and not any(e['start'] < 45 for e in cand) and round(words[0]['start'] * fps) < 15:   # the hook line: a reaction sticker in the first second
+        icon = next((STICKER_FOR[x['text']] for x in words[:12] if x['text'] in STICKER_FOR), 'shock')
+        cand.append({'kind': 'sticker', 'icon': icon, 'start': 8, 'end': 8 + round(1.5 * fps), 'word': 0})
     out, last = [], {}
     for ev in sorted(cand, key=lambda e: (e['start'], PRIORITY.index(e['kind']))):
         k = ev['kind']

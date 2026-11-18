@@ -83,17 +83,48 @@ Days later, the real invasion lands against almost no resistance.
 The Germans never doubted the papers, because a drowned officer had no reason to lie.
 The best lie is the one carried by someone who can't tell it.`;
 
+export const GOLD_4 = `A con man sold the Eiffel Tower, then tried again.
+1925. Victor Lustig reads that Paris cannot afford to repair the Eiffel Tower.
+So he forges government papers and invites six scrap-metal dealers to a luxury hotel.
+He tells them the tower is secretly being sold for scrap, and the deal must stay quiet.
+One dealer, André Poisson, wants to impress the city's elite, so he is the easiest to fool.
+Lustig hints that a small bribe would help, and Poisson happily pays it.
+Then Poisson hands over a huge payment for a tower he will never own.
+Lustig takes the cash and boards a train to Vienna.
+Poisson is too embarrassed to tell the police, so nothing happens.
+That's when Lustig does the unthinkable. He comes back and sells it again.
+This time the buyer goes to the police, and Lustig barely escapes.
+The best con doesn't need a lie that's believable. It needs a victim who can't admit he was fooled.`;
+
+export const GOLD_5 = `A wave of molasses killed twenty-one people in Boston.
+January 1919. A huge tank of molasses stands over a busy neighborhood by the harbor.
+It holds more than two million gallons, and it has been leaking for months.
+Instead of fixing it, the company paints it brown so nobody can see the leaks.
+Then, on an unusually warm afternoon, the tank bursts.
+A wave of molasses rushes down the street at about thirty-five miles an hour.
+It is taller than a house, and it flattens buildings and knocks a train off its tracks.
+People are trapped in the thick, sticky syrup and can't swim out.
+Rescuers struggle to reach them because the molasses holds on like glue.
+Twenty-one people die, and the city smells sweet for decades.
+The company blamed anarchists. The court blamed the company.
+The disaster started the moment someone chose to hide the problem instead of fixing it.`;
+
 export const GOLD_TOPIC_WORDS: Record<string, RegExp> = {
   GOLD_1: /\b(hannibal|carthage|carthaginian|oxen|ox|rome|roman|punic|cannae|alps)\b/i,
   GOLD_2: /\b(seal|great seal|moscow|theremin|bug|spy|spies|soviet|ussr|embassy|ambassador|cold war)\b/i,
   GOLD_3: /\b(mincemeat|sicily|hitler|nazi|german|world war|ww2|wwii|deception|decoy|british intelligence)\b/i,
+  GOLD_4: /\b(lustig|eiffel|con man|con artist|scam|swindl\w*|fraud)\b/i,
+  GOLD_5: /\b(molasses|boston|tank burst|flood|disaster)\b/i,
 };
 
 /** Gold examples that share the requested topic are left out: the writer must see the standard, never a script to copy. */
 export function goldExamplesFor(topic = ''): string[] {
-  const all: [string, string][] = [['GOLD_1', GOLD_1], ['GOLD_2', GOLD_2], ['GOLD_3', GOLD_3]];
+  const all: [string, string][] = [['GOLD_1', GOLD_1], ['GOLD_2', GOLD_2], ['GOLD_3', GOLD_3], ['GOLD_4', GOLD_4], ['GOLD_5', GOLD_5]];
   const kept = all.filter(([k]) => !GOLD_TOPIC_WORDS[k]!.test(topic));
-  return (kept.length >= 2 ? kept : all).map(([, v]) => v);
+  const pool = kept.length >= 2 ? kept : all;
+  // Different topics see different pairs, so the writer learns many hook shapes rather than one; the same topic always sees the same pair.
+  const start = [...topic].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % pool.length;
+  return [pool[start]![1], pool[(start + 1) % pool.length]![1]];
 }
 
 /** First lines of the gold examples for hook prompts, again without any that match the topic. */
@@ -107,6 +138,15 @@ export function goldBlockFor(topic = ''): string {
   return `${shown}\n\n${WHY_GOLD}\n\n${BAD_GOOD}\n\nNEVER reuse a sentence, fact or structure from these examples for a different topic; they show the standard, not a template.`;
 }
 
+export const HOOK_PLAYBOOK = `HOOK PLAYBOOK. The first spoken sentence decides everything. Use ONE of these proven shapes (examples show the shape, never reuse their facts):
+1. IMPOSSIBLE OUTCOME: [ordinary thing] did [extreme result]. "A wave of molasses killed twenty-one people in Boston."
+2. TRAPPED, SO: [someone cornered], so [absurd move]. "Hannibal was trapped, so he strapped fire to two thousand oxen."
+3. THE HIDDEN SPY / SECRET: [harmless thing] secretly [did damage] for [long time]. "A gift with no battery spied on America for seven years."
+4. BIG NUMBER, TINY CAUSE: [huge number or scale] because of [small thing]. "One missing nail cost a king his kingdom."
+5. ROLE REVERSAL: [the powerful] lost to [the unlikely]. "The Australian army went to war against birds, and lost."
+6. TIME BOMB: [it] [failed] [absurdly fast]. "The most expensive warship in Sweden sank before it left the harbor."
+HOOK RULES: 8-12 words. The strangest noun or number lands in the first five words. One plain sentence, never a question, never a warm-up ("Did you know", "Imagine", "In 1925,"). A concrete number or a named person or place. A verb that can be SHOWN. It must open a gap in the viewer's mind (how? why?) and NEVER give the reason. Test: would a stranger who sees only this sentence stop scrolling and say "wait, what?"`;
+
 export const RETENTION = `RETENTION RULES (a viewer decides in 2 seconds, then again every 5-8 seconds):
 - The first line is the strongest image or claim: no welcome, no context before it. Line 2 adds the stakes or the strangest detail within about 4 seconds.
 - Plant an OPEN LOOP in the first three lines (something the viewer needs answered, without asking it as a question) and close it only near the end.
@@ -116,6 +156,12 @@ export const RETENTION = `RETENTION RULES (a viewer decides in 2 seconds, then a
 - Use concrete specifics (a number, a name, a material) instead of generalities. "Two thousand oxen" beats "many animals".
 - The last line lands the insight and makes the viewer want to replay (a reframe that makes the first line mean something new).
 - Never start more than two lines in a row with the same word, and never use filler ("interestingly", "it turns out", "in fact").
+- HOOK TO SECOND 8: line 1 is the hook; line 2 raises the stakes with a number, a danger or a deadline; line 3 plants the problem. Nothing slow, nothing explanatory, in the first 8 seconds.
+- MICRO-CLIFFHANGERS: end every 2nd or 3rd line on an unresolved beat ("But there was one problem.", "Nobody noticed what he had done.", "That's when it went wrong.") so the viewer waits for the next line instead of leaving.
+- EMOTION SPIKES: at least twice, say what someone FEELS or risks (fear, pride, shame, greed) in a plain sentence; people stay for people, not for facts.
+- SPEAK TO THE VIEWER only where it raises the stakes ("If you were standing there, you would have heard nothing"), never as a greeting.
+- THE REPLAY LOOP: the last line reframes the first line so that watching again changes its meaning (the hook was a clue, the last line is the key). It must not copy the hook's words.
+- THE PAYOFF IS SPECIFIC: the final third contains the one image the viewer will tell a friend about, told with a concrete number or action.
 
 STORY BEATS (the house formula; positions are by line, for a 12-16 line script):
 - Line 1 is the paradox: a strange claim that sounds impossible, with no intro and no throat-clearing. The first word of the script is already the story.

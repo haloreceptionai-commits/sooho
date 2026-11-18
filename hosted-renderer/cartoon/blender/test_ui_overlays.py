@@ -30,7 +30,15 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(kinds('the damage was huge'), ['health'])
         self.assertEqual(kinds('you unlocked a hidden room'), ['achievement', 'highlight'][:1])
         self.assertEqual(kinds('the dead king'), ['sticker'])
-        self.assertEqual(kinds('nothing special happens here at all'), [])
+        self.assertEqual(kinds('nothing special happens here at all'), ['sticker'])      # only the opening hook sticker
+
+    def test_the_hook_gets_a_reaction_sticker_in_its_first_second(self):
+        ev = U.plan(words('nothing special happens here at all'))
+        self.assertEqual((ev[0]['kind'], ev[0]['icon'], ev[0]['start']), ('sticker', 'shock', 8))
+        ev = U.plan(words('the fire spread through the town'))          # a word that already has a sticker picks that one
+        self.assertEqual(ev[0]['icon'], 'fire')
+        ev = U.plan(words('why did nobody notice for years', start=2.0))     # speech starts after the first second: no opening sticker
+        self.assertFalse(any(e['start'] == 8 for e in ev))
 
     def test_chat_shows_the_words_that_follow_the_trigger(self):
         ev = U.plan(words('Then he texted I can not believe it worked at all'))[0]

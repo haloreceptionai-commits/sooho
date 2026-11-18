@@ -215,9 +215,16 @@ def render_range(manifest_path, web, out, first, last, card_dir):
         return shot
 
     def blender_run(sp, outdir, env, what):
+        t_run = time.time()
         r = subprocess.run([blender, '-b', '--factory-startup', '--python-exit-code', '1', '--python', str(ROOT / 'blender' / 'render_shot.py'), '--', str(sp), str(outdir)],
                            env=env, capture_output=True, text=True, timeout=1500)
         if r.returncode != 0: raise RuntimeError(f'Blender {what} failed: {(r.stdout + r.stderr)[-1500:]}')
+        stats = {}
+        for line in r.stdout.splitlines():     # what the process itself reports: build time, file open time and pure drawing time
+            if line.startswith('{"') and any(k in line for k in ('built_seconds', 'opened_seconds', '"frames"')):
+                try: stats.update(json.loads(line))
+                except ValueError: pass
+        print(json.dumps({'blender_process': what[:40], 'wall': round(time.time() - t_run, 1), **stats}), flush=True)
         return r.stdout
 
     # The scene build (importing models, rigging, keyframing) is single-threaded CPU work that used to keep the GPU waiting. It now runs ahead on

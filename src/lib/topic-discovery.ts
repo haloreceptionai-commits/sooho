@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { topicKey, topicUnavailable, type FactTopic, type TopicUse } from './topics';
+import { meetsViralGate } from './viral-topics';
 
 export const topicEvidence = z.object({ url: z.string().url().refine(v => v.startsWith('https://')), title: z.string().min(1), quote: z.string().min(30) });
 export const discoveredTopicSchema = z.object({
@@ -41,5 +42,5 @@ export function freshSix(candidates: DiscoveredTopic[], seen: DiscoveredTopic[],
     const key = topicKey(t.factKey), title = topicKey(t.title);
     if (keys.has(key) || titles.has(title) || topicUnavailable(t.title, t.id, used)) return false;
     keys.add(key); titles.add(title); return true;
-  }).sort((a, b) => potential(b) - potential(a)).slice(0, 6);
+  }).sort((a, b) => Number(meetsViralGate(b.scores)) - Number(meetsViralGate(a.scores)) || potential(b) - potential(a)).slice(0, 6);   // strongest, genuinely viral stories first
 }

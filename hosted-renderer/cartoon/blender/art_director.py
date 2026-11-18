@@ -566,7 +566,8 @@ class Director:
         prev = self.history[-1] if self.history else None
         recent = self.history[-4:]
         prefs = []
-        if ctx['first_of_video']: prefs += ['establish', 'low']
+        if ctx['first_of_video']: prefs += (['insert'] if (ctx['story_object'] or ctx['props']) else []) + ['low', 'close', 'establish']   # the hook frame: big and moving
+        if ctx.get('opening_reveal'): prefs += ['wide', 'establish', 'high']                                                              # then pull out and show the world
         if ctx['new_place'] and ctx['part'] == 0: prefs += ['establish', 'wide', 'high']
         if ctx['story_object'] and ctx['part'] >= 1: prefs += ['insert']
         if ctx['moving']: prefs += ['track', 'wide']
@@ -644,7 +645,7 @@ class Director:
         obj_cards = obj_cards[:3]
         if seq_card:  # climax: each setup shows one state of the key event, in story order
             obj_cards = [o for o in obj_cards if o['image'] == seq_card][:1]
-        ctx = {'first_of_video': i == 0 and part == 0, 'new_place': new_place, 'part': part, 'story_object': bool(story_obj), 'props': bool(props) or bool(obj_cards),
+        ctx = {'first_of_video': i == 0 and part == 0, 'opening_reveal': i == 0 and part == 1, 'new_place': new_place, 'part': part, 'story_object': bool(story_obj), 'props': bool(props) or bool(obj_cards),
                'moving': bool(moving), 'scale': bool(SCALE_WORDS.search(txt)) or herd, 'threat': verb in ('aim', 'load') or s.get('mood') == 'tense',
                'n_people': len(actors), 'n_subjects': len(actors) + len(beasts), 'emotion': verb in ('panic', 'fall', 'cheer') or s.get('expression') in ('shock', 'laugh', 'nervous'),
                'reveal': s.get('mood') == 'reveal', 'hint': HINT.get(s.get('shot')) if part == 0 else None}
@@ -841,6 +842,7 @@ class Director:
         """Editing-language VFX chosen from the words of the line: confetti at a celebration, hearts for love, floating dust motes in light,
         speed lines on a chase, a white flash on a bang, an RGB glitch for digital trouble, film grain for old footage, a light leak for warm memories."""
         t = (txt or '').lower(); fx = shot.setdefault('effects', []); ov = shot.setdefault('overlay', [])
+        if i == 0 and part == 0 and 'flash' not in ov: ov.append('flash')    # a white pop on the very first frames: a pattern interrupt for the scroll
         if not cast: return
         cx = sum(c['pos'][0] for c in cast) / len(cast); cy = sum(c['pos'][1] for c in cast) / len(cast)
         def add(kk, sc=1.0):

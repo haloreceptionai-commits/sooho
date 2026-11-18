@@ -1,3 +1,4 @@
+import { HOOK_PLAYBOOK } from './shorts-writer/prompts';
 import { effortFor } from "@/lib/azure-effort";
 import { styleAnchor } from "@/lib/styles";
 import { FEW_SHOT } from "@/lib/story-v2";
@@ -418,7 +419,7 @@ export const generateHooksOperation = async ({ data }: { data: { topic: string; 
     const shapeHook = data.shape ? `\nSTORY SHAPE v3 OVERRIDE for every hook: 8-12 words, a CONTRADICTION that makes the viewer need the answer and HIDES the reason (no "because", "which is why" or mechanism). No mandatory year or place. Gold hooks: "A gift with no battery spied on America for seven years." / "Hannibal was trapped, so he strapped fire to two thousand oxen."` : '';
     if (data.shape) {
       // Shorts: the gold-shape hook prompt replaces the legacy type quotas (no direct questions, no mandatory place/time).
-      const sys = `You write the first 3 seconds of viral story Shorts. Write exactly 10 different hooks in the owner's gold shape.
+      const sys = `You write the first 3 seconds of viral story Shorts. Write exactly 10 different hooks in the owner's gold shape. ${HOOK_PLAYBOOK}
 "line": 8-12 words, ONE plain statement (never a question), a CONTRADICTION that pairs the strange fact with what makes it impossible ("A gift with no battery spied on America for seven years." / "Hannibal was trapped, so he strapped fire to two thousand oxen."). It hides the reason: never "because", "which is why" or the mechanism. Say the subject in the first 8 words. Words a 10-year-old knows, no metaphors, no "we/us". Every number and name must come from the fact sheet.
 "visual" = a literal WIDE first frame showing the odd thing (never a face close-up). "text" = at most 6 words, states the oddity as a fact, must not repeat the spoken line's words. Score each 1-10 honestly on curiosity, clarity, visualness, speakability.${data.advanced ? `\n${ADVANCED_STORY_DIRECTION}` : ''}`;
       const ask = (extra = '') => azureJson<{ hooks: Hook[] }>(data.deployment, sys, `Topic: ${data.topic}\nResearch (anchors, premise, question):\n${data.research}\nFact sheet:\n${data.facts}${extra}`, "hooks", hookSchema, "Hook writer");
