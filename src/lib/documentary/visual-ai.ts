@@ -11,7 +11,7 @@ export const visualSchema = {
     scene: { type: 'integer' },
     beats: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['w0', 'w1', 'kind', 'move', 'focus_x', 'focus_y', 'data_json', 'overlay_kind', 'overlay_json', 'sfx', 'transition'], properties: {
       w0: { type: 'integer' }, w1: { type: 'integer' }, kind: { type: 'string', enum: ['image', ...CARD_KINDS.filter(k => k !== 'chapter' && k !== 'title')] }, move: { type: 'string', enum: [...MOVES] },
-      focus_x: { type: 'number' }, focus_y: { type: 'number' }, data_json: { type: 'string' }, overlay_kind: { type: 'string', enum: ['none', 'lower_third', 'date_stamp', 'source_tag'] }, overlay_json: { type: 'string' },
+      focus_x: { type: 'number' }, focus_y: { type: 'number' }, data_json: { type: 'string' }, overlay_kind: { type: 'string', enum: ['none', 'lower_third', 'date_stamp', 'source_tag', 'speech'] }, overlay_json: { type: 'string' },
       sfx: { type: 'string', enum: [...SFX] }, transition: { type: 'string', enum: [...TRANSITIONS] } } } },
   } } } },
 };
@@ -27,7 +27,7 @@ Use kind "image" (a different part of the same painting: give focus_x/focus_y 0.
 - keyfact: the single most surprising sentence of the line, repeated big. {"text":"...","tag":"The twist","mark":["half"]}
 - document: a letter, record or headline described in the line. {"kind":"headline","masthead":"","title":"...","lines":["..."],"stamp":""}
 - steps: a chain of 3-5 spoken causes. {"steps":["..."]}
-Cards must not be more than 1 beat in 3. Never invent a number, date, place or quote. Camera: push for tension and focus, pull for reveals and scale, pan/tilt for travel and height, orbit for depth, punch for shocks, drift or hold for quiet. Never repeat the same move twice in a row. overlay_kind: lower_third when a named person first appears (name, sub), date_stamp when a place or year is introduced (place, when), source_tag only for a source named in: ${sources.slice(0, 6).join(' | ') || 'none'}. sfx: hit on a shock, riser before a reveal, whoosh on fast travel, none otherwise. transition: cross between ideas, cut inside one idea, dip for time passing, whip for action, flash for a shock.`,
+Cards must not be more than 1 beat in 3. Never invent a number, date, place or quote. Camera: push for tension and focus, pull for reveals and scale, pan/tilt for travel and height, orbit for depth, punch for shocks, drift or hold for quiet. Never repeat the same move twice in a row. overlay_kind: lower_third when a named person first appears (name, sub), date_stamp when a place or year is introduced (place, when), speech when a person says something quoted in the line (data {"text":"the exact spoken words","side":"left"|"right"}), shown as a speech bubble; source_tag only for a source named in: ${sources.slice(0, 6).join(' | ') || 'none'}. sfx: hit on a shock, riser before a reveal, whoosh on fast travel, none otherwise. transition: cross between ideas, cut inside one idea, dip for time passing, whip for action, flash for a shock.`,
   user: `Topic: ${topic}\n\n${scenes.map(s => `[${s.index}] ${s.text}`).join('\n')}\n\nFor every line give word-range beats in order. Use data_json "{}" and overlay_json "{}" when unused.`,
 });
 
@@ -42,7 +42,7 @@ export function parseVisualPlan(r: VisualAnswer, valid: Set<number>): AiScenePla
       move: (MOVES as readonly string[]).includes(b.move) ? b.move as AiBeat['move'] : undefined, focus: [clamp(b.focus_x, .15, .85, .5), clamp(b.focus_y, .15, .85, .45)],
       data: parseJson(b.data_json), sfx: (SFX as readonly string[]).includes(b.sfx) && b.sfx !== 'none' ? b.sfx as AiBeat['sfx'] : undefined,
       transition: (TRANSITIONS as readonly string[]).includes(b.transition) ? b.transition as AiBeat['transition'] : undefined,
-      ...(b.overlay_kind && b.overlay_kind !== 'none' ? { overlay: { kind: b.overlay_kind as 'lower_third' | 'date_stamp' | 'source_tag', data: parseJson(b.overlay_json) } } : {}),
+      ...(b.overlay_kind && b.overlay_kind !== 'none' ? { overlay: { kind: b.overlay_kind as 'lower_third' | 'date_stamp' | 'source_tag' | 'speech', data: parseJson(b.overlay_json) } } : {}),
     })),
   }));
 }

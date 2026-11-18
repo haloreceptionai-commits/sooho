@@ -207,4 +207,4 @@ export function cutoutPrompts(c: CastEntry, era: Era, look = ''): string[] {
 }
 
 /** Added to every background picture prompt of a documentary: people come from the cutouts, so the picture shows the place and the event. */
-export const BACKGROUND_RULE = 'Show the place, objects and event. Any people are tiny and far away; no person fills the foreground or looks at the camera. Keep the lower left and lower right of the frame as open ground, floor or water where a character can stand.';
+export const BACKGROUND_RULE = 'Stage the place and the event like a scene of an animated history explainer: set, props, flags, buildings, and small groups or crowds of period people in the middle distance. The story\'s main people are added afterwards as separate cutouts, so keep the lower left and lower right of the frame open (empty ground or floor) and never draw a large person in the foreground.';

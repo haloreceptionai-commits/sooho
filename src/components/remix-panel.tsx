@@ -1,3 +1,4 @@
+import { LONG_DEFAULT_STYLE } from "@/lib/styles";
 import { useState } from "react";
 import { Loader2, Sparkles, Youtube, Smartphone, Film } from "lucide-react";
 import { toast } from "sonner";
@@ -90,7 +91,7 @@ export function RemixPanel() {
                 <p className={label}>3 · Format, length, style & model</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {([["short", Smartphone, "Short / Reel 9:16"], ["long", Film, "Long-form 16:9 · 3–15 min"]] as const).map(([f, Icon, n]) => (
-                    <button key={f} onClick={() => { setFormat(f); setEngine(f === "long" ? "own" : "advanced"); setStyle(f === "long" ? "Ink explainer" : settings.defaultStyle); }} className={`flex items-center gap-2 rounded-lg border-2 p-3 text-sm font-semibold ${format === f ? "border-primary bg-primary/5" : "hover:bg-muted"}`}><Icon className="h-4 w-4" /> {n}</button>
+                    <button key={f} onClick={() => { setFormat(f); setEngine(f === "long" ? "own" : "advanced"); setStyle(f === "long" ? LONG_DEFAULT_STYLE : settings.defaultStyle); }} className={`flex items-center gap-2 rounded-lg border-2 p-3 text-sm font-semibold ${format === f ? "border-primary bg-primary/5" : "hover:bg-muted"}`}><Icon className="h-4 w-4" /> {n}</button>
                   ))}
                 </div>
                 <div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Film, Smartphone, Sparkles, Loader2, ArrowUpRight, Mic, Youtube, FilePenLine, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, STYLES, type VideoEngine } from "@/lib/store";
+import { LONG_DEFAULT_STYLE } from "@/lib/styles";
 import { startVideo } from "@/lib/pipeline";
 import { scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
 import { scoreTopic5 } from "@/lib/quality";
@@ -126,7 +127,7 @@ function Create() {
                 ["short", Smartphone, "Short / Reel", "9:16 vertical · 30–90 sec · viral hook formula"],
                 ["long", Film, "Long-form", "16:9 YouTube · 3–15 min documentary"],
               ] as const).map(([f, Icon, name, sub]) => (
-                <button key={f} onClick={() => { setFormat(f); setEngine(f === "long" ? "own" : "advanced"); if (f === "long") setStyle("Ink explainer"); }}
+                <button key={f} onClick={() => { setFormat(f); setEngine(f === "long" ? "own" : "advanced"); if (f === "long") setStyle(LONG_DEFAULT_STYLE); }}
                   className={`flex items-center gap-4 rounded-lg border-2 p-4 text-left transition-colors ${format === f ? "border-primary bg-primary/5" : "border-border hover:bg-muted"}`}>
                   <div className={`grid h-12 place-items-center rounded-md ${format === f ? "bg-primary text-primary-foreground" : "bg-muted"} ${f === "short" ? "w-8" : "w-16"}`}><Icon className="h-5 w-5" /></div>
                   <div><p className="font-bold">{name}</p><p className="text-xs text-muted-foreground">{sub}</p></div>

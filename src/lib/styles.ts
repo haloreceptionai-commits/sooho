@@ -3,6 +3,8 @@
 export const INK_HERO = "the hero: a simple stick-figure man with a large perfectly round plain white head, two small black dot eyes, small simple eyebrows and mouth, no nose, no hair, thin black stick arms and legs, wearing a plain bright blue crew-neck t-shirt and blue jeans with white sneakers";
 
 export const STYLE_ANCHORS: Record<string, string> = {
+  "Flat 2D history cartoon":
+    "Flat 2D animated history-explainer illustration, like the popular animated history channels: clean vector shapes with no outlines or only thin ones, solid flat colours with very little shading, a soft muted palette (sage greens, dusty blues, sandy browns, warm reds, cream), simple staged sets with props, flags, furniture and buildings, round-faced human cartoon characters with small dot eyes, tiny mouths and simple hands wearing accurate period clothing, uniforms and hats, simple clear layered backgrounds (hills, sky, rooms, streets), storybook composition, wide or medium shot, evenly lit. Not photoreal, not 3D, not a stick figure, no text or lettering in the picture",
   "Ink explainer":
     `Hand-drawn 2D cartoon explainer illustration (whiteboard-comic look): clean confident black ink outlines of even medium weight, flat matte colour fills with very light soft shading, muted warm palette (cream walls, soft greys, sandy browns, gentle greens and sky blues), simple uncluttered backgrounds with a few readable props, expressive minimal stick-figure characters with big round heads and exaggerated reactions. When the story includes ${INK_HERO}, draw him exactly that way. People from other eras are drawn in the same stick-figure style with period clothing (furs, robes, armour). Strictly 2D, no 3D render, no gradients, no photorealism, no text, no letters, no watermark or logo`,
   "3D animated cartoon":
@@ -17,4 +19,6 @@ export const STYLE_ANCHORS: Record<string, string> = {
 
 export const STYLES = Object.keys(STYLE_ANCHORS);
 export const DEFAULT_STYLE = "3D animated cartoon";
+/** Long-form history videos open on the flat 2D look (Shorts keep the 3D default). */
+export const LONG_DEFAULT_STYLE = "Flat 2D history cartoon";
 export const styleAnchor = (s: string) => STYLE_ANCHORS[s] ?? STYLE_ANCHORS[DEFAULT_STYLE]!;

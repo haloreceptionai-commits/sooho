@@ -107,7 +107,25 @@ describe('planning a scene', () => {
     const ok = planScene(input({ ai: { scene: 0, beats: [{ w0: 0, w1: 9, kind: 'image', overlay: { kind: 'lower_third', data: { name: 'Hannibal', sub: 'General' } } }] } }), newCameraState());
     expect(ok[0]!.overlays?.[0]?.kind).toBe('lower_third');
     const bad = planScene(input({ ai: { scene: 0, beats: [{ w0: 0, w1: 9, kind: 'image', overlay: { kind: 'lower_third', data: { name: 'Napoleon', sub: 'Emperor' } } }] } }), newCameraState());
-    expect(bad[0]!.overlays).toBeUndefined();
+    expect(bad[0]!.overlays?.some(o => o.kind === 'lower_third')).toBeFalsy();
+  });
+});
+
+describe('history-channel touches', () => {
+  it('stamps the date when a year is first spoken, then not on every beat', () => {
+    const scenes = Array.from({ length: 6 }, (_, i) => ({ index: i, image: i, text: i % 2 === 0 ? 'In eighteen eighty nine the workers raised the iron tower above the city streets of Paris.' : 'The engineers argued about the plans for hours while the crowds waited outside in the cold.' }));
+    const stamps = planVideo(scenes).flatMap(b => (b.overlays ?? []).filter(o => o.kind === 'date_stamp'));
+    expect(stamps.length).toBeGreaterThanOrEqual(1);
+    expect(stamps[0]!.data).toMatchObject({ when: '1889' });
+    expect(stamps.length).toBeLessThan(3);
+  });
+
+  it('shows a speech bubble only for words the narrator says', () => {
+    const ctx = { index: 0, image: 0, text: 'He turned to his officers and said we will either find a way or make one.' };
+    const ok = planScene({ ...ctx, ai: { scene: 0, beats: [{ w0: 0, w1: 15, kind: 'image', overlay: { kind: 'speech', data: { text: 'We will either find a way or make one', side: 'right' } } }] } }, newCameraState());
+    expect(ok[0]!.overlays?.[0]).toMatchObject({ kind: 'speech', data: { side: 'right' } });
+    const bad = planScene({ ...ctx, ai: { scene: 0, beats: [{ w0: 0, w1: 15, kind: 'image', overlay: { kind: 'speech', data: { text: 'Retreat at once to the harbour now', side: 'left' } } }] } }, newCameraState());
+    expect(bad[0]!.overlays?.some(o => o.kind === 'speech')).toBeFalsy();
   });
 });
 

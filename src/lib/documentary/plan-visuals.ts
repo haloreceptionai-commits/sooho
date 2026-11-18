@@ -120,6 +120,10 @@ function groundOverlay(o: AiBeat['overlay'], ctx: Ctx): OverlaySpec | null {
     const okPlace = !place || overlap(place, ctx.window) > 0;
     return (when || place) && okWhen && okPlace ? { kind: 'date_stamp', data: { when, place }, at: .3, dur: 3 } : null;
   }
+  if (o.kind === 'speech') {
+    const text = clip(d['text'], 120);
+    return text.split(' ').length >= 3 && overlap(text, ctx.words) >= .7 ? { kind: 'speech', data: { text, side: d['side'] === 'right' ? 'right' : 'left' }, at: .3, dur: 3 } : null;   // only words the narrator really says
+  }
   if (o.kind === 'source_tag') {
     const text = clip(d['text'], 60);
     return text && ctx.sources.some(s => s.toLowerCase().includes(text.toLowerCase().slice(0, 30)) || text.toLowerCase().includes(s.toLowerCase().slice(0, 30))) ? { kind: 'source_tag', data: { text }, at: .6, dur: 3 } : null;
@@ -216,12 +220,19 @@ export function planScene(s: SceneInput, state: CameraState): DocBeat[] {
       beats.push({ scene: s.index, w0: sp.range[0], w1: sp.range[1], visual: pickCamera(state, { text, mood, first, image: s.image, cold: !!s.cold, ai: sp.ai }), transition, ...(sfx ? { sfx } : {}), ...(overlays ? { overlays } : {}), ...(mood ? { mood } : {}) });
     }
   });
+  // a date stamp the first time a year is spoken, then at most one every ~25 seconds (the way history channels mark time)
+  for (const b of beats) {
+    state.stampGap--;
+    if (b.visual.type !== 'image' || b.overlays?.length || state.stampGap > 0) continue;
+    const y = spoken.find(n => (n.year || n.era) && n.start >= b.w0 && n.start < b.w1);
+    if (y) { b.overlays = [{ kind: 'date_stamp', data: { when: cardValue(y) }, at: .3, dur: 3 }]; state.stampGap = 8; }
+  }
   return beats;
 }
 
 // ---------------------------------------------------------------------------------------------------- camera choice
-export interface CameraState { count: number; last?: Move; lastSrc?: number; lastWide: boolean; cursor: Record<string, number> }
-export const newCameraState = (): CameraState => ({ count: 0, lastWide: false, cursor: {} });
+export interface CameraState { count: number; last?: Move; lastSrc?: number; lastWide: boolean; cursor: Record<string, number>; stampGap: number }
+export const newCameraState = (): CameraState => ({ count: 0, lastWide: false, cursor: {}, stampGap: 0 });
 
 const POOL: Record<string, Move[]> = {
   action: ['pan_left', 'pan_right', 'punch', 'orbit_left', 'orbit_right'],

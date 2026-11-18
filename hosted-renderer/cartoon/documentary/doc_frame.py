@@ -114,7 +114,7 @@ class Composer:
 
     def _draw_caption(self, p, active):
         s = self.H / 1080.0
-        fnt = font('inter', 56 * s, 800)
+        fnt = font('inter', 44 * s, 800)
         words = [w['text'] for w in p['words']]
         lines, cur = [], []
         for w in words:

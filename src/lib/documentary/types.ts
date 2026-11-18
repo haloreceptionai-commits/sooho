@@ -3,7 +3,7 @@
 
 export const CARD_KINDS = ['number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps'] as const;
 export type CardKind = (typeof CARD_KINDS)[number];
-export const OVERLAY_KINDS = ['lower_third', 'date_stamp', 'source_tag'] as const;
+export const OVERLAY_KINDS = ['lower_third', 'date_stamp', 'source_tag', 'speech'] as const;
 export type OverlayKind = (typeof OVERLAY_KINDS)[number];
 export const MOVES = ['push', 'pull', 'pan_left', 'pan_right', 'tilt_up', 'tilt_down', 'orbit_left', 'orbit_right', 'drift', 'hold', 'punch'] as const;
 export type Move = (typeof MOVES)[number];

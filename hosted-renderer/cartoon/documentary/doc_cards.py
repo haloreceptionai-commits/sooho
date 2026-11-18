@@ -13,7 +13,7 @@ from doc_gfx import (GOLD, GREY, INK, PAPER, RED, TEAL, WHITE, Layer, clamp01, e
                      format_number, lerp, parse_number, smooth, text_size, window, wrap)
 
 KINDS = ('number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps')
-OVERLAYS = ('lower_third', 'date_stamp', 'source_tag')
+OVERLAYS = ('lower_third', 'date_stamp', 'source_tag', 'speech')
 LIMITS = {'text': 220, 'label': 80, 'items': 6, 'events': 7, 'lines': 7}
 
 
@@ -494,6 +494,34 @@ def source_tag(W, H, d, t, dur):
 
 from doc_geo import location
 
+def speech(W, H, d, t, dur):
+    """A speech bubble for words a person says, top left or top right. data: text, side."""
+    s = _s(H)
+    L = Layer(W, H)
+    text = str(d.get('text', ''))[:120]
+    if not text:
+        return L
+    right = d.get('side') == 'right'
+    fnt = font('inter', 40 * s, 600)
+    lines = wrap(text, fnt, W * .32)[:4]
+    lw = max(text_size(l, fnt)[0] for l in lines)
+    lh = int(fnt.size * 1.3)
+    bw, bh = lw + int(64 * s), lh * len(lines) + int(44 * s)
+    cx = (W - W * .06 - bw / 2) if right else (W * .06 + bw / 2)
+    cy = H * .1 + bh / 2
+    sc = clamp01(ease_out_back(window(t, .05, .45))) * (1 - smooth(window(t, dur - .3, dur)))
+    if sc <= .02:
+        return L
+    w, h = bw * sc, bh * sc
+    L.rect(cx - w / 2 + 4 * s, cy - h / 2 + 6 * s, w, h, (10, 12, 18), alpha=70, radius=int(26 * s))
+    L.rect(cx - w / 2, cy - h / 2, w, h, (252, 252, 250), alpha=248, radius=int(26 * s))
+    tx = cx + (bw * .22 if right else -bw * .22) * sc
+    L.polygon([(tx - 18 * s * sc, cy + h / 2 - 2), (tx + 18 * s * sc, cy + h / 2 - 2), (tx + (26 * s if right else -26 * s) * sc, cy + h / 2 + 46 * s * sc)], (252, 252, 250), alpha=248)
+    if sc > .8:
+        L.paragraph((cx - lw / 2, cy - h / 2 + 22 * s), lines, fnt, (28, 32, 44), 'left', lh, alpha=255)
+    return L
+
+
 CARD_FUNCS = {'location': location, 'number': number, 'quote': quote, 'document': document, 'timeline': timeline, 'compare': compare, 'keyfact': keyfact, 'chapter': chapter,
               'title': title, 'steps': steps}
-OVERLAY_FUNCS = {'lower_third': lower_third, 'date_stamp': date_stamp, 'source_tag': source_tag}
+OVERLAY_FUNCS = {'lower_third': lower_third, 'date_stamp': date_stamp, 'source_tag': source_tag, 'speech': speech}

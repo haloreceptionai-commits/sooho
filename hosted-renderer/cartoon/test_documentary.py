@@ -108,7 +108,7 @@ class Cards(unittest.TestCase):
                 self.assertTrue(layer.a.any(), f'{kind} blank at {t}')
 
     def test_overlays_draw(self):
-        for kind, data in {'lower_third': {'name': 'Hannibal', 'sub': 'General'}, 'date_stamp': {'place': 'Rome', 'when': '216 BC'}, 'source_tag': {'text': 'Livy'}}.items():
+        for kind, data in {'lower_third': {'name': 'Hannibal', 'sub': 'General'}, 'date_stamp': {'place': 'Rome', 'when': '216 BC'}, 'source_tag': {'text': 'Livy'}, 'speech': {'text': 'We will find a way', 'side': 'right'}}.items():
             self.assertTrue(CARDS.OVERLAY_FUNCS[kind](W, H, data, 1.0, 3.0).a.any(), kind)
 
     def test_number_counts_up_and_lands_on_the_exact_value(self):
