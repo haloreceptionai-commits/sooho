@@ -12,7 +12,7 @@ import numpy as np
 from doc_gfx import (GOLD, GREY, INK, PAPER, RED, TEAL, WHITE, Layer, clamp01, ease_in_out, ease_out, ease_out_back, fit_font, font,
                      format_number, lerp, parse_number, smooth, text_size, window, wrap)
 
-KINDS = ('number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps', 'balance')
+KINDS = ('board', 'number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps', 'balance')
 OVERLAYS = ('lower_third', 'date_stamp', 'source_tag', 'speech')
 LIMITS = {'text': 220, 'label': 80, 'items': 6, 'events': 7, 'lines': 7}
 
@@ -570,6 +570,15 @@ def speech(W, H, d, t, dur):
     return L
 
 
-CARD_FUNCS = {'balance': balance, 'location': location, 'number': number, 'quote': quote, 'document': document, 'timeline': timeline, 'compare': compare, 'keyfact': keyfact, 'chapter': chapter,
+def board(W, H, d, t, dur):
+    """A full-frame long-form board background (amber plaster or antique parchment). data: style ('plaster' | 'parchment'), seed."""
+    import doc_board
+    L = Layer(W, H)
+    L.rgb[:] = doc_board.board(str(d.get('style', 'parchment')), W, H, int(d.get('seed', 7)))
+    L.a[:] = 255
+    return L
+
+
+CARD_FUNCS = {'board': board, 'balance': balance, 'location': location, 'number': number, 'quote': quote, 'document': document, 'timeline': timeline, 'compare': compare, 'keyfact': keyfact, 'chapter': chapter,
               'title': title, 'steps': steps}
 OVERLAY_FUNCS = {'lower_third': lower_third, 'date_stamp': date_stamp, 'source_tag': source_tag, 'speech': speech}
