@@ -16,6 +16,7 @@ GRADES = {
     'tension': (1.12, .86, (-5, -1, 7)),
     'reveal': (1.1, 1.12, (7, 3, -4)),
     'warm': (1.06, 1.08, (8, 2, -6)),
+    'board': (1.08, 1.0, (-14, -9, -14)),   # the parchment and plaster boards: a little darker and browner, like the reference frame
     'cold': (1.08, .9, (-6, 0, 8)),
     'dark': (1.15, .8, (-4, -2, 3)),
 }

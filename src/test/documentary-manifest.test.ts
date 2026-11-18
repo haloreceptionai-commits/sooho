@@ -14,7 +14,7 @@ describe('documentary manifest', () => {
   it('builds a valid plan whose beats cover every word once', () => {
     const { manifest } = buildManifest(input());
     expect(manifest.kind).toBe('documentary');
-    expect(manifest.beats.length).toBeGreaterThan(manifest.scenes.length * 1.8);
+    expect(manifest.beats.length).toBeGreaterThan(manifest.scenes.length);   // long-form holds: fewer, longer beats than the old 2-5 s pace
     for (let s = 0; s < manifest.scenes.length; s++) {
       const bs = manifest.beats.filter(b => b.scene === s);
       expect(bs[0]!.w0).toBe(0);

@@ -37,6 +37,16 @@ class Composer:
             self.paths[bi] = plan_move(move, v.get('focus') or (.5, .45), v.get('strength', 1.0), v.get('zoom'))
         return self.paths[bi]
 
+    def _elements_for(self, bi):
+        """The timed elements of one board beat, scheduled once from the words the beat holds."""
+        cache = self.__dict__.setdefault('_elem_cache', {})
+        if bi not in cache:
+            import doc_elements as elements
+            b = self.tl['beats'][bi]
+            ws = [w for w in self.tl['words'][b.get('w0', 0):b.get('w1', 0)]]
+            cache[bi] = elements.schedule([{'text': w['text'], 't0': w['t0'], 't1': w['t1']} for w in ws], b['start'], b['end'])
+        return cache[bi]
+
     def _picture(self, src, bi, tb, dur):
         shot = self.shots[src]
         return shot.frame(clamp01(tb / max(.1, dur)), self._path(bi))
@@ -52,6 +62,11 @@ class Composer:
             return pic
         kind = v['card']
         layer = cards.CARD_FUNCS[kind](self.W, self.H, v.get('data') or {}, tb, dur)
+        if kind == 'board':   # the animated board: parchment or plaster, with the elements the narration names
+            import doc_elements as elements
+            pic = layer.rgb.copy()
+            ev = self._elements_for(bi)
+            return elements.draw(pic, ev, tb, self.W, self.H, (v.get('data') or {}).get('style', 'parchment'))
         if kind == 'location':
             return layer.rgb.copy()
         if v.get('bg') is not None:
@@ -64,6 +79,7 @@ class Composer:
 
     def _mood(self, bi):
         b = self.tl['beats'][bi]
+        if b['visual'].get('type') == 'card' and b['visual'].get('card') == 'board': return 'board'   # boards get their own warm, brown finish
         return b.get('mood') or self.m['scenes'][b['scene']].get('mood') or 'neutral'
 
     # ------------------------------------------------------------------- frame

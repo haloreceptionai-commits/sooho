@@ -96,7 +96,7 @@ class Cards(unittest.TestCase):
         'location': {'points': [{'name': 'Carthage', 'lat': 36.8, 'lon': 10.3}, {'name': 'Rome', 'lat': 41.9, 'lon': 12.5}]},
         'compare': {'items': [{'label': 'A', 'value': '330', 'unit': 'm'}, {'label': 'B', 'value': '93'}]},
         'keyfact': {'text': 'He lost half his army', 'tag': 'The twist', 'mark': ['HALF']}, 'chapter': {'number': '2', 'title': 'The crossing', 'subtitle': '218 BC'},
-        'title': {'title': 'The Man Who Sold The Tower', 'subtitle': 'Paris 1925'}, 'steps': {'steps': ['Rumour', 'Invite', 'Bribe']},
+        'title': {'title': 'The Man Who Sold The Tower', 'subtitle': 'Paris 1925'}, 'steps': {'steps': ['Rumour', 'Invite', 'Bribe']}, 'board': {'style': 'parchment', 'seed': 3},
         'balance': {'title': 'Arms race', 'left': {'label': 'USA', 'value': '6,000', 'unit': 'warheads'}, 'right': {'label': 'USSR', 'value': '4,000', 'unit': 'warheads'}},
     }
 

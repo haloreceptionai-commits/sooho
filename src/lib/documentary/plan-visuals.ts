@@ -152,6 +152,8 @@ export interface SceneInput {
   sources?: string[] | undefined;
   /** Index of the scene's own picture in the manifest's image list. */
   image: number;
+  /** 'long' = long-form pacing: held pictures (about 14-22 s) and animated boards every third picture. */
+  pace?: 'long' | undefined;
 }
 
 const ACTION = /\b(ran|run|runs|charg\w+|attack\w*|fled|flee\w*|fell|fall\w*|crash\w*|rush\w*|storm\w*|fight\w*|fought|burn\w*|exploded|escap\w+|chas\w+|march\w*|raced|jump\w*|leap\w*|sailed|crossed)\b/i;
@@ -193,7 +195,8 @@ export function planScene(s: SceneInput, state: CameraState): DocBeat[] {
   }
   picked.sort((a, b) => a.range[0] - b.range[0]);
   // 3) fill everything not covered with picture beats of a sensible length
-  const target = s.cold ? 5 : 8, min = s.cold ? 3 : 4, max = s.cold ? 7 : 13;
+  const long = s.pace === 'long';
+  const target = s.cold ? 5 : long ? 30 : 8, min = s.cold ? 3 : long ? 18 : 4, max = s.cold ? 7 : long ? 44 : 13;
   const spans: { range: [number, number]; ai?: AiBeat | undefined; data?: CardData | undefined }[] = [];
   let at = 0;
   const pushImages = (a: number, b: number) => { for (const r of chunkWords(words, a, b, target, min, max)) spans.push({ range: r }); };
@@ -206,6 +209,16 @@ export function planScene(s: SceneInput, state: CameraState): DocBeat[] {
     at = p.range[1];
   }
   if (at < n) pushImages(at, n);
+  // long-form: every third held picture becomes an animated board (parchment or amber plaster) that carries the story's elements
+  if (long) {
+    let plain = 0;
+    spans.forEach((sp, k) => {
+      if (sp.data || sp.ai || k === 0) return;
+      if (plain++ % 3 !== 2) return;
+      sp.data = { style: (plain / 3) % 2 === 1 ? 'parchment' : 'plaster', seed: s.index * 7 + k };
+      sp.ai = { kind: 'board', w0: sp.range[0], w1: sp.range[1] } as AiBeat;
+    });
+  }
   // a card right at the start of a scene would hide its picture; keep at least one picture beat in the scene
   if (spans.length && spans.every(sp => sp.data)) spans[0] = { range: spans[0]!.range };
   // 4) beats: camera, transition, sound
@@ -270,10 +283,10 @@ export function pickCamera(state: CameraState, o: { text: string; mood?: Mood | 
 
 // ---------------------------------------------------------------------------------------------------- whole video
 /** Plans every scene in order with one shared camera state, so no two neighbouring beats move the same way. */
-export function planVideo(scenes: SceneInput[]): DocBeat[] {
+export function planVideo(scenes: SceneInput[], opts: { pace?: 'long' | undefined } = {}): DocBeat[] {
   const state = newCameraState();
   const out: DocBeat[] = [];
-  scenes.forEach((sc, i) => out.push(...planScene({ ...sc, prev: i > 0 ? scenes[i - 1]!.text.split(/\s+/).slice(-14) : [], next: i + 1 < scenes.length ? scenes[i + 1]!.text.split(/\s+/).slice(0, 14) : [] }, state)));
+  scenes.forEach((sc, i) => out.push(...planScene({ ...sc, ...(opts.pace ? { pace: opts.pace } : {}), prev: i > 0 ? scenes[i - 1]!.text.split(/\s+/).slice(-14) : [], next: i + 1 < scenes.length ? scenes[i + 1]!.text.split(/\s+/).slice(0, 14) : [] }, state)));
   return limitCards(out);
 }
 
@@ -283,6 +296,7 @@ export function limitCards(beats: DocBeat[]): DocBeat[] {
   let cards = 0;
   return beats.map((b, i) => {
     if (b.visual.type !== 'card') return b;
+    if (b.visual.card === 'board') return b;   // boards are backgrounds for the story, not wallpaper cards: never capped
     const prev = beats[i - 1];
     if (cards >= max || (prev?.visual.type === 'card' && prev.scene === b.scene && prev.visual.card !== 'chapter')) {
       const bg = b.visual.bg ?? 0;

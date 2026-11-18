@@ -49,7 +49,7 @@ export function buildManifest(inp: BuildInput): { manifest: DocManifest; report:
     index: i, text: s.narration.trim(), mood: s.mood, cold: s.cold, chapterStart: chapterAt.has(i) && i > 0, image: inp.sceneImage[i]!, sources: inp.sources,
     ai: inp.ai?.find(p => p.scene === i),
   }));
-  const beats = attachCast(planVideo(sceneInputs), inp.scenes.map(s => s.narration.trim()), inp.cast ?? []);
+  const beats = attachCast(planVideo(sceneInputs, { pace: 'long' }), inp.scenes.map(s => s.narration.trim()), inp.cast ?? []);
   // a wry aside gets comic timing: a quick punch-in and a record scratch on its first picture beat
   inp.scenes.forEach((s, i) => {
     if (!s.aside) return;

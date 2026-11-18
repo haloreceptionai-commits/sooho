@@ -59,6 +59,9 @@ export const coldOpenSchema = obj({ scenes: arr(obj({ narration: S, image_prompt
 
 // ---------------------------------------------------------------------------------------------------- prompts
 const RULES = `STYLE (documentary narration for YouTube, spoken aloud):
+- The first sentence is a question or a specific number from the story (a year, a count, a date). The second names the story plainly ("This is the story of..."). Never open on a greeting or a vague line.
+- Close with one present-day tie-in in one or two sentences, after the story's resolution. Never a summary of what was already said.
+- Deep, calm, documentary voice: lay out cause and consequence, pause before turning points, let big facts land. No hype, no shouting, no mystery-thriller phrases.
 - Every 10 seconds the viewer must learn something NEW: a fact, a name, a number, a reversal. Never restate what was already said.
 - Concrete over abstract: people, places, objects, numbers. No vague summaries ("this changed everything", "a remarkable story").
 - Sentences vary: mostly 8-20 words, a few very short ones for impact, none over 28 words. No list-like runs ("First... Second... Third...").
@@ -148,6 +151,8 @@ export function longScriptIssues(scenes: { narration: string; loop_opened?: stri
   const words = text.split(/\s+/).filter(Boolean);
   const target = wordTarget(durationSec);
   if (words.length < target * .82 || words.length > target * 1.18) issues.push({ id: 'LEN', msg: `${words.length} words for ${durationSec}s (aim ${target})` });
+  const first = scenes[0]?.narration ?? '';
+  if (first && !/\?|\b(eighteen|nineteen|seventeen|sixteen|fifteen|fourteen|thirteen|twelve|eleven|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|\d+)\b/i.test(first)) issues.push({ id: 'HOOK_WEAK', msg: 'the first sentence should be a question or a specific number from the story' });
   const tooLong = scenes.map((s, i) => [i, s.narration.split(/\s+/).length] as const).filter(([, n]) => n > 30).map(([i]) => i);
   if (tooLong.length) issues.push({ id: 'SCENE_LONG', msg: `${tooLong.length} scenes run over 30 words (cut them into two)`, scenes: tooLong });
   const toks = words.map(norm).filter(Boolean);

@@ -1,7 +1,7 @@
 // Shapes shared by the documentary planner (this folder) and the Azure worker (hosted-renderer/cartoon/documentary/*.py).
 // The plan never holds seconds: a beat starts on the word it names, so the worker lines every card up with the spoken word.
 
-export const CARD_KINDS = ['number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps', 'balance'] as const;
+export const CARD_KINDS = ['number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps', 'balance', 'board'] as const;
 export type CardKind = (typeof CARD_KINDS)[number];
 export const OVERLAY_KINDS = ['lower_third', 'date_stamp', 'source_tag', 'speech'] as const;
 export type OverlayKind = (typeof OVERLAY_KINDS)[number];

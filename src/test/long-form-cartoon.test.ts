@@ -86,6 +86,6 @@ it('wraps a long thumbnail title onto two badge lines and keeps years below', ()
 });
 
 it('ships a bundled region list with the empire presets the map director may use', () => {
-  const ids = JSON.parse(readFileSync('hosted-renderer/cartoon/assets/map/region-ids.json', 'utf8')) as string[];
+  const ids = JSON.parse(readFileSync(new URL('../../hosted-renderer/cartoon/assets/map/region-ids.json', import.meta.url), 'utf8')) as string[];
   for (const id of ['ottoman_empire', 'roman_empire', 'mongol_empire', 'british_empire', 'tur', 'egy']) expect(ids).toContain(id);
 });
