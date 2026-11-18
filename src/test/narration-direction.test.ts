@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { LONG_NARRATION_DIRECTION, narrationSettings } from "@/lib/narration-direction";
 
 describe("approved narration selection", () => {
+  it("reads Shorts at a natural pace, not the old rushed 225 words per minute", () => {
+    const t = narrationSettings("short", "A needle points north.").text;
+    expect(t).toContain("about 160 words per minute");
+    expect(t).toContain("never rushed");
+    expect(t).not.toContain("225");
+  });
   it("uses Puck for new Shorts", () => {
     expect(narrationSettings("short", "A needle points north.").voice).toBe("Puck");
   });
