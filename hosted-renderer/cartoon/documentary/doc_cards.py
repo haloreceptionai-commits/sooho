@@ -493,16 +493,17 @@ def lower_third(W, H, d, t, dur):
     out = smooth(window(t, dur - .35, dur))
     nf, sf = font('oswald', 64 * s, 700), font('inter', 34 * s, 600)
     w = max(text_size(name.upper(), nf)[0], text_size(sub, sf)[0] if sub else 0) + 70 * s
-    h = nf.size * 1.12 + (sf.size * 1.4 if sub else 8 * s) + 18 * s
+    gh = text_size(name.upper(), nf)[1]
+    h = gh + (sf.size * 1.5 if sub else 8 * s) + 26 * s
     right = d.get('side') == 'right'   # next to a cutout, the label stands on the other side of the frame
     gone = (1 - slide) * (w + 80 * s) + out * (w + 80 * s)
     x = (W - w - W * .06 + gone) if right else (W * .06 - gone)
-    y = H * .76
+    y = H * .64   # above the caption band
     L.rect(x, y, w, h, (12, 14, 22), alpha=225, radius=int(8 * s))
     L.rect(x, y, 10 * s, h, GOLD, radius=int(4 * s))
     L.text((x + 36 * s, y + 8 * s), name.upper(), nf, WHITE)
     if sub:
-        L.text((x + 36 * s, y + 8 * s + nf.size * 1.1), sub, sf, GOLD)
+        L.text((x + 36 * s, y + 8 * s + gh + 8 * s), sub, sf, GOLD)
     return L
 
 
@@ -516,6 +517,7 @@ def date_stamp(W, H, d, t, dur):
         return L
     fnt = font('inter', 38 * s, 800)
     w, h = text_size(text, fnt)
+    w += 3 * len(text)   # the letter spacing
     a = smooth(window(t, .1, .5)) * (1 - smooth(window(t, dur - .3, dur)))
     x, y = W * .05, H * .07
     L.rect(x, y, (w + 56 * s) * ease_out(window(t, .05, .5)), h + 30 * s, (12, 14, 22), alpha=a * 220, radius=int(6 * s))
