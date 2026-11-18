@@ -32,7 +32,7 @@ export async function outlineOperation({ data }: { data: { topic: string; promis
   const n = chapterCount(data.durationSec);
   const chapters = (r.chapters ?? []).slice(0, 16).map(c => ({ ...c, facts: (c.facts ?? []).filter(i => Number.isInteger(i) && i >= 0 && i < data.dossier.facts.length).slice(0, 8), words: clamp(c.words, 80, 400, 190), rehooks: (c.rehooks ?? []).slice(0, 4) }));
   if (chapters.length < Math.max(3, Math.floor(n / 2))) throw new Error('The outline came back with too few chapters');
-  return { characters: (r.characters ?? []).filter(c => c?.name?.trim()).slice(0, 4).map(c => ({ name: c.name.trim().slice(0, 60), role: String(c.role ?? '').slice(0, 80), look: String(c.look ?? '').slice(0, 240) })), chapters, coldOpen: r.coldOpen, finalReframe: String(r.finalReframe ?? ''), twistChapter: clamp(r.twistChapter, 0, chapters.length - 1, Math.floor(chapters.length / 2)) };
+  return { gag: String(r.gag ?? '').slice(0, 240), characters: (r.characters ?? []).filter(c => c?.name?.trim()).slice(0, 4).map(c => ({ name: c.name.trim().slice(0, 60), role: String(c.role ?? '').slice(0, 80), look: String(c.look ?? '').slice(0, 240) })), chapters, coldOpen: r.coldOpen, finalReframe: String(r.finalReframe ?? ''), twistChapter: clamp(r.twistChapter, 0, chapters.length - 1, Math.floor(chapters.length / 2)) };
 }
 
 export async function chapterOperation({ data }: { data: { topic: string; title: string; index: number; outline: Outline; dossier: Dossier; style: string; priorLine: string; hook: string; first: boolean; deployment: string } }): Promise<ChapterDraft> {

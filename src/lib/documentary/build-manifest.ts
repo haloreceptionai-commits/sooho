@@ -5,7 +5,7 @@ import { attachCast, type CastEntry } from './cast';
 import { planVideo, type SceneInput } from './plan-visuals';
 import { DOC_WPS, type AiScenePlan, type DocBeat, type DocManifest, type DocScene, type Mood, type MusicMood } from './types';
 
-export interface BuildScene { narration: string; mood?: Mood | undefined; ambience?: string | undefined; cold?: boolean | undefined; reveal?: boolean | undefined; beat?: string | undefined }
+export interface BuildScene { narration: string; mood?: Mood | undefined; ambience?: string | undefined; cold?: boolean | undefined; reveal?: boolean | undefined; beat?: string | undefined; aside?: boolean | undefined }
 export interface BuildChapter { scene: number; title: string; subtitle?: string | undefined; music?: MusicMood | undefined }
 export interface BuildInput {
   title: string; subtitle?: string | undefined;
@@ -50,6 +50,12 @@ export function buildManifest(inp: BuildInput): { manifest: DocManifest; report:
     ai: inp.ai?.find(p => p.scene === i),
   }));
   const beats = attachCast(planVideo(sceneInputs), inp.scenes.map(s => s.narration.trim()), inp.cast ?? []);
+  // a wry aside gets comic timing: a quick punch-in and a record scratch on its first picture beat
+  inp.scenes.forEach((s, i) => {
+    if (!s.aside) return;
+    const b = beats.find(x => x.scene === i && x.visual.type === 'image');
+    if (b && b.visual.type === 'image') { b.visual = { ...b.visual, move: 'punch' }; if (!b.sfx) b.sfx = 'scratch'; }
+  });
   // chapter openers sit on the first beat of the chapter; the video's own title sits on the first beat after the cold open
   const first = (scene: number): DocBeat | undefined => beats.find(b => b.scene === scene);
   for (const [scene, c] of chapterAt) {

@@ -189,6 +189,20 @@ export function attachCast(beats: DocBeat[], sceneTexts: string[], cast: CastEnt
   });
 }
 
+// ---------------------------------------------------------------------------------------------------- one look in every picture
+const ERA_FOLK: Record<Era, string> = { ancient: 'tunics, cloaks and sandals', medieval: 'tunics, hoods, long dresses and simple boots', 'early-modern': 'doublets, breeches, long dresses and hats', '19th': 'frock coats, top hats, long dresses and bonnets', '20th': 'suits, hats, plain dresses and wartime uniforms', modern: 'modern everyday clothes' };
+export const roleMentioned = (id: string, text: string) => !!ROLES.find(r => r.id === id)?.re.test(text);
+
+/** Added to every background prompt: ordinary people and the story's roles are drawn the same way in every picture, and named figures are left to their cutouts. */
+export function sceneBible(text: string, cast: CastEntry[], era: Era): string {
+  const parts = [`Any ordinary people in the picture are round-faced human cartoon people wearing ${ERA_FOLK[era]}, drawn exactly the same way in every picture of the video.`];
+  for (const c of cast) {
+    if (c.kind === 'role' && roleMentioned(c.id, text)) parts.push(`Any ${c.label.toLowerCase()}s in the picture wear: ${c.look}.`);
+    if (c.kind === 'figure' && mentions(c.name, text)) parts.push(`${c.name} is added separately: do not draw them.`);
+  }
+  return parts.join(' ');
+}
+
 // ---------------------------------------------------------------------------------------------------- painting
 /** Same art style as the video's pictures (whatever style the owner chose), drawn by the image model as one transparent full-body cutout. Never a 3D render. */
 export const DEFAULT_CUTOUT_LOOK = 'Stylized 3D animated cartoon illustration look (clay-like shapes, big expressive human face, slightly exaggerated proportions, rich period costume detail, soft lighting, thin dark outline).';

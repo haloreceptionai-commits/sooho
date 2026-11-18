@@ -13,10 +13,12 @@ export interface DossierFact { fact: string; source: string; surprise: number }
 export interface Dossier { facts: DossierFact[]; people: { name: string; motive: string }[]; quotes: { text: string; who: string; source: string }[]; angle: string }
 export interface OutlineChapter { title: string; question: string; escalation: string; facts: number[]; words: number; music: MusicMood; reveal: boolean; rehooks: string[] }
 export interface OutlineCharacter { name: string; role: string; look: string }
-export interface Outline { characters: OutlineCharacter[]; chapters: OutlineChapter[]; coldOpen: { moments: string[]; stakes: string; promise: string }; finalReframe: string; twistChapter: number }
+export interface Outline { gag: string; characters: OutlineCharacter[]; chapters: OutlineChapter[]; coldOpen: { moments: string[]; stakes: string; promise: string }; finalReframe: string; twistChapter: number }
 export interface ChapterScene {
   narration: string; image_prompt: string; characters: string[]; shot: PlanScene['shot']; angle: string; mood: 'tension' | 'reveal'; beat: string;
   loop_opened: string; loop_closed: string; money: boolean; ambience: string;
+  /** One short, dry aside in the narrator's voice (a callback to the running gag), never at anyone's expense. */
+  aside: boolean;
 }
 export interface ChapterDraft { scenes: ChapterScene[]; summary: string }
 
@@ -36,6 +38,7 @@ export const dossierSchema = obj({
   angle: S,
 });
 export const outlineSchema = obj({
+  gag: S,
   characters: arr(obj({ name: S, role: S, look: S })),
   chapters: arr(obj({ title: S, question: S, escalation: S, facts: arr({ type: 'integer' }), words: { type: 'integer' }, music: { type: 'string', enum: [...MUSIC] }, reveal: { type: 'boolean' }, rehooks: arr(S) })),
   coldOpen: obj({ moments: arr(S), stakes: S, promise: S }),
@@ -47,7 +50,7 @@ export const chapterSchema = obj({
     narration: S, image_prompt: S, characters: arr(S), shot: { type: 'string', enum: ['wide', 'aerial', 'action', 'macro', 'face'] },
     angle: { type: 'string', enum: ['wide', 'close', 'aerial', 'top_down', 'macro', 'pov', 'low_angle', 'over_shoulder'] }, mood: { type: 'string', enum: ['tension', 'reveal'] },
     beat: { type: 'string', enum: ['context', 'question', 'try', 'fail', 'escalation', 'myth', 'reveal', 'analogy', 'proof', 'payoff'] },
-    loop_opened: S, loop_closed: S, money: { type: 'boolean' }, ambience: { type: 'string', enum: ['none', 'rain', 'wind', 'traffic', 'chatter', 'crickets', 'birds', 'fire', 'water'] },
+    loop_opened: S, loop_closed: S, money: { type: 'boolean' }, aside: { type: 'boolean' }, ambience: { type: 'string', enum: ['none', 'rain', 'wind', 'traffic', 'chatter', 'crickets', 'birds', 'fire', 'water'] },
   })),
   summary: S,
 });
@@ -74,7 +77,7 @@ export const outlinePrompt = (o: { topic: string; promise: string; title: string
   const facts = o.dossier.facts.map((f, i) => `${i}. ${f.fact}`).join('\n');
   return {
     system: `You are a showrunner outlining a ${Math.round(o.durationSec / 60)}-minute documentary video. ${RULES}\nStructure: ${n} chapters of about ${CHAPTER_SEC} seconds. Each chapter asks its OWN question, makes things harder or bigger than the last (escalation), and ends by opening the next question before the old one closes. A twist that reframes the story sits near the middle. The last chapter answers the main question plainly and ends with a line that changes what the opening meant.`,
-    user: `Topic: ${o.topic}\nLocked title (the video must deliver exactly this promise): "${o.title}"\nPromise: ${o.promise}\nOpening hook: ${o.hook}\nArchetype: ${o.archetype}\nAngle: ${o.dossier.angle}\nFacts (use their numbers in "facts"):\n${facts}\nPeople: ${o.dossier.people.map(p => `${p.name} (${p.motive})`).join('; ')}\n\nReturn: ${n} chapters (title 2-6 words, question, escalation, fact numbers, words ≈ ${Math.round(CHAPTER_SEC * WPS_LONG)}, music mood, reveal = true when the chapter ends on a reveal, rehooks = 2-3 short teases placed every ~20 seconds); coldOpen = the 3 most striking moments (one sentence each, with fact numbers resolved into plain words), the stakes in one sentence, the promise in one sentence; finalReframe; twistChapter (index); characters = the 1-4 people who recur (name, role, and a one-sentence look: age, build, face, period clothing, so every picture draws them the same way).`,
+    user: `Topic: ${o.topic}\nLocked title (the video must deliver exactly this promise): "${o.title}"\nPromise: ${o.promise}\nOpening hook: ${o.hook}\nArchetype: ${o.archetype}\nAngle: ${o.dossier.angle}\nFacts (use their numbers in "facts"):\n${facts}\nPeople: ${o.dossier.people.map(p => `${p.name} (${p.motive})`).join('; ')}\n\nReturn: ${n} chapters (title 2-6 words, question, escalation, fact numbers, words ≈ ${Math.round(CHAPTER_SEC * WPS_LONG)}, music mood, reveal = true when the chapter ends on a reveal, rehooks = 2-3 short teases placed every ~20 seconds); coldOpen = the 3 most striking moments (one sentence each, with fact numbers resolved into plain words), the stakes in one sentence, the promise in one sentence; finalReframe; twistChapter (index); gag = ONE light running joke or motif taken from a real, documented absurdity of the story (an odd habit, a repeated mistake, a ridiculous rule) that can be called back two or three times with a dry aside, never at the expense of victims, never invented; characters = the 1-4 people who recur (name, role, and a one-sentence look: age, build, face, period clothing, so every picture draws them the same way).`,
   };
 };
 
@@ -85,7 +88,7 @@ export const chapterPrompt = (o: { topic: string; title: string; index: number; 
   const last = o.index === o.outline.chapters.length - 1;
   return {
     system: `You write ONE chapter of a documentary script. ${RULES}\nEvery scene = one or two sentences of narration (10-22 words) plus the picture shown while it is spoken. The picture is a literal staged scene of the PLACE and the EVENT the words describe, like a frame of an animated history explainer: a battlefield, a palace, a harbour, a street, with props, flags and small groups of period people. Never ask for text, signs, maps or numbers inside the picture (graphics are added separately). People are added to the picture afterwards as cutouts of the right historical figures and soldiers, workers or sailors, so in image_prompt never describe a person close up or by face; any people are tiny and far away. Style of the pictures: ${o.style}.`,
-    user: `Topic: ${o.topic}\nFull outline:\n${all}\nRecurring characters (use these names; describe them in pictures exactly as given): ${o.outline.characters.map(c => `${c.name} (${c.role}; ${c.look})`).join(' | ') || 'none'}\n\nWrite chapter ${o.index + 1}: "${c.title}". Question it asks: ${c.question}. Escalation: ${c.escalation}. About ${c.words} words (${Math.round(c.words / 15)} scenes). ${o.first ? `Open with this hook (exact first line): ${o.hook}` : `Continue naturally from the previous chapter's last line: "${o.priorLine}". Do not greet or recap.`}\nFacts you may use:\n- ${facts}\nRe-hooks to place about every 20 seconds: ${c.rehooks.join(' | ')}\n${c.reveal ? 'End on a reveal.' : 'End by opening the next chapter\'s question.'}${last ? `\nThis is the last chapter: answer the main question plainly, then end on this reframe: ${o.outline.finalReframe}` : ''}\nloop_opened / loop_closed: short ids of questions opened or answered in a scene ("" when none). Return a one-sentence summary of what the chapter established.`,
+    user: `Topic: ${o.topic}\nFull outline:\n${all}\nRecurring characters (use these names; describe them in pictures exactly as given): ${o.outline.characters.map(c => `${c.name} (${c.role}; ${c.look})`).join(' | ') || 'none'}\n\nWrite chapter ${o.index + 1}: "${c.title}". Question it asks: ${c.question}. Escalation: ${c.escalation}. About ${c.words} words (${Math.round(c.words / 15)} scenes). ${o.first ? `Open with this hook (exact first line): ${o.hook}` : `Continue naturally from the previous chapter's last line: "${o.priorLine}". Do not greet or recap.`}\nFacts you may use:\n- ${facts}\nRe-hooks to place about every 20 seconds: ${c.rehooks.join(' | ')}\n${c.reveal ? 'End on a reveal.' : 'End by opening the next chapter\'s question.'}${last ? `\nThis is the last chapter: answer the main question plainly, then end on this reframe: ${o.outline.finalReframe}` : ''}\nloop_opened / loop_closed: short ids of questions opened or answered in a scene ("" when none). Running gag of the video: ${o.outline.gag || 'none'}. Include AT MOST ONE short wry aside in this chapter (under 14 words, aside = true on that scene), a dry callback to the running gag or a documented absurdity; never joke about deaths or suffering and never invent a fact. Return a one-sentence summary of what the chapter established.`,
   };
 };
 
@@ -105,7 +108,7 @@ const BEATS = new Set(['hook', 'context', 'question', 'try', 'fail', 'escalation
 /** The app's scene shape from a chapter scene; fields the picture stage needs get safe defaults. Narration is made safe for speech timing. */
 export function toPlanScene(s: ChapterScene, extra: Partial<PlanScene> = {}): PlanScene {
   return {
-    beat: BEATS.has(s.beat) ? s.beat : 'context', narration: speakable(spellNumbers(s.narration.trim())), image_prompt: s.image_prompt.trim(), characters: s.characters ?? [],
+    aside: !!s.aside, beat: BEATS.has(s.beat) ? s.beat : 'context', narration: speakable(spellNumbers(s.narration.trim())), image_prompt: s.image_prompt.trim(), characters: s.characters ?? [],
     camera: 'push_in', sfx: 'none', mood: s.mood === 'reveal' ? 'reveal' : 'tension', color: 'bright', angle: s.angle || 'wide', shot: s.shot || 'wide', money: !!s.money,
     loop_opened: s.loop_opened ?? '', loop_closed: s.loop_closed ?? '', purpose: '', ...extra,
   };
@@ -117,7 +120,7 @@ export function assembleLongScript(o: { chapters: ChapterDraft[]; outline: Outli
   const scenes: LongScript['scenes'] = [];
   const marks: LongScript['chapters'] = [];
   for (const c of o.cold?.scenes ?? []) {
-    scenes.push({ ...toPlanScene({ narration: c.narration, image_prompt: c.image_prompt, characters: c.characters, shot: 'wide', angle: 'wide', mood: 'tension', beat: 'hook', loop_opened: '', loop_closed: '', money: false, ambience: 'none' }), cold: true, chapter: -1, ambience: 'none' });
+    scenes.push({ ...toPlanScene({ narration: c.narration, image_prompt: c.image_prompt, characters: c.characters, shot: 'wide', angle: 'wide', mood: 'tension', beat: 'hook', loop_opened: '', loop_closed: '', money: false, ambience: 'none', aside: false }), cold: true, chapter: -1, ambience: 'none' });
   }
   const coldCount = scenes.length;
   o.chapters.forEach((ch, ci) => {
@@ -130,7 +133,7 @@ export function assembleLongScript(o: { chapters: ChapterDraft[]; outline: Outli
 /** Puts the cold open in front of a finished script: its scenes come first, flagged, and every chapter moves down by their number. */
 export function withColdOpen(script: LongScript, cold: { narration: string; image_prompt: string; characters: string[] }[]): LongScript {
   if (!cold.length) return script;
-  const scenes = cold.map(c => ({ ...toPlanScene({ narration: c.narration, image_prompt: c.image_prompt, characters: c.characters, shot: 'wide', angle: 'wide', mood: 'tension', beat: 'hook', loop_opened: '', loop_closed: '', money: false, ambience: 'none' }), cold: true, chapter: -1, ambience: '' }));
+  const scenes = cold.map(c => ({ ...toPlanScene({ narration: c.narration, image_prompt: c.image_prompt, characters: c.characters, shot: 'wide', angle: 'wide', mood: 'tension', beat: 'hook', loop_opened: '', loop_closed: '', money: false, ambience: 'none', aside: false }), cold: true, chapter: -1, ambience: '' }));
   return { scenes: [...scenes, ...script.scenes], chapters: script.chapters.map(c => ({ ...c, scene: c.scene + scenes.length })), coldCount: scenes.length };
 }
 

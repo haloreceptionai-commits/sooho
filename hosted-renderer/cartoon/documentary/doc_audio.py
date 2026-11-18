@@ -175,6 +175,8 @@ def sfx_events(manifest, timeline):
             ev.append((b['start'], 'reveal', 1.0))
         elif kind == 'whoosh':
             ev.append((max(0.0, b['start'] - .08), 'whoosh', .8))
+        elif kind in ('scratch', 'boing'):   # comic timing for a wry aside
+            ev.append((b['start'] + .05, kind, .7))
         for o in b.get('overlays') or []:
             if o.get('kind') == 'chapter':
                 ev.append((b['start'] + float(o.get('at', 0)), 'whoosh', .7))

@@ -250,6 +250,8 @@ export interface PlanScene {
   shot: "wide" | "aerial" | "action" | "macro" | "face"; money: boolean; loop_opened: string; loop_closed: string; purpose: string;
   /** Long-form documentary: part of the cold open, the chapter it belongs to, and the ambience bed it asks for. */
   cold?: boolean; chapter?: number; ambience?: string;
+  /** A short wry aside (comic timing: record scratch or boing, quick punch-in). */
+  aside?: boolean;
 }
 export interface PlanBeat { beat: string; start_s: number; end_s: number; words: number; purpose: string; loop_opened: string; loop_closed: string; visual: string; camera_move: string }
 export interface Plan {

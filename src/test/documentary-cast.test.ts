@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { attachCast, buildCast, cutoutPrompts, detectRoles, eraOf, heuristicFigures, mentions, nameTokens, parseCast, roleLook, type CastEntry } from '@/lib/documentary/cast';
+import { attachCast, sceneBible, buildCast, cutoutPrompts, detectRoles, eraOf, heuristicFigures, mentions, nameTokens, parseCast, roleLook, type CastEntry } from '@/lib/documentary/cast';
 import { cutoutName, paintCutouts } from '@/lib/documentary/cast-paint';
 import { buildManifest } from '@/lib/documentary/build-manifest';
 import { manifestProblems } from '@/lib/documentary/validate';
@@ -95,6 +95,22 @@ describe('placing the cast on beats', () => {
 
   it('leaves everything alone with an empty cast', () => {
     expect(attachCast(beats, texts, [])).toBe(beats);
+  });
+});
+
+describe('one look in every picture', () => {
+  it('dresses ordinary people for the era and repeats the same role description every time', () => {
+    const a = sceneBible(LINES[1]!, cast, 'early-modern'), b = sceneBible(LINES[1]!, cast, 'early-modern');
+    expect(a).toBe(b);
+    expect(a).toMatch(/doublets, breeches/);
+    expect(a).toMatch(/Any soldiers in the picture wear: a soldier/);
+    expect(sceneBible(LINES[3]!, cast, 'early-modern')).not.toMatch(/soldiers in the picture/);
+    expect(sceneBible('The tower was built in Paris.', cast, '19th')).toMatch(/frock coats/);
+  });
+
+  it('keeps named figures out of the background because their cutout is added separately', () => {
+    expect(sceneBible(LINES[0]!, cast, 'early-modern')).toMatch(/Queen Elizabeth I is added separately: do not draw them/);
+    expect(sceneBible(LINES[1]!, cast, 'early-modern')).not.toMatch(/added separately/);
   });
 });
 

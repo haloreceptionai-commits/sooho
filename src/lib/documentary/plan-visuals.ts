@@ -84,6 +84,12 @@ export function groundCard(kind: CardKind, data: CardData | undefined, ctx: Ctx)
       .filter(e => e.label && values.has(Number(e.value.replace(/,/g, '')))).slice(0, 5);
     return items.length >= 2 ? { items, title: clip(d['title'], 60) } : null;
   }
+  if (kind === 'balance') {
+    const values = new Set(ctx.spoken.map(n => n.value));
+    const side = (x: unknown) => { const e = (x ?? {}) as Record<string, unknown>; return { label: clip(e['label'], 24), value: clip(e['value'], 16).replace(/[^0-9,.]/g, ''), unit: clip(e['unit'], 12) }; };
+    const l = side(d['left']), r = side(d['right']);
+    return l.label && r.label && values.has(Number(l.value.replace(/,/g, ''))) && values.has(Number(r.value.replace(/,/g, ''))) && l.value !== r.value ? { left: l, right: r, title: clip(d['title'], 60) } : null;
+  }
   if (kind === 'location') {
     const points = (Array.isArray(d['points']) ? d['points'] : []).map(p => p as Record<string, unknown>)
       .map(p => ({ name: clip(p['name'], 28), lat: Number(p['lat']), lon: Number(p['lon']) }))

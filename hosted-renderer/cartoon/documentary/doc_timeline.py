@@ -15,11 +15,11 @@ TAKE_GAP = .18          # breath between two recorded takes
 TAIL = .6               # picture held after the last word
 LEAD = .07              # a cut lands just before its word, the way an editor places it
 MIN_BEAT = {'image': .8, 'card': 1.7}
-CARD_MIN = {'timeline': 2.6, 'location': 3.2, 'compare': 2.6, 'steps': 3.0, 'document': 2.6, 'chapter': 2.0, 'title': 2.4}
+CARD_MIN = {'balance': 3.2, 'timeline': 2.6, 'location': 3.2, 'compare': 2.6, 'steps': 3.0, 'document': 2.6, 'chapter': 2.0, 'title': 2.4}
 TRANSITIONS = ('cut', 'cross', 'dip', 'whip', 'flash')
 MOODS = ('neutral', 'tension', 'reveal', 'warm', 'cold', 'dark')
 MUSIC = ('lofi', 'epic', 'suspense', 'sad')
-SFX = ('none', 'hit', 'riser', 'whoosh', 'sting')
+SFX = ('none', 'hit', 'riser', 'whoosh', 'sting', 'scratch', 'boing')
 
 
 def validate_manifest(m):

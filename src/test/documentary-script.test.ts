@@ -26,6 +26,7 @@ describe('packaging first', () => {
 
 const dossier: Dossier = { facts: Array.from({ length: 12 }, (_, i) => ({ fact: `Fact number ${i} about the tower`, source: 'archive', surprise: 3 })), people: [{ name: 'Victor Lustig', motive: 'money' }], quotes: [], angle: 'the con needed no tower' };
 const outline = (n = 6): Outline => ({
+  gag: 'the committee that kept forming committees',
   characters: [{ name: 'Victor Lustig', role: 'con man', look: 'slim man in a grey suit and hat' }],
   chapters: Array.from({ length: n }, (_, i) => ({ title: `Chapter ${i + 1}`, question: `Question ${i + 1}?`, escalation: 'bigger', facts: [i], words: 190, music: i % 2 ? 'epic' : 'suspense', reveal: i === 3, rehooks: ['but then'] })),
   coldOpen: { moments: ['a'], stakes: 's', promise: 'p' }, finalReframe: 'it was never about the tower', twistChapter: 3,
@@ -36,7 +37,7 @@ const chapterOf = (ci: number, scenes = 8): ChapterDraft => ({
   scenes: Array.from({ length: scenes }, (_, k) => ({
     narration: `In scene ${k} of chapter ${ci} ${names[(ci + k) % names.length]} paid ${['one hundred', 'two hundred', 'three thousand'][k % 3]} francs for a paper that proved nothing at all to anyone.`.replace(/\d+/g, w => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][Number(w) % 10]!),
     image_prompt: `A painting of scene ${k}`, characters: ['Victor Lustig'], shot: 'wide', angle: 'wide', mood: k % 2 ? 'reveal' : 'tension', beat: 'context',
-    loop_opened: k === 0 ? `q${ci}` : '', loop_closed: k === scenes - 1 && ci > 0 ? `q${ci - 1}` : '', money: false, ambience: 'none',
+    loop_opened: k === 0 ? `q${ci}` : '', loop_closed: k === scenes - 1 && ci > 0 ? `q${ci - 1}` : '', money: false, ambience: 'none', aside: k === 3,
   })),
 });
 
@@ -144,5 +145,21 @@ describe('manifest checks and the render request', () => {
     const body = { videoId: 'abc', doc: m(), checkpoint: { gate: { score: 80, ready: true, parts: {}, blockers: [] }, report: { revealSec: 10, shotMix: {} }, hookType: 'x', continuity: 1, plan: { characters: [] } } };
     expect(documentaryRequest.safeParse(body).success).toBe(true);
     expect(documentaryRequest.safeParse({ ...body, doc: { ...m(), kind: 'cartoon' } }).success).toBe(false);
+  });
+});
+
+describe('the running gag and wry asides', () => {
+  it('the chapter prompt carries the gag and allows one short aside, never at anyone\'s expense', async () => {
+    const { chapterPrompt, outlinePrompt } = await import('@/lib/documentary/long-script');
+    const p = chapterPrompt({ topic: 't', title: 'T', index: 1, outline: outline(), dossier, style: 'flat', priorLine: 'x', hook: 'h', first: false });
+    expect(p.user).toContain('the committee that kept forming committees');
+    expect(p.user).toMatch(/AT MOST ONE short wry aside/);
+    expect(p.user).toMatch(/never joke about deaths/);
+    expect(outlinePrompt({ topic: 't', promise: 'p', title: 'T', hook: 'h', durationSec: 600, dossier, archetype: 'a' }).user).toMatch(/running joke/);
+  });
+
+  it('asides flow into the plan scenes', () => {
+    const s = assembleLongScript({ chapters: [chapterOf(0)], outline: outline(1) }).scenes;
+    expect(s.filter(x => x.aside)).toHaveLength(1);
   });
 });

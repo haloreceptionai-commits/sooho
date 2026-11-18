@@ -129,6 +129,16 @@ describe('history-channel touches', () => {
   });
 });
 
+describe('balance scale', () => {
+  it('weighs two spoken quantities and refuses unspoken or equal ones', () => {
+    const ctx = ctxFor('The Americans held six thousand warheads while the Soviets held four thousand.');
+    const ok = groundCard('balance', { left: { label: 'USA', value: '6,000', unit: 'warheads' }, right: { label: 'USSR', value: '4,000', unit: 'warheads' }, title: 'Arms race' }, ctx) as { left: { value: string } };
+    expect(ok.left.value).toBe('6,000');
+    expect(groundCard('balance', { left: { label: 'USA', value: '6,000' }, right: { label: 'USSR', value: '9,000' } }, ctx)).toBeNull();
+    expect(groundCard('balance', { left: { label: 'A', value: '6,000' }, right: { label: 'B', value: '6,000' } }, ctx)).toBeNull();
+  });
+});
+
 describe('planning a video', () => {
   const scenes = Array.from({ length: 30 }, (_, i) => ({ index: i, image: i, text: i % 5 === 2 ? 'The tower rose to three hundred thirty meters above the city streets below it.' : 'The workers carried heavy beams across the muddy field while the engineers argued about the plans for hours.' }));
 

@@ -28,7 +28,7 @@ import { documentaryChapter, documentaryCast, documentaryColdOpen, documentaryDo
 import { writeLongForm, type LongFormCalls } from '@/lib/documentary/long-form';
 import { buildManifest } from '@/lib/documentary/build-manifest';
 import { buildCast, eraOf, type CastEntry } from '@/lib/documentary/cast';
-import { BACKGROUND_RULE } from '@/lib/documentary/cast';
+import { BACKGROUND_RULE, sceneBible } from '@/lib/documentary/cast';
 import { cutoutName, paintCutouts } from '@/lib/documentary/cast-paint';
 import { describeWeak } from '@/lib/documentary/boredom';
 import type { AiScenePlan } from '@/lib/documentary/types';
@@ -604,7 +604,7 @@ export async function runVideo(id: string, input: VideoInput) {
           const shot = [
             SHOT[docMode && (sc.shot === "face" || sc.shot === "action") ? "wide" : sc.shot] ?? "", ANGLE[docMode && ["close", "over_shoulder", "pov"].includes(sc.angle) ? "wide" : sc.angle] ?? "", sc.money && moneyShot ? `MONEY SHOT: ${moneyShot}.` : "", sc.image_prompt,
             people ? "The characters are mid-action, busy with the task, NOT posing side by side and NOT looking at the camera." : castAll && !docMode ? `Any people are small in the frame (${castAll.slice(0, 200)}).` : "",
-            COLOR[sc.color] ?? "", LIGHT, docMode ? BACKGROUND_RULE : "",
+            COLOR[sc.color] ?? "", LIGHT, docMode ? BACKGROUND_RULE : "", docMode ? sceneBible(sc.narration, cast, era) : "",
           ].filter(Boolean).join(" ");
           let r = await img((cast && sheet ? { cast, reference: sheet } : { cast }), shot).catch((e: unknown) => { if (/\[429\]/.test(String(e))) throw e; return null; });
           if (!r) r = await img({ cast }, shot); // retry without the reference
@@ -640,11 +640,11 @@ export async function runVideo(id: string, input: VideoInput) {
       const cp = await saveAssemblyAssets(id, plan, full, voice, { gate: gate, report: { revealSec: report.revealSec, shotMix: report.shotMix }, hookType: hookType, continuity });
       up({ assemblyCheckpoint: cp, stage: 'render', progress: 70, detail: 'Planning the cuts, cards and camera…', thumb: full[0] ? thumbnail(full[0].image) : undefined });
       const dm = plan.documentary;
-      const dscenes = plan.scenes as (typeof plan.scenes[number] & { cold?: boolean; ambience?: string })[];
+      const dscenes = plan.scenes as (typeof plan.scenes[number] & { cold?: boolean; ambience?: string; aside?: boolean })[];
       const ai = (await visualPlan) ?? [];
       const painted = castP ? await castP : { painted: [] as CastEntry[], log: [] as string[] };
       const { manifest, report: bored } = buildManifest({
-        title: plan.title, subtitle: dm?.subtitle, scenes: dscenes.map(sc => ({ narration: sc.narration, mood: sc.mood === 'reveal' ? 'reveal' as const : 'tension' as const, ambience: sc.ambience, cold: sc.cold, reveal: sc.beat === 'reveal' || sc.beat === 'payoff', beat: sc.beat })),
+        title: plan.title, subtitle: dm?.subtitle, scenes: dscenes.map(sc => ({ narration: sc.narration, mood: sc.mood === 'reveal' ? 'reveal' as const : 'tension' as const, ambience: sc.ambience, cold: sc.cold, reveal: sc.beat === 'reveal' || sc.beat === 'payoff', beat: sc.beat, aside: sc.aside })),
         chapters: (dm?.chapters ?? [{ scene: 0, title: plan.title, music: 'suspense' }]).map(c => ({ scene: c.scene, title: c.title, music: c.music as 'lofi' | 'epic' | 'suspense' | 'sad' })),
         sceneImage: plan.scenes.map((_, i) => i), images: cp.images, voice: cp.voice, ai, sources: dm?.sources, captions: s.burnCaptions,
         cast: painted.painted, cutouts: painted.painted.map(c => media.path(cutoutName(c.id))),

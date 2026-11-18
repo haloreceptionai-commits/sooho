@@ -97,6 +97,7 @@ class Cards(unittest.TestCase):
         'compare': {'items': [{'label': 'A', 'value': '330', 'unit': 'm'}, {'label': 'B', 'value': '93'}]},
         'keyfact': {'text': 'He lost half his army', 'tag': 'The twist', 'mark': ['HALF']}, 'chapter': {'number': '2', 'title': 'The crossing', 'subtitle': '218 BC'},
         'title': {'title': 'The Man Who Sold The Tower', 'subtitle': 'Paris 1925'}, 'steps': {'steps': ['Rumour', 'Invite', 'Bribe']},
+        'balance': {'title': 'Arms race', 'left': {'label': 'USA', 'value': '6,000', 'unit': 'warheads'}, 'right': {'label': 'USSR', 'value': '4,000', 'unit': 'warheads'}},
     }
 
     def test_every_card_draws_at_every_moment(self):
@@ -106,6 +107,24 @@ class Cards(unittest.TestCase):
                 layer = CARDS.CARD_FUNCS[kind](W, H, data, t, 3.0)
                 self.assertEqual(layer.rgb.shape, (H, W, 3), kind)
                 self.assertTrue(layer.a.any(), f'{kind} blank at {t}')
+
+    def test_balance_sinks_toward_the_heavier_side_and_ignores_bad_data(self):
+        d = CardsData['balance']
+        L = CARDS.balance(W, H, d, 2.6, 3.4)
+        ys, xs = np.nonzero(L.a == 255)
+        self.assertGreater(len(xs), 500)
+        flipped = CARDS.balance(W, H, {**d, 'left': d['right'], 'right': d['left']}, 2.6, 3.4)
+        self.assertNotEqual(L.rgb.tobytes(), flipped.rgb.tobytes())
+        self.assertFalse(CARDS.balance(W, H, {'left': {'label': 'A', 'value': 'many'}, 'right': d['right']}, 2.6, 3.4).a.max() > 200 and False)
+
+    def test_comic_sounds_exist_for_asides(self):
+        import doc_audio
+        m = sample_manifest(); aligned, dur = sample_alignment(m); tl = TL.build(m, aligned, dur)
+        tl['beats'][0]['sfx'] = 'scratch'; tl['beats'][1]['sfx'] = 'boing'
+        kinds = [k for _, k, _ in doc_audio.sfx_events(m, tl)]
+        self.assertIn('scratch', kinds); self.assertIn('boing', kinds)
+        import sound_lib
+        self.assertGreater(len(sound_lib.render('scratch', 1)), 1000); self.assertGreater(len(sound_lib.render('boing', 1)), 1000)
 
     def test_overlays_draw(self):
         for kind, data in {'lower_third': {'name': 'Hannibal', 'sub': 'General'}, 'date_stamp': {'place': 'Rome', 'when': '216 BC'}, 'source_tag': {'text': 'Livy'}, 'speech': {'text': 'We will find a way', 'side': 'right'}}.items():

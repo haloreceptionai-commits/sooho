@@ -1,7 +1,7 @@
 // Shapes shared by the documentary planner (this folder) and the Azure worker (hosted-renderer/cartoon/documentary/*.py).
 // The plan never holds seconds: a beat starts on the word it names, so the worker lines every card up with the spoken word.
 
-export const CARD_KINDS = ['number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps'] as const;
+export const CARD_KINDS = ['number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps', 'balance'] as const;
 export type CardKind = (typeof CARD_KINDS)[number];
 export const OVERLAY_KINDS = ['lower_third', 'date_stamp', 'source_tag', 'speech'] as const;
 export type OverlayKind = (typeof OVERLAY_KINDS)[number];
@@ -9,7 +9,7 @@ export const MOVES = ['push', 'pull', 'pan_left', 'pan_right', 'tilt_up', 'tilt_
 export type Move = (typeof MOVES)[number];
 export const TRANSITIONS = ['cut', 'cross', 'dip', 'whip', 'flash'] as const;
 export type Transition = (typeof TRANSITIONS)[number];
-export const SFX = ['none', 'hit', 'riser', 'whoosh', 'sting'] as const;
+export const SFX = ['none', 'hit', 'riser', 'whoosh', 'sting', 'scratch', 'boing'] as const;
 export type Sfx = (typeof SFX)[number];
 export const MOODS = ['neutral', 'tension', 'reveal', 'warm', 'cold', 'dark'] as const;
 export type Mood = (typeof MOODS)[number];

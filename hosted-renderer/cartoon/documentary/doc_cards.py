@@ -12,7 +12,7 @@ import numpy as np
 from doc_gfx import (GOLD, GREY, INK, PAPER, RED, TEAL, WHITE, Layer, clamp01, ease_in_out, ease_out, ease_out_back, fit_font, font,
                      format_number, lerp, parse_number, smooth, text_size, window, wrap)
 
-KINDS = ('number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps')
+KINDS = ('number', 'quote', 'document', 'timeline', 'location', 'compare', 'keyfact', 'chapter', 'title', 'steps', 'balance')
 OVERLAYS = ('lower_third', 'date_stamp', 'source_tag', 'speech')
 LIMITS = {'text': 220, 'label': 80, 'items': 6, 'events': 7, 'lines': 7}
 
@@ -307,6 +307,52 @@ def compare(W, H, d, t, dur):
     return L
 
 
+def balance(W, H, d, t, dur):
+    """A balance scale: two things weighed against each other, the heavier side sinks. data: left{label,value,unit}, right{label,value,unit}, title."""
+    s = _s(H)
+    L = Layer(W, H)
+    _scrim(L, .68)
+    sides = []
+    for key in ('left', 'right'):
+        it = d.get(key) or {}
+        p = parse_number(it.get('value'))
+        if not p or p[0] <= 0:
+            return L
+        sides.append((str(it.get('label', ''))[:24].upper(), p, str(it.get('unit', ''))[:12]))
+    fade = _fade(t, dur, .3, .22)
+    title = str(d.get('title', ''))[:60]
+    if title:
+        L.text((W / 2, H * .1), title.upper(), font('inter', 44 * s, 700), GOLD, 'center', alpha=fade * 255, shadow=6, spacing=3)
+    (ll, (lv, ldec, lcom), lu), (rl, (rv, rdec, rcom), ru) = sides
+    big = max(lv, rv)
+    target = math.copysign(8.0 + 14.0 * abs(lv - rv) / big, lv - rv)   # degrees: clearly tilted, the heavier side goes down
+    settle = ease_out_back(window(t, .35, 1.7), 2.2)
+    ang = math.radians(target * settle)
+    px, py = W / 2, H * .6
+    half = W * .3
+    lx, ly = px - math.cos(ang) * half, py + math.sin(ang) * half
+    rx, ry = px + math.cos(ang) * half, py - math.sin(ang) * half
+    L.polygon([(px, py + 6 * s), (px - 70 * s, H * .86), (px + 70 * s, H * .86)], (110, 118, 136), alpha=fade * 255)
+    L.line((lx, ly), (rx, ry), (226, 230, 240), max(6, int(16 * s)), alpha=fade * 255)
+    L.circle((px, py), 20 * s, GOLD, alpha=fade * 255)
+    for (x, y, label, (v, dec, com), unit, colour) in ((lx, ly, ll, sides[0][1], lu, TEAL), (rx, ry, rl, sides[1][1], ru, GOLD)):
+        pan_y = y + 120 * s
+        L.line((x - 70 * s, y), (x - 90 * s, pan_y), (170, 176, 190), max(2, int(4 * s)), alpha=fade * 255)
+        L.line((x + 70 * s, y), (x + 90 * s, pan_y), (170, 176, 190), max(2, int(4 * s)), alpha=fade * 255)
+        L.rect(x - 110 * s, pan_y, 220 * s, 16 * s, (226, 230, 240), alpha=fade * 255, radius=int(8 * s))
+        blocks = max(1, min(8, int(round(1 + 7 * v / big))))
+        for k in range(blocks):
+            pop = ease_out(window(t, .2 + k * .08, .45 + k * .08))
+            bw = 46 * s
+            bx = x - (min(blocks, 4) * bw) / 2 + (k % 4) * bw
+            by = pan_y - (k // 4 + 1) * bw * pop
+            L.rect(bx + 2, by, bw - 4, bw - 4, colour, alpha=fade * 255 * min(1, pop * 2), radius=int(6 * s))
+        shown = format_number(v * ease_out(window(t, .3, 1.5)), dec, com) + (' ' + unit if unit else '')
+        L.text((x, pan_y + 30 * s), label, font('oswald', 54 * s, 700), WHITE, 'center', alpha=fade * 255, shadow=8)
+        L.text((x, pan_y + 30 * s + 64 * s), shown, font('oswald', 70 * s, 700), colour, 'center', alpha=fade * 255, shadow=8)
+    return L
+
+
 def keyfact(W, H, d, t, dur):
     """One sentence on screen with the key words highlighted. data: text, tag, mark[]."""
     s = _s(H)
@@ -522,6 +568,6 @@ def speech(W, H, d, t, dur):
     return L
 
 
-CARD_FUNCS = {'location': location, 'number': number, 'quote': quote, 'document': document, 'timeline': timeline, 'compare': compare, 'keyfact': keyfact, 'chapter': chapter,
+CARD_FUNCS = {'balance': balance, 'location': location, 'number': number, 'quote': quote, 'document': document, 'timeline': timeline, 'compare': compare, 'keyfact': keyfact, 'chapter': chapter,
               'title': title, 'steps': steps}
 OVERLAY_FUNCS = {'lower_third': lower_third, 'date_stamp': date_stamp, 'source_tag': source_tag, 'speech': speech}

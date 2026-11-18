@@ -85,3 +85,14 @@ describe('boredom meter', () => {
     expect(boredomReport(bad).metrics.longSentences).toBeGreaterThan(0);
   });
 });
+
+describe('wry asides in the manifest', () => {
+  it('an aside gets a punch-in and a record scratch on its first picture beat', () => {
+    const base = scenesOf(8).map((s, i) => ({ ...s, aside: i === 3 }));
+    const { manifest } = buildManifest(input(8, { scenes: base, chapters: [{ scene: 0, title: 'A' }] }));
+    const first = manifest.beats.find(b => b.scene === 3 && b.visual.type === 'image')!;
+    expect(first.sfx).toBe('scratch');
+    expect(first.visual.type === 'image' && first.visual.move).toBe('punch');
+    expect(manifest.beats.filter(b => b.sfx === 'scratch')).toHaveLength(1);
+  });
+});

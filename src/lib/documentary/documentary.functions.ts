@@ -13,6 +13,7 @@ const dossierZ = z.object({
   quotes: z.array(z.object({ text: text(300), who: text(80), source: text(120) })).max(6), angle: text(400),
 });
 const outlineZ = z.object({
+  gag: text(240),
   characters: z.array(z.object({ name: text(60), role: text(80), look: text(240) })).max(4),
   chapters: z.array(z.object({ title: text(80), question: text(300), escalation: text(300), facts: z.array(z.number().int()).max(10), words: z.number(), music: z.enum(['lofi', 'epic', 'suspense', 'sad']), reveal: z.boolean(), rehooks: z.array(text(200)).max(5) })).min(1).max(16),
   coldOpen: z.object({ moments: z.array(text(300)).max(5), stakes: text(300), promise: text(300) }), finalReframe: text(400), twistChapter: z.number().int(),
