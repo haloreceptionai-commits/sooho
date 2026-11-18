@@ -23,7 +23,7 @@ describe("approved narration selection", () => {
     const plain = narrationSettings("long", "Earth is a giant magnet.");
     const tense = narrationSettings("long:suspense", "Earth is a giant magnet.");
     expect(tense.voice).toBe("Charon");
-    expect(tense.text).toContain("hushed");
+    expect(tense.text).toContain("quieter");
     expect(tense.text.endsWith("Narration: Earth is a giant magnet.")).toBe(true);
     expect(tense.text).not.toBe(plain.text);
     expect(narrationSettings("long:unknown", "x").text).toBe(narrationSettings("long", "x").text);
