@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import torchaudio
 from alignment import align_words
+from acoustic_windows import acoustic_emissions
 
 def infer(audio, weights, transcript, output):
     lock=json.loads(Path(__file__).with_name('acoustic-model.json').read_text())
@@ -19,7 +20,6 @@ def infer(audio, weights, transcript, output):
     waveform=np.frombuffer(raw,dtype='<f4').copy()
     if len(waveform)<400 or not np.isfinite(waveform).all() or np.sqrt(np.mean(waveform**2))<1e-5:
         raise ValueError('Silent or invalid narration')
-    if len(waveform)>16000*90: raise ValueError('Short alignment exceeds ninety-second budget')
     torch.set_num_threads(2)
     bundle=torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
     # Build the published bundle architecture, then load only the hash-checked local state.
@@ -30,9 +30,11 @@ def infer(audio, weights, transcript, output):
     state['aux.weight']=state['aux.weight'][keep]
     state['aux.bias']=state['aux.bias'][keep]
     model.load_state_dict(state);model.eval()
-    with torch.inference_mode():
-        logits,_=model(torch.from_numpy(waveform)[None,:])
-        emissions=torch.log_softmax(logits[0],dim=-1).numpy()
+    def predict(samples):
+        with torch.inference_mode():
+            logits,_=model(torch.from_numpy(samples)[None,:])
+            return torch.log_softmax(logits[0],dim=-1).numpy()
+    emissions=acoustic_emissions(waveform,predict)
     output.mkdir(parents=True,exist_ok=True)
     np.save(output/'emissions.npy',emissions)
     vocabulary={label:i for i,label in enumerate(bundle.get_labels())}

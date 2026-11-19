@@ -1,3 +1,7 @@
+# Carthage long-form recovery
+- [x] Replace the Shorts-only acoustic limit with bounded long-form inference; deployed Azure/Apify, 11 alignment tests and 428 app tests passed; Carthage aligned in 32.3 seconds.
+- [ ] Recover Carthage preview after fixing five advertised-but-undrawn props; full rendering still requires the owner's existing picture/timing approval.
+
 # Spartacus documentary recovery
 - [x] Recover saved Spartacus assembly without regenerating media and verify the completed video (544.73 seconds, 244 MB).
 - [x] Include character cutouts in documentary media validation and signing; restore documentary Resume; 418 tests passed and preview build OK.
