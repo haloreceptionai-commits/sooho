@@ -1,0 +1,37 @@
+{
+ "topic": "Benjamin Franklin calming waves with oil",
+ "script": "Benjamin Franklin calmed a windy pond with almost no oil. Clapham Common pond heaves under gusts and whitecaps. Franklin grips a small vial at the bank. A sea captain watches, shakes his head, and walks off. Can a teaspoon of oil quiet a pond? Franklin pours a quick splash at the edge. It spreads, but the chop rolls straight through. The wind climbs and roughens the surface. Benjamin Franklin studies the gusts, then shifts a few steps upwind. He drips a slow, steady thread into the breeze. The thin slick rides the surface downwind. One drop blossoms into a wide rainbow sheen. Why do ripples fade? The film weakens surface pull and kills tiny waves. Bigger swells still move under; crests soften. Then he tries it from a ship near Portsmouth. A glassy lane forms and the spray falls. Franklin writes the Royal Society in 1774 about acres smoothed. Small ripples stop; oil makes them vanish. A windy pond shows a smooth path growing wider.",
+ "score": 93,
+ "ready": true,
+ "blockers": [
+  "Viewer would swipe away at: \"Clapham Common pond heaves under gusts and whitecaps.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"Franklin grips a small vial at the bank.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"A sea captain watches, shakes his head, and walks off.\" — make it a surprise, danger or new fact",
+  "Visual literalness: scenes 1, 7, 13, 14, 15, 17, 18, 19, 20 don't show what is said"
+ ],
+ "log": [
+  {
+   "attempt": 0,
+   "score": 86,
+   "blockers": [
+    "Shape repeat: \"Franklin calmed a windy pond using almost no oil.\" says an earlier line again; the close should echo a few hook words with the twist, never replay a line; Shape clarity: \"A sea captain laughs that oil is just sailor talk.\" is a metaphor or narrator aside a first-time viewer can't picture; say literally what happens; Shape close copies the hook; write a new twist sentence that reuses only two or three hook words",
+    "Read-aloud: \"Nothing.\"",
+    "Read-aloud: \"How?\"",
+    "Viewer would swipe away at: \"Benjamin Franklin calmed a windy pond using almost no oil.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Clapham Common pond thrashes under a rising wind.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Franklin stands with a small glass vial.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 2, 4, 8, 9, 11, 13, 14, 15, 17, 19 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 1,
+   "score": 93,
+   "blockers": [
+    "Viewer would swipe away at: \"Clapham Common pond heaves under gusts and whitecaps.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Franklin grips a small vial at the bank.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"A sea captain watches, shakes his head, and walks off.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 1, 7, 13, 14, 15, 17, 18, 19, 20 don't show what is said"
+   ]
+  }
+ ]
+}

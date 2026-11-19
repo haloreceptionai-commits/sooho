@@ -1,0 +1,30 @@
+{
+  "set": "ship_deck",
+  "duration": 3,
+  "lighting": "day",
+  "samples": 64,
+  "engine": "cycles",
+  "size": [
+    1080,
+    1920
+  ],
+  "frames": [
+    1
+  ],
+  "camera": {
+    "from": [
+      2.8,
+      0,
+      2.1
+    ],
+    "look_at": [
+      0,
+      8,
+      3.3
+    ],
+    "lens": 27,
+    "fstop": 5.6
+  },
+  "grade": "Punchy",
+  "haze": 0.001
+}

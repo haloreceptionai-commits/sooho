@@ -1,0 +1,395 @@
+{
+ "_doc": "Spoken word forms -> drawable engine concepts. Only ids that the engine renders may appear. Phrases are matched on lowercase word sequences with punctuation removed.",
+ "sets": {
+  "mine_tunnel": [
+   "mine",
+   "tunnel",
+   "beam",
+   "mined",
+   "walls of the mine",
+   "wall",
+   "walls",
+   "rock",
+   "dug"
+  ],
+  "rail_yard": [
+   "rail",
+   "rails",
+   "track",
+   "tracks",
+   "train",
+   "trains",
+   "railway",
+   "mainlines",
+   "mainline"
+  ],
+  "castle": [
+   "fort",
+   "castle",
+   "walls of the fort"
+  ],
+  "battlefield": [
+   "army",
+   "battle",
+   "charges"
+  ],
+  "village": [
+   "village",
+   "hill"
+  ],
+  "ship_deck": [
+   "ship",
+   "sailors",
+   "deck boards",
+   "boards"
+  ],
+  "office": [
+   "office",
+   "standards"
+  ],
+  "saloon": [
+   "saloon",
+   "bar"
+  ],
+  "workshop": [
+   "workshop",
+   "machine"
+  ],
+  "street": [
+   "street",
+   "town"
+  ],
+  "room": [
+   "living room",
+   "house"
+  ]
+ },
+ "objects": {
+  "gold_shotgun": {
+   "words": [
+    "shotgun",
+    "gun"
+   ],
+   "actions": {
+    "load": [
+     "loaded",
+     "load",
+     "loading"
+    ],
+    "fire": [
+     "fired",
+     "fire",
+     "shooting",
+     "shoot",
+     "shot"
+    ]
+   }
+  },
+  "gold_vein": {
+   "words": [
+    "vein",
+    "chunk of wall",
+    "gold-bearing rock"
+   ],
+   "actions": {
+    "open": [
+     "smashes",
+     "smash",
+     "clears",
+     "cracks"
+    ],
+    "explode": [
+     "blows up"
+    ]
+   }
+  },
+  "gold_pan": {
+   "words": [
+    "pan",
+    "flakes"
+   ],
+   "actions": {
+    "pour": [
+     "swirls",
+     "swirl",
+     "spin"
+    ]
+   }
+  },
+  "magnifier": {
+   "words": [
+    "magnifying glass",
+    "magnifier"
+   ],
+   "actions": {
+    "swing": [
+     "swings",
+     "waves"
+    ]
+   }
+  },
+  "dynamite": {
+   "words": [
+    "dynamite",
+    "firecracker"
+   ],
+   "actions": {
+    "fire": [
+     "lights",
+     "lit",
+     "light"
+    ],
+    "explode": [
+     "explodes",
+     "explosion",
+     "dust clears"
+    ]
+   }
+  },
+  "hand_drill": {
+   "words": [
+    "drill",
+    "drilled",
+    "drilling"
+   ],
+   "actions": {
+    "drill": [
+     "drill",
+     "drilled",
+     "drilling"
+    ]
+   }
+  },
+  "perforated_cart": {
+   "words": [
+    "holes",
+    "cart"
+   ],
+   "actions": {
+    "roll": [
+     "roll",
+     "rolling"
+    ]
+   }
+  },
+  "fuse_bundle": {
+   "words": [
+    "string",
+    "strings",
+    "rope",
+    "fuse"
+   ],
+   "actions": {
+    "fire": [
+     "lights",
+     "spark",
+     "flames"
+    ]
+   }
+  },
+  "rocket_arrow": {
+   "words": [
+    "arrow",
+    "rocket",
+    "rockets",
+    "gunpowder"
+   ],
+   "actions": {
+    "fire": [
+     "blast off",
+     "flying",
+     "fired"
+    ]
+   }
+  },
+  "covered_cart": {
+   "words": [
+    "coat"
+   ],
+   "actions": {
+    "open": [
+     "rips off"
+    ]
+   }
+  },
+  "rail_joint": {
+   "words": [
+    "gap",
+    "gaps",
+    "space",
+    "joint",
+    "joints",
+    "rail ends",
+    "bolts",
+    "bolted",
+    "bars",
+    "clips",
+    "anchors",
+    "stone",
+    "steel",
+    "signals"
+   ],
+   "actions": {
+    "expand": [
+     "get longer",
+     "longer",
+     "shorter",
+     "grows",
+     "nearly closes"
+    ],
+    "buckle": [
+     "buckle",
+     "buckles",
+     "kink",
+     "shove sideways"
+    ],
+    "break": [
+     "pull apart",
+     "break bolts",
+     "breaks"
+    ]
+   }
+  },
+  "money_bag": {
+   "words": [
+    "money",
+    "bucks",
+    "pays",
+    "cash",
+    "coins",
+    "dollars"
+   ],
+   "actions": {}
+  }
+ },
+ "character_actions": {
+  "walk": [
+   "walks",
+   "walked",
+   "rolls up",
+   "comes",
+   "coming",
+   "arrives"
+  ],
+  "run": [
+   "runs",
+   "ran",
+   "run",
+   "bolt",
+   "flee"
+  ],
+  "carry": [
+   "carries",
+   "carry",
+   "carrying"
+  ],
+  "point": [
+   "points",
+   "pointed",
+   "shows"
+  ],
+  "swing": [
+   "tosses",
+   "throws",
+   "swings",
+   "slaps"
+  ],
+  "aim": [
+   "aims",
+   "aimed"
+  ],
+  "crouch": [
+   "lies",
+   "crouches",
+   "kneels"
+  ],
+  "fall": [
+   "falls",
+   "fell",
+   "bangs his head"
+  ],
+  "cheer": [
+   "laughs",
+   "cheers",
+   "celebrates"
+  ],
+  "panic": [
+   "screams",
+   "panics",
+   "scream"
+  ],
+  "stand": [
+   "watches",
+   "watch",
+   "nods",
+   "stays behind",
+   "stands"
+  ]
+ },
+ "expressions": [
+  "neutral",
+  "happy",
+  "angry",
+  "sad",
+  "shock",
+  "worried",
+  "smug",
+  "determined",
+  "talk"
+ ],
+ "lighting": {
+  "night": [
+   "night",
+   "winter",
+   "cold"
+  ],
+  "sunset": [
+   "evening",
+   "dusk"
+  ],
+  "rain": [
+   "rain",
+   "pours",
+   "storm"
+  ],
+  "day": [
+   "morning",
+   "summer",
+   "day"
+  ]
+ },
+ "people": [
+  "buddy",
+  "expert",
+  "rich guy",
+  "crews",
+  "commander",
+  "soldier",
+  "everyone",
+  "guy",
+  "miner",
+  "somebody",
+  "anyone",
+  "those two"
+ ],
+ "outfits": {
+  "merchant": [
+   "suit",
+   "white suit",
+   "rich guy"
+  ],
+  "soldier": [
+   "soldier",
+   "soldiers",
+   "army"
+  ],
+  "sailor": [
+   "sailors",
+   "sailor"
+  ],
+  "worker": [
+   "crews",
+   "miner"
+  ]
+ }
+}

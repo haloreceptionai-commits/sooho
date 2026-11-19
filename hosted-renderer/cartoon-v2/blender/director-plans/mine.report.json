@@ -1,0 +1,62 @@
+{
+ "story": "mine",
+ "timing": "syllable-estimated",
+ "model": "gpt-5.1-codex",
+ "accepted": true,
+ "errors": [],
+ "report": {
+  "sentences": 23,
+  "shots": 31,
+  "required": 153,
+  "covered": 153,
+  "coverage": 1.0,
+  "undrawable": [],
+  "missing": [],
+  "set_changes_per_min": 13.75,
+  "mean_shot_len": 1.97,
+  "max_shot_len": 3.92,
+  "min_shot_len": 0.64,
+  "sets_used": [
+   "mine_tunnel"
+  ]
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "errors": [
+    "s19: bad cast action/expression",
+    "s19: unknown expression",
+    "s21: bad cast action/expression",
+    "s21: unknown expression",
+    "s2: spoken obj:gold_vein not shown",
+    "s10: spoken word:bottom not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+    "s19: spoken char:run not shown",
+    "s19: spoken obj:money_bag not shown",
+    "s19: spoken word:bolt not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+    "s19: spoken word:money not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+    "s21: spoken char:run not shown",
+    "s21: spoken word:runs not shown (independent reader marked it concrete: map it to a drawable concept and show it)",
+    "s22: spoken obj:gold_vein:open not shown",
+    "set changes 27.7/min outside benchmark band 12.0-22.0: 27 backdrop (set or zone) changes in 58.5s; need 12-21 changes across 28 shots"
+   ],
+   "coverage": 0.9412,
+   "set_changes_per_min": 27.67
+  },
+  {
+   "round": 2,
+   "errors": [
+    "s21: shot timing out of 0.5-5.0s (sentence 4.11s); valid start_word values for a 2-shot split: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]",
+    "set changes 11.8/min outside benchmark band 12.0-22.0: 12 backdrop (set or zone) changes in 61.1s; need 13-22 changes across 31 shots",
+    "shot 28 length 0.44s outside 0.5-5.0"
+   ],
+   "coverage": 1.0,
+   "set_changes_per_min": 11.78
+  },
+  {
+   "round": 3,
+   "errors": [],
+   "coverage": 1.0,
+   "set_changes_per_min": 13.75
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+  "set": "castle",
+  "duration": 3,
+  "lighting": "day",
+  "samples": 64,
+  "engine": "cycles",
+  "size": [
+    1080,
+    1920
+  ],
+  "frames": [
+    1
+  ],
+  "camera": {
+    "from": [
+      3,
+      -1,
+      2.0
+    ],
+    "look_at": [
+      0,
+      6,
+      3.4
+    ],
+    "lens": 24,
+    "fstop": 5.6
+  },
+  "grade": "Punchy",
+  "haze": 0.001
+}

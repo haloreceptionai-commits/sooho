@@ -1,0 +1,78 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 2.121,
+ "camera": {
+  "from": [
+   0.9,
+   -4.533,
+   1.6
+  ],
+  "look_at": [
+   0.0,
+   0.517,
+   0.95
+  ],
+  "lens": 35,
+  "fstop": 5.6
+ },
+ "cast": [
+  {
+   "id": "miner",
+   "pos": [
+    -0.6,
+    0.6
+   ],
+   "yaw": 0,
+   "action": "run",
+   "expression": "worried",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.7,
+    0.5,
+    0.3
+   ]
+  },
+  {
+   "id": "buddy",
+   "pos": [
+    0.65,
+    1.05
+   ],
+   "yaw": 0,
+   "action": "run",
+   "expression": "happy",
+   "outfit": "worker",
+   "hat": "beanie",
+   "shirt": [
+    0.2,
+    0.3,
+    0.6
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "money_bag",
+   "action": "hold",
+   "pos": [
+    -0.05,
+    -0.1,
+    0
+   ],
+   "scale": 0.85,
+   "yaw": 0
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  38
+ ]
+}

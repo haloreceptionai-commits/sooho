@@ -1,0 +1,205 @@
+{
+  "title": "Salted Samples",
+  "sentences": [
+    {
+      "text": "Empty tunnels fetch dollars despite thin gold inside.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:money_bag:hold"
+      ]
+    },
+    {
+      "text": "Miner drills hole into the rough wall today now.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Buddy swirls pan beside that fresh hole today slowly.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:swirl"
+      ]
+    },
+    {
+      "text": "Hands toss flakes onto chosen chips from that hole now.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:swirl"
+      ]
+    },
+    {
+      "text": "But expert swings magnifying glass toward those sampled chips carefully.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Expert writes numbers after that first test reads high today.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Rich guy pays dollars after seeing those numbers today inside.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:office",
+        "obj:money_bag:hold"
+      ]
+    },
+    {
+      "text": "Then engineer drills second face for clean new cores today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Engineer maps spots where results swing up and down today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "But numbers refuse matching across those fresh cores today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Engineer points board showing spikes near sample holes today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Buddy swirls pan again and sees dull specks only today.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:swirl"
+      ]
+    },
+    {
+      "text": "Yet chips glitter under that swinging glass on salted spots.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Engineer cracks chunk of wall for plain rock today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_vein:open"
+      ]
+    },
+    {
+      "text": "Expert swings magnifier and compares these clean pieces today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Results show mismatch between salted chips and new cores today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Office holds meeting while report notes inconsistent assays today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Then crews drill more holes to verify reported ore today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Salted samples collapse under inconsistent results today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Empty tunnels lose dollars when gold stays uneven inside.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:money_bag:hold"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,474 @@
+{
+  "accepted": false,
+  "attempt": 2,
+  "errors": [],
+  "votes": [
+    {
+      "labels": {
+        "benchmark": "A",
+        "candidate": "B"
+      },
+      "passed": false,
+      "result": {
+        "scores": {
+          "A": {
+            "clarity": 6,
+            "cause_effect": 8,
+            "engagement": 9,
+            "kid_clear": true,
+            "opening": true
+          },
+          "B": {
+            "clarity": 8,
+            "cause_effect": 7,
+            "engagement": 5,
+            "kid_clear": true,
+            "opening": true
+          }
+        },
+        "candidate_sentences": [
+          {
+            "index": 0,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Cart-based rocket launcher used in fortress defense is supported; cart rolling near fort walls is depictable (cart roll in castle set)."
+          },
+          {
+            "index": 1,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Fortress defense context is supported; soldiers standing/pointing is depictable in castle set with cart present."
+          },
+          {
+            "index": 2,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Multiple rocket arrows in rapid succession is supported by rocket-artillery evidence; rockets firing is drawable."
+          },
+          {
+            "index": 3,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rockets flying from a cart in a fortress context is supported and drawable."
+          },
+          {
+            "index": 4,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Repeated rocket firing in fortress defense is supported and drawable; cheering is extra flavor but drawable (cheer action)."
+          },
+          {
+            "index": 5,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Fortress context is supported; commanders pointing toward other carts is drawable."
+          },
+          {
+            "index": 6,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Use in fortress defense during invasions is supported by history/defense facts; the noun 'invasions' is not literally drawable in the given vocabulary."
+          },
+          {
+            "index": 7,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Fortress context and rolling carts are drawable, but the action 'stop' is not in the drawable actions list."
+          },
+          {
+            "index": 8,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Multiple salvos/bursts are supported conceptually, but the noun 'bursts' is not literally drawable."
+          },
+          {
+            "index": 9,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rockets in flight are supported/drawable, but the action word 'shooting' for rocket arrows is not in the rocket_arrow action list."
+          },
+          {
+            "index": 10,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Repeated firing in fortress context is supported; 'direct' as an action is not in the drawable list."
+          },
+          {
+            "index": 11,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rocket arrows launched from a cart are supported and drawable."
+          },
+          {
+            "index": 12,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Fortress context is supported; rolling carts and having two carts are drawable even if not evidenced."
+          },
+          {
+            "index": 13,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "'Blast off' rockets are supported/drawable; pointing and nodding are drawable actions."
+          },
+          {
+            "index": 14,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Watching rockets fly from near castle walls is supported/drawable."
+          },
+          {
+            "index": 15,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Launching many rockets at once in fortress defense is supported and drawable."
+          },
+          {
+            "index": 16,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Firing many at once is supported by rocket-artillery evidence; drawable as multiple rocket_arrow:fire."
+          },
+          {
+            "index": 17,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Reason given (inaccurate and slow to reload) is directly supported by the rocket-artillery evidence; firing is drawable."
+          }
+        ],
+        "unsupported": [
+          "Crews or soldiers cheering loudly",
+          "Commanders\u2019 pointing or nodding directly triggering another firing",
+          "Multiple carts specifically indicated as \u201cother wheeled carts,\u201d a \u201cfirst cart,\u201d and a \u201cwaiting cart\u201d",
+          "Rolling carts along the walls and stopping together",
+          "Soldiers standing and pointing outward or watching as a notable behavior",
+          "Crews nodding on command"
+        ],
+        "undrawable": [
+          "invasions",
+          "stop",
+          "bursts",
+          "shooting",
+          "direct"
+        ]
+      }
+    },
+    {
+      "labels": {
+        "benchmark": "A",
+        "candidate": "B"
+      },
+      "passed": false,
+      "result": {
+        "scores": {
+          "A": {
+            "clarity": 7,
+            "cause_effect": 8,
+            "engagement": 9,
+            "kid_clear": true,
+            "opening": true
+          },
+          "B": {
+            "clarity": 7,
+            "cause_effect": 7,
+            "engagement": 6,
+            "kid_clear": true,
+            "opening": true
+          }
+        },
+        "candidate_sentences": [
+          {
+            "index": 1,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Hwacha were carts used in fortress defense (cart, defense). Picture has castle set and a cart rolling."
+          },
+          {
+            "index": 2,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Defensive fortress context is fine (defense), but picture lacks soldiers, cart, and pointing action."
+          },
+          {
+            "index": 3,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Multiple rockets in rapid succession is supported (rockets). Picture shows rocket arrows firing."
+          },
+          {
+            "index": 4,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rockets from a cart are supported (cart, defense), but the picture does not include a cart."
+          },
+          {
+            "index": 5,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Repeated rocket firing is fine (rockets), but cheering crews and carts are not depicted."
+          },
+          {
+            "index": 6,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Commanders at fortress walls is consistent (defense), but picture lacks pointing and carts."
+          },
+          {
+            "index": 7,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Use in invasions/defense is supported (history, defense), but picture lacks people/carts."
+          },
+          {
+            "index": 8,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Movement of carts on walls is consistent (defense). Picture shows a cart rolling at the castle."
+          },
+          {
+            "index": 9,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Repeated rocket firing is supported (rockets), but picture lacks the carts mentioned."
+          },
+          {
+            "index": 10,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rockets are supported (rockets), but picture lacks soldiers and pointing."
+          },
+          {
+            "index": 11,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Fort defense context ok (rockets, defense), but picture lacks crews/commanders and their gestures."
+          },
+          {
+            "index": 12,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rocket arrows from a wooden cart fit hwacha (cart), but the cart isn't in the picture."
+          },
+          {
+            "index": 13,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rolling a cart is fine (defense), but the sentence requires two carts; picture shows only a rolling cart with no second cart."
+          },
+          {
+            "index": 14,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rocket arrows blasting off is supported (rockets). Picture shows rockets firing."
+          },
+          {
+            "index": 15,
+            "evidence_ok": true,
+            "picture_ok": false,
+            "reason": "Rockets in fortress defense supported, but picture lacks soldiers watching."
+          },
+          {
+            "index": 16,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Firing many at once in defense is supported (rockets, defense). Picture shows rockets firing at a castle."
+          },
+          {
+            "index": 17,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Firing many rockets is supported (rockets). Picture shows rockets firing."
+          },
+          {
+            "index": 18,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "The stated reason matches evidence (rockets). Picture shows rockets firing; the explanation itself is not picturable."
+          }
+        ],
+        "unsupported": [],
+        "undrawable": [
+          "invasions",
+          "rapid succession",
+          "bursts",
+          "direct (as in 'direct another firing')",
+          "wooden (material attribute of cart)",
+          "wheeled (attribute of carts)",
+          "reload",
+          "stop (cart stopping action)"
+        ]
+      }
+    },
+    {
+      "labels": {
+        "benchmark": "A",
+        "candidate": "B"
+      },
+      "passed": false,
+      "result": {
+        "scores": {
+          "A": {
+            "clarity": 6,
+            "cause_effect": 7,
+            "engagement": 9,
+            "kid_clear": true,
+            "opening": false
+          },
+          "B": {
+            "clarity": 8,
+            "cause_effect": 9,
+            "engagement": 6,
+            "kid_clear": true,
+            "opening": true
+          }
+        },
+        "candidate_sentences": [
+          {
+            "index": 1,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Hwacha was a wooden cart-like launcher (cart) used in fortress defense (defense). Rolling a cart near fort walls is consistent with that use."
+          },
+          {
+            "index": 2,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Defensive fortress context (defense) is supported; soldiers standing by the cart is plausible staging. Drawable via set:castle, outfit:soldier, actions stand/point."
+          },
+          {
+            "index": 3,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Hwacha (cart) launched many rocket arrows; multiple rocket launchers fire rockets in rapid succession (rockets). Drawable via cart object and rocket_arrow:fire."
+          },
+          {
+            "index": 4,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rockets flying from a cart (rockets) in a fort setting (defense) matches evidence. Drawable with set:castle and obj:rocket_arrow:fire."
+          },
+          {
+            "index": 5,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rocket firing during fortress defense is supported (rockets, defense). Cheering is staging and drawable via char action cheer."
+          },
+          {
+            "index": 6,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Commanders in a fort directing carts fits defensive deployment (defense). Drawable with set:castle, outfit:commander, point action and carts."
+          },
+          {
+            "index": 7,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Hwacha notably used in defensive actions during invasions (history) and in fortresses (defense). Drawable with set:castle and carts with commanders."
+          },
+          {
+            "index": 8,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Moving carts along fort walls aligns with fortress defense context (defense). Drawable via obj:perforated_cart:roll and set:castle."
+          },
+          {
+            "index": 9,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Multiple-rocket launchers fire repeatedly/in bursts (rockets). Drawable via repeated obj:rocket_arrow:fire."
+          },
+          {
+            "index": 10,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rockets shooting forward is consistent with rocket artillery (rockets). Drawable via obj:rocket_arrow:fire and soldiers pointing."
+          },
+          {
+            "index": 11,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rocket firing in a fort defense setting (rockets, defense) is supported. Drawable with commander point and crews nod actions."
+          },
+          {
+            "index": 12,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Hwacha resembled a wooden cart with launch pad (cart). Drawable with obj:perforated_cart and obj:rocket_arrow:fire."
+          },
+          {
+            "index": 13,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Moving carts in a fortress defense context (defense) is consistent. Drawable via obj:perforated_cart:roll."
+          },
+          {
+            "index": 14,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Rocket arrows blasting off again matches multiple-rocket launcher behavior (rockets). Drawable via obj:rocket_arrow:fire."
+          },
+          {
+            "index": 15,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Watching rockets in a fort defense fits (rockets, defense). Drawable via set:castle, soldiers stand/watch and rockets firing."
+          },
+          {
+            "index": 16,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Firing many at once during fortress defense aligns with multiple rocket launcher capability (rockets) and fortress use (defense)."
+          },
+          {
+            "index": 17,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Statement about many rockets aligns with multiple-rocket behavior (rockets). Drawable via many obj:rocket_arrow:fire."
+          },
+          {
+            "index": 18,
+            "evidence_ok": true,
+            "picture_ok": true,
+            "reason": "Directly supported: unguided rocket artillery is inaccurate and slow to reload; multiple launchers compensate by firing many (rockets)."
+          }
+        ],
+        "unsupported": [],
+        "undrawable": [
+          "launchers",
+          "in bursts"
+        ]
+      }
+    }
+  ],
+  "word_count": 185,
+  "evidence": {
+    "id": "battle",
+    "benchmark": "cart",
+    "topic": "Korean rocket carts in the invasion-era fortress defense; no claimed one-cart victory",
+    "facts": [
+      {
+        "id": "cart",
+        "url": "https://en.wikipedia.org/wiki/Hwacha",
+        "quote": "The overall design resembled a wooden cart with a launch pad attached; depending on the specific version and type, it could fire up to 200 singijeon (rocket-powered) arrows, or several dozen iron-headed arrows or bolts out of gun barrels."
+      },
+      {
+        "id": "history",
+        "url": "https://en.wikipedia.org/wiki/Hwacha",
+        "quote": "These weapons were most notably deployed in the defense against the two Japanese invasions of the Korean Peninsula in 1592\u201398."
+      },
+      {
+        "id": "rockets",
+        "url": "https://en.wikipedia.org/wiki/Multiple_rocket_launcher",
+        "quote": "Unguided rocket artillery is notoriously inaccurate and slow to reload compared to gun artillery. A multiple rocket launcher helps compensate for this with its ability to launch multiple rockets in rapid succession"
+      },
+      {
+        "id": "defense",
+        "url": "https://history-maps.com/museum/hwacha",
+        "quote": "Stationed in fortresses, hwachas were used defensively against tightly packed samurai formations.",
+        "note": "Avoid disputed army sizes, precise kills, invented rain/coats/hand-slaps, 82 historically claimed rockets, or no-miss victory."
+      }
+    ]
+  },
+  "duration_measured": false,
+  "production_enabled": false
+}

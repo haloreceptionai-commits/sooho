@@ -1,0 +1,35 @@
+{
+  "set": "mine_tunnel",
+  "duration": 3,
+  "lighting": "day",
+  "samples": 24,
+  "engine": "cycles",
+  "size": [
+    1080,
+    1920
+  ],
+  "frames": [
+    1
+  ],
+  "camera": {
+    "from": [
+      0.9,
+      -2.6,
+      1.45
+    ],
+    "to": [
+      0.35,
+      -1.5,
+      1.55
+    ],
+    "look_at": [
+      0,
+      0.6,
+      1.45
+    ],
+    "lens": 32,
+    "fstop": 4
+  },
+  "grade": "Punchy",
+  "haze": 0.003
+}

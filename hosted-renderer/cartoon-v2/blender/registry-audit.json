@@ -1,0 +1,574 @@
+{
+ "banner": {
+  "frame_box": [
+   0.451,
+   0.332,
+   0.546,
+   0.667
+  ],
+  "ground": 0.0,
+  "hash": "aeb40deae512bab3",
+  "height": 3.4,
+  "meshes": 1,
+  "pass": true
+ },
+ "barrel": {
+  "frame_box": [
+   0.242,
+   0.388,
+   0.74,
+   0.607
+  ],
+  "ground": 0.0,
+  "hash": "00af1ecea1640e9c",
+  "height": 0.9,
+  "meshes": 1,
+  "pass": true
+ },
+ "big_rock": {
+  "frame_box": [
+   0.137,
+   0.446,
+   0.812,
+   0.55
+  ],
+  "ground": -0.0,
+  "hash": "6c5e05d912acb556",
+  "height": 2.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "boat": {
+  "frame_box": [
+   0.225,
+   0.439,
+   0.794,
+   0.553
+  ],
+  "ground": 0.0,
+  "hash": "8c07208a12e74606",
+  "height": 1.0,
+  "meshes": 2,
+  "pass": true
+ },
+ "bridge": {
+  "frame_box": [
+   0.085,
+   0.417,
+   0.87,
+   0.576
+  ],
+  "ground": 0.0,
+  "hash": "ee8e7ac6cb083ce4",
+  "height": 1.6,
+  "meshes": 1,
+  "pass": true
+ },
+ "bush": {
+  "frame_box": [
+   0.085,
+   0.367,
+   0.871,
+   0.622
+  ],
+  "ground": 0.0,
+  "hash": "f9bf7e91659c8a88",
+  "height": 1.2,
+  "meshes": 1,
+  "pass": true
+ },
+ "cactus": {
+  "frame_box": [
+   0.3,
+   0.318,
+   0.693,
+   0.677
+  ],
+  "ground": 0.0,
+  "hash": "06f4531ec757f5be",
+  "height": 2.4,
+  "meshes": 1,
+  "pass": true
+ },
+ "campfire": {
+  "frame_box": [
+   0.096,
+   0.469,
+   0.866,
+   0.645
+  ],
+  "ground": -0.0,
+  "hash": "38aa44dd09ca040e",
+  "height": 1.839,
+  "meshes": 8,
+  "pass": true
+ },
+ "cannon": {
+  "frame_box": [
+   0.147,
+   0.386,
+   0.801,
+   0.606
+  ],
+  "ground": 0.0,
+  "hash": "22bac065920c264e",
+  "height": 1.0,
+  "meshes": 3,
+  "pass": true
+ },
+ "cart": {
+  "frame_box": [
+   0.209,
+   0.375,
+   0.737,
+   0.617
+  ],
+  "ground": 0.0,
+  "hash": "faff2b6ad333b7fb",
+  "height": 1.8,
+  "meshes": 3,
+  "pass": true
+ },
+ "castle_gate": {
+  "frame_box": [
+   0.337,
+   0.316,
+   0.636,
+   0.678
+  ],
+  "ground": 0.0,
+  "hash": "6b09eeff7b991348",
+  "height": 5.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "catapult": {
+  "frame_box": [
+   0.246,
+   0.346,
+   0.828,
+   0.642
+  ],
+  "ground": 0.0,
+  "hash": "68a4c3690bbf165b",
+  "height": 3.5,
+  "meshes": 6,
+  "pass": true
+ },
+ "chest": {
+  "frame_box": [
+   0.339,
+   0.418,
+   0.652,
+   0.577
+  ],
+  "ground": 0.0,
+  "hash": "05cbd59d035aac02",
+  "height": 0.7,
+  "meshes": 2,
+  "pass": true
+ },
+ "cliff": {
+  "frame_box": [
+   0.2,
+   0.309,
+   0.815,
+   0.683
+  ],
+  "ground": 0.0,
+  "hash": "690961d814b86e63",
+  "height": 9.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "column": {
+  "frame_box": [
+   0.38,
+   0.327,
+   0.616,
+   0.67
+  ],
+  "ground": 0.0,
+  "hash": "91c09210f8235008",
+  "height": 4.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "column_damaged": {
+  "frame_box": [
+   0.327,
+   0.32,
+   0.664,
+   0.675
+  ],
+  "ground": 0.0,
+  "hash": "a793c574adde9ef5",
+  "height": 3.2,
+  "meshes": 1,
+  "pass": true
+ },
+ "crate": {
+  "frame_box": [
+   0.127,
+   0.377,
+   0.824,
+   0.614
+  ],
+  "ground": 0.0,
+  "hash": "ecd26cef0b1b9332",
+  "height": 0.9,
+  "meshes": 1,
+  "pass": true
+ },
+ "dock": {
+  "frame_box": [
+   0.196,
+   0.422,
+   0.779,
+   0.573
+  ],
+  "ground": 0.0,
+  "hash": "ac074ecc9b00a18f",
+  "height": 0.6,
+  "meshes": 1,
+  "pass": true
+ },
+ "fern": {
+  "frame_box": [
+   0.099,
+   0.436,
+   0.865,
+   0.558
+  ],
+  "ground": 0.0,
+  "hash": "55aa1c55dc72c934",
+  "height": 0.9,
+  "meshes": 1,
+  "pass": true
+ },
+ "horse": {
+  "frame_box": [
+   0.256,
+   0.356,
+   0.692,
+   0.661
+  ],
+  "ground": 0.0,
+  "hash": "5214d3c613a37abf",
+  "height": 1.7,
+  "meshes": 2,
+  "pass": true
+ },
+ "jungle_tree": {
+  "frame_box": [
+   0.249,
+   0.311,
+   0.739,
+   0.681
+  ],
+  "ground": 0.0,
+  "hash": "b0c380502c931bbd",
+  "height": 5.5,
+  "meshes": 1,
+  "pass": true
+ },
+ "log": {
+  "frame_box": [
+   0.244,
+   0.451,
+   0.704,
+   0.546
+  ],
+  "ground": -0.0,
+  "hash": "c1d2aeab9ca89ba4",
+  "height": 0.6,
+  "meshes": 1,
+  "pass": true
+ },
+ "obelisk": {
+  "frame_box": [
+   0.359,
+   0.324,
+   0.635,
+   0.672
+  ],
+  "ground": 0.0,
+  "hash": "9eab3cb794d5f7e4",
+  "height": 6.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "ox": {
+  "frame_box": [
+   0.288,
+   0.404,
+   0.687,
+   0.608
+  ],
+  "ground": 0.0,
+  "hash": "36fc2629365ba8f6",
+  "height": 1.536,
+  "meshes": 4,
+  "pass": true
+ },
+ "ox_burning": {
+  "frame_box": [
+   0.288,
+   0.404,
+   0.687,
+   0.677
+  ],
+  "ground": 0.0,
+  "hash": "25d723c8dbe2dd1b",
+  "height": 2.087,
+  "meshes": 18,
+  "pass": true
+ },
+ "palm": {
+  "frame_box": [
+   0.186,
+   0.301,
+   0.788,
+   0.688
+  ],
+  "ground": 0.0,
+  "hash": "d01711405d0d01aa",
+  "height": 5.5,
+  "meshes": 1,
+  "pass": true
+ },
+ "pine": {
+  "frame_box": [
+   0.305,
+   0.317,
+   0.681,
+   0.677
+  ],
+  "ground": -0.0,
+  "hash": "5a5a33c1b0dfa188",
+  "height": 6.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "pyramid": {
+  "frame_box": [
+   0.084,
+   0.314,
+   0.871,
+   0.671
+  ],
+  "ground": 0.0,
+  "hash": "913ee78e68e1d8fc",
+  "height": 14.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "rocks": {
+  "frame_box": [
+   0.1,
+   0.351,
+   0.864,
+   0.637
+  ],
+  "ground": 0.0,
+  "hash": "72ea088e615d3355",
+  "height": 1.2,
+  "meshes": 1,
+  "pass": true
+ },
+ "sheep": {
+  "frame_box": [
+   0.334,
+   0.403,
+   0.644,
+   0.603
+  ],
+  "ground": 0.0,
+  "hash": "df25fd99b56ddf91",
+  "height": 0.9,
+  "meshes": 2,
+  "pass": true
+ },
+ "shield": {
+  "frame_box": [
+   0.337,
+   0.398,
+   0.672,
+   0.6
+  ],
+  "ground": 0.0,
+  "hash": "f0fcd49ec9d4e495",
+  "height": 0.9,
+  "meshes": 1,
+  "pass": true
+ },
+ "ship": {
+  "frame_box": [
+   0.234,
+   0.348,
+   0.713,
+   0.643
+  ],
+  "ground": 0.0,
+  "hash": "ac71eba92f2db986",
+  "height": 7.0,
+  "meshes": 6,
+  "pass": true
+ },
+ "small_pine": {
+  "frame_box": [
+   0.345,
+   0.323,
+   0.648,
+   0.673
+  ],
+  "ground": 0.0,
+  "hash": "697b316b6e195c9b",
+  "height": 3.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "small_tent": {
+  "frame_box": [
+   0.115,
+   0.314,
+   0.835,
+   0.673
+  ],
+  "ground": -0.0,
+  "hash": "6bf46e9cdd8f89dd",
+  "height": 1.8,
+  "meshes": 1,
+  "pass": true
+ },
+ "spear": {
+  "frame_box": [
+   0.41,
+   0.331,
+   0.588,
+   0.668
+  ],
+  "ground": 0.0,
+  "hash": "e8e1187ca8f7998f",
+  "height": 2.1,
+  "meshes": 1,
+  "pass": true
+ },
+ "stone_wall": {
+  "frame_box": [
+   0.186,
+   0.301,
+   0.788,
+   0.688
+  ],
+  "ground": 0.0,
+  "hash": "4bb05da3e629c6f1",
+  "height": 4.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "stump": {
+  "frame_box": [
+   0.249,
+   0.413,
+   0.733,
+   0.583
+  ],
+  "ground": 0.0,
+  "hash": "c18edaac65aa4545",
+  "height": 0.7,
+  "meshes": 1,
+  "pass": true
+ },
+ "tall_rock": {
+  "frame_box": [
+   0.152,
+   0.299,
+   0.839,
+   0.69
+  ],
+  "ground": 0.0,
+  "hash": "a2028d5489d9aec1",
+  "height": 4.5,
+  "meshes": 1,
+  "pass": true
+ },
+ "tent": {
+  "frame_box": [
+   0.135,
+   0.368,
+   0.849,
+   0.623
+  ],
+  "ground": -0.0,
+  "hash": "1297651a084938cd",
+  "height": 2.6,
+  "meshes": 1,
+  "pass": true
+ },
+ "torch": {
+  "frame_box": [
+   0.41,
+   0.356,
+   0.588,
+   0.764
+  ],
+  "ground": -0.0,
+  "hash": "7856d857a18c425a",
+  "height": 1.92,
+  "meshes": 8,
+  "pass": true
+ },
+ "tree": {
+  "frame_box": [
+   0.273,
+   0.312,
+   0.709,
+   0.68
+  ],
+  "ground": 0.0,
+  "hash": "90404855886df5f7",
+  "height": 5.5,
+  "meshes": 1,
+  "pass": true
+ },
+ "watchtower": {
+  "frame_box": [
+   0.186,
+   0.301,
+   0.788,
+   0.688
+  ],
+  "ground": 0.0,
+  "hash": "6000a372a1a0d5d9",
+  "height": 9.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "well": {
+  "frame_box": [
+   0.239,
+   0.308,
+   0.737,
+   0.684
+  ],
+  "ground": -0.0,
+  "hash": "537f2629e120e2fb",
+  "height": 2.0,
+  "meshes": 1,
+  "pass": true
+ },
+ "windmill": {
+  "frame_box": [
+   0.34,
+   0.326,
+   0.672,
+   0.666
+  ],
+  "ground": -0.0,
+  "hash": "fb111a60a26c3ec0",
+  "height": 7.0,
+  "meshes": 2,
+  "pass": true
+ }
+}

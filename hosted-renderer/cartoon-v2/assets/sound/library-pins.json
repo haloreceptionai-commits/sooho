@@ -1,0 +1,110 @@
+{
+ "license": "CC0-1.0",
+ "listings": {
+  "fire": "https://opengameart.org/content/fire-crackling",
+  "crowd": "https://opengameart.org/content/crowd-shoutingspeaking-ambience",
+  "packs": [
+   "https://opengameart.org/content/100-cc0-sfx",
+   "https://opengameart.org/content/100-cc0-sfx-2"
+  ]
+ },
+ "adaptation": "ffmpeg decode to mono 48 kHz PCM16; sha256 is of the decoded file",
+ "sounds": {
+  "explosion": {
+   "url": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip",
+   "member": "explosion.ogg",
+   "sha256": "a2674aabb9bce0b557b5c4ebd0b39da413e4a3fb90817739287a8cfb98221c5e",
+   "source_sha256": "f31e12359b96b5e4d43edbcd533630b32421e55bc0b08aec4520d2ed45cd1a93"
+  },
+  "rumble": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_thunder_01.ogg",
+   "sha256": "6a1c8a89902c72fc97d3014c330754027bc67013166da9020128ae2cf15f4f0d",
+   "source_sha256": "8a4f1dee999546b363f989eff92174375eeae7c241dc9beaa0892fb131ef12a9"
+  },
+  "debris": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_stones_02.ogg",
+   "sha256": "7a211267ed4357f1a00344277f39f48410313f92a0fd4d099a6d3220f553dd35",
+   "source_sha256": "23f8c7335eb656ea759899946ed665712ec41f4572656f421f7f5652bea66279"
+  },
+  "sparks": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_metal_hit_02.ogg",
+   "sha256": "625aeb07e4410f2d3d268f7b0c6195491f8b8d0fce92c4e296f975c1f7d7c29f",
+   "source_sha256": "5ea1f077585fb655220a19bcd5cfaf44d60151652339cdcecc86b1fc3b4fe94d"
+  },
+  "whoosh": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_air_02.ogg",
+   "sha256": "ffbd680ac45a8e6bd783a0c1c880cf49873ba16393a0cce5c3d4f1d545359385",
+   "source_sha256": "c2d5d5f73b70c155797c1655bdd1850145a47606803e1d9b6dd9c59d35a6909a"
+  },
+  "gunshot": {
+   "url": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip",
+   "member": "shot_01.ogg",
+   "sha256": "1ba5d054bf292579634e5035b415480643f7f2fcfc768536de0a9205b1a15ebd",
+   "source_sha256": "f293bc079a1859ba3d7e7f200c6d4a555543010eb7f5a33f561b064621819014"
+  },
+  "pickaxe": {
+   "url": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip",
+   "member": "tools_03.ogg",
+   "sha256": "efed19c8a20a576a84cb5cc542b6b62b40848556a71048e2fba9dc035c345086",
+   "source_sha256": "dafbd9b2eab999f124fef4e7949cbab1e45660692798c6e5b451ea95f6b9a66d"
+  },
+  "clank": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_metal_hit_01.ogg",
+   "sha256": "f908339cd96cc26768c9bb815adfc14430f410bacbafaec6fbdcbf35f63728c4",
+   "source_sha256": "ad7167446b3d2fe0f5bb9009c4c4c6bca583107d4525549239782a22d84a5db0"
+  },
+  "creak": {
+   "url": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip",
+   "member": "metal_01.ogg",
+   "sha256": "f51417a3810dc237b177f09bf4eeacbc55f95fe3abd156c061a7f187a578e162",
+   "source_sha256": "f638423b1c67c9aeb0db9410b968ca1a89de728f3117f1bdd35a4fc7be4130ed"
+  },
+  "coins": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_items_01.ogg",
+   "sha256": "01b8258beaca8308252060a8341b72096dd1decf033102a09cdbf06d42e26fd9",
+   "source_sha256": "828940e6c04c63ea22f15ff47b6722c2b9fde54f148b26935d95a645baf770f4"
+  },
+  "fire": {
+   "url": "https://opengameart.org/sites/default/files/fire-1.wav",
+   "member": null,
+   "sha256": "ed99262767636d25ae766c09aff21cc0e119ffd0f1f6a98e05f29eb51c94c17c",
+   "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5"
+  },
+  "crowd": {
+   "url": "https://opengameart.org/sites/default/files/crowd_shouting.ogg",
+   "member": null,
+   "sha256": "dcd1c2a5b86410b6db28444679c93112a12420128c6c915fedac343bee9a2db3",
+   "source_sha256": "a2c23a64c127c77717cbe4abb21f138bac9d9aa6cb3cc89d62bab5d0d96dd7ca"
+  },
+  "footstep": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_footstep_01.ogg",
+   "sha256": "3c6fea59ba64982f3bb7cf7bf7d5b9aa50fbf242ed77e3bceb6dab13bc640f83",
+   "source_sha256": "007a96c62d6c335df0d292bdc5cf44fef768b7e2f14378759d03673be6be7ec6"
+  },
+  "impact": {
+   "url": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip",
+   "member": "hit_03.ogg",
+   "sha256": "b16ff24f70cbcfd7f4cea9def798991e711e238edfac8ffcfc7aa9e6b0ca05fd",
+   "source_sha256": "c8948294e7885ada74bcab6efb6c60613b74241cc58eacd18e81aa6bd33449b8"
+  },
+  "stone": {
+   "url": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "member": "sfx100v2_stones_01.ogg",
+   "sha256": "850d4999a1165ce70724b458f4d01fc10fece3af572c902db910d68324d1904c",
+   "source_sha256": "20d293a892e1fa6330da2569065aa260a822198bddce2b183f8c11642e7deb4d"
+  },
+  "handling": {
+   "url": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip",
+   "member": "tools_01.ogg",
+   "sha256": "ed51605f0e406b5be4449b6e5dfee4f7638a401445283e8dbb7aa6eebd4b39ef",
+   "source_sha256": "99cdef7f37b80cdea78681f24fee792a95fad1bb0f2c2b88dc3ae8baf539b0da"
+  }
+ }
+}

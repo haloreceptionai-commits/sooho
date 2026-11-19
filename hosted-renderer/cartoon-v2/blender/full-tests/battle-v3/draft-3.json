@@ -1,0 +1,218 @@
+{
+  "title": "Volley Cart on the Fortress Wall",
+  "sentences": [
+    {
+      "text": "Slow reloads fill gate approaches with fast bursts of fire.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort soldiers roll a perforated cart along the wall.",
+      "fact_ids": [
+        "cart",
+        "defense",
+        "history"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:perforated_cart:roll"
+      ]
+    },
+    {
+      "text": "Wooden frame shows a launch board packed with holes.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle crews stack rocket arrows under those drilled lines.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Yet shots miss small targets and reloads drag.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Multiple launchers fire many at once to cover ground.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Castle commanders point defenders toward the packed gate below.",
+      "fact_ids": [
+        "defense",
+        "history"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Then crews light strings that hang from every tube.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:fuse_bundle:fire"
+      ]
+    },
+    {
+      "text": "Fuses spark and crawl across the cart deck.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:fuse_bundle:fire"
+      ]
+    },
+    {
+      "text": "Rocket arrows blast off in a single flaring wave.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort defenders watch volleys spread across tight approaches.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "But attackers press forward while crews wrestle with reloads.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle crews roll the cart to cover another lane.",
+      "fact_ids": [
+        "cart"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:perforated_cart:roll"
+      ]
+    },
+    {
+      "text": "Then commanders signal another broadside toward the field.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Unguided salvos spread over the ditch and lower slope.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Fort walls hold defenders while flames pour past merlons.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Yet launchers trade precision for heavy coverage across approaches.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Castle ramparts keep the cart steady behind crenels.",
+      "fact_ids": [
+        "defense"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Massed rockets answer scatter by saturating narrow lanes.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Then volleys break momentum long enough for spears to ready.",
+      "fact_ids": [
+        "defense",
+        "rockets"
+      ],
+      "picture": [
+        "set:castle"
+      ]
+    },
+    {
+      "text": "Slow launchers make fast fields of fire.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    },
+    {
+      "text": "Slow rockets drive fast retreats under fire.",
+      "fact_ids": [
+        "rockets"
+      ],
+      "picture": [
+        "set:castle",
+        "obj:rocket_arrow:fire"
+      ]
+    }
+  ]
+}

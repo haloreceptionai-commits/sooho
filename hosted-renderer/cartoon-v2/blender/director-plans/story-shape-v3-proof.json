@@ -1,0 +1,32 @@
+[
+ {
+  "topic": "The Great Moon Hoax newspaper of 1835",
+  "hook": "A newspaper sells moon bat-people in New York, 1835.",
+  "script": "A newspaper sells moon bat-people in New York, 1835. New York Sun presses rumble through the night. Richard Adams Locke wants sales to skyrocket. The stake is truth in every line. How do you sell the Moon for a penny? Borrow a famous name: Sir John Herschel in Africa. Then promise wonders: forests, crystals, winged people. How? Add a helper with a name: Andrew Grant. Print it in six parts. One cent each. Crowds grab papers. Coins hit the counter. Rivals call hoax on the giant scope. The Sun just keeps the presses roaring. Names, serial parts, and a penny price move papers. Under heat, the Sun admits it\u2019s fiction. Locke sold the Moon by renting a name.",
+  "failed": [],
+  "shape": []
+ },
+ {
+  "topic": "Why railway tracks had gaps between the rails",
+  "hook": "A straight rail suddenly kicks sideways on this bridge at 3PM.",
+  "script": "Rail gaps suddenly stop a straight bridge rail kicking. A straight rail suddenly kicks sideways on this bridge at 3PM. Railway engineers rush along the track. Arthur H. Wickens kneels at a joint. He measures a small rail gap and fishplates. How do you stop hot rails from bending trains? Arthur H. Wickens and the team bolt rails tight for a smooth, quiet line. In heat, the rails push and snake. Trains can leave the track. Steel grows a tiny bit with heat. Like a door swelling unless you leave space. Engineers leave measured gaps and bolt fishplates. Wickens sizes those gaps for summer and winter. Morning, the joint gap looks wider. By noon, the same gap looks smaller. The clickety-clack is not the purpose. Later, welded rails use anchors and a neutral set heat. Gaps prevent kinks; anchors control it without gaps. A straight rail suddenly kicks sideways on this bridge at 3PM.",
+  "failed": [
+   "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape loops: 29 seconds with no open question or reversal (gold scripts never go past ~18 seconds)"
+  ],
+  "shape": [
+   "Shape hook has no contradiction; pair the strange fact with what makes it impossible",
+   "Shape loops: 29 seconds with no open question or reversal (gold scripts never go past ~18 seconds)"
+  ]
+ },
+ {
+  "topic": "Why sailors poured oil on stormy seas",
+  "hook": "Oil drips, yet the storm\u2019s teeth vanish beside our bow.",
+  "script": "Oil drips, yet the storm\u2019s teeth vanish beside our bow. 1770s North Atlantic. A squall chews at the ship. Benjamin Franklin watches sailors try an old trick. He wants the crests near the boat to die. How do you quiet waves without stopping the storm? Spray blinds the deck. Breakers slam the bow. First, they dump a cask, hoping to calm the sea. The slick thins, but the big swells keep rolling. So they drip olive oil from a rag upwind. A dark film fans out over the chop. In a pan, tiny ripples vanish under a drop. Thin films kill short waves, not the long swell. Franklin writes the Royal Society. Doubts turn to reports. Lifesaving manuals add oil bags for surf landings. Modern tests agree: crests fade, storms do not. Watch the edge: spray stops at the slick\u2019s line. The trick is surface, not strength. Storm\u2019s teeth vanish beside our bow.",
+  "failed": [
+   "Shape loops: 20 seconds with no open question or reversal (gold scripts never go past ~18 seconds)"
+  ],
+  "shape": [
+   "Shape loops: 20 seconds with no open question or reversal (gold scripts never go past ~18 seconds)"
+  ]
+ }
+]

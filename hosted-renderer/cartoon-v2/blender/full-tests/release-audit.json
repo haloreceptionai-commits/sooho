@@ -1,0 +1,72 @@
+{
+  "production_enabled": false,
+  "owner_approved": false,
+  "prerequisites_accepted": false,
+  "videos": {
+    "rail": {
+      "script_accepted": false,
+      "script_attempt": 2
+    },
+    "battle": {
+      "script_accepted": false,
+      "script_attempt": 2
+    },
+    "mine": {
+      "script_accepted": false,
+      "script_attempt": 2
+    }
+  },
+  "recovery": {},
+  "blockers": [
+    "rail: script blind review not accepted",
+    "rail: real speech alignment required",
+    "rail: word timing review missing",
+    "rail: measured 60-second Short required",
+    "rail: full 1080x1920 render required",
+    "rail: all 1800 motion frames must decode",
+    "rail: per-frame geometry and output QA missing",
+    "rail: voice clock preservation not verified",
+    "rail: every sound must be within one frame",
+    "rail: -14 \u00b11 LUFS and \u2264-1 dBTP required",
+    "rail: actual benchmark scorecard parity required in every dimension",
+    "rail: full-video visual/audio review missing",
+    "rail: saved private video readback missing",
+    "rail: measured completion within 15 minutes required",
+    "battle: script blind review not accepted",
+    "battle: real speech alignment required",
+    "battle: word timing review missing",
+    "battle: measured 60-second Short required",
+    "battle: full 1080x1920 render required",
+    "battle: all 1800 motion frames must decode",
+    "battle: per-frame geometry and output QA missing",
+    "battle: voice clock preservation not verified",
+    "battle: every sound must be within one frame",
+    "battle: -14 \u00b11 LUFS and \u2264-1 dBTP required",
+    "battle: actual benchmark scorecard parity required in every dimension",
+    "battle: full-video visual/audio review missing",
+    "battle: saved private video readback missing",
+    "battle: measured completion within 15 minutes required",
+    "mine: script blind review not accepted",
+    "mine: real speech alignment required",
+    "mine: word timing review missing",
+    "mine: measured 60-second Short required",
+    "mine: full 1080x1920 render required",
+    "mine: all 1800 motion frames must decode",
+    "mine: per-frame geometry and output QA missing",
+    "mine: voice clock preservation not verified",
+    "mine: every sound must be within one frame",
+    "mine: -14 \u00b11 LUFS and \u2264-1 dBTP required",
+    "mine: actual benchmark scorecard parity required in every dimension",
+    "mine: full-video visual/audio review missing",
+    "mine: saved private video readback missing",
+    "mine: measured completion within 15 minutes required",
+    "Earlier visual and crowd-sound acceptance gates remain open",
+    "Real Blender recovery check missing: browser_closed",
+    "Real Blender recovery check missing: worker_crash",
+    "Real Blender recovery check missing: ambiguous_start",
+    "Real Blender recovery check missing: cancelled",
+    "Real Blender recovery check missing: lost_callback",
+    "Owner must review and approve all three final videos before launch"
+  ],
+  "accepted": false
+}

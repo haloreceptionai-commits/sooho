@@ -1,0 +1,54 @@
+{
+ "set": "rail_yard",
+ "lighting": "day",
+ "duration": 3.943,
+ "camera": {
+  "from": [
+   7.009,
+   1.145,
+   1.5
+  ],
+  "look_at": [
+   3.928,
+   0.927,
+   0.22
+  ],
+  "lens": 38,
+  "fstop": 8
+ },
+ "cast": [],
+ "objects": [
+  {
+   "kind": "rail_joint",
+   "action": "buckle",
+   "pos": [
+    3.928,
+    0.927,
+    0
+   ],
+   "scale": 1,
+   "yaw": 65
+  },
+  {
+   "kind": "rail_joint",
+   "action": "break",
+   "pos": [
+    3.674,
+    2.039,
+    0
+   ],
+   "scale": 0.6,
+   "yaw": 65
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  71
+ ]
+}

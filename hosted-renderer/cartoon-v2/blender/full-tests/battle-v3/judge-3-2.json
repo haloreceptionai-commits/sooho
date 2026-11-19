@@ -1,0 +1,205 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 8,
+        "cause_effect": 8,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      },
+      "B": {
+        "clarity": 6,
+        "cause_effect": 6,
+        "engagement": 5,
+        "kid_clear": false,
+        "opening": false
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 0,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Rockets evidence supports slow reloads, but not 'fill gate approaches with fast bursts'; 'gate approaches' not in evidence or drawable set."
+      },
+      {
+        "index": 1,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Cart/defense/history evidence does not mention 'perforated' or rolling along a wall; drawable: castle + perforated cart rolling is supported."
+      },
+      {
+        "index": 2,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Cart evidence mentions a launch pad but not 'packed with holes/wooden frame'; no object provided to depict a launch board."
+      },
+      {
+        "index": 3,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Cart evidence implies rocket arrows exist (singijeon) but not 'stack under drilled lines'; picture lacks rocket_arrow object and 'drilled lines' are not drawable."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets evidence: unguided rockets are inaccurate and slow to reload; 'miss small targets' and 'reloads drag' are supported; visuals for 'miss/reload' not in vocab."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets evidence: multiple rocket launchers fire many in rapid succession; 'cover ground' is abstract and not drawable as given."
+      },
+      {
+        "index": 6,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Defense/history evidence does not mention 'commanders point defenders toward the packed gate'; 'gate' is not in vocab."
+      },
+      {
+        "index": 7,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for strings/tubes in the cart quote; tubes are not drawable; fuse lighting is drawable but claim exceeds evidence."
+      },
+      {
+        "index": 8,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for 'cart deck' or fuse behavior; 'crawl' not in fuse actions; cart not included in picture list."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Cart evidence mentions firing many rocket arrows; combined with rockets context, a mass blast-off is supported; rocket_arrow:fire is drawable."
+      },
+      {
+        "index": 10,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Defense evidence says defensive use vs packed formations, but not 'watch volleys spread across approaches'; 'approaches' not drawable."
+      },
+      {
+        "index": 11,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Rockets evidence supports slow reloads, but 'attackers press forward' is not evidenced; 'reloads' action not drawable."
+      },
+      {
+        "index": 12,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Cart evidence doesn't mention repositioning to 'another lane'; 'lane' not drawable though cart rolling is."
+      },
+      {
+        "index": 13,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for commanders signaling a 'broadside' toward a 'field'; both terms not drawable with given sets/objects."
+      },
+      {
+        "index": 14,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Rockets evidence supports inaccuracy/spread, but 'ditch' and 'lower slope' terrain not in evidence or drawable vocab."
+      },
+      {
+        "index": 15,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Defense evidence mentions fortresses, not 'merlons' or flames pouring past them; these features are not drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets evidence supports trading precision for area coverage; 'approaches' are not drawable."
+      },
+      {
+        "index": 17,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Defense evidence does not mention 'ramparts' or 'crenels'; these features are not in the drawable vocabulary."
+      },
+      {
+        "index": 18,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets evidence: MRL compensates by saturating an area; 'narrow lanes' are not drawable."
+      },
+      {
+        "index": 19,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for 'breaking momentum' or 'spears to ready'; 'spears' not in vocabulary."
+      },
+      {
+        "index": 20,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets evidence: slow to reload but can create rapid mass fire; 'fields of fire' is abstract and not drawable."
+      },
+      {
+        "index": 21,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence that rockets cause 'fast retreats'; outcome claim not supported; depiction of 'retreats' not specified."
+      }
+    ],
+    "unsupported": [
+      "Slow reloads fill gate approaches with fast bursts of fire.",
+      "Fort soldiers roll a perforated cart along the wall.",
+      "Wooden frame shows a launch board packed with holes.",
+      "Castle crews stack rocket arrows under those drilled lines.",
+      "Castle commanders point defenders toward the packed gate below.",
+      "Then crews light strings that hang from every tube.",
+      "Fuses spark and crawl across the cart deck.",
+      "Fort defenders watch volleys spread across tight approaches.",
+      "But attackers press forward while crews wrestle with reloads.",
+      "Castle crews roll the cart to cover another lane.",
+      "Then commanders signal another broadside toward the field.",
+      "Unguided salvos spread over the ditch and lower slope.",
+      "Fort walls hold defenders while flames pour past merlons.",
+      "Castle ramparts keep the cart steady behind crenels.",
+      "Then volleys break momentum long enough for spears to ready.",
+      "Slow rockets drive fast retreats under fire."
+    ],
+    "undrawable": [
+      "gate approaches",
+      "gate",
+      "approaches",
+      "launch board",
+      "drilled lines",
+      "tubes",
+      "cart deck",
+      "volleys",
+      "lane",
+      "lanes",
+      "broadside",
+      "field",
+      "ditch",
+      "lower slope",
+      "merlons",
+      "ramparts",
+      "crenels",
+      "spears",
+      "salvos",
+      "signal (action)",
+      "crawl (fuse action)",
+      "cover ground (action phrase)",
+      "press forward (action phrase)",
+      "wrestle with reloads (action phrase)",
+      "break momentum (action phrase)",
+      "drive fast retreats (action phrase)"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 1.35,
+ "camera": {
+  "from": [
+   0.9,
+   1.6,
+   2
+  ],
+  "look_at": [
+   0.0,
+   4.9,
+   0.6
+  ],
+  "lens": 48,
+  "fstop": 8
+ },
+ "cast": [],
+ "objects": [
+  {
+   "kind": "dynamite",
+   "action": "explode",
+   "pos": [
+    0.0,
+    4.9,
+    0
+   ],
+   "scale": 1,
+   "yaw": 0
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  24
+ ]
+}

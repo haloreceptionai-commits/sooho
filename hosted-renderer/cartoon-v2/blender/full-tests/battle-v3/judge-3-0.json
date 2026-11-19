@@ -1,0 +1,196 @@
+{
+  "labels": {
+    "candidate": "A",
+    "benchmark": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 7,
+        "cause_effect": 7,
+        "engagement": 6,
+        "kid_clear": true,
+        "opening": false
+      },
+      "B": {
+        "clarity": 8,
+        "cause_effect": 9,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 0,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Supported by rockets evidence (slow to reload; rapid salvos cover area). Picture set castle + rocket firing can show bursts."
+      },
+      {
+        "index": 1,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Hwacha-as-cart in fortress is supported, but 'perforated' detail (holes) is not in provided evidence. Picture includes rolling perforated cart."
+      },
+      {
+        "index": 2,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence does not mention a holed launch board. Picture only shows castle set, not a holed board."
+      },
+      {
+        "index": 3,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Hwacha can fire rocket arrows, but 'drilled lines' and castle crew loading details are not in evidence. Picture lacks rocket-arrow object."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets are inaccurate and slow to reload per evidence. No drawable items for misses/reloads in picture list."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Multiple rocket launchers fire many in rapid succession to cover area. Rockets firing is drawable."
+      },
+      {
+        "index": 6,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Fortress defense is supported, but 'commanders pointing toward the packed gate' is not evidenced. No commander/pointing in picture list."
+      },
+      {
+        "index": 7,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Lighting strings/tubes is not in evidence. Fuse bundle being lit is drawable."
+      },
+      {
+        "index": 8,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Fuses crawling across a cart deck not in evidence. Fuses sparking is drawable."
+      },
+      {
+        "index": 9,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Hwacha can fire many rockets but 'single flaring wave' volley not stated in evidence. Rockets blasting off is drawable."
+      },
+      {
+        "index": 10,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Use in fortress defense is supported, but 'defenders watch volleys spread across tight approaches' is not explicitly evidenced. No volley depiction specified."
+      },
+      {
+        "index": 11,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Slow reloads are supported, but 'attackers press forward' outcome is not. No drawable items for attackers/reloads."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "It's a cart (implies rolling) and moving it is plausible; not contradicted by evidence. Rolling perforated cart is drawable."
+      },
+      {
+        "index": 13,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence about commanders signaling or 'broadside.' Picture lacks signaling/broadside elements."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Unguided salvos spreading (inaccuracy/area coverage) is supported. Rockets firing is drawable (ditch/slope not literal but core action shown)."
+      },
+      {
+        "index": 15,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Fortress use is supported, but 'flames past merlons' is not in evidence and 'merlons' are not drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Trade precision for area coverage is directly supported by rockets evidence. No specific drawable object for this abstraction."
+      },
+      {
+        "index": 17,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence for 'ramparts keep cart steady behind crenels.' Crenels not drawable; picture lacks cart."
+      },
+      {
+        "index": 18,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Massed rockets saturate to compensate for scatter is supported by rockets evidence. Rockets firing is drawable."
+      },
+      {
+        "index": 19,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence that volleys 'break momentum' or that 'spears' are readied. Spears not drawable."
+      },
+      {
+        "index": 20,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Slow launchers (reload) but fast salvo/field of fire aligns with rockets evidence. Rockets firing is drawable."
+      },
+      {
+        "index": 21,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "No evidence that rockets drive 'fast retreats.' Retreat action not drawable with provided items."
+      }
+    ],
+    "unsupported": [
+      "Perforated/holed launch board details ('perforated cart', 'packed with holes', 'drilled lines') are not in the provided evidence.",
+      "Ignition specifics ('light strings that hang from every tube', 'fuses spark and crawl across the cart deck') are not evidenced.",
+      "Volley characterization ('single flaring wave') is not evidenced.",
+      "Command-and-control specifics ('commanders point defenders toward the packed gate', 'commanders signal another broadside') are not in the evidence.",
+      "Terrain/architecture specifics ('gate', 'ditch', 'lower slope', 'merlons', 'crenels', 'ramparts') are not in the evidence.",
+      "Outcome/behavior claims ('attackers press forward', 'volleys break momentum', 'spears to ready', 'rockets drive fast retreats') are not in the evidence.",
+      "Positional/movement claims beyond basics ('roll the cart to cover another lane') are not in the evidence."
+    ],
+    "undrawable": [
+      "gate",
+      "approaches",
+      "launch board",
+      "drilled lines",
+      "small targets",
+      "multiple launchers (as a named object)",
+      "defenders (as a labeled role distinct from 'soldier'/'crews')",
+      "signal (as an action)",
+      "broadside",
+      "tube",
+      "cart deck",
+      "volley/volleys",
+      "attackers press forward (this specific action phrase)",
+      "lane",
+      "ditch",
+      "lower slope",
+      "flames pour (pouring flames as an action)",
+      "merlons",
+      "ramparts",
+      "crenels",
+      "spears",
+      "fields of fire",
+      "retreats (as an action)",
+      "hang (strings hanging)",
+      "crawl (fuse crawling)",
+      "miss (as an action)"
+    ]
+  }
+}

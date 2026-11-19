@@ -1,0 +1,31 @@
+{
+  "image": "blender-renderer:sets10",
+  "execution": "blender-shot-gpu-bg5vbd8",
+  "status": "Succeeded",
+  "stills": 15,
+  "tests": 17,
+  "accepted": false,
+  "benchmark_render_mean": 7.17,
+  "known_defects": [
+    "Battlefield lamps inherited wall brackets without a wall; not production ready.",
+    "Castle side towers cropped and repetitive masonry; render score remains 5.",
+    "Battlefield score regressed to 4; retain as unaccepted prototype."
+  ],
+  "scores": {
+    "battlefield": 4,
+    "castle": 5,
+    "day": 5,
+    "mine_tunnel": 6,
+    "night": 6,
+    "office": 6,
+    "rail_yard": 6,
+    "rain": 6,
+    "room": 5,
+    "saloon": 5,
+    "ship_deck": 6,
+    "street": 6,
+    "sunset": 6,
+    "village": 6,
+    "workshop": 6
+  }
+}

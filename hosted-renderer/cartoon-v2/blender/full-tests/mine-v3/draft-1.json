@@ -1,0 +1,206 @@
+{
+  "title": "Salted Samples",
+  "sentences": [
+    {
+      "text": "Empty tunnels fetch dollars despite thin gold inside.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:money_bag:hold"
+      ]
+    },
+    {
+      "text": "Miner drills hole into a rough wall of the mine.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Buddy swirls pan beside the freshly drilled hole.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:swirl"
+      ]
+    },
+    {
+      "text": "Hands toss flakes onto chosen chips from the round hole.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:swirl"
+      ]
+    },
+    {
+      "text": "But samples glow only where tests will happen very soon.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Expert swings heavy magnifying glass toward those chipped pieces.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Rich guy pays dollars after assay numbers come high.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:office",
+        "obj:money_bag:hold"
+      ]
+    },
+    {
+      "text": "Expert stamps report inside the busy office.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Then engineer drills another face for fresh clean cores.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Results come messy with highs and lows on repeats today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "How samples read rich while nearby cores stay low.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Engineer maps clusters on a board near the rock wall.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel"
+      ]
+    },
+    {
+      "text": "Numbers break pattern because only chosen chips show spikes.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Miner cracks chunk of wall for fresh grey rock.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_vein:open"
+      ]
+    },
+    {
+      "text": "Yet chips look bright under the magnifier.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Expert shows inconsistency with those collected pieces.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Crew swirls pan over dust on the wooden floor.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:swirl"
+      ]
+    },
+    {
+      "text": "Notebook notes pattern with rich spots only at sample holes.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Office files report about salting for the cautious buyers.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "Buyer learns truth from inconsistent results today.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office"
+      ]
+    },
+    {
+      "text": "New tunnels guard dollars as thin gold stays today.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:money_bag:hold"
+      ]
+    }
+  ]
+}

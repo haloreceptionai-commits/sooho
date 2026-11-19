@@ -1,0 +1,43 @@
+{
+ "set": "rail_yard",
+ "lighting": "day",
+ "duration": 2.789,
+ "camera": {
+  "from": [
+   2.75,
+   -0.05,
+   0.75
+  ],
+  "look_at": [
+   2.0,
+   0.94,
+   0.24
+  ],
+  "lens": 42,
+  "fstop": 8
+ },
+ "cast": [],
+ "objects": [
+  {
+   "kind": "rail_joint",
+   "action": "expand",
+   "pos": [
+    2.0,
+    1.3,
+    0
+   ],
+   "scale": 1,
+   "yaw": 0
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  50
+ ]
+}

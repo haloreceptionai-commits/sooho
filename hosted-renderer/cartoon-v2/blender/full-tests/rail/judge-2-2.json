@@ -1,0 +1,161 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 8,
+        "cause_effect": 7,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": false
+      },
+      "B": {
+        "clarity": 7,
+        "cause_effect": 8,
+        "engagement": 5,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 1,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Supported by heat (rails expand) and gaps (expansion gaps close in summer). Drawable with rail_yard + rail_joint:expand (grows, nearly closes)."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Expansion at joint gaps is consistent with heat and gaps evidence. Drawable with rail_joint:expand."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Network Rail states expansion generates forces that can push track out of shape (forces), consistent with 'shove sideways'. Drawable via rail_joint:buckle (shove sideways)."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Buckling and kinks are directly supported by heat and forces evidence; drawable with rail_joint:buckle."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Gaps close in summer (gaps) due to expansion (heat); drawable with rail_joint:expand."
+      },
+      {
+        "index": 6,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Gaps open again in winter (gaps) supports contraction and openings, but 'stays open' cannot be literally depicted; rail_joint:expand allows 'shorter' but not 'stays open'."
+      },
+      {
+        "index": 7,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Cyclical closing of gaps with heat (gaps + heat); drawable with rail_joint:expand."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Implied by combined evidence: when gaps can no longer accommodate expansion, forces cause buckling (heat + forces + gaps). However, 'cannot take more change' is not literally drawable; only 'shove sideways' is."
+      },
+      {
+        "index": 9,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence mentions long rails generate forces and can buckle, but does not support 'the shove stacks along long lengths' wording. 'Stacks' cannot be depicted with available actions."
+      },
+      {
+        "index": 10,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Rail Magazine states many stretches today still use joints (gaps); drawable with rail_joint:expand."
+      },
+      {
+        "index": 11,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "Evidence supports gaps at joints but does not support the qualifier 'tiny'. The gap depiction is drawable via rail_joint:expand."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Expansion closes the space (gaps + heat); drawable via rail_joint:expand."
+      },
+      {
+        "index": 13,
+        "evidence_ok": false,
+        "picture_ok": false,
+        "reason": "Evidence says gaps open in winter but does not say they 'stay wide'. 'Stays wide' is not drawable with available actions."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Older joints left gaps to accommodate expansion (gaps); physical elements (rails, gaps) are drawable with rail_joint:expand."
+      },
+      {
+        "index": 15,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "When no space remains, rails can buckle (heat + forces + gaps); drawable via rail_joint:buckle."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Forces can push track out of shape; 'kinks' matches buckling description (forces); drawable with rail_joint:buckle."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Gaps maintain separation of rail ends (implied by gaps evidence); rail_joint vocabulary includes 'rail ends'; drawable with rail_joint:expand showing ends apart."
+      },
+      {
+        "index": 18,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Modern evidence mentions fastenings preventing free expansion; 'clips and anchors' are types of fastenings, so generally supported. However 'help hold length' is not a drawable action with provided verbs."
+      },
+      {
+        "index": 19,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Evidence says CWR fastenings keep the rail at its original length (modern), matching 'stay near size'. 'Stay near size' cannot be literally depicted with available actions."
+      },
+      {
+        "index": 20,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Without gaps, expansion causes kinks/buckles (gaps + heat + forces); drawable via rail_joint:buckle."
+      }
+    ],
+    "unsupported": [
+      "Stacks along long lengths (the phrase 'the shove stacks along long lengths' is not supported by the provided sources).",
+      "Tiny space (no evidence specifies that joint gaps are 'tiny').",
+      "Gap stays open/stays wide (evidence says gaps open in winter; it does not claim they 'stay' open or 'stay wide').",
+      "Specific mention of 'clips and anchors' (evidence mentions 'fastenings' generally, not these named items)."
+    ],
+    "undrawable": [
+      "stays open",
+      "stays wide",
+      "cannot take more change",
+      "shove stacks (stacks along long lengths)",
+      "help hold length",
+      "stay near size"
+    ]
+  }
+}

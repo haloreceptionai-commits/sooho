@@ -1,0 +1,51 @@
+{
+ "story": "rail",
+ "timing": "syllable-estimated",
+ "model": "gpt-5.1-codex",
+ "accepted": true,
+ "errors": [],
+ "report": {
+  "sentences": 19,
+  "shots": 24,
+  "required": 94,
+  "covered": 94,
+  "coverage": 1.0,
+  "undrawable": [],
+  "missing": [],
+  "set_changes_per_min": 20.37,
+  "mean_shot_len": 2.82,
+  "max_shot_len": 4.41,
+  "min_shot_len": 1.15,
+  "sets_used": [
+   "office",
+   "rail_yard",
+   "ship_deck"
+  ]
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "errors": [
+    "at most 2 extra worlds",
+    "s15: spoken obj:rail_joint:expand not shown",
+    "s15: spoken word:move not shown (independent reader marked it concrete: map it to a drawable concept and show it)"
+   ],
+   "coverage": 0.9787,
+   "set_changes_per_min": 19.49
+  },
+  {
+   "round": 2,
+   "errors": [
+    "at most 2 extra worlds"
+   ],
+   "coverage": 1.0,
+   "set_changes_per_min": 20.37
+  },
+  {
+   "round": 3,
+   "errors": [],
+   "coverage": 1.0,
+   "set_changes_per_min": 20.37
+  }
+ ]
+}

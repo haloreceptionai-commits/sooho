@@ -1,0 +1,43 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 2.95,
+ "camera": {
+  "from": [
+   -0.9,
+   6.5,
+   2.5
+  ],
+  "look_at": [
+   0.0,
+   3.6,
+   0.4
+  ],
+  "lens": 48,
+  "fstop": 8
+ },
+ "cast": [],
+ "objects": [
+  {
+   "kind": "gold_pan",
+   "action": "pour",
+   "pos": [
+    0.0,
+    3.3,
+    0
+   ],
+   "scale": 1,
+   "yaw": 180
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  53
+ ]
+}

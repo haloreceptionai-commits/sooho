@@ -1,0 +1,146 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 7,
+        "cause_effect": 8,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      },
+      "B": {
+        "clarity": 7,
+        "cause_effect": 7,
+        "engagement": 6,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 1,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Hwacha were carts used in fortress defense (cart, defense). Picture has castle set and a cart rolling."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Defensive fortress context is fine (defense), but picture lacks soldiers, cart, and pointing action."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Multiple rockets in rapid succession is supported (rockets). Picture shows rocket arrows firing."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets from a cart are supported (cart, defense), but the picture does not include a cart."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Repeated rocket firing is fine (rockets), but cheering crews and carts are not depicted."
+      },
+      {
+        "index": 6,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Commanders at fortress walls is consistent (defense), but picture lacks pointing and carts."
+      },
+      {
+        "index": 7,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Use in invasions/defense is supported (history, defense), but picture lacks people/carts."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Movement of carts on walls is consistent (defense). Picture shows a cart rolling at the castle."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Repeated rocket firing is supported (rockets), but picture lacks the carts mentioned."
+      },
+      {
+        "index": 10,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets are supported (rockets), but picture lacks soldiers and pointing."
+      },
+      {
+        "index": 11,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Fort defense context ok (rockets, defense), but picture lacks crews/commanders and their gestures."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rocket arrows from a wooden cart fit hwacha (cart), but the cart isn't in the picture."
+      },
+      {
+        "index": 13,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rolling a cart is fine (defense), but the sentence requires two carts; picture shows only a rolling cart with no second cart."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Rocket arrows blasting off is supported (rockets). Picture shows rockets firing."
+      },
+      {
+        "index": 15,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets in fortress defense supported, but picture lacks soldiers watching."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Firing many at once in defense is supported (rockets, defense). Picture shows rockets firing at a castle."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Firing many rockets is supported (rockets). Picture shows rockets firing."
+      },
+      {
+        "index": 18,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "The stated reason matches evidence (rockets). Picture shows rockets firing; the explanation itself is not picturable."
+      }
+    ],
+    "unsupported": [],
+    "undrawable": [
+      "invasions",
+      "rapid succession",
+      "bursts",
+      "direct (as in 'direct another firing')",
+      "wooden (material attribute of cart)",
+      "wheeled (attribute of carts)",
+      "reload",
+      "stop (cart stopping action)"
+    ]
+  }
+}

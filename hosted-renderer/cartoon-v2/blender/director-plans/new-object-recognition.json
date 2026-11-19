@@ -1,0 +1,88 @@
+[
+ [
+  "money_bag",
+  {
+   "object": "money bag with dollar sign",
+   "parts": [
+    "round bag body",
+    "tied neck band",
+    "ruffled top",
+    "green dollar sign emblem"
+   ]
+  }
+ ],
+ [
+  "money_bag",
+  {
+   "object": "money bag",
+   "parts": [
+    "round sack body",
+    "band around the neck",
+    "pleated/tied top",
+    "green dollar sign emblem"
+   ]
+  }
+ ],
+ [
+  "money_bag",
+  {
+   "object": "money bag",
+   "parts": [
+    "round sack body",
+    "gathered neck",
+    "tie/collar band",
+    "ruffled top opening",
+    "green dollar sign emblem"
+   ]
+  }
+ ],
+ [
+  "rail_joint",
+  {
+   "object": "Railway track section",
+   "parts": [
+    "two steel rails",
+    "sleepers/ties",
+    "tie plates/baseplates",
+    "rail fasteners/clips",
+    "fishplates (rail joiners) with bolts",
+    "ballast stones",
+    "track slab/base",
+    "signal pole",
+    "signal head with green and red lights"
+   ]
+  }
+ ],
+ [
+  "rail_joint",
+  {
+   "object": "Railroad track section",
+   "parts": [
+    "two steel rails",
+    "sleepers/ties",
+    "rail clips/baseplates",
+    "fishplates (joint bars)",
+    "bolts and nuts",
+    "ballast stones",
+    "track bed/base slab",
+    "trackside signal with red and green lights"
+   ]
+  }
+ ],
+ [
+  "rail_joint",
+  {
+   "object": "railway track section",
+   "parts": [
+    "two steel rails",
+    "sleepers/ties",
+    "fishplates/joint bars",
+    "bolts and nuts",
+    "rail clips/fasteners",
+    "ballast stones",
+    "concrete base slab",
+    "signal post with green and red lights"
+   ]
+  }
+ ]
+]

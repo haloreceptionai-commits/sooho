@@ -1,0 +1,169 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 6,
+        "cause_effect": 4,
+        "engagement": 8,
+        "kid_clear": false,
+        "opening": true
+      },
+      "B": {
+        "clarity": 8,
+        "cause_effect": 9,
+        "engagement": 6,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 1,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Consistent with sampling taken here and there (samples), but 'holes' as mine-wall holes are not in the drawable vocabulary."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Panning as part of taking/processing samples is consistent with samples, but 'sample bits' are not in the drawable vocabulary."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Swirling/flakes are compatible with sample processing, but 'rims' are not drawable."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Targeting only the sampled material matches samples evidence; 'holes' are not drawable."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Paraphrases samples evidence that full-wall salting is too expensive; physical depiction can show pointing and money."
+      },
+      {
+        "index": 6,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "A buyer is implied by fraud evidence; money bag and watching pans can be shown."
+      },
+      {
+        "index": 7,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "More drilling to take additional samples is consistent with samples; all objects/actions drawable."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Comparative panning of new and prior samples is consistent with samples; drawable."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Expert examining/pointing fits detection workflow; magnifier/pointing/pans drawable."
+      },
+      {
+        "index": 10,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "One pan with flakes and one without illustrates inconsistent results (detection); drawable."
+      },
+      {
+        "index": 11,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Taking more samples (samples) is consistent; 'holes' are not drawable."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Mixed presence/absence of flakes indicates inconsistency (detection); can show pans with/without flakes."
+      },
+      {
+        "index": 13,
+        "evidence_ok": false,
+        "picture_ok": true,
+        "reason": "An 'office buddy' holding money is not supported by the fraud evidence (which mentions a buyer), though it is drawable."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Points across pans taken 'here and there' aligns with samples being taken from various spots; drawable."
+      },
+      {
+        "index": 15,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Re-drilling when results disagree aligns with detection by inconsistency; drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "More fresh checks via drilling/panning fits samples/detection workflow; drawable."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Recognizing repeating mismatches aligns with detection principle; magnifier/nod/pans drawable."
+      },
+      {
+        "index": 18,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Buyer present (fraud) and expert indicating uneven results (detection); drawable."
+      },
+      {
+        "index": 19,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Growing number of pans implies multiple samples (samples); office setting is staging but drawable."
+      },
+      {
+        "index": 20,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Asks about detection (detection); magnifier action drawable."
+      },
+      {
+        "index": 21,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Directly states detection principle: inconsistent results reveal salting (detection); pointing/drills/pans drawable."
+      }
+    ],
+    "unsupported": [
+      "Using drilling into tunnel walls and pans as the specific sampling method is not stated in the provided evidence.",
+      "Miners crouching and detailed panning behavior like flakes circling pan rims are not in the evidence.",
+      "A specific act of someone tossing flakes into selected sample pans at the drill holes is not in the evidence (only the idea that salting targets samples is stated).",
+      "Use of a magnifying glass and the expert\u2019s pointing/nodding behavior are staging details not supported by the evidence.",
+      "A 'rich guy' visibly holding a money bag and watching pans is staging beyond the evidence (which only implies a buyer).",
+      "Scenes located in an 'office' and an 'office buddy' holding money are not supported by the evidence.",
+      "Crews walking/running back to drill again when pans disagree are procedural details not in the evidence.",
+      "Arranging 'lined up' pans and referring to 'two pans' as focal props are staging details not in the evidence."
+    ],
+    "undrawable": [
+      "holes (mine-wall holes)",
+      "rims (of the pan)",
+      "sample bits",
+      "salting (as an explicit action label)"
+    ]
+  }
+}

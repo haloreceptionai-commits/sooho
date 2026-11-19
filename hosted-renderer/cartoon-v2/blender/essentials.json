@@ -1,0 +1,2434 @@
+{
+ "_doc": "Everyday props: words -> exact library model or shape assembly. Consulted before fuzzy library search (liftDressing).",
+ "items": {
+  "smartphone": {
+   "words": [
+    "phone",
+    "smartphone",
+    "iphone",
+    "cellphone",
+    "mobile phone"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "smartphone",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.5,
+        0.06,
+        1.0
+       ],
+       "pos": [
+        0,
+        0,
+        0.5
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.44,
+        0.02,
+        0.9
+       ],
+       "pos": [
+        0,
+        -0.035,
+        0.5
+       ],
+       "color": [
+        0.2,
+        0.55,
+        0.95
+       ],
+       "glow": 2.2
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.05,
+        0.05,
+        0.03
+       ],
+       "pos": [
+        0,
+        -0.04,
+        0.08
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.0,
+    "layout": "near"
+   }
+  },
+  "laptop": {
+   "words": [
+    "laptop",
+    "notebook computer",
+    "macbook"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/laptop",
+    "count": 1,
+    "height": 0.5,
+    "layout": "near"
+   }
+  },
+  "gaming pc": {
+   "words": [
+    "gaming pc",
+    "desktop computer",
+    "pc setup",
+    "gaming setup",
+    "computer setup"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "gaming pc",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        1.1,
+        0.08,
+        0.65
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        1.0,
+        0.04,
+        0.55
+       ],
+       "pos": [
+        0,
+        -0.05,
+        1.0
+       ],
+       "color": [
+        0.1,
+        0.85,
+        0.95
+       ],
+       "glow": 2.4
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.2,
+        0.5,
+        0.1
+       ],
+       "pos": [
+        0,
+        0.1,
+        0.58
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.4,
+        0.5,
+        0.9
+       ],
+       "pos": [
+        1.0,
+        0.1,
+        0.45
+       ],
+       "color": [
+        0.12,
+        0.12,
+        0.16
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.03,
+        0.5,
+        0.7
+       ],
+       "pos": [
+        0.8,
+        -0.14,
+        0.45
+       ],
+       "color": [
+        0.9,
+        0.2,
+        0.9
+       ],
+       "glow": 5.0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.9,
+        0.3,
+        0.04
+       ],
+       "pos": [
+        0,
+        -0.4,
+        0.02
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.7,
+        0.2,
+        0.03
+       ],
+       "pos": [
+        0,
+        -0.4,
+        0.05
+       ],
+       "color": [
+        0.3,
+        0.3,
+        0.35
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.325,
+    "layout": "near"
+   }
+  },
+  "television": {
+   "words": [
+    "television",
+    "tv",
+    "telly"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/televisionModern",
+    "count": 1,
+    "height": 0.8,
+    "layout": "near"
+   }
+  },
+  "car": {
+   "words": [
+    "car",
+    "automobile",
+    "sedan",
+    "vehicle"
+   ],
+   "dressing": {
+    "lib": "car-kit/sedan",
+    "count": 1,
+    "height": 1.5,
+    "layout": "near"
+   }
+  },
+  "taxi": {
+   "words": [
+    "taxi",
+    "cab"
+   ],
+   "dressing": {
+    "lib": "car-kit/taxi",
+    "count": 1,
+    "height": 1.5,
+    "layout": "near"
+   }
+  },
+  "truck": {
+   "words": [
+    "truck",
+    "lorry",
+    "pickup"
+   ],
+   "dressing": {
+    "lib": "car-kit/truck",
+    "count": 1,
+    "height": 2.6,
+    "layout": "near"
+   }
+  },
+  "police car": {
+   "words": [
+    "police car",
+    "cop car",
+    "patrol car"
+   ],
+   "dressing": {
+    "lib": "car-kit/police",
+    "count": 1,
+    "height": 1.5,
+    "layout": "near"
+   }
+  },
+  "ambulance": {
+   "words": [
+    "ambulance"
+   ],
+   "dressing": {
+    "lib": "car-kit/ambulance",
+    "count": 1,
+    "height": 2.0,
+    "layout": "near"
+   }
+  },
+  "bus": {
+   "words": [
+    "bus"
+   ],
+   "dressing": {
+    "lib": "q-publictransport/Bus",
+    "count": 1,
+    "height": 3.2,
+    "layout": "near"
+   }
+  },
+  "school bus": {
+   "words": [
+    "school bus"
+   ],
+   "dressing": {
+    "lib": "q-publictransport/SchoolBus",
+    "count": 1,
+    "height": 3.2,
+    "layout": "near"
+   }
+  },
+  "bicycle": {
+   "words": [
+    "bicycle",
+    "bike"
+   ],
+   "dressing": {
+    "lib": "q-publictransport/Bicycle",
+    "count": 1,
+    "height": 1.1,
+    "layout": "near"
+   }
+  },
+  "scooter": {
+   "words": [
+    "scooter",
+    "skateboard"
+   ],
+   "dressing": {
+    "lib": "mini-skate/scooter",
+    "count": 1,
+    "height": 0.9,
+    "layout": "near"
+   }
+  },
+  "motorcycle": {
+   "words": [
+    "motorcycle",
+    "motorbike",
+    "moped",
+    "chopper"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "motorcycle",
+     "parts": [
+      {
+       "shape": "sphere",
+       "size": [
+        0.16,
+        0.9,
+        0.9
+       ],
+       "pos": [
+        0,
+        -0.8,
+        0.45
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.16,
+        0.9,
+        0.9
+       ],
+       "pos": [
+        0,
+        0.8,
+        0.45
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.2,
+        0.3,
+        0.3
+       ],
+       "pos": [
+        0,
+        -0.8,
+        0.45
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.2,
+        0.3,
+        0.3
+       ],
+       "pos": [
+        0,
+        0.8,
+        0.45
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.3,
+        1.6,
+        0.15
+       ],
+       "pos": [
+        0,
+        0,
+        0.55
+       ],
+       "color": [
+        0.85,
+        0.15,
+        0.15
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.34,
+        0.6,
+        0.3
+       ],
+       "pos": [
+        0,
+        -0.1,
+        0.8
+       ],
+       "color": [
+        0.85,
+        0.15,
+        0.15
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.3,
+        0.55,
+        0.1
+       ],
+       "pos": [
+        0,
+        0.4,
+        0.78
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.06,
+        0.06,
+        0.5
+       ],
+       "pos": [
+        0,
+        -0.7,
+        0.9
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.9,
+        0.06,
+        0.06
+       ],
+       "pos": [
+        0,
+        -0.7,
+        1.15
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.22,
+        0.22,
+        0.22
+       ],
+       "pos": [
+        0,
+        -0.85,
+        0.95
+       ],
+       "color": [
+        1,
+        0.95,
+        0.6
+       ],
+       "glow": 3.0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.18,
+    "layout": "near"
+   }
+  },
+  "school bag": {
+   "words": [
+    "school bag",
+    "backpack",
+    "schoolbag",
+    "rucksack"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "school bag",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.6,
+        0.3,
+        0.7
+       ],
+       "pos": [
+        0,
+        0,
+        0.35
+       ],
+       "color": [
+        0.2,
+        0.45,
+        0.9
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.5,
+        0.1,
+        0.35
+       ],
+       "pos": [
+        0,
+        -0.2,
+        0.3
+       ],
+       "color": [
+        0.15,
+        0.35,
+        0.75
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.08,
+        0.12,
+        0.6
+       ],
+       "pos": [
+        -0.18,
+        0.18,
+        0.35
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.08,
+        0.12,
+        0.6
+       ],
+       "pos": [
+        0.18,
+        0.18,
+        0.35
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.18,
+        0.06,
+        0.06
+       ],
+       "pos": [
+        0,
+        0,
+        0.74
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 0.77,
+    "layout": "near"
+   }
+  },
+  "books": {
+   "words": [
+    "book",
+    "books",
+    "textbook",
+    "textbooks"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/books",
+    "count": 1,
+    "height": 0.35,
+    "layout": "near"
+   }
+  },
+  "pencil": {
+   "words": [
+    "pencil",
+    "pen",
+    "stationery",
+    "marker"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "pencil",
+     "parts": [
+      {
+       "shape": "cylinder",
+       "size": [
+        0.1,
+        0.1,
+        1.1
+       ],
+       "pos": [
+        0,
+        0,
+        0.55
+       ],
+       "color": [
+        0.98,
+        0.82,
+        0.2
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cone",
+       "size": [
+        0.1,
+        0.1,
+        0.22
+       ],
+       "pos": [
+        0,
+        0,
+        1.2
+       ],
+       "color": [
+        0.9,
+        0.75,
+        0.55
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cone",
+       "size": [
+        0.04,
+        0.04,
+        0.08
+       ],
+       "pos": [
+        0,
+        0,
+        1.33
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.105,
+        0.105,
+        0.12
+       ],
+       "pos": [
+        0,
+        0,
+        0.06
+       ],
+       "color": [
+        0.9,
+        0.4,
+        0.5
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.37,
+    "layout": "near"
+   }
+  },
+  "coffee cup": {
+   "words": [
+    "coffee",
+    "coffee cup",
+    "mug",
+    "latte",
+    "cup of coffee"
+   ],
+   "dressing": {
+    "lib": "food-kit/cup-coffee",
+    "count": 1,
+    "height": 0.4,
+    "layout": "near"
+   }
+  },
+  "soda can": {
+   "words": [
+    "soda",
+    "cola",
+    "energy drink",
+    "soft drink"
+   ],
+   "dressing": {
+    "lib": "food-kit/can",
+    "count": 1,
+    "height": 0.4,
+    "layout": "near"
+   }
+  },
+  "burger": {
+   "words": [
+    "burger",
+    "hamburger",
+    "cheeseburger",
+    "fast food"
+   ],
+   "dressing": {
+    "lib": "food-kit/burger-cheese",
+    "count": 1,
+    "height": 0.4,
+    "layout": "near"
+   }
+  },
+  "fries": {
+   "words": [
+    "fries",
+    "french fries"
+   ],
+   "dressing": {
+    "lib": "food-kit/fries",
+    "count": 1,
+    "height": 0.4,
+    "layout": "near"
+   }
+  },
+  "pizza": {
+   "words": [
+    "pizza"
+   ],
+   "dressing": {
+    "lib": "food-kit/pizza",
+    "count": 1,
+    "height": 0.15,
+    "layout": "near"
+   }
+  },
+  "birthday cake": {
+   "words": [
+    "cake",
+    "birthday cake"
+   ],
+   "dressing": {
+    "lib": "food-kit/cake-birthday",
+    "count": 1,
+    "height": 0.4,
+    "layout": "near"
+   }
+  },
+  "money stack": {
+   "words": [
+    "money",
+    "cash",
+    "dollars",
+    "bills",
+    "money stack",
+    "banknotes"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "money stack",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.9,
+        0.45,
+        0.14
+       ],
+       "pos": [
+        0,
+        0,
+        0.07
+       ],
+       "color": [
+        0.2,
+        0.65,
+        0.3
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.9,
+        0.45,
+        0.14
+       ],
+       "pos": [
+        0,
+        0,
+        0.21
+       ],
+       "color": [
+        0.25,
+        0.7,
+        0.35
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.9,
+        0.45,
+        0.14
+       ],
+       "pos": [
+        0,
+        0,
+        0.35
+       ],
+       "color": [
+        0.2,
+        0.65,
+        0.3
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.9,
+        0.45,
+        0.14
+       ],
+       "pos": [
+        0,
+        0,
+        0.49
+       ],
+       "color": [
+        0.25,
+        0.7,
+        0.35
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.2,
+        0.47,
+        0.58
+       ],
+       "pos": [
+        0,
+        0,
+        0.29
+       ],
+       "color": [
+        0.95,
+        0.95,
+        0.9
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 0.58,
+    "layout": "near"
+   }
+  },
+  "briefcase": {
+   "words": [
+    "briefcase",
+    "suitcase",
+    "attache case",
+    "attach\u00e9"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "briefcase",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        1.0,
+        0.28,
+        0.7
+       ],
+       "pos": [
+        0,
+        0,
+        0.5
+       ],
+       "color": [
+        0.3,
+        0.2,
+        0.12
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.3,
+        0.08,
+        0.1
+       ],
+       "pos": [
+        0,
+        0,
+        0.98
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.12,
+        0.3,
+        0.12
+       ],
+       "pos": [
+        -0.35,
+        0,
+        0.6
+       ],
+       "color": [
+        0.98,
+        0.82,
+        0.2
+       ],
+       "glow": 0.4
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.12,
+        0.3,
+        0.12
+       ],
+       "pos": [
+        0.35,
+        0,
+        0.6
+       ],
+       "color": [
+        0.98,
+        0.82,
+        0.2
+       ],
+       "glow": 0.4
+      }
+     ]
+    },
+    "count": 1,
+    "height": 0.88,
+    "layout": "near"
+   }
+  },
+  "credit card": {
+   "words": [
+    "credit card",
+    "bank card",
+    "debit card",
+    "card payment"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "credit card",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.86,
+        0.02,
+        0.54
+       ],
+       "pos": [
+        0,
+        0,
+        0.27
+       ],
+       "color": [
+        0.15,
+        0.25,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.15,
+        0.025,
+        0.12
+       ],
+       "pos": [
+        -0.25,
+        -0.02,
+        0.3
+       ],
+       "color": [
+        0.95,
+        0.8,
+        0.2
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.6,
+        0.025,
+        0.06
+       ],
+       "pos": [
+        0,
+        -0.02,
+        0.1
+       ],
+       "color": [
+        0.9,
+        0.9,
+        0.95
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 0.6,
+    "layout": "near"
+   }
+  },
+  "gold coins": {
+   "words": [
+    "coin",
+    "coins",
+    "gold coin",
+    "treasure"
+   ],
+   "dressing": {
+    "lib": "q-modulardungeon/Coin_Pile",
+    "count": 1,
+    "height": 0.5,
+    "layout": "near"
+   }
+  },
+  "sword": {
+   "words": [
+    "sword",
+    "blade",
+    "saber"
+   ],
+   "dressing": {
+    "lib": "q-medievalweapons/Sword",
+    "count": 1,
+    "height": 1.1,
+    "layout": "near"
+   }
+  },
+  "pistol": {
+   "words": [
+    "gun",
+    "pistol",
+    "handgun",
+    "revolver"
+   ],
+   "dressing": {
+    "lib": "q-piratekit/Pistol",
+    "count": 1,
+    "height": 0.35,
+    "layout": "near"
+   }
+  },
+  "rifle": {
+   "words": [
+    "rifle",
+    "musket"
+   ],
+   "dressing": {
+    "lib": "space-kit/weapon_rifle",
+    "count": 1,
+    "height": 1.2,
+    "layout": "near"
+   }
+  },
+  "magic staff": {
+   "words": [
+    "magic staff",
+    "wizard staff",
+    "wand",
+    "magic wand"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "magic staff",
+     "parts": [
+      {
+       "shape": "cylinder",
+       "size": [
+        0.07,
+        0.07,
+        2.0
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        0.5,
+        0.33,
+        0.18
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.32,
+        0.32,
+        0.32
+       ],
+       "pos": [
+        0,
+        0,
+        2.15
+       ],
+       "color": [
+        0.5,
+        0.3,
+        1
+       ],
+       "glow": 7.0
+      },
+      {
+       "shape": "torus",
+       "size": [
+        0.46,
+        0.46,
+        0.46
+       ],
+       "pos": [
+        0,
+        0,
+        2.15
+       ],
+       "color": [
+        0.98,
+        0.82,
+        0.2
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 2.38,
+    "layout": "near"
+   }
+  },
+  "shield": {
+   "words": [
+    "shield"
+   ],
+   "dressing": {
+    "lib": "q-medievalweapons/Shield_Heater",
+    "count": 1,
+    "height": 0.9,
+    "layout": "near"
+   }
+  },
+  "bed": {
+   "words": [
+    "bed",
+    "double bed"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/bedDouble",
+    "count": 1,
+    "height": 1.1,
+    "layout": "near"
+   }
+  },
+  "desk": {
+   "words": [
+    "desk",
+    "office desk",
+    "writing desk"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/desk",
+    "count": 1,
+    "height": 0.8,
+    "layout": "near"
+   }
+  },
+  "sofa": {
+   "words": [
+    "sofa",
+    "couch"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/loungeSofa",
+    "count": 1,
+    "height": 0.95,
+    "layout": "near"
+   }
+  },
+  "gaming chair": {
+   "words": [
+    "gaming chair",
+    "racing chair",
+    "office chair"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "gaming chair",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.7,
+        0.6,
+        0.14
+       ],
+       "pos": [
+        0,
+        0,
+        0.5
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.66,
+        0.16,
+        1.0
+       ],
+       "pos": [
+        0,
+        0.3,
+        1.0
+       ],
+       "color": [
+        0.15,
+        0.15,
+        0.18
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.5,
+        0.1,
+        0.4
+       ],
+       "pos": [
+        0,
+        0.22,
+        1.35
+       ],
+       "color": [
+        0.85,
+        0.15,
+        0.15
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.1,
+        0.1,
+        0.45
+       ],
+       "pos": [
+        0,
+        0,
+        0.25
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.8,
+        0.08,
+        0.08
+       ],
+       "pos": [
+        0,
+        0,
+        0.04
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.08,
+        0.6,
+        0.08
+       ],
+       "pos": [
+        0,
+        0,
+        0.04
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.1,
+        0.5,
+        0.1
+       ],
+       "pos": [
+        -0.38,
+        0,
+        0.72
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.1,
+        0.5,
+        0.1
+       ],
+       "pos": [
+        0.38,
+        0,
+        0.72
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.55,
+    "layout": "near"
+   }
+  },
+  "traffic light": {
+   "words": [
+    "traffic light",
+    "traffic lights",
+    "stoplight",
+    "traffic signal"
+   ],
+   "dressing": {
+    "lib": "city-kit-roads/traffic-light",
+    "count": 1,
+    "height": 4.5,
+    "layout": "near"
+   }
+  },
+  "streetlight": {
+   "words": [
+    "streetlight",
+    "street light",
+    "lamp post",
+    "lamppost",
+    "street lamp"
+   ],
+   "dressing": {
+    "lib": "racing-kit/lightPostModern",
+    "count": 1,
+    "height": 4.6,
+    "layout": "near"
+   }
+  },
+  "road sign": {
+   "words": [
+    "road sign",
+    "street sign",
+    "signpost",
+    "stop sign"
+   ],
+   "dressing": {
+    "lib": "city-kit-roads/road-sign-street",
+    "count": 1,
+    "height": 3.5,
+    "layout": "near"
+   }
+  },
+  "vending machine": {
+   "words": [
+    "vending machine",
+    "vending",
+    "snack machine"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "vending machine",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        1.0,
+        0.8,
+        1.9
+       ],
+       "pos": [
+        0,
+        0,
+        0.95
+       ],
+       "color": [
+        0.8,
+        0.12,
+        0.15
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.7,
+        0.04,
+        1.2
+       ],
+       "pos": [
+        -0.0,
+        -0.4,
+        1.1
+       ],
+       "color": [
+        0.55,
+        0.8,
+        1.0
+       ],
+       "glow": 1.5,
+       "glass": true
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.7,
+        0.04,
+        0.3
+       ],
+       "pos": [
+        0,
+        -0.4,
+        0.3
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.16,
+        0.04,
+        0.5
+       ],
+       "pos": [
+        0.38,
+        -0.41,
+        1.0
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.12,
+        0.12,
+        0.12
+       ],
+       "pos": [
+        -0.2,
+        -0.43,
+        1.5
+       ],
+       "color": [
+        0.98,
+        0.82,
+        0.2
+       ],
+       "glow": 3.0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.12,
+        0.12,
+        0.12
+       ],
+       "pos": [
+        0.0,
+        -0.43,
+        1.5
+       ],
+       "color": [
+        0.4,
+        0.9,
+        0.4
+       ],
+       "glow": 3.0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.12,
+        0.12,
+        0.12
+       ],
+       "pos": [
+        0.2,
+        -0.43,
+        1.5
+       ],
+       "color": [
+        0.4,
+        0.6,
+        1
+       ],
+       "glow": 3.0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.9,
+    "layout": "near"
+   }
+  },
+  "trash can": {
+   "words": [
+    "trash can",
+    "trash",
+    "garbage can",
+    "bin",
+    "waste bin",
+    "rubbish bin"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "trash can",
+     "parts": [
+      {
+       "shape": "cylinder",
+       "size": [
+        0.6,
+        0.6,
+        0.9
+       ],
+       "pos": [
+        0,
+        0,
+        0.45
+       ],
+       "color": [
+        0.3,
+        0.38,
+        0.4
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.66,
+        0.66,
+        0.08
+       ],
+       "pos": [
+        0,
+        0,
+        0.94
+       ],
+       "color": [
+        0.25,
+        0.3,
+        0.32
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.12,
+        0.12,
+        0.06
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.03,
+    "layout": "near"
+   }
+  },
+  "bench": {
+   "words": [
+    "bench",
+    "park bench"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/benchCushion",
+    "count": 1,
+    "height": 1.0,
+    "layout": "near"
+   }
+  },
+  "hospital bed": {
+   "words": [
+    "hospital bed",
+    "stretcher"
+   ],
+   "dressing": {
+    "lib": "furniture-kit/bedSingle",
+    "count": 1,
+    "height": 1.0,
+    "layout": "near"
+   }
+  },
+  "heart monitor": {
+   "words": [
+    "heart monitor",
+    "ecg",
+    "vital signs",
+    "heartbeat monitor"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "heart monitor",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.8,
+        0.45,
+        0.55
+       ],
+       "pos": [
+        0,
+        0,
+        1.45
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.7,
+        0.02,
+        0.45
+       ],
+       "pos": [
+        0,
+        -0.23,
+        1.45
+       ],
+       "color": [
+        0.1,
+        0.95,
+        0.5
+       ],
+       "glow": 3.0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.4,
+        0.02,
+        0.04
+       ],
+       "pos": [
+        0,
+        -0.25,
+        1.4
+       ],
+       "color": [
+        0.9,
+        1,
+        0.9
+       ],
+       "glow": 6.0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.07,
+        0.07,
+        1.2
+       ],
+       "pos": [
+        0,
+        0,
+        0.6
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.45,
+        0.45,
+        0.05
+       ],
+       "pos": [
+        0,
+        0,
+        0.03
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.725,
+    "layout": "near"
+   }
+  },
+  "camera": {
+   "words": [
+    "camera",
+    "video camera",
+    "dslr",
+    "vlog camera"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "camera",
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.2,
+        0.2,
+        1.2
+       ],
+       "pos": [
+        -0.55,
+        0,
+        0.6
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.2,
+        0.2,
+        1.2
+       ],
+       "pos": [
+        0.55,
+        0,
+        0.6
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.2,
+        0.2,
+        1.2
+       ],
+       "pos": [
+        0,
+        0.55,
+        0.6
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.7,
+        0.5,
+        0.45
+       ],
+       "pos": [
+        0,
+        0,
+        1.4
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.3,
+        0.3,
+        0.35
+       ],
+       "pos": [
+        0,
+        -0.4,
+        1.4
+       ],
+       "color": [
+        0.2,
+        0.2,
+        0.25
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.2,
+        0.1,
+        0.2
+       ],
+       "pos": [
+        0,
+        -0.58,
+        1.4
+       ],
+       "color": [
+        0.3,
+        0.5,
+        1
+       ],
+       "glow": 2.0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.08,
+        0.08,
+        0.08
+       ],
+       "pos": [
+        0.2,
+        -0.26,
+        1.6
+       ],
+       "color": [
+        0.85,
+        0.15,
+        0.15
+       ],
+       "glow": 8.0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.64,
+    "layout": "near"
+   }
+  },
+  "microphone": {
+   "words": [
+    "microphone",
+    "mic",
+    "podcast",
+    "podcast mic",
+    "karaoke"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "microphone",
+     "parts": [
+      {
+       "shape": "cylinder",
+       "size": [
+        0.06,
+        0.06,
+        1.2
+       ],
+       "pos": [
+        0,
+        0,
+        0.6
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "cylinder",
+       "size": [
+        0.4,
+        0.4,
+        0.05
+       ],
+       "pos": [
+        0,
+        0,
+        0.03
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.3,
+        0.3,
+        0.36
+       ],
+       "pos": [
+        0,
+        0,
+        1.3
+       ],
+       "color": [
+        0.25,
+        0.25,
+        0.3
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.34,
+        0.34,
+        0.04
+       ],
+       "pos": [
+        0,
+        0,
+        1.22
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "torus",
+       "size": [
+        0.32,
+        0.32,
+        0.32
+       ],
+       "pos": [
+        0,
+        0,
+        1.3
+       ],
+       "color": [
+        0.55,
+        0.56,
+        0.6
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.48,
+    "layout": "near"
+   }
+  },
+  "speech bubble": {
+   "words": [
+    "speech bubble",
+    "comic bubble",
+    "thought bubble",
+    "chat bubble"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "speech bubble",
+     "parts": [
+      {
+       "shape": "sphere",
+       "size": [
+        1.6,
+        0.12,
+        1.0
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        0.96,
+        0.96,
+        0.98
+       ],
+       "glow": 0.5
+      },
+      {
+       "shape": "cone",
+       "size": [
+        0.3,
+        0.3,
+        0.5
+       ],
+       "pos": [
+        -0.4,
+        0,
+        0.4
+       ],
+       "color": [
+        0.96,
+        0.96,
+        0.98
+       ],
+       "glow": 0.5
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.1,
+        0.1,
+        0.1
+       ],
+       "pos": [
+        -0.3,
+        -0.07,
+        1.0
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.1,
+        0.1,
+        0.1
+       ],
+       "pos": [
+        0,
+        -0.07,
+        1.0
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.1,
+        0.1,
+        0.1
+       ],
+       "pos": [
+        0.3,
+        -0.07,
+        1.0
+       ],
+       "color": [
+        0.1,
+        0.1,
+        0.13
+       ],
+       "glow": 0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.35,
+    "layout": "near"
+   }
+  },
+  "comic impact star": {
+   "words": [
+    "pow",
+    "comic star",
+    "impact lines",
+    "comic impact"
+   ],
+   "dressing": {
+    "asm": {
+     "name": "comic impact star",
+     "parts": [
+      {
+       "shape": "cone",
+       "size": [
+        0.5,
+        0.12,
+        1.0
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        0.98,
+        0.82,
+        0.2
+       ],
+       "glow": 4.0
+      },
+      {
+       "shape": "cone",
+       "size": [
+        1.0,
+        0.12,
+        0.5
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        0.98,
+        0.82,
+        0.2
+       ],
+       "glow": 4.0
+      },
+      {
+       "shape": "cone",
+       "size": [
+        0.8,
+        0.12,
+        0.8
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        1,
+        0.6,
+        0.1
+       ],
+       "glow": 4.0
+      },
+      {
+       "shape": "sphere",
+       "size": [
+        0.7,
+        0.14,
+        0.7
+       ],
+       "pos": [
+        0,
+        0,
+        1.0
+       ],
+       "color": [
+        1,
+        0.95,
+        0.5
+       ],
+       "glow": 5.0
+      }
+     ]
+    },
+    "count": 1,
+    "height": 1.0,
+    "layout": "near"
+   }
+  },
+  "cat": {
+   "words": [
+    "cat",
+    "kitten",
+    "kitty"
+   ],
+   "dressing": {
+    "lib": "q-ultimateanimatedanimals/Cat",
+    "count": 1,
+    "height": 0.5,
+    "layout": "near"
+   }
+  },
+  "dog": {
+   "words": [
+    "dog",
+    "puppy",
+    "pet dog"
+   ],
+   "dressing": {
+    "lib": "q-ultimateanimatedanimals/Dog",
+    "count": 1,
+    "height": 0.7,
+    "layout": "near"
+   }
+  },
+  "rabbit": {
+   "words": [
+    "rabbit",
+    "bunny"
+   ],
+   "dressing": {
+    "lib": "cube-pets/animal-bunny",
+    "count": 1,
+    "height": 0.5,
+    "layout": "near"
+   }
+  },
+  "cute pet": {
+   "words": [
+    "pet",
+    "companion animal"
+   ],
+   "dressing": {
+    "lib": "cube-pets/animal-dog",
+    "count": 1,
+    "height": 0.6,
+    "layout": "near"
+   }
+  }
+ }
+}
