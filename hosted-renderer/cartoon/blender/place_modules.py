@@ -289,6 +289,8 @@ def scatter_detail(p, seed):
     """Real ground detail like the benchmark: tufts of grass and a few flowers instanced over grassy places."""
     from set_library import model
     import library
+    import set_library as _sl
+    if getattr(_sl, 'LOOK', 'cartoon') == 'realistic': return 0   # photographic streets: no cartoon grass tufts
     t = p['terrain']; ground = (p.get('params') or {}).get('ground', 'grass')
     grassy = (t in ('valley', 'plain', 'river_crossing', 'jungle', 'mountain_pass') or (t == 'custom' and ground in ('grass', 'mud'))) and t != 'snow_mountain'
     if not grassy: return 0

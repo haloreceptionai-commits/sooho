@@ -17,7 +17,7 @@ LIGHTING = {'dawn': 'sunset', 'day': 'day', 'dusk': 'sunset', 'night': 'night'}
 CLEAR = 6.0          # metres around the world origin kept flat and free of dressing (cast zones sit up to ~3 m off origin)
 MAX_ITEMS = 12; MAX_COUNT = 12
 GROUNDS = ('grass', 'sand', 'snow', 'rock', 'dirt', 'stone', 'mud', 'ice', 'asphalt', 'metal')
-RELIEFS = ('flat', 'hills', 'mountains', 'canyon', 'dunes')
+RELIEFS = ('flat', 'hills', 'mountains', 'canyon', 'dunes', 'street')   # 'street': level ground, so the road and footpaths are never buried
 WATERS = ('none', 'sea', 'lake', 'river')
 LAYOUTS = ('near', 'far', 'row', 'cluster', 'line', 'table')
 SHAPES = ('box', 'cylinder', 'sphere', 'cone', 'torus')
@@ -164,7 +164,7 @@ def height(terrain, x, y, seed=0, params=None):
     r = math.hypot(x, y); n = noise(x, y, seed, 7.0); big = noise(x, y, seed + 1, 22.0)
     if terrain == 'custom':
         p = params or {}; relief = p.get('relief', 'hills'); water = p.get('water', 'none')
-        if r <= CLEAR - 0.5: return 0.0
+        if r <= CLEAR - 0.5 or relief == 'street': return 0.0
         edge = ramp(r, CLEAR + 2, 8)
         base = {'flat': 0.25 * n, 'hills': 5 + 6 * big, 'mountains': 14 + 14 * big, 'canyon': 11 * abs(math.sin(x * 0.08 + big * 3)) + 2 * n, 'dunes': 1.6 + 1.6 * math.sin(x * 0.11 + big * 6) * math.cos(y * 0.09 + n * 3)}.get(relief, 0)
         far = {'flat': 20, 'hills': 18, 'mountains': 14, 'canyon': 12, 'dunes': 16}.get(relief, 18)
@@ -342,7 +342,7 @@ def compile_place(spec, seed=0):
 
 def validate_compiled(p):
     """Worker/renderer-side check of a compiled place carried in a shot (numbers and whitelisted models only)."""
-    if not isinstance(p, dict) or set(p) - {'terrain', 'time', 'weather', 'seed', 'items', 'params', 'shell'}: raise ValueError('invalid place')
+    if not isinstance(p, dict) or set(p) - {'terrain', 'time', 'weather', 'seed', 'items', 'params', 'shell', 'streetscape', 'townhouses', 'street_trees', 'high_street'}: raise ValueError('invalid place')
     if p.get('terrain') not in TERRAINS | KITS or p.get('time') not in TIMES or p.get('weather') not in WEATHER: raise ValueError('invalid place')
     items = p.get('items', [])
     if not isinstance(items, list) or len(items) > 90: raise ValueError('up to 90 place items')

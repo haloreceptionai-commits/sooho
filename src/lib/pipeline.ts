@@ -33,7 +33,7 @@ import { cutoutName, paintCutouts } from '@/lib/documentary/cast-paint';
 import { describeWeak } from '@/lib/documentary/boredom';
 import type { AiScenePlan } from '@/lib/documentary/types';
 
-import { assertVideoEngine, usesCartoonWorker } from "./video-engines";
+import { assertVideoEngine, isAdvancedEngine, usesCartoonWorker } from "./video-engines";
 import { ensureAnimalCast, paintAdvancedCards, placeObjectCards } from "@/lib/advanced-cards";
 import { claimStep, type StepClaim } from "@/lib/step-lock";
 import { applyStaging } from "@/lib/advanced-staging";
@@ -195,7 +195,7 @@ export async function runVideo(id: string, input: VideoInput) {
   keepAlive();
   const s = getState().settings;
   const up = (p: Parameters<typeof actions.updateVideo>[1]) => { if (removed.has(id)) throw new Error("Removed from queue"); if (p.detail) held.setStage(p.detail); actions.updateVideo(id, p); };
-  const advanced = input.engine === 'advanced';
+  const advanced = isAdvancedEngine(input.engine);
   let docMode = false;
   try {
     docMode = input.format !== 'short' && !advanced && !usesCartoonWorker(input.engine) && input.style !== 'Ink explainer' && await documentaryEnabled().then(r => r.enabled).catch(() => false);

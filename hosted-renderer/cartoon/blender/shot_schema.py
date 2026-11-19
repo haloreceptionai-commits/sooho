@@ -14,7 +14,8 @@ def _known_model(i):
 
 PROP_IDS = set(json.loads((Path(__file__).parent / 'asset-spec.json').read_text())['models'])
 GRADES = {'Medium High Contrast', 'High Contrast', 'Base Contrast', 'Punchy'}
-KEYS = {'rigs', 'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label', 'overlay', 'era'}
+KEYS = {'rigs', 'set', 'duration', 'camera', 'cast', 'objects', 'haze', 'grade', 'samples', 'size', 'fps', 'frames', 'engine', 'haze_color', 'lighting', 'effects', 'crowd', 'cards', 'props', 'composition', 'backdrop', 'place', 'tint', 'label', 'overlay', 'era', 'look', 'world'}
+LOOKS = {'cartoon', 'realistic'}   # 'realistic': photographic environment, no outlines or toon bands (characters keep their own look)
 
 
 def _vec(v, n, name, limit=1000):
@@ -43,6 +44,16 @@ def validate_shot(s):
         lb = s['label']
         if not isinstance(lb, dict) or set(lb) - {'text', 'pos', 'yaw', 'scale'} or not re.fullmatch(r"[A-Z0-9 ,.'&-]{1,24}", str(lb.get('text', ''))): raise ValueError('invalid label')
         _vec(lb.get('pos'), 2, 'label.pos', 200)
+    if 'world' in s:
+        w = s['world']
+        if not isinstance(w, dict) or set(w) - {'zone', 'file', 'road', 'lighting', 'topic'}:
+            raise ValueError('world keys: zone, file, road, lighting, topic')
+        f = str(w.get('file', ''))
+        if not isinstance(w.get('zone'), str) or not f.startswith('worlds/everything/') or not f.endswith('.glb') or '..' in f:
+            raise ValueError('world.file must be worlds/everything/<zone>.glb')
+        if not isinstance(w.get('road', False), bool): raise ValueError('world.road is true or false')
+        if w.get('lighting', 'day') not in {'day', 'sunset', 'night', 'rain'}: raise ValueError('world.lighting day|sunset|night|rain')
+        if 'place' in s: raise ValueError('a world replaces the place')
     if 'place' in s:
         from place_spec import validate_compiled
         validate_compiled(s['place'])
@@ -129,6 +140,19 @@ def validate_shot(s):
         if not -720 <= p.get('yaw', 0) <= 720: raise ValueError('prop yaw')
     if not 0 <= s.get('haze', 0) <= 0.2: raise ValueError('haze 0-0.2')
     if s.get('grade', 'Medium High Contrast') not in GRADES: raise ValueError('unknown grade')
+    if s.get('look', 'cartoon') not in LOOKS: raise ValueError('unknown look')
+    if isinstance(s.get('place'), dict) and 'streetscape' in s['place']:
+        ss = s['place']['streetscape']
+        if not (isinstance(ss, list) and len(ss) == 2 and all(isinstance(v, (int, float)) and -500 <= v <= 500 for v in ss)): raise ValueError('streetscape needs [y0, y1]')
+    if isinstance(s.get('place'), dict) and 'street_trees' in s['place']:
+        st = s['place']['street_trees']
+        if not (isinstance(st, list) and len(st) == 2 and all(isinstance(v, (int, float)) and -500 <= v <= 500 for v in st)): raise ValueError('street_trees needs [y0, y1]')
+    if isinstance(s.get('place'), dict) and 'high_street' in s['place']:
+        hs = s['place']['high_street']
+        if not (isinstance(hs, list) and len(hs) == 3 and all(isinstance(v, (int, float)) for v in hs[:2]) and hs[2] in (-1, 1)): raise ValueError('high_street needs [y0, y1, side]')
+    if isinstance(s.get('place'), dict) and 'townhouses' in s['place']:
+        th = s['place']['townhouses']
+        if not (isinstance(th, list) and len(th) == 2 and all(isinstance(v, (int, float)) and -500 <= v <= 500 for v in th)): raise ValueError('townhouses needs [y0, y1]')
     if not 1 <= s.get('samples', 32) <= 256: raise ValueError('samples 1-256')
     if 'size' in s: _vec(s['size'], 2, 'size', 4096); assert all(64 <= x <= 2160 for x in s['size']), 'size'
     if s.get('fps', 30) not in (24, 25, 30): raise ValueError('fps 24|25|30')

@@ -6,6 +6,7 @@ import { autoFixPlan, eligibleHooks, preferRepair, preferAdvancedRepair, repairB
 import type { VideoInput, Settings } from './store';
 import type { ScriptCheckpoint } from './pipeline';
 import { writerCalls } from './shorts-writer/calls';
+import { isAdvancedEngine } from './video-engines';
 import { directRunner } from './shorts-writer/calls.server';
 import { runExactScript, runShortsV4 } from './shorts-writer/stage';
 export interface ScriptAPI { call<T>(fn: () => Promise<T>): Promise<T> }
@@ -28,7 +29,7 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
 
     export async function writeBackgroundScript(input: VideoInput, s: Settings, api: ScriptAPI, up: (patch: Record<string, unknown>) => Promise<void>, existing?: ScriptCheckpoint): Promise<ScriptCheckpoint> {
     if (existing) return existing;
-    const advanced = input.engine === "advanced";
+    const advanced = isAdvancedEngine(input.engine);
     await up({ status: "running", stage: "script", progress: 3, detail: "Viral Brain is writing the script…", error: undefined });
     const archetype = ARCHETYPES.find((a) => a.id === input.archetype);
     if (input.exactScript?.trim()) {

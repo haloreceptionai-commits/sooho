@@ -4,6 +4,7 @@ import { Loader2, Sparkles, Youtube, Smartphone, Film } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { useStore, STYLES, type VideoEngine } from "@/lib/store";
+import { isAdvancedEngine } from "@/lib/video-engines";
 import { startVideo } from "@/lib/pipeline";
 import { importShort, type ShortImport } from "@/lib/pipeline.functions";
 import { getTopicHistory } from "@/lib/topics.functions";
@@ -108,9 +109,12 @@ export function RemixPanel() {
                       <option value="own">Own model — AI images with camera motion</option>
                       <option value="cartoon">Own cartoon — 3D cartoon + animated maps on Azure</option>
                     </select>
-                  : <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm font-semibold">Advanced Video AI · 3D worlds, characters, VFX and sound</p>}
+                  : <select aria-label="Video model" className={input} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
+                      <option value="advanced">Advanced Video AI — painted characters in inked 3D sets</option>
+                      <option value="advanced-v2">Advanced Cartoon v2 — characters in real 3D Everything World sets</option>
+                    </select>}
                 {engine === "own" && format === "long" && style === "Ink explainer" && <p className="text-xs text-muted-foreground">Ink explainer long-form: sharp hand-drawn pictures that change every 1–2 seconds in time with the narration, plus a matching thumbnail.</p>}
-                {engine === "advanced" && <p className="text-xs text-muted-foreground">Advanced Video AI: story-matched painted characters standing in inked 3D sets, with depth of field, word-pop captions and music. Renders straight through on Azure — no preview step — and keeps going if you close your browser.</p>}
+                {isAdvancedEngine(engine) && engine === "advanced" && <p className="text-xs text-muted-foreground">Advanced Video AI: story-matched painted characters standing in inked 3D sets, with depth of field, word-pop captions and music. Renders straight through on Azure — no preview step — and keeps going if you close your browser.</p>}
                 {engine === "cartoon" && <p className="text-xs text-muted-foreground">{format === "short" ? "3D cartoon Short rendered on Azure." : "Long-form cartoon: 16:9 documentary with animated relief maps, glowing territory and marching armies, plus cartoon scenes."} You approve a preview before the full render; it then continues even if you close your browser.</p>}
               </Panel>
 

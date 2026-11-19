@@ -144,3 +144,15 @@ All entries are CC0-1.0; licenses checked at import.
 - models/q-ultimatedanimatedcharacter/Doctor_Male_Young.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `70b74026ce0bd9780add26a341f982b42335e1af2cd203e639f73de86b266996`
 - models/q-ultimatedanimatedcharacter/Cowboy_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `6d1312cad120cb6dbcaf4bcc271796c3a2ebae96af668339b89d32edaca9939f`
 - models/q-ultimatedanimatedcharacter/Kimono_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `7e660a0b460404c61a2585a446c8237ab40d880a8f279ce7707057ef99fd39cc`
+
+## ambientCG (CC0-1.0) — realistic street materials (1K JPG colour, normal GL, roughness)
+- ambientcg/Bricks059: https://ambientcg.com/view?id=Bricks059 — CC0-1.0 (Color, NormalGL, Roughness)
+- ambientcg/Asphalt010: https://ambientcg.com/view?id=Asphalt010 — CC0-1.0 (Color, NormalGL, Roughness)
+- ambientcg/PavingStones070: https://ambientcg.com/view?id=PavingStones070 — CC0-1.0 (Color, NormalGL, Roughness)
+  SHA-256: see the files, pinned at download (Bricks059 colour 22b53ec9…, Asphalt010 colour 412598f9…, PavingStones070 colour 4dd55b7e…)
+
+## ambientCG LeafSet001 (CC0-1.0) — realistic foliage (1K JPG colour, opacity, normal GL, roughness)
+- https://ambientcg.com/view?id=LeafSet001 — CC0-1.0
+
+## Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0-1.0) — sky HDRI, 1K
+- https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky — CC0-1.0

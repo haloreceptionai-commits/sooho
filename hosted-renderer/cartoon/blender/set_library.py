@@ -82,6 +82,47 @@ def surface(name, metres=2):
     return m
 
 
+LOOK = 'cartoon'   # set per shot by render_shot: 'realistic' uses the scanned brick
+BRICK_HOUSES = {'q-buildings/House1', 'q-buildings/House2'}   # kit houses whose walls are re-skinned as brick (their tile roofs stay)
+
+
+def _brick_node_material(name, c1, c2, mortar, scale, brick_w, row_h, mortar_size, rough, bump):
+    """Procedural brick or roof-tile courses, built in world space so every house matches. Deterministic (no images)."""
+    m = bpy.data.materials.get(name)
+    if m: return m
+    m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; bs = nt.nodes['Principled BSDF']
+    bs.inputs['Roughness'].default_value = rough
+    geo = nt.nodes.new('ShaderNodeNewGeometry'); br = nt.nodes.new('ShaderNodeTexBrick')
+    br.inputs['Color1'].default_value = (*c1, 1); br.inputs['Color2'].default_value = (*c2, 1); br.inputs['Mortar'].default_value = (*mortar, 1)
+    br.inputs['Scale'].default_value = scale; br.inputs['Mortar Size'].default_value = mortar_size
+    br.inputs['Brick Width'].default_value = brick_w; br.inputs['Row Height'].default_value = row_h; br.inputs['Bias'].default_value = 0.0
+    nt.links.new(geo.outputs['Position'], br.inputs['Vector']); nt.links.new(br.outputs['Color'], bs.inputs['Base Color'])
+    bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = bump; bp.inputs['Distance'].default_value = 0.03
+    nt.links.new(br.outputs['Fac'], bp.inputs['Height']); nt.links.new(bp.outputs['Normal'], bs.inputs['Normal'])
+    return m
+
+
+def brick_wall_material():
+    if LOOK == 'realistic':
+        from realistic_env import brick
+        real = brick()
+        if real is not None: return real
+    return _brick_node_material('kit-brick-wall', (.62, .3, .2), (.53, .24, .16), (.78, .75, .7), 3.2, .5, .25, .035, .85, .35)
+
+
+def roof_tile_material():
+    return _brick_node_material('kit-roof-tile', (.66, .27, .16), (.56, .22, .13), (.3, .14, .1), 5.0, .9, .3, .02, .6, .5)
+
+
+def reskin_house(o):
+    """Brick walls and terracotta roof tiles for a kit house: the grey walls become brick, the dark roof becomes tile, trim keeps its colour."""
+    # Slot names in the kit do not match their use: 'white' is the wall, 'grey' is the roof, 'darkgrey' the window frames (verified by painting each slot).
+    for i, old in enumerate(o.data.materials):
+        name = (old.name if old else '').lower()
+        if name.startswith('white'): o.data.materials[i] = brick_wall_material()
+        elif name.startswith('grey'): o.data.materials[i] = roof_tile_material()
+
+
 def natural_foliage(m):
     """The kit palette renders leaves and grass teal; shift them to natural greens (same brightness) so worlds look like the benchmark."""
     name = (m.name or '').lower()
@@ -168,9 +209,14 @@ def model(spec):
     if foot * factor > 10: BIG_ASSETS.append(root)
     print('ASSET_BOUNDS',spec['id'],[round(float(v),3) for v in (high-low)*factor], 'yaw',spec.get('yaw',0),flush=True)
     for o in meshes:
+        if LOOK == 'realistic':   # photographic foliage: scanned leaves with cut-out edges instead of cartoon leaf colour
+            from realistic_env import leaf_material
+            for i, old in enumerate(o.data.materials):
+                if old and any(k in old.name.lower() for k in ('leaf', 'foliage')): o.data.materials[i] = leaf_material()
         for old in o.data.materials:natural_foliage(old);finish_palette(old)
         # Reuse the real model geometry; assign scanned surfaces to appropriate
         # material groups rather than flattening every prop to one wood colour.
+        if spec['id'].removeprefix('lib:') in BRICK_HOUSES: reskin_house(o)   # brick walls, terracotta roof tiles
         if 'surface' in spec:
             replacement = surface(spec['surface'], spec.get('metres', 2))
             for i, old in enumerate(o.data.materials):

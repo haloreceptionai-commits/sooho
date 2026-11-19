@@ -3,6 +3,7 @@ import { validRenderAssets } from '@/lib/hosted-render';
 import type { Json } from '@/integrations/supabase/types';
 import { startAzureCartoon, cartoonInputKey } from '@/lib/azure-render';
 import { RENDER_CALLBACK_URL } from '@/lib/render-complete';
+import { rendererFor } from '@/lib/video-engines';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 export const submitCartoonOperation = async ({ data, context }: { data: CartoonStart; context: { supabase: SupabaseClient<Database>; userId: string } }) => {
@@ -21,7 +22,8 @@ export const submitCartoonOperation = async ({ data, context }: { data: CartoonS
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const token = crypto.randomUUID() + crypto.randomUUID();
     const tokenHash = await digest(token);
-    const manifest = { ...data, kind: 'cartoon', width: long ? 1920 : 1080, height: long ? 1080 : 1920, checkpoint: { gate: data.gate, hookType: data.hookType, report: data.report, continuity: 1, plan: { characters: data.direction.cast } } };
+    const renderer = rendererFor((record['input'] as Record<string, Json> | undefined)?.['engine']);   // 'cartoon-v2' = Everything World zone sets
+    const manifest = { ...data, kind: 'cartoon', width: long ? 1920 : 1080, height: long ? 1080 : 1920, ...(renderer ? { renderer } : {}), checkpoint: { gate: data.gate, hookType: data.hookType, report: data.report, continuity: 1, plan: { characters: data.direction.cast } } };
     const { data: job, error } = await supabaseAdmin.from('render_jobs').insert({ video_id: data.videoId, user_id: context.userId, token_hash: tokenHash, expires_at: new Date(Date.now() + CARTOON_LIFETIME_MS).toISOString(), manifest: manifest as unknown as Json, output_path: `${context.userId}/${data.videoId}/generation-output/${crypto.randomUUID()}.mp4` }).select('id').single();
     if (error || !job) {
       const { data: claimed } = await context.supabase.from('render_jobs').select('id,status').eq('video_id', data.videoId).order('created_at', { ascending: false }).limit(1).maybeSingle();

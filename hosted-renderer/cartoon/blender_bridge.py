@@ -13,6 +13,7 @@ from shot_director import compile_one, ZONES  # noqa: E402
 from shot_schema import validate_shot  # noqa: E402
 from place_spec import compile_place, LIGHTING as PLACE_LIGHT, smooth_story_time  # noqa: E402
 import ui_overlays  # noqa: E402
+import world_topics  # noqa: E402  (cartoon-v2 zone router: used only when the manifest asks for renderer 'cartoon-v2')
 import atmosphere  # noqa: E402
 
 # Old-engine worlds -> Blender set kits (+ forced lighting).
@@ -101,8 +102,21 @@ def compile_shot(m, i, cards=()):
         shot['place'] = compile_place(s['place'], seed=i)
         shot['lighting'] = 'rain' if s['place'].get('weather') == 'rain' else PLACE_LIGHT[s['place']['time']]
         shot.pop('backdrop', None)
+    if m.get('renderer') == 'cartoon-v2':   # the set is a real Everything World zone; people, camera and effects stay as planned
+        shot.pop('place', None); shot.pop('backdrop', None)
+        plan = world_for_shot(s)
+        shot['world'] = plan
+        shot['lighting'] = plan['lighting']
     shot.update({'samples': 12, 'size': list(SCALE), 'engine': 'cycles'})
     return validate_shot(shot)
+
+
+def world_for_shot(s):
+    """cartoon-v2: the shot's words (old world key, place terrain or name, set) pick an Everything World zone."""
+    place = s.get('place') or {}
+    words = ' '.join(str(x) for x in [s.get('world') or '', place.get('terrain') or '', place.get('name') or '', s.get('set') or ''] if x)
+    plan = world_topics.resolve(words or 'town')
+    return {'zone': plan['zone'], 'file': plan['file'], 'road': bool(plan['road']), 'lighting': plan['lighting'], 'topic': words[:120]}
 
 
 def compile_all(m, cards=()):

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Film, Smartphone, Sparkles, Loader2, ArrowUpRight, Mic, Youtube, FilePenLine, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, STYLES, type VideoEngine } from "@/lib/store";
+import { isAdvancedEngine } from "@/lib/video-engines";
 import { LONG_DEFAULT_STYLE } from "@/lib/styles";
 import { startVideo } from "@/lib/pipeline";
 import { scoreTopic, type ArchetypeId } from "@/lib/viral-brain";
@@ -138,7 +139,7 @@ function Create() {
               <div className="flex justify-between text-sm"><span className="font-semibold">Length</span>
                 <span className="font-mono">{format === "short" ? `${shortSec}s` : `${longMin} min`}</span></div>
               {format === "short"
-                ? <input aria-label="Short length in seconds" type="range" min={engine === "advanced" ? 10 : 30} max={90} step={engine === "advanced" ? 1 : 5} value={shortSec} onChange={(e) => setShortSec(+e.target.value)} className="mt-2 w-full accent-primary" />
+                ? <input aria-label="Short length in seconds" type="range" min={isAdvancedEngine(engine) ? 10 : 30} max={90} step={isAdvancedEngine(engine) ? 1 : 5} value={shortSec} onChange={(e) => setShortSec(+e.target.value)} className="mt-2 w-full accent-primary" />
                 : <input type="range" min={3} max={15} step={1} value={longMin} onChange={(e) => setLongMin(+e.target.value)} className="mt-2 w-full accent-primary" />}
             </div>
           </Panel>
@@ -187,9 +188,15 @@ function Create() {
                 {engine === "cartoon" && <p className="mt-2 text-xs text-muted-foreground">Long-form cartoon: 16:9 documentary with animated relief maps, glowing territory and marching armies, plus cartoon scenes. You approve a preview before the full render.</p>}
               </>
             ) : (
-              <div className="mt-3 rounded-md border bg-muted/40 p-3">
-                <p className="text-sm font-bold">Advanced Video AI</p>
-                <p className="mt-1 text-xs text-muted-foreground">3D worlds and characters in inked sets, depth of field, VFX, music, ambience and sound effects, word-pop captions and on-screen graphics. Renders on Azure GPUs, retries and repairs itself if a step fails — safe to close your browser.</p>
+              <div className="mt-3 space-y-2">
+                <select id="engine" aria-label="Video model" className={input} value={engine} onChange={(e) => setEngine(e.target.value as VideoEngine)}>
+                  <option value="advanced">Advanced Video AI — painted characters in inked 3D sets</option>
+                  <option value="advanced-v2">Advanced Cartoon v2 — characters in real 3D Everything World sets</option>
+                </select>
+                <div className="rounded-md border bg-muted/40 p-3">
+                  <p className="text-sm font-bold">{engine === "advanced-v2" ? "Advanced Cartoon v2" : "Advanced Video AI"}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{engine === "advanced-v2" ? "Each shot's set is a real 3D place from the Everything World (streets, offices, hospitals, villages, battlefields and more) with the same story, characters and captions. Renders on Azure GPUs, retries and repairs itself if a step fails — safe to close your browser." : "3D worlds and characters in inked sets, depth of field, VFX, music, ambience and sound effects, word-pop captions and on-screen graphics. Renders on Azure GPUs, retries and repairs itself if a step fails — safe to close your browser."}</p>
+                </div>
               </div>
             )}
           </Panel>

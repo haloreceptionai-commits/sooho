@@ -35,3 +35,4 @@ dist-ssr
 __pycache__/
 *.pyc
 hosted-renderer/cartoon/blender/assets/humans/ual_mannequin.glb
+hosted-renderer/cartoon/worlds/everything/*.glb

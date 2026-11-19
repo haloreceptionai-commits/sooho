@@ -625,6 +625,13 @@ def render_frames(sc, shot, out, n):
     t0 = time.time()
     if only:
         for f in only:
+            if os.environ.get('DBG_SCENE'):
+                from mathutils import Vector as _V
+                for _o in bpy.data.objects:
+                    if _o.type == 'MESH' and not _o.hide_render:
+                        _p = [_o.matrix_world @ _V(c) for c in _o.bound_box]
+                        _lo = [round(min(v[i] for v in _p), 2) for i in range(3)]; _hi = [round(max(v[i] for v in _p), 2) for i in range(3)]
+                        print('DBG_OBJ', _o.name, _lo, _hi, len(_o.data.polygons), [m.name if m else None for m in _o.data.materials], flush=True)
             sc.frame_set(f); sc.render.filepath = os.path.join(out, f'f_{f:05d}'); bpy.ops.render.render(write_still=True)
     else:
         bpy.ops.render.render(animation=True)
@@ -652,10 +659,29 @@ def main():
     sc.world.use_nodes = True
     fps = configure_render(sc, shot)
     place = shot.get('place')
-    if place and place['terrain'] not in KIT_TERRAINS:
+    import set_library as _sl; _sl.LOOK = shot.get('look', 'cartoon')
+    if shot.get('world'):
+        # v2: the set is an Everything World zone; the procedural place is not built
+        from world_env import build_world
+        print('WORLD', build_world(shot['world'], shot.get('lighting', 'day'), shot['camera']), flush=True)
+    elif place and place['terrain'] not in KIT_TERRAINS:
         from place_modules import build_place
         build_place(place, shot.get('lighting', 'day'), shot['duration'], fps)
         apply_mood(shot.get('lighting', 'day'))
+        if shot.get('look', 'cartoon') == 'realistic' and place.get('streetscape'):
+            from realistic_env import build_streetscape
+            build_streetscape(*place['streetscape'])
+        if shot.get('look', 'cartoon') == 'realistic' and place.get('townhouses'):
+            from realistic_env import build_townhouse_row
+            if place.get('high_street'):
+                from realistic_env import build_high_street
+                build_high_street(*place['high_street'][:2], side=place['high_street'][2])
+                build_townhouse_row(-place['high_street'][2], *place['townhouses'])
+            else:
+                for _side in (-1, 1): build_townhouse_row(_side, *place['townhouses'])
+        if shot.get('look', 'cartoon') == 'realistic' and place.get('street_trees'):
+            from realistic_env import build_street_trees
+            print('TREES', build_street_trees(*place['street_trees']), flush=True)
     elif place:
         build_set(place['terrain'], shot.get('lighting', 'day'), place.get('shell'), shot.get('era'))
         from place_modules import build_kit_items
@@ -682,10 +708,13 @@ def main():
         from labels import build_label
         try: build_label(shot['label'])
         except Exception as e: print('label skipped', str(e)[:120], flush=True)
-    try:
-        from toon import apply_house_style
-        print('HOUSE_STYLE', apply_house_style(), flush=True)
-    except Exception as e: print('house style skipped', str(e)[:160], flush=True)
+    if shot.get('look', 'cartoon') == 'realistic':
+        print('LOOK realistic: no toon bands, no outlines', flush=True)
+    else:
+        try:
+            from toon import apply_house_style
+            print('HOUSE_STYLE', apply_house_style(), flush=True)
+        except Exception as e: print('house style skipped', str(e)[:160], flush=True)
     try:
         from lighting import apply_rig
         cc = [sum(c['pos'][i] for c in shot['cast']) / len(shot['cast']) for i in (0, 1)] if shot.get('cast') else [0.0, 0.0]
@@ -695,11 +724,15 @@ def main():
         tr, tg, tb = shot['tint']
         for o in bpy.data.objects:
             if o.type == 'LIGHT' and o.data.type == 'SUN': o.data.color = (min(1.0, o.data.color[0] * tr), min(1.0, o.data.color[1] * tg), min(1.0, o.data.color[2] * tb))
+    if shot.get('look', 'cartoon') == 'realistic':
+        from realistic_env import apply_hdri
+        if not shot.get('world'):   # v2 world already set its own sky strength
+            print('HDRI', apply_hdri(sc.world), flush=True)
     look(sc, shot)
     n = camera(shot, fps); sc.frame_start = 1; sc.frame_end = n
     bpy.context.view_layer.update(); hide_engulfing([Vector(shot['camera']['from']), Vector(shot['camera'].get('to', shot['camera']['from']))])
     cards = [build_card(cd, sc.camera, shot['duration'], fps) for cd in shot.get('cards', [])]
-    if not place: build_backdrop(shot, sc.camera)  # v3 places are real 3D; painted backdrops are legacy only
+    if not place and not shot.get('world'): build_backdrop(shot, sc.camera)  # v3 places are real 3D; painted backdrops are legacy only
     if shot.get('composition'):
         from composition import enforce
         enforce(sc, shot, scenery, [c for c in cards if c is not None], roots, out)

@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends xz-utils libx11
 ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=all
 WORKDIR /usr/src/app
 COPY blender ./blender
+# Everything World zone sets for Advanced Cartoon v2 (manifest renderer 'cartoon-v2'); the GLBs are local build inputs, never committed.
+COPY worlds ./worlds
 COPY blender_bridge.py actor.js capture.py atmosphere.py ./
 COPY tools/bench-frames.mjs ./tools/
 # Owner-uploaded rigged humans (Quaternius CC0), materialized and checksum-pinned at build: the project keeps only pointers.
