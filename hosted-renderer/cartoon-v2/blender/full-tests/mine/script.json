@@ -1,0 +1,237 @@
+{
+  "title": "Salted Samples: How Inconsistent Pans Expose Mine Tricks",
+  "sentences": [
+    {
+      "text": "Mine crews drill walls; small pans wait under fresh holes.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Miners crouch low and swirl pans for tiny sample bits.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "char:crouch",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Miners swirl pans; flakes circle rims after each spin.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Somebody tosses flakes only into chosen sample pans by holes.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "char:swing",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Expert points at pans; full-wall salting would cost money fast.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:office",
+        "char:point",
+        "obj:gold_pan:pour",
+        "obj:money_bag:hold"
+      ]
+    },
+    {
+      "text": "Rich guy watches pans and holds a money bag.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:office",
+        "obj:money_bag:hold",
+        "char:stand"
+      ]
+    },
+    {
+      "text": "Crews drill again farther along the tunnel for checks.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Miners swirl new pans beside the first sample pans.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Expert swings magnifier and points at those two pans.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing",
+        "char:point",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "One pan swirls flakes; the other pan spins with nothing.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Crews walk onward and drill a third set of holes.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "char:walk",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Miners swirl again; some pans carry flakes, others carry none.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Office buddy holds money and watches the lined up pans.",
+      "fact_ids": [
+        "fraud"
+      ],
+      "picture": [
+        "set:office",
+        "obj:money_bag:hold",
+        "char:stand",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Expert points across pans from here and there along tunnels.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:office",
+        "char:point",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Crews run back and drill when pans do not agree.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "char:run",
+        "obj:hand_drill:drill"
+      ]
+    },
+    {
+      "text": "Miners drill fresh spots and spin more pans for checks.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:mine_tunnel",
+        "obj:hand_drill:drill",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Expert swings magnifier and nods at repeating mismatches across pans.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing",
+        "char:stand",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Rich guy holds money while expert points at those uneven pans.",
+      "fact_ids": [
+        "fraud",
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:money_bag:hold",
+        "char:point",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Office expert stands and watches the growing set of pans.",
+      "fact_ids": [
+        "samples"
+      ],
+      "picture": [
+        "set:office",
+        "char:stand",
+        "obj:gold_pan:pour"
+      ]
+    },
+    {
+      "text": "Office expert swings magnifier; how do crews catch salting?",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "obj:magnifier:swing"
+      ]
+    },
+    {
+      "text": "Office expert points; inconsistent results across fresh drills reveal salting.",
+      "fact_ids": [
+        "detection"
+      ],
+      "picture": [
+        "set:office",
+        "char:point",
+        "obj:hand_drill:drill",
+        "obj:gold_pan:pour"
+      ]
+    }
+  ]
+}

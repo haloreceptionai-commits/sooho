@@ -1,0 +1,72 @@
+{
+ "topic": "Great Moon Hoax of 1835",
+ "script": "New York bought the Moon with a borrowed glass. Plates sit empty while the clock slams toward print. Richard Adams Locke sees the paper’s trust on the line. The Sun must fill a sky tonight or fail. How? Richard Adams Locke sets a line that cites the Edinburgh Journal of Science. He prints bat-winged people and busy beavers on craters. Then he promises six parts to drip the news. Then the letters arrive. Sir John Herschel, at the Cape, denies any part. That journal ended in 1833, yet the name sells. Reprints race the claim across city after city. Yet readers ask if any of this is real. The Sun hints fiction inside, skips a front apology. Here are the Sun pages and that bold line. Here is Herschel’s own letter saying no. People trust a voice that sounds like science. Richard Adams Locke and the team didn’t sell the Moon at all. New York kept its Moon with a borrowed name.",
+ "score": 90,
+ "ready": false,
+ "blockers": [
+  "Shot mix: wide 32% (≥40), action 32% (~30), macro 26% (~20), faces 11% (≤30)",
+  "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape close copies the hook; write a new twist sentence that reuses only two or three hook words",
+  "Pass B: after 15s a viewer gets only 3/4 of premise, hero, want, question",
+  "Viewer would swipe away at: \"Plates sit empty while the clock slams toward print.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"The Sun must fill a sky tonight or fail.\" — make it a surprise, danger or new fact",
+  "Viewer would swipe away at: \"Then he promises six parts to drip the news.\" — make it a surprise, danger or new fact",
+  "Visual literalness: scenes 4 don't show what is said"
+ ],
+ "log": [
+  {
+   "attempt": 0,
+   "score": 83,
+   "blockers": [
+    "Shot mix: wide 32% (≥40), action 21% (~30), macro 32% (~20), faces 16% (≤30)",
+    "hard words: telescope, tomorrows, reporter, edinburgh, facsimiles, citation",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape repeat: \"New York's Sun bought a Moon with a borrowed name.\" says an earlier line again; the close should echo a few hook words with the twist, never replay a line; Shape close copies the hook; write a new twist sentence that reuses only two or three hook words",
+    "Viewer would swipe away at: \"A noisy newsroom pounds out tomorrow’s paper.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"A reporter stares at empty columns.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Sapphire temples glitter on the lunar plain.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 1, 4, 6, 7, 9, 11, 12, 14, 15, 16, 17, 18, 19 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 1,
+   "score": 79,
+   "blockers": [
+    "Shot mix: wide 26% (≥40), action 37% (~30), macro 26% (~20), faces 11% (≤30)",
+    "hard words: edinburgh, apology, authority",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape close copies the hook; write a new twist sentence that reuses only two or three hook words",
+    "Read-aloud: \"Richard Adams Locke sets, From the Edinburgh Journal of Science.\"",
+    "Read-aloud: \"People crave authority; this reads like science.\"",
+    "Viewer would swipe away at: \"The series runs in six loud parts.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Other papers copy every line and spread it.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"See the Sun pages with the fancy line.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 1, 4, 5, 8, 11, 12, 13, 14, 17, 19 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 2,
+   "score": 79,
+   "blockers": [
+    "Shot mix: wide 32% (≥40), action 32% (~30), macro 26% (~20), faces 11% (≤30)",
+    "hard words: telescope, edinburgh, discovery, overnight",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape close copies the hook; write a new twist sentence that reuses only two or three hook words",
+    "Pass B: after 15s a viewer gets only 3/4 of premise, hero, want, question",
+    "Viewer would swipe away at: \"An editor slams a blank front page.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Richard Adams Locke needs a miracle story now.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"The New York Sun gambles its name today.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 1, 4, 8, 11, 12, 17, 19 don't show what is said"
+   ]
+  },
+  {
+   "attempt": 3,
+   "score": 90,
+   "blockers": [
+    "Shot mix: wide 32% (≥40), action 32% (~30), macro 26% (~20), faces 11% (≤30)",
+    "Shape hook has no contradiction; pair the strange fact with what makes it impossible; Shape close copies the hook; write a new twist sentence that reuses only two or three hook words",
+    "Pass B: after 15s a viewer gets only 3/4 of premise, hero, want, question",
+    "Viewer would swipe away at: \"Plates sit empty while the clock slams toward print.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"The Sun must fill a sky tonight or fail.\" — make it a surprise, danger or new fact",
+    "Viewer would swipe away at: \"Then he promises six parts to drip the news.\" — make it a surprise, danger or new fact",
+    "Visual literalness: scenes 4 don't show what is said"
+   ]
+  }
+ ]
+}

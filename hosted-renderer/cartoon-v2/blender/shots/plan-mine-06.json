@@ -1,0 +1,61 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 1.736,
+ "camera": {
+  "from": [
+   0.72,
+   0.071,
+   1.6
+  ],
+  "look_at": [
+   -0.325,
+   4.25,
+   0.95
+  ],
+  "lens": 35,
+  "fstop": 5.6
+ },
+ "cast": [
+  {
+   "id": "miner",
+   "pos": [
+    -0.6,
+    4.6
+   ],
+   "yaw": 0,
+   "action": "stand",
+   "expression": "determined",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.7,
+    0.5,
+    0.3
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "hand_drill",
+   "action": "drill",
+   "pos": [
+    -0.05,
+    3.9,
+    0
+   ],
+   "scale": 0.85,
+   "yaw": 0
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  31
+ ]
+}

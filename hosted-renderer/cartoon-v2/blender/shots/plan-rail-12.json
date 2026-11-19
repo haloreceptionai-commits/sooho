@@ -1,0 +1,61 @@
+{
+ "set": "office",
+ "lighting": "day",
+ "duration": 4.175,
+ "camera": {
+  "from": [
+   0.296,
+   1.265,
+   1.6
+  ],
+  "look_at": [
+   -1.459,
+   5.199,
+   0.95
+  ],
+  "lens": 35,
+  "fstop": 5.6
+ },
+ "cast": [
+  {
+   "id": "mgr",
+   "pos": [
+    -1.791,
+    5.496
+   ],
+   "yaw": 10,
+   "action": "point",
+   "expression": "determined",
+   "outfit": "merchant",
+   "hat": "none",
+   "shirt": [
+    0.2,
+    0.4,
+    0.8
+   ]
+  }
+ ],
+ "objects": [
+  {
+   "kind": "rail_joint",
+   "action": "hold",
+   "pos": [
+    -1.128,
+    4.902,
+    0
+   ],
+   "scale": 0.85,
+   "yaw": 10
+  }
+ ],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  75
+ ]
+}

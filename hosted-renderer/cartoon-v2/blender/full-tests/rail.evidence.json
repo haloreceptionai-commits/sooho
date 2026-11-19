@@ -1,0 +1,8 @@
+{
+  "id": "rail", "benchmark": "mine", "topic": "Why older rail joints leave a gap", "facts": [
+    {"id": "heat", "url": "https://www.networkrail.co.uk/stories/why-rails-buckle-in-britain/", "quote": "The problem is that when steel rails get hot, they expand, which can cause a buckled rail."},
+    {"id": "forces", "url": "https://www.networkrail.co.uk/stories/why-rails-buckle-in-britain/", "quote": "The steel rail on a railway track is a very long piece of metal that can expand or contract significantly in the summer and winter. This generates forces that try to push and pull the railway out of shape. The mass of the sleepers and ballast are designed to contain these forces and prevent the track from buckling."},
+    {"id": "gaps", "url": "https://www.railmagazine.com/news/network/analysis-the-heat-is-on-and-stress-management-is-the-key", "quote": "In the past (and indeed on many stretches of today's railway), this expansion was accommodated by maintaining gaps between the rail joints. These expansion gaps close in summer and open up again in winter."},
+    {"id": "modern", "url": "https://www.railmagazine.com/news/network/analysis-the-heat-is-on-and-stress-management-is-the-key", "quote": "By stitching rails together, rail strings many kilometres in length are created. Fastenings between rails and sleepers ensure that CWR doesn't expand freely in the heat, resulting in a compressive force being applied to keep the rail (that wants to get longer) at its original length."}
+  ]
+}

@@ -1,0 +1,158 @@
+# Offline Blender assets
+
+All entries are CC0-1.0; licenses checked at import.
+
+- models/castle-kit/gate.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `fdc3d5b07f619dcacbf2af36024dc9a356696e541f6ce409a5305be782665ec9`
+- models/castle-kit/Textures/colormap.png: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `66fd49be148f32e88f6c8cace67120250d1943a7856601158ad0ff24651db0b0`
+- models/castle-kit/wall.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `b2ea00acbf4ba91ff0d4b8b942edf9fa12d821abd0b2c945c57a2b9b3153cfe3`
+- models/castle-kit/tower-square-base.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `996887e98957eeea2ba7b5d14f0d17877c91e4e99e1c5b8ee57d87b7f7c9d5e8`
+- models/castle-kit/tower-square-top.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `5e98cdf2bf4d885edc3fa514719f80d63872e11c54ee629c11859223dad8489c`
+- models/castle-kit/siege-catapult.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `35a7484ff74630228e474fae885bdc9176c30e0af0d94def80307bdbc87b7583`
+- models/castle-kit/flag-banner-long.glb: https://kenney.nl/assets/castle-kit — CC0-1.0, SHA-256 `e6a4433f5770b9fc31bf67d72424a877d5c010486d5b7373ce7af900566827e4`
+- models/fantasy-town-kit/wall.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `cab1dff37610e2a214237cc62ec0b1506e8fd76bb66c29f6c585b4b643b569c4`
+- models/fantasy-town-kit/Textures/colormap.png: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `4aac939dc33195e35caf8c382ee3cb170054da763577f22d3c22692ec6afccdf`
+- models/fantasy-town-kit/wall-window-shutters.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `58a641a03fc4a5a225663969cc257fcf4f2fc63c199b4aca16b612142ff9eed0`
+- models/fantasy-town-kit/wall-door.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `79b2d40db110ca96a6e77d4261da665fdf8c68f4c20c2afef5bce1c28ad72857`
+- models/fantasy-town-kit/roof-gable.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `4bb6bdbcadbb8ebeb69d720e29f6c2e57c99d98966baa41fd86914d3c13d6039`
+- models/fantasy-town-kit/roof-gable-end.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `2ee635e8550180bb7840f7fdfff0b0835a34a425ffb903f19657cde65c261704`
+- models/fantasy-town-kit/cart.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `63503cd0a7398310e01aabc8e3663f711a7517394d23d179d0695157fee99d40`
+- models/fantasy-town-kit/stall-red.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `aa20a630f417032c46aaefbc779fd2b3355b451bf05d31acc36fd664146866b1`
+- models/fantasy-town-kit/stall-bench.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `5a4b379488241394916991c4b482ec4863c05bb548ca8751f5c3935f1f6e5b9c`
+- models/fantasy-town-kit/fence.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `92261b9419108d84f3db0def5eadeffa783032029897562b1f512e4a7570ef48`
+- models/fantasy-town-kit/lantern.glb: https://kenney.nl/assets/fantasy-town-kit — CC0-1.0, SHA-256 `f270637e3083d6e84a30626ee05df2b09597a642985a7f5c3e4ab5bb1c7a8d55`
+- models/nature-kit/tree_oak.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `d7fd8773674928c50c11b66d12c636d49bdcc15a8b1c7fbb98e6f63a3439a3f3`
+- models/nature-kit/tree_pineTallA.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `e0a56eb196d8a64ba86c7304d607136e17e6f9ad748dffcf86bd53b18b91b196`
+- models/nature-kit/rock_largeA.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `6dd15390fd96501dcd1454765a17ba61dbbd8d47705dfe5149c8dd92b353ce25`
+- models/nature-kit/rock_smallA.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `df9fff9d711e61370e8df0caa2514c89b8f8a8dc6c6fafaf4eb2ec79c5ae07c1`
+- models/nature-kit/plant_bush.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `ae7b1beb39e242b13f5f29e3ec23ef21034b814f82297b8aa00a9bf4e1b09590`
+- models/nature-kit/grass_large.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `af49a595624abca7249824eeefb944d4baf974abeeb5b16110d175da3563d6cd`
+- models/nature-kit/log_stack.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `90eaae4a01ba1f25c2f0c6d83087e4a7a8fac684f2452615245333968d118d68`
+- models/pirate-kit/barrel.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `7616dedf7c1023afa6ecd3c52a4609460aae0e582dee14e60ec5e47c1174793b`
+- models/pirate-kit/Textures/colormap.png: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `451e1d7a53b8e76f4b2ee58742e241509fee5f82cf2cee6e3f7aca86ba718abe`
+- models/pirate-kit/crate.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `b525674e07c8b83667512a8dd93be0d7684358347d0e64d2bb16b156ac382ed1`
+- models/pirate-kit/crate-bottles.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `8412a3d3dc00a81ac61f0975682ef9f08288bee5c5eb783b09dbc1144e655302`
+- models/pirate-kit/bottle.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `b59ff617014ace27dacf2909bba94f3ad3a9a9d1660c6ae4d468b5e8561637ae`
+- models/pirate-kit/chest.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `26d26c4c032a12320fe05b5005a72eba96db7167db0d35873639a4b7dcc06bcb`
+- models/pirate-kit/cannon.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `b2ea71475fa52de312a0fe3fb9085e1a3f83f9e6bb167668fb62f71383cbc41a`
+- models/pirate-kit/ship-large.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `270fff44a9c97f0f5038b0776f9a9b661961ff2098109a9ce614b645cc5e0d20`
+- models/pirate-kit/mast-ropes.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `ad2bd14acacd3f4901177d8b13bcc6158f558e8c1959b6e19576e17ea8b10570`
+- models/pirate-kit/structure-fence.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `d4b9eca0f219efc7ec37d45170c5888a4ba6e0e8f39905f9d92d491ae5de7281`
+- models/pirate-kit/tool-shovel.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `b468372526e419c712f50b824eff50d6e7838de646eaa5a6aacfc4dcdfcfa265`
+- models/train-kit/railroad-straight.glb: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `bcbd501f74b754b61f2ddb5cba2d45d5d694bfd25c497fa72af65202a53930d9`
+- models/train-kit/Textures/colormap.png: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `e264660f3fc9ecbd642bdb7fb7b7dc10755a061560a66651baf48274c729af09`
+- models/train-kit/train-locomotive-a.glb: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `8dfe9d20667c1534652286149fb0e1639ff48975a4187d3ad2fd956add0bba2a`
+- models/train-kit/train-carriage-coal.glb: https://kenney.nl/assets/train-kit — CC0-1.0, SHA-256 `95c6282a6b13317640ac48bd75d7aeec10faa9bfc035ba21977bb0296df7199a`
+- models/furniture-kit/table.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `ff1a94498d023957f4bc3ff6f55a7a82977d336dbf01a573b3364f03afe5ff61`
+- models/furniture-kit/chair.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `c8a11eec93e89e31250ba91afc1b8d56c3bec7ae86640fd1239f595ff4180883`
+- models/furniture-kit/desk.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `0164fe828f028b321730fb8c74502e353583f751be74da1682d42fff7d3c5a42`
+- models/furniture-kit/bookcaseOpen.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `750702218d68c062b15dfef6ab06a4014d1cfa8bd05f02e57c53b7e13bec157c`
+- models/furniture-kit/books.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `b8dc56e5d29f6fc1f4727fccb1b9642627fee9942c48060a00034e98df02701c`
+- models/furniture-kit/lampRoundTable.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `75bb644caaa3da003b4fcad7a931722dd61cd2858aab70cf660021d5061fa1b2`
+- models/furniture-kit/sideTable.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `8227810584f7d37582e4e9ec821c56f1dc54b99c88a8dc74242ea3b7402bc472`
+- models/furniture-kit/loungeSofa.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `1886b811c0d3ad0d8525a4fd43adf4112c497c8e0ed906f06877ca3517f4c7dd`
+- models/furniture-kit/pottedPlant.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `5b760eda2766f75fda36b2c5df652a1662f82981ef64cd8fa7fe7bcd386b3a15`
+- models/furniture-kit/rugRectangle.glb: https://kenney.nl/assets/furniture-kit — CC0-1.0, SHA-256 `a989d2d59c04e3071e0c90388b113a9a8f339ce1814ef984c51cb6dcd7c8e0eb`
+- models/factory-kit/cog-a.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `71fac911b6f760a97af12fe81814186e84b8d8f8b380f211afe8175baba96a12`
+- models/factory-kit/Textures/colormap.png: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `35d7bd6900dde0208429eeaec87fa17fbf024ed59f3f4eab54bc92802eba9dd7`
+- models/factory-kit/machine.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `a39e3042bcb7789274428357383317d70e1c31906e5301c99e7d9e90ac584863`
+- models/factory-kit/pipe-large-valve.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `57126374dce5b172e06d5d6f8cbaab97c9cffe3e5e726060eb14c50a5bd519b6`
+- models/factory-kit/box-small.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `fd2ea1ac4f24a9515dc9c53a4a589a8897c824fa5865771799f965a252f684f0`
+- models/factory-kit/lever-single.glb: https://kenney.nl/assets/factory-kit — CC0-1.0, SHA-256 `d7056a698ecb46c972d51848a77c8a9aca86f085cc5800347fce1c19c6c59477`
+- models/q-medievalvillage/House_1.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `74d4c91022414875ec61ab80835705a9c0e9415aa0dd413fc8e83cbfd861a5c9`
+- models/q-medievalvillage/House_2.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `39b9d7d4c85e170f64d066a3f762ab88689a614c270e95c52927908fb52fa36a`
+- models/q-medievalvillage/Inn.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `106ac5aef624710d5a8e14ce076d73b4fd85312688cc80cebb6bd45cf61daefe`
+- models/q-medievalvillage/Blacksmith.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `264fc6abe5be8c091a1c6f293dce9e8ae79b96b50ccec45f0a7fb12201db1d7c`
+- models/q-medievalvillage/MarketStand_1.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `19b9b99c84d41c0b1124fe286ac3b99668d2f2d489d44affa559188881448d75`
+- models/q-medievalvillage/Cart.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `c98eee1d2a91a1a894bbbe5b54f0b262bfcfc268d4eab17fbbde5b0a40885f53`
+- models/q-medievalvillage/Well.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `8e5158984421cfd8ec5040a318a2627911a6dcd7e4b43172bdd7d36f367ad3db`
+- models/q-medievalvillage/Hay.glb: https://quaternius.com/packs/medievalvillage.html — CC0-1.0, SHA-256 `a7b39cae2cbd0839647c23c597a4ff64cb3a1086529e78c0169614f4a42655ed`
+- models/q-stylizednaturemegakit/CommonTree_1.glb: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `6a86b31a37b3f7f9aa60ea97753c3313c1b40bac2415efe27de7b7327382d3bc`
+- models/q-stylizednaturemegakit/Textures/Bark_NormalTree.png: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `a800cb97b5dc135ed690f71c941a126077c68e634c48b61c575469139a887465`
+- models/q-stylizednaturemegakit/Textures/Leaves_NormalTree_C.png: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `e9595477cf05a3ef91886ccbe6e3cd0a1175f79654342bffe021a1a4e6f0ffa5`
+- models/q-stylizednaturemegakit/CommonTree_3.glb: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `42a2b9beeecadefb14d97de0fae7084ec6f1b881ba51f1b72c1d9ff3f3745057`
+- models/q-stylizednaturemegakit/Bush_Common.glb: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `27bad3f2839666ec6b317e2a3b230b5900518a0677acdcda25c64f505ee95a8e`
+- models/q-stylizednaturemegakit/Textures/Leaves_TwistedTree_C.png: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `eb2762ded765abc9a61b99e1bd997ea1e6108d7692e48cca3e433b25e9041b66`
+- models/q-stylizednaturemegakit/Rock_Medium_1.glb: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `09ff6fd91323b8b46eb3c702119b8889e9149d2816b3713295b1983d34adaed4`
+- models/q-stylizednaturemegakit/Textures/Rocks_Diffuse.png: https://quaternius.com/packs/stylizednaturemegakit.html — CC0-1.0, SHA-256 `00ca5c9012897892ef1a791ab3562eac5e6ddd5879b395004bc321a8755455ac`
+- models/q-modulartrain/Locomotive_Front.glb: https://quaternius.com/packs/modulartrain.html — CC0-1.0, SHA-256 `4304988a85b45978bca630298eef8d1098b92fc4fc865d3880d46b9f92177d52`
+- models/q-modulartrain/Locomotive_CoalTender.glb: https://quaternius.com/packs/modulartrain.html — CC0-1.0, SHA-256 `85212031d02f7b2790837ff2fac4d8f785541e0726bae9513f838425d0587400`
+- models/q-modulartrain/Locomotive_Wagon.glb: https://quaternius.com/packs/modulartrain.html — CC0-1.0, SHA-256 `21d78205f63d7dbaf95dd9f5f84e9455cc46ea695e590e77e1888d7c8b91caa3`
+- models/q-modulartrain/RailwayTrack_Straight.glb: https://quaternius.com/packs/modulartrain.html — CC0-1.0, SHA-256 `b71ed49b5d1eaa30409bd331975a3109262464041583bbc8a9b6eae3dc795aa9`
+- textures/wood-color.jpg: https://polyhaven.com/a/wood_planks — CC0-1.0, SHA-256 `3b0669f683e4bf10f5a55a381cfa9669a7b8dfd921901829daa3b35acc2bbdec`
+- textures/wood-roughness.jpg: https://polyhaven.com/a/wood_planks — CC0-1.0, SHA-256 `1b7f115bfa25619b0a2db554eb1ab88a6fc5ef0b74ba4890611eae04d00b9829`
+- textures/wood-normal.jpg: https://polyhaven.com/a/wood_planks — CC0-1.0, SHA-256 `d02abf113e17a8abe97e1be3e9d6d88add242e8c2291e2200d37aa8c68909f25`
+- textures/rock-color.jpg: https://polyhaven.com/a/rock_boulder_cracked — CC0-1.0, SHA-256 `e88c9e50109c7f610bc380a00b9bdac5954c392bb02134dedeea3358da57276a`
+- textures/rock-roughness.jpg: https://polyhaven.com/a/rock_boulder_cracked — CC0-1.0, SHA-256 `47e6c4b43c9cc5331d0392e3f74777f9a6712edda141dd148586b404c6c30e73`
+- textures/rock-normal.jpg: https://polyhaven.com/a/rock_boulder_cracked — CC0-1.0, SHA-256 `022000a37cb91457de2e0c738baebbc1b0b8eb864ba99321d07c248d5c0741bc`
+- textures/grass-color.jpg: https://polyhaven.com/a/aerial_grass_rock — CC0-1.0, SHA-256 `57b8041bfe0d0f01430e4dbaad45e7ddddf0a9fc97317f90dbc51f7b0d9e1b5d`
+- textures/grass-roughness.jpg: https://polyhaven.com/a/aerial_grass_rock — CC0-1.0, SHA-256 `b9f3f76aba74007f708333c0dbe73c52eb83ea0c4187a13e2e994f888a25114a`
+- textures/grass-normal.jpg: https://polyhaven.com/a/aerial_grass_rock — CC0-1.0, SHA-256 `1aa3e23bff453f152e089b9f83aa36b4901651e019f7e2ca01d5331a9bbbda78`
+- textures/dirt-color.jpg: https://polyhaven.com/a/brown_mud_leaves_01 — CC0-1.0, SHA-256 `c598c555f13cd5328409fd5e2a45496a26e319e52299e3959042f1449c2f1b06`
+- textures/dirt-roughness.jpg: https://polyhaven.com/a/brown_mud_leaves_01 — CC0-1.0, SHA-256 `9f84b7e7b5fdd2ff9798645fdec243b994fced05e543692761994b793211b5d0`
+- textures/dirt-normal.jpg: https://polyhaven.com/a/brown_mud_leaves_01 — CC0-1.0, SHA-256 `8dd5166ddcc293cefd331d491ce6b9162bc9202ddd999ac1e4141697560d38e0`
+- textures/stone-color.jpg: https://polyhaven.com/a/castle_brick_01 — CC0-1.0, SHA-256 `3823fdc4bcb37cc7b26fd7e3b2a80e82f5a23354d22d84eb0ca277909f923b2c`
+- textures/stone-roughness.jpg: https://polyhaven.com/a/castle_brick_01 — CC0-1.0, SHA-256 `0958bde6010e2b7e4098b2737e94cff53c0c41c865e09a69b1a1e39ba7973985`
+- textures/stone-normal.jpg: https://polyhaven.com/a/castle_brick_01 — CC0-1.0, SHA-256 `f3c4c0538fd5c3f9e1aabcb0169fbbc3ac2883ed5544f05d9008d2736a2899de`
+- skies/day.hdr: https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky — CC0-1.0, SHA-256 `fd94c84997b8a3c353b62c2125a9b44e19509956986a126e472684432a02d798`
+- skies/sunset.hdr: https://polyhaven.com/a/qwantani_sunset_puresky — CC0-1.0, SHA-256 `e90f2130848de0364b76d2b3da7a72ce31bbb95d66bd86d5b4f85f0626421b8d`
+- skies/overcast.hdr: https://polyhaven.com/a/kloofendal_overcast_puresky — CC0-1.0, SHA-256 `5f98aa01d43a49cd899299751a978b3e5559a76300198b5dd2d9c68ecc4ad130`
+- models/q-farmanimal/Cow.glb: https://quaternius.com/packs/farmanimal.html — CC0-1.0, SHA-256 `5bdb18da23e114c717a8739e7defc75b6bf3d1dd54e928c141a0286bf14aa4a8`
+- models/q-survival/Torch.glb: https://quaternius.com/packs/survival.html — CC0-1.0, SHA-256 `62c1f1e63e889716480ac5484e342e82650461aab9a0158b65e2c3516a522d3c`
+- models/mini-characters/weapon-spear.glb: https://kenney.nl/assets/mini-characters — CC0-1.0, SHA-256 `2576c07d71b86f59c579824cc4592c2988a63be767ef6e3f71c66dbea2a6a615`
+- models/mini-characters/Textures/colormap.png: https://kenney.nl/assets/mini-characters — CC0-1.0, SHA-256 `3aba07b39c13e9fa9a02cba6246fdd9d711bb15702e00e10ad84595b25452f95`
+- models/mini-characters/shield-round.glb: https://kenney.nl/assets/mini-characters — CC0-1.0, SHA-256 `dda06a4c532a12521a3cc22b7e3a07982f4c981fdd3db7de64c61a6bd4ac583e`
+- models/nature-kit/tent_detailedOpen.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `d54d9665d07e0ff9680e56731c9f5338fc25d93788504d63b8375f54e6444193`
+- models/nature-kit/tent_smallClosed.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `326bb7909d67a587149be7f048f39257daadc899d80b5f956090571881b096e0`
+- models/nature-kit/campfire_stones.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `54869db23243a3f4905bc00bd4cd93b1037b28556ab3ef93e7a893a093791e35`
+- models/nature-kit/cliff_large_rock.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `f9bf79cd3a76bbe11f4887053655585e467e14f2528678215a820896669e4e8e`
+- models/nature-kit/rock_tallA.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `88250f236a3b75f8b55c1d8afb6af020f8a91b1e81f9fb51f7ef513420d45a2d`
+- models/nature-kit/rock_tallE.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `21f135fa85c5fde5f1136ceefe7f9c9103f292109a5b1d77a6675e97d7a782fb`
+- models/nature-kit/stone_tallB.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `4dc2798870b56fe4028f47418994c8b7c336baf7045bf034fe8117cb7e635ba1`
+- models/nature-kit/tree_pineRoundA.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `7dc9711f31585eafdcb965d0649c30af5e19f2def1955f7a915081d30759ef8e`
+- models/nature-kit/tree_pineSmallB.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `59392aa6604adb9dccd4fb76df5ed12ae8ac7d7391eb7e04bc84fffe9f9b36c8`
+- models/pirate-kit/boat-row-small.glb: https://kenney.nl/assets/pirate-kit — CC0-1.0, SHA-256 `846d9b17a73f80e03f7201d3bf0ad1b1bbb49e114b99697740d3426e4f42482d`
+- models/nature-kit/bridge_wood.glb: https://kenney.nl/assets/nature-kit — CC0-1.0, SHA-256 `3da4c208b0f72b7f2ba42db521b62ec4b0278050c75256a6982c40d21aab5701`
+- models/nature-kit/cactus_tall.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `d43a1aca5952e1f8a104d64a0edfec09c39f15102ca6bdc531460dd5a2c53d25`
+- models/nature-kit/cactus_short.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `81ac9fc4c66eacceaf4aebcb6df3468ea450a2f5081151bb11400282efbc51bd`
+- models/pirate-kit/palm-detailed-straight.glb: https://kenney.nl/assets/pirate-kit � CC0-1.0, SHA-256 `cdc42b4bd02d01a5e15a5d69f1db83e1c77ca7d0a97ad2d9ae8f6a409fed8a36`
+- models/q-desert/Pyramid.glb: https://quaternius.com/packs/desert.html � CC0-1.0, SHA-256 `ade8b0e4c82f54319d4dce300e19a5aa9c3e613d4cf908bf2076f1fbdf339a4d`
+- models/pirate-kit/structure-platform-dock.glb: https://kenney.nl/assets/pirate-kit � CC0-1.0, SHA-256 `bf64343d37b5570cb78cf0918e3eeb98f96f9b2c69b3f16d103c61ebc8f063f7`
+- models/nature-kit/statue_column.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `5d7f6c8bce8d1dc7ee62b1841376cda331c4359acfa2b9a11dd7e78c14ea9dbb`
+- models/nature-kit/statue_columnDamaged.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `ce8f21c31ec16ad67759dd171860bd85fd57fc3857963610c4ed8a39c8d91b95`
+- models/nature-kit/statue_obelisk.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `e18013044ad6453a1850226be29f63c37d67e0002141f5f6a4d14a46bde69e00`
+- models/q-stylizednaturemegakit/Fern_1.glb: https://quaternius.com/packs/stylizednaturemegakit.html � CC0-1.0, SHA-256 `094d036d31705fb4921ad1d75f52a912936903cea8e858b573a992577c3fafb1`
+- models/q-stylizednaturemegakit/Textures/Leaves.png: https://quaternius.com/packs/stylizednaturemegakit.html � CC0-1.0, SHA-256 `db740769d39a7a44214f7ed22ccf0fb2ebbee1613310eaa4017d6f1304109255`
+- models/nature-kit/log.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `8c8fe8f6adfc03a3c0cd6cb24961ff74be96c2da284d70322f05797d049972d6`
+- models/nature-kit/stump_old.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `4c2d2da34804c1662c6a776a9d60fe4449e6f6fdd50914bfec7d5cca3e9ceddb`
+- models/q-farmanimal/Horse.glb: https://quaternius.com/packs/farmanimal.html � CC0-1.0, SHA-256 `1312aaea32693547ef064e7b5225741503234d117aac9bc9826273a579bc238f`
+- models/q-farmanimal/Sheep.glb: https://quaternius.com/packs/farmanimal.html � CC0-1.0, SHA-256 `91aedec323b54d42b802b065b2f5005daea527b0a379a9f3fe90f3258f3c2382`
+- models/q-farmbuildings/Well.glb: https://quaternius.com/packs/farmbuildings.html � CC0-1.0, SHA-256 `0ff38947ad062fc1cd996a8721fee8e730c1407f9cd21440fdbe8cf936687a33`
+- models/q-farmbuildings/Windmill.glb: https://quaternius.com/packs/farmbuildings.html � CC0-1.0, SHA-256 `47ff69525f48730f986531d6b52fa93cf7cdad5608e56faef7e2a8c6de517b56`
+- models/castle-kit/tower-square.glb: https://kenney.nl/assets/castle-kit � CC0-1.0, SHA-256 `ae2e4f11247fef4e8e550011c20bc1862839cd4cfd21590aec9781ae0fbbbc7f`
+- models/nature-kit/tree_palm.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `27bbb23d26ed788d84de6df2f7fab0acc3fe0ff16c7d08cdcfa1fffcb11de324`
+- models/nature-kit/tree_fat.glb: https://kenney.nl/assets/nature-kit � CC0-1.0, SHA-256 `84b262c5dda3a91ac6c95f9d8b23a0ebbb1951d678c0e1375d3e32623cc43ee2`
+- models/fantasy-town-kit/cart-high.glb: https://kenney.nl/assets/fantasy-town-kit � CC0-1.0, SHA-256 `4b0bce37e8645f3719a9032bf4d49048b7779ac891758ae6e2693238911c5eec`
+- models/q-ultimatedanimatedcharacter/Casual_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `152d6f237f33afe698eb5003440e2caf5b8089e3ae06e1fb98fb32e7f6e9588a`
+- models/q-ultimatedanimatedcharacter/Casual_Female.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `a45f3c351c141711463d77f836ec3255124b64bd557e6a21cf47717e6ebebda7`
+- models/q-ultimatedanimatedcharacter/Knight_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `4fdfb27bda95f5efb45095aca5e81fcae71cb0489ff36567599ff6dc6b35e295`
+- models/q-ultimatedanimatedcharacter/Soldier_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `d04c499d01e960f8ab4ad713ce29661b84ee46f9c9db1bf10c3a381ff264287b`
+- models/q-ultimatedanimatedcharacter/Pirate_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `c4325d4e0842a362eb9b2682bed8114b63c3ee3d58e8bafebdb1f15218a7fcc3`
+- models/q-ultimatedanimatedcharacter/Suit_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `8c96a8d4b43c4ea6889d3f3dbb250463a430787f2c923e5647c703c5f0ad5117`
+- models/q-ultimatedanimatedcharacter/Viking_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `7085fcdaf7a2b3968cdf3c58a7bb1ac4b8ae3385f55c47292322a64f658a401b`
+- models/q-ultimatedanimatedcharacter/Worker_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `5632e1baa6ace408cd5f194b4abecf206560a5f3299264c855ce3ddc68cf6966`
+- models/q-ultimatedanimatedcharacter/OldClassy_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `33f1798d136e528d66669b401e4e9e92401df1076752af1e0958d5d97cca5d47`
+- models/q-ultimatedanimatedcharacter/Doctor_Male_Young.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `70b74026ce0bd9780add26a341f982b42335e1af2cd203e639f73de86b266996`
+- models/q-ultimatedanimatedcharacter/Cowboy_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `6d1312cad120cb6dbcaf4bcc271796c3a2ebae96af668339b89d32edaca9939f`
+- models/q-ultimatedanimatedcharacter/Kimono_Male.glb: https://quaternius.com/packs/ultimatedanimatedcharacter.html � CC0-1.0, SHA-256 `7e660a0b460404c61a2585a446c8237ab40d880a8f279ce7707057ef99fd39cc`
+
+## ambientCG (CC0-1.0) — realistic street materials (1K JPG colour, normal GL, roughness)
+- ambientcg/Bricks059: https://ambientcg.com/view?id=Bricks059 — CC0-1.0 (Color, NormalGL, Roughness)
+- ambientcg/Asphalt010: https://ambientcg.com/view?id=Asphalt010 — CC0-1.0 (Color, NormalGL, Roughness)
+- ambientcg/PavingStones070: https://ambientcg.com/view?id=PavingStones070 — CC0-1.0 (Color, NormalGL, Roughness)
+  SHA-256: see the files, pinned at download (Bricks059 colour 22b53ec9…, Asphalt010 colour 412598f9…, PavingStones070 colour 4dd55b7e…)
+
+## ambientCG LeafSet001 (CC0-1.0) — realistic foliage (1K JPG colour, opacity, normal GL, roughness)
+- https://ambientcg.com/view?id=LeafSet001 — CC0-1.0
+
+## Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0-1.0) — sky HDRI, 1K
+- https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky — CC0-1.0

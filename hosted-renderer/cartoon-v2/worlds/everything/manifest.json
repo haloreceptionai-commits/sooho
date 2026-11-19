@@ -1,0 +1,1344 @@
+[
+ {
+  "index": 0,
+  "name": "Interior (Modern House)",
+  "category": "Residential",
+  "centre": [
+   -330,
+   -290
+  ],
+  "size": [
+   70,
+   100
+  ],
+  "cameraSpawn": [
+   -333.4,
+   -262,
+   0
+  ],
+  "targetPoint": [
+   -330,
+   -290
+  ]
+ },
+ {
+  "index": 1,
+  "name": "Downtown (City Centre)",
+  "category": "Residential",
+  "centre": [
+   0,
+   -55
+  ],
+  "size": [
+   380,
+   300
+  ],
+  "cameraSpawn": [
+   0,
+   -47,
+   0
+  ],
+  "targetPoint": [
+   0,
+   -20
+  ]
+ },
+ {
+  "index": 2,
+  "name": "High Street",
+  "category": "Residential",
+  "centre": [
+   0,
+   40
+  ],
+  "size": [
+   332,
+   40
+  ],
+  "cameraSpawn": [
+   -140,
+   40,
+   -1.5707963267948966
+  ],
+  "targetPoint": [
+   0,
+   40
+  ]
+ },
+ {
+  "index": 3,
+  "name": "Village",
+  "category": "Residential",
+  "centre": [
+   -590,
+   10
+  ],
+  "size": [
+   190,
+   200
+  ],
+  "cameraSpawn": [
+   -498,
+   -30,
+   1.5707963267948966
+  ],
+  "targetPoint": [
+   -590,
+   5
+  ]
+ },
+ {
+  "index": 4,
+  "name": "Suburb (Private Street)",
+  "category": "Residential",
+  "centre": [
+   -330,
+   -120
+  ],
+  "size": [
+   270,
+   110
+  ],
+  "cameraSpawn": [
+   -206,
+   -120,
+   1.5707963267948966
+  ],
+  "targetPoint": [
+   -330,
+   -120
+  ]
+ },
+ {
+  "index": 5,
+  "name": "Apartment Block",
+  "category": "Residential",
+  "centre": [
+   -190,
+   1465
+  ],
+  "size": [
+   100,
+   80
+  ],
+  "cameraSpawn": [
+   -190,
+   1431.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -190,
+   1465
+  ]
+ },
+ {
+  "index": 6,
+  "name": "Mansion",
+  "category": "Residential",
+  "centre": [
+   -900,
+   1400
+  ],
+  "size": [
+   230,
+   200
+  ],
+  "cameraSpawn": [
+   -900,
+   1316,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -900,
+   1400
+  ]
+ },
+ {
+  "index": 7,
+  "name": "Slum",
+  "category": "Residential",
+  "centre": [
+   -1050,
+   320
+  ],
+  "size": [
+   240,
+   220
+  ],
+  "cameraSpawn": [
+   -1050,
+   227.60000000000002,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1050,
+   320
+  ]
+ },
+ {
+  "index": 8,
+  "name": "Alleyway",
+  "category": "Residential",
+  "centre": [
+   -1050,
+   540
+  ],
+  "size": [
+   200,
+   160
+  ],
+  "cameraSpawn": [
+   -1050,
+   472.8,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1050,
+   540
+  ]
+ },
+ {
+  "index": 9,
+  "name": "Playground & Park",
+  "category": "Commercial & Public",
+  "centre": [
+   -110,
+   230
+  ],
+  "size": [
+   124,
+   100
+  ],
+  "cameraSpawn": [
+   -92,
+   186,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -105,
+   230
+  ]
+ },
+ {
+  "index": 10,
+  "name": "Stadium",
+  "category": "Commercial & Public",
+  "centre": [
+   380,
+   -160
+  ],
+  "size": [
+   200,
+   170
+  ],
+  "cameraSpawn": [
+   380,
+   -70,
+   0
+  ],
+  "targetPoint": [
+   380,
+   -160
+  ]
+ },
+ {
+  "index": 11,
+  "name": "School",
+  "category": "Commercial & Public",
+  "centre": [
+   -330,
+   165
+  ],
+  "size": [
+   150,
+   130
+  ],
+  "cameraSpawn": [
+   -330,
+   92,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -330,
+   160
+  ]
+ },
+ {
+  "index": 12,
+  "name": "Offices & Business Park",
+  "category": "Commercial & Public",
+  "centre": [
+   0,
+   -330
+  ],
+  "size": [
+   300,
+   170
+  ],
+  "cameraSpawn": [
+   0,
+   -262,
+   0
+  ],
+  "targetPoint": [
+   0,
+   -335
+  ]
+ },
+ {
+  "index": 13,
+  "name": "Play Place & Fun Fair",
+  "category": "Commercial & Public",
+  "centre": [
+   110,
+   235
+  ],
+  "size": [
+   130,
+   120
+  ],
+  "cameraSpawn": [
+   110,
+   172,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   110,
+   235
+  ]
+ },
+ {
+  "index": 14,
+  "name": "Hospital & Fire Station",
+  "category": "Commercial & Public",
+  "centre": [
+   260,
+   25
+  ],
+  "size": [
+   130,
+   70
+  ],
+  "cameraSpawn": [
+   285,
+   78,
+   0
+  ],
+  "targetPoint": [
+   262,
+   25
+  ]
+ },
+ {
+  "index": 15,
+  "name": "Police Station & Jail",
+  "category": "Commercial & Public",
+  "centre": [
+   -690,
+   650
+  ],
+  "size": [
+   190,
+   160
+  ],
+  "cameraSpawn": [
+   -690,
+   582.8,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -690,
+   650
+  ]
+ },
+ {
+  "index": 16,
+  "name": "Restaurant Street",
+  "category": "Commercial & Public",
+  "centre": [
+   700,
+   640
+  ],
+  "size": [
+   220,
+   150
+  ],
+  "cameraSpawn": [
+   700,
+   577,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   700,
+   640
+  ]
+ },
+ {
+  "index": 17,
+  "name": "Mall",
+  "category": "Commercial & Public",
+  "centre": [
+   -480,
+   1335
+  ],
+  "size": [
+   200,
+   80
+  ],
+  "cameraSpawn": [
+   -480,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -480,
+   1335
+  ]
+ },
+ {
+  "index": 18,
+  "name": "Supermarket",
+  "category": "Commercial & Public",
+  "centre": [
+   -300,
+   1335
+  ],
+  "size": [
+   90,
+   80
+  ],
+  "cameraSpawn": [
+   -300,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -300,
+   1335
+  ]
+ },
+ {
+  "index": 19,
+  "name": "Restaurant",
+  "category": "Commercial & Public",
+  "centre": [
+   -205,
+   1335
+  ],
+  "size": [
+   62,
+   80
+  ],
+  "cameraSpawn": [
+   -205,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -205,
+   1335
+  ]
+ },
+ {
+  "index": 20,
+  "name": "Hotel",
+  "category": "Commercial & Public",
+  "centre": [
+   -90,
+   1335
+  ],
+  "size": [
+   110,
+   80
+  ],
+  "cameraSpawn": [
+   -90,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -90,
+   1335
+  ]
+ },
+ {
+  "index": 21,
+  "name": "Museum",
+  "category": "Commercial & Public",
+  "centre": [
+   60,
+   1335
+  ],
+  "size": [
+   100,
+   80
+  ],
+  "cameraSpawn": [
+   60,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   60,
+   1335
+  ]
+ },
+ {
+  "index": 22,
+  "name": "Library",
+  "category": "Commercial & Public",
+  "centre": [
+   170,
+   1335
+  ],
+  "size": [
+   80,
+   80
+  ],
+  "cameraSpawn": [
+   170,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   170,
+   1335
+  ]
+ },
+ {
+  "index": 23,
+  "name": "Bank",
+  "category": "Commercial & Public",
+  "centre": [
+   260,
+   1335
+  ],
+  "size": [
+   70,
+   80
+  ],
+  "cameraSpawn": [
+   260,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   260,
+   1335
+  ]
+ },
+ {
+  "index": 24,
+  "name": "Arcade",
+  "category": "Commercial & Public",
+  "centre": [
+   350,
+   1335
+  ],
+  "size": [
+   70,
+   80
+  ],
+  "cameraSpawn": [
+   350,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   350,
+   1335
+  ]
+ },
+ {
+  "index": 25,
+  "name": "Cinema",
+  "category": "Commercial & Public",
+  "centre": [
+   450,
+   1335
+  ],
+  "size": [
+   100,
+   80
+  ],
+  "cameraSpawn": [
+   450,
+   1301.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   450,
+   1335
+  ]
+ },
+ {
+  "index": 26,
+  "name": "Gym",
+  "category": "Commercial & Public",
+  "centre": [
+   -480,
+   1465
+  ],
+  "size": [
+   100,
+   80
+  ],
+  "cameraSpawn": [
+   -480,
+   1431.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -480,
+   1465
+  ]
+ },
+ {
+  "index": 27,
+  "name": "Garage (Car Park & Mechanic)",
+  "category": "Commercial & Public",
+  "centre": [
+   -350,
+   1465
+  ],
+  "size": [
+   120,
+   80
+  ],
+  "cameraSpawn": [
+   -350,
+   1431.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -350,
+   1465
+  ]
+ },
+ {
+  "index": 28,
+  "name": "Airport",
+  "category": "Transport",
+  "centre": [
+   0,
+   590
+  ],
+  "size": [
+   780,
+   230
+  ],
+  "cameraSpawn": [
+   0,
+   458,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   0,
+   585
+  ]
+ },
+ {
+  "index": 29,
+  "name": "Railway Station",
+  "category": "Transport",
+  "centre": [
+   60,
+   -495
+  ],
+  "size": [
+   160,
+   50
+  ],
+  "cameraSpawn": [
+   60,
+   -462,
+   0
+  ],
+  "targetPoint": [
+   60,
+   -500
+  ]
+ },
+ {
+  "index": 30,
+  "name": "Bus & Metro Hub",
+  "category": "Transport",
+  "centre": [
+   0,
+   1465
+  ],
+  "size": [
+   160,
+   80
+  ],
+  "cameraSpawn": [
+   0,
+   1431.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   0,
+   1465
+  ]
+ },
+ {
+  "index": 31,
+  "name": "Harbour (Port & Docks)",
+  "category": "Transport",
+  "centre": [
+   -300,
+   1060
+  ],
+  "size": [
+   340,
+   300
+  ],
+  "cameraSpawn": [
+   -300,
+   934,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -300,
+   1060
+  ]
+ },
+ {
+  "index": 32,
+  "name": "Highway (Elevated)",
+  "category": "Transport",
+  "centre": [
+   0,
+   -200
+  ],
+  "size": [
+   1400,
+   26
+  ],
+  "cameraSpawn": [
+   -300,
+   -200,
+   -1.5707963267948966
+  ],
+  "targetPoint": [
+   0,
+   -200
+  ]
+ },
+ {
+  "index": 33,
+  "name": "Bridge (Suspension)",
+  "category": "Transport",
+  "centre": [
+   55,
+   1040
+  ],
+  "size": [
+   640,
+   50
+  ],
+  "cameraSpawn": [
+   -215,
+   1040,
+   -1.5707963267948966
+  ],
+  "targetPoint": [
+   55,
+   1040
+  ]
+ },
+ {
+  "index": 34,
+  "name": "Tunnel",
+  "category": "Transport",
+  "centre": [
+   0,
+   1760
+  ],
+  "size": [
+   420,
+   150
+  ],
+  "cameraSpawn": [
+   0,
+   1697,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   0,
+   1760
+  ]
+ },
+ {
+  "index": 35,
+  "name": "Warehouse & Logistics",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   400,
+   170
+  ],
+  "size": [
+   180,
+   150
+  ],
+  "cameraSpawn": [
+   400,
+   92,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   400,
+   170
+  ]
+ },
+ {
+  "index": 36,
+  "name": "Laboratory Campus",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   -580,
+   -330
+  ],
+  "size": [
+   156,
+   150
+  ],
+  "cameraSpawn": [
+   -580,
+   -240,
+   0
+  ],
+  "targetPoint": [
+   -580,
+   -330
+  ]
+ },
+ {
+  "index": 37,
+  "name": "Battlefield",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   490,
+   400
+  ],
+  "size": [
+   214,
+   184
+  ],
+  "cameraSpawn": [
+   380,
+   400,
+   -1.5707963267948966
+  ],
+  "targetPoint": [
+   490,
+   400
+  ]
+ },
+ {
+  "index": 38,
+  "name": "Military Base & Cantonment",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   -585,
+   330
+  ],
+  "size": [
+   154,
+   204
+  ],
+  "cameraSpawn": [
+   -490,
+   330,
+   1.5707963267948966
+  ],
+  "targetPoint": [
+   -585,
+   330
+  ]
+ },
+ {
+  "index": 39,
+  "name": "Factory",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   -1050,
+   -650
+  ],
+  "size": [
+   240,
+   200
+  ],
+  "cameraSpawn": [
+   -1050,
+   -734,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1050,
+   -650
+  ]
+ },
+ {
+  "index": 40,
+  "name": "Power Plant",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   -1050,
+   -410
+  ],
+  "size": [
+   240,
+   220
+  ],
+  "cameraSpawn": [
+   -1050,
+   -502.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1050,
+   -410
+  ]
+ },
+ {
+  "index": 41,
+  "name": "Prison",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   -1050,
+   -160
+  ],
+  "size": [
+   240,
+   220
+  ],
+  "cameraSpawn": [
+   -1050,
+   -252.39999999999998,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1050,
+   -160
+  ]
+ },
+ {
+  "index": 42,
+  "name": "Bunker",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   -1050,
+   80
+  ],
+  "size": [
+   200,
+   180
+  ],
+  "cameraSpawn": [
+   -1050,
+   4.400000000000006,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1050,
+   80
+  ]
+ },
+ {
+  "index": 43,
+  "name": "Mine",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   1090,
+   -330
+  ],
+  "size": [
+   260,
+   200
+  ],
+  "cameraSpawn": [
+   1090,
+   -414,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   1090,
+   -330
+  ]
+ },
+ {
+  "index": 44,
+  "name": "Farm",
+  "category": "Industrial, Science & Military",
+  "centre": [
+   -610,
+   90
+  ],
+  "size": [
+   200,
+   100
+  ],
+  "cameraSpawn": [
+   -610,
+   48,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -610,
+   90
+  ]
+ },
+ {
+  "index": 45,
+  "name": "Forest & Campsite",
+  "category": "Natural & Outdoor",
+  "centre": [
+   500,
+   -400
+  ],
+  "size": [
+   260,
+   200
+  ],
+  "cameraSpawn": [
+   470,
+   -318,
+   -0.62
+  ],
+  "targetPoint": [
+   500,
+   -400
+  ]
+ },
+ {
+  "index": 46,
+  "name": "Desert",
+  "category": "Natural & Outdoor",
+  "centre": [
+   1130,
+   -620
+  ],
+  "size": [
+   360,
+   320
+  ],
+  "cameraSpawn": [
+   1130,
+   -754.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   1130,
+   -620
+  ]
+ },
+ {
+  "index": 47,
+  "name": "Beach",
+  "category": "Natural & Outdoor",
+  "centre": [
+   -720,
+   1050
+  ],
+  "size": [
+   340,
+   300
+  ],
+  "cameraSpawn": [
+   -720,
+   924,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -720,
+   1050
+  ]
+ },
+ {
+  "index": 48,
+  "name": "Mountain",
+  "category": "Natural & Outdoor",
+  "centre": [
+   -1330,
+   -1000
+  ],
+  "size": [
+   340,
+   320
+  ],
+  "cameraSpawn": [
+   -1330,
+   -1134.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1330,
+   -1000
+  ]
+ },
+ {
+  "index": 49,
+  "name": "Jungle",
+  "category": "Natural & Outdoor",
+  "centre": [
+   1110,
+   -60
+  ],
+  "size": [
+   300,
+   280
+  ],
+  "cameraSpawn": [
+   1110,
+   -177.6,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   1110,
+   -60
+  ]
+ },
+ {
+  "index": 50,
+  "name": "Island",
+  "category": "Natural & Outdoor",
+  "centre": [
+   360,
+   1060
+  ],
+  "size": [
+   240,
+   260
+  ],
+  "cameraSpawn": [
+   360,
+   950.8,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   360,
+   1060
+  ]
+ },
+ {
+  "index": 51,
+  "name": "Cave",
+  "category": "Natural & Outdoor",
+  "centre": [
+   -1330,
+   -1350
+  ],
+  "size": [
+   260,
+   240
+  ],
+  "cameraSpawn": [
+   -1330,
+   -1450.8,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -1330,
+   -1350
+  ]
+ },
+ {
+  "index": 52,
+  "name": "Swamp",
+  "category": "Natural & Outdoor",
+  "centre": [
+   1110,
+   250
+  ],
+  "size": [
+   300,
+   260
+  ],
+  "cameraSpawn": [
+   1110,
+   140.8,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   1110,
+   250
+  ]
+ },
+ {
+  "index": 53,
+  "name": "Arctic",
+  "category": "Natural & Outdoor",
+  "centre": [
+   -960,
+   -1000
+  ],
+  "size": [
+   340,
+   320
+  ],
+  "cameraSpawn": [
+   -960,
+   -1134.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -960,
+   -1000
+  ]
+ },
+ {
+  "index": 54,
+  "name": "Underwater",
+  "category": "Natural & Outdoor",
+  "centre": [
+   850,
+   1060
+  ],
+  "size": [
+   300,
+   300
+  ],
+  "cameraSpawn": [
+   850,
+   1020,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   850,
+   1060
+  ]
+ },
+ {
+  "index": 55,
+  "name": "Castle",
+  "category": "Historical & Fantasy",
+  "centre": [
+   -560,
+   -1000
+  ],
+  "size": [
+   340,
+   320
+  ],
+  "cameraSpawn": [
+   -560,
+   -1134.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -560,
+   -1000
+  ]
+ },
+ {
+  "index": 56,
+  "name": "Ruins",
+  "category": "Historical & Fantasy",
+  "centre": [
+   -190,
+   -1000
+  ],
+  "size": [
+   260,
+   260
+  ],
+  "cameraSpawn": [
+   -190,
+   -1109.2,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   -190,
+   -1000
+  ]
+ },
+ {
+  "index": 57,
+  "name": "Temple",
+  "category": "Historical & Fantasy",
+  "centre": [
+   120,
+   -1000
+  ],
+  "size": [
+   240,
+   260
+  ],
+  "cameraSpawn": [
+   120,
+   -1109.2,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   120,
+   -1000
+  ]
+ },
+ {
+  "index": 58,
+  "name": "Cemetery",
+  "category": "Historical & Fantasy",
+  "centre": [
+   390,
+   -1000
+  ],
+  "size": [
+   200,
+   200
+  ],
+  "cameraSpawn": [
+   390,
+   -1084,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   390,
+   -1000
+  ]
+ },
+ {
+  "index": 59,
+  "name": "Spaceship Landing Site",
+  "category": "Historical & Fantasy",
+  "centre": [
+   700,
+   -1000
+  ],
+  "size": [
+   300,
+   300
+  ],
+  "cameraSpawn": [
+   700,
+   -1126,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   700,
+   -1000
+  ]
+ },
+ {
+  "index": 60,
+  "name": "Wasteland",
+  "category": "Historical & Fantasy",
+  "centre": [
+   1080,
+   -1000
+  ],
+  "size": [
+   340,
+   320
+  ],
+  "cameraSpawn": [
+   1080,
+   -1134.4,
+   3.141592653589793
+  ],
+  "targetPoint": [
+   1080,
+   -1000
+  ]
+ }
+]

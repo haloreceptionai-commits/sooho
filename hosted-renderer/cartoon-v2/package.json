@@ -1,0 +1,1 @@
+{"name":"chronicle-cartoon-renderer","private":true,"type":"module","dependencies":{"apify":"3.4.5"},"scripts":{"start":"node actor.js"}}

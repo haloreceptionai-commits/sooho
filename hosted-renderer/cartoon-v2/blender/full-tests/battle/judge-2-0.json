@@ -1,0 +1,150 @@
+{
+  "labels": {
+    "benchmark": "A",
+    "candidate": "B"
+  },
+  "passed": false,
+  "result": {
+    "scores": {
+      "A": {
+        "clarity": 6,
+        "cause_effect": 8,
+        "engagement": 9,
+        "kid_clear": true,
+        "opening": true
+      },
+      "B": {
+        "clarity": 8,
+        "cause_effect": 7,
+        "engagement": 5,
+        "kid_clear": true,
+        "opening": true
+      }
+    },
+    "candidate_sentences": [
+      {
+        "index": 0,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Cart-based rocket launcher used in fortress defense is supported; cart rolling near fort walls is depictable (cart roll in castle set)."
+      },
+      {
+        "index": 1,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Fortress defense context is supported; soldiers standing/pointing is depictable in castle set with cart present."
+      },
+      {
+        "index": 2,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Multiple rocket arrows in rapid succession is supported by rocket-artillery evidence; rockets firing is drawable."
+      },
+      {
+        "index": 3,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Rockets flying from a cart in a fortress context is supported and drawable."
+      },
+      {
+        "index": 4,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Repeated rocket firing in fortress defense is supported and drawable; cheering is extra flavor but drawable (cheer action)."
+      },
+      {
+        "index": 5,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Fortress context is supported; commanders pointing toward other carts is drawable."
+      },
+      {
+        "index": 6,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Use in fortress defense during invasions is supported by history/defense facts; the noun 'invasions' is not literally drawable in the given vocabulary."
+      },
+      {
+        "index": 7,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Fortress context and rolling carts are drawable, but the action 'stop' is not in the drawable actions list."
+      },
+      {
+        "index": 8,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Multiple salvos/bursts are supported conceptually, but the noun 'bursts' is not literally drawable."
+      },
+      {
+        "index": 9,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Rockets in flight are supported/drawable, but the action word 'shooting' for rocket arrows is not in the rocket_arrow action list."
+      },
+      {
+        "index": 10,
+        "evidence_ok": true,
+        "picture_ok": false,
+        "reason": "Repeated firing in fortress context is supported; 'direct' as an action is not in the drawable list."
+      },
+      {
+        "index": 11,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Rocket arrows launched from a cart are supported and drawable."
+      },
+      {
+        "index": 12,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Fortress context is supported; rolling carts and having two carts are drawable even if not evidenced."
+      },
+      {
+        "index": 13,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "'Blast off' rockets are supported/drawable; pointing and nodding are drawable actions."
+      },
+      {
+        "index": 14,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Watching rockets fly from near castle walls is supported/drawable."
+      },
+      {
+        "index": 15,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Launching many rockets at once in fortress defense is supported and drawable."
+      },
+      {
+        "index": 16,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Firing many at once is supported by rocket-artillery evidence; drawable as multiple rocket_arrow:fire."
+      },
+      {
+        "index": 17,
+        "evidence_ok": true,
+        "picture_ok": true,
+        "reason": "Reason given (inaccurate and slow to reload) is directly supported by the rocket-artillery evidence; firing is drawable."
+      }
+    ],
+    "unsupported": [
+      "Crews or soldiers cheering loudly",
+      "Commanders\u2019 pointing or nodding directly triggering another firing",
+      "Multiple carts specifically indicated as \u201cother wheeled carts,\u201d a \u201cfirst cart,\u201d and a \u201cwaiting cart\u201d",
+      "Rolling carts along the walls and stopping together",
+      "Soldiers standing and pointing outward or watching as a notable behavior",
+      "Crews nodding on command"
+    ],
+    "undrawable": [
+      "invasions",
+      "stop",
+      "bursts",
+      "shooting",
+      "direct"
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+ "step": 8,
+ "accepted": false,
+ "loudness": {
+  "1": {
+   "lufs": -14.33,
+   "true_peak": -1.36,
+   "pass": true
+  },
+  "2": {
+   "lufs": -13.99,
+   "true_peak": -1.74,
+   "pass": true
+  },
+  "3": {
+   "lufs": -14.05,
+   "true_peak": -1.26,
+   "pass": true
+  }
+ },
+ "voice_unchanged": true,
+ "listening": {
+  "1": {
+   "in_sync": 3,
+   "fits": 3,
+   "scores": [
+    7,
+    7,
+    7
+   ]
+  },
+  "2": {
+   "in_sync": 3,
+   "fits": 2,
+   "scores": [
+    4,
+    6,
+    6
+   ]
+  },
+  "3": {
+   "in_sync": 3,
+   "fits": 3,
+   "scores": [
+    7,
+    7,
+    7
+   ]
+  }
+ },
+ "open": [
+  "crowd: only CC0 crowd recording is a few voices shouting; layered to a crowd but judges hear it 1-2/3 times; a CC-BY crowd cheer (Gregor Quendel, opengameart) needs owner approval for attribution",
+  "fire crackle recording is faint",
+  "footsteps masked by blast tails/pickaxe in 5 of 25 cues (by design, same as real mixing)"
+ ]
+}

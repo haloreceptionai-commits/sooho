@@ -1,0 +1,256 @@
+{
+  "image": "blender-renderer:qa10",
+  "evidence": "Eight independently identified stills, original and alternate camera per object. No motion claims. Intended names withheld from judge.",
+  "images": {
+    "shot-0": "recognition-hand_drill-original",
+    "shot-1": "recognition-fuse_bundle-alternate",
+    "shot-2": "recognition-gold_pan-alternate",
+    "shot-3": "recognition-fuse_bundle-original",
+    "shot-4": "recognition-gold_pan-original",
+    "shot-5": "recognition-gold_vein-alternate",
+    "shot-6": "recognition-gold_vein-original",
+    "shot-7": "recognition-hand_drill-alternate"
+  },
+  "result": {
+    "results": [
+      {
+        "id": "shot-0",
+        "identity": "Manual hand drill (\u201ceggbeater\u201d drill) mounted over a block",
+        "recognizable": true,
+        "visible_features": [
+          "large spoked gear wheel",
+          "side crank handle on the wheel",
+          "top knob/handle",
+          "spiral drill bit pointing downward",
+          "mounted on a rectangular base"
+        ],
+        "confusions": [
+          "valve handwheel",
+          "winch or small grinder",
+          "mechanical gear display"
+        ]
+      },
+      {
+        "id": "shot-1",
+        "identity": "Bundle of dynamite sticks with a fuse",
+        "recognizable": true,
+        "visible_features": [
+          "three red cylindrical sticks with white bands",
+          "sticks held together by dark straps",
+          "single twisted fuse/cord leading out",
+          "spark at the end of the fuse"
+        ],
+        "confusions": [
+          "large fireworks",
+          "road flares",
+          "battery pack"
+        ]
+      },
+      {
+        "id": "shot-2",
+        "identity": "Gold panning pan with gold pieces in the riffles",
+        "recognizable": true,
+        "visible_features": [
+          "shallow round pan with concentric riffles",
+          "dark metallic surface",
+          "small yellow nuggets clustered near the center"
+        ],
+        "confusions": [
+          "satellite dish",
+          "serving plate with food",
+          "decorative bowl"
+        ]
+      },
+      {
+        "id": "shot-3",
+        "identity": "Bundle of dynamite sticks with a fuse",
+        "recognizable": true,
+        "visible_features": [
+          "three red cylindrical sticks with white bands",
+          "dark connectors/straps between sticks",
+          "twisted fuse cord with a lit spark"
+        ],
+        "confusions": [
+          "large fireworks",
+          "road flares",
+          "battery pack"
+        ]
+      },
+      {
+        "id": "shot-4",
+        "identity": "Gold panning pan with gold pieces",
+        "recognizable": true,
+        "visible_features": [
+          "round shallow pan with stepped riffles",
+          "cluster of small gold nuggets near center"
+        ],
+        "confusions": [
+          "satellite dish",
+          "serving plate",
+          "frisbee"
+        ]
+      },
+      {
+        "id": "shot-5",
+        "identity": "Gold-bearing quartz vein in host rock (gold ore)",
+        "recognizable": true,
+        "visible_features": [
+          "block of gray rock",
+          "white vein running diagonally through the rock",
+          "yellow metallic nuggets aligned along the vein"
+        ],
+        "confusions": [
+          "decorative sculpture",
+          "painted stripe on a block",
+          "crack filled with resin"
+        ]
+      },
+      {
+        "id": "shot-6",
+        "identity": "Gold-bearing quartz vein in host rock (gold ore)",
+        "recognizable": true,
+        "visible_features": [
+          "gray rock block",
+          "light-colored vein traversing the face",
+          "gold-colored nuggets clustered along the vein"
+        ],
+        "confusions": [
+          "decorative inlay",
+          "painted stripe",
+          "crack with filler"
+        ]
+      },
+      {
+        "id": "shot-7",
+        "identity": "Manual hand drill (\u201ceggbeater\u201d drill) on a base",
+        "recognizable": true,
+        "visible_features": [
+          "spoked gear wheel",
+          "side crank handle",
+          "top knob/handle",
+          "spiral drill bit pointing downward",
+          "rectangular base beneath"
+        ],
+        "confusions": [
+          "valve wheel",
+          "winch",
+          "grinding wheel mechanism"
+        ]
+      }
+    ]
+  },
+  "execution": "blender-shot-gpu-wxu9msz",
+  "status": "Succeeded",
+  "recognition_accepted": true,
+  "accepted": false,
+  "scope": "Four previously failed identities only; not full step-5 or mechanism acceptance.",
+  "previous_audit": {
+    "images": [
+      "object-covered_cart",
+      "object-dynamite",
+      "object-fuse_bundle",
+      "object-gold_pan",
+      "object-gold_shotgun",
+      "object-gold_vein",
+      "object-hand_drill",
+      "object-magnifier",
+      "object-perforated_cart",
+      "object-rocket_arrow"
+    ],
+    "result": {
+      "results": [
+        {
+          "i": 0,
+          "identity": "covered cart/wagon",
+          "recognizable": true,
+          "defects": "roof is oversized corrugated sheet hiding most of the body; no hitch or details so it looks toy\u2011like"
+        },
+        {
+          "i": 1,
+          "identity": "stick of dynamite with fuse",
+          "recognizable": true,
+          "defects": "single stick with decorative bands; simplified toy look"
+        },
+        {
+          "i": 2,
+          "identity": "rake",
+          "recognizable": true,
+          "defects": "teeth are chunky white cylinders and the head is unusual, making it look stylized"
+        },
+        {
+          "i": 3,
+          "identity": "bowl",
+          "recognizable": true,
+          "defects": "very shallow metallic bowl; contents are unclear beads"
+        },
+        {
+          "i": 4,
+          "identity": "double\u2011barrel shotgun",
+          "recognizable": true,
+          "defects": "upright pose and simplified proportions make it toy\u2011like"
+        },
+        {
+          "i": 5,
+          "identity": "cracked egg",
+          "recognizable": true,
+          "defects": "faceted low\u2011poly surface and a gold zigzag seam instead of a real crack"
+        },
+        {
+          "i": 6,
+          "identity": "hand crank mechanism",
+          "recognizable": false,
+          "defects": "abstract assembly with floating offsets and springy base; purpose unclear"
+        },
+        {
+          "i": 7,
+          "identity": "magnifying glass on a stand",
+          "recognizable": true,
+          "defects": "handle replaced by a post; yellow disk in center is unexplained"
+        },
+        {
+          "i": 8,
+          "identity": "pegboard on wheels",
+          "recognizable": true,
+          "defects": "wheeled base makes it resemble a cart or cheese grater, causing ambiguity"
+        },
+        {
+          "i": 9,
+          "identity": "rocket/firework rocket",
+          "recognizable": true,
+          "defects": "hovering, simplified materials and geometry"
+        }
+      ]
+    },
+    "image": "blender-renderer:qa8",
+    "execution": "blender-shot-gpu-au9az02",
+    "status": "Succeeded",
+    "accepted": false,
+    "evidence": "single still per object; no motion claims",
+    "remaining": [
+      "Fuse misidentified as rake",
+      "Gold vein misidentified as cracked egg",
+      "Hand drill purpose unclear",
+      "Pan flakes unclear",
+      "All ten moving mechanisms need rendered checks"
+    ]
+  },
+  "remaining": [
+    "All ten moving mechanisms need rendered checks"
+  ],
+  "sha256": {
+    "recognition-hand_drill-original": "6b3825dcd8b0826a3414aaf6cd877b0de3c2e2114d84876b2fb9d030754b6344",
+    "recognition-fuse_bundle-alternate": "76d3f6a17d95bcb9fa4ef81e943ef4cee3cec9b3f94670bb961cbfe7acfc4c87",
+    "recognition-gold_pan-alternate": "f80eb13cf78d5f7f24d1a80e15c21764b7adb884a9fb19691b0e1a5f6ccc8770",
+    "recognition-fuse_bundle-original": "534996dfbdb3855d54a6e6007f80465d9b844ae1d6037b258056c50b994d0751",
+    "recognition-gold_pan-original": "4b9ae459ac2108c229be334279dcc19b50b115dc4460dc2bcc13f621e9f0ab4b",
+    "recognition-gold_vein-alternate": "ce81bedd65c77a39ee538cadcfc332d7ab67969249d644185194738ab7fe396e",
+    "recognition-gold_vein-original": "31f988914dd7529cea64bdc68a16c4d7e52e6ad1a9c240e662b9304444e031ed",
+    "recognition-hand_drill-alternate": "70e93894b8aba540672a37100386475e160267c262de57696e83037ffb63e087"
+  },
+  "identity_acceptance": {
+    "hand_drill": "manual eggbeater drill in both views",
+    "fuse_bundle": "fused explosive charge bundle in both views; connected fuse visible, not rake/plumbing",
+    "gold_pan": "gold panning pan with nuggets in both views",
+    "gold_vein": "gold-bearing quartz vein in rock in both views"
+  }
+}

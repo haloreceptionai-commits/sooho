@@ -1,0 +1,223 @@
+{
+  "title": "Hot Bars, Cold Gaps",
+  "sentences": [
+    {
+      "text": "Steel rails grow, cold gaps stop hot tracks from lengthening.",
+      "fact_ids": [
+        "heat",
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails grow under summer day along the rail yard.",
+      "fact_ids": [
+        "heat"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Rail joints show neat gaps between bolted steel ends.",
+      "fact_ids": [
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Stone sleepers hold rails against sideways shove from heat.",
+      "fact_ids": [
+        "forces"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "But...",
+      "fact_ids": [],
+      "picture": [
+        "set:rail_yard"
+      ]
+    },
+    {
+      "text": "Steel gaps close when noon heat climbs higher.",
+      "fact_ids": [
+        "heat",
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails shove sideways when gaps vanish under heat.",
+      "fact_ids": [
+        "heat",
+        "forces"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "Rail joints buckle under compressive force during summer heat.",
+      "fact_ids": [
+        "forces",
+        "heat"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "How?",
+      "fact_ids": [],
+      "picture": [
+        "set:rail_yard"
+      ]
+    },
+    {
+      "text": "Steel rails contract during winter and open joints wider.",
+      "fact_ids": [
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Rail joints show longer spaces under frosty morning light.",
+      "fact_ids": [
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel gaps close again under summer sun.",
+      "fact_ids": [
+        "gaps",
+        "heat"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Stone sleepers contain forces to prevent buckling.",
+      "fact_ids": [
+        "forces"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:buckle"
+      ]
+    },
+    {
+      "text": "Yet rails get longer under strong sun.",
+      "fact_ids": [
+        "heat"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "But...",
+      "fact_ids": [],
+      "picture": [
+        "set:rail_yard"
+      ]
+    },
+    {
+      "text": "Stitched rails create long strings with fastenings over sleepers.",
+      "fact_ids": [
+        "modern"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel fastenings apply compressive force to keep set length.",
+      "fact_ids": [
+        "modern"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Then fastenings hold bars against free expansion.",
+      "fact_ids": [
+        "modern"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails expand under heat while fastenings resist.",
+      "fact_ids": [
+        "heat",
+        "modern"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails stay at original length under compressive force.",
+      "fact_ids": [
+        "modern"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Cold gaps save hot rails from kinks.",
+      "fact_ids": [
+        "gaps",
+        "heat"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    },
+    {
+      "text": "Steel rails rest under cold gaps tonight.",
+      "fact_ids": [
+        "gaps"
+      ],
+      "picture": [
+        "set:rail_yard",
+        "obj:rail_joint:expand"
+      ]
+    }
+  ]
+}

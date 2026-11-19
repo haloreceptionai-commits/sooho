@@ -1,0 +1,4 @@
+out/
+worlds/everything/*.glb
+assets/library
+__pycache__/

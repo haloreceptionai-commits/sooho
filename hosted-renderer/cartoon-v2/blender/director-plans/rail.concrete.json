@@ -1,0 +1,86 @@
+{
+ "0": [
+  "Rail",
+  "ends",
+  "touch",
+  "gap",
+  "trains"
+ ],
+ "1": [
+  "rails"
+ ],
+ "2": [],
+ "3": [
+  "tracks",
+  "gaps"
+ ],
+ "4": [
+  "lines",
+  "rails",
+  "ends",
+  "bolted",
+  "bars",
+  "space"
+ ],
+ "5": [
+  "space",
+  "grows",
+  "closes"
+ ],
+ "6": [
+  "rails",
+  "shove",
+  "buckle"
+ ],
+ "7": [
+  "joints"
+ ],
+ "8": [
+  "mainlines",
+  "weld",
+  "rails"
+ ],
+ "9": [
+  "set",
+  "rail"
+ ],
+ "10": [
+  "Clips",
+  "anchors",
+  "stone",
+  "hold"
+ ],
+ "11": [
+  "joints",
+  "gaps",
+  "signals"
+ ],
+ "12": [
+  "joints",
+  "pull",
+  "break",
+  "bolts"
+ ],
+ "13": [
+  "rails",
+  "kink"
+ ],
+ "14": [
+  "crews"
+ ],
+ "15": [
+  "space",
+  "move"
+ ],
+ "16": [
+  "deck",
+  "boards",
+  "gaps",
+  "pushes"
+ ],
+ "17": [],
+ "18": [
+  "mainlines",
+  "gaps"
+ ]
+}

@@ -1,0 +1,66 @@
+{
+ "set": "mine_tunnel",
+ "lighting": "day",
+ "duration": 1.407,
+ "camera": {
+  "from": [
+   -0.9,
+   8.036,
+   1.6
+  ],
+  "look_at": [
+   -0.025,
+   3.375,
+   0.95
+  ],
+  "lens": 35,
+  "fstop": 5.6
+ },
+ "cast": [
+  {
+   "id": "expert",
+   "pos": [
+    0.6,
+    3.6
+   ],
+   "yaw": 180,
+   "action": "walk",
+   "expression": "determined",
+   "outfit": "worker",
+   "hat": "helmet",
+   "shirt": [
+    0.8,
+    0.8,
+    0.5
+   ]
+  },
+  {
+   "id": "rich_guy",
+   "pos": [
+    -0.65,
+    3.15
+   ],
+   "yaw": 180,
+   "action": "stand",
+   "expression": "smug",
+   "outfit": "merchant",
+   "hat": "top",
+   "shirt": [
+    0.9,
+    0.9,
+    0.9
+   ]
+  }
+ ],
+ "objects": [],
+ "engine": "cycles",
+ "samples": 16,
+ "size": [
+  540,
+  960
+ ],
+ "grade": "Punchy",
+ "frames": [
+  25
+ ]
+}

@@ -1,0 +1,247 @@
+{
+ "step": 5,
+ "image": "blender-renderer:mech17",
+ "execution": "blender-shot-gpu-ugdloaf",
+ "blob_prefix": "step5/mech17/actions",
+ "method": "Azure gpt-5, 3 independent action-specific votes per shot on a 5-frame chronological strip; intended action stated (not a blind identity test); majority required, plus manual sheet inspection and Blender per-frame geometry verification",
+ "render_frames": 65,
+ "geometry_frames_checked": 780,
+ "all_actions_pass": true,
+ "recognition_audit": "object-audit.json (qa10, separate)",
+ "shots": {
+  "covered_cart-open": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "A blue corrugated cover over the cart lifts and swings backward: closed in frame 1, partially raised in frames 2\u20133, then fully upright/open behind the cart in frames 4\u20135, exposing the cart\u2019s top/front.",
+   "frames_checked": 60,
+   "moving_parts": 5,
+   "frame_sha256": [
+    "d826391386bb1864caaf1ef80e97069179f1314cb437a8c20907df1abaa7863c",
+    "4c79c9e92240a104ba7fde651521c4b938b340f005b3a771da6ddf732dbd322d",
+    "83837918783b63b0247484709a0256d77e902392dafaf354b304f503e925ed24",
+    "b865e76ece67b25224b25a42378bffa38fa5ec186ba1f3869cca69a4982452cb",
+    "d87885f20d981c415975fd31f8168aa70120ca26e8b6eb80bc52e02a979e8c1f"
+   ]
+  },
+  "dynamite-explode": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "A red dynamite stick stands in the first two frames. In frame 3 an orange star-shaped blast appears where it was, expanding in frame 4. By frame 5 the stick is gone and small red/green fragments are scattered in a ring on the ground, with gray cloud-like spheres above.",
+   "frames_checked": 60,
+   "moving_parts": 16,
+   "frame_sha256": [
+    "8ad8ea70c77af559bf5ccc5e50f8cdb523e4297c4675d41d935ee3042979990e",
+    "d3584d86d954ed48c56b7ef50a596efe9290481d974d4aebb0871ab5f330b452",
+    "9ea2e3cf5f1b74d133eb87c0f17a83c3ad22fa956565b14c25b415c52b4c204c",
+    "9585a2e93026fd0f1c9052eaa8de481eba1471118f58fcd959a110058c00fc83",
+    "24a78dcff611da1f5f801e2a4b2b43774c6905edeccc518d6948c05ae8dc4853"
+   ]
+  },
+  "dynamite-fire": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "An orange glowing tip moves along the fuse toward the top of the dynamite while the fuse shortens. Gray smoke puffs are visible above and shift upward across frames.",
+   "frames_checked": 60,
+   "moving_parts": 15,
+   "frame_sha256": [
+    "50c47e636373fbca8cfbef6c03de5efb8d8d13e949b48b9eb3b180c0ae9211e3",
+    "b094751297c401158c45bdea6b07e69584dc119bb6fffd81ad19c35d9ec0e5f8",
+    "b4c378bbab7bf32a4cb52fa436980881a11de2efc93dbfec6e67c9700547381d",
+    "4748ce53b4afaef131298d67371cc04c53333873c3ddf811d643835656a68a4d",
+    "7f4007b7f2b4b21ac5f093ff0294bd92b4a90e752575543a3ab6156c13628287"
+   ]
+  },
+  "fuse_bundle-fire": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "A bright flame/spark with smoke starts at the lower fuse end and advances up the cord toward the three sticks. Behind it the rope turns black/charred. By frame 4\u20135 the glowing spark reaches the junction near the dynamite and flares there.",
+   "frames_checked": 60,
+   "moving_parts": 90,
+   "frame_sha256": [
+    "3c3d5d4382b10c16877c11e45f1d983d90a9bc6052aaae8a1eb181291f3c585d",
+    "be4c2e7bc96eef22f0629b60f1afceadce59c36605682933ed40f8aa63e11916",
+    "e883472006ccb6d5e166d9a797ebf1612dde7889ed024f503545443095609bef",
+    "e0e5ba1ec46a796409664cc26db83364ab9f4d24989e3c4fc559114bffa1ca2d",
+    "75f1cca790ec1a415427b30d542fce088dfac78de6667a5bf44e6c6b5503fd24"
+   ]
+  },
+  "gold_pan-pour": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "Frame 1: pan upright with nuggets inside. Frame 2: pan sharply tilts. Frame 3: several nuggets are seen spilling out midair from the tilted pan. Frame 4: nuggets reach the ground while the pan stays tilted. Frame 5: a nugget remains on the ground beneath the pan.",
+   "frames_checked": 60,
+   "moving_parts": 13,
+   "frame_sha256": [
+    "2ba3c18a45242541c1e74fa43915706b1a2b1535cf21b609ecfde0a8f198768d",
+    "34b5bff5895f95bf02cb9eacab67c6f92ca8a64593bc2248b5a53ee84cd66d14",
+    "7bea4b616460c84d23aa0a39506118aa6959ca05899c94469adbfd752198b1b4",
+    "8c830baf5785b838b6dd16d4e0d5434145273a0aa3a6948c5e23841dab457a9e",
+    "53a909a2903de1dc0f56418935814e104b581934669a58cabf49b820d6537beb"
+   ]
+  },
+  "gold_shotgun-fire": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "Shotgun stays centered. In frame 3 an orange muzzle flash appears at the barrel. In frames 4 and 5 a small yellow projectile is visible above the barrel and moves upward. Other small pieces near the gun remain mostly unchanged.",
+   "frames_checked": 60,
+   "moving_parts": 3,
+   "frame_sha256": [
+    "167388110b410c9e452ac42f672df57815f3661985c20def3fd1ff4fe46e2fac",
+    "3074b808ab12b49730c6f01962da664646e6733dcf6e24c868e5a85258d2550b",
+    "a4ea0a78b9ea1aa1164e9138432c215ed1fa836243b9ca3f87a0ee35fa07afd6",
+    "e53e82858608055f242908017638c5ee79330e38afc7024d337ae190d639685a",
+    "db88b6d4942cca675e0470ed4d4f7c5ee4e25c9538bec2db7bf08284081bd0ce"
+   ]
+  },
+  "gold_shotgun-load": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "Frame 1: shotgun closed. Frame 2: shotgun breaks open; a red shell appears near the breech. Frame 3: shell moves closer to the open barrel. Frame 4: shell is visibly seated in the right barrel. Frame 5: shotgun is closed again.",
+   "frames_checked": 60,
+   "moving_parts": 2,
+   "frame_sha256": [
+    "b9e1f3e31a75165951fde7afd07ce9bb8e2f0c7c9d0c07e14a003ee4ce01d96a",
+    "61f42f2cba7dfa0974dc49753e199bc054b6773298f02540fe6d232a44c6de3b",
+    "acff3dcd0a47929f4922943929980680aace704c35c2819f4aa57ca38709ba7c",
+    "d682aad5ae42fc26720ec86b510015f6fb20523e06753f2cfe96224a13b823af",
+    "3fc7adb8844c4f8948eafe03d7ad27de04c60f3c3c9c7299f8f06939b5b1b058"
+   ]
+  },
+  "gold_vein-explode": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "Intact gold-veined rock in frames 1\u20132; frame 3 shows a sudden orange explosion where it was; frame 4 the blast expands with rock and gold chunks flying; frame 5 shows gray smoke above and scattered gold and rock pieces on the ground.",
+   "frames_checked": 60,
+   "moving_parts": 16,
+   "frame_sha256": [
+    "70183ea8404ff44953c4ac59b3b87c179b2e11142dfcb0acfc9cd01b51f88043",
+    "39917139b8d8a6f197f2306e9cb02cc48b4fa57fc1f411e2093f8283850c268e",
+    "c0c8ec7e290e52588d0940fa10dbf08c018a31d072165f706e3a96db61bfad34",
+    "dfc26b402331883136c370eb9b4f9be53c0f928d39b537ec55287e2e7dea76f2",
+    "ff3fc847faa1cddf5a8f2aba02fa62f65a6715987f7c9bdb5e769670c45985cf"
+   ]
+  },
+  "gold_vein-open": {
+   "votes": [
+    false,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "A gray block with two front plates separates: the plates swing outward and fall to the ground, revealing a yellow wavy stripe on the exposed face. The main cube stays intact; no new fracture propagates.",
+   "frames_checked": 60,
+   "moving_parts": 2,
+   "frame_sha256": [
+    "60681648f31080be1b8d1a940419c432ba9fee77e6b426ec6a187bd2c4ba5c01",
+    "f0e608958b01e10f584b3b7233cb56972336cda72dbc3017eb5f2d36122a00c7",
+    "d852a85ec2d2f7dc3cedc8dc2dbcc73f4e9ee8bc90f79258e23bb6a5a4ebcffa",
+    "b89366c50cf82fcd2351e4b242fc73ea446e48d366e91b69cc79b8356aab5e71",
+    "5243b4570db1e1264fcb5c8d676725e7856abbb0e048ec76511255740706c72f"
+   ]
+  },
+  "hand_drill-drill": {
+   "votes": [
+    false,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "The crank wheel visibly rotates and wood shavings appear and accumulate on the block. The drill assembly also shifts sideways (frame 3) and then back. The hole looks similar throughout; the bit\u2019s depth doesn\u2019t clearly change.",
+   "frames_checked": 60,
+   "moving_parts": 15,
+   "frame_sha256": [
+    "1a0e9bc4cf566dd4cd42769a8eb3a54b25aa6595a0d62796c0b84e52b3876590",
+    "ad7a104fd5227e4ebbae01cd67388448fe74204683ae421eff46ecf23008ca6c",
+    "30d7a2f384dbb8006ea878fbeae543cebea3528e8c9a9b3c7b1411b9303dafc3",
+    "fc38b9a50968dde96644c7e7440a9ba768af01dd88dee3d75c7ceabf7fc2b2b1",
+    "01e9cc3b91ae9d9d16998a893e87b6c8cc5a9478ab66132d8cb6afb184b221a4"
+   ]
+  },
+  "magnifier-swing": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "The magnifying glass changes orientation around its center; the handle moves from pointing down to left, then to right, and back down, with the shadow sweeping accordingly while the glass stays roughly in place.",
+   "frames_checked": 60,
+   "moving_parts": 0,
+   "frame_sha256": [
+    "b133edf5a1a167ce01b745b05c2a1ecc4e8ac81ed7a854966c3113e885ba056d",
+    "eb7d85e3d965302c078277d89c9cf1dc20e23658a092897396f83ce51edc3bd7",
+    "90828a7239da744de8f0e1953427214808b0a92d2b1aed1c88ac93d2cc09d1b9",
+    "37b5b12a3254100f53c19c8d5c7a575d102b1b3e16128385399e3b85c5fdca80",
+    "a32dfee5c5d2c04b6efd1265f58148ccdcf076b48f38289bee6b93c1ee0e531d"
+   ]
+  },
+  "perforated_cart-roll": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "Cart shifts slightly right/back across frames; wheel spokes visibly rotate each frame; shadow moves with the cart.",
+   "frames_checked": 60,
+   "moving_parts": 4,
+   "frame_sha256": [
+    "6c83cbf95b1b8d9c7d923cd2093477049c9eba97f7174d649b9a5d8c47a81aa5",
+    "3964088f9fc34ff32ac4184808d6e3bb97af0755724c5eb691271a226f864672",
+    "7a35af0170f23f1997b22c49740a18b2a359c76bf963d8cb6ae08e7b344aa604",
+    "b4e3870151c251c784990e28015faebcc08b5f27a7d607d2e61f736d74de9737",
+    "75acc5d74ad6053fa860d3525bdf0225302768be63843ee75d36c2aa65fef7da"
+   ]
+  },
+  "rocket_arrow-fire": {
+   "votes": [
+    true,
+    true,
+    true
+   ],
+   "pass": true,
+   "observed": "Rocket starts on the ground. An orange flame appears and strengthens with gray smoke beneath. By frames 4\u20135 the rocket is clearly off the ground and higher, with a visible exhaust plume.",
+   "frames_checked": 60,
+   "moving_parts": 5,
+   "frame_sha256": [
+    "c5385edfd1eba26a37a3a0941d65a6d6cf0d226fadb04f8f5ebb1409cec28404",
+    "2e41320433688d2ae71f4b8035c8b6af6f632268457f968bb678986f0cde9fab",
+    "f20074f9b91165c1d353d46da39fb5145080a5a6080c5f28bae82bf4daa77331",
+    "4166b7b7213584fd5b83afd7322c788266a3ad0b1891c8f452c1844e78912dd4",
+    "4207db555394a0620a0dbac3078fe24f2162fb656a1d2ee15165342319f8e89f"
+   ]
+  }
+ }
+}

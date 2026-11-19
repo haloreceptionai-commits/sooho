@@ -1,0 +1,30 @@
+{
+  "set": "battlefield",
+  "duration": 3,
+  "lighting": "day",
+  "samples": 64,
+  "engine": "cycles",
+  "size": [
+    1080,
+    1920
+  ],
+  "frames": [
+    1
+  ],
+  "camera": {
+    "from": [
+      4,
+      -2,
+      2.4
+    ],
+    "look_at": [
+      -1,
+      7,
+      1.6
+    ],
+    "lens": 30,
+    "fstop": 5.6
+  },
+  "grade": "Punchy",
+  "haze": 0.001
+}

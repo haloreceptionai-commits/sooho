@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Export Everything World zones to GLB</title>
+<style>
+  body{font:14px/1.5 system-ui,Segoe UI,sans-serif;margin:24px;max-width:720px;color:#1b2430}
+  button{font:600 14px system-ui;padding:9px 14px;border-radius:8px;border:0;background:#2f7bff;color:#fff;cursor:pointer}
+  button:disabled{background:#9aa6b8}
+  #log{margin-top:14px;white-space:pre-wrap;font:12px/1.4 ui-monospace,Consolas,monospace;background:#f3f5f9;padding:10px;border-radius:8px;max-height:320px;overflow:auto}
+  code{background:#f3f5f9;padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<h2>Export Everything World zones to GLB</h2>
+<p>This runs the source world (<code>Everything-World-3D.html</code>, next to this page) in a hidden frame,
+exports each zone with three.js GLTFExporter, and downloads one GLB per zone plus <code>manifest.json</code>.
+Move the downloads into <code>worlds/everything/</code>. The file names match what the pipeline expects.</p>
+<p>Serve this folder first, for example <code>python -m http.server 8000</code> in <code>worlds/source</code>, then open
+<code>http://localhost:8000/export_zones.html</code>. Allow multiple downloads when the browser asks.
+An internet connection is needed for three.js (cdnjs and unpkg).</p>
+<button id="go">Export all zones</button>
+<div id="log">Ready.</div>
+<iframe id="world" src="Everything-World-3D.html" style="display:none"></iframe>
+<script>
+const CAP = 900;                  // skip sky, ocean and ground planes wider than this (same as the first export)
+const TOOL_THREE_EXPORTER = 'https://unpkg.com/three@0.128.0/examples/js/exporters/GLTFExporter.js';
+const logEl = document.getElementById('log');
+const log = (m) => { logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; };
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+// The world's S, ZONES and CATS are top-level const values: they are not window properties,
+// so they are read with eval inside the frame.
+function worldState(w) {
+  return {
+    S: w.eval('typeof S !== "undefined" ? S : null'),
+    ZONES: w.eval('typeof ZONES !== "undefined" ? ZONES : null'),
+    CATS: w.eval('typeof CATS !== "undefined" ? CATS : null'),
+  };
+}
+
+async function waitForWorld(frame) {
+  for (let i = 0; i < 240; i++) {
+    const w = frame.contentWindow;
+    if (w && w.THREE) {
+      const st = worldState(w);
+      if (st.S && st.ZONES && st.S.children.length > 100) return { w, ...st };
+    }
+    await wait(500);
+  }
+  throw new Error('world did not build in time');
+}
+
+function fileName(z) {
+  return (z.i + '_' + z.n).replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '') + '.glb';
+}
+
+function download(name, blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+
+// The export runs INSIDE the world frame (same JavaScript realm as three.js and the exporter).
+// Running it from this page failed with "Unsupported bufferAttribute component type", because
+// the frame's typed arrays are not the page's typed arrays.
+const EXPORT_IN_WORLD = `(async (z, S) => {
+  const meshes = []; S.traverse(o => { if (o.isMesh) meshes.push(o); });
+  const bb = new THREE.Box3(), c = new THREE.Vector3(), sz = new THREE.Vector3();
+  const sel = [];
+  for (const m of meshes) {
+    bb.setFromObject(m); bb.getCenter(c); bb.getSize(sz);
+    if (sz.x > ${CAP} || sz.z > ${CAP}) continue;
+    if (c.x >= z.x - z.w / 2 && c.x <= z.x + z.w / 2 && c.z >= z.z - z.d / 2 && c.z <= z.z + z.d / 2) sel.push(m);
+  }
+  const grp = new THREE.Group(); grp.name = z.n;
+  const parents = sel.map(m => m.parent);
+  for (const m of sel) grp.add(m);
+  let glb;
+  try {
+    const ex = new THREE.GLTFExporter();
+    glb = await new Promise((res, rej) => {
+      try { ex.parse(grp, res, { binary: true, onlyVisible: true, maxTextureSize: 1024 }); } catch (e) { rej(e); }
+    });
+  } finally {
+    for (let i = 0; i < sel.length; i++) (parents[i] || S).add(sel[i]);   // always restore the world
+  }
+  return { glb, count: sel.length };
+})`;
+
+async function exportZone(w, z) {
+  const exportIn = w.eval(EXPORT_IN_WORLD);
+  const scene = w.eval('S');                       // the world's scene, read inside the frame
+  const { glb, count } = await exportIn(z, scene);
+  return { bytes: new Uint8Array(glb), count };   // copy into this page's realm
+}
+
+// The world places trees, cars and crowds with Math.random, so every load is a different world.
+// A seeded generator is put in front of the world's own script, so every export is identical.
+const SEED = 20240601;
+const SEED_SCRIPT = `<script>(function(){let a=${SEED}>>>0;Math.random=function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})();<\/script>`;
+
+async function loadSeededWorld(frame) {
+  const html = await (await fetch('Everything-World-3D.html')).text();
+  frame.srcdoc = html.replace('<head>', '<head>' + SEED_SCRIPT);
+}
+
+// Optional: ?upload=http://127.0.0.1:8765/upload sends each file to a local receiver instead of downloading it.
+const UPLOAD = new URLSearchParams(location.search).get('upload');
+async function save(name, bytes) {
+  if (UPLOAD) {
+    const r = await fetch(UPLOAD + '?name=' + encodeURIComponent(name), { method: 'POST', body: bytes });
+    if (!r.ok) throw new Error('upload failed for ' + name);
+  } else {
+    download(name, new Blob([bytes]));
+  }
+}
+
+async function run() {
+  const btn = document.getElementById('go');
+  btn.disabled = true;
+  try {
+    const frame = document.getElementById('world');
+    log('Loading the world (seed ' + SEED + ')...');
+    await loadSeededWorld(frame);
+    const { w, S, ZONES: zones, CATS } = await waitForWorld(frame);
+    if (!w.THREE.GLTFExporter) {
+      log('Loading GLTFExporter...');
+      // fetch + eval inside the frame: a script tag in the hidden frame could stall without firing onload
+      const code = await (await fetch(TOOL_THREE_EXPORTER)).text();
+      // run the exporter as a script inside the frame, so it sees the frame's THREE global
+      const sc = w.document.createElement('script');
+      sc.textContent = code;
+      w.document.head.appendChild(sc);
+      if (!w.THREE.GLTFExporter) throw new Error('GLTFExporter did not load');
+    }
+    for (const z of zones) {
+      const { bytes, count } = await exportZone(w, z);
+      const name = fileName(z);
+      await save(name, bytes);
+      log(`${name}  meshes=${count}  bytes=${bytes.byteLength}`);
+      await wait(700);            // give the browser time between downloads
+    }
+    const manifest = zones.map(z => ({ index: z.i, name: z.n, category: CATS[z.cat], centre: [z.x, z.z], size: [z.w, z.d], cameraSpawn: z.sp || null, targetPoint: z.t || null }));
+    await save('manifest.json', new TextEncoder().encode(JSON.stringify(manifest, null, 1)));
+    log(`Done: ${zones.length} zones. Move the downloads into worlds/everything/.`);
+  } catch (e) {
+    log('ERROR: ' + (e && e.message ? e.message : e));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('go').addEventListener('click', run);
+</script>
+</body>
+</html>

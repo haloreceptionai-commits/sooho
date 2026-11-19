@@ -1,0 +1,28 @@
+{
+  "image": "blender-renderer:cast6",
+  "sheet_execution": "blender-shot-gpu-gt5r28w",
+  "action_execution": "blender-shot-gpu-1aviot9",
+  "action_frames": 150,
+  "duration": 5,
+  "size": [
+    1080,
+    1920
+  ],
+  "tests_passed": 32,
+  "accepted": false,
+  "remaining": [
+    "Corrected all-action held-prop review still required",
+    "Benchmark appearance/stronger swing recognizability not accepted",
+    "Speech-aligned mouth shapes await integration"
+  ],
+  "ground_image": "blender-renderer:qa8",
+  "ground_execution": "blender-shot-gpu-uoi1q1q",
+  "ground_frames": [
+    1,
+    36,
+    76,
+    116,
+    150
+  ],
+  "ground_status": "Succeeded"
+}
