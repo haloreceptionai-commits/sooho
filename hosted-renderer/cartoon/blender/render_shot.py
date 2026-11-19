@@ -315,7 +315,7 @@ def camera(shot, fps):
 
 def look(scene, shot):
     scene.view_settings.view_transform = 'AgX'
-    scene.view_settings.exposure = {'night': 1.0, 'sunset': 0.75, 'rain': 0.7, 'day': 0.6}.get(shot.get('lighting', 'day'), 0.8) + float(os.environ.get('GRADE_EXPOSURE', '0'))   # bright and cheerful: viewers prefer a light, colourful picture to a dark one   # benchmark brightness is 0.50-0.57
+    scene.view_settings.exposure = {'night': 1.0, 'sunset': 0.75, 'rain': 0.7, 'day': 0.48}.get(shot.get('lighting', 'day'), 0.8) + float(os.environ.get('GRADE_EXPOSURE', '0'))   # bright and cheerful: viewers prefer a light, colourful picture to a dark one   # benchmark brightness is 0.50-0.57
     for name in (os.environ.get('GRADE_LOOK') or shot.get('grade', 'Medium High Contrast'),):
         for cand in (f'AgX - {name}', name):
             try: scene.view_settings.look = cand; break
@@ -347,7 +347,7 @@ def look(scene, shot):
     nt.links.new(blur.outputs[0], inv.inputs[0])
     nt.links.new(img, vig.inputs[1]); nt.links.new(inv.outputs[0], vig.inputs[2]); vig.inputs[0].default_value = 1
     img = vig.outputs[0]
-    grade = nt.nodes.new('CompositorNodeHueSat'); grade.inputs['Saturation'].default_value = float(os.environ.get('GRADE_SAT', '1.0')); grade.inputs['Value'].default_value = float(os.environ.get('GRADE_VALUE', '1.04'))   # colour grade: vivid, punchy
+    grade = nt.nodes.new('CompositorNodeHueSat'); grade.inputs['Saturation'].default_value = float(os.environ.get('GRADE_SAT', '1.7'))   # AgX washes colour out: lift saturation so shirts, hair and skin read as vivid as the benchmark; grade.inputs['Value'].default_value = float(os.environ.get('GRADE_VALUE', '1.04'))   # colour grade: vivid, punchy
     nt.links.new(img, grade.inputs['Image']); img = grade.outputs['Image']
     cc = nt.nodes.new('CompositorNodeBrightContrast'); cc.inputs['Bright'].default_value = float(os.environ.get('GRADE_BRIGHT', '0.0')); cc.inputs['Contrast'].default_value = float(os.environ.get('GRADE_CONTRAST', '0.3'))   # lifted shadows: nothing crushes to brown or black
     nt.links.new(img, cc.inputs['Image']); img = cc.outputs['Image']

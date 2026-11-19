@@ -22,7 +22,8 @@ def shot_for(action, outfit='worker'):
     from shot_schema import validate_shot
     sh = {'set': 'open_day', 'framing': 'medium', 'lighting': 'day', 'objects': [],   # open ground: no trunks in front of the lens
           'cast': [{'id': 'worker_a', 'action': action, 'expression': EXPRESSIONS[action]}]}
-    plan = {'cast': [{'id': 'worker_a', 'outfit': outfit, 'hat': 'beanie'}]}
+    # the production palette (art_director): azure shirt, orange hat; without these the sheet fell back to a muted teal
+    plan = {'cast': [{'id': 'worker_a', 'outfit': outfit, 'hat': 'beanie', 'shirt': [0.2, 0.55, 0.95], 'hat_color': [0.95, 0.55, 0.1]}]}
     shot = compile_one(sh, plan, 0.2, 0)
     x, y = shot['cast'][0]['pos']
     # three-quarter front view from the face side (the face points to -y), 6 m out so the whole figure fits. Blender space: z is up.
