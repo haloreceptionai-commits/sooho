@@ -162,8 +162,9 @@ def camera_for(zone):
     """Camera in zone-local Blender space, looking along the spawn yaw, 30 m ahead, 2.2 m high."""
     x, z, yaw = spawn_of(zone)
     fwd_x, fwd_z = -math.sin(yaw), -math.cos(yaw)       # three.js forward for rotation.y = yaw
-    eye = local_blender(zone, [x, 2.2, z])
-    aim = local_blender(zone, [x + 30 * fwd_x, 2.6, z + 30 * fwd_z])
+    h = 12.6 if zone['name'].startswith('Highway') else 2.2   # the highway camera stands on the deck (about 11.2 m)
+    eye = local_blender(zone, [x, h, z])
+    aim = local_blender(zone, [x + 30 * fwd_x, h + 0.4, z + 30 * fwd_z])
     return eye, aim
 
 

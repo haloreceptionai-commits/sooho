@@ -73,7 +73,8 @@ const EXPORT_IN_WORLD = `(async (z, S) => {
   const sel = [];
   for (const m of meshes) {
     bb.setFromObject(m); bb.getCenter(c); bb.getSize(sz);
-    if (sz.x > ${CAP} || sz.z > ${CAP}) continue;
+    const cap = Math.max(${CAP}, 1.5 * Math.max(z.w, z.d));   // long zones (a highway deck) keep their own length
+    if (sz.x > cap || sz.z > cap) continue;
     if (c.x >= z.x - z.w / 2 && c.x <= z.x + z.w / 2 && c.z >= z.z - z.d / 2 && c.z <= z.z + z.d / 2) sel.push(m);
   }
   const grp = new THREE.Group(); grp.name = z.n;

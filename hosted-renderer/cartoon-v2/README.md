@@ -58,7 +58,7 @@ output says `no keyword matched`.
 
 - `world_env.py` removes what would block the lens: backdrop meshes wider than 2× the zone (sky, sea, distant terrain), meshes that contain the camera (a barrier or pier), and faces within 5 m of the camera.
 - Battlefield zones get sandbag lines and craters in front of the camera (`add_battlefield_props`).
-- Highway: the elevated deck is not built yet. The shot shows the bare road with lamp posts.
+- Highway: the elevated deck is in the export; its camera stands on the deck at 12.6 m.
 
 ## Status and known problems
 

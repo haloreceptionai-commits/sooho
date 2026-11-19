@@ -20,13 +20,12 @@
 - `export_zones.html` was fixed: the exporter runs as a script in the frame, and the scene is read inside the frame.
 
 ## Known problems
-- **Highway**: the elevated deck is not built; the ground is an empty flat plane with lamp posts and a distant pier. It reads as a bare road, not a motorway.
+- **Highway**: fixed. The deck was not in the first export; the re-export (`export_zones.html`, cap per zone) includes it. The highway camera stands on the deck (12.6 m).
 - **Full-world GLB**: about 3 minutes per import. The High Street overhead structure and bus are not investigated. Per-zone GLBs are the default.
 - **Seeded export** (`worlds/everything-seeded/`): not completed.
 - Nothing committed, pushed or deployed.
 
 ## Next
-1. Build the highway deck and barriers from the zone data.
 2. Decide per-zone vs full world as the default.
 
 ## Fine-tune zip (EverythingWorld_zones fine tune.zip, 10:33)
