@@ -91,7 +91,7 @@ def _legacy_pose(action,t):
             else:
                 v=(u-stance)/(1-stance);world_y=landing-speed*period*(v*v*(3-2*v));lift=.12*math.sin(math.pi*v)
             p[side+'_ankle']=(sign*.09,world_y-p['root'][1],.055+lift)
-            p[side+'_wrist']=(sign*.27,-.3*wave,.78)
+            p[side+'_wrist']=(sign*.27,-.36*wave,.86)   # a fuller arm swing (was .3 m), kept inside the two-bone reach
         # gait life: the body bobs twice per stride (over each planted foot), leans into the run and the arms bend with the swing
         bob=(.045 if action=='run' else .02 if action=='walk' else .03)*abs(math.sin(math.pi*t/(1/2.8 if action!='walk' else 1/1.2)))
         p['hips']=(0,0,hip_z-bob); p['head']=(0,0,hip_z-bob+.84); p['lean']=.14 if action=='run' else .05 if action=='walk' else .08

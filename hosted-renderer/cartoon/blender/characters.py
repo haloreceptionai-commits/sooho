@@ -331,8 +331,11 @@ def build_character(c,duration=3,fps=30):
                 bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=.1,depth=.16,location=(0,0,.06));o=bpy.context.active_object;o.data.materials.append(hatmat);o.parent=wrist
                 sphere('cup contents',(0,0,.145),(.088,.088,.009),skin).parent=wrist
     if bench:
-        for side in ['left','right']:
-            hand=sphere(side+' hand',(0,0,.04),(.075,.06,.07),skin);hand.parent=anchors[side+'_wrist']
+        for side in ['left','right']:   # benchmark mitten hands: a round palm with a thumb on the inner side, big enough to read at phone size
+            sx=-1 if side=='left' else 1
+            hand=sphere(side+' hand',(0,0,.05),(.1,.078,.095),skin);hand.parent=anchors[side+'_wrist']
+            thumb=sphere(side+' thumb',(sx*.07,-.03,.06),(.036,.034,.05),skin);thumb.parent=anchors[side+'_wrist']
+            outline(hand,.012);outline(thumb,.01)
         for o in list(headroot.children):
             if o.type=='MESH' and not any(k in o.name for k in ('eye','brow','mouth','mustache','beard','ink','tongue','cheek','nose','ear','smile','crown point','laurel','crest','stubble')):outline(o,.013)
         for o in list(root.children):
