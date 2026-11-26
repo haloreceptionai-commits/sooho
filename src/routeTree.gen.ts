@@ -18,6 +18,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
+import { Route as ApiPublicAutomationRouteImport } from './routes/api/public/automation'
 import { Route as ApiPublicGenerationRecoveryRouteImport } from './routes/api/public/generation-recovery'
 import { Route as ApiPublicGenerationWorkerRouteImport } from './routes/api/public/generation-worker'
 import { Route as ApiPublicRenderCallbackRouteImport } from './routes/api/public/render-callback'
@@ -70,6 +71,11 @@ const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicAutomationRoute = ApiPublicAutomationRouteImport.update({
+  id: '/api/public/automation',
+  path: '/api/public/automation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicGenerationRecoveryRoute =
   ApiPublicGenerationRecoveryRouteImport.update({
     id: '/api/public/generation-recovery',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/create': typeof AuthenticatedCreateRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/videos': typeof AuthenticatedVideosRoute
+  '/api/public/automation': typeof ApiPublicAutomationRoute
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/automation': typeof ApiPublicAutomationRoute
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/automation': typeof ApiPublicAutomationRoute
   '/api/public/generation-recovery': typeof ApiPublicGenerationRecoveryRoute
   '/api/public/generation-worker': typeof ApiPublicGenerationWorkerRoute
   '/api/public/render-callback': typeof ApiPublicRenderCallbackRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/settings'
     | '/videos'
+    | '/api/public/automation'
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/videos'
     | '/'
+    | '/api/public/automation'
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/videos'
     | '/_authenticated/'
+    | '/api/public/automation'
     | '/api/public/generation-recovery'
     | '/api/public/generation-worker'
     | '/api/public/render-callback'
@@ -224,6 +236,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  ApiPublicAutomationRoute: typeof ApiPublicAutomationRoute
   ApiPublicGenerationRecoveryRoute: typeof ApiPublicGenerationRecoveryRoute
   ApiPublicGenerationWorkerRoute: typeof ApiPublicGenerationWorkerRoute
   ApiPublicRenderCallbackRoute: typeof ApiPublicRenderCallbackRoute
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/videos'
       preLoaderRoute: typeof AuthenticatedVideosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/automation': {
+      id: '/api/public/automation'
+      path: '/api/public/automation'
+      fullPath: '/api/public/automation'
+      preLoaderRoute: typeof ApiPublicAutomationRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/generation-recovery': {
       id: '/api/public/generation-recovery'
@@ -374,6 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  ApiPublicAutomationRoute: ApiPublicAutomationRoute,
   ApiPublicGenerationRecoveryRoute: ApiPublicGenerationRecoveryRoute,
   ApiPublicGenerationWorkerRoute: ApiPublicGenerationWorkerRoute,
   ApiPublicRenderCallbackRoute: ApiPublicRenderCallbackRoute,

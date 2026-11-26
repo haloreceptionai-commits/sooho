@@ -10,6 +10,7 @@ const MODELS = [
 import { toast } from "sonner";
 import { YouTubePanel } from "@/components/youtube";
 import { FacebookPanel } from "@/components/facebook";
+import { AutomationPanel } from "@/components/automation-panel";
 import { cleanName, NAME_MAX, renameWorkspace, useActiveWorkspace } from "@/lib/workspaces";
 import { actions, useStore, STYLES, DEFAULT_SETTINGS, type Settings } from "@/lib/store";
 import { Page, Panel, btnDark, btnOutline, input, label } from "@/components/page";
@@ -18,9 +19,9 @@ export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Chronicle Studio" },
-      { name: "description", content: "Channel, Azure OpenAI and render settings." },
+      { name: "description", content: "Workspace channels, UK-time daily video automation, Azure OpenAI and render settings." },
       { property: "og:title", content: "Settings — Chronicle Studio" },
-      { property: "og:description", content: "Channel, Azure OpenAI and render settings." },
+      { property: "og:description", content: "Workspace channels, UK-time daily video automation, Azure OpenAI and render settings." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -66,6 +67,7 @@ function SettingsPage() {
 
         <YouTubePanel />
         <FacebookPanel />
+        <AutomationPanel settings={f} />
 
         <Panel className="space-y-4 p-5">
           <h2 className="font-bold">Azure OpenAI</h2>

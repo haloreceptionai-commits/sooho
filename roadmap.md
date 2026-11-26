@@ -1,3 +1,10 @@
+# Daily workspace automation
+- [x] Add per-workspace Automate controls: on/off, Shorts/long-form, UK time (Europe/London, with daylight-saving changes) and daily posting time; save/reload and mobile verified signed in.
+- [x] Save owner-only schedules, deduplicate daily runs and reserve generation one hour before publication; UK DST, two-format deduplication, lease and off/paused tests pass.
+- [x] Connect checkpointed Advanced Shorts and documentary long-form generation to resumable scheduled YouTube uploads; preserve uncertain sessions rather than duplicate them.
+- [x] Register minute-level managed schedule (job 4), verify local signed requests return 200, unsigned 401 and invalid body 400; leave schedule paused without recurring cost until rollout is verified.
+- [ ] Publish the new endpoint, verify real generation/render/scheduled YouTube upload plus recovery, then enable rollout and resume schedule 4. Blocker: published endpoint is still 404; publishing requires the owner's request. See docs/daily-automation.md. Do not claim unattended posting works before these checks.
+
 # Carthage long-form recovery
 - [x] Replace the Shorts-only acoustic limit with bounded long-form inference; deployed Azure/Apify, 11 alignment tests and 428 app tests passed; Carthage aligned in 32.3 seconds.
 - [ ] Recover Carthage preview after fixing five advertised-but-undrawn props; full rendering still requires the owner's existing picture/timing approval.

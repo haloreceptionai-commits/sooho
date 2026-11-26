@@ -1,4 +1,5 @@
 // Server-only YouTube helpers. Refresh tokens never leave the server.
+import { youtubeScheduledStatus } from './automation';
 export const YT_REDIRECT = "https://sooha.io/api/public/youtube/callback";
 export const YT_SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
@@ -130,7 +131,7 @@ export async function myChannel(access: string) {
   return ch ? { id: ch.id, title: ch.snippet.title } : null;
 }
 
-export type UploadMeta = { title: string; description: string; tags: string[]; privacy: "private" | "unlisted" | "public"; short: boolean; size: number; mime: string; origin: string };
+export type UploadMeta = { title: string; description: string; tags: string[]; privacy: "private" | "unlisted" | "public"; short: boolean; size: number; mime: string; origin: string; publishAt?: string };
 
 /** Starts a resumable upload; the browser PUTs the file straight to the returned URL. */
 export async function startUpload(access: string, m: UploadMeta) {
@@ -147,7 +148,7 @@ export async function startUpload(access: string, m: UploadMeta) {
     },
     body: JSON.stringify({
       snippet: { title, description, tags: m.tags.slice(0, 30), categoryId: "27" },
-      status: { privacyStatus: m.privacy, selfDeclaredMadeForKids: false, containsSyntheticMedia: true },
+      status: m.publishAt ? youtubeScheduledStatus(m.publishAt) : { privacyStatus: m.privacy, selfDeclaredMadeForKids: false, containsSyntheticMedia: true },
     }),
   });
   if (!res.ok) throw new Error(`YouTube upload start failed [${res.status}]: ${await res.text()}`);

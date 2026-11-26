@@ -2,6 +2,7 @@
  * the background coordinator, the Script Writer page and tests share one flow. */
 import { criticPasses, flaggedLines, hookIssues, needsNewSpine, scriptIssues, type Critic, type Fact } from './checks';
 import type { HookCandidate, Spine } from './operations.server';
+import { preserveGenerationCheckpoint } from '../generation-checkpoint';
 
 export interface WriterCalls {
   facts(): Promise<Fact[]>;
@@ -48,7 +49,7 @@ function checkTargets(lines: string[], checks: string[]): { n: number; reason: s
   return out;
 }
 
-export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; budgetMs?: number; progress?: Progress | undefined }): Promise<WriterResult> {
+export async function writeShort(calls: WriterCalls, opts: { durationSec: number; maxPatches?: number; maxSpines?: number; budgetMs?: number; serial?: boolean; progress?: Progress | undefined }): Promise<WriterResult> {
   // Speed: the whole script must be ready in under ~2 minutes, so extra passes only start while time remains.
   const maxPatches = opts.maxPatches ?? 2, maxSpines = opts.maxSpines ?? 2, budget = opts.budgetMs ?? 80_000, t0 = Date.now();
   const left = () => budget - (Date.now() - t0);
@@ -63,7 +64,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
     const spine = await calls.spine(facts, rounds.map((r) => r.spine));
     await say('Writing 10 hooks…');
     // Spine check runs alongside the hooks instead of before them.
-    const [sc0, hooks0] = await Promise.all([calls.spineCheck(spine, facts), calls.hooks(facts, spine)]);
+    const [sc0, hooks0] = opts.serial ? [await calls.spineCheck(spine, facts), await calls.hooks(facts, spine)] : await Promise.all([calls.spineCheck(spine, facts), calls.hooks(facts, spine)]);
     const sc = sc0; let hooks = hooks0;
     let valid = hooks.filter((h) => !h.reveals_answer && !hookIssues(h.line).length);
     if (!valid.length) {
@@ -84,7 +85,7 @@ export async function writeShort(calls: WriterCalls, opts: { durationSec: number
       const miss = scriptIssues(lines, facts, opts.durationSec).find((c) => c.startsWith('dates/numbers not in the certain facts'));
       if (!miss) return;
       await say('Verifying numbers…');
-      const found = await calls.verifyNumbers(miss.split(': ')[1]!.split(', '), lines).catch(() => []);
+      const found = await calls.verifyNumbers(miss.split(': ')[1]!.split(', '), lines).catch((error: unknown) => { preserveGenerationCheckpoint(error); if (opts.serial) throw error; return []; });
       found.forEach((f, i) => facts.push({ id: `v${facts.length + i + 1}`, text: f.text, certain: f.certain, headline: true }));
     };
     await verify();

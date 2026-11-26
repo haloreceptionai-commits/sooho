@@ -9,6 +9,7 @@ import { writerCalls } from './shorts-writer/calls';
 import { isAdvancedEngine } from './video-engines';
 import { directRunner } from './shorts-writer/calls.server';
 import { runExactScript, runShortsV4 } from './shorts-writer/stage';
+import { backgroundDocumentaryScript } from './generation-documentary-script.server';
 export interface ScriptAPI { call<T>(fn: () => Promise<T>): Promise<T> }
 const STEP_TIMEOUT_MS = 180000;
 const ROTATE: Record<string,string> = { wide:'low_angle', aerial:'top_down', close:'over_shoulder', top_down:'wide', macro:'close', pov:'wide', low_angle:'close', over_shoulder:'close' };
@@ -38,19 +39,15 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       await up({ hooks: { best: ex.hook, runnerUp: ex.hook }, checks: [], scriptCheckpoint: saved });
       return saved;
     }
-    if (input.format === 'short' && process.env['SHORTS_WRITER_V4'] !== 'off') try {
+    if (input.format === 'short' && process.env['SHORTS_WRITER_V4'] !== 'off') {
       // Shorts Writer v4 (owner's task): one checkpointed AI call per step, then scenes split word for word.
       const research = [input.reference ? `Inspiration video transcript (research only; never copy its lines): ${input.reference.transcript.slice(0, 4000)}` : '', input.topicSource ? `Research starting point: ${input.topicSource.fact} — ${input.topicSource.url}. Verify independently.` : ''].filter(Boolean).join('\n') || undefined;
       const calls = writerCalls((step, args) => api.call(() => directRunner(step, args)), { topic: input.topic, deployment: s.scriptDeployment, durationSec: input.durationSec, kid: advanced, research });
       const base = { topic: input.topic, format: input.format, durationSec: input.durationSec, archetype: archetype ? `${archetype.name} — ${archetype.formula}` : 'Best fit', style: input.style, deployment: s.scriptDeployment, ...(advanced ? { kid: true } : {}) };
-      const v4 = await runShortsV4({ calls, durationSec: input.durationSec, base, plan: (data) => api.call(() => generatePlan({ data })), progress: (detail) => up({ detail }) });
+      const v4 = await runShortsV4({ calls, durationSec: input.durationSec, base, plan: (data) => api.call(() => generatePlan({ data })), progress: (detail) => up({ detail }), durable: true });
       const saved: ScriptCheckpoint = { plan: v4.plan, gate: v4.gate, report: v4.report, judgeOk: v4.judgeOk, hookType: v4.hookType, moneyShot: v4.moneyShot };
       await up({ hooks: { best: v4.writer.hook, runnerUp: v4.writer.rounds[0]?.hooks[1]?.line ?? v4.writer.hook }, checks: v4.gate.blockers, scriptCheckpoint: saved });
       return saved;
-    } catch (e) {
-      // Self-healing: fall back to the proven Story Engine rather than failing the background job.
-      console.warn('Shorts Writer v4 failed, using the backup writer:', e);
-      await up({ detail: 'New script writer hit a problem — continuing with the backup writer…' });
     }
     // 1) fact check
     await up({ detail: "Fact-checking the story…" });
@@ -119,6 +116,14 @@ export function splitLongScenes(scenes: Plan["scenes"], maxWords = 11): Plan["sc
       const gate = storyScore(report, judge, p.scenes.length, { strict: advanced });
       return { report, judge, gate };
     };
+    if (input.format === 'long' && (input.engine ?? 'own') === 'own' && input.style !== 'Ink explainer' && process.env['LONGFORM_DOCUMENTARY'] !== 'off') {
+      const doc = await backgroundDocumentaryScript({ topic: input.topic, durationSec: input.durationSec, archetype: archetype?.name ?? 'Best fit', style: input.style, facts: factText, research: researchText, hook: hb.line, hookText: hb.text, description: rs.premise, hero: rs.hero, question: rs.question, premise: rs.premise, palette: 'natural historical colours', pastTitles: [], sources: [...new Set(facts.claims.flatMap(c => c.sources))] }, s.scriptDeployment, api);
+      const checked = await evaluate(doc.plan);
+      const blockers = [...checked.gate.blockers, ...doc.issues.map(i => `Long-form: ${i.msg}`)];
+      const saved: ScriptCheckpoint = { plan: doc.plan, gate: { ...checked.gate, blockers }, report: { revealSec: checked.report.revealSec, shotMix: checked.report.shotMix }, judgeOk: !!checked.judge, hookType: hb.type, moneyShot: rs.moneyShot };
+      await up({ scriptCheckpoint: saved, checks: blockers, ...(doc.plan.documentary?.packaging ? { packaging: doc.plan.documentary.packaging } : {}), judges: checked.judge ? { passA: checked.judge.passA, passB: checked.judge.passB, passC: checked.judge.passC, payoff: checked.judge.payoff, weakest: checked.judge.weakest } : null });
+      return saved;
+    }
     const planWait = input.format === "short" ? STEP_TIMEOUT_MS : 8 * 60_000; // a 10-20 min script is a much longer answer
     let plan = autoFixPlan(await api.call(() => generatePlan({ data: base })), advanced);
     let ev = await evaluate(plan);

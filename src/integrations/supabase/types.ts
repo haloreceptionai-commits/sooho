@@ -247,6 +247,180 @@ export type Database = {
         }
         Relationships: []
       }
+      video_automation: {
+        Row: {
+          enabled: boolean
+          focus: string
+          formats: string[]
+          last_checked_at: string | null
+          long_seconds: number
+          long_time: string
+          paused_reason: string | null
+          settings: Json
+          short_seconds: number
+          short_time: string
+          timezone: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          enabled?: boolean
+          focus?: string
+          formats?: string[]
+          last_checked_at?: string | null
+          long_seconds?: number
+          long_time?: string
+          paused_reason?: string | null
+          settings?: Json
+          short_seconds?: number
+          short_time?: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          enabled?: boolean
+          focus?: string
+          formats?: string[]
+          last_checked_at?: string | null
+          long_seconds?: number
+          long_time?: string
+          paused_reason?: string | null
+          settings?: Json
+          short_seconds?: number
+          short_time?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_automation_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_automation_runs: {
+        Row: {
+          created_at: string
+          error: string | null
+          fence: number
+          format: string
+          generate_at: string
+          generation_job_id: string | null
+          id: string
+          lease_owner: string | null
+          lease_until: string | null
+          local_date: string
+          publish_at: string
+          status: string
+          updated_at: string
+          upload_mime: string | null
+          upload_offset: number
+          upload_size: number | null
+          upload_url: string | null
+          user_id: string
+          video_id: string
+          workspace_id: string
+          youtube_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          fence?: number
+          format: string
+          generate_at: string
+          generation_job_id?: string | null
+          id?: string
+          lease_owner?: string | null
+          lease_until?: string | null
+          local_date: string
+          publish_at: string
+          status?: string
+          updated_at?: string
+          upload_mime?: string | null
+          upload_offset?: number
+          upload_size?: number | null
+          upload_url?: string | null
+          user_id: string
+          video_id: string
+          workspace_id: string
+          youtube_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          fence?: number
+          format?: string
+          generate_at?: string
+          generation_job_id?: string | null
+          id?: string
+          lease_owner?: string | null
+          lease_until?: string | null
+          local_date?: string
+          publish_at?: string
+          status?: string
+          updated_at?: string
+          upload_mime?: string | null
+          upload_offset?: number
+          upload_size?: number | null
+          upload_url?: string | null
+          user_id?: string
+          video_id?: string
+          workspace_id?: string
+          youtube_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_automation_runs_generation_job_id_fkey"
+            columns: ["generation_job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_automation_runs_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: true
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_automation_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "video_automation"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
+      video_automation_runtime: {
+        Row: {
+          key: string
+          last_checked_at: string | null
+          lease_owner: string | null
+          lease_until: string | null
+        }
+        Insert: {
+          key: string
+          last_checked_at?: string | null
+          lease_owner?: string | null
+          lease_until?: string | null
+        }
+        Update: {
+          key?: string
+          last_checked_at?: string | null
+          lease_owner?: string | null
+          lease_until?: string | null
+        }
+        Relationships: []
+      }
       video_step_locks: {
         Row: {
           expires_at: string
@@ -454,6 +628,14 @@ export type Database = {
         Args: { p_hash: string; p_job: string; p_owner: string }
         Returns: number
       }
+      claim_video_automation_tick: {
+        Args: { p_owner: string }
+        Returns: boolean
+      }
+      claim_video_automation_upload: {
+        Args: { p_owner: string; p_run: string }
+        Returns: number
+      }
       claim_video_step: {
         Args: {
           _holder: string
@@ -478,6 +660,15 @@ export type Database = {
           p_key: string
           p_owner: string
           p_result: Json
+        }
+        Returns: boolean
+      }
+      complete_video_automation_upload: {
+        Args: {
+          p_fence: number
+          p_owner: string
+          p_run: string
+          p_youtube: string
         }
         Returns: boolean
       }
@@ -528,6 +719,17 @@ export type Database = {
       recover_generation_job: {
         Args: { p_job: string; p_new_hash: string }
         Returns: boolean
+      }
+      reserve_video_automation_run: {
+        Args: {
+          p_date: string
+          p_format: string
+          p_hash: string
+          p_publish: string
+          p_video: string
+          p_workspace: string
+        }
+        Returns: Json
       }
       resume_cartoon_render: {
         Args: {

@@ -6,7 +6,8 @@
  * Every file is saved under the video's media folder as soon as it is made, so Resume never repays for finished cards.
  */
 import { supabase } from "@/integrations/supabase/client";
-import animalVocab from "../../hosted-renderer/cartoon/blender/animals.json";
+import { paintedCastIds } from "./advanced-layout";
+export { paintedCastIds, ensureAnimalCast, placeObjectCards } from "./advanced-layout";
 import { checkCardText, designAdvancedCards, paintAdvancedCard } from "@/lib/pipeline.functions";
 import { CARD_POSES, type cartoonDirection } from "@/lib/cartoon-job";
 import type { z } from "zod";
@@ -24,7 +25,6 @@ export const OBJECT_PAINT_CAP = 8;
 const toBytes = (b64: string) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 const toB64 = async (blob: Blob) => { const b = new Uint8Array(await blob.arrayBuffer()); let s = ""; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(s); };
 /** Cast ids that are animals or creatures: the only cast members drawn from painted cards. */
-export const paintedCastIds = (ids: string[]) => ids.filter(id => id.split(/[_-]+/).some(w => animalIn(w)));
 
 export async function paintAdvancedCards(direction: Direction, narration: string[], root: string, settings: { scriptDeployment: string; imageDeployment: string }, report: (detail: string) => void, retry: Retry = fn => fn()): Promise<PaintedCards> {
   const ids = paintedCastIds(direction.cast.map(c => c.id));
@@ -165,68 +165,4 @@ async function validateRigAtlas(base64:string){
     for(let y=0;y<384;y+=3)for(let x=0;x<512;x+=3){const alpha=data[((row*384+y)*1024+col*512+x)*4+3]??0;if(alpha>80){solid++;if(x<12||x>499||y<12||y>371)edge++;}}
     if(solid<100||edge>100||solid>16000)throw Error('Character parts are missing or overlap their cells');
   }
-}
-
-/** Puts each painted story object into the scenes where it is said (on the ground beside the cast) and keeps only cards in use. */
-export function placeObjectCards(direction: Direction, painted: PaintedCards): { direction: Direction; cards: PaintedCards["cards"] } {
-  const used = new Set<string>();
-  const have = new Set(painted.cards.map(c => c.id));
-  if (direction.scenes.some(sc => (sc.props ?? []).some(p => p.asset?.startsWith("card/")))) {
-    // Shot-plan objects are already placed; drop only the ones whose painting failed (never swap in a different object).
-    const scenes = direction.scenes.map(sc => ({ ...sc, props: (sc.props ?? []).filter(p => {
-      if (!p.asset?.startsWith("card/")) return true;
-      const key = `obj-${p.asset.slice(5)}`; if (!have.has(key)) { console.warn("Missing painted object:", p.phrase ?? key); return false; }
-      used.add(key); return true;
-    }) }));
-    return { direction: { ...direction, scenes }, cards: painted.cards.filter(c => !c.id.startsWith("obj-") || used.has(c.id)) };
-  }
-  const scenes = direction.scenes.map((sc, i) => {
-    const props = [...(sc.props ?? [])];
-    for (const o of painted.objects) {
-      if (!o.scenes.includes(i) || props.length >= 4 || props.some(p => p.asset === `card/${o.name}`)) continue;
-      const place = props.some(p => p.place === "ground_right") ? "ground_left" : "ground_right";
-      if (props.some(p => p.place === place)) continue;
-      props.push({ kind: "asset", asset: `card/${o.name}`, place, motion: "none" });
-      used.add(`obj-${o.name}`);
-    }
-    return { ...sc, props };
-  });
-  return { direction: { ...direction, scenes }, cards: painted.cards.filter(c => !c.id.startsWith("obj-") || used.has(c.id)) };
-}
-
-// One animal list shared with the renderer (hosted-renderer/cartoon/blender/animals.json): a painted card must also be shown.
-const ANIMALS: string[] = animalVocab.animals;
-const PLURAL: Record<string, string> = animalVocab.plural;
-const animalIn = (word: string) => { const w = word.toLowerCase().replace(/[^a-z]/g, ""); const s = PLURAL[w] ?? (ANIMALS.includes(w) ? w : w.replace(/(es|s)$/, "")); return ANIMALS.includes(s) ? s : (ANIMALS.includes(w.replace(/s$/, "")) ? w.replace(/s$/, "") : null); };
-
-/**
- * The story's animal must act on screen: when the narration names an animal the Visual Director left out of the cast,
- * it joins the cast (replacing the least-used extra if four are already cast) and appears in every scene that names it.
- */
-export function ensureAnimalCast(direction: Direction, narration: string[]): Direction {
-  const hits = new Map<string, number[]>();
-  narration.forEach((line, i) => { for (const w of line.split(/\s+/)) { const a = animalIn(w); if (a) hits.set(a, [...new Set([...(hits.get(a) ?? []), i])]); } });
-  const [animal, scenesWith] = [...hits.entries()].sort((a, b) => b[1].length - a[1].length)[0] ?? [];
-  if (!animal || !scenesWith || direction.cast.some(c => c.id.includes(animal))) return direction;
-  const uses = (id: string) => direction.scenes.filter(s => s.actor === id || (s.actors ?? []).some(a => a.actor === id)).length;
-  let cast = [...direction.cast];
-  let dropped: string | null = null;
-  if (cast.length >= 4) { const least = [...cast].sort((a, b) => uses(a.id) - uses(b.id))[0]!; dropped = least.id; cast = cast.filter(c => c.id !== least.id); }
-  const id = animal.replace(/[^a-z0-9_]/g, "").slice(0, 30);
-  cast.push({ id, seed: 9000 + cast.length, outfit: direction.cast[0]!.outfit });
-  const slots = ["left", "center", "right"] as const;
-  const scenes = direction.scenes.map((sc, i) => {
-    let actors = (sc.actors?.length ? sc.actors : [{ actor: sc.actor, action: sc.action, expression: sc.expression, slot: "center" as const, facing: 0 }]).filter(a => a.actor !== dropped);
-    let actor = sc.actor === dropped ? (actors[0]?.actor ?? id) : sc.actor;
-    if (scenesWith.includes(i) && !actors.some(a => a.actor === id)) {
-      if (actors.length >= 3) actors = actors.filter(a => a.actor === actor || a.actor === sc.speaker).slice(0, 2);
-      const free = slots.find(s => !actors.some(a => a.slot === s)) ?? "right";
-      const moving = /\b(run|runs|ran|dash|dashes|bolt|bolts|chase|chases|flee|flees|race|races|charge|charges)\b/i.test(narration[i] ?? "");
-      actors = [...actors, { actor: id, action: moving ? "run" : "idle", expression: "grin", slot: free, facing: 0 }];
-    }
-    if (!actors.length) { actors = [{ actor: id, action: "idle", expression: "grin", slot: "center", facing: 0 }]; actor = id; }
-    const speaker = sc.speaker && actors.some(a => a.actor === sc.speaker) ? sc.speaker : undefined;
-    return { ...sc, actor: actors.some(a => a.actor === actor) ? actor : actors[0]!.actor, actors, speaker };
-  });
-  return { cast, scenes };
 }

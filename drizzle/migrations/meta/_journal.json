@@ -204,6 +204,20 @@
       "when": 1794991375761,
       "tag": "0028_facebook_user_token",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795651528719,
+      "tag": "0029_daily_workspace_automation",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795651705705,
+      "tag": "0030_fenced_automation_upload_confirmation",
+      "breakpoints": true
     }
   ]
 }

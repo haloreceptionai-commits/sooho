@@ -22,8 +22,8 @@ export function v4Gate(w: WriterResult): GateResult {
   return { score: Math.round(((c.coherence * 2 + c.clarity + c.curiosity) / 40) * 100), ready: w.ready, parts: { coherence: c.coherence, clarity: c.clarity, curiosity: c.curiosity }, blockers };
 }
 
-export async function runShortsV4(o: { calls: WriterCalls; durationSec: number; base: PlanInput; plan: (data: PlanInput) => Promise<Plan>; progress?: Progress | undefined }): Promise<V4Script> {
-  const writer = await writeShort(o.calls, { durationSec: o.durationSec, progress: o.progress });
+export async function runShortsV4(o: { calls: WriterCalls; durationSec: number; base: PlanInput; plan: (data: PlanInput) => Promise<Plan>; progress?: Progress | undefined; durable?: boolean }): Promise<V4Script> {
+  const writer = await writeShort(o.calls, { durationSec: o.durationSec, progress: o.progress, ...(o.durable ? { serial: true, budgetMs: Infinity } : {}) });
   await o.progress?.('Splitting the approved narration into scenes…');
   const facts = writer.facts.filter((f) => f.certain).map((f) => `- ${f.text}`).join('\n');
   const { repair: _r, ...rest } = o.base; void _r;

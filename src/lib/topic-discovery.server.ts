@@ -19,6 +19,12 @@ async function research(path: string, body: unknown) {
   }
   return response.json();
 }
+async function boundedMap<T, R>(items: T[], fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = [];
+  // Discovery is also called by the coordinator; five requests leave one connection for tracking.
+  for (let start = 0; start < items.length; start += 5) out.push(...await Promise.all(items.slice(start, start + 5).map(fn)));
+  return out;
+}
 const resultSchema = z.object({ results: z.array(z.object({ url: z.string().url(), title: z.string(), excerpts: z.array(z.string()).nullish(), full_content: z.string().nullish() })).default([]), warnings: z.array(z.unknown()).nullish(), errors: z.array(z.unknown()).nullish() });
 const candidateJson = {
   type: 'object', additionalProperties: false, required: ['topics'], properties: { topics: { type: 'array', items: {
@@ -62,10 +68,10 @@ export async function discoverFacts(input: { focus: string; format: string; depl
 
       `Format: ${input.format}; focus ${input.focus}. Exclude subjects/renamed versions:\n${exclude}\nEvidence:\n${JSON.stringify(results)}`, 'topic_candidates', candidateJson, 'Topic editor');
     const candidates = draft.topics.flatMap(raw => { const parsed = discoveredTopicSchema.extend({ sources: discoveredTopicSchema.shape.sources.min(1) }).safeParse(normalizeCandidate(raw)); return parsed.success ? [parsed.data] : []; }).slice(0, 14);
-    const corroboration = await Promise.all(candidates.map(t => research('search', {
+    const corroboration = await boundedMap(candidates, t => research('search', {
       objective: `Independently verify this exact premise: ${t.fact}. Find a different primary/expert/institutional publisher from ${t.source}. Find qualifications and reject myths.`,
       search_queries: [t.factKey.replace(/[-_]/g, ' ').slice(0, 200)], mode: 'fast', advanced_settings: { max_results: 3, excerpt_settings: { max_chars_per_result: 3000 } },
-    })));
+    }));
     // Search excerpts are fetched evidence too. Give the reviewer stable passage IDs,
     // rather than asking it to retype quotes from huge full-page collections.
     const groups = [candidates.slice(0, 5), candidates.slice(5, 10), candidates.slice(10, 14)].filter(g => g.length);
