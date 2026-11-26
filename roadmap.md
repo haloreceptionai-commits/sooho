@@ -1,3 +1,6 @@
+# ElevenLabs Shorts narration
+- [x] Connect the owner's saved voice "my voice v1" with informational delivery for new Shorts in both manual and daily generation; preserve long-form and saved takes. Voice/settings access verified without paid audio, all 464 tests pass; this narration update has not yet been published.
+
 # Daily workspace automation
 - [x] Add per-workspace Automate controls: on/off, Shorts/long-form, UK time (Europe/London, with daylight-saving changes) and daily posting time; save/reload and mobile verified signed in.
 - [x] Save owner-only schedules, deduplicate daily runs and reserve generation one hour before publication; UK DST, two-format deduplication, lease and off/paused tests pass.

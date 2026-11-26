@@ -1,17 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { LONG_NARRATION_DIRECTION, narrationSettings } from "@/lib/narration-direction";
+import { LONG_NARRATION_DIRECTION, SHORT_VOICE_SETTINGS, narrationSettings } from "@/lib/narration-direction";
 
 describe("approved narration selection", () => {
-  it("keeps the owner-approved sample-03 Shorts delivery (re-shared 2026-11-18)", () => {
-    const t = narrationSettings("short", "A needle points north.").text;
-    expect(t).toContain("Energetic compact explanation around 225 words per minute");
-    expect(t).toContain("Minimal dead space, smoothly linked sentences, controlled pitch");
-    expect(t).toContain("No theatrical drama");
-    expect(t).not.toContain("about 160 words per minute");
-    expect(t).not.toContain("never rushed");
+  it("keeps informational delivery on the saved voice without added spoken instructions", () => {
+    expect(narrationSettings("short", "A needle points north.").text).toBe("A needle points north.");
+    expect(SHORT_VOICE_SETTINGS).toEqual({ stability: 0.5, similarity_boost: 0.75, style: 0, speed: 1, use_speaker_boost: true });
   });
-  it("uses Puck for new Shorts", () => {
-    expect(narrationSettings("short", "A needle points north.").voice).toBe("Puck");
+  it("uses the owner's my voice v1 through ElevenLabs for new Shorts", () => {
+    const take = narrationSettings("short", "A needle points north.");
+    expect(take.voice).toBe("0QHpDjMRrhedmdJmEcp7");
+    expect(take.provider).toBe('elevenlabs');
   });
   it("uses the same Shorts selection for Advanced", () => {
     expect(narrationSettings("advanced", "A needle points north.")).toEqual(narrationSettings("short", "A needle points north."));
@@ -20,6 +18,7 @@ describe("approved narration selection", () => {
     const text = "Spartacus turned back from the Alps.";
     const take = narrationSettings(style, text);
     expect(take.voice).toBe("Charon");
+    expect(take.provider).toBe('lovable');
     expect(take.voice).not.toBe(narrationSettings("short", text).voice);
     expect(take.text.split("Narration: ").at(-1)).toBe(text);
   });

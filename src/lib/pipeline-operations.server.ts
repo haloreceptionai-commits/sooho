@@ -7,10 +7,11 @@ import { z } from 'zod';
 
 import { azureOpenAIRequest } from './azure-openai.server';
 import { generateSpeech } from '@lovable.dev/ai-gateway';
+import { generateElevenLabsNarration } from './elevenlabs-narration.server';
 import { ADVANCED_STORY_DIRECTION } from './advanced-story';
 import { STORY_SHAPE_DIRECTION, STORY_SHAPE_JUDGE, hookShapeIssues, lockShapeHook } from './story-shape';
 
-// Scripts and images use the owner's Azure resource; narration remains Gemini.
+// Scripts/images use Azure; shared voice routing covers manual and durable jobs.
 
 const safeName = (s: string) => {
   if (!/^[A-Za-z0-9._-]{1,64}$/.test(s)) throw new Error("Invalid deployment name");
@@ -676,9 +677,11 @@ import { narrationSettings } from "@/lib/narration-direction";
 
 const VOICES = new Set(["onyx", "ash", "echo", "ballad", "verse", "cedar"]);
 
-export const generateVoiceOperation = async ({ data }: { data: VoiceInput }): Promise<{ audio: string; engine: "lovable"; deployment: string; voice: string }> => {
-    // Atlas narrator: Gemini Charon via Lovable AI (owner's choice; Azure has no cloning and no TTS deployment).
+export const generateVoiceOperation = async ({ data }: { data: VoiceInput }): Promise<{ audio: string; engine: "lovable" | "elevenlabs"; deployment: string; voice: string }> => {
     const narration = narrationSettings(data.style, data.text);
+    if (narration.provider === 'elevenlabs') {
+      return { audio: toBase64(await generateElevenLabsNarration(narration.text)), engine: 'elevenlabs', deployment: 'eleven_multilingual_v2', voice: narration.voice };
+    }
     const res = await generateSpeech({
         model: "google/gemini-3.1-flash-tts-preview",
         contents: [{ role: "user", parts: [{ text: narration.text }] }],
