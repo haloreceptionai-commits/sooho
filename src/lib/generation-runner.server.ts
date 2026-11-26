@@ -66,7 +66,14 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
       if (e || !saved) throw Error('Saved step could not load');
       return saved.result as T;
     }
-    if (action !== 'started') throw Error(`Generation step ${key} needs reconciliation (${action})`);
+    if (action === 'uncertain') {
+      // A dropped connection can cut a step off mid-call; retry it once after the original call has surely ended.
+      const { data: retry, error: retryError } = await db.rpc('retry_generation_step', { ...auth, p_key: key, p_input_hash: hash });
+      if (retryError) throw Error('Could not check the interrupted generation step');
+      if (retry === 'wait') throw new GenerationCheckpointSaved('waiting');
+      if (retry === 'complete') return step(key, identity, fn);
+      if (retry !== 'started') throw Error(`Generation step ${key} needs reconciliation (${retry})`);
+    } else if (action !== 'started') throw Error(`Generation step ${key} needs reconciliation (${action})`);
     const result = await fn();
     const { data: accepted, error: saveError } = await db.rpc('complete_generation_step', { ...auth, p_key: key, p_input_hash: hash, p_result: result as Json });
     if (saveError || !accepted) throw Error('Step completed but its save was not confirmed; do not regenerate');

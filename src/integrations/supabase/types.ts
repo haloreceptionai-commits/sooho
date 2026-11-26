@@ -125,6 +125,7 @@ export type Database = {
           input_hash: string
           job_id: string
           result: Json | null
+          retries: number
           status: string
           step_key: string
           updated_at: string
@@ -136,6 +137,7 @@ export type Database = {
           input_hash: string
           job_id: string
           result?: Json | null
+          retries?: number
           status: string
           step_key: string
           updated_at?: string
@@ -147,6 +149,7 @@ export type Database = {
           input_hash?: string
           job_id?: string
           result?: Json | null
+          retries?: number
           status?: string
           step_key?: string
           updated_at?: string
@@ -256,6 +259,8 @@ export type Database = {
           long_seconds: number
           long_time: string
           paused_reason: string | null
+          posting_verified_at: string | null
+          posting_verified_youtube_id: string | null
           settings: Json
           short_seconds: number
           short_time: string
@@ -272,6 +277,8 @@ export type Database = {
           long_seconds?: number
           long_time?: string
           paused_reason?: string | null
+          posting_verified_at?: string | null
+          posting_verified_youtube_id?: string | null
           settings?: Json
           short_seconds?: number
           short_time?: string
@@ -288,6 +295,8 @@ export type Database = {
           long_seconds?: number
           long_time?: string
           paused_reason?: string | null
+          posting_verified_at?: string | null
+          posting_verified_youtube_id?: string | null
           settings?: Json
           short_seconds?: number
           short_time?: string
@@ -743,6 +752,17 @@ export type Database = {
           review_hash: string
         }
         Returns: boolean
+      }
+      retry_generation_step: {
+        Args: {
+          p_fence: number
+          p_hash: string
+          p_input_hash: string
+          p_job: string
+          p_key: string
+          p_owner: string
+        }
+        Returns: string
       }
       start_generation_job: {
         Args: {

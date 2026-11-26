@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Panel, input, label } from '@/components/page';
 import { useActiveWorkspace } from '@/lib/workspaces';
-import { getAutomation, saveAutomation, startAutomationTest } from '@/lib/automation.functions';
+import { getAutomation, saveAutomation, verifyAutomationPosting } from '@/lib/automation.functions';
 import { nextAutomationSlots, type AutomationConfig } from '@/lib/automation';
 import type { Settings } from '@/lib/store';
 
@@ -18,7 +18,7 @@ export function AutomationPanel({ settings }: { settings: Settings }) {
   return <WorkspaceAutomation key={id} workspaceId={id} settings={settings} />;
 }
 function WorkspaceAutomation({ workspaceId, settings }: { workspaceId: string; settings: Settings }) {
-  const get = useServerFn(getAutomation), save = useServerFn(saveAutomation), startTest = useServerFn(startAutomationTest), cache = useQueryClient();
+  const get = useServerFn(getAutomation), save = useServerFn(saveAutomation), verifyPosting = useServerFn(verifyAutomationPosting), cache = useQueryClient();
   const key = ['video-automation', workspaceId];
   const query = useQuery({ queryKey: key, queryFn: () => get({ data: { workspaceId } }), refetchInterval: 30000 });
   const [draft, setDraft] = useState<AutomationConfig | null>(null), [busy, setBusy] = useState(false);
@@ -35,12 +35,13 @@ function WorkspaceAutomation({ workspaceId, settings }: { workspaceId: string; s
     finally { setBusy(false); }
   };
   const verify = async () => {
+    if (!c) return;
     setBusy(true);
     try {
-      for (const format of ['short','long'] as const) await startTest({ data: { workspaceId, format, settings } });
+      const done = await verifyPosting({ data: { workspaceId, config: c, settings } });
       await cache.invalidateQueries({ queryKey: key });
-      toast.success('Both private video tests are saved. Daily automation remains off.');
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'Private verification could not start'); }
+      toast.success(`Posting works: "${done.title}" was uploaded privately to YouTube. You can now turn on daily automation.`);
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Posting check failed'); }
     finally { setBusy(false); }
   };
   return <Panel className="space-y-5 p-5 lg:col-span-2">
@@ -56,7 +57,8 @@ function WorkspaceAutomation({ workspaceId, settings }: { workspaceId: string; s
         <span className="text-muted-foreground">United Kingdom · GMT / BST</span>
       </div>
       {(!query.data.readiness.ready || query.data.pausedReason) && <p role="status" className="border-l-2 border-warning pl-3 text-sm text-warning">{query.data.pausedReason ?? query.data.readiness.reason}</p>}
-      {!query.data.readiness.ready && <Button variant="outline" disabled={busy || !query.data.connected} onClick={() => void verify()}><FlaskConical className="h-4 w-4" />Run private posting tests</Button>}
+      {!query.data.readiness.ready && <div className="flex flex-wrap items-center gap-3"><Button variant="outline" disabled={busy || !query.data.connected} onClick={() => void verify()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FlaskConical className="h-4 w-4" />}Verify posting with a finished video</Button><span className="text-xs text-muted-foreground">Uploads one video you already made, privately. No new video is created.</span></div>}
+      {query.data.verifiedAt && query.data.verifiedYoutubeId && <p className="text-xs text-muted-foreground">Posting verified {timeLabel(query.data.verifiedAt)} · <a className="text-primary underline" href={`https://youtu.be/${query.data.verifiedYoutubeId}`} target="_blank" rel="noreferrer">private check video</a></p>}
       <div className="grid gap-5 md:grid-cols-2">
         {(['short', 'long'] as const).map(format => {
           const short = format === 'short', selected = c.formats.includes(format);

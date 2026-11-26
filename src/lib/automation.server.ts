@@ -7,10 +7,9 @@ import { refreshAccess, startUpload } from './youtube.server';
 
 type Db = SupabaseClient<Database>;
 type Run = Database['public']['Tables']['video_automation_runs']['Row'];
-export function automationReadiness(privateTest = false) {
+export function automationReadiness(_privateTest = false) {
   const keys = ['AZURE_GENERATION_IMAGE', 'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_CLIENT_SECRET', 'AZURE_SUBSCRIPTION_ID', 'AZURE_RESOURCE_GROUP', 'YOUTUBE_CLIENT_ID', 'YOUTUBE_CLIENT_SECRET'];
   if (keys.some(k => !process.env[k])) return { ready: false, reason: 'Daily automation is waiting for its generation or YouTube connection setup.' };
-  if (!privateTest && process.env['AUTOMATION_ROLLOUT_ENABLED'] !== 'true') return { ready: false, reason: 'Daily automation is awaiting its private video-generation and YouTube-upload tests. Daily creation and posting remain off.' };
   if (process.env['LONGFORM_DOCUMENTARY'] === 'off') return { ready: false, reason: 'The long-form documentary renderer must be available before daily automation starts.' };
   return { ready: true, reason: null };
 }
@@ -38,6 +37,8 @@ export async function automationTick(db: Db, now = Date.now()) {
     if (!automationReadiness().ready) return { started: 0, blocked: automationReadiness().reason };
     let started = 0;
     for (const a of settings ?? []) {
+      // Each workspace must have proven YouTube posting once with a finished library video.
+      if (!a.posting_verified_at) continue;
       const { error: checked } = await db.from('video_automation').update({ last_checked_at: new Date(now).toISOString() }).eq('workspace_id', a.workspace_id);
       if (checked) throw Error('Could not save the schedule check');
       const slots = dueAutomationSlots({ enabled: a.enabled, formats: a.formats.filter((f): f is 'short' | 'long' => f === 'short' || f === 'long'), shortTime: a.short_time, longTime: a.long_time }, now);
@@ -92,6 +93,51 @@ export async function stopScheduledAutomation(db: Db, workspaceId: string, userI
     const { error: saveError } = await db.from('video_automation_runs').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', run.id).eq('status', 'scheduled');
     if (saveError) throw Error('Publication cancelled on YouTube, but its saved status needs a refresh');
   }
+}
+
+export const POSTING_UNVERIFIED = 'Verify posting once with a finished video from your library, then turn on daily automation.';
+
+/** Uploads one already-finished library video privately (no new generation) to prove this channel accepts automated uploads. */
+export async function verifyPostingWithFinishedVideo(db: Db, workspaceId: string, userId: string) {
+  const { data: conn, error: connError } = await db.from('youtube_connections').select('refresh_token').eq('workspace_id', workspaceId).eq('user_id', userId).maybeSingle();
+  if (connError || !conn) throw Error("Connect this workspace's YouTube channel first");
+  const { data: rows, error } = await db.from('videos').select('id,data,file_path').eq('user_id', userId).not('file_path', 'is', null).order('updated_at', { ascending: false }).limit(60);
+  if (error) throw Error('Could not read your finished videos');
+  const finished = (rows ?? []).filter(r => {
+    const d = r.data as { status?: string; workspaceId?: string };
+    return d.status === 'done' && !!r.file_path && r.file_path.startsWith(`${userId}/${r.id}/`) && (d.workspaceId ?? workspaceId) === workspaceId;
+  }).slice(0, 8);
+  if (!finished.length) throw Error('No finished video in this workspace yet; finish one video first.');
+  // Pick the smallest finished file so the check is quick.
+  let pick: { row: (typeof finished)[number]; url: string; size: number } | null = null;
+  for (const row of finished) {
+    const { data: signed } = await db.storage.from('videos').createSignedUrl(row.file_path as string, 900);
+    if (!signed) continue;
+    const head = await fetch(signed.signedUrl, { method: 'HEAD' });
+    const size = Number(head.headers.get('content-length'));
+    if (head.ok && Number.isSafeInteger(size) && size > 0 && (!pick || size < pick.size)) pick = { row, url: signed.signedUrl, size };
+  }
+  if (!pick) throw Error('Your finished videos could not be opened from private storage');
+  const v = pick.row.data as { title?: string; description?: string; input?: { topic?: string; format?: string } };
+  const access = await refreshAccess(conn.refresh_token);
+  const url = uploadAddress(await startUpload(access, { title: v.title ?? 'History video', description: v.description ?? '', tags: [v.input?.topic ?? 'history', 'history facts'], privacy: 'private', short: v.input?.format === 'short', size: pick.size, mime: 'video/mp4', origin: 'https://sooha.io' }));
+  const CHUNK = 8 * 1024 * 1024;
+  let youtubeId: string | null = null;
+  for (let offset = 0, guard = 0; offset < pick.size && guard < 200; guard++) {
+    const last = Math.min(pick.size - 1, offset + CHUNK - 1);
+    const chunk = await fetch(pick.url, { headers: { Range: `bytes=${offset}-${last}` } });
+    if (chunk.status !== 206) throw Error('Private storage did not return the video chunk');
+    const bytes = await chunk.arrayBuffer();
+    const put = await fetch(url, { method: 'PUT', redirect: 'manual', headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'video/mp4', 'Content-Length': String(bytes.byteLength), 'Content-Range': `bytes ${offset}-${last}/${pick.size}` }, body: bytes });
+    if (put.ok) { youtubeId = ((await put.json()) as { id?: string }).id ?? null; break; }
+    if (put.status !== 308) throw Error(`YouTube stopped the posting check [${put.status}]`);
+    const end = /^bytes=0-(\d+)$/.exec(put.headers.get('range') ?? '')?.[1];
+    offset = end ? Number(end) + 1 : 0;
+  }
+  if (!youtubeId) throw Error('YouTube did not confirm the posting check');
+  const { error: saveError } = await db.from('video_automation').update({ posting_verified_at: new Date().toISOString(), posting_verified_youtube_id: youtubeId, paused_reason: null, updated_at: new Date().toISOString() }).eq('workspace_id', workspaceId).eq('user_id', userId);
+  if (saveError) throw Error('YouTube received the video, but the check could not be saved');
+  return { youtubeId, title: v.title ?? 'History video' };
 }
 
 /** The existing scale-to-zero coordinator calls this after render handoff: one resumable 8 MiB chunk per invocation. */

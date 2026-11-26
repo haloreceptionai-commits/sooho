@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({ dispatch: vi.fn(async () => 'execution-1') }))
 vi.mock('@/lib/generation-dispatch.server', () => ({ startGenerationWorker: mocks.dispatch }));
 vi.mock('@/lib/generation-runner.server', () => ({ digest: async () => 'a'.repeat(64) }));
 
-const settings = { workspace_id: 'workspace-1', enabled: true, paused_reason: null, formats: ['short', 'long'], short_time: '18:00', long_time: '18:00' };
+const settings = { workspace_id: 'workspace-1', enabled: true, paused_reason: null, formats: ['short', 'long'], short_time: '18:00', long_time: '18:00', posting_verified_at: '2026-11-26T01:00:00Z' as string | null };
 function fakeDb(opts: { busy?: boolean; reserved?: boolean; paused?: boolean; off?: boolean; upload?: boolean } = {}) {
   const claims = new Set<string>();
   const rpc = vi.fn(async (name: string, args: Record<string, unknown>) => {
@@ -59,15 +59,19 @@ describe('daily automation service boundaries', () => {
     expect(await automationTick(fakeDb({ paused: true }).db, Date.parse('2026-11-26T17:00:00Z'))).toEqual({ started: 0 });
     expect(mocks.dispatch).not.toHaveBeenCalled();
   });
-  it('does not bypass the production verification gate', async () => {
-    vi.stubEnv('AUTOMATION_ROLLOUT_ENABLED', 'false');
-    expect(automationReadiness().ready).toBe(false);
-    expect((await automationTick(fakeDb().db)).started).toBe(0);
-    expect(mocks.dispatch).not.toHaveBeenCalled();
+  it('does not create daily videos for a workspace whose posting was never verified', async () => {
+    settings.posting_verified_at = null;
+    try {
+      expect(await automationTick(fakeDb().db, Date.parse('2026-11-26T17:00:00Z'))).toEqual({ started: 0 });
+      expect(mocks.dispatch).not.toHaveBeenCalled();
+    } finally { settings.posting_verified_at = '2026-11-26T01:00:00Z'; }
   });
-  it('only permits private verification services while daily rollout remains blocked', () => {
+  it('is ready with credentials alone; no rollout switch blocks it', () => {
     vi.stubEnv('AUTOMATION_ROLLOUT_ENABLED', 'false');
-    expect(automationReadiness(true).ready).toBe(true);
+    expect(automationReadiness().ready).toBe(true);
+  });
+  it('is not ready when generation credentials are missing', () => {
+    vi.stubEnv('AZURE_CLIENT_SECRET', '');
     expect(automationReadiness().ready).toBe(false);
   });
   it('does not upload when the owner turns automation off', async () => {

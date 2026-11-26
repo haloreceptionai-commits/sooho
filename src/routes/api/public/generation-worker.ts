@@ -44,7 +44,7 @@ export const Route = createFileRoute('/api/public/generation-worker')({
       return Response.json((job.request as { automation?: unknown } | null)?.automation && result.status === 'handoff' ? { status: 'waiting' } : result);
     }
     catch (e) {
-      if (e instanceof GenerationCheckpointSaved) return Response.json({ status: 'continue' });
+      if (e instanceof GenerationCheckpointSaved) return Response.json({ status: e.message === 'waiting' ? 'waiting' : 'continue' });
       const message = e instanceof Error ? e.message : 'Generation needs review';
       await db.rpc('pause_generation_job', { ...auth, p_error: message });
       if ((job.request as { automation?: unknown } | null)?.automation) {
