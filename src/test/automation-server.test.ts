@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
-import { automationTick, advanceAutomationUpload } from '@/lib/automation.server';
+import { automationReadiness, automationTick, advanceAutomationUpload } from '@/lib/automation.server';
 
 const mocks = vi.hoisted(() => ({ dispatch: vi.fn(async () => 'execution-1') }));
 vi.mock('@/lib/generation-dispatch.server', () => ({ startGenerationWorker: mocks.dispatch }));
@@ -61,8 +61,14 @@ describe('daily automation service boundaries', () => {
   });
   it('does not bypass the production verification gate', async () => {
     vi.stubEnv('AUTOMATION_ROLLOUT_ENABLED', 'false');
-    expect(await automationTick(fakeDb().db)).toMatchObject({ started: 0, blocked: expect.stringContaining('not activated') });
+    expect(automationReadiness().ready).toBe(false);
+    expect((await automationTick(fakeDb().db)).started).toBe(0);
     expect(mocks.dispatch).not.toHaveBeenCalled();
+  });
+  it('only permits private verification services while daily rollout remains blocked', () => {
+    vi.stubEnv('AUTOMATION_ROLLOUT_ENABLED', 'false');
+    expect(automationReadiness(true).ready).toBe(true);
+    expect(automationReadiness().ready).toBe(false);
   });
   it('does not upload when the owner turns automation off', async () => {
     const { db, rpc } = fakeDb({ off: true });

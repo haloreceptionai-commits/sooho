@@ -53,6 +53,12 @@ export function dueAutomationSlots(config: Pick<AutomationConfig, 'enabled' | 'f
   return automationSlots(config, now).filter(s => Date.parse(s.generateAt) <= now && now < Date.parse(s.generateAt) + 10 * 60000 && now < Date.parse(s.publishAt));
 }
 export function automationEngine(format: 'short' | 'long') { return format === 'short' ? 'advanced' as const : 'own' as const; }
+export function automationUploadTiming(privateTest: boolean, publishAt: string): { publishAt?: string } {
+  return privateTest ? {} : { publishAt };
+}
+export function automationRunAllowed(privateTest: boolean, enabled: boolean, pausedReason: string | null | undefined) {
+  return (privateTest || enabled) && !pausedReason;
+}
 export function youtubeScheduledStatus(publishAt: string, now = Date.now()) {
   if (Date.parse(publishAt) <= now) throw Error('The posting time has passed; this video was not published late.');
   return { privacyStatus: 'private', publishAt, selfDeclaredMadeForKids: false, containsSyntheticMedia: true };

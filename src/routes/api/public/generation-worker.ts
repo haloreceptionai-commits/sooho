@@ -18,8 +18,10 @@ export const Route = createFileRoute('/api/public/generation-worker')({
     if (!parsed.success) return new Response('Invalid request', { status: 400 });
     const { action, owner, fence } = parsed.data;
     if ((job.request as { automation?: unknown } | null)?.automation) {
+      const { data: run, error: runError } = await db.from('video_automation_runs').select('private_test').eq('generation_job_id', job.id).single();
+      if (runError || !run) return new Response('Automation tracking unavailable', { status: 503 });
       const { automationReadiness } = await import('@/lib/automation.server');
-      if (!automationReadiness().ready) return Response.json({ status: 'paused', error: automationReadiness().reason });
+      if (!automationReadiness(run.private_test).ready) return Response.json({ status: 'paused', error: automationReadiness(run.private_test).reason });
     }
     if (action === 'claim') {
       const { data, error } = await db.rpc('claim_generation_job', { p_job: id, p_hash: hash, p_owner: owner });

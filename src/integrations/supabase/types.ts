@@ -318,6 +318,7 @@ export type Database = {
           lease_owner: string | null
           lease_until: string | null
           local_date: string
+          private_test: boolean
           publish_at: string
           status: string
           updated_at: string
@@ -341,6 +342,7 @@ export type Database = {
           lease_owner?: string | null
           lease_until?: string | null
           local_date: string
+          private_test?: boolean
           publish_at: string
           status?: string
           updated_at?: string
@@ -364,6 +366,7 @@ export type Database = {
           lease_owner?: string | null
           lease_until?: string | null
           local_date?: string
+          private_test?: boolean
           publish_at?: string
           status?: string
           updated_at?: string
@@ -747,6 +750,17 @@ export type Database = {
           p_settings: Json
           p_user: string
           p_video: string
+        }
+        Returns: Json
+      }
+      start_video_automation_test: {
+        Args: {
+          p_format: string
+          p_hash: string
+          p_settings: Json
+          p_user: string
+          p_video: string
+          p_workspace: string
         }
         Returns: Json
       }

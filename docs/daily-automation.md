@@ -4,7 +4,7 @@
 
 Settings are implemented and verified signed in: saved values read back, both formats can be selected, disabled schedules cannot spend, and the rollout guard rejects activation until production validation. UK time is always Europe/London, including BST. Generation is reserved one hour before the chosen publication time; YouTube receives a private upload with a future `publishAt`.
 
-The new managed schedule is job **4**, `daily-video-automation`, `/api/public/automation`, static body `{}`, every minute. It is intentionally **paused**, and `AUTOMATION_ROLLOUT_ENABLED` is not `true`. The existing published site returns 404 for that route. Do not enable either without the checks below. A minute-level scheduler has 1,440 checks/day and recurring compute cost; YouTube's own scheduled publication avoids relying on the scheduler for the exact posting second. Provider processing can delay publishing, so one hour is a lead time, not a guarantee.
+The new managed schedule is job **4**, `daily-video-automation`, `/api/public/automation`, static body `{}`, every minute. It is intentionally **paused**, and `AUTOMATION_ROLLOUT_ENABLED` is not `true`. The published target has now been verified: unsigned requests return 401, and managed authenticated requests return 200 with zero starts and the rollout block. Paid private tests for both formats are waiting for the owner's answer in chat. Do not enable either without the checks below. A minute-level scheduler has 1,440 checks/day and recurring compute cost; YouTube's own scheduled publication avoids relying on the scheduler for the exact posting second. Provider processing can delay publishing, so one hour is a lead time, not a guarantee.
 
 ## Safety boundaries
 
@@ -29,4 +29,4 @@ The new managed schedule is job **4**, `daily-video-automation`, `/api/public/au
 - Service-boundary tests cover duplicate ticks, both formats, scheduler lease, disabled/paused state, rollout guard and off-before-upload.
 - Paid checkpoint tests ensure a saved step ends an invocation rather than triggering an additional paid operation.
 - Signed-in browser verification saved and reloaded both formats, time and focus; activation remained blocked; desktop/mobile had no horizontal overflow or browser errors. Demonstration edits were restored to an off schedule.
-- Scheduler verification: local unsigned 401, managed signed 200 with rollout blocked, malformed body 400. Production unsigned request currently 404, so live scheduled generation/upload is **not verified**.
+- Scheduler verification: local unsigned 401, managed signed 200 with rollout blocked, malformed body 400; published unsigned 401 and managed signed 200 with zero starts. Real scheduled generation/upload is still **not verified**.

@@ -3,7 +3,8 @@
 - [x] Save owner-only schedules, deduplicate daily runs and reserve generation one hour before publication; UK DST, two-format deduplication, lease and off/paused tests pass.
 - [x] Connect checkpointed Advanced Shorts and documentary long-form generation to resumable scheduled YouTube uploads; preserve uncertain sessions rather than duplicate them.
 - [x] Register minute-level managed schedule (job 4), verify local signed requests return 200, unsigned 401 and invalid body 400; leave schedule paused without recurring cost until rollout is verified.
-- [ ] Publish the new endpoint, verify real generation/render/scheduled YouTube upload plus recovery, then enable rollout and resume schedule 4. Blocker: published endpoint is still 404; publishing requires the owner's request. See docs/daily-automation.md. Do not claim unattended posting works before these checks.
+- [x] Verify the published scheduler target: unsigned requests return 401, managed authenticated requests return 200 with zero videos started while rollout is blocked.
+- [ ] Resolve the Settings activation block by verifying real generation/render/scheduled YouTube upload plus recovery, then enable rollout and resume schedule 4. Owner approved both paid private tests and publishing the test update. Add private-only verification runs, publish after validation, and start both tests without changing saved daily schedules. Keep daily schedule 4 paused until checks pass. Do not claim unattended posting works before completion checks. See docs/daily-automation.md.
 
 # Carthage long-form recovery
 - [x] Replace the Shorts-only acoustic limit with bounded long-form inference; deployed Azure/Apify, 11 alignment tests and 428 app tests passed; Carthage aligned in 32.3 seconds.

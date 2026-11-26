@@ -218,6 +218,13 @@
       "when": 1795651705705,
       "tag": "0030_fenced_automation_upload_confirmation",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795652985560,
+      "tag": "0031_private_automation_verification",
+      "breakpoints": true
     }
   ]
 }

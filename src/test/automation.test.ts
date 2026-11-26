@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { automationConfig, automationEngine, defaultAutomation, dueAutomationSlots, londonInstant, nextAutomationSlots, youtubeScheduledStatus } from '@/lib/automation';
+import { automationConfig, automationEngine, automationRunAllowed, automationUploadTiming, defaultAutomation, dueAutomationSlots, londonInstant, nextAutomationSlots, youtubeScheduledStatus } from '@/lib/automation';
 
 describe('daily video automation', () => {
+  it('never gives a private verification upload a public posting time', () => {
+    expect(automationUploadTiming(true, '2026-11-26T18:00:00Z')).toEqual({});
+  });
+  it('keeps the chosen publication time for normal daily uploads', () => {
+    expect(automationUploadTiming(false, '2026-11-26T18:00:00Z')).toEqual({ publishAt: '2026-11-26T18:00:00Z' });
+  });
+  it('allows an explicitly approved private test without turning daily automation on', () => {
+    expect(automationRunAllowed(true, false, null)).toBe(true);
+    expect(automationRunAllowed(false, false, null)).toBe(false);
+  });
+  it('does not bypass paused workspace access during private verification', () => {
+    expect(automationRunAllowed(true, false, 'Provider access denied')).toBe(false);
+  });
   it('starts exactly one hour before the selected UK posting time', () => {
     const [slot] = dueAutomationSlots({ ...defaultAutomation, enabled: true }, Date.parse('2026-11-26T17:00:00Z'));
     expect(slot?.generateAt).toBe('2026-11-26T17:00:00.000Z');

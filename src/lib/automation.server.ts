@@ -1,25 +1,27 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
-import { dueAutomationSlots, youtubeScheduledStatus } from './automation';
+import { automationRunAllowed, automationUploadTiming, dueAutomationSlots, youtubeScheduledStatus } from './automation';
 import { digest } from './generation-runner.server';
 import { startGenerationWorker } from './generation-dispatch.server';
 import { refreshAccess, startUpload } from './youtube.server';
 
 type Db = SupabaseClient<Database>;
 type Run = Database['public']['Tables']['video_automation_runs']['Row'];
-export function automationReadiness() {
+export function automationReadiness(privateTest = false) {
   const keys = ['AZURE_GENERATION_IMAGE', 'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_CLIENT_SECRET', 'AZURE_SUBSCRIPTION_ID', 'AZURE_RESOURCE_GROUP', 'YOUTUBE_CLIENT_ID', 'YOUTUBE_CLIENT_SECRET'];
   if (keys.some(k => !process.env[k])) return { ready: false, reason: 'Daily automation is waiting for its generation or YouTube connection setup.' };
-  if (process.env['AUTOMATION_ROLLOUT_ENABLED'] !== 'true') return { ready: false, reason: 'Daily automation is not activated yet: the published generation and scheduled-upload checks must pass first.' };
+  if (!privateTest && process.env['AUTOMATION_ROLLOUT_ENABLED'] !== 'true') return { ready: false, reason: 'Daily automation is awaiting its private video-generation and YouTube-upload tests. Daily creation and posting remain off.' };
   if (process.env['LONGFORM_DOCUMENTARY'] === 'off') return { ready: false, reason: 'The long-form documentary renderer must be available before daily automation starts.' };
   return { ready: true, reason: null };
 }
 
 export async function pauseAutomation(db: Db, run: Pick<Run, 'id' | 'workspace_id'>, message: string) {
   const reason = message.slice(0, 1500);
+  const { data: current, error: readError } = await db.from('video_automation_runs').select('private_test').eq('id', run.id).single();
+  if (readError || !current) throw Error('Could not verify which automation run needs pausing');
   const [{ error: e1 }, { error: e2 }] = await Promise.all([
     db.from('video_automation_runs').update({ status: 'paused', error: reason, lease_until: null, updated_at: new Date().toISOString() }).eq('id', run.id).in('status', ['generating', 'uploading']),
-    db.from('video_automation').update({ paused_reason: reason, updated_at: new Date().toISOString() }).eq('workspace_id', run.workspace_id),
+    current.private_test ? Promise.resolve({ error: null }) : db.from('video_automation').update({ paused_reason: reason, updated_at: new Date().toISOString() }).eq('workspace_id', run.workspace_id),
   ]);
   if (e1 || e2) throw Error('Could not save the automation pause; no additional work was started');
 }
@@ -54,6 +56,7 @@ export async function automationTick(db: Db, now = Date.now()) {
         } catch (e) {
           // Uncertain submissions stay claimed. Never dispatch the same video or a replacement automatically.
           await pauseAutomation(db, { id: run.id, workspace_id: a.workspace_id }, e instanceof Error ? e.message : 'Generation start was not confirmed');
+          return { started };
         }
       }
       if (started >= 2) break;
@@ -77,7 +80,7 @@ async function keepPrivate(access: string, id: string) {
 export async function stopScheduledAutomation(db: Db, workspaceId: string, userId: string) {
   const { error: stopError } = await db.from('video_automation').update({ enabled: false }).eq('workspace_id', workspaceId).eq('user_id', userId);
   if (stopError) throw Error('Could not turn off automation');
-  const { data: scheduled, error } = await db.from('video_automation_runs').select('id,youtube_id,publish_at').eq('workspace_id', workspaceId).eq('user_id', userId).eq('status', 'scheduled').gt('publish_at', new Date().toISOString());
+  const { data: scheduled, error } = await db.from('video_automation_runs').select('id,youtube_id,publish_at').eq('workspace_id', workspaceId).eq('user_id', userId).eq('private_test', false).eq('status', 'scheduled').gt('publish_at', new Date().toISOString());
   if (error) throw Error('Automation is off, but pending YouTube posts could not be checked');
   if (!scheduled?.length) return;
   const { data: conn } = await db.from('youtube_connections').select('refresh_token').eq('workspace_id', workspaceId).eq('user_id', userId).maybeSingle();
@@ -97,10 +100,10 @@ export async function advanceAutomationUpload(db: Db, generationId: string, owne
   if (error) throw Error('Could not read scheduled upload progress');
   if (!run) return { status: 'handoff' };
   if (!['generating', 'uploading'].includes(run.status)) return { status: run.status, error: run.error };
-  if (!automationReadiness().ready) return { status: 'paused', error: automationReadiness().reason };
+  if (!automationReadiness(run.private_test).ready) return { status: 'paused', error: automationReadiness(run.private_test).reason };
   const { data: settings, error: configError } = await db.from('video_automation').select('enabled,paused_reason').eq('workspace_id', run.workspace_id).single();
   if (configError || !settings) throw Error('Could not check automation permission');
-  if (!settings.enabled || settings.paused_reason) return { status: 'paused', error: settings.paused_reason ?? 'Daily automation is off' };
+  if (!automationRunAllowed(run.private_test, settings.enabled, settings.paused_reason)) return { status: 'paused', error: settings.paused_reason ?? 'Daily automation is off' };
   const { data: video, error: videoError } = await db.from('videos').select('data,file_path').eq('id', run.video_id).eq('user_id', run.user_id).single();
   if (videoError || !video) throw Error('Saved daily video is unavailable');
   const v = video.data as { status?: string; title?: string; description?: string; error?: string; input?: { topic?: string }; hostedRender?: { status?: string } };
@@ -133,8 +136,8 @@ export async function advanceAutomationUpload(db: Db, generationId: string, owne
       total = Number(head.headers.get('content-length'));
       if (!head.ok || !Number.isSafeInteger(total) || total <= 0) throw Error('The finished video size could not be verified');
       await update({ status: 'uploading', upload_size: total, upload_mime: 'video/mp4' });
-      youtubeScheduledStatus(run.publish_at);
-      url = uploadAddress(await startUpload(access, { title: v.title ?? 'History video', description: v.description ?? '', tags: [v.input?.topic ?? 'history', 'history facts'], privacy: 'private', short: run.format === 'short', size: total, mime: 'video/mp4', origin: 'https://sooha.io', publishAt: run.publish_at }));
+      if (!run.private_test) youtubeScheduledStatus(run.publish_at);
+      url = uploadAddress(await startUpload(access, { title: v.title ?? 'History video', description: v.description ?? '', tags: [v.input?.topic ?? 'history', 'history facts'], privacy: 'private', short: run.format === 'short', size: total, mime: 'video/mp4', origin: 'https://sooha.io', ...automationUploadTiming(run.private_test, run.publish_at) }));
       await update({ upload_url: url });
     }
     if (!total || total <= 0) throw Error('Saved upload size is missing');
@@ -142,7 +145,7 @@ export async function advanceAutomationUpload(db: Db, generationId: string, owne
       const body = await response.json() as { id?: string };
       if (!body.id) throw Error('YouTube completed the upload without a video ID');
       const { data: current } = await db.from('video_automation').select('enabled,paused_reason').eq('workspace_id', run.workspace_id).single();
-      if (!current?.enabled || current.paused_reason || Date.parse(run.publish_at) <= Date.now()) {
+      if (!current || !automationRunAllowed(run.private_test, current.enabled, current.paused_reason) || Date.parse(run.publish_at) <= Date.now()) {
         await keepPrivate(access, body.id);
         await update({ status: 'cancelled', youtube_id: body.id, lease_until: null });
         return { status: 'cancelled' };
@@ -165,7 +168,7 @@ export async function advanceAutomationUpload(db: Db, generationId: string, owne
     if (bytes.byteLength !== last - offset + 1) throw Error('Private video chunk size does not match');
     // Recheck immediately before writing bytes: turning off stops an in-progress upload as well.
     const { data: allowed } = await db.from('video_automation').select('enabled,paused_reason').eq('workspace_id', run.workspace_id).single();
-    if (!allowed?.enabled || allowed.paused_reason) return { status: 'paused' };
+    if (!allowed || !automationRunAllowed(run.private_test, allowed.enabled, allowed.paused_reason)) return { status: 'paused' };
     if (Date.parse(run.publish_at) <= Date.now()) return { status: 'missed' };
     const uploaded = await fetch(uploadAddress(url), { method: 'PUT', redirect: 'manual', headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'video/mp4', 'Content-Length': String(bytes.byteLength), 'Content-Range': `bytes ${offset}-${last}/${total}` }, body: bytes });
     if (uploaded.ok) return finish(uploaded);

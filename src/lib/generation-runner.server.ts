@@ -37,10 +37,10 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
   const settings = snapshot.settings;
   assertVideoEngine(input.engine);
   if (snapshot.automation) {
-    const { data: run, error: runError } = await db.from('video_automation_runs').select('workspace_id,status').eq('id', snapshot.automation.id).eq('generation_job_id', job.id).single();
+    const { data: run, error: runError } = await db.from('video_automation_runs').select('workspace_id,status,private_test').eq('id', snapshot.automation.id).eq('generation_job_id', job.id).single();
     if (runError || !run || run.status !== 'generating') throw Error('Daily generation is no longer active');
     const { data: allowed, error: allowError } = await db.from('video_automation').select('enabled,paused_reason').eq('workspace_id', run.workspace_id).single();
-    if (allowError || !allowed?.enabled || allowed.paused_reason) throw Error(allowed?.paused_reason ?? 'Daily automation is off');
+    if (allowError || !allowed || (!allowed.enabled && !run.private_test) || allowed.paused_reason) throw Error(allowed?.paused_reason ?? 'Daily automation is off');
   }
   const auth = { p_job: job.id, p_hash: job.token_hash, p_owner: owner, p_fence: fence };
   const { data: row, error: readError } = await db.from('videos').select('data').eq('id', job.video_id).single();

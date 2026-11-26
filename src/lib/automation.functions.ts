@@ -12,7 +12,7 @@ export const getAutomation = createServerFn({ method: 'POST' }).middleware([requ
     const { supabaseAdmin: db } = await import('@/integrations/supabase/client.server');
     const [{ data: saved, error: settingsError }, { data: runs, error: runsError }, { data: connected }] = await Promise.all([
       db.from('video_automation').select('*').eq('workspace_id', data.workspaceId).eq('user_id', context.userId).maybeSingle(),
-      context.supabase.from('video_automation_runs').select('id,format,publish_at,generate_at,video_id,status,error,youtube_id,created_at').eq('workspace_id', data.workspaceId).order('created_at', { ascending: false }).limit(8),
+      context.supabase.from('video_automation_runs').select('id,format,publish_at,generate_at,video_id,status,error,youtube_id,created_at,private_test').eq('workspace_id', data.workspaceId).order('created_at', { ascending: false }).limit(8),
       db.from('youtube_connections').select('channel_title').eq('workspace_id', data.workspaceId).eq('user_id', context.userId).maybeSingle(),
     ]);
     if (settingsError || runsError) throw Error('Could not load automation settings');
@@ -49,4 +49,33 @@ export const saveAutomation = createServerFn({ method: 'POST' }).middleware([req
     const { error } = await db.from('video_automation').upsert({ workspace_id: c.workspaceId, user_id: context.userId, enabled: c.enabled, timezone: 'Europe/London', formats: c.formats, short_time: c.shortTime, long_time: c.longTime, short_seconds: c.shortSeconds, long_seconds: c.longSeconds, focus: c.focus.trim(), settings: data.settings, paused_reason: null, updated_at: new Date().toISOString() });
     if (error) throw Error('Could not save automation');
     return { saved: true, enabled: c.enabled };
+  });
+
+/** Explicit owner action only. Never called by the daily scheduler or a page render. */
+export const startAutomationTest = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ workspaceId: z.string().uuid(), format: z.enum(['short','long']), settings: settingsSchema }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: own, error } = await context.supabase.from('workspaces').select('id').eq('id', data.workspaceId).eq('user_id', context.userId).maybeSingle();
+    if (error || !own) throw Error('Workspace not found');
+    const { automationReadiness, pauseAutomation } = await import('./automation.server');
+    const ready = automationReadiness(true);
+    if (!ready.ready) throw Error(ready.reason ?? 'Private verification services are unavailable');
+    if (data.settings.defaultStyle === 'Ink explainer' && data.format === 'long') throw Error('Private long-form verification needs the documentary visual style.');
+    const { supabaseAdmin: db } = await import('@/integrations/supabase/client.server');
+    const { digest } = await import('./generation-runner.server');
+    const token = crypto.randomUUID() + crypto.randomUUID();
+    const { data: result, error: reserveError } = await db.rpc('start_video_automation_test', { p_workspace: data.workspaceId, p_user: context.userId, p_format: data.format, p_video: `test-${crypto.randomUUID()}`, p_settings: JSON.parse(JSON.stringify(data.settings)), p_hash: await digest(token) });
+    const run = z.object({ id: z.string().uuid(), generationJobId: z.string().uuid(), videoId: z.string(), existing: z.boolean() }).safeParse(result);
+    if (reserveError || !run.success) throw Error('Could not reserve the private test; check that this workspace has saved automation settings and a connected YouTube channel.');
+    if (run.data.existing) return run.data;
+    try {
+      const { startGenerationWorker } = await import('./generation-dispatch.server');
+      const execution = await startGenerationWorker(run.data.generationJobId, token);
+      const { error: trackError } = await db.from('generation_jobs').update({ run_id: execution }).eq('id', run.data.generationJobId);
+      if (trackError) throw Error('Private test started but tracking is uncertain; do not restart it.');
+    } catch (e) {
+      await pauseAutomation(db, { id: run.data.id, workspace_id: data.workspaceId }, e instanceof Error ? e.message : 'Private test start is uncertain');
+      throw e;
+    }
+    return run.data;
   });

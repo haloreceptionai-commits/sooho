@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
-import { CalendarClock, Loader2, Save, Video, Youtube } from 'lucide-react';
+import { CalendarClock, FlaskConical, Loader2, Save, Video, Youtube } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Panel, input, label } from '@/components/page';
 import { useActiveWorkspace } from '@/lib/workspaces';
-import { getAutomation, saveAutomation } from '@/lib/automation.functions';
+import { getAutomation, saveAutomation, startAutomationTest } from '@/lib/automation.functions';
 import { nextAutomationSlots, type AutomationConfig } from '@/lib/automation';
 import type { Settings } from '@/lib/store';
 
@@ -18,7 +18,7 @@ export function AutomationPanel({ settings }: { settings: Settings }) {
   return <WorkspaceAutomation key={id} workspaceId={id} settings={settings} />;
 }
 function WorkspaceAutomation({ workspaceId, settings }: { workspaceId: string; settings: Settings }) {
-  const get = useServerFn(getAutomation), save = useServerFn(saveAutomation), cache = useQueryClient();
+  const get = useServerFn(getAutomation), save = useServerFn(saveAutomation), startTest = useServerFn(startAutomationTest), cache = useQueryClient();
   const key = ['video-automation', workspaceId];
   const query = useQuery({ queryKey: key, queryFn: () => get({ data: { workspaceId } }), refetchInterval: 30000 });
   const [draft, setDraft] = useState<AutomationConfig | null>(null), [busy, setBusy] = useState(false);
@@ -34,10 +34,19 @@ function WorkspaceAutomation({ workspaceId, settings }: { workspaceId: string; s
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not save automation'); }
     finally { setBusy(false); }
   };
+  const verify = async () => {
+    setBusy(true);
+    try {
+      for (const format of ['short','long'] as const) await startTest({ data: { workspaceId, format, settings } });
+      await cache.invalidateQueries({ queryKey: key });
+      toast.success('Both private video tests are saved. Daily automation remains off.');
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Private verification could not start'); }
+    finally { setBusy(false); }
+  };
   return <Panel className="space-y-5 p-5 lg:col-span-2">
     <div className="flex items-center justify-between gap-4">
       <h2 className="flex items-center gap-2 font-bold"><CalendarClock className="h-4 w-4" /> Automate</h2>
-      <div className="flex items-center gap-3"><span className="text-sm text-muted-foreground">{c?.enabled ? 'On' : 'Off'}</span><Switch aria-label="Daily video automation" checked={c?.enabled ?? false} disabled={!c || busy} onCheckedChange={enabled => set({ enabled })} /></div>
+      <div className="flex items-center gap-3"><span className="text-sm text-muted-foreground">{c?.enabled ? 'On' : 'Off'}</span><Switch aria-label="Daily video automation" checked={c?.enabled ?? false} disabled={!c || busy || (!c.enabled && !query.data?.readiness.ready)} onCheckedChange={enabled => set({ enabled })} /></div>
     </div>
     {query.isPending && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking automation…</p>}
     {query.isError && <div className="flex flex-wrap items-center gap-3"><p role="alert" className="text-sm text-destructive">{query.error.message}</p><Button variant="outline" size="sm" onClick={() => void query.refetch()}>Retry</Button></div>}
@@ -47,6 +56,7 @@ function WorkspaceAutomation({ workspaceId, settings }: { workspaceId: string; s
         <span className="text-muted-foreground">United Kingdom · GMT / BST</span>
       </div>
       {(!query.data.readiness.ready || query.data.pausedReason) && <p role="status" className="border-l-2 border-warning pl-3 text-sm text-warning">{query.data.pausedReason ?? query.data.readiness.reason}</p>}
+      {!query.data.readiness.ready && <Button variant="outline" disabled={busy || !query.data.connected} onClick={() => void verify()}><FlaskConical className="h-4 w-4" />Run private posting tests</Button>}
       <div className="grid gap-5 md:grid-cols-2">
         {(['short', 'long'] as const).map(format => {
           const short = format === 'short', selected = c.formats.includes(format);
@@ -67,7 +77,7 @@ function WorkspaceAutomation({ workspaceId, settings }: { workspaceId: string; s
         <p className="max-w-xl text-xs text-muted-foreground">{c.formats.length} video{c.formats.length === 1 ? '' : 's'} per day · Paid AI generation{query.data.lastCheckedAt ? ` · Last checked ${timeLabel(query.data.lastCheckedAt)}` : ''}</p>
         <Button disabled={busy || !c.formats.length} onClick={() => void submit()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Save automation</Button>
       </div>
-      {!!query.data.runs.length && <div className="border-t pt-4"><h3 className="mb-2 text-sm font-semibold">Recent daily videos</h3><ul className="divide-y">{query.data.runs.map(run => <li key={run.id} className="flex flex-wrap items-start justify-between gap-2 py-2 text-sm"><div><p>{run.format === 'short' ? 'Short' : 'Long-form'} · {timeLabel(run.publish_at)}</p>{run.error && <p className="mt-1 max-w-xl break-words text-xs text-destructive">{run.error}</p>}</div>{run.youtube_id ? <a href={`https://youtu.be/${run.youtube_id}`} target="_blank" rel="noreferrer" className="text-primary underline">{run.status}</a> : <span className="text-muted-foreground">{run.status}</span>}</li>)}</ul></div>}
+      {!!query.data.runs.length && <div className="border-t pt-4"><h3 className="mb-2 text-sm font-semibold">Recent daily videos</h3><ul className="divide-y">{query.data.runs.map(run => <li key={run.id} className="flex flex-wrap items-start justify-between gap-2 py-2 text-sm"><div><p>{run.format === 'short' ? 'Short' : 'Long-form'} · {run.private_test ? 'Private test' : timeLabel(run.publish_at)}</p>{run.error && <p className="mt-1 max-w-xl break-words text-xs text-destructive">{run.error}</p>}</div>{run.youtube_id ? <a href={`https://youtu.be/${run.youtube_id}`} target="_blank" rel="noreferrer" className="text-primary underline">{run.private_test ? 'Private on YouTube' : run.status}</a> : <span className="text-muted-foreground">{run.status}</span>}</li>)}</ul></div>}
     </>}
   </Panel>;
 }
