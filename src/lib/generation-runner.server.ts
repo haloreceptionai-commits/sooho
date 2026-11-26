@@ -110,7 +110,7 @@ export async function advanceGeneration(db: Client, job: Job, owner: string, fen
         }
         if ((rows?.length ?? 0) < 500) break;
       }
-      const topics = await discoverFacts({ focus, format: input.format, deployment: settings.scriptDeployment }, seen, used);
+      const topics = await discoverFacts({ focus, format: input.format, deployment: settings.scriptDeployment, mode: 'automation' }, seen, used);
       const chosen = topics[0];
       if (!chosen) throw Error('No new topic passed evidence checks');
       const { error } = await db.from('topic_discoveries').insert(topics.map(t => ({ user_id: job.user_id, batch_id: job.id, fact_key: t.factKey, data: JSON.parse(JSON.stringify(t)) })));

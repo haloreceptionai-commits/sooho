@@ -11,6 +11,9 @@ export const discoveredTopicSchema = z.object({
   sources: z.array(topicEvidence).min(2),
 });
 export type DiscoveredTopic = z.infer<typeof discoveredTopicSchema> & FactTopic;
+export function discoveryTarget(mode: 'suggestions' | 'automation') {
+  return mode === 'automation' ? 1 : 6;
+}
 export interface DiscoveryLibrary { latest: DiscoveredTopic[]; saved: DiscoveredTopic[] }
 export const potential = (t: DiscoveredTopic) => Object.values(t.scores).reduce((sum, n) => sum + n, 0);
 const normalized = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();

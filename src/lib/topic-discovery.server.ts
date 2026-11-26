@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { azureJson } from './pipeline-operations.server';
-import { discoveredTopicSchema, evidenceSupported, freshSix, type DiscoveredTopic } from './topic-discovery';
+import { discoveredTopicSchema, discoveryTarget, evidenceSupported, freshSix, type DiscoveredTopic } from './topic-discovery';
 import type { TopicUse } from './topics';
 import { sourcePassages } from './topic-passages';
 import { pickLenses, VIRAL_STANDARD } from './viral-topics';
@@ -45,11 +45,12 @@ function normalizeCandidate(raw: unknown) {
   return { ...t, source: first?.url ?? t['source'] };
 }
 
-export async function discoverFacts(input: { focus: string; format: string; deployment: string }, seen: DiscoveredTopic[], used: TopicUse[]) {
+export async function discoverFacts(input: { focus: string; format: string; deployment: string; mode?: 'suggestions' | 'automation' }, seen: DiscoveredTopic[], used: TopicUse[]) {
+  const needed = discoveryTarget(input.mode ?? 'suggestions');
   const exclude = [...seen.map(t => `${t.factKey}: ${t.title}`), ...used.filter(t => ['done', 'running'].includes(t.status)).map(t => t.topic)].join('\n');
   let accepted: DiscoveredTopic[] = [];
   // Two bounded research passes; never fill missing places with invented or static topics.
-  for (let pass = 0; pass < 2 && accepted.length < 6; pass++) {
+  for (let pass = 0; pass < 2 && accepted.length < needed; pass++) {
     const long = input.format === 'long';   // documentary topics: old to current history and facts, enough material for ten minutes
     const standard = long ? LONGFORM_STANDARD : VIRAL_STANDARD;
     const lenses = input.focus.trim() ? [input.focus.trim(), ...(long ? pickLongLenses(2) : pickLenses(2))] : long ? pickLongLenses(4) : pickLenses(4);
@@ -101,6 +102,6 @@ export async function discoverFacts(input: { focus: string; format: string; depl
     const verified = verifiedGroups.flat();
     accepted = freshSix([...accepted, ...verified], seen, used);
   }
-  if (accepted.length !== 6) throw new Error(`Only ${accepted.length} new facts passed source checks. No weak fillers were added. Your previous topics are kept; try a broader focus.`);
+  if (accepted.length < needed) throw new Error(`Only ${accepted.length} new facts passed source checks. No weak fillers were added. Your previous topics are kept; try a broader focus.`);
   return accepted;
 }

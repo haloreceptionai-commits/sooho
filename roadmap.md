@@ -4,6 +4,7 @@
 - [x] Connect checkpointed Advanced Shorts and documentary long-form generation to resumable scheduled YouTube uploads; preserve uncertain sessions rather than duplicate them.
 - [x] Register minute-level managed schedule (job 4), verify local signed requests return 200, unsigned 401 and invalid body 400; leave schedule paused without recurring cost until rollout is verified.
 - [x] Verify the published scheduler target: unsigned requests return 401, managed authenticated requests return 200 with zero videos started while rollout is blocked.
+- [x] Fix the shared topic-count mismatch: automatic creation needs one fully source-verified topic, while Find topics still requires six fresh suggestions; dedicated tests pass.
 - [ ] Resolve the Settings activation block by verifying real generation/render/scheduled YouTube upload plus recovery, then enable rollout and resume schedule 4. Owner approved both paid private tests and publishing the test update. Add private-only verification runs, publish after validation, and start both tests without changing saved daily schedules. Keep daily schedule 4 paused until checks pass. Do not claim unattended posting works before completion checks. See docs/daily-automation.md.
 
 # Carthage long-form recovery
