@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { authenticateCronRequest } from '@/integrations/supabase/cron-auth';
 import { z } from 'zod';
+import { discoveryTarget } from '@/lib/topic-discovery';
 
 export const Route = createFileRoute('/api/public/automation')({
   server: { handlers: { POST: async ({ request }) => {
@@ -12,6 +13,6 @@ export const Route = createFileRoute('/api/public/automation')({
     if (!z.object({}).strict().safeParse(body).success) return new Response('Invalid request', { status: 400 });
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { automationTick } = await import('@/lib/automation.server');
-    return Response.json(await automationTick(supabaseAdmin));
+    return Response.json({ ...await automationTick(supabaseAdmin), topicTarget: discoveryTarget('automation') });
   } } },
 });
